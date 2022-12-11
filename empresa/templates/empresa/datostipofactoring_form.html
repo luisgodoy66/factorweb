@@ -1,0 +1,243 @@
+{% extends 'bases/home.html' %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Extras</a></li>
+                    <li><a href="#">configuración</a></li>
+                    <li class="active">Tipos de factoring</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post"  class="form-horizontal">
+    <!-- <div class="col-lg-6"> -->
+        <div class="card">
+            <div class="card-header">
+                <strong>Datos</strong> 
+                de {% if tipofactoring %}  {{ tipofactoring }} {% else %}  nuevo tipo de factoring {% endif %} 
+            </div>
+                {% csrf_token %}
+            <div class="card-body card-block">
+                <div class="col-lg-6">
+
+                    <div class="row form-group">
+                        <div class="col col-md-6">
+                            <label for="id_cxtipoid" class=" form-control-label">
+                                {{ form.cxtipofactoring.label}}
+                            </label></div>
+                        <div class="col-12 col-md-6">
+                            {{ form.cxtipofactoring}}
+                            <small class="form-text text-muted">Máximo 3 caracteres</small>
+                        </div>
+                    </div>  
+
+                    <div class="row form-group">
+                        <div class="col col-md-6">
+                            <label for="id_cxparticipante" class=" form-control-label">
+                                {{ form.cttipofactoring.label}}
+                            </label></div>
+                        <div class="col-12 col-md-6">
+                            {{ form.cttipofactoring}}
+                            <small class="form-text text-muted">Máximo 40 caracteres</small>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-6">
+                            <label for="id_cxparticipante" class=" form-control-label">
+                            {{ form.ctabreviacion.label}}</label></div>
+                        <div class="col-12 col-md-6">
+                            {{ form.ctabreviacion}}
+                            <small class="form-text text-muted">Máximo 30 caracteres</small>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-6">
+                            <label for="id_cttelefono1" class=" form-control-label">
+                            {{ form.ndiasgracia.label}}</label></div>
+                        <div class="col-12 col-md-6">
+                            {{ form.ndiasgracia}}
+                            <small class="form-text text-muted">Para el cobro de cargos de cartera vencida. </small>
+                        </div>
+                    </div>
+                    <!-- <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cttelefono1" class=" form-control-label">Porcentaje de retención a la renta en factura a cliente</label></div>
+                        <div class="col-12 col-md-9">
+                            {{ form.nporcentajeretencionenfactura}}
+                            <small class="form-text text-muted">Deje en 0 si no va a considerar este valor en la negociación. </small>
+                        </div>
+                    </div> -->
+                    <div class="row form-group">
+                        <div class="col col-md-6">
+                            <label for="id_ctinicialesliquidacioncobranza" class=" form-control-label">
+                            {{ form.ctinicialesliquidacioncobranza.label}}</label></div>
+                        <div class="col-12 col-md-6">
+                            {{ form.ctinicialesliquidacioncobranza}}
+                            <small class="form-text text-muted">Máximo 3 caracteres</small>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-6">
+                            <label for="id_ctinicialesasignacion" class=" form-control-label">
+                            {{ form.ctinicialesasignacion.label}}</label></div>
+                        <div class="col-12 col-md-6">
+                            {{ form.ctinicialesasignacion}}
+                            <small class="form-text text-muted">Máximo 3 caracteres</small>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- PANEL DERECHO -->
+                <div class="col-lg-6">
+                    <div class="row form-group">
+                        <div class="col col-md-9">
+                            <label for="id_cxparticipante" class=" form-control-label">
+                            {{ form.cxmoneda.label}}</label></div>
+                        <div class="col-12 col-md-3">
+                            {{ form.cxmoneda}}
+                            <!-- <small class="form-text text-muted">Máximo 3 caracteres</small> -->
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-9">
+                            <label for="id_cxlocalidad" class=" form-control-label">
+                                {{form.lmanejalineafactoring.label}}</label>
+                        </div>
+                        <div class="col ">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  tipofactoring.lmanejalineafactoring %} checked {% endif %} 
+                                id = "id_lmanejalineafactoring" name = "lmanejalineafactoring"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-9"><label for="id_cxlocalidad" class=" form-control-label">
+                            {{form.lanticipatotalnegociado.label}}</label></div>
+                        <div class="col">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  tipofactoring.lanticipatotalnegociado %} checked {% endif %} 
+                                id = "id_lanticipatotalnegociado" name = "lanticipatotalnegociado"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-9"><label for="id_cxlocalidad" class=" form-control-label">
+                            {{form.lpermitediasferiados.label}}</label></div>
+                        <div class="col">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  tipofactoring.lpermitediasferiados %} checked {% endif %} 
+                                id = "id_lpermitediasferiados" name = "lpermitediasferiados"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-9"><label for="id_cxlocalidad" class=" form-control-label">
+                            {{form.lmanejacondicionesoperativas.label}}</label></div>
+                        <div class="col">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  tipofactoring.lmanejacondicionesoperativas %} checked {% endif %} 
+                                id = "id_lmanejacondicionesoperativas" name = "lmanejacondicionesoperativas"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-9"><label for="id_cxlocalidad" class=" form-control-label">
+                            {{form.lgeneradcenaceptacion.label}}</label></div>
+                        <div class="col">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  tipofactoring.lgeneradcenaceptacion %} checked {% endif %} 
+                                id = "id_lgeneradcenaceptacion" name = "lgeneradcenaceptacion"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-9"><label for="id_cxlocalidad" class=" form-control-label">
+                            {{form.lgeneragaoenaceptacion.label}}</label></div>
+                        <div class="col">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  tipofactoring.lgeneragaoenaceptacion %} checked {% endif %} 
+                                id = "id_lgeneragaoenaceptacion" name = "lgeneragaoenaceptacion"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-9"><label for="id_cxlocalidad" class=" form-control-label">
+                            {{form.lcargagaoa.label}}</label></div>
+                        <div class="col">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  tipofactoring.lcargagaoa %} checked {% endif %} 
+                                id = "id_lcargagaoa" name = "lcargagaoa"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-9"><label for="id_cxlocalidad" class=" form-control-label">
+                            {{form.lacumulagaoaatasagao.label}}</label></div>
+                        <div class="col">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  tipofactoring.lacumulagaoaatasagao %} checked {% endif %} 
+                                id = "id_lacumulagaoaatasagao" name = "lacumulagaoaatasagao"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-9"><label for="id_cxlocalidad" class=" form-control-label">
+                            {{form.lfactoringproveedores.label}}</label></div>
+                        <div class="col">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  tipofactoring.lfactoringproveedores %} checked {% endif %} 
+                                id = "id_lfactoringproveedores" name = "lfactoringproveedores"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+            </div>    
+
+            <div class="card-footer">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <span class="fa fa-dot-circle-o"></span> Grabar
+                    </button>
+                    <a href="{% url 'empresa:listatiposfactoring' %}" class="btn btn-danger btn-sm">
+                        <i class="fa fa-ban"></i> Cancelar
+                    </a>
+                    {{ form.errors}}
+            </div>
+        </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}{% endblock %}

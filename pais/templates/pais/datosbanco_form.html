@@ -1,0 +1,62 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Extras</a></li>
+                    <li><a href="#">Tablas</a></li>
+                    <li class="active">Bancos</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post"  class="form-horizontal">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <strong>Datos</strong> 
+                de {% if tipofactoring %}  {{ tipofactoring }} {% else %}  nuevo banco {% endif %} 
+            </div>
+                {% csrf_token %}
+            <div class="card-body card-block">
+
+                    <div class="row form-group">
+                        <div class="col-12 col-md-6"><label for="id_cxtipoid" class=" form-control-label">{{ form.ctbanco.label}}</label></div>
+                        <div class="col col-md-6">
+                            {{ form.ctbanco}}
+                        </div>
+                    </div>  
+
+                    <div class="row form-group">
+                        <div class="col col-md-6"><label for="id_cxlocalidad" class=" form-control-label">{{form.llocal.label}}</label></div>
+                        <div class="col ">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  banco.llocal %} checked {% endif %} 
+                                id = "id_llocal" name = "llocal"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+            </div>    
+
+            <div class="card-footer">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <span class="fa fa-dot-circle-o"></span> Grabar
+                    </button>
+                    <a href="{% url 'pais:listabancos' %}" class="btn btn-danger btn-sm">
+                        <i class="fa fa-ban"></i> Cancelar
+                    </a>
+                    {{ form.errors}}
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+{% block js_page %}{% endblock %}

@@ -1,0 +1,176 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Extras</a></li>
+                    <li><a href="#">configuración</a></li>
+                    <li class="active">condiciones operativas</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmCondicion" enctype="multipart/form-data" class="form-horizontal">
+    <!-- <div class="col-lg-6"> -->
+    <div class="card">
+            {% csrf_token %}
+        <div class="card-header">
+            <strong>Condición operativa</strong> 
+            {% if condicion.id %} de  {{ condicion.ctcondicion }}  {% else %}  nueva{% endif %} 
+            <a href="{% url 'operaciones:listacondicionesoperativas' %}" class="btn btn-danger btn-sm float-right">
+                <i class="fa fa-ban"></i> Cancelar
+            </a>
+        </div>
+        <div class="card-body card-block">
+            <!-- columna superior -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="row form-group">
+                        <div class="col-md-2"><label for="id_ctcondicion" class=" form-control-label">
+                            {{ form_cabecera.ctcondicion.label}}</label></div>
+                        <div class="col-md-4">
+                            {{ form_cabecera.ctcondicion}}
+                        </div>
+                        <div class="col-md-2"><label for="id_cxtipofactoring" class=" form-control-label"> 
+                            {{ form_cabecera.cxtipofactoring.label}}</label></div>
+                        <div class="col-md-4">
+                            {{ form_cabecera.cxtipofactoring}}
+                        </div>
+                    </div>  
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="row form-group">
+                        <div class="col col-md-2"><label for="id_laplicaafacturaspuras" class=" form-control-label">
+                            {{ form_cabecera.laplicaafacturaspuras.label}}</label></div>
+                        <div class="col col-md-4">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  condicion.laplicaafacturaspuras %} checked {% endif %} 
+                                id = "id_laplicaafacturaspuras" name = "laplicaafacturaspuras"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+
+                        <div class="col col-md-2"><label for="id_laplicaaaccesorios" class=" form-control-label">
+                            {{ form_cabecera.laplicaaaccesorios.label}}</label></div>
+                        <div class="col col-md-4">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  condicion.laplicaaaccesorios %} checked {% endif %} 
+                                id = "id_laplicaaaccesorios" name = "laplicaaaccesorios"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+
+                    </div>  
+                </div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <!-- file intermedia -->
+            <div class="row">
+                <div class="col-3">
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="id_cxclasecliente" class=" form-control-label">  
+                            {{ form_detalle.cxclasecliente.label}}</label></div>
+                        <div class="col-md-6">
+                            {{ form_detalle.cxclasecliente}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="id_cxclasecomprador" class=" form-control-label">  
+                            {{ form_detalle.cxclasecomprador.label}}</label></div>
+                        <div class="col-md-6">
+                            {{ form_detalle.cxclasecomprador}}
+                        </div>
+                    </div>  
+                </div>
+
+                <div class="col-3">
+                    <div class="row form-group">
+                        <div class="col-md-2"><label for="id_nplazodesde" class=" form-control-label">  
+                            {{ form_detalle.nplazodesde.label}}</label></div>
+                        <div class="col-md-4">
+                            {{ form_detalle.nplazodesde}}
+                        </div>
+                        <div class="col-md-2"><label for="id_nplazohasta" class=" form-control-label">  
+                            {{ form_detalle.nplazohasta.label}}</label></div>
+                        <div class="col-md-4">
+                            {{ form_detalle.nplazohasta}}
+                        </div>
+                    </div>  
+                </div>
+
+                <div class="col-3">
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="id_nporcentajeanticipo" class=" form-control-label">  
+                            {{ form_detalle.nporcentajeanticipo.label}}</label></div>
+                        <div class="col-md-6">
+                            {{ form_detalle.nporcentajeanticipo}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="id_ntasagao" class=" form-control-label">  
+                            {{ form_detalle.ntasagao.label}}</label></div>
+                        <div class="col-md-6">
+                            {{ form_detalle.ntasagao}}
+                        </div>
+                    </div>  
+
+                </div>
+
+                <div class="col-3">
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="id_ntasadescuento" class=" form-control-label">  
+                            {{ form_detalle.ntasadescuento.label}}</label></div>
+                        <div class="col-md-6">
+                            {{ form_detalle.ntasadescuento}}
+                        </div>
+                    </div>  
+                    <div class="row form-group float-right">
+                        <button type="submit" class="btn btn-primary btn-sm float-right">
+                        <i class="fa fa-dot-circle-o"></i> Agregar
+                        </button>
+                    </div>  
+                </div>
+            </div>
+            
+            <!-- parte inferior -->
+            <div class="row">
+                <div class="col col-xs-12">
+                        
+                    <table id="table"                      
+                        data-show-columns-toggle-all="true"
+                        data-show-export="true"
+                        data-detail-formatter="detailFormatter"
+                        data-minimum-count-columns="2"
+                        data-pagination="true"
+                        data-id-field="id"
+                        data-page-list="[10, 50, all]"
+                        data-show-footer="false"
+                        data-side-pagination="server"
+                        {% if condicion.id %} 
+                        data-url="{% url 'operaciones:detallecondicionoperativa' condicion.id %}"
+                        {% endif %} 
+                        >
+                    </table>
+
+                </div>
+
+            </div>
+        </div>    
+          
+    </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<script type="text/javascript" src="{% static 'factorweb/js/condicionesoperativas.js' %}"></script>
+{% endblock %}

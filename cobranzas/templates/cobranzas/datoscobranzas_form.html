@@ -1,0 +1,232 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">cobranzas</a></li>
+                    <li><a href="{% url 'cobranzas:listadocumentosporvencer' %}">cartera por vencer</a></li>
+                    <li class="active">cobro de documentos</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" 
+    class="form-horizontal">
+    <!-- <div class="col-lg-6"> -->
+    <div class="card">
+            {% csrf_token %}
+        <div class="card-header">
+            <strong>Cobro de documentos</strong> de {{ cliente }}
+        </div>
+        <div hidden>
+            <input type="text" id="documentos" name="documentos" 
+                value="{{ documentos }}" class="form-control">
+            <input type="text" id="total_cartera" name="total_cartera" 
+                value="{{ total_cartera }}" class="form-control">
+            <input type="text" id="id_cliente" name="id_cliente" 
+                value="{{ cliente_id }}"  class="form-control">
+            <input type="text" id="forma_cobro" value="{{ forma_cobro }}"
+                class="form-control">
+            <input type="text" id="tipo_factoring" value="{{ tipo_factoring }}"
+                class="form-control">
+            <input type="text" id="id_deudor" value="{{ deudor_id }}"
+                class="form-control">
+        </div>
+        <div class="card-body card-block">
+            <!-- lista de clientes -->
+            <div class="row form-group">
+                <div class="col-md-1"><label for="id_dcobranza" 
+                    class=" form-control-label">
+                    {{ form.dcobranza.label}}</label>
+                </div>
+                <div class="col-md-2">
+                    {{ form.dcobranza}}
+                </div>
+
+                <div class="col-md-1">
+                    <label for="id_nvalor" class=" form-control-label">
+                    {{ form.nvalor.label}}</label>
+                </div>
+                <div class="col-md-2 animate__animated animate__shakeX">
+                        {{ form.nvalor}}
+                </div>
+
+                <div class="col-md-1">
+                    <label for="id_nvalor" class=" form-control-label">
+                    Recibido de:</label>
+                </div>
+                <div class="btn-group col-md-2 " data-toggle="buttons" aria-label="First group">
+                    <label class="btn btn-outline-secondary  
+                    {% if un_solo_comprador == 'Si' %} active {% endif %}">
+                        <input type="radio" name="pagadopor" 
+                        id="pordeudor" 
+                        {% if un_solo_comprador == 'No' or forma_cobro == 'MOV' %} 
+                            disabled 
+                        {% else %} 
+                            checked="" 
+                        {% endif %}
+                        > Deudor
+                    </label>
+                    <label class="btn btn-outline-secondary 
+                    {% if un_solo_comprador != 'Si' %} active {% endif %}">
+                        <input type="radio" name="pagadopor" 
+                        id="porcliente"
+                        {% if un_solo_comprador != "Si" or forma_cobro == 'MOV' %} 
+                            checked="" 
+                        {% endif %}
+                        > Cliente
+                    </label>
+                </div>
+                
+                <div class="col-md-1 "><label for="id_nvalor" 
+                    class=" form-control-label">
+                    {{ form.nsobrepago.label}}</label>
+                </div>
+                <div class="col-md-2">
+                    {{ form.nsobrepago}}
+                </div>
+            </div>
+
+            {% if forma_cobro in 'CHE, TRA' %} 
+
+            <div class="dropdown-divider"></div>
+
+            <div class="row form-group ">
+                <div class="col-md-1">
+                    <label for="id_cxbanco" class=" form-control-label">
+                    {{ form_cheque.cxcuentabancaria.label}}</label>
+                </div>
+                <div class="col-md-3">
+                    <!-- dependiendo de si pagó el cliente o el deudor -->
+                    <!-- presentar la lista de cuentas bancarias -->
+                    <div id="div_cuentas_deudor">
+                    {% if un_solo_comprador == 'Si' %}
+                        <select data-placeholder="Seleccione una cuenta..." 
+                            class="standardSelect" tabindex="1" 
+                            id="cuenta_deudor" name="cuenta_deudor"
+                            >
+                            <option value=""></option>
+                            {% for cuenta in cuentas_bancarias_deudor %}
+                            <option value="{{ cuenta.id}}" >{{ cuenta}} </option>
+                            {% endfor %}
+                        </select>
+
+                    {% endif %}
+                    </div>
+
+                    <div id="div_cuentas_cliente" {% if un_solo_comprador == 'Si'%} hidden {% endif %} %}>
+                        <select data-placeholder="Seleccione una cuenta..." 
+                            class="standardSelect" tabindex="1" 
+                            id="cuenta_cliente" name="cuenta_cliente"
+                            >
+                            <option value=""></option>
+                            {% for cuenta in cuentas_bancarias_cliente %}
+                            <option value="{{ cuenta.id}}" >{{ cuenta}} </option>
+                            {% endfor %}
+                        </select>
+                        
+                    </div>
+                </div>
+
+                {% if forma_cobro == 'CHE' %}
+
+                <div class="col-md-1"><label for="id_ctcheque" 
+                    class=" form-control-label">
+                    {{ form_cheque.ctcheque.label}}</label>
+                </div>
+                <div class="col-md-1">
+                    {{ form_cheque.ctcheque}}
+                </div>
+                <div class="col-md-1"><label for="id_ctgirador" 
+                    class=" form-control-label">
+                    {{ form_cheque.ctgirador.label}}</label>
+                </div>
+                <div class="col-md-3">
+                    {{ form_cheque.ctgirador}}
+                </div>
+                <!-- <div class="col-md-1"><label for="id_demision" 
+                    class=" form-control-label">
+                    {{ form_cheque.demision.label}}</label>
+                </div>
+                <div class="col-md-1">
+                    {{ form_cheque.demision}}
+                </div> -->
+                {% endif %}
+            </div>
+            {% endif %} 
+
+            <!-- parte inferior -->
+            <!-- <h5 class="heading-title mb-1 mt-3 text-secondary">Detalle de documentos</h5> -->
+
+            <div >
+                <small>
+                        
+                    <table id="table"                      
+                        data-show-columns-toggle-all="true"
+                        data-detail-formatter="detailFormatter"
+                        data-minimum-count-columns="2"
+                        data-id-field="id"
+                        data-unique-id="id"
+                        data-show-footer="true"
+                        data-side-pagination="server"
+                        data-url="{% url 'cobranzas:detalle_documentos' documentos %}"
+                        >
+                        </table>
+
+                </small>
+
+            </div>
+            <!-- datos de deposito -->
+            <div {% if forma_cobro == 'MOV' %} hidden {% endif %} >
+                <h5 class="heading-title mb-1 text-secondary">Datos del depósito</h5>
+
+                <div class="row form-group mt-3">
+                    <div class="btn-group col-md-4 " data-toggle="buttons" aria-label="First group">
+                        <label class="btn btn-outline-secondary active">
+                            <input type="radio" name="depositaren" 
+                            id="cuentaempresa"checked=""> Cuenta de la empresa
+                        </label>
+                        <label class="btn btn-outline-secondary ">
+                            <input type="radio" name="depositaren" 
+                            id="cuentacliente" > Cuenta del cliente
+                        </label>
+                    </div>
+                    <div class="col-md-1"><label for="id_cxcuentadeposito" 
+                        class=" form-control-label">
+                        {{form.cxcuentadeposito.label}}</label></div>
+                    <div class="col-md-3">
+                        {{form.cxcuentadeposito}}
+                    </div>
+                    <div class="col-md-2"><label for="id_ddeposito" 
+                        class=" form-control-label">
+                        {{form.ddeposito.label}}</label></div>
+                    <div class="col-md-2">
+                        {{form.ddeposito}}
+                    </div>
+                </div>
+            </div>
+
+        </div>    
+          
+        <div class="card-footer">
+            <button class="btn btn-success btn-sm"  type="button" onclick="AceptarCobranza()">  
+                <i class="fa fa-dot-circle-o"></i> Grabar
+            </button>
+            <a href="{% url 'cobranzas:listadocumentosporvencer' %}" 
+            class="btn btn-danger btn-sm">
+                <i class="fa fa-ban"></i> Cancelar
+            </a>
+        </div>
+    </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<script type="text/javascript" src="{% static 'factorweb/js/datoscobranzas.js' %}"></script>
+{% endblock %}

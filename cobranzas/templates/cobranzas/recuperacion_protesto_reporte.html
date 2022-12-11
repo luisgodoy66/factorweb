@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Recuperación</title>
+
+    <style type="text/css">
+        @page {
+            size: A4;
+            margin: 1cm;
+            size:  portrait;
+        }
+        .table thead th {
+                vertical-align:  top ;
+                border-bottom: 1px solid #000;
+        }
+        .table td.numero{
+            text-align: right;
+        }
+        .caja { 
+        font-family: sans-serif; 
+        font-size: 11px; 
+        font-weight: 400; 
+        color: #090909; 
+        background:#a9b7b7 }        
+        .alerta { 
+        font-family: sans-serif; 
+        font-size: 11px; 
+        font-weight: 400; 
+        color: #eb1111; 
+        }        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2>Reporte de recuperación </h2>
+            </div>
+
+            <div class="list-group">
+                <table >
+                    <tbody>
+                        <tr>
+                            <td><h4>Cliente:</h4></td>
+                            <td colspan="3">{{ cobranza.cxcliente.cxcliente.ctnombre }}</td>
+                            <td><h4>Fecha de recuperación:</h4></td>
+                            <td>{{ cobranza.dcobranza|date:"Y/m/d" }}</td>
+                        </tr>
+                        <tr>
+                            <td><h4>Id:</h4></td>
+                            <td colspan="3">{{cobranza.cxcliente.cxcliente.cxparticipante}}</td>
+                            <td><h4>tipo de factoring:</h4></td>
+                            <td>{{ cobranza.cxtipofactoring }}</td>
+                        </tr>
+                        <tr>
+                            <td><h4>Recuperación:</h4></td>
+                            <td colspan="3">{{ cobranza.cxrecuperacion }}</td>
+                            <td><h4>Total:</h4></td>
+                            <td>{{ cobranza.nvalor}}</td>
+                        </tr>
+                        <tr>
+                            <td><h4>Forma de cobro:</h4></td>
+                            <td colspan="3">{{ datos_forma_cobro }}</td>
+                            <td><h4>Sobrepago:</h4></td>
+                            <td colspan="1">{{ cobranza.nsobrepago}}</td>                           
+                        </tr>
+                    </tbody>
+                </table>
+                <hr>
+            </div>                       
+
+            <div class="row">
+                <div class="col">
+                    <table class="table table-striped table-hover nowrap" style="width:100%">
+                        <thead>
+                            <th>Asignación</th>        
+                            <th>Documento</th>
+                            <th>Vencimiento</th>
+                            <th>Días vencidos</th>
+                            <th>Saldo a la fecha</th>
+                            <th>Baja de cobranza</th>
+                            <th>Valor recuperado</th>
+                            <th>Bajas</th>
+                            <th>Total aplicado</th>
+                            <th>Saldo actual</th>
+                        </thead>
+                        <tbody>
+                            <!-- <tr></tr> -->
+                            {% for protesto in detalle %}
+                            <tr></tr>
+                            <tr class="caja">
+                                <div class="caja">
+                                <td colspan="4"><h3>Cheque protestado:</h3></td>
+                                <td ><h3>Valor</h3></td>
+                                <td ><h3>Protestado</h3></td>
+                                <td colspan="2"><h3>Motivo</h3></td>
+                                <td class="numero"><h3>Aplicado</h3></td>
+                                <td class="numero"><h3>Sdo. actual</h3></td>
+                                </div>
+                            </tr>
+                            <tr class="caja">
+                                <td colspan="4">{{ protesto.nombre }}</td>
+                                <td > {{ protesto.valor_protesto }}</td>
+                                <td > {{ protesto.fecha|date:"Y-m-d"  }}</td>
+                                <td colspan="2"> {{ protesto.motivo }}</td>
+                                <td class="numero"> {{ protesto.valor_aplicado }}</td>
+                                <td class="numero"> {{ protesto.saldo_protesto }}</td>
+                            </tr>
+                            <tr></tr>
+                            {% for item in protesto.detalle %}
+                            <tr>
+                                <td>{{ item.asignacion }}</td>
+                                <td>{{ item.documento }}</td>
+                                <td>{{ item.vencimiento|date:"Y-m-d" }}</td>
+                                <td class="numero">{{ item.dias_vencidos }}</td>
+                                <td class="numero">{{ item.saldo_al_dia_protesto }}</td>
+                                <td class="numero">{{ item.saldo_al_dia_baja_cobranza }}</td>
+                                <td class="numero">{{ item.valor_recuperado }}</td>
+                                <td class="numero">{{ item.valor_baja }}</td>
+                                <td class="numero">{{ item.total_aplicado }}</td>
+                                <td class="numero">{{ item.saldo_actual_protesto }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% endfor %}
+                            <!-- totales -->
+                            <tr></tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="numero"><h4>{{ totales.cobrado }}</h4></td>
+                                <td class="numero"><h4>{{ totales.bajas }}</h4></td>
+                                <td class="numero"><h4>{{ totales.aplicado }}</h4></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+            <table >
+                <tbody>
+                    <tr></tr>
+                    <tr>
+                        <td><h4>Depositado el:</h4></td>
+                        <td colspan="5">{{ datos_deposito }}</td>
+                        {% if cobranza.cxestado == 'P' %}
+                        <td class="alerta"><h4>Protestado el:</h4></td>
+                        <td class="alerta" colspan="2">{{ fecha_protesto|date:"Y/m/d" }}</td>
+                        {% endif %}
+                    </tr>
+                    <tr></tr>
+                    <tr>
+                        <td><h4>Realizado por:</h4></td>
+                        <td colspan="5">{{cobranza.cxusuariocrea}}</td>
+                        {% if cobranza.cxestado == 'P' %}
+                        <td class="alerta"><h4>Motivo:</h4></td>
+                        <td class="alerta" colspan="2">{{ motivo_protesto}}</td>
+                        {% endif %}
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</body>
+</html>

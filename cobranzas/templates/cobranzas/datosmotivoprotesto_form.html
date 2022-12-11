@@ -1,0 +1,75 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Extras</a></li>
+                    <li><a href="#">Tablas</a></li>
+                    <li class="active">Motivos de protesto</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post"  class="form-horizontal">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <strong>Datos</strong> 
+                de {% if motivo %}  {{ motivo }} {% else %}  nuevo motivo {% endif %} 
+            </div>
+                {% csrf_token %}
+            <div class="card-body card-block">
+
+                    <div class="row form-group">
+                        <div class="col-12 col-md-6">
+                            <label for="id_cxtipoid" class=" form-control-label">
+                                {{ form.ctmotivoprotesto.label}}</label></div>
+                        <div class="col col-md-6">
+                            {{ form.ctmotivoprotesto}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-12 col-md-6">
+                            <label for="id_cxtipoid" class=" form-control-label">
+                                {{ form.ctabreviacion.label}}</label></div>
+                        <div class="col col-md-6">
+                            {{ form.ctabreviacion}}
+                        </div>
+                    </div>  
+
+                    <div class="row form-group">
+                        <div class="col col-md-6">
+                            {{form.lresponsabilidadgirador.label}}
+                        </div>
+                        <div class="col ">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  motivo.lresponsabilidadgirador %} checked {% endif %} 
+                                id = "id_lresponsabilidadgirador" name = "lresponsabilidadgirador"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+            </div>    
+
+            <div class="card-footer">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <span class="fa fa-dot-circle-o"></span> Grabar
+                    </button>
+                    <a href="{% url 'cobranzas:listamotivosprotesto' %}" class="btn btn-danger btn-sm">
+                        <i class="fa fa-ban"></i> Cancelar
+                    </a>
+                    {{ form.errors}}
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+{% block js_page %}
+{% endblock %}

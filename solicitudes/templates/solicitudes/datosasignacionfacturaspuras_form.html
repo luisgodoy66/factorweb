@@ -1,0 +1,134 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">Negociación</a></li>
+                    <li class="active">Solicitudes pendientes</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" 
+    class="form-horizontal">
+    <!-- <div class="col-lg-6"> -->
+    <div class="card">
+            {% csrf_token %}
+        <div class="card-header">
+            <strong>Solicitud de factoring</strong> 
+            {% if asignacion.id %} de  {{ asignacion.cxcliente }}  
+            {% else %}  nueva {% endif %} 
+        </div>
+        <div class="col-6 col-md-6" hidden>
+            <input type="text" 
+                id="asignacion_id" 
+                name="asignacion_id" 
+                value="{{ asignacion.id }}"
+                class="form-control">
+            <input type="text" 
+                id="id_cliente" 
+                name="id_cliente" 
+                value="{{ asignacion.cxcliente_id }}"
+                class="form-control">
+        </div>
+        <div class="card-body card-block">
+            <!-- lista de clientes -->
+            <div class="row form-group">
+                <div class="col-md-2"><label for="id_cxtipofactoring" 
+                    class=" form-control-label">
+                    {{ form.cxcliente.label}}</label>
+                </div>
+                <div class="col-md-4">
+                    <select data-placeholder="Seleccione un cliente..." 
+                        class="standardSelect" tabindex="1" 
+                        id="cliente_id" name="cliente_id"
+                        {% if asignacion.id %} disabled {% endif %}
+                        >
+                        <option value=""></option>
+                        {% for cli in clientes %}
+                        <option value="{{ cli.id}}" >{{ cli.ctnombre}} </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2"><label for="id_cxtipofactoring" 
+                    class=" form-control-label">
+                    {{ form.cxtipofactoring.label}}</label>
+                </div>
+                <div class="col-md-4">
+                    {{ form.cxtipofactoring}}
+                </div>
+            </div>
+            <!-- tipo de factoring -->
+            <div class="row form-group">
+                <div class="col-md-2"><label for="id_ncantidaddocumentos" 
+                    class=" form-control-label">
+                    {{form.ncantidaddocumentos.label}}</label></div>
+                <div class="col-md-1">
+                    {{form.ncantidaddocumentos}}
+                </div>
+                <div class="col-md-1"><label for="id_nvalor" 
+                    class=" form-control-label">
+                    {{form.nvalor.label}}</label></div>
+                <div class="col-md-2">
+                    {{form.nvalor}}
+                </div>
+                <div class="col-md-6">
+                    <button class="btn btn-success btn-sm"  role="button"
+                        {% if asignacion.id %}
+                        onclick="return AbrirModal(
+                            '{% url 'solicitudes:facturaspuras_editar' asignacion.id asignacion.cxcliente_id asignacion.cxtipofactoring_id %}')"
+                        {% else %}
+                        onclick="return NuevaAsignacion()"
+                        {% endif %} 
+                        >  
+                        <i class="fa fa-dot-circle-o"></i> Agregar factura
+                    </button>
+                    <a href="{% url 'solicitudes:listasolicitudes' %}" 
+                    class="btn btn-danger btn-sm">
+                        <i class="fa fa-ban"></i> Cancelar
+                    </a>
+
+                </div>
+            </div>
+            <!-- parte inferior -->
+                <small>
+            <div class="row">
+
+                <div class="col col-xs-12">
+                        
+                    <table id="table"                      
+                        data-show-columns-toggle-all="true"
+                        data-show-export="true"
+                        data-detail-formatter="detailFormatter"
+                        data-minimum-count-columns="2"
+                        data-pagination="true"
+                        data-id-field="id"
+                        data-page-list="[10, 50, all]"
+                        data-show-footer="true"
+                        data-side-pagination="server"
+                        {% if asignacion.id %} 
+                        data-url="{% url 'solicitudes:detallesolicitudfacturaspuras' asignacion.id %}"
+                        {% endif %} 
+                        >
+                    </table>
+
+                </div>
+
+            </div>
+                </small>
+        </div>    
+          
+    </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<script src="{% static 'factorweb/vendors/chosen/chosen.jquery.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'factorweb/js/datosasignacionfacturaspuras.js' %}"></script>
+{% endblock %}

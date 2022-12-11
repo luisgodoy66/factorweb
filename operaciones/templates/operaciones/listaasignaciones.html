@@ -1,0 +1,91 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">operaciones</a></li>
+                    <li><a href="#">negociación</a></li>
+                    <li class="active">aceptadas</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div class="card-body">
+            <div class="dropdown float-right">
+                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <div class="dropdown-menu-content">
+                        <a class="dropdown-item" href="{% url 'operaciones:listadatosoperativos' %}">Nuevo</a>
+                        <a class="dropdown-item" href="#">Imprimir</a>
+                    </div>
+                </div>
+            </div>
+            <h4 class="mb-0">
+                <span class="count">{{ consulta.count }}</span>
+            </h4>
+
+            {% if not consulta %}
+            <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                <span class="badge badge-pill badge-danger">Sin registros</span>
+                {% if error %}
+                    {{ error }}
+                {% else %}
+                 No hay asignaciones.
+               {% endif %}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            {% endif %}
+
+            <!-- <div class="content"> -->
+
+                <table class="table table-striped table-bordered" 
+                    id="bootstrap-data-table-export">
+                    <thead>
+                        <th>Nombre de cliente</th>
+                        <th>Asignación</th>
+                        <th>Tipo de factoring</th>
+                        <th>Tipo de asignación</th>
+                        <th>Desembolso</th>
+                        <th>Valor negociado</th>
+                        <th>Estado</th>
+                        <th>Registro</th>
+                        <th class="all">Acciones</th>
+                    </thead>
+                    <tbody>
+                        {% for item in consulta %}
+                        <tr>
+                            <td>{{ item.cxcliente.ctnombre }}</td>
+                            <td>{{ item.cxasignacion }}</td>
+                            <td>{{ item.cxtipofactoring }}</td>
+                            <td>{{ item.cxtipo }} </td>
+                            <td>{{ item.ddesembolso|date:"Y/m/d" }}</td>
+                            <td>{{ item.nvalor }}</td>
+                            <td>{{ item.cxestado }}</td>
+                            <td>{{ item.dregistro|date:"Y/m/d H:i:s" }}</td>
+                            <td>
+                                <a href="{% url 'operaciones:reporteasignacion' item.id %}" 
+                                class="btn btn-success btn-sm" role="button" target="reporte">
+                                <i class="fa fa-print"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            <!-- </div> -->
+
+        </div>
+
+    </div>
+ 
+
+{% endblock %}
+

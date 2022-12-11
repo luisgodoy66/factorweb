@@ -1,0 +1,97 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Extras</a></li>
+                    <li><a href="#">tablas</a></li>
+                    <li class="active">movimientos</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal">
+    <div class="col-lg-6">
+        <div class="card">
+            {% csrf_token %}
+            <div class="card-header">
+                <strong>Movimiento</strong> 
+                de  {{ nombrecliente }}
+            </div>
+            <div class="card-body card-block">
+                <!-- columna izquierda -->
+                <!-- <div class="col-lg-6"> -->
+                    
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cxparticipante" class=" form-control-label">Código</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.cxmovimiento}}
+                            <!-- <small class="form-text text-muted">Máximo 13 caracteres</small> -->
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_ctnombre" class=" form-control-label">Descripción</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.ctmovimiento}}
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cxlocalidad" class=" form-control-label">Signo</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.cxsigno}}
+                            <!-- <small class="form-text text-muted">Máximo 10 caracteres.</small> -->
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_ctdireccion" class=" form-control-label">Carga desciento de cartera</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.lcargadescuentocartera}}
+                            <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cttelefono2" class=" form-control-label">Prioridad</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.nprioridad}}
+                            <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cttelefono2" class=" form-control-label">Afecta a cartera</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.lcolateral}}
+                            <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cttelefono2" class=" form-control-label">Código de movimiento padre</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.cxmovimientopadre}}
+                            <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
+                        </div>
+                    </div>
+
+            </div>    
+            
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Grabar
+                </button>
+                <a href="{% url 'operaciones:listamaestromovimientos' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+

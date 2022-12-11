@@ -1,0 +1,225 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">Negociación</a></li>
+                    <li class="active">Solicitudes pendientes</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal">
+    <!-- <div class="col-lg-6"> -->
+    <div class="card">
+            {% csrf_token %}
+        <div class="card-header">
+            <strong>Solicitud de factoring</strong> 
+            {% if asignacion.id %} de  {{ asignacion.cxcliente }}  {% else %}  nueva{% endif %} 
+            <a href="{% url 'solicitudes:listasolicitudes' %}" class="btn btn-danger btn-sm float-right">
+                <i class="fa fa-ban"></i> Cancelar
+            </a>
+            <button type="button" onclick="AceptarAsignacion()" class="btn btn-primary btn-sm float-right">
+                <i class="fa fa-dot-circle-o"></i> Aceptar
+            </button>
+
+        </div>
+        <div class="col-6 col-md-6" hidden>
+            <input type="text" 
+            id="asignacion_id" 
+            name="asignacion_id" 
+            value="{{ asignacion.id }}"
+            class="form-control">
+            <input type="text" 
+            id="id_cliente" 
+            name="id_cliente" 
+            value="{{ asignacion.cxcliente_id }}"
+            class="form-control">
+            <input type="text" 
+            id="iva_gao" 
+            name="iva_gao" 
+            value="{{ gao.carga_iva }}"
+            class="form-control">
+            <input type="text" 
+            id="iva_dc" 
+            name="iva_dc" 
+            value="{{ dc.carga_iva }}"
+            class="form-control">
+            <input type="text" 
+            id="carga_dc" 
+            name="carga_dc" 
+            value="{{ dc.generar }}"
+            class="form-control">
+            <input type="text" 
+            id="carga_gao" 
+            name="carga_gao" 
+            value="{{ gao.generar }}"
+            class="form-control">
+            <input type="text" 
+            id="usa_linea_factoring" 
+            name="usa_linea_factoring" 
+            value="{{ usa_linea_factoring }}"
+            class="form-control">
+            <input type="text" 
+            id="tipo_asignacion" 
+            name="tipo_asignacion" 
+            value="{{ tipo_asignacion }}"
+            class="form-control">
+        </div>
+            <div class="card-body card-block">
+                <!-- columna izquierda -->
+                <div class="col-7">
+                        <!-- fechas -->
+                    <div class="row form-group">
+                        <div class="col-md-3"><label for="id_dnegociacion" class=" form-control-label">
+                            {{ form_asignacion.dnegociacion.label}}
+                        </label></div>
+                        <div class="col-md-3">
+                            {{ form_asignacion.dnegociacion}}
+                        </div>
+                        <div class="col-md-2"><label for="id_ddesembolso" class=" form-control-label">
+                            {{ form_asignacion.ddesembolso.label}}
+                        </label></div>
+                        <div class="col-md-4">
+                            {{ form_asignacion.ddesembolso}}
+                        </div>
+                    </div>  
+                       
+                    <div class="row form-group">
+                        <div class="col-md-3"><label for="id_ctinstrucciondepago" class=" form-control-label">
+                            {{ form_asignacion.ctinstrucciondepago.label}}</label></div>
+                        <div class="col-md-9">
+                            {{ form_asignacion.ctinstrucciondepago}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-3"><label for="id_nvalor" class=" form-control-label">
+                            {{ form_asignacion.nvalor.label }}
+                        </label></div>
+                        <div class="col-md-3">
+                            {{ form_asignacion.nvalor}}
+                        </div>
+                        <div class="col col-md-2"{% if not condicion_operativa %} hidden {% endif %}>
+                            <label for="id_nvalor" class=" form-control-label">
+                            Condición operativa
+                        </label></div>
+                        <div class="col col-md-4"{% if not condicion_operativa %} hidden {% endif %}>
+                            <select data-placeholder="Seleccione una condición operativa..." class="standardSelect" tabindex="1" 
+                            id="condicion_id" name="condicion_id"
+                            >
+                            {% for cond in condicion_operativa %}
+                            <option value="{{ cond.id}}" >{{ cond.ctcondicion}} </option>
+                            {% endfor %}
+                            </select>
+                        </div>
+                    </div>  
+                    <!-- datos de ckiebte -->
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_nvalor" class=" form-control-label">
+                            Cuenta de transferencia
+                        </label></div>
+                        <div class="col-md-8">
+                            {{ cuenta_transferencia}}
+                        </div>
+                    </div>  
+                    <!-- <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_nvalor" class=" form-control-label">
+                            Beneficiario de cheque
+                        </label></div>
+                        <div class="col-md-3">
+                            {{ beneficiario}}
+                        </div>
+                    </div>   -->
+                </div>
+                <!-- columna derecha -->
+                <div class="col-5">
+                    <div class="row form-group">
+                        <div class="col col-xs-3"><label for="id_nanticipo" class=" form-control-label">
+                            {{ form_asignacion.nanticipo.label }}
+                        </label></div>
+                        <div class="col-6 col-md-6">
+                            {{ form_asignacion.nanticipo}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col col-xs-3"><label for="id_ngao" class=" form-control-label">{{gao.descripcion}}</label></div>
+                        <div class="col-6 col-md-6">
+                            {{ form_asignacion.ngao}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col col-xs-3"><label for="id_ndescuentodecartera" class=" form-control-label">{{dc.descripcion}}</label></div>
+                        <div class="col-6 col-md-6">
+                            {{ form_asignacion.ndescuentodecartera}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col col-xs-2"><label for="id_niva" class=" form-control-label">
+                            {{ form_asignacion.niva.label}}
+                        </label></div>
+                        <div class="col col-xs-1">
+                            <input type="number" name="neto" step="0.01" class="form-control" 
+                            readonly id="porcentaje_iva" value="{{ porcentaje_iva }}">
+                        </div>
+                        <div class="col-6 col-md-6">
+                            {{ form_asignacion.niva}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col col-xs-3"><label for="id_cxtipocliente" 
+                            class=" form-control-label">Neto</label></div>
+                        <div class="col-6 col-md-6">
+                            <input type="number" name="neto" step="0.01" 
+                            class="form-control" readonly id="neto">
+                        </div>
+                    </div>  
+                </div>
+                <!-- parte inferior -->
+                <div class="row">
+                    <small>
+
+                    <div class="col col-xs-12">
+                          
+                        <table id="table"                      
+                            data-show-columns-toggle-all="true"
+                            data-show-export="true"
+                            data-detail-formatter="detailFormatter"
+                            data-minimum-count-columns="2"
+                            data-pagination="true"
+                            data-id-field="id"
+                            data-page-list="[10, 50, all]"
+                            data-show-footer="true"
+                            data-side-pagination="server"
+                            data-search="true"
+                            >
+                            <thead>
+                                <tr>
+                                <th data-field="id" data-filter-control="input">id</th>
+                                <th data-field="Comprador" data-filter-control="input">comp</th>
+                                <th data-field="Documento" data-filter-control="input">docu</th>
+                                <th data-field="Emision" data-filter-control="input">emision</th>
+                                <th data-field="Vencimiento" data-filter-control="input">vencimiento</th>
+                                <th data-field="Total" data-filter-control="select">total</th>
+                                <th data-field="Plazo" data-filter-control="select">plazo</th>
+                                </tr>
+                            </thead>
+                                </table>
+
+                    </div>
+
+                    </small>
+               </div>
+            </div>    
+          
+    </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<script type="text/javascript" src="{% static 'factorweb/js/aceptarasignacion.js' %}"></script>
+{% endblock %}

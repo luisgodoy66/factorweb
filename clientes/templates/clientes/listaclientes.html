@@ -1,0 +1,86 @@
+{% extends 'bases/home.html' %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Participantes</a></li>
+                    <li><a href="#">Clientes</a></li>
+                    <li class="active">Ficha general</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div class="card-body">
+            <div class="dropdown float-right">
+                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <div class="dropdown-menu-content">
+                        <a class="dropdown-item" href="{% url 'clientes:datoscliente_nuevo' %}">Nuevo</a>
+                        <a class="dropdown-item" href="#">Imprimir</a>
+                    </div>
+                </div>
+            </div>
+            <h4 class="mb-0">
+                <span class="count">{{ consulta.count }}</span>
+            </h4>
+
+            {% if not consulta %}
+            <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                <span class="badge badge-pill badge-danger">Sin registros</span>
+                {% if error %}
+                    {{ error }}
+                {% else %}
+                 No hay clientes registrados.
+               {% endif %}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            {% endif %}
+
+            <!-- <div class="content"> -->
+
+                <table class="table table-striped table-bordered" id="bootstrap-data-table-export">
+                    <thead>
+                        <th>Id</th>
+                        <th>Nombre</th>
+                        <th>Dirección</th>
+                        <th>Telefonos</th>
+                        <th>Email</th>
+                        <th>Estado</th>
+                        <th>Registro</th>
+                        <th class="all">Acciones</th>
+                    </thead>
+                    <tbody>
+                        {% for item in consulta %}
+                        <tr>
+                            <td>{{ item.cxcliente.cxparticipante }}</td>
+                            <td>{{ item }}</td>
+                            <td>{{ item.cxcliente.ctdireccion }}</td>
+                            <td>{{ item.cxcliente.cttelefono1 }} / {{ item.cxcliente.cttelefono2 }} / {{ item.cxcliente.ctcelular }}</td>
+                            <td>{{ item.cxcliente.ctemail }}</td>
+                            <td>{{ item.cxestado }}</td>
+                            <td>{{ item.dregistro|date:"Y/m/d H:i:s" }}</td>
+                            <td>
+                                <a href="{% url 'clientes:cliente_editar' item.cxcliente.cxparticipante %}" class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>
+                                <a href="#" class="btn btn-danger btn-sm" role="button"><i class="fa fa-exclamation"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            <!-- </div> -->
+
+        </div>
+
+    </div>
+ 
+
+{% endblock %}
+

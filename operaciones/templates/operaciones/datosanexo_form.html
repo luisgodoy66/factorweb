@@ -1,0 +1,85 @@
+{% extends 'bases/home.html' %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Extras</a></li>
+                    <li><a href="#">configuración</a></li>
+                    <li class="active">Anexos</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post"  class="form-horizontal">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <strong>Datos</strong> 
+                de {% if anexo  %}  {{ anexo }} {% else %}  nuevo anexo {% endif %} 
+            </div>
+                {% csrf_token %}
+            <div class="card-body card-block">
+
+                    <div class="row form-group">
+                        <div class="col-md-3">
+                            {{ form.ctnombre.label }}
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.ctnombre }}
+                            <!-- <small class="form-text text-muted">Máximo 3 caracteres</small> -->
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-3">
+                            {{ form.ctrutageneracion.label }}
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.ctrutageneracion }}
+                            <small class="form-text text-muted">defina el directorio donde se crearán los anexos. Incluya el caracter \ final</small>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-3">
+                            {{ form.lactivo.label}}
+                        </div>
+                        <div class="col-md-9 ">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  anexo.lactivo %} checked {% endif %} 
+                                id = "id_lactivo" name = "lactivo"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                <div class="row form-group">
+                    <div class="col-md-3">
+                        {{ form.ctrutaanexo.label }}
+                    </div>
+                    <div class="col-md-9">
+                        {{ form.ctrutaanexo }}
+                        <small class="form-text text-muted">defina la ubicación de la plantilla del anexo incluyendo el nombre del archivo</small>
+                    </div>
+            </div>
+            </div>    
+
+            <div class="card-footer">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <span class="fa fa-dot-circle-o"></span> Grabar
+                    </button>
+                    <a href="{% url 'operaciones:listaanexos' %}" class="btn btn-danger btn-sm">
+                        <i class="fa fa-ban"></i> Cancelar
+                    </a>
+                    {{ form.errors}}
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+

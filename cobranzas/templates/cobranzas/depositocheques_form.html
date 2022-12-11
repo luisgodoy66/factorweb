@@ -1,0 +1,81 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">operaciones</a></li>
+                    <li><a href="#">cobranzas</a></li>
+                    <li><a href="{% url 'cobranzas:listachequesadepositar' %}">depósito de cheques</a></li>
+                    <li class="active">depósito</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal">
+    <div class="card bg-flat-color-0">
+        {% csrf_token %}
+        <div class="card-body">
+
+            <!-- <div class="content"> -->
+            <div>
+                <table class="table table-striped table-bordered" id="bootstrap-data-table-export">
+                    <thead>
+                        <th>Cliente</th>
+                        <th>Cantidad</th>
+                        <th>Total</th>
+                    </thead>
+                    <tbody>
+                        {% for item in cheques %}
+                        <tr>
+                            <td>{{ item.documento__cxcliente__ctnombre }}</td>
+                            <td>{{ item.pcount }}</td>
+                            <td>{{ item.total }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div >
+                <h5 class="heading-title mb-1 text-secondary">Datos del depósito</h5>
+
+                <div class="row form-group mt-3">
+                    <div class="col-md-2"><label for="id_cxcuentadeposito" 
+                        class=" form-control-label">
+                        {{form.cxcuentadeposito.label}}</label></div>
+                    <div class="col-md-4">
+                        {{form.cxcuentadeposito}}
+                    </div>
+                    <div class="col-md-2"><label for="id_ddeposito" 
+                        class=" form-control-label">
+                        {{form.ddeposito.label}}</label></div>
+                    <div class="col-md-2 animate__animated animate__shakeX">
+                            {{form.ddeposito}}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'cobranzas:listachequesadepositar' %}" class="btn btn-danger btn-sm">
+                <i class="fa fa-ban"></i> Cancelar
+            </a>
+        <button type="submit" class="btn btn-primary btn-sm ">
+                <i class="fa fa-dot-circle-o"></i> Confirmar
+            </button>
+
+        </div>
+    </div>
+</form>
+
+
+{% endblock %}
+
+{% block js_page %}
+<script>
+    objeto_fechas("#id_ddeposito");
+</script>
+{% endblock %}

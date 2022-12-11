@@ -1,0 +1,95 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Participantes</a></li>
+                    <li><a href="#">Clientes</a></li>
+                    <li class="active">Ficha general</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal">
+    <div class="col-lg-6">
+        <div class="card">
+            {% csrf_token %}
+            <div class="card-header">
+                <strong>Ficha general</strong> 
+                de  {{ nombrecliente }}
+            </div>
+            <div class="card-body card-block">
+                <!-- columna izquierda -->
+                <!-- <div class="col-lg-6"> -->
+                    
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cttelefono1" class=" form-control-label">Profesión</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_cliente.ctprofesion}}
+                            <small class="form-text text-muted">Máximo 60 caracteres.</small></div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cxtipocliente" class=" form-control-label">Sexo</label></div>
+                        <div class="col-12 col-md-9">
+                            {{ form_cliente.cxsexo}}
+                        </div>
+                    </div>  
+    
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cxparticipante" class=" form-control-label">Fecha de nacimiento</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_cliente.dnacimiento}}
+                            <small class="form-text text-muted">Máximo 13 caracteres</small></div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_ctnombre" class=" form-control-label">Estado civil</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_cliente.cxestadocivil}}
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cxlocalidad" class=" form-control-label">Id. de conyuge</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_cliente.cxconyuge}}
+                            <small class="form-text text-muted">Máximo 10 caracteres.</small></div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_ctdireccion" class=" form-control-label">Nombre de conyuge</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_cliente.ctnombreconyuge}}
+                            <small class="form-text text-muted">Máximo 60 caracteres.</small></div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cttelefono2" class=" form-control-label">Nombre de negocio</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_cliente.ctnombrenegocio}}
+                            <small class="form-text text-muted">Máximo 60 caracteres.</small></div>
+                    </div>
+
+            </div>    
+            
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Grabar y continuar
+                </button>
+                <a href="{% url 'clientes:listaclientes' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+{% block js_page %}
+<script type="text/javascript" 
+    src="{% static 'factorweb/js/datosclientenatural.js' %}">
+</script>
+
+{% endblock %}

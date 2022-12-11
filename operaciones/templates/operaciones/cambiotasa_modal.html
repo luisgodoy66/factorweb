@@ -1,0 +1,89 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" rol="form"  class="form-horizontal" name="form"
+                action="{% url 'operaciones:editartasasdocumento' documento_id fecha_desembolso asignacion %}"
+            >
+            <div class="card">
+
+                {% csrf_token %}
+                <div class="card-header">
+                    <strong>Tasas </strong> 
+                        de documento {{ documento }}. Referencia {{ documento_id}}
+                </div>
+                
+                <input type="text" name = "asignacion_id" hidden value = "{{ asignacion}}">
+
+                <div class="card-body card-block">
+                <!-- <div class="col-lg-6"> -->
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="id_nporcentajeanticipo" class=" form-control-label">
+                            {{ form_documento.nporcentajeanticipo.label}}</label></div>
+                        <div class="col-md-6">
+                            {{ form_documento.nporcentajeanticipo}}
+                            <!-- <small class="form-text text-muted">{{ form.nporcentajeanticipo.help}}</small> -->
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="id_ntasacomision" class=" form-control-label">
+                            {{ form_documento.ntasacomision.label}}</label></div>
+                        <div class="col-md-6">
+                            {{ form_documento.ntasacomision}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="id_ntasadescuento" class=" form-control-label">
+                            {{ form_documento.ntasadescuento.label}}</label></div>
+                        <div class="col-md-6">
+                            {{ form_documento.ntasadescuento}}
+                        </div>
+                    </div>
+                <!-- </div> -->
+                    <!-- {{ form.as_p}} -->
+                </div>    
+                {{ errors}}
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="return CerrarModal()">
+                        <i class="fa fa-dot-circle-o"></i> Cerrar
+                    </button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+    {% block js_page %}
+    <script>
+        var url = jQuery("[name=form]").attr("action");
+        var token = jQuery("[name=csrfmiddlewaretoken]").val();
+        var asgn = jQuery("[name=asignacion_id]").val();
+
+        jQuery("form").submit(function(e){
+            e.preventDefault();
+           var formData = jQuery("form").serializeArray();
+            // console.log(formData);
+            jQuery.ajax({
+                url:url,
+                method:"POST",
+                headers: {'X-CSRFToken': token },
+                data: formData
+            })
+            .done(function(r,textStatus,xhr){
+                if(xhr.status=200){
+                    jQuery("#popup").modal('hide');
+                    // refrescar la tabla
+                    RefrescarTabla(asgn);
+                }
+                else{
+                    alert(textStatus);
+                }
+            }).fail(function (error) {
+                MensajeError(error.responseText);
+            });
+        });
+    </script>
+    {% endblock %}
+    

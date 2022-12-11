@@ -1,0 +1,103 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">liquidar cobranzas</a></li>
+                    <li><a href="{% url 'cobranzas:listacobranzaspendientesliquidar' %}">por liquidar</a></li>
+                    <li class="active">cobros por condonar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" 
+        class="form-horizontal">
+    <!-- <div class="col-lg-6"> -->
+    <div class="col-md-6" hidden>
+        <input type="number" id="id_cobranza" value={{ operacion.id }}>
+        <input id="tipo_operacion" value={{ tipo_operacion }}>
+    </div>
+    <div class="card">
+            {% csrf_token %}
+        <div class="card-header">
+            <strong>Cobranza</strong> 
+            {{ operacion }} de  {{ operacion.cxcliente }}  
+        </div>
+        <div class="card-body card-block">
+                <!-- numero de documentos -->
+                <div class="row form-group">
+                    <div class="col-md-2">
+                        <label for="id_cxactividad" class=" form-control-label">
+                        {{form.ddeposito.label}}</label>
+                    </div>
+                    <div class="col-md-2" >
+                        {{form.ddeposito}}
+                    </div>
+                    <div class="col-md-2">
+                        <label for="id_cxactividad" class=" form-control-label">
+                        {{form.nvalor.label}}</label>
+                    </div>
+                    <div class="col-md-2" >
+                        {{form.nvalor}}
+                    </div>
+                </div>
+            <!-- parte inferior -->
+            <div class="row">
+                <div class="col ">
+                    <small>
+
+                    <table id="table"                      
+                        data-show-columns-toggle-all="true"
+                        data-show-export="true"
+                        data-detail-formatter="detailFormatter"
+                        data-minimum-count-columns="2"
+                        data-pagination="true"
+                        data-id-field="id"
+                        data-page-list="[10, 50, all]"
+                        data-show-footer="true"
+                        data-side-pagination="server"
+                        data-url="{% url 'cobranzas:detalledocumentoscobrados' operacion.id tipo_operacion %}"
+                        >
+                    <thead>
+                        <tr>
+                        <th data-field="id" ></th>
+                        <th data-field="Comprador" data-sortable="true" >Deudor</th>
+                        <th data-field="Asignacion" data-sortable="true" >Asignación</th>
+                        <th data-field="Documento" data-sortable="true" >Documento</th>
+                        <th data-field="Vencimiento" data-sortable="true" >Vencimiento</th>
+                        <th data-field="DiasVencidos" data-sortable="true" >Días vencidos</th>
+                        <th data-field="Valor" data-sortable="true" >Valor cobrado</th>
+                        <th data-field="DiasCondonados" data-sortable="true" >Días condonados</th>
+                        <th data-field="UsuarioCondona" data-sortable="true" >Usuario condona</th>
+                        <th data-field="operate" data-sortable="true" data-events="window.operateEvents"
+                            data-formatter="operateFormatter">Acción</th>
+                        </tr>
+                    </thead>
+                    </table>
+                    </small>
+
+                </div>
+
+            </div>
+        </div>    
+        <!-- pie de card -->
+        <div class="card-footer">
+        <a href="{% url 'cobranzas:listacobranzaspendientesliquidar' %}" class="btn btn-danger btn-sm">
+            <i class="fa fa-ban"></i> Cerrar
+        </a>
+        </div>
+
+    </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<script type="text/javascript" src="{% static 'factorweb/js/detallecobroporcondonar.js' %}"></script>
+{% endblock %}
+

@@ -1,0 +1,175 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">Negociación</a></li>
+                    <li class="active">Solicitudes pendientes</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" 
+        class="form-horizontal">
+<div class="col-md-8">
+    <div class="card">
+        {% csrf_token %}
+        <div class="card-header">
+            <strong>Detalle de factura</strong> 
+        </div>
+        <div class="col-6 col-md-6" hidden>
+            <input type="text" 
+                id="asignacion_id" 
+                name="asignacion_id" 
+                value="{{ asignacion_id }}"
+                class="form-control">
+            <input type="text" 
+                id="id_cliente" 
+                name="id_cliente" 
+                value="{{ cliente }}"
+                class="form-control">
+            <input type="text" 
+                id="id_tipofactoring" 
+                name="id_tipofactoring" 
+                value="{{ tipo_factoring }}"
+                class="form-control">
+        </div>
+        
+        <div class="card-body">
+            <!-- datos de factura texto y fecha -->
+            <div class="col-xs-6 col-sm-6">
+                <div class="row form-group">
+                    <div class="col col-xs-3">
+                        <select name="cxtipoid" class="form-control" required id="cxtipoid">
+                            <option value="" >---------</option>                                            
+                            <option value="R" selected>RUC</option>                                            
+                            <option value="C">CEDULA</option>                                            
+                            <option value="P">PASAPORTE</option>                                            
+                            <option value="O">OTRO</option>                                            
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-6">
+                        {{ form_documento.cxcomprador}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{ form_documento.ctcomprador.label}}</label></div>
+                    <div class="col-6 col-md-6">
+                        {{ form_documento.ctcomprador}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{ form_documento.ctdocumento.label}}</label></div>
+                    <div class="col-6 col-md-6">
+                        {{ form_documento.ctdocumento}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{ form_documento.demision.label}}</label></div>
+                    <div class="col-6 col-md-6">
+                        {{ form_documento.demision}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col-md-6 col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{ form_documento.nvalorantesiva.label}}</label></div>
+                    <div class="col-6 col-md-6">
+                        {{ form_documento.nvalorantesiva}}
+                    </div>
+                </div>  
+
+            </div>
+            <!-- datos de factura valores -->
+            <div class="col-6">
+                <div class="row form-group">
+                    <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{ form_documento.niva.label}}</label></div>
+                    <div class="col-6 col-md-6">
+                        {{ form_documento.niva}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{ form_documento.nretencioniva.label}}</label></div>
+                    <div class="col-6 col-md-6">
+                        {{ form_documento.nretencioniva}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{ form_documento.nretencionrenta.label}}</label></div>
+                    <div class="col-6 col-md-6">
+                        {{ form_documento.nretencionrenta}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{ form_documento.ntotal.label}}</label></div>
+                    <div class="col-6 col-md-6">
+                        {{ form_documento.ntotal}}
+    
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col-md-12">
+                    <button type="button" class="btn btn-success btn-sm float-right" 
+                        onclick="AbrirModal('/solicitudes/editarchequeaccesorio/')">                                        
+                        <i class="fa fa-dot-circle-o"></i> Agregar cheque accesorio
+                    </button>
+                    </div>
+                </div>  
+            </div>
+            <div class="dropdown-divider"></div>
+            <small>
+
+            <div class="container mt-3">
+                <div id="divTabla">
+                    <table class="table table-striped table-bordered" id="tabla_cheques" data-propiedadId="Id">
+                        <thead>
+                            <tr>
+                                <td data-cabecera="cxbanco">banco</td>
+                                <td data-cabecera="ctcuenta">cuenta</td>
+                                <td data-cabecera="cxcheque">Cheque</td>
+                                <td data-cabecera="ctgirador">Girador</td>
+                                <td data-cabecera="dvencimiento">Vencimiento</td>
+                                <td data-cabecera="nvalor">Valor</td>
+                                <td data-cabecera="Acciones"class="all">Acciones</td>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            </small>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa fa-dot-circle-o"></i> Agregar
+            </button>
+            <a class="btn btn-danger btn-sm "
+            {% if asignacion_id %}
+                href="{% url 'solicitudes:asignacionconaccesorios_editar' asignacion_id %}" 
+            {% else %}
+                href="{% url 'solicitudes:asignacionconaccesorios_nueva' %}" 
+            {% endif %}
+            ><i class="fa fa-ban"></i> Cancelar
+            </a>
+            
+        </div>
+    </div>
+</div>
+
+</form>
+{% endblock %}
+{% block js_page %}
+<script type="text/javascript" src="{% static 'factorweb/js/datosdocumentosconaccesorios.js' %}"></script>
+{% endblock %}
+

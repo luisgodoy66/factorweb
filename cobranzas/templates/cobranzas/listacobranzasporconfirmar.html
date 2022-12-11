@@ -1,0 +1,108 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">Liquidar cobranzas</a></li>
+                    <li class="active">Confirma depósito</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div class="card-body">
+            <div class="dropdown float-right">
+                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <div class="dropdown-menu-content">
+                        <a class="dropdown-item" href="#">Imprimir</a>
+                    </div>
+                </div>
+            </div>
+            <h4 class="mb-0">
+                <span class="count">{{ consulta.count }}</span>
+            </h4>
+
+            {% if not consulta %}
+            <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                <span class="badge badge-pill badge-danger">Sin registros</span>
+                {% if error %}
+                    {{ error }}
+                {% else %}
+                 No hay cobranzas por confirmar
+               {% endif %}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            {% endif %}
+
+            <!-- <div class="content"> -->
+
+                <table class="table table-striped table-bordered" id="bootstrap-data-table-export">
+                    <thead>
+                        <th>Nombre de cliente</th>
+                        <th>Depósito</th>
+                        <th>Tipo de factoring</th>
+                        <th>Cobranza</th>
+                        <th>Forma de pago</th>
+                        <th>Valor</th>
+                        <th>Cuenta de depósito</th>
+                        <th class="all">Acciones</th>
+                    </thead>
+                    <tbody>
+                        {% for item in consulta %}
+                        <tr>
+                            <td>{{ item.cxcliente__cxcliente__ctnombre }}</td>
+                            <td>{{ item.ddeposito|date:"Y/m/d" }}</td>
+                            <td>{{ item.cxtipofactoring__ctabreviacion }}</td>
+                            <td>{{ item.cxcobranza }} </td>
+                            <td>{{ item.cxformapago }}</td>
+                            <td>{{ item.nvalor}}</td>
+                            {% if item.ldepositoencuentaconjunta %}
+                            <td>Cuenta del cliente</td>
+                            {% else %}
+                            <td>{{ item.cxcuentadeposito__cxcuenta}}</td>
+                            {% endif %}
+                            <td>
+                                <a href="#" onclick='ConfirmarCobranza("{{item.id}}","{{item.tipo}}")' 
+                                    class="btn btn-success btn-sm" role="button" title="Confirmado">
+                                    <i class="fa fa-check"></i></a>
+                                {% if item.cxformapago in 'CHE, DEP' %}
+                                {% if item.tipo == 'C' %}
+                                <a href="{% url 'cobranzas:protestocobranza' item.cxcheque_id item.id %}" 
+                                    class="btn btn-danger btn-sm" role="button" title="Cobranza protestada">
+                                    <i class="fa fa-times"></i></a>
+                                {% endif %}
+                                {% if item.tipo == 'R' %}
+                                <a href="{% url 'cobranzas:protestorecuperacion' item.cxcheque_id item.id %}" 
+                                    class="btn btn-danger btn-sm" role="button" title="Recuperacion potestada">
+                                    <i class="fa fa-times"></i></a>
+                                {% endif %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            <!-- </div> -->
+
+        </div>
+
+    </div>
+ 
+
+{% endblock %}
+
+{% block js_page %}
+<script type="text/javascript" 
+    src="{% static 'factorweb/js/listacobranzasporconfirmar.js' %}">
+</script>
+{% endblock %}

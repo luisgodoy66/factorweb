@@ -1,0 +1,123 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">Negociación</a></li>
+                    <li class="active">Pendientes de liquidar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal">
+    <div class="col-lg-6">
+        <div class="card">
+                {% csrf_token %}
+            <div class="card-header">
+                <strong>Operación</strong> 
+                de {{ cliente }}
+            </div>
+            <div hidden>
+                <input type="text" value="{{ id_beneficiario }}" name="id_beneficiario">
+            </div>
+            <div class="card-body card-block">
+                    <!-- columna izquierda -->
+                    <!-- <div class="col-6"> -->
+                            <!-- fechas -->
+                        <div class="row form-group">
+                            <div class="col-md-5"><label for="id_ddesembolso" class=" form-control-label">
+                                {{ form.cxoperacion.label}}
+                            </label></div>
+                                <div class="col-md-3">
+                                    {{ operacion}}
+                                </div>
+                                <div hidden>
+                                    {{ form.cxoperacion}}
+                                </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col-md-5"><label for="id_ddesembolso" class=" form-control-label">
+                                Liquidación
+                            </label></div>
+                            <div class="col-md-7">
+                                {{ liquidacion|date:"Y-m-d" }}
+                            </div>
+                        </div>  
+                        
+                        <div class="row form-group">
+                            <div class="col col-md-5"><label for="id_ctinstrucciondepago" class=" form-control-label">
+                                Instrucción de pago</label></div>
+                            <div class="col-md-7">
+                                {{ instruccion_de_pago}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-5"><label for="id_nvalor" class=" form-control-label">
+                                {{ form.nvalor.label}}
+                            </label></div>
+                            <div class="col-md-7">
+                                {{ form.nvalor}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-5"><label for="id_nvalor" class=" form-control-label">
+                                Destino de transferencia
+                            </label></div>
+                            <div class="col-md-7">
+                                {{ cuenta_transferencia}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-5"><label for="id_nvalor" class=" form-control-label">
+                                {{ form.ctbeneficiario.label }}
+                            </label></div>
+                            <div class="col-md-7">
+                                {{ beneficiario }}
+                            </div>
+                        </div>  
+                        <div class="dropdown-divider"></div>
+                        <div class="row form-group">
+                            <div class="col col-md-5"><label for="id_nvalor" class=" form-control-label">
+                                {{ form.cxformapago.label}}
+                            </label></div>
+                            <div class="col-md-7">
+                                {{ form.cxformapago }}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-5">
+                                <label for="id_nvalor" class=" form-control-label">
+                                    {{ form.cxcuentapago.label }}</label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ form.cxcuentapago }}
+                            </div>
+                        </div>  
+                <!-- </div> -->
+            </div>    
+            <div class="card-footer">
+                {% if tipo_operacion == 'A' %}
+                <a href="{% url 'operaciones:listaasignacionespendientesdesembolsar' %}" class="btn btn-danger btn-sm ">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                {% else %}
+                <a href="{% url 'cobranzas:listaliquidacionespendientespagar' %}" class="btn btn-danger btn-sm ">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                {% endif %}
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Desembolso
+                </button>
+
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+{% block js_page %}
+{% endblock %}

@@ -1,0 +1,94 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" rol="form" id="frmCupo" class="form-horizontal"
+            {% if consulta.pk %}
+                action="{% url 'clientes:cupo_editar' consulta.pk  %}"
+            {% else %}
+                action="{% url 'clientes:cupo_nuevo' %}"
+            {% endif %}
+            >
+            <!-- <div class="col-xl-12 col-md-12 mb-12"> -->
+                <div class="card">
+
+                {% csrf_token %}
+                <div class="card-header">
+                    <strong>Cupo </strong> 
+                    {% if consulta.pk %}
+                        de {{ consulta.cxcomprador }} en {{ consulta.cxcliente }}
+                    {% else %}
+                        Nuevo
+                    {% endif %}
+                </div>
+                
+                <div class="card-body card-block">
+                <!-- <div class="col-lg-6"> -->
+                    <div class="row form-group" {% if consulta.cxcomprador %} hidden {% endif %}>
+                        <div class="col-md-6"><label for="id_cxcomprador" class=" form-control-label"> 
+                            {{ form.cxcomprador.label}}</label></div>
+                        <div class="col-md-6">
+                            {{ form.cxcomprador}}
+                        </div>
+                    </div>
+                    <div class="row form-group" {% if consulta.cxcomprador %} hidden {% endif %}>
+                        <div class="col-md-6"><label for="id_cxcliente" class=" form-control-label"> 
+                            {{ form.cxcliente.label}}</label></div>
+                        <div class="col-md-6">
+                            {{ form.cxcliente}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="id_cxmoneda" class=" form-control-label">
+                            {{ form.cxmoneda.label}}</label></div>
+                        <div class="col-md-6">
+                            {{ form.cxmoneda}}
+                            <small class="form-text text-muted">Máximo 3 caracteres</small>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="id_ncupocartera" class=" form-control-label">
+                            {{ form.ncupocartera.label}}</label></div>
+                        <div class="col-md-6">
+                            {{ form.ncupocartera}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="id_cxmodalidadcobranza" class=" form-control-label">
+                            {{ form.cxmodalidadcobranza.label}}</label></div>
+                        <div class="col-md-6">
+                            {{ form.cxmodalidadcobranza}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="id_lsenotifica" class=" form-control-label"> 
+                            {{ form.lsenotifica.label}}</label></div>
+                        <div class="col-md-6">
+                            {{ form.lsenotifica}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="id_lactivo" class=" form-control-label">
+                            {{ form.lactivo.label}}</label></div>
+                        <div class="col-md-6">
+                            {{ form.lactivo}}
+                        </div>
+                    </div>
+                <!-- </div> -->
+                    <!-- {{ form.as_p}} -->
+                </div>    
+                {{ errors}}
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="return CerrarModal()">
+                        <i class="fa fa-dot-circle-o"></i> Cerrar
+                    </button>
+                </div>
+                </div>
+            <!-- </div> -->
+        </form>
+
+    </div>
+</div>
+

@@ -1,0 +1,125 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">cobranzas</a></li>
+                    <li><a href="#">liquidar cobranzas</a></li>
+                    <li><a href="#">confirma depósito</a></li>
+                    <li class="active">protesto de cheque</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal">
+    <div class="col-lg-6">
+        <div class="card">
+                {% csrf_token %}
+            <div class="card-header">
+                <strong>Protesto</strong> 
+                de {{ cheque.cxparticipante }}
+            </div>
+            <div hidden>
+                <input type="text" value="{{ id_cliente }}" id="id_cliente">
+                <input type="text" value="{{ forma_cobro }}" id="forma_cobro">
+                <input type="text" value="{{ codigo_cobranza }}" id="codigo_cobranza">
+                <input type="text" value="{{ cobranza.id }}" id="id_cobranza">
+                <input type="text" value="{{ cobranza.cxtipofactoring.cxtipofactoring }}" id="tipo_factoring">
+                <input type="text" value="{{ cobranza.cxaccesorio.id }}" id="id_accesorio">
+                <input type="text" value="{{ cheque.id }}" id="id_cheque">
+                <input type="text" value="{{ cheque.nvalor|floatformat:"2u"  }}" id="valor_cheque">
+                <input type="text" value="{{ cheque.cxtipoparticipante }}" id="tipo_emisor">
+                <input type="text" value="{{ tipo_operacion }}" id="tipo_operacion">
+            </div>
+            <div class="card-body card-block">
+                    <!-- columna izquierda -->
+                    <!-- <div class="col-6"> -->
+                            <!-- fechas -->
+                        <div class="row form-group">
+                            <div class="col-md-5"><label for="id_ddesembolso" class=" form-control-label">
+                                Operación
+                            </label></div>
+                            <div class="col-md-7">
+                                {{ cobranza}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col-md-5"><label for="id_ddesembolso" class=" form-control-label">
+                                Cheque
+                            </label></div>
+                            <div class="col-md-7">
+                                {{ cheque}}
+                            </div>
+                        </div>  
+                        
+                        <div class="row form-group">
+                            <div class="col col-md-5"><label for="id_ctinstrucciondepago" class=" form-control-label">
+                                Girador</label></div>
+                            <div class="col-md-7">
+                                {{ cheque.ctgirador}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-5"><label for="id_ctinstrucciondepago" class=" form-control-label">
+                                Valor</label></div>
+                            <div class="col-md-7">
+                                {{ cheque.nvalor}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-5"><label for="id_nvalor" class=" form-control-label">
+                               Fecha de depósito
+                            </label></div>
+                            <div class="col-md-7">
+                                {{ cobranza.ddeposito|date:"Y-m-d" }}
+                            </div>
+                        </div>  
+                        <div class="dropdown-divider"></div>
+                        <div class="row form-group">
+                            <div class="col col-md-5"><label for="id_dprotesto" class=" form-control-label">
+                                {{ form.dprotesto.label}}
+                            </label></div>
+                            <div class="col-md-7">
+                                {{ form.dprotesto }}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-5">
+                                <label for="id_motivoprotesto" class=" form-control-label">
+                                    {{ form.motivoprotesto.label }}</label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ form.motivoprotesto }}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-5">
+                                <label for="id_nvalornotadebito" class=" form-control-label">
+                                    {{ form.nvalornotadebito.label }}</label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ form.nvalornotadebito }}
+                            </div>
+                        </div>  
+                <!-- </div> -->
+            </div>    
+            <div class="card-footer">
+                <a href="{% url 'cobranzas:listacobranzasporconfirmar' %}" class="btn btn-danger btn-sm ">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="button" class="btn btn-primary btn-sm" onclick="AceptarProtesto()">  
+                    <i class="fa fa-dot-circle-o"></i> Protestar
+                </button>
+
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+{% block js_page %}
+<script type="text/javascript" src="{% static 'factorweb/js/datosprotesto.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">operaciones</a></li>
+                    <li><a href="#">cobranzas</a></li>
+                    <li class="active">protestos pendientes</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div hidden>
+            <input type="text" value="{{ filtro}}" id="filtro">
+        </div>
+        <div class="card-body">
+            <div class="dropdown float-right">
+                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <div class="dropdown-menu-content">
+                        <a class="dropdown-item" href="#">Imprimir</a>
+                    </div>
+                </div>
+            </div>
+            {% if not consulta %}
+            <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                <span class="badge badge-pill badge-danger">Sin registros</span>
+                {% if error %}
+                    {{ error }}
+                {% else %}
+                 No hay protestos pendientes.
+               {% endif %}
+                <button type="button" class="close" data-dismiss="alert" 
+                    aria-label="Close" id ="btnFiltrar" name="btnFiltrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            {% endif %}
+
+            <!-- <div class="content"> -->
+            <div>
+                <h5 class="heading-title mb-1 text-secondary">Formas de cobro</h5>
+        
+                <div id="toolbar" >
+                    <button id="cobroconefectivo" class="btn btn-danger" disabled>
+                        <i class="fa fa-money"></i> Efectivo
+                    </button>
+                    <button id="cobroconcheque" class="btn btn-danger" disabled>
+                        <i class="fa fa-money"></i> cheque
+                    </button>
+                    <button id="cobrocontransferencia" class="btn btn-danger" disabled>
+                        <i class="fa fa-money"></i> Transferencia
+                    </button>
+                    <button id="cobroconmovimiento" class="btn btn-danger" disabled>
+                        <i class="fa fa-retweet"></i> Movimiento contable
+                    </button>
+    
+                </div>
+            </div>        
+            <div>
+                <small>
+
+                <table id="table"  class="table table-striped table-bordered"
+                    data-url="{% url 'cobranzas:protestospendientes_json' %}"
+                    data-filter-control="true"
+                    data-show-search-clear-button="true"
+                    data-show-refresh="true"
+                    data-show-fullscreen="true"
+                    data-show-columns="true"
+                    data-show-columns-toggle-all="true"
+                    data-show-export="true"
+                    data-detail-formatter="detailFormatter"
+                    data-show-pagination-switch="true"
+                    data-pagination="true"
+                    data-page-list="[10, 25, 50, 100, all]"
+                    data-toolbar="#toolbar"
+                    data-id-field="id"
+                    data-search="true"
+                    data-click-to-select="true"
+                    >
+                    <thead>
+                        <tr>
+                        <th data-field="state" data-checkbox="true"></th>
+                        <th data-field="Cliente" data-filter-control="input" 
+                        data-sortable="true" >Cliente</th>
+                        <th data-field="Cobranza" data-filter-control="input" 
+                        data-sortable="true" >Cobranza</th>
+                        <th data-field="Girador" data-filter-control="input"
+                        data-sortable="true" >Girador</th>
+                        <th data-field="Deposito" data-filter-control="input"
+                        data-sortable="true" >Depósito</th>
+                        <th data-field="Cheque" data-filter-control="input"
+                        data-sortable="true" >Cheque</th>
+                        <th data-field="Motivo" data-filter-control="input"
+                        data-sortable="true" >Motivo cobranza</th>
+                        <th data-field="NotaDebito" data-sortable="true" >Nota débito</th>
+                        <th data-field="Protesto" data-sortable="true" >Protesto</th>
+                        <th data-field="Saldo" data-sortable="true" >Saldo</th>
+                        </tr>
+                    </thead>
+                </table>
+                </small>
+            </div>
+
+        </div>
+
+    </div>
+ 
+
+{% endblock %}
+
+{% block js_page %}
+<script type="text/javascript" src="{% static 'factorweb/js/listaprotestospendientes.js' %}">
+</script>
+
+{% endblock %}

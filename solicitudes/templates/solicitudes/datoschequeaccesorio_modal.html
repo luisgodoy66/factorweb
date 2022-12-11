@@ -1,0 +1,89 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" rol="form"  class="form-horizontal" name="form"
+                action="{% url 'solicitudes:editarchequeaccesorio' %}"
+            >
+            <!-- <div class="col-md-12"> -->
+                <div class="card">
+
+                    {% csrf_token %}
+                    <div class="card-header">
+                        <strong>Datos de cheque </strong> 
+                    </div>
+                    
+                    <input type="text" name = "asignacion_id" hidden value = "{{ asignacion}}">
+
+                    <div class="card-body card-block">
+                    <!-- <div class="col-lg-6"> -->
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="id_cxbanco" class=" form-control-label">
+                                {{ form_cheque.cxbanco.label}}</label></div>
+                            <div class="col-md-6">
+                                {{ form_cheque.cxbanco}}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="id_ctcuenta" class=" form-control-label">
+                                {{ form_cheque.ctcuenta.label}}</label></div>
+                            <div class="col-md-6">
+                                {{ form_cheque.ctcuenta}}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="id_ctcheque" class=" form-control-label">
+                                {{ form_cheque.ctcheque.label}}</label></div>
+                            <div class="col-md-6">
+                                {{ form_cheque.ctcheque}}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="id_ctgirador" class=" form-control-label">
+                                {{ form_cheque.ctgirador.label}}</label></div>
+                            <div class="col-md-6">
+                                {{ form_cheque.ctgirador}}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="id_dvencimiento" class=" form-control-label">
+                                {{ form_cheque.dvencimiento.label}}</label></div>
+                            <div class="col-md-6">
+                                {{ form_cheque.dvencimiento}}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="cheque_nvalor" class=" form-control-label">
+                                {{ form_cheque.ntotal.label}}</label></div>
+                            <div class="col-md-6">
+                                <input type="number" id="cheque_nvalor" name="cheque_nvalor">
+                                <!-- {{ form_cheque.nvalor}} -->
+                            </div>
+                        </div>
+                    </div>    
+                    {{ errors}}
+                    <div class="card-footer">
+                        <button type="button" class="btn btn-primary btn-sm"
+                            onclick="AgregarFilaCheque()" >
+                            <i class="fa fa-dot-circle-o"></i> Grabar
+                        </button>
+                        <button type="buttom" class="btn btn-danger btn-sm" 
+                            onclick="return CerrarModal()">
+                            <i class="fa fa-dot-circle-o"></i> Cerrar
+                        </button>
+                    </div>
+                </div>
+            <!-- </div> -->
+        </form>
+
+    </div>
+
+    {% block js_page %}
+    <script>
+
+        objeto_fechas("#id_dvencimiento");
+        inicializaValor("id_ctgirador",capturaValor("id_ctcomprador"))
+        inicializaValor("cheque_nvalor",capturaValor("id_ntotal"))
+        
+    </script>
+    {% endblock %}
+</div>    

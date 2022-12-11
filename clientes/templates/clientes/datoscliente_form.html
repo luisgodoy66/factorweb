@@ -1,0 +1,137 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Participantes</a></li>
+                    <li><a href="#">Clientes</a></li>
+                    <li class="active">Ficha general</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal">
+    <!-- <div class="col-lg-6"> -->
+        <div class="card">
+            {% csrf_token %}
+            <div class="card-header">
+                <strong>Ficha general</strong> 
+                de {% if datosparticipante %} {{ datosparticipante }} {% else %}  nuevo cliente {% endif %} 
+            </div>
+            <div class="card-body card-block">
+                <!-- columna izquierda -->
+                <div class="col-lg-6">
+                    
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cxtipocliente" class=" form-control-label">Tipo de cliente</label></div>
+                        <div class="col-12 col-md-9">
+                            {{ form_cliente.cxtipocliente}}
+                        </div>
+                    </div>  
+    
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cxparticipante" class=" form-control-label">Identificación</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_participante.cxparticipante}}
+                            <small class="form-text text-muted">Máximo 13 caracteres</small></div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_ctnombre" class=" form-control-label">Nombre de cliente</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_participante.ctnombre}}
+                            <small class="form-text text-muted">Máximo 100 caracteres</small></div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cxlocalidad" class=" form-control-label">Localidad</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_participante.cxlocalidad}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_ctdireccion" class=" form-control-label">Dirección de cliente</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_participante.ctdireccion}}
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cttelefono1" class=" form-control-label">Teléfono principal</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_participante.cttelefono1}}
+                            <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cttelefono2" class=" form-control-label">Teléfono secundario</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_participante.cttelefono2}}
+                            <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
+                    </div>
+
+                </div>
+                <!-- columna derecha -->
+                <div class="col-lg-6">
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_ctcelular" class=" form-control-label">Teléfono movil</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_participante.ctcelular}}
+                            <small class="form-text text-muted">Máximo 30 caracteres. Incluya el código de país</small></div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_ctemail" class=" form-control-label">Email principal</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_participante.ctemail}}
+                            <small class="text-muted form-text">Ingrese el email principal</small></div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_ctemail2" class=" form-control-label">Email secundario</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_participante.ctemail2}}
+                            <small class="text-muted form-text">Ingrese el email secundario</small></div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_ctgirocomercial" class=" form-control-label">Giro comercial</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_participante.ctgirocomercial}}
+                        </div>
+                    </div> 
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cxactividad" class=" form-control-label">Actividad</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_cliente.cxactividad}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_dinicioactividades" class=" form-control-label">inicio de actividades</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form_cliente.dinicioactividades}}
+                        </div>
+                    </div>
+                            
+                </div>
+            </div>    
+            
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Grabar y continuar
+                </button>
+                <a href="{% url 'clientes:listaclientes' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+            </div>
+        </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<script type="text/javascript" 
+    src="{% static 'factorweb/js/datoscliente.js' %}">
+</script>
+{% endblock %}

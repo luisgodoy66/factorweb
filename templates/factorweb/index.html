@@ -1,0 +1,332 @@
+{% load static %}
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="es">
+<!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>FACTORNUBE</title>
+    <meta name="description" content="Sistema de factoring en la nube">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="apple-touch-icon" href="apple-icon.png">
+    <link rel="shortcut icon" href="{% static 'factorweb/favicon.ico' %}">
+
+    <link rel="stylesheet" href="{% static 'factorweb/vendors/bootstrap/dist/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'factorweb/vendors/font-awesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'factorweb/vendors/themify-icons/css/themify-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'factorweb/vendors/selectFX/css/cs-skin-elastic.css' %}">
+    <link rel="stylesheet" href="{% static 'factorweb/vendors/datatables.net-bs4/css/dataTables.bootstrap4.min.css' %}">
+    <link rel="stylesheet" href="{% static 'factorweb/vendors/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css' %}">
+    <!-- <link rel="stylesheet" href="vendors/jqvmap/dist/jqvmap.min.css"> -->
+
+    <link rel="stylesheet" href="{% static 'factorweb/assets/css/style.css' %}">
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!-- las siguientes lineas se agregaron al grupo de css originales -->
+
+    <!-- datetime picker -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" 
+        integrity="sha256-DOS9W6NR+NFe1fUhEE0PGKY/fubbUCnOfTje2JMDw3Y=" crossorigin="anonymous" />  
+
+    <!-- bootstrap table -->
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.1/dist/bootstrap-table.min.css">   
+        
+    <!-- select -->
+    <link rel="stylesheet" href="{% static 'factorweb/vendors/chosen/chosen.min.css' %}">
+
+    <!-- sweatalert -->
+    <link rel="stylesheet" href="{% static 'factorweb/css/sweetalert2.css' %}" />
+
+    <!-- animate -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel='stylesheet'>
+
+</head>
+
+<body>
+
+
+    <!-- Left Panel -->
+    {% block side_bar %}
+    <aside id="left-panel" class="left-panel">
+        <nav class="navbar navbar-expand-sm navbar-default">
+
+            <div class="navbar-header">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-menu" aria-controls="main-menu" 
+                aria-expanded="false" aria-label="Toggle navigation" >
+                    <i class="fa fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="./"><img src="{% static 'factorweb/images/logo.png' %}" alt="Logo"></a>
+                <a class="navbar-brand hidden" href="./"><img src="{% static 'factorweb/images/logo2.png' %}" alt="Logo"></a>
+            </div>
+
+            <div id="main-menu" class="main-menu collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active">
+                        <a href="index.html"> <i class="menu-icon fa fa-dashboard"></i>Dashboard </a>
+                    </li>
+                    <h3 class="menu-title">Operaciones</h3><!-- /.menu-title -->
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-file-text"></i>Negociación</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="fa fa-inbox"></i><a href="{% url 'solicitudes:listasolicitudes' %} ">Solicitudes </a></li>
+                            <li><i class="fa fa-check"></i><a href="{% url 'operaciones:listaasignaciones' %} ">Aceptadas</a></li>
+                            <li><i class="fa fa-file-text"></i><a href="{% url 'operaciones:consulta_asignaciones' %} ">Consulta general</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-calendar"></i>Cobranzas</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="fa fa-calendar"></i><a href="{% url 'cobranzas:listachequesadepositar' %}">Depósito de cheques</a></li>
+                            <li><i class="fa fa-frown-o"></i><a href="{% url 'cobranzas:listadocumentosvencidos' %}">Cartera vencida</a></li>
+                            <li><i class="fa fa-calendar"></i><a href="{% url 'cobranzas:listadocumentosporvencer' %}">Cartera por vencer</a></li>
+                            <li><i class="menu-icon fa fa-money"></i><a href="{% url 'cobranzas:listacobranzasporconfirmar' %}">Confirma o protesta</a></li>
+                            <li><i class="menu-icon fa fa-money"></i><a href="{% url 'cobranzas:listaprotestospendientes' %}">Protestos pendientes</a></li>
+                            <li><i class="menu-icon fa fa-money"></i><a href="{% url 'cobranzas:listacobranzaspendientesliquidar' %}">Por liquidar</a></li>
+                            <li><i class="fa fa-print"></i><a href="{% url 'cobranzas:consulta_cobranzas' %}">Consulta general</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-money"></i>Pagos a clientes</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="fa fa-money"></i><a href="{% url 'operaciones:listaasignacionespendientesdesembolsar' %} "> Negociaciones</a></li>
+                            <li><i class="menu-icon fa fa-money"></i><a href="{% url 'cobranzas:listaliquidacionespendientespagar' %}">Cobranzas</a></li>
+                            <li><i class="menu-icon fa fa-print"></i><a href="#">Consulta general</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-exclamation"></i>Cargos pendientes</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-exclamation"></i><a href="#">Liquidaciones en negativo</a></li>
+                            <li><i class="menu-icon fa fa-exclamation"></i><a href="#">Ampliaciones de plazo</a></li>
+                        </ul>
+                    </li>
+
+                    <h3 class="menu-title">Participantes</h3><!-- /.menu-title -->
+
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-user"></i>Clientes</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-info-circle"></i><a href="{% url 'clientes:listaclientes' %}">Ficha general</a></li>
+                            <li><i class="menu-icon fa fa-folder"></i><a href="{% url 'operaciones:listadatosoperativos' %}">Datos operativos</a></li>
+                            <li><i class="menu-icon fa fa-pencil"></i><a href="{% url 'clientes:listalineas' %}">Línea de factoring</a></li>
+                            <li><i class="menu-icon fa fa-laptop"></i><a href="{% url 'clientes:listacuentasbancarias' %}">Cuentas bancarias</a></li>
+                            <li><i class="menu-icon fa fa-info"></i><a href="#">Estado operativo</a></li>
+                        </ul>
+                    </li>
+                    <!-- <li>
+                        <a href="widgets.html"> <i class="menu-icon ti-email"></i>Widgets </a>
+                    </li> -->
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-tag"></i>Deudores</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-info-circle"></i><a href="{% url 'clientes:listacompradores' %}">Ficha general</a></li>
+                            <li><i class="menu-icon fa fa-laptop"></i><a href="{% url 'clientes:listacuentasbancarias_deudores' %}">Cuentas bancarias</a></li>
+                            <li><i class="menu-icon fa fa-tag"></i><a href="{% url 'clientes:listacupos' %}">Cupos</a></li>
+                            <li><i class="menu-icon fa fa-info"></i><a href="#">Estado operativo</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-truck"></i>Proveedores</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-info-circle"></i><a href="#">ficha general</a></li>
+                        </ul>
+                    </li>
+                    <h3 class="menu-title">Extras</h3><!-- /.menu-title -->
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-laptop"></i>Cuentas conjuntas</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-info"></i><a href="#">Consulta general</a></li>
+                            <li><i class="menu-icon fa fa-wrench"></i><a href="#">Mantenimiento</a></li>
+                            <li><i class="menu-icon fa fa-forward"></i><a href="#">Transferencias</a></li>
+                            <li><i class="menu-icon fa fa-print"></i><a href="#">Movimientos</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-eye"></i>Revisión de cartera</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-eye"></i><a href="#">Control por mes</a></li>
+                            <li><i class="menu-icon fa fa-legal"></i><a href="#">Pendientes a legal</a></li>
+                            <li><i class="menu-icon fa fa-cog"></i><a href="#">Configuración</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-wrench"></i>Configuración</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'empresa:listatiposfactoring' %}">Tipos de factoring</a></li>
+                            <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'empresa:listatasasfactoring' %}">Tasas de factoring</a></li>
+                            <li><i class="menu-icon fa fa-tasks"></i><a href="{% url 'operaciones:listacondicionesoperativas' %}">Condiciones</a></li>
+                            <li><i class="menu-icon fa fa-money"></i><a href="{% url 'empresa:listacuentasbancarias' %}">Cuentas bancarias</a></li>
+                            <li><i class="menu-icon fa fa-paperclip"></i><a href="{% url 'operaciones:listaanexos' %}">Anexos al contrato</a></li>
+                            <li><i class="menu-icon fa fa-cogs"></i><a href="#">Ajustes adicionales</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-cog"></i>Tablas</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'empresa:listaclasesparticipantes' %}">Clases de clientes</a></li>
+                            <li><i class="menu-icon fa fa-building"></i><a href="{% url 'pais:listabancos' %}">Bancos</a></li>
+                            <li><i class="menu-icon fa fa-calendar"></i><a href="{% url 'pais:listaferiados' %}">Días feriados</a></li>
+                            <li><i class="menu-icon fa fa-map-marker"></i><a href="#">Localidades</a></li>
+                            <li><i class="menu-icon fa fa-paperclip"></i><a href="{% url 'operaciones:listamaestromovimientos' %}">Movimientos</a></li>
+                            <li><i class="menu-icon fa fa-times"></i><a href="{% url 'cobranzas:listamotivosprotesto' %}">Motivos de protestos</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </nav>
+    </aside><!-- /#left-panel -->
+    {% endblock side_bar %}
+    <!-- Left Panel -->
+
+    <!-- Right Panel -->
+
+    <div id="right-panel" class="right-panel">
+
+        <!-- Header-->
+        {% block header %}
+        {% endblock header %}
+
+        <div class="breadcrumbs">
+            <div class="col-sm-4">
+                <div class="page-header float-left">
+                    <div class="page-title">
+                        <h1>Dashboard</h1>
+                    </div>
+                </div>
+            </div>
+        {% block breadcrumbs %}
+            <div class="col-sm-8">
+                <div class="page-header float-right">
+                    <div class="page-title">
+                        <ol class="breadcrumb text-right">
+                            <li class="active">Dashboard</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        {% endblock breadcrumbs %}
+        </div>
+
+        {% block content %}
+        <div class="content mt-3">
+
+            {% block alerta %}
+            <div class="col-sm-12">
+                <div class="alert  alert-success alert-dismissible fade show" role="alert">
+                    <span class="badge badge-pill badge-success">Conectado</span> Ingreso correcto al sistema.
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+            {% endblock alerta %}
+
+
+        </div> <!-- .content -->
+        {% endblock content %}
+    </div><!-- /#right-panel -->
+
+    <div class="modal fade" id="popup"></div>
+    
+    <!-- Right Panel -->
+
+    <script src="{% static 'factorweb/vendors/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'factorweb/vendors/popper.js/dist/umd/popper.min.js' %}"></script>
+    <script src="{% static 'factorweb/vendors/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'factorweb/assets/js/main.js' %}"></script>
+
+
+    <script src="{% static 'factorweb/vendors/chart.js/dist/Chart.bundle.min.js' %}"></script>
+    <script src="{% static 'factorweb/assets/js/dashboard.js' %}"></script>
+    <script src="{% static 'factorweb/assets/js/widgets.js' %}"></script>
+    <!-- <script src="vendors/jqvmap/dist/jquery.vmap.min.js"></script> -->
+    <!-- <script src="vendors/jqvmap/examples/js/jquery.vmap.sampledata.js"></script> -->
+    <!-- <script src="vendors/jqvmap/dist/maps/jquery.vmap.world.js"></script> -->
+
+
+    <!-- agregados para mostrar tablas -->
+    <script src="{% static 'factorweb/vendors/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'factorweb/vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'factorweb/vendors/datatables.net-buttons/js/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'factorweb/vendors/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'factorweb/vendors/jszip/dist/jszip.min.js' %}"></script>
+    <script src="{% static 'factorweb/vendors/pdfmake/build/pdfmake.min.js' %}"></script>
+    <script src="{% static 'factorweb/vendors/pdfmake/build/vfs_fonts.js' %}"></script>
+    <script src="{% static 'factorweb/vendors/datatables.net-buttons/js/buttons.html5.min.js' %}"></script>
+    <script src="{% static 'factorweb/vendors/datatables.net-buttons/js/buttons.print.min.js' %}"></script>
+    <script src="{% static 'factorweb/vendors/datatables.net-buttons/js/buttons.colVis.min.js' %}"></script>
+    <script src="{% static 'factorweb/assets/js/init-scripts/data-table/datatables-init.js' %}"></script>
+    <!-- /agregados para mostrar tablas -->
+
+    <!-- agregado para datetime picker -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js" integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>      
+    <script>
+        jQuery(document).ready(function(){
+            jQuery.datetimepicker.setlocale('es');
+        });
+    </script>
+     <!-- /agregado para datetime picker -->
+
+     <!-- rutinas generales -->
+     <script type="text/javascript" src="{% static 'factorweb/js/generic.js' %}"></script>
+     <script type="text/javascript" src="{% static 'factorweb/js/sweetalert2.js' %}"></script>
+        
+    <!-- bootstrap table -->
+    <script src="https://unpkg.com/bootstrap-table@1.21.1/dist/bootstrap-table.min.js"></script>    
+     <!--bloque exportar  -->
+     <script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/tableExport.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/libs/jsPDF/jspdf.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/libs/jsPDF-AutoTable/jspdf.plugin.autotable.js"></script>
+     <!-- bloque exportar -->
+     <script src="https://unpkg.com/tableexport.jquery.plugin/tableExport.min.js"></script>
+     <script src="https://unpkg.com/bootstrap-table@1.21.1/dist/bootstrap-table-locale-all.min.js"></script>
+     <script src="https://unpkg.com/bootstrap-table@1.21.1/dist/extensions/export/bootstrap-table-export.min.js"></script>
+     <!--22-sep-22 agregado para colocar filtros en las columnas -->
+     <script src="https://unpkg.com/bootstrap-table@1.21.1/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
+
+    <!-- <script>
+
+        (function($) {
+            "use strict";
+
+            jQuery('#vmap').vectorMap({
+                map: 'world_en',
+                backgroundColor: null,
+                color: '#ffffff',
+                hoverOpacity: 0.7,
+                selectedColor: '#1de9b6',
+                enableZoom: true,
+                showTooltip: true,
+                values: sample_data,
+                scaleColors: ['#1de9b6', '#03a9f5'],
+                normalizeFunction: 'polynomial'
+            });
+        })(jQuery);
+    </script> -->
+
+    {% block js_page %} {% endblock %}
+</body>
+
+</html>

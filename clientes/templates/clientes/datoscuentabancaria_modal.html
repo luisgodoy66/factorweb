@@ -1,0 +1,107 @@
+<div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+        <form  method="post" id="frmSolicitud" enctype="multipart/form-data" 
+            class="form-horizontal" name="form"
+            {% if not nueva %}
+            action="{% url 'clientes:cuentabancaria_editar' cuentabancaria_id %}"
+            {% else %}
+            action="{% url 'clientes:cuentabancaria_nueva' cliente_id %}"
+            {% endif %}
+            >
+            <!-- columna izquierda -->
+            <div class="card">
+                {% csrf_token %}
+                <div class="card-header">
+                    <strong>Detalle de cuenta</strong> 
+                </div>
+                <div class="card-body">
+                    <!-- datos de factura texto y fecha -->
+                    <div class="col-12 col-md-9"hidden>
+                        <input type="text" id="id_cxparticipante" name="cxparticipante" 
+                        value="{{ cliente_id }}" class="form-control" >
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row form-group">
+                            <div class="col col-md-4"><label for="id_cxtipocliente" 
+                                class=" form-control-label">
+                                {{ form.cxbanco.label}}</label></div>
+                            <div class="col-8 col-md-8">
+                                {{ form.cxbanco}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-4"><label for="id_cxtipocliente" 
+                                class=" form-control-label">
+                                {{ form.cxtipocuenta.label}}</label></div>
+                            <div class="col-8 col-md-8">
+                                {{ form.cxtipocuenta}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-4"><label for="id_cxtipocliente" 
+                                class=" form-control-label">
+                                {{ form.cxcuenta.label}}</label></div>
+                            <div class="col-8 col-md-8">
+                                {{ form.cxcuenta}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-4"><label for="id_cxtipocliente" 
+                                class=" form-control-label">
+                                {{ form.lpropia.label}}</label></div>
+                            <div class="col-8 col-md-8">
+                                {{ form.lpropia}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-4"><label for="id_cxtipocliente" 
+                                class=" form-control-label">
+                                {{ form.lactiva.label}}</label></div>
+                            <div class="col-8 col-md-8">
+                                {{ form.lactiva}}
+                            </div>
+                        </div>  
+                    </div>
+                    <!-- datos de factura valores -->
+                    <div class="col-md-6">
+                        <div class="row form-group">
+                            <div class="col col-xs-3"><label for="id_cxtipocliente" 
+                                class=" form-control-label">
+                                {{ form.cxtipoidpropietario.label}}</label></div>
+                            <div class="col-6 col-md-6">
+                                {{ form.cxtipoidpropietario}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-xs-3"><label for="id_cxtipocliente" 
+                                class=" form-control-label">
+                                {{ form.cxidpropietario.label}}</label></div>
+                            <div class="col-6 col-md-6">
+                                {{ form.cxidpropietario}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-xs-3"><label for="id_cxtipocliente" 
+                                class=" form-control-label">
+                                {{ form.ctnombrepropietario.label}}</label></div>
+                            <div class="col-6 col-md-6">
+                                {{ form.ctnombrepropietario}}
+                            </div>
+                        </div>  
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="button" class="btn btn-danger btn-sm" 
+                        onclick="return CerrarModal()">
+                        <i class="fa fa-dot-circle-o"></i> Cerrar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm ">
+                        <i class="fa fa-dot-circle-o"></i> Agregar
+                    </button>
+
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
