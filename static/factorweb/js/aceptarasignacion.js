@@ -147,8 +147,8 @@ function initTable() {
           }, {title: 'GAO', colspan: 2, align: 'center'
           }, {title: 'DC', colspan: 2, align: 'center'
           
-          }, {field: 'operate', title: 'Acción',rowspan: 2, align: 'center', clickToSelect: false, 
-          events: window.operateEvents, formatter: operateFormatter
+          }, {field: 'operate', title: 'Acción',rowspan: 2, align: 'center', valign: 'middle'
+          , clickToSelect: false, events: window.operateEvents, formatter: operateFormatter
           }],
         [{field: 'Porc_anticipo', title: '%', sortable: true
           }, {field: 'Valor_anticipo', title: 'valor', sortable: true, align: 'center', 

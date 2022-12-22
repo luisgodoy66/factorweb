@@ -1,6 +1,6 @@
 from datetime import date
 from django import forms
-from .models import Asignacion, Documentos, ChequesAccesorios
+from .models import Asignacion, Documentos, ChequesAccesorios, Clientes
 
 class AsignacionesForm(forms.ModelForm):
 
@@ -77,3 +77,25 @@ class ChequesForm(forms.ModelForm):
             })
         self.fields['dvencimiento'].widget.attrs['value']=date.today
         self.fields['dvencimiento'].widget.attrs['readonly']=True
+
+class ClientesForm(forms.ModelForm):
+    class Meta:
+        model = Clientes
+        fields=['cxcliente', 'ctnombre', 'ctdireccion', 'cttelefono1'
+            , 'cttelefono2', 'ctemail', 'ctemail2', 'ctcelular'
+            , 'ctgirocomercial']
+        labels={
+            'cxcliente':'Id. cliente', 'ctnombre':'Nombre de cliente'
+            , 'ctdireccion':'Dirección', 'cttelefono1':'Teléfono'
+            , 'cttelefono2':'Teléfono', 'ctemail':'Dirección email'
+            , 'ctemail2':'Dirección email', 'ctcelular':'Celular'
+            , 'ctgirocomercial':'Giro comercial'
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })

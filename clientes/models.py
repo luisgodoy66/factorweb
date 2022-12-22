@@ -97,8 +97,7 @@ class Cuentas_bancarias(ClaseModelo):
 
 class Cuenta_transferencia_Manager(models.Manager):
     def cuenta_default(self, cxcliente):
-        return self.filter(leliminado = False)\
-            .filter(cxcliente = cxcliente)
+        return self.filter(leliminado = False, cxcliente = cxcliente)
 
 class Cuenta_transferencia(ClaseModelo):
     cxcliente=models.OneToOneField(Datos_generales,

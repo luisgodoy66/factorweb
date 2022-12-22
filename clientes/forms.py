@@ -1,5 +1,4 @@
-from dataclasses import fields
-from tkinter import Widget
+# from dataclasses import fields
 from django import forms
 from .models import  Cuentas_bancarias, Datos_generales\
     , Linea_Factoring, Personas_juridicas \

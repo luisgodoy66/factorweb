@@ -54,7 +54,11 @@ function initTable() {
             align: 'center', valign: 'middle', sortable: true,
           }, {title: 'Emisión', field: 'Emision', rowspan: 2,
             align: 'center', valign: 'middle', sortable: true,
-          }, {title: 'Cheques', colspan:6, align: 'center'
+          }, {title: 'Cheques', colspan:5, align: 'center'
+        }, {
+            field: 'operate', title: 'Acción', align: 'center',
+          clickToSelect: false, rowspan: 2, events: window.operateEvents
+          ,align: 'center', valign: 'middle', formatter: operateFormatter
         }],
         [{field: 'Banco', title: 'Banco',
           sortable: true, align: 'center'
@@ -70,11 +74,7 @@ function initTable() {
         }, {
             field: 'Total', title: 'Total', sortable: true,
             align: 'center', footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
-          }, {
-            field: 'operate', title: 'Acción', align: 'center',
-          clickToSelect: false, events: window.operateEvents,
-          formatter: operateFormatter
-        }]
+          }]
       ]
     })
     // $table.on('check.bs.table uncheck.bs.table ' +

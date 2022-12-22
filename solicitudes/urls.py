@@ -3,11 +3,14 @@ from solicitudes.views import SolicitudesView, DetalleSolicitudFacturasPuras , \
     DetalleSolicitudConAccesorios, EliminarDocumento, EliminarAsignacion, \
     DatosAsignacionConAccesorios, DatosChequeAccesorio, DatosFacturasPuras, \
     AsignacionFacturasPurasView, DatosAsignacionFacturasPurasNueva, \
-    DatosAsignacionConAccesoriosNueva, AsignacionConAccesoriosView
+    DatosAsignacionConAccesoriosNueva, AsignacionConAccesoriosView, \
+        ClienteCrearView
 
 urlpatterns=[
     path('listasolicitudes/',SolicitudesView.as_view(), \
         name='listasolicitudes'),
+    path('crearcliente/',ClienteCrearView.as_view(), \
+        name='cliente_nuevo'),
     path('nuevasolicitud/',DatosAsignacionFacturasPurasNueva
         , name='asignacionfacturaspuras_nueva'),
     path('nuevasolicitudconaccesorios/',DatosAsignacionConAccesoriosNueva

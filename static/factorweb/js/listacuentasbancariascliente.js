@@ -55,7 +55,10 @@ function initTable() {
         align: 'center', valign: 'middle', sortable: true,
       }, {title: 'Recibe transferencia', field: 'Default', rowspan: 2,
       align: 'center', valign: 'middle', sortable: true,
-      }, {title: 'Propietario', colspan: 3, align: 'center'
+      }, {title: 'Propietario', colspan: 2, align: 'center'
+      }, {field: 'operate', title: 'Acción', align: 'center',valign: 'middle',
+        clickToSelect: false, events: window.operateEvents,rowspan: 2,
+        formatter: operateFormatter
       }],
       [{field: 'IdPropietario', title: 'Id.',
         sortable: true, 
@@ -63,11 +66,7 @@ function initTable() {
         }, {
           field: 'Propietario', title: 'Propietario', sortable: true,
           align: 'center'          
-        }, {
-          field: 'operate', title: 'Acción', align: 'center',
-        clickToSelect: false, events: window.operateEvents,
-        formatter: operateFormatter
-      }]
+        }]
     ]
   })
   // $table.on('check.bs.table uncheck.bs.table ' +

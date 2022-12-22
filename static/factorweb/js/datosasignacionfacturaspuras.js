@@ -63,7 +63,11 @@ function initTable() {
             align: 'center', valign: 'middle', sortable: true,
           }, {title: 'Vencimiento', field: 'Vencimiento', rowspan: 2,
             align: 'center', valign: 'middle', sortable: true,
-          }, {title: 'Valores', colspan: 5, align: 'center'
+          }, {title: 'Valores', colspan: 4, align: 'center'
+        }, {
+            field: 'operate', title: 'Acción', align: 'center',rowspan: 2,
+          clickToSelect: false, events: window.operateEvents,valign: 'middle',
+          formatter: operateFormatter
         }],
         [{field: 'ValorAntesDeIVA', title: 'Antes de IVA',
           sortable: true, footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla,
@@ -78,11 +82,7 @@ function initTable() {
           }, {
             field: 'Total', title: 'Total', sortable: true,
             align: 'center', footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
-          }, {
-            field: 'operate', title: 'Acción', align: 'center',
-          clickToSelect: false, events: window.operateEvents,
-          formatter: operateFormatter
-        }]
+          }]
       ]
     })
     // $table.on('check.bs.table uncheck.bs.table ' +

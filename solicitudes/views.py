@@ -10,8 +10,10 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse
 from django.db import transaction
 from django.utils.dateparse import parse_date
+from django.urls import reverse_lazy
 
-from .forms import AsignacionesForm, ChequesForm, DocumentosForm
+from .forms import AsignacionesForm, ChequesForm, DocumentosForm\
+    , ClientesForm
 
 from empresa.models import Tipos_factoring
 from .models import Asignacion, ChequesAccesorios, Documentos, Clientes
@@ -58,6 +60,18 @@ class AsignacionConAccesoriosView(LoginRequiredMixin, generic.UpdateView):
         context['clientes'] = Clientes.objects.all() 
 
         return context
+
+class ClienteCrearView(LoginRequiredMixin, generic.CreateView):
+    model = Clientes
+    template_name="solicitudes/datosclientes_form.html"
+    context_object_name="cliente"
+    login_url = "bases:login"
+    form_class = ClientesForm
+    success_url= reverse_lazy("solicitudes:listasolicitudes")
+
+    def form_valid(self, form):
+        form.instance.cxusuariocrea = self.request.user
+        return super().form_valid(form)
 
 @login_required(login_url='/login/')
 @permission_required('solicitudes.update_asignaciones', login_url='bases:sin_permisos')
