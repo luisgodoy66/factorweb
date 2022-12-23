@@ -101,7 +101,7 @@ class MaestroMovimientosForm(forms.ModelForm):
         model=Movimientos_maestro
         fields=['cxmovimiento', 'ctmovimiento', 'cxsigno', 'nprioridad'
             , 'lcargadescuentocartera', 'lcolateral', 'cxmovimientopadre']
-        labels={'cxmovimiento':'Movimiento', 'ctmovimiento':'Descripción'
+        labels={'cxmovimiento':'Código', 'ctmovimiento':'Descripción'
             , 'cxsigno': 'Signo', 'nprioridad': 'Prioridad'
             , 'lcargadescuentocartera':'Carga descuento de cartera'
             , 'lcolateral': 'Afecta a cartera'

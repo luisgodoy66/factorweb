@@ -25,8 +25,12 @@ SECRET_KEY = 'django-insecure-o!$b%i-r8^9lc(0v7%rugi*dmy+!rumaxw)&o#1j7212*bxv1)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+ALLOWED_HOSTS = ['*', ]
+# CSRF_TRUSTED_ORIGINS=[]
 
-ALLOWED_HOSTS = ['django-factoring-env.eba-nxta2e7g.us-west-2.elasticbeanstalk.com', ]
+# DEBUG = True
+ALLOWED_HOSTS=[]
+
 
 
 # Application definition
@@ -45,6 +49,7 @@ INSTALLED_APPS = [
     'solicitudes.apps.SolicitudesConfig',
     'pais.apps.PaisConfig',
     'cobranzas.apps.CobranzasConfig',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -85,13 +90,12 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME':  'factorwebdb',
-        'HOST':  'localhost',
+        'HOST':  'database-1.c5i2bulrjalv.us-east-2.rds.amazonaws.com',
         'USER': 'postgres',
         'PASSWORD':'milo2015',
-        'PORT': 5433,
+        'PORT': 5432,
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -138,3 +142,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL='/'
 LOGOUT_REDIRECT_URL ='/login/'
 
+
+# CONFIGURACION AWS
+AWS_ACCESS_KEY_ID ="AKIAUW2EOMCY6M7XEXND"
+AWS_SECRET_ACCESS_KEY="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"
+
+AWS_STORAGE_BUCKET_NAME="factorweb-bucket"
+
+DEFAULT_FILE_STORAGE="storages.backends.s3boto3.S3Boto3Storage"
+STATICFILES_STORAGE="storages.backends.s3boto3.S3Boto3Storage"
+
+AWS_S3_CUSTOM_DOMAIN="%s.s3.amazonaws.com" % AWS_STORAGE_BUCKET_NAME
+AWS_S3_FILE_OVERWRITE = False
+ADMIN_MEDIA_PREFIX = '/static/admin/'

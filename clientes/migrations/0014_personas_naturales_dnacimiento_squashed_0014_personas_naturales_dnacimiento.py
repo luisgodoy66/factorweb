@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='personas_naturales',
             name='dnacimiento',
-            field=models.DateField(default='20000101'),
+            field=models.DateField(default='2000-01-01'),
         ),
     ]

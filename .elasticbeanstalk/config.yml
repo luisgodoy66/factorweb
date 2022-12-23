@@ -2,6 +2,9 @@ branch-defaults:
   default:
     environment: django-env
     group_suffix: null
+  main:
+    environment: null
+    group_suffix: null
 global:
   application_name: django-tutorial
   branch: null
@@ -14,5 +17,5 @@ global:
   platform_version: null
   profile: eb-cli
   repository: null
-  sc: null
+  sc: git
   workspace_type: Application
