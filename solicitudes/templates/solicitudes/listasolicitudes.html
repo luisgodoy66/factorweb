@@ -75,10 +75,12 @@
                                 {% else %}
                                     href="{% url 'solicitudes:asignacionfacturaspuras_editar' item.id %}" 
                                 {% endif %}
-                                class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i>
+                                    class="btn btn-warning btn-sm" role="button" title="Editar"><i class="fa fa-edit"></i>
                                 </a>
-                                <a href="{% url 'operaciones:aceptarasignacion' item.id %}" class="btn btn-success btn-sm" role="button"><i class="fa fa-check"></i></a>
-                                <a href="#" onclick='EliminarAsignacion("{{item.id}}")' class="btn btn-danger btn-sm" role="button"><i class="fa fa-trash"></i></a>
+                                <a href="{% url 'operaciones:aceptarasignacion' item.id %}" title="Aceptar"
+                                    class="btn btn-success btn-sm" role="button"><i class="fa fa-check"></i></a>
+                                <a href="#" onclick='EliminarAsignacion("{{item.id}}")' title="Eliminar"
+                                    class="btn btn-danger btn-sm" role="button"><i class="fa fa-trash"></i></a>
                             </td>
                         </tr>
                         {% endfor %}

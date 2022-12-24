@@ -73,8 +73,9 @@
                             <td>{{ item.dregistro|date:"Y/m/d H:i:s" }}</td>
                             <td>
                                 <a href="{% url 'operaciones:reporteasignacion' item.id %}" 
-                                class="btn btn-success btn-sm" role="button" target="reporte">
-                                <i class="fa fa-print"></i></a>
+                                    class="btn btn-success btn-sm" role="button" target="reporte"
+                                    title="Imprimir"><i class="fa fa-print"></i>
+                                </a>
                             </td>
                         </tr>
                         {% endfor %}

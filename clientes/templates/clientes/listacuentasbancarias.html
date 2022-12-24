@@ -63,7 +63,8 @@
                             <td>{{ item.cuenta_cliente.cxcuenta.cxtipocuenta }}</td>
                             <td>{{ item.cuenta_cliente.cxcuenta.lpropia }}</td>
                             <td>
-                                <a href="{% url 'clientes:listacuentasbancariascliente' item.cxcliente.cxparticipante %}" class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>
+                                <a href="{% url 'clientes:listacuentasbancariascliente' item.cxcliente.cxparticipante %}" 
+                                    class="btn btn-warning btn-sm" title="Editar" role="button"><i class="fa fa-edit"></i></a>
                                 <a href="#" class="btn btn-danger btn-sm" role="button"><i class="fa fa-exclamation"></i></a>
                             </td>
                         </tr>

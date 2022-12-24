@@ -67,15 +67,14 @@
                             <td>{{ item.ddesembolso|date:"Y/m/d" }}</td>
                             <td>{{ item.neto }}</td>
                             <td>
-                                <a href="{% url 'operaciones:generaranexos' item.id %}" 
-                                class="btn btn-success btn-sm" role="button" target="reporte">
-                                <i class="fa fa-paperclip"></i></a>
+                                <a href="{% url 'operaciones:generaranexos' item.id %}"  title="Anexos"
+                                    class="btn btn-success btn-sm" role="button" target="reporte">
+                                    <i class="fa fa-paperclip"></i></a>
                                 <a href="{% url 'operaciones:desembolsarasignacion' item.id item.cxcliente.cxparticipante %}" 
-                                class="btn btn-primary btn-sm" role="button" >
-                                <i class="fa fa-money"></i></a>
+                                    class="btn btn-primary btn-sm" role="button"  title="Desembolsar">
+                                    <i class="fa fa-money"></i></a>
                                 <button onclick="ReversarAceptacionAsignacion( {{item.id}})" 
-                                    class="btn btn-danger btn-sm"
-                                    role="button">
+                                    class="btn btn-danger btn-sm"  title="Reversar" role="button">
                                     <i class="fa fa-rotate-left"></i>
                                 </button>
                             </td>

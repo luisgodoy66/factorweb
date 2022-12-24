@@ -70,7 +70,8 @@
                             <td>{{ item.ctdescripcionenreporte }}</td>
                             <td>{{ item.lcargaiva|yesno:"Si,No" }}</td>
                             <td>
-                                <a href="{% url 'empresa:tasafactoring_editar' item.id %}" class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>
+                                <a href="{% url 'empresa:tasafactoring_editar' item.id %}"  title="Editar"
+                                class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>
                                 <a href="#" class="btn btn-danger btn-sm" role="button"><i class="fa fa-exclamation"></i></a>
                             </td>
                         </tr>

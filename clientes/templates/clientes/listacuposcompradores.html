@@ -73,7 +73,7 @@
                             <td>{{ item.lactivo }}</td>
                             <td>{{ item.daprobacion|date:"Y/m/d" }}</td>
                             <td>
-                                <button class="btn btn-warning btn-sm" 
+                                <button class="btn btn-warning btn-sm"  title="Editar"
                                     onclick="return AbrirModal('{% url 'clientes:cupo_editar' item.id %}')"
                                     role="button">
                                     <i class="fa fa-edit"></i>

@@ -68,7 +68,8 @@
                             <td>{{ item.cxestado }}</td>
                             <td>{{ item.dregistro|date:"Y/m/d H:i:s" }}</td>
                             <td>
-                                <a href="{% url 'clientes:comprador_editar' item.cxcomprador.cxparticipante %}" class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>
+                                <a href="{% url 'clientes:comprador_editar' item.cxcomprador.cxparticipante %}" 
+                                    class="btn btn-warning btn-sm" title="Editar" role="button"><i class="fa fa-edit"></i></a>
                                 <a href="#" class="btn btn-danger btn-sm" role="button"><i class="fa fa-exclamation"></i></a>
                             </td>
                         </tr>
