@@ -1,5 +1,6 @@
 from pathlib import Path
 import os   
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -9,7 +10,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-o!$b%i-r8^9lc(0v7%rugi*dmy+!rumaxw)&o#1j7212*bxv1)'
+# SECRET_KEY = 'django-insecure-o!$b%i-r8^9lc(0v7%rugi*dmy+!rumaxw)&o#1j7212*bxv1)'
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -128,8 +130,8 @@ LOGOUT_REDIRECT_URL ='/login/'
 
 
 # CONFIGURACION AWS
-AWS_ACCESS_KEY_ID ="AKIAUW2EOMCY6M7XEXND"
-AWS_SECRET_ACCESS_KEY="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"
+AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY=config("AWS_SECRET_ACCESS_KEY")
 
 AWS_STORAGE_BUCKET_NAME="factorweb-bucket"
 
