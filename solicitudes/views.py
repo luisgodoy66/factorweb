@@ -119,7 +119,7 @@ def DatosFacturasPuras(request, cliente_id=None
             , 'nretencioniva':detalle.nretencioniva
             , 'nretencionrenta':detalle.nretencionrenta
             , 'ntotal':detalle.ntotal
-
+            , 'nvalornonegociado':detalle.nvalornonegociado
             }
             form_documento = DocumentosForm(e)
 
@@ -182,6 +182,9 @@ def DatosFacturasPuras(request, cliente_id=None
         retencion_iva =request.POST.get("nretencioniva")
         retencion_renta =request.POST.get("nretencionrenta")
         total = request.POST.get("ntotal")
+        valornonegociado = request.POST.get("nvalornonegociado")
+        serie1=request.POST.get("ctserie1")
+        serie2=request.POST.get("ctserie2")
 
         # segun tipo de factoring no acepte vencimientos en feriados
         # cambiar la fecha de vencimiento
@@ -211,6 +214,9 @@ def DatosFacturasPuras(request, cliente_id=None
                 nretencioniva = retencion_iva,
                 nretencionrenta = retencion_renta,
                 ntotal = total,
+                nvalornonegociado = valornonegociado,
+                ctserie1 = serie1,
+                ctserie2 = serie2,
                 cxusuariocrea = request.user
             )
         else:
@@ -227,6 +233,9 @@ def DatosFacturasPuras(request, cliente_id=None
             detalle.nretencioniva = retencion_iva
             detalle.nretencionrenta = retencion_renta
             detalle.ntotal = total
+            detalle.nvalornonegociado = valornonegociado
+            detalle.ctserie1 = serie1
+            detalle.ctserie2 = serie2
             detalle.cxusuariomodifica = request.user.id
 
         if detalle:
@@ -512,6 +521,9 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
         retencion_iva =request.POST.get("nretencioniva")
         retencion_renta =request.POST.get("nretencionrenta")
         total = request.POST.get("ntotal")
+        valornonegociado = request.POST.get("nvalornonegociado")
+        serie1=request.POST.get("ctserie1")
+        serie2=request.POST.get("ctserie2")
 
         det = Documentos(
             cxasignacion=asignacion,
@@ -525,6 +537,9 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
             nretencioniva = retencion_iva,
             nretencionrenta = retencion_renta,
             ntotal = total,
+            nvalornonegociado = valornonegociado,
+            ctserie1 = serie1,
+            ctserie2 = serie2,
             cxusuariocrea = request.user
         )
 

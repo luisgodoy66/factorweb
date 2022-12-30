@@ -3,7 +3,7 @@ window.onload=function(){
     ActualizarHeader();
 
     // configuar cambios en los campos de valores
-    jQuery('#id_nvalorantesiva, #id_niva, #id_nretencioniva, #id_nretencionrenta')
+    jQuery('#id_nvalorantesiva, #id_niva, #id_nretencioniva, #id_nretencionrenta,  #id_nvalornonegociado')
         .change(function(){
             calcular_factura();
         });
@@ -98,7 +98,6 @@ function calcular_factura()
     antes_de_iva = antes_de_iva==="" ? 0 : +antes_de_iva;
     antes_de_iva = antes_de_iva<0 ? 0 : antes_de_iva;
 
-
     iva =jQuery('#id_niva').val();
     iva = iva==="" ? 0 : +iva;
     iva = iva<0 ? 0 : iva;
@@ -112,14 +111,19 @@ function calcular_factura()
     retencion_renta = retencion_renta==="" ? 0 : +retencion_renta;
     retencion_renta = retencion_renta<0 ? 0 : retencion_renta;
 
+    valor_nonegociado = jQuery('#id_nvalornonegociado').val();
+    valor_nonegociado = valor_nonegociado===""? 0 : +valor_nonegociado;
+    valor_nonegociado = valor_nonegociado<0 ? 0 : valor_nonegociado
+
     stotal = antes_de_iva + iva;
-    total  = stotal - retencion_iva - retencion_renta;
+    total  = stotal - retencion_iva - retencion_renta - valor_nonegociado;
 
     jQuery('#id_nvalorantesiva').val(antes_de_iva);
     jQuery('#id_niva').val(iva);
     jQuery('#id_nretencioniva').val(retencion_iva);
     jQuery('#id_nretencionrenta').val(retencion_renta);
     jQuery('#id_ntotal').val(total);
+    jQuery('#id_nvalornonegociado').val(valor_nonegociado);
 
 };
 

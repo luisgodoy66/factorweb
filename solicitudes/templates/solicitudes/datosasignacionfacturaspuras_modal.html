@@ -20,7 +20,7 @@
                 <div class="card-body">
                     <div class="col-md-6">
                         <div class="row form-group">
-                            <div class="col col-xs-3">
+                            <div class="col col-md-6">
                                 <select name="cxtipoid" class="form-control" required id="cxtipoid">
                                     <option value="" >---------</option>                                            
                                     <option value="R" selected>RUC</option>                                            
@@ -34,10 +34,20 @@
                             </div>
                         </div>  
                         <div class="row form-group">
-                            <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                            <div class="col-md-6"><label for="id_cxtipocliente" class=" form-control-label">
                                 {{ form_documento.ctcomprador.label}}</label></div>
                             <div class="col-6 col-md-6">
                                 {{ form_documento.ctcomprador}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="id_cxtipocliente" class=" form-control-label">
+                                Establecimiento / punto de emisión</label></div>
+                            <div class="col-md-3">
+                                {{ form_documento.ctserie1}}
+                            </div>
+                            <div class="col-md-3">
+                                {{ form_documento.ctserie2}}
                             </div>
                         </div>  
                         <div class="row form-group">
@@ -79,21 +89,29 @@
                             </div>
                         </div>  
                         <div class="row form-group">
-                            <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                            <div class="col col-xs-3"><label for="id_nretencioniva" class=" form-control-label">
                                 {{ form_documento.nretencioniva.label}}</label></div>
                             <div class="col-6 col-md-6">
                                 {{ form_documento.nretencioniva}}
                             </div>
                         </div>  
                         <div class="row form-group">
-                            <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                            <div class="col col-xs-3"><label for="id_nretencionrenta" class=" form-control-label">
                                 {{ form_documento.nretencionrenta.label}}</label></div>
                             <div class="col-6 col-md-6">
                                 {{ form_documento.nretencionrenta}}
                             </div>
                         </div>  
                         <div class="row form-group">
-                            <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                            <div class="col col-xs-3"><label for="id_nvalornonegociado" class=" form-control-label">
+                                {{ form_documento.nvalornonegociado.label}}</label></div>
+                            <div class="col-6 col-md-6">
+                                {{ form_documento.nvalornonegociado}}
+            
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-xs-3"><label for="id_ntotal" class=" form-control-label">
                                 {{ form_documento.ntotal.label}}</label></div>
                             <div class="col-6 col-md-6">
                                 {{ form_documento.ntotal}}
@@ -121,7 +139,7 @@
         objeto_fechas("#id_dvencimiento");
 
         // configuar cambios en ls campos de valores
-        jQuery('#id_nvalorantesiva, #id_niva, #id_nretencioniva, #id_nretencionrenta')
+        jQuery('#id_nvalorantesiva, #id_niva, #id_nretencioniva, #id_nretencionrenta, #id_nvalornonegociado')
             .change(function(){
                 calcular_factura();
             });
@@ -148,15 +166,19 @@
             retencion_renta = retencion_renta==="" ? 0 : +retencion_renta;
             retencion_renta = retencion_renta<0 ? 0 : retencion_renta;
 
+            valor_nonegociado = jQuery('#id_nvalornonegociado').val();
+            valor_nonegociado = valor_nonegociado===""? 0 : +valor_nonegociado;
+            valor_nonegociado = valor_nonegociado<0 ? 0 : valor_nonegociado
+
             stotal = antes_de_iva + iva;
-            total  = stotal - retencion_iva - retencion_renta;
+            total  = stotal - retencion_iva - retencion_renta - valor_nonegociado;
 
             jQuery('#id_nvalorantesiva').val(antes_de_iva);
             jQuery('#id_niva').val(iva);
             jQuery('#id_nretencioniva').val(retencion_iva);
             jQuery('#id_nretencionrenta').val(retencion_renta);
             jQuery('#id_ntotal').val(total);
-
+            jQuery('#id_nvalornonegociado').val(valor_nonegociado);
         };
         
     </script>

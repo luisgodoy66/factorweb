@@ -31,16 +31,16 @@ class DocumentosForm(forms.ModelForm):
         fields=[
             'cxcomprador', 'ctcomprador', 'ctserie1', 'ctserie2'
             ,'ctdocumento', 'demision', 'dvencimiento', 'nvalorantesiva'
-            ,'niva', 'nretencioniva', 'nretencionrenta', 'ntotal'
+            ,'niva', 'nretencioniva', 'nretencionrenta', 'ntotal', 'nvalornonegociado'
         ]
         labels={
             'cxcomprador':'Comprador', 'ctcomprador':'Nombre de comprador'
             , 'ctserie1':'Serie 1', 'ctserie2':'Serie 2'
-            ,'ctdocumento':'Documento', 'demision':'Emisión'
+            , 'ctdocumento':'Documento', 'demision':'Emisión'
             , 'dvencimiento':'Vencimiento', 'nvalorantesiva':'Valor antes de IVA'
-            ,'niva':'IVA', 'nretencioniva':'Retención de IVA'
+            , 'niva':'IVA', 'nretencioniva':'Retención de IVA'
             , 'nretencionrenta':'Retencion de impuesto a la renta'
-            , 'ntotal':'Neto'
+            , 'ntotal':'Neto', 'nvalornonegociado':'Valor no negociado'
         }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

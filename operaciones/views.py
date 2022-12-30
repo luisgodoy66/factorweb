@@ -694,7 +694,6 @@ def SumaCargos(request,asignacion_id, gao_carga_iva, dc_carga_iva, carga_gao, ca
         base += g
     if dc_carga_iva=="Si":
         base += d
-    print(porcentaje_iva)
     iva = base * porcentaje_iva / 100
     
     # neto
@@ -717,7 +716,6 @@ def EditarTasasDocumentoSolicitud(request, documento_id, fecha_desembolso, asign
     # si son facturas puras los documentos son las facturas
     # si son accesorios los documentos son los cheques
     asignacion = ModelosSolicitud.Asignacion.objects.get(pk=asignacion_id) 
-    print(asignacion.cxtipo, documento_id)
     if asignacion.cxtipo =="P":
         documento = ModelosSolicitud.Documentos.objects.filter(pk=documento_id).first()
         es_facturas_puras = True
@@ -725,7 +723,6 @@ def EditarTasasDocumentoSolicitud(request, documento_id, fecha_desembolso, asign
         documento = ModelosSolicitud.ChequesAccesorios.objects.filter(pk=documento_id).first()
         es_facturas_puras = False
 
-    print(documento)
 
     if request.method=='GET':
         if documento:
@@ -961,8 +958,8 @@ def GenerarAnexos(request,asignacion_id):
     asignacion = Asignacion.objects.filter(pk=asignacion_id).first()
     
     cliente = Datos_participantes.objects\
-        .filter(cxparticipante=asignacion.cxcliente).first()
-    
+        .filter(cxparticipante=asignacion.cxcliente.cxparticipante).first()
+        
     anexos = Anexos.objects.filter(lactivo = True).all()
 
     if cliente.datos_generales.cxtipocliente =="J":
@@ -971,9 +968,9 @@ def GenerarAnexos(request,asignacion_id):
         if datos:
             rl_id = datos.cxrepresentante1
             rl_nombre = datos.ctrepresentante1
-
-    rl_id = cliente.cxparticipante
-    rl_nombre = cliente.ctnombre
+    else:
+        rl_id = cliente.cxparticipante
+        rl_nombre = cliente.ctnombre
     
     for anexo in anexos:
 

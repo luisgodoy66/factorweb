@@ -62,7 +62,8 @@
                             <td>{{ item.lactivo }}</td>
                             <td>{{ item.ctrutageneracion }}</td>
                             <td>
-                                <a href="{% url 'operaciones:anexo_editar' item.id %}" class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>
+                                <a href="{% url 'operaciones:anexo_editar' item.id %}" title="Editar"
+                                    class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>
                                 <a href="#" class="btn btn-danger btn-sm" role="button"><i class="fa fa-exclamation"></i></a>
                             </td>
                         </tr>

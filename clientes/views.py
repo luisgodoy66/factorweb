@@ -245,7 +245,6 @@ def DatosClientes(request, cliente_id=None):
 
     if request.method=='POST':
         # cxtipoid=request.POST.get("cxtipoid")
-        print(request.POST)
         cxtipoid="R"
         idcliente=request.POST.get("cxparticipante")
         ctnombre=request.POST.get("ctnombre")
@@ -568,7 +567,6 @@ def DatosClienteJuridico(request, cliente_ruc=None):
 def CuentasBancariasCliente(request, cliente_ruc):
     template_name = "clientes/listacuentasbancariascliente.html"
     cliente = Datos_generales.objects.filter(cxcliente=cliente_ruc).first()
-    print(cliente)
     contexto={'cliente':cliente
             }
     return render(request, template_name, contexto)
@@ -578,7 +576,6 @@ def DetalleCuentasBancarias(request, cliente_ruc = None):
     cuentas = Cuentas_bancarias.objects\
         .filter(cxparticipante__cxparticipante=cliente_ruc)\
             .filter( leliminado = False)
-    print(cuentas.count())
     tempBlogs = []
 
     # Converting `QuerySet` to a Python Dictionary

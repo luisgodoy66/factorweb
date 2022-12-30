@@ -20,6 +20,9 @@
         .table td.numero{
             text-align: right;
         }
+        .table td.fecha{
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -84,8 +87,8 @@
                                 <td>{{ item.id }}</td>
                                 <td>{{ item.cxcomprador.ctnombre }}</td>
                                 <td>{{ item.ctdocumento }}</td>
-                                <td>{{ item.demision|date:"Y/m/d"  }}</td>
-                                <td>{{ item.dvencimiento|date:"Y/m/d"  }}</td>
+                                <td class="fecha">{{ item.demision|date:"Y/m/d"  }}</td>
+                                <td class="fecha">{{ item.dvencimiento|date:"Y/m/d"  }}</td>
                                 <td class="numero">{{ item.ntotal }}</td>
                                 <td class="numero">{{ item.nplazo }}</td>
                                 <td class="numero">{{ item.nporcentajeanticipo }}</td>
