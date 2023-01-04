@@ -15,8 +15,8 @@ SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-ALLOWED_HOSTS = ['factorweb-dev.us-east-2.elasticbeanstalk.com','localhost', '127.0.0.1','*']
-CSRF_TRUSTED_ORIGINS=['http://factorweb-dev.us-east-2.elasticbeanstalk.com/']
+ALLOWED_HOSTS = ['factorcloud2-dev.us-east-2.elasticbeanstalk.com','localhost', '127.0.0.1','*']
+CSRF_TRUSTED_ORIGINS=['http://factorcloud2-dev.us-east-2.elasticbeanstalk.com/']
 
 
 # Application definition
