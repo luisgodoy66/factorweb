@@ -15,8 +15,10 @@ SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-ALLOWED_HOSTS = ['factorcloud2-dev.us-east-2.elasticbeanstalk.com','localhost', '127.0.0.1','*']
-CSRF_TRUSTED_ORIGINS=['http://factorcloud2-dev.us-east-2.elasticbeanstalk.com/']
+# ALLOWED_HOSTS = ['factorcloud2-dev.us-east-2.elasticbeanstalk.com','localhost', '127.0.0.1','*']
+# CSRF_TRUSTED_ORIGINS=['http://factorcloud2-dev.us-east-2.elasticbeanstalk.com/']
+ALLOWED_HOSTS = ['factorweb-dev.us-east-2.elasticbeanstalk.com','localhost', '127.0.0.1','*']
+CSRF_TRUSTED_ORIGINS=['http://factorweb-dev.us-east-2.elasticbeanstalk.com/']
 
 
 # Application definition
@@ -130,10 +132,8 @@ LOGOUT_REDIRECT_URL ='/login/'
 
 
 # CONFIGURACION AWS
-# AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
-# AWS_SECRET_ACCESS_KEY=config("AWS_SECRET_ACCESS_KEY")
-AWS_ACCESS_KEY_ID ="AKIAUW2EOMCY6HZQAQ5S"
-AWS_SECRET_ACCESS_KEY="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"
+AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY=config("AWS_SECRET_ACCESS_KEY")
 
 AWS_STORAGE_BUCKET_NAME="factorweb-bucket"
 
