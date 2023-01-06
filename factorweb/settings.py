@@ -15,7 +15,7 @@ SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-ALLOWED_HOSTS = ['factorcloud2-dev.us-east-2.elasticbeanstalk.com','localhost', '127.0.0.1','*']
+ALLOWED_HOSTS = ['factorcloud2-dev.us-east-2.elasticbeanstalk.com','localhost', '*']
 CSRF_TRUSTED_ORIGINS=['http://factorcloud2-dev.us-east-2.elasticbeanstalk.com/']
 # ALLOWED_HOSTS = ['factorweb-dev.us-east-2.elasticbeanstalk.com','localhost', '127.0.0.1','*']
 # CSRF_TRUSTED_ORIGINS=['http://factorweb-dev.us-east-2.elasticbeanstalk.com/']
@@ -80,7 +80,7 @@ DATABASES = {
         'NAME':  'factorwebdb',
         'HOST':  'database-1.c5i2bulrjalv.us-east-2.rds.amazonaws.com',
         'USER': 'postgres',
-        'PASSWORD':'milo2015',
+        'PASSWORD':config("PASSWORD_BD"),
         'PORT': 5432,
     }
 }
