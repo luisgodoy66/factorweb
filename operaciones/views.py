@@ -390,8 +390,7 @@ def AceptarAsignacion(request, asignacion_id=None):
 
     return render(request, template_name, contexto)
 
-from django.http import HttpResponse
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 
 def DetalleCargosAsignacion(request, asignacion_id = None
                         , fecha_desembolso = None, condicion_id=None):
@@ -401,19 +400,19 @@ def DetalleCargosAsignacion(request, asignacion_id = None
         return HttpResponse("Asignación "+ str(asignacion_id) + " no encontrada")
 
     # buscar el tipo de factoring 
-    tipo_factoring = Tipos_factoring.objects.get(cxtipofactoring=asignacion.cxtipofactoring_id)
+    tipo_factoring = Tipos_factoring.objects.filter(cxtipofactoring=asignacion.cxtipofactoring_id).first()
     if not tipo_factoring:
         return HttpResponse("Tipo de factoring "+ asignacion.cxtipofactoring + " no existe")
 
     # buscar el cliente 
-    cliente = ModelosSolicitud.Clientes.objects.get(pk=asignacion.cxcliente_id)
+    cliente = ModelosSolicitud.Clientes.objects.filter(pk=asignacion.cxcliente_id).first()
     if not cliente:
         return HttpResponse("cliente "+asignacion.cxcliente_id + " no encontrado")
     
     # buscar los datos operativos 
-    datos_operativos = Datos_operativos.objects.get(cxcliente=cliente.cxcliente)
+    datos_operativos = Datos_operativos.objects.filter(cxcliente=cliente.cxcliente).first()
     if not datos_operativos:
-        return HttpResponse("datos operativos "+cliente.cxcliente + " no encontrado")
+        return HttpResponse("No se ha encontrado datos operativos del cliente.")
 
     # datos de tasa gao/dc
     gao = Tasas_factoring.objects.filter(cxtasa="GAO").first()
