@@ -1,16 +1,16 @@
 from django.shortcuts import redirect, render
 from django.views import generic
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required
+from django.http import JsonResponse, HttpResponse
+from django.urls import reverse_lazy
+from django.db import transaction
 
 from .models import Cuenta_transferencia, Datos_generales, Personas_juridicas, Personas_naturales, Linea_Factoring \
     , Datos_compradores, Cupos_compradores, Cuentas_bancarias
 
 from empresa.models import Datos_participantes
 from empresa.forms import ParticipanteForm
-
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required, permission_required
-from django.http import JsonResponse, HttpResponse
-from django.urls import reverse_lazy
 
 from .forms import  ClienteForm, PersonaNaturalForm, PersonaJuridicaForm\
     ,LineaFactoringForm, CuposCompradoresForm, CuentasBancariasForm\
@@ -616,28 +616,35 @@ def DocumentoADictionario(doc):
 @permission_required('clientes.update_cuentas_bancarias', login_url='bases:sin_permisos')
 def EliminarCuentaBancaria(request, pk):
     # la eliminacion es lógica
-    # debe devolver: 1 si esta bien, 0 si esta mal
 
-    doc = Cuentas_bancarias.objects.filter(pk=pk).first()
+    cuenta = Cuentas_bancarias.objects.filter(pk=pk).first()
 
-    if not doc:
-        return HttpResponse(0)
+    if not cuenta:
+        return HttpResponse("Cuenta no encontrada")
 
     if request.method=="GET":
-        # marcar como eliminado
-        doc.leliminado = True
-        doc.cxusuarioelimina = request.user.id
-        doc.save()
 
-        # eliminar la relacion cuentas de transferencias
+        with transaction.atomic():
+
+            # marcar como eliminado
+            cuenta.leliminado = True
+            cuenta.cxusuarioelimina = request.user.id
+            cuenta.save()
+
+            # eliminar la relacion cuentas de transferencias
+            cliente = cuenta.cxparticipante.cxparticipante
+            ctacte = Cuenta_transferencia.objects.filter(cxcliente=cliente).first()
+
+            if ctacte.cxcuenta.id == pk:
+                ctacte.leliminado = True
+                ctacte.cxusuarioelimina = request.user.id
+                ctacte.save()
 
     return HttpResponse("OK")
 
 @login_required(login_url='/login/')
 @permission_required('clientes.update_cuentas_bancarias', login_url='bases:sin_permisos')
 def ActualizarCuentaTransferencia(request, pk, cliente_ruc):
-    # la eliminacion es lógica
-    # debe devolver: 1 si esta bien, 0 si esta mal
 
     cuenta = Cuentas_bancarias.objects.filter(pk=pk).first()
 
@@ -645,7 +652,6 @@ def ActualizarCuentaTransferencia(request, pk, cliente_ruc):
         return HttpResponse(0)
 
     if request.method=="GET":
-        # marcar como eliminado
         cliente = Datos_generales.objects.filter(cxcliente=cliente_ruc).first()
         ctacte = Cuenta_transferencia.objects.filter(cxcliente=cliente).first()
         if not ctacte:
@@ -656,8 +662,6 @@ def ActualizarCuentaTransferencia(request, pk, cliente_ruc):
             ctacte.cxcuenta = cuenta
 
         ctacte.save()
-
-        # eliminar la relacion cuentas de transferencias
 
     return HttpResponse("OK")
 
