@@ -285,7 +285,7 @@ def DatosOperativos(request, cliente_ruc=None):
                 dalta = dalta,
                 cxclase=idclase,
                 nporcentajeanticipo=nporcentajeanticipo,
-                cxcliente = cliente.cxcliente,
+                cxcliente = cliente,
                 ntasacomision = ntasacomision,
                 ntasadescuentocartera = ntasadescuentocartera,
                 ntasagaoa = ntasagaoa,
@@ -312,7 +312,7 @@ def DatosOperativos(request, cliente_ruc=None):
 
             datoscliente.save()
 
-            return redirect("operaciones:listadatosoperativos")
+        return redirect("operaciones:listadatosoperativos")
 
     return render(request, template_name, contexto)
 
