@@ -1,10 +1,11 @@
 from pathlib import Path
 import os   
 # from decouple import config
-from dotenv import load_dotenv
+# # 06-ene-23 l.g.    cambiar de decouple a dotenv
+# 09-ene-23 l.g.    usar environ y el archivo de configuracion de elasticbeanstalk
+# from dotenv import load_dotenv
 
-# 23-ene-06 l.g.    cambiar de decouple a dotenv
-load_dotenv()
+# load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -16,12 +17,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = 'django-insecure-o!$b%i-r8^9lc(0v7%rugi*dmy+!rumaxw)&o#1j7212*bxv1)'
 # SECRET_KEY = config("SECRET_KEY")
-SECRET_KEY = os.getenv("SECRET_KEY")
+# SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-ALLOWED_HOSTS = ['factorweb-dev.us-east-2.elasticbeanstalk.com','localhost', '*']
-CSRF_TRUSTED_ORIGINS=['http://factorweb-dev.us-east-2.elasticbeanstalk.com/']
+ALLOWED_HOSTS = ['factorweb-dev2.us-east-2.elasticbeanstalk.com','localhost', '*']
+CSRF_TRUSTED_ORIGINS=['http://factorweb-dev2.us-east-2.elasticbeanstalk.com/']
 # ALLOWED_HOSTS = ['factorweb-dev.us-east-2.elasticbeanstalk.com','localhost', '127.0.0.1','*']
 # CSRF_TRUSTED_ORIGINS=['http://factorweb-dev.us-east-2.elasticbeanstalk.com/']
 
@@ -85,7 +87,8 @@ DATABASES = {
         'NAME':  'factorwebdb',
         'HOST':  'database-1.c5i2bulrjalv.us-east-2.rds.amazonaws.com',
         'USER': 'postgres',
-        'PASSWORD':os.getenv("PASSWORD_BD"),
+        # 'PASSWORD':os.getenv("PASSWORD_BD"),
+        'PASSWORD':os.environ["PASSWORD_BD"],
         'PORT': 5432,
     }
 }
@@ -137,8 +140,10 @@ LOGOUT_REDIRECT_URL ='/login/'
 
 
 # CONFIGURACION AWS
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY=os.getenv("AWS_SECRET_ACCESS_KEY")
+# AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+# AWS_SECRET_ACCESS_KEY=os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
+AWS_SECRET_ACCESS_KEY=os.environ["AWS_SECRET_ACCESS_KEY"]
 
 AWS_STORAGE_BUCKET_NAME="factorweb-bucket"
 
