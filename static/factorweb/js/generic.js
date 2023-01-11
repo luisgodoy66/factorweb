@@ -10,7 +10,7 @@ function ActualizarHeader(){
     inicializaValor("solicitudes_pendientes",100)
 }
 
-// <funciones de tablas>
+// <funciones de tablas bootstrap>
 function responseHandler(res) {
     jQuery.each(res.rows, function (i, row) {
         row.state = $.inArray(row.id, selections) !== -1
@@ -164,22 +164,7 @@ function CerrarModal(){
     return false;
 }
 
-// funciones operativas
-function EliminarDocumentoDeSolicitudAsignacion(asignacion_id, documento_id, tipo_asignacion, documento){
-    MensajeConfirmacion("Eliminar documento " + documento
-        + " con referencia " + documento_id +"?",function(){
-
-      fetchProcesar("/solicitudes/eliminardetalleasignacion/"
-        + asignacion_id + "/" + documento_id+"/"+tipo_asignacion, function(){
-        // $table.bootstrapTable('remove', {
-        //   field: 'id',
-        //   values: [documento_id]
-        // });
-        location.reload();
-      })
-  })
-}
-
+// funciones de tablas html
 function AgregarFilaVacia(id, nombre_body){
     var tabla=document.getElementById(id)
     var thead = tabla.children[0]

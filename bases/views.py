@@ -1,15 +1,13 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-
-# Create your views here.
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin\
     , PermissionRequiredMixin
-from solicitudes.models import Asignacion
 from django.db import connection
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 
+from solicitudes.models import Asignacion
+from datetime import date, timedelta
 
 class Home(LoginRequiredMixin, generic.TemplateView):
     # model = Asignacion
@@ -35,7 +33,6 @@ class SinPrivilegios(LoginRequiredMixin, PermissionRequiredMixin, MixinFormInval
         if not self.request.user==AnonymousUser():
             self.login_url='bases:sin_privilegios'
         return HttpResponseRedirect(reverse_lazy(self.login_url))
-
 
 class HomeSinPrivilegios(LoginRequiredMixin, generic.TemplateView):
     login_url = "bases:login"
@@ -140,3 +137,14 @@ def convierte_cifra(numero,sw):
             texto_unidad = texto_unidad[sw]
  
     return "%s %s %s" %(texto_centena,texto_decena,texto_unidad)
+
+def dashboard(request):
+    template_name='bases/dashboard.html'
+    # para que tome todo el día de hoy estoy poniendo hasta mañana
+    desde = date.today() + timedelta(days=-1)
+    hasta = date.today() + timedelta(days=1)
+
+    datos = { 'desde':desde
+        , 'hasta':hasta
+    }
+    return render(request, template_name, datos)

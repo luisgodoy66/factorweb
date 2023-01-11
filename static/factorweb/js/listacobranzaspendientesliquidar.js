@@ -117,15 +117,3 @@ function Liquidar(){
   return false
 }
 
-function ImprimirCobranza(cobranza_id, tipo_operacion){
-  // en una nueva ventana abrir el reporte de asignación
-  url = window.location.origin
-  if (tipo_operacion=="C"){
-    url = url + "/cobranzas/reportecobranzacartera/"+cobranza_id;
-   }
-   else{
-    url = url + "/cobranzas/reporterecuperacion/"+cobranza_id;
-   }
-window.open( url);
-
-}

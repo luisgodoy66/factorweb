@@ -65,6 +65,7 @@
                     data-toolbar="#toolbar"
                     data-id-field="id"
                     data-search="true"
+                    data-click-to-select="true"
                     >
                     <thead>
                         <tr>
@@ -79,8 +80,8 @@
                         <th data-field="Detalle" data-filter-control="input"data-sortable="true" >Detalle</th>
                         <th data-field="Estado" data-filter-control="input"data-sortable="true" >Estado</th>
                         <th data-field="Sobrepago" data-filter-control="input"data-sortable="true" >Sobrepago</th>
-                        <!-- <th data-field="FechaLiquidacion" data-filter-control="input"data-sortable="true" >Moneda</th> -->
-                        <!-- <th data-field="InstruccionDePago" data-filter-control="input"data-sortable="true" >Asiento</th> -->
+                        <th data-field="operate" data-sortable="true" data-events="window.operateEvents"
+                            data-formatter="operateFormatter" data-click-to-select="false">Acción</th>
                         </tr>
                     </thead>
                 </table>

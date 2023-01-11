@@ -11,7 +11,8 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , MotivoProtestoEdit, ProtestoCobranzaNew, AceptarProtesto, DocumentosVencidosView\
     , ProtestosPendientesView, GeneraListaProtestosPendientesJSON\
     , RecuperacionProtestoView, DetalleDocumentosProtesosJSON, DatosRecuperacion\
-    , AceptarRecuperacion, ProtestoRecuperacionNew, ReversaLiquidacion
+    , AceptarRecuperacion, ProtestoRecuperacionNew, ReversaLiquidacion\
+    , ReversaCobranza, GeneraListaCobranzasRegistradasJSON
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto
@@ -45,6 +46,9 @@ urlpatterns = [
         , name='consulta_cobranzas'),
     path('cobranzasjson/<desde>/<hasta>',GeneraListaCobranzasJSON
         , name="cobranzas_json"),
+    path('cobranzasregistradasjson/<desde>/<hasta>',GeneraListaCobranzasRegistradasJSON
+        , name="cobranzasregistradas_json"),
+    path('reversarcobranza/<int:pid_cobranza>/<tipo_operacion>',ReversaCobranza),
     
     # liquidaciones
     path('confirmarcobranza/<int:cobranza_id>/<tipo_operacion>',ConfirmarCobranza),

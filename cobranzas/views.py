@@ -603,35 +603,35 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 ,'cxtipofactoring__ctabreviacion','cxcobranza'
                 ,'cxformapago'
                 ,'nvalor', 'dcobranza'
-                ,'cxcheque', 'cxestado'
+                ,'cxcheque', 'cxestado', 'dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
-                    .annotate(movimiento=RawSQL("select 'Cobranza'",''))
+                    .annotate(tipo=RawSQL("select 'C'",''))
         recuperaciones = Recuperaciones_cabecera.objects.all()\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxrecuperacion'
                 ,'cxformacobro'
                 ,'nvalor', 'dcobranza'
-                , 'cxcheque', 'cxestado'
+                , 'cxcheque', 'cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
-                    .annotate(movimiento=RawSQL("select 'Recuperación'",''))
+                    .annotate(tipo=RawSQL("select 'R'",''))
         protestos_cobranzas = Documentos_cabecera.objects\
             .filter(cxestado='P')\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxcobranza'
                 ,'cxcheque__cheque_protestado__motivoprotesto__ctmotivoprotesto'
                 ,'nvalor', 'cxcheque__cheque_protestado__dprotesto'
-                ,'cxcheque', 'cxcheque__cheque_protestado__cxestado'
+                ,'cxcheque', 'cxcheque__cheque_protestado__cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
-                    .annotate(movimiento=RawSQL("select 'Cobranza protestada'",''))
+                    .annotate(tipo=RawSQL("select 'C protestada'",''))
         protestos_recuperaciones = Recuperaciones_cabecera.objects\
             .filter(cxestado='P')\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxrecuperacion'
                 ,'cxcheque__cheque_protestado__motivoprotesto__ctmotivoprotesto'
                 ,'nvalor', 'cxcheque__cheque_protestado__dprotesto'
-                ,'cxcheque', 'cxcheque__cheque_protestado__cxestado'
+                ,'cxcheque', 'cxcheque__cheque_protestado__cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
-                    .annotate(movimiento=RawSQL("select 'Recuperación protestada'",''))
+                    .annotate(tipo=RawSQL("select 'R protestada'",''))
     else:
 
         cobranzas = Documentos_cabecera.objects\
@@ -639,18 +639,18 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxcobranza'
                 ,'cxformapago','nvalor', 'dcobranza'
-                , 'cxcheque', 'cxestado'
+                , 'cxcheque', 'cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
-                    .annotate(movimiento=RawSQL("select 'Cobranza'",''))
+                    .annotate(tipo=RawSQL("select 'C'",''))
                 
         recuperaciones = Recuperaciones_cabecera.objects\
             .filter(dcobranza__gte = desde, dcobranza__lte = hasta)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxrecuperacion'
                 ,'cxformacobro','nvalor', 'dcobranza'
-                , 'cxcheque', 'cxestado'
+                , 'cxcheque', 'cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
-                    .annotate(movimiento=RawSQL("select 'Recuperación'",''))
+                    .annotate(tipo=RawSQL("select 'R'",''))
 
         protestos_cobranzas = Documentos_cabecera.objects\
             .filter(dcobranza__gte = desde, dcobranza__lte = hasta, cxestado='P')\
@@ -658,9 +658,9 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 ,'cxtipofactoring__ctabreviacion','cxcobranza'
                 ,'cxcheque__cheque_protestado__motivoprotesto__ctmotivoprotesto'
                 ,'nvalor', 'cxcheque__cheque_protestado__dprotesto'
-                ,'cxcheque', 'cxcheque__cheque_protestado__cxestado'
+                ,'cxcheque', 'cxcheque__cheque_protestado__cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
-                    .annotate(movimiento=RawSQL("select 'Cobranza protestada'",''))
+                    .annotate(tipo=RawSQL("select 'C protestada'",''))
                     
         protestos_recuperaciones = Recuperaciones_cabecera.objects\
             .filter(dcobranza__gte = desde, dcobranza__lte = hasta, cxestado='P')\
@@ -668,9 +668,9 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 ,'cxtipofactoring__ctabreviacion','cxrecuperacion'
                 ,'cxcheque__cheque_protestado__motivoprotesto__ctmotivoprotesto'
                 ,'nvalor', 'cxcheque__cheque_protestado__dprotesto'
-                ,'cxcheque', 'cxcheque__cheque_protestado__cxestado'
+                ,'cxcheque', 'cxcheque__cheque_protestado__cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
-                    .annotate(movimiento=RawSQL("select 'Recuperación protestada'",''))
+                    .annotate(tipo=RawSQL("select 'R protestada'",''))
 
         # Documentos_cabecera.objects.filter(cxestado='P').values('cxcheque__cheque_protestado__motivoprotesto__ctmotivoprotesto')                
 
@@ -691,16 +691,16 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
 
 def GeneraListaCobranzasJSONSalida(transaccion):
     output = {}
-    print(transaccion)
+    output['id'] = transaccion['id']
     output["Cliente"] = transaccion['cxcliente__cxcliente__ctnombre']
-    output["Movimiento"] = transaccion['movimiento']
     output["Operacion"] = transaccion['cxcobranza']
     output["Fecha"] = transaccion['dcobranza'].strftime("%Y-%m-%d")
     output["Estado"] = transaccion['cxestado']
     output["Valor"] =  transaccion['nvalor']
     output["TipoFactoring"] = transaccion['cxtipofactoring__ctabreviacion']
-    
-    if transaccion['movimiento']=='Cobranza protestada':
+    output["Registro"] = transaccion["dregistro"]
+
+    if 'protestada' in transaccion['tipo']:
         output["Detalle"] = transaccion['cxformapago']
     else:
         if transaccion['cxformapago'] =="CHE" or transaccion['cxformapago'] =="DEP":
@@ -715,6 +715,19 @@ def GeneraListaCobranzasJSONSalida(transaccion):
             output["Deposito"] = transaccion['ddeposito'].strftime("%Y-%m-%d")
         output["FormaCobro"] = transaccion['cxformapago']
         output["Sobrepago"] = transaccion['nsobrepago']
+
+    if transaccion['tipo'] =='C':
+        output["Movimiento"] = 'Cobranza'
+    elif transaccion['tipo'] =='R':
+        output["Movimiento"] = 'Recuperación'
+    elif transaccion['tipo'] =='C protestada':
+        output["Movimiento"] = 'Cobranza protestada'
+    elif transaccion['tipo'] =='R protestada':
+        output["Movimiento"] = 'Recuperación protestada'
+
+    # se necesita el tipo de operacion para saber que va a imprimir o reversar
+    output["TipoOperacion"] = transaccion["tipo"]
+    output["FormaPago"] = transaccion["cxformapago"]
 
     return output
 
@@ -889,7 +902,6 @@ def GeneraListaCobranzasPendientesProcesarJSON(request):
 
 def GeneraListaCobranzasPendientesProcesarJSONSalida(transaccion):
     output = {}
-    print(transaccion)
     output["id"] = transaccion["id"]
     output["Cliente"] = transaccion["cxcliente__cxcliente__ctnombre"]
     output["Cobranza"] = transaccion["cxcobranza"]
@@ -967,7 +979,6 @@ def Liquidacion(request, tipo_operacion):
     pjcobranzas = objeto["cobranzas"]
     pjotroscargos = objeto["otros_cargos"]
 
-    print(pjotroscargos)
     resultado=enviarPost("CALL uspLiquidarCobranzas( '{0}','{1}', {2},'{3}'\
         ,'{4}'\
         ,{5},{6},{7},{8},{9},{10}\
@@ -986,8 +997,6 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
     template_name = "operaciones/datosdesembolsoaclientes_form.html"
     contexto = {}
     formulario={}
-
-    print(request.method)
 
     cliente = Datos_generales.objects.filter(cxcliente=cliente_ruc).first()
 
@@ -1087,7 +1096,6 @@ def AceptarProtesto(request):
     if id_accesorio=='':
         id_accesorio='Null'
 
-    print(object)
     # Los 2 ultimos parametros son el id de cheque accesorio y el mensaje de error
     resultado=enviarPost("CALL uspRegistroProtesto( {0},'{1}',{2},'{3}','{4}'\
         ,'{5}','{6}',{7},{8},{9},{10}\
@@ -1104,7 +1112,6 @@ def GeneraListaProtestosPendientesJSON(request):
     documentos = Cheques_protestados.objects\
         .filter(leliminado=False, nsaldo__gt = 0).all()
 
-    print(documentos)
     tempBlogs = []
     for i in range(len(documentos)):
         tempBlogs.append(GeneraListaProtestosPendientesJSONSalida(documentos[i])) 
@@ -1146,55 +1153,6 @@ def GeneraListaProtestosPendientesJSONSalida(doc):
 
     return output
 
-# class RecuperacionProtestoView(LoginRequiredMixin, generic.FormView):
-#     model = Documentos_cabecera
-#     template_name = "cobranzas/datoscobranzas_form.html"
-#     context_object_name='cobranza'
-#     login_url = 'bases:login'
-#     form_class = CobranzasDocumentosForm
-
-#     # recibe como parametros los id's de los documentos a cobrar
-#     # los pasa al html para que se pasen al js que carga el detalle
-#     def get_context_data(self, **kwargs):
-
-#         docs = self.kwargs.get('ids_documentos')
-#         total_cartera=self.kwargs.get('total_cartera')
-#         forma_cobro=self.kwargs.get('forma_cobro')
-#         cliente_ruc = self.kwargs.get('cliente_ruc')
-#         un_solo_deudor = self.kwargs.get('un_comprador')
-#         deudor_id = self.kwargs.get('deudor_id')
-#         tipo_factoring = self.kwargs.get('tipo_factoring')
-
-#         cliente = Datos_generales.objects.filter(cxcliente = cliente_ruc).first()
-
-#         cuentas = Cuentas_bancarias\
-#             .objects.filter(cxparticipante = cliente_ruc \
-#                 , leliminado = False, lpropia = True).all()
-#                 # , cxtipocuenta = 'C').all()
-        
-#         cuentas_deudor = None
-
-#         if un_solo_deudor=="Si":
-#             cuentas_deudor = Cuentas_bancarias\
-#                 .objects.filter(cxparticipante = deudor_id \
-#                     , leliminado = False, lpropia = True).all()
-#                     # , cxtipocuenta = 'C').all()   # podría hacer transferencias desde cuenta de ahorros
-
-#         # Call the base implementation first to get a context
-#         context = super(CobranzasDocumentosView, self).get_context_data(**kwargs)
-#         context["documentos"] = docs
-#         context["total_cartera"] = total_cartera
-#         context["forma_cobro"] = forma_cobro
-#         context["form_cheque"] = ChequesForm
-#         context["cuentas_bancarias_cliente"] = cuentas
-#         context["cuentas_bancarias_deudor"] = cuentas_deudor
-#         context["un_solo_comprador"] = un_solo_deudor
-#         context["cliente_id"] = cliente_ruc
-#         context["cliente"] = cliente
-#         context["tipo_factoring"] = tipo_factoring
-#         context["deudor_id"] = deudor_id
-
-#         return context
 
 def DetalleDocumentosProtesosJSON(request, ids_protestos):
     # filtrar los documentos correspondientes a la lista pasada
@@ -1689,3 +1647,71 @@ def ReversaLiquidacion(request, pid_liquidacion,codigo_liquidacion,tipo_operacio
 
     return HttpResponse(resultado)
 
+def ReversaCobranza(request, pid_cobranza, tipo_operacion):
+    # ejecuta un store procedure 
+    #  EL TIPO DE OPERACION debe determinar el SP a ejecutar: o cobranzas o recuperaciones
+    nusuario = request.user.id
+
+    if tipo_operacion[0]=='C':
+        resultado=enviarPost("CALL uspReversarCobranzaCartera( {0},{1},'')"
+        .format(pid_cobranza, nusuario))
+    elif tipo_operacion[0]=='R':
+        print('falta sp revers recuperaciones')
+    
+
+    return HttpResponse(resultado)
+
+def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
+    # Es invocado desde la url de una tabla bt
+    print(desde,hasta)
+    if desde == 'None':
+        cobranzas = Documentos_cabecera.objects.all()\
+                .values('cxcliente__cxcliente__ctnombre','ddeposito'
+                ,'cxtipofactoring__ctabreviacion','cxcobranza'
+                ,'cxformapago'
+                ,'nvalor', 'dcobranza'
+                ,'cxcheque', 'cxestado', 'dregistro'
+                , 'id', 'cxcuentatransferencia','nsobrepago')\
+                    .annotate(tipo=RawSQL("select 'C'",''))
+        recuperaciones = Recuperaciones_cabecera.objects.all()\
+                .values('cxcliente__cxcliente__ctnombre','ddeposito'
+                ,'cxtipofactoring__ctabreviacion','cxrecuperacion'
+                ,'cxformacobro'
+                ,'nvalor', 'dcobranza'
+                , 'cxcheque', 'cxestado','dregistro'
+                , 'id', 'cxcuentatransferencia','nsobrepago')\
+                    .annotate(tipo=RawSQL("select 'R'",''))
+    else:
+
+        cobranzas = Documentos_cabecera.objects\
+            .filter(dregistro__gte = desde, dregistro__lte = hasta)\
+                .values('cxcliente__cxcliente__ctnombre','ddeposito'
+                ,'cxtipofactoring__ctabreviacion','cxcobranza'
+                ,'cxformapago','nvalor', 'dcobranza'
+                , 'cxcheque', 'cxestado','dregistro'
+                , 'id', 'cxcuentatransferencia','nsobrepago')\
+                    .annotate(tipo=RawSQL("select 'C'",''))
+                
+        recuperaciones = Recuperaciones_cabecera.objects\
+            .filter(dregistro__gte = desde, dregistro__lte = hasta)\
+                .values('cxcliente__cxcliente__ctnombre','ddeposito'
+                ,'cxtipofactoring__ctabreviacion','cxrecuperacion'
+                ,'cxformacobro','nvalor', 'dcobranza'
+                , 'cxcheque', 'cxestado','dregistro'
+                , 'id', 'cxcuentatransferencia','nsobrepago')\
+                    .annotate(tipo=RawSQL("select 'R'",''))
+
+    movimiento = cobranzas.union(recuperaciones, )
+            
+    tempBlogs = []
+    for i in range(len(movimiento)):
+        tempBlogs.append(GeneraListaCobranzasJSONSalida(movimiento[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": movimiento.count(),
+        "totalNotFiltered": movimiento.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)

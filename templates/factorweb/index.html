@@ -69,7 +69,7 @@
             <div id="main-menu" class="main-menu collapse navbar-collapse">
                 <ul class="nav navbar-nav">
                     <li class="active">
-                        <a href="#"> <i class="menu-icon fa fa-dashboard"></i>Dashboard </a>
+                        <a href="{% url 'bases:dashboard' %}"> <i class="menu-icon fa fa-dashboard"></i>Dashboard </a>
                     </li>
                     <h3 class="menu-title">Operaciones</h3><!-- /.menu-title -->
                     <li class="menu-item-has-children dropdown">
@@ -291,6 +291,7 @@
 
      <!-- rutinas generales -->
      <script type="text/javascript" src="{% static 'factorweb/js/generic.js' %}"></script>
+     <script type="text/javascript" src="{% static 'factorweb/js/procesosgenerales.js' %}"></script>
      <script type="text/javascript" src="{% static 'factorweb/js/sweetalert2.js' %}"></script>
         
     <!-- bootstrap table -->
