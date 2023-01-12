@@ -9,7 +9,7 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     EditarTasasDocumentoSolicitud, GeneraDetalleParaTabla1, \
     AsignacionesPendientesDesembolsarView, DesembolsarAsignacion, \
     GenerarAnexos, AnexosView, AnexosEdit, ReversaAceptacionAsignacion, \
-    GeneraListaAsignacionesJSON, AsignacionesConsulta
+    GeneraListaAsignacionesJSON, AsignacionesConsulta, GeneraListaAsignacionesRegistradasJSON
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud
@@ -71,5 +71,7 @@ urlpatterns = [
     path('editaranexo/<int:pk>',AnexosEdit.as_view(), name='anexo_editar'),
     path('reversaraceptacionasignacion/<int:pid_asignacion>',ReversaAceptacionAsignacion),
     path('asignacionesjson/<desde>/<hasta>',GeneraListaAsignacionesJSON, name="asignaciones_json"),
+    path('asignacionesregistradasjson/<desde>/<hasta>',GeneraListaAsignacionesRegistradasJSON
+        , name="asignacionesregistradas_json"),
 
     ]

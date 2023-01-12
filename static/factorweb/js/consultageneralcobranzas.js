@@ -31,10 +31,7 @@ window.onload=function(){
 
 window.operateEvents = {
     'click .revertir': function (e, value, row, index) {
-        ReversaConfirmacion(row.id, row.TipoOperacion)
-      },
-      'click .condonar': function (e, value, row, index) {
-        Condonar( row.id, row.TipoOperacion)
+      ReversarCobranza(row.id, row.TipoOperacion)
       },
       'click .imprimir': function (e, value, row, index) {
         ImprimirCobranza( row.id, row.TipoOperacion)
@@ -43,10 +40,7 @@ window.operateEvents = {
       
 function operateFormatter(value, row, index) {
     return [
-        '<a class="condonar" href="javascript:void(0)" title="Días a condonar">',
-        '<i class="fa fa-gift"></i>',
-        '</a>  ',
-        '<a class="revertir" href="javascript:void(0)" title="Reverso de confirmación">',
+        '<a class="revertir" href="javascript:void(0)" title="Reverso de cobranza">',
         '<i class="fa fa-rotate-left"></i>',
         '</a>  ',
         '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',

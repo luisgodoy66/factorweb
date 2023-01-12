@@ -3,50 +3,66 @@
 {% block content %}
 <div class="content mt-3">
     <div class="col-xl-6">
-    <div class="card">
-        <div class="card-header">
-            <strong>Cobranzas de hoy y ayer</strong>
-        </div>
-
-        <!-- <div class="card-body"> -->
-        <small>
-            <div >
-                <table id="table"  class="table table-striped table-bordered"
-                data-url="{% url 'cobranzas:cobranzasregistradas_json' desde hasta %}"
-                data-detail-formatter="detailFormatter"
-                data-id-field="id"
-                >
-                <thead>
-                        <tr>
-                        <th data-field="Cliente" >Cliente</th>
-                        <th data-field="Registro" >Registro</th>
-                        <th data-field="Operacion" >Cobranza</th>
-                        <th data-field="Valor" >Valor</th>
-                        <th data-field="Estado" >Estado</th>
-                        <th data-field="operate" data-events="window.operateEvents"
-                            data-formatter="operateFormatter" data-click-to-select="false">Acción</th>
-                        </tr>
-                    </thead>
-                </table>
-
+        <div class="card">
+            <div class="card-header">
+                <strong>Cobranzas de hoy y ayer</strong>
             </div>
 
-        </small>
-        <!-- </div> -->
+            <!-- <div class="card-body"> -->
+            <small>
+                <div >
+                    <table id="table"  class="table table-striped table-bordered"
+                    data-url="{% url 'cobranzas:cobranzasregistradas_json' desde hasta %}"
+                    data-detail-formatter="detailFormatter"
+                    data-id-field="id"
+                    >
+                    <thead>
+                            <tr>
+                            <th data-field="Cliente" >Cliente</th>
+                            <th data-field="Registro" >Registro</th>
+                            <th data-field="Operacion" >Cobranza</th>
+                            <th data-field="Valor" >Valor</th>
+                            <th data-field="Estado" >Estado</th>
+                            <th data-field="operate" data-events="window.operateEvents"
+                                data-formatter="operateFormatter" data-click-to-select="false">Acción</th>
+                            </tr>
+                        </thead>
+                    </table>
 
-    </div>
-    </div>
-    <div class="card col-xl-6">
-        <div class="card-header">
-            <strong>Asignaciones</strong>
+                </div>
+
+            </small>
+            <!-- </div> -->
+
         </div>
-        <div class="card-body">
-            <div >
-
+    </div>
+    <div class="col-xl-6">
+        <div class="card">
+            <div class="card-header">
+                <strong>Asignaciones aceptadas de hoy y ayer</strong>
             </div>
-
+            <small>
+                <div >
+                    <table id="tb_asgn"  class="table table-striped table-bordered"
+                    data-url="{% url 'operaciones:asignacionesregistradas_json' desde hasta %}"
+                    data-detail-formatter="detailFormatter"
+                    data-id-field="id"
+                    >
+                    <thead>
+                            <tr>
+                            <th data-field="Cliente" >Cliente</th>
+                            <th data-field="Registro" >Registro</th>
+                            <th data-field="Asignacion" >Asignación</th>
+                            <th data-field="ValorNegociado" >Negociado</th>
+                            <th data-field="Estado" >Estado</th>
+                            <th data-field="operate" data-events="window.operateEventsAsgn"
+                                data-formatter="operateFormatterAsgn" data-click-to-select="false">Acción</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </small>
         </div>
-
     </div>
 </div>
 

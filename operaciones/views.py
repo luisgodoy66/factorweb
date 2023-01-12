@@ -1037,7 +1037,7 @@ def GeneraListaAsignacionesJSONSalida(asignacion):
     output = {}
 
     neto = asignacion.nanticipo - asignacion.ngao - asignacion.ndescuentodecartera - asignacion.niva
-
+    output["id"] = asignacion.id
     output["Cliente"] = asignacion.cxcliente.ctnombre
     output["Asignacion"] = asignacion.cxasignacion
     output["TipoFactoring"] = asignacion.cxtipofactoring.cttipofactoring
@@ -1050,6 +1050,28 @@ def GeneraListaAsignacionesJSONSalida(asignacion):
     output["IVA"] = asignacion.niva
     output["Neto"] = neto
     output["Estado"] = asignacion.cxestado
+    output["Registro"] = asignacion.dregistro
 
     return output
+
+def GeneraListaAsignacionesRegistradasJSON(request, desde = None, hasta= None):
+    # Es invocado desde la url de una tabla bt
+
+    if desde == 'None':
+        asignacion = Asignacion.objects.all()
+    else:
+        asignacion = Asignacion.objects\
+            .filter(dregistro__gte = desde, dregistro__lte = hasta)
+    tempBlogs = []
+    for i in range(len(asignacion)):
+        tempBlogs.append(GeneraListaAsignacionesJSONSalida(asignacion[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": asignacion.count(),
+        "totalNotFiltered": asignacion.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
 

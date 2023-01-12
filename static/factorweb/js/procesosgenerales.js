@@ -1,4 +1,8 @@
 // funciones operativas
+function ActualizarHeader(){
+  inicializaValor("solicitudes_pendientes",100)
+}
+
 function EliminarDocumentoDeSolicitudAsignacion(asignacion_id, documento_id, tipo_asignacion, documento){
     MensajeConfirmacion("Eliminar documento " + documento
         + " con referencia " + documento_id +"?",function(){
@@ -15,7 +19,7 @@ function EliminarDocumentoDeSolicitudAsignacion(asignacion_id, documento_id, tip
 }
 
 function ImprimirCobranza(cobranza_id, tipo_operacion){
-    // en una nueva ventana abrir el reporte de asignación
+    // en una nueva ventana abrir el reporte de cobranza
     url = window.location.origin
     if (tipo_operacion[0]=="C"){
       url = url + "/cobranzas/reportecobranzacartera/"+cobranza_id;
@@ -38,4 +42,23 @@ function ReversarCobranza(cobranza_id, tipo_operacion){
         })
     })
       
+}
+function ImprimirAsignacion(id, ){
+  // en una nueva ventana abrir el reporte de asignación
+  url = window.location.origin
+  url = url + "/operaciones/reporteasignacion/"+id;
+window.open( url);
+
+}
+
+function ReversarAceptacionAsignacion(asignacion_id){
+  // este proceso a diferencia de aceptar no se ejecuta desde un
+  // formulario por eso no usa fetchPostear
+
+  MensajeConfirmacion("Reversar aceptación " +  asignacion_id +"?",function(){
+      fetchProcesar("/operaciones/reversaraceptacionasignacion/"+  asignacion_id,  function(){
+          location.reload();
+      })
+  })
+    
 }

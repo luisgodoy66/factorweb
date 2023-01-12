@@ -6,10 +6,6 @@ function objeto_fechas(Campo, Valor = null){
        });
 };
 
-function ActualizarHeader(){
-    inicializaValor("solicitudes_pendientes",100)
-}
-
 // <funciones de tablas bootstrap>
 function responseHandler(res) {
     jQuery.each(res.rows, function (i, row) {

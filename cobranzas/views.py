@@ -1651,19 +1651,18 @@ def ReversaCobranza(request, pid_cobranza, tipo_operacion):
     # ejecuta un store procedure 
     #  EL TIPO DE OPERACION debe determinar el SP a ejecutar: o cobranzas o recuperaciones
     nusuario = request.user.id
-
+    
     if tipo_operacion[0]=='C':
         resultado=enviarPost("CALL uspReversarCobranzaCartera( {0},{1},'')"
         .format(pid_cobranza, nusuario))
     elif tipo_operacion[0]=='R':
-        print('falta sp revers recuperaciones')
+        resultado='falta sp reverso recuperaciones'
     
 
     return HttpResponse(resultado)
 
 def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
-    print(desde,hasta)
     if desde == 'None':
         cobranzas = Documentos_cabecera.objects.all()\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'

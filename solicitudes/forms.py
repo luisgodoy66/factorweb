@@ -92,6 +92,8 @@ class ClientesForm(forms.ModelForm):
             , 'ctgirocomercial':'Giro comercial'
         }
 
+        widgets={'ctdireccion': forms.Textarea(attrs={'rows': '3'})
+                }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
