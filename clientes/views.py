@@ -9,6 +9,8 @@ from django.db import transaction
 from .models import Cuenta_transferencia, Datos_generales, Personas_juridicas, Personas_naturales, Linea_Factoring \
     , Datos_compradores, Cupos_compradores, Cuentas_bancarias
 
+from solicitudes.models import Clientes as Solicitante
+
 from empresa.models import Datos_participantes
 from empresa.forms import ParticipanteForm
 
@@ -185,10 +187,22 @@ class CuposCompradoresEdit(LoginRequiredMixin, generic.UpdateView):
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
 
+class ClientesSolicitudesView(LoginRequiredMixin, generic.ListView):
+    model = Solicitante
+    template_name = "clientes/listaclientessolicitudes.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    # solo cuentas de deudores
+    def get_queryset(self):
+        solicitantes = Solicitante.objects.values_list('cxcliente')
+        clientes = Datos_generales.objects.values_list('cxcliente')
+
+        return Solicitante.objects\
+            .filter(cxcliente__in = solicitantes.difference(clientes))
 
 @login_required(login_url='/login/')
 @permission_required('clientes.view_datos_generales', login_url='bases:sin_permisos')
-def DatosClientes(request, cliente_id=None):
+def DatosClientes(request, cliente_id=None, solicitante_id=None):
     template_name="clientes/datoscliente_form.html"
     contexto={}
     idcliente={}
@@ -236,7 +250,27 @@ def DatosClientes(request, cliente_id=None):
             formulario=ParticipanteForm()
             form_cliente=ClienteForm()
 
-            datoscliente=Datos_generales.objects.filter(pk=0)
+            # si viene desde la opción de arrastre desde solicitud
+            if solicitante_id:
+                solicitante = Solicitante.objects.filter(pk=solicitante_id).first()
+                if solicitante:
+                    e={ 
+                        'cxparticipante':solicitante.cxcliente,
+                        'ctnombre':solicitante.ctnombre,
+                        # 'cxzona': solicitante.cxzona,
+                        'cxlocalidad':solicitante.cxlocalidad,
+                        'ctdireccion':solicitante.ctdireccion,
+                        'ctemail':solicitante.ctemail,
+                        'ctemail2':solicitante.ctemail2,
+                        'cttelefono1':solicitante.cttelefono1,
+                        'cttelefono2':solicitante.cttelefono2,
+                        'ctcelular':solicitante.ctcelular,
+                        'ctgirocomercial':solicitante.ctgirocomercial,
+                    }
+                    formulario=ParticipanteForm(e)
+
+            # 14-ene-23 l.g.    no sé porqué estaba esta línea
+            # datoscliente=Datos_generales.objects.filter(pk=0)
             
     contexto={'datosparticipante':datosparticipante
             , 'form_participante':formulario

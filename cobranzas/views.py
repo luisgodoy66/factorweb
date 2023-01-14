@@ -5,6 +5,9 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db import transaction
 from django.urls import reverse_lazy
+from django.db.models import Count, Sum, Q
+from django.db.models.expressions import RawSQL 
+
 
 from .models import Documentos_cabecera, Documentos_detalle, Liquidacion_cabecera\
     , Cheques_protestados, Cheques, Recuperaciones_cabecera\
@@ -121,8 +124,6 @@ class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
         context["deudor_id"] = deudor_id
 
         return context
-from django.db.models.expressions import RawSQL 
-
 class CobranzasConsulta(LoginRequiredMixin, generic.ListView):
     model = Documentos_cabecera
     template_name = "cobranzas/consultageneralcobranzas.html"
@@ -556,8 +557,6 @@ def GeneraListaChequesADepositarJSONSalida(doc):
 
     return output
 
-from django.db.models import Count, Sum
-
 def DepositoCheques(request, ids_cheques, total_cartera):
     template_name = "cobranzas/depositocheques_form.html"
     contexto={}
@@ -862,8 +861,6 @@ def ReversaConfirmacionCobranza(request, cobranza_id, tipo_operacion):
         cobr.save()
 
     return HttpResponse("OK")
-
-from django.db.models import Q
 
 def GeneraListaCobranzasPendientesProcesarJSON(request):
     # Es invocado desde la url de una tabla bt
@@ -1518,7 +1515,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
             # si es recuperacion obtener cargos del protesto
             if tipo_operacion  == 'R':
 
-                total_otroscargos = ObtenerCargosDeProtestos(cobranza, listaotroscargos)
+                total_otroscargos += ObtenerCargosDeProtestos(cobranza, listaotroscargos)
             # nota:obtener cualkquier cargo cargado a la cobranza
         
         # fin for cobranzas
@@ -1574,7 +1571,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
 def ObtenerCargosDeProtestos(cobranza, listaotroscargos):
     total_cargos = 0
 
-    # Las recueracines se hacen sobre protestos, determinar los protestos
+    # Las recueraciones se hacen sobre protestos, determinar los protestos
     protestos = Cheques_protestados.objects\
         .filter(id__in = Recuperaciones_detalle.objects\
             .filter(recuperacion = cobranza).values('chequeprotestado'))
@@ -1656,7 +1653,8 @@ def ReversaCobranza(request, pid_cobranza, tipo_operacion):
         resultado=enviarPost("CALL uspReversarCobranzaCartera( {0},{1},'')"
         .format(pid_cobranza, nusuario))
     elif tipo_operacion[0]=='R':
-        resultado='falta sp reverso recuperaciones'
+        resultado=enviarPost("CALL uspReversarRecuperacion( {0},{1},'')"
+        .format(pid_cobranza, nusuario))
     
 
     return HttpResponse(resultado)

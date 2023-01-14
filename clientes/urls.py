@@ -5,9 +5,11 @@ from .views import  ClientesView,  DatosClientes, DatosClienteNatural \
     , CuposCompradoresNew, CuentasBancariasView, CuentasBancariasCliente\
     , DetalleCuentasBancarias, CuentasBancariasNew, EliminarCuentaBancaria\
     , ActualizarCuentaTransferencia,  DatosClienteJuridico, CuentasBancariasDeudoresView\
-    , CuentasBancariasDeudorNew, CuentasBancariasDeudorEdit
+    , CuentasBancariasDeudorNew, CuentasBancariasDeudorEdit, ClientesSolicitudesView
 
 urlpatterns = [
+    path('listaclientessolicitudes/',ClientesSolicitudesView.as_view()
+        , name='listaclientessolicitudes'),
     path('listaclientes/',ClientesView.as_view(), name='listaclientes'),
     path('listacompradores/',CompradoresView.as_view(), name='listacompradores'),
     path('listalineas/',LineasView.as_view(), name='listalineas'),
@@ -22,6 +24,7 @@ urlpatterns = [
     path('listacupos/',CuposCompradoresView.as_view(), name='listacupos'),
     path('clientenuevo/',DatosClientes, name='datoscliente_nuevo'),
     path('edit/<cliente_id>',DatosClientes, name='cliente_editar'),
+    path('clientenuevo/<solicitante_id>',DatosClientes, name='solicitante_nuevo'),
     path('compradornuevo/',DatosCompradores, name='comprador_nuevo'),
     path('editcomprador/<comprador_id>',DatosCompradores, name='comprador_editar'),
     path('editnatural/<cliente_ruc>',DatosClienteNatural

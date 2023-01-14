@@ -118,6 +118,7 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
                             <i class="menu-icon fa fa-user"></i>Clientes</a>
                         <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-inbox"></i><a href="{% url 'clientes:listaclientessolicitudes' %}">Desde solicitudes</a></li>
                             <li><i class="menu-icon fa fa-info-circle"></i><a href="{% url 'clientes:listaclientes' %}">Ficha general</a></li>
                             <li><i class="menu-icon fa fa-folder"></i><a href="{% url 'operaciones:listadatosoperativos' %}">Datos operativos</a></li>
                             <li><i class="menu-icon fa fa-pencil"></i><a href="{% url 'clientes:listalineas' %}">Línea de factoring</a></li>
