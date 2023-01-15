@@ -57,7 +57,7 @@ def ImpresionCobranzaCartera(request, cobranza_id):
     codigo_forma = ''
     fecha_protesto=''
     motivo_protesto=''
-
+    nd_protesto = 0
     # tomar el codigo de asignacion grabado en la solicitud
     cobranza = Documentos_cabecera.objects.filter(id= cobranza_id).first()
     
@@ -118,7 +118,7 @@ def ImpresionCobranzaCartera(request, cobranza_id):
         if protesto:
             fecha_protesto = protesto.dprotesto
             motivo_protesto = protesto.motivoprotesto.ctmotivoprotesto
-
+            nd_protesto = protesto.nvalornotadebito
 
     context = {
         "cobranza" : cobranza,
@@ -129,6 +129,7 @@ def ImpresionCobranzaCartera(request, cobranza_id):
         "totales": totales,
         "fecha_protesto": fecha_protesto,
         "motivo_protesto": motivo_protesto,
+        "nd_protesto":nd_protesto,
     }
 
     # Create a Django response object, and specify content_type as pdf
@@ -259,6 +260,7 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
     codigo_forma = ''
     fecha_protesto=''
     motivo_protesto=''
+    nd_protesto = 0
 
     # tomar el codigo de asignacion grabado en la solicitud
     recuperacion = Recuperaciones_cabecera.objects.filter(id= cobranza_id).first()
@@ -382,6 +384,7 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
         if protesto:
             fecha_protesto = protesto.dprotesto
             motivo_protesto = protesto.motivoprotesto.ctmotivoprotesto
+            nd_protesto = protesto.nvalornotadebito
 
 
     context = {
@@ -393,6 +396,7 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
         "totales": totales,
         "fecha_protesto": fecha_protesto,
         "motivo_protesto": motivo_protesto,
+        "nd_protesto":nd_protesto,
     }
 
     # Create a Django response object, and specify content_type as pdf

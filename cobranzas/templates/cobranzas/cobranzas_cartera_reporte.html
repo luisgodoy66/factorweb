@@ -123,11 +123,20 @@
                         <td><h4>Depositado el:</h4></td>
                         <td colspan="5">{{ datos_deposito }}</td>
                         {% if cobranza.cxestado == 'P' %}
-                        <td class="alerta"><h4>Protestado el:</h4></td>
-                        <td class="alerta" colspan="2">{{ fecha_protesto|date:"Y/m/d" }}</td>
+                            <td class="alerta"><h4>Protestado el:</h4></td>
+                            <td class="alerta" colspan="2">{{ fecha_protesto|date:"Y/m/d" }}</td>
+                        {% endif %}
+                        {% if cobranza.cxestado == 'E' %}
+                            <td class="alerta"><h4>Reversada</h4></td>
                         {% endif %}
                     </tr>
-                    <tr></tr>
+                    <tr>
+                        {% if cobranza.cxestado == 'P' %}
+                            <td colspan="6"></td>
+                            <td class="alerta" ><h4>Nd:</h4></td>
+                            <td class="alerta" colspan="2">{{ nd_protesto}}</td>
+                        {% endif %}
+                    </tr>
                     <tr>
                         <td><h4>Realizado por:</h4></td>
                         <td colspan="5">{{cobranza.cxusuariocrea}}</td>

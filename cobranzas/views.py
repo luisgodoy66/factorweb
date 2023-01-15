@@ -873,14 +873,14 @@ def GeneraListaCobranzasPendientesProcesarJSON(request):
             .values('cxcliente__cxcliente__ctnombre','ddeposito'
             ,'cxtipofactoring__ctabreviacion', 'dcobranza', 'nsobrepago'
             ,'cxcobranza','cxformapago','nvalor', 'cxcuentadeposito__cxcuenta'
-            , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'C'",''))
+            , 'id', 'cxcheque_id','cxcliente').annotate(tipo=RawSQL("select 'C'",''))
 
     recuperaciones = Recuperaciones_cabecera.objects.filter(Q(cxestado='C',\
         leliminado = False) | Q(cxformacobro__in=["EFE", "MOV"], cxestado='A'))\
             .values('cxcliente__cxcliente__ctnombre','ddeposito'
             ,'cxtipofactoring__ctabreviacion', 'dcobranza', 'nsobrepago'
             ,'cxrecuperacion','cxformacobro','nvalor', 'cxcuentadeposito__cxcuenta'
-            , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'R'",''))
+            , 'id', 'cxcheque_id','cxcliente').annotate(tipo=RawSQL("select 'R'",''))
 
     movimiento = cobranzas.union(recuperaciones)
             
@@ -900,6 +900,7 @@ def GeneraListaCobranzasPendientesProcesarJSON(request):
 def GeneraListaCobranzasPendientesProcesarJSONSalida(transaccion):
     output = {}
     output["id"] = transaccion["id"]
+    output["IdCliente"] = transaccion["cxcliente"]
     output["Cliente"] = transaccion["cxcliente__cxcliente__ctnombre"]
     output["Cobranza"] = transaccion["cxcobranza"]
     output["FechaCobro"] = transaccion["dcobranza"].strftime("%Y-%m-%d")
