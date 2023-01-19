@@ -1,4 +1,4 @@
-from re import T
+# from re import T
 from django.db import models
 from bases.models import ClaseModelo
 from empresa.models import Tipos_factoring

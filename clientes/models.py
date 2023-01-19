@@ -1,8 +1,7 @@
 from django.db import models
 
 from bases.models import ClaseModelo
-from empresa.models import Datos_participantes
-from empresa.models import Clases_cliente
+from empresa.models import Datos_participantes, Clases_cliente
 from pais.models import Bancos
 
 class Datos_compradores(ClaseModelo):

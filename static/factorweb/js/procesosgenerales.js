@@ -62,3 +62,32 @@ function ReversarAceptacionAsignacion(asignacion_id){
   })
     
 }
+
+function ImprimirCobranzaCargos(cobranza_id){
+  // en una nueva ventana abrir el reporte de cobranza
+  url = window.location.origin
+  url = url + "/cobranzas/reportecobranzacargos/"+cobranza_id;
+window.open( url);
+
+}
+
+function ImprimirLiquidacionCobranza(id, ){
+  // en una nueva ventana abrir el reporte de asignación
+  url = window.location.origin
+  url = url + "/cobranzas/reporteliquidacion/"+id;
+window.open( url);
+
+}
+
+function ReversarliquidacionCobranza(liquidacion_id, codigo_liquidacion, tipo_operacion){
+  // este proceso a diferencia de aceptar no se ejecuta desde un
+  // formulario por eso no usa fetchPostear
+
+  MensajeConfirmacion("Reversar liquidación " +  liquidacion_id +"?",function(){
+      fetchProcesar("/cobranzas/reversarliquidacion/"+liquidacion_id+"/"
+        +codigo_liquidacion+"/"+tipo_operacion,  function(){
+          location.reload();
+      })
+  })
+    
+}

@@ -1,7 +1,7 @@
 from pyexpat import model
 from django import forms
 from .models import Cheques, Documentos_cabecera, Liquidacion_cabecera\
-    , Cheques_protestados, Recuperaciones_cabecera
+    , Cheques_protestados, Recuperaciones_cabecera, Cargos_cabecera
 from operaciones.models import Motivos_protesto_maestro
 
 from datetime import date
@@ -137,6 +137,45 @@ class RecuperacionesProtestosForm(forms.ModelForm):
         labels={'cxcliente':'Cliente', 'cxtipofactoring':'Tipo de factoring'
             , 'cxformacobro':'Forma de cobro','nvalor':'Valor recibido'
             , 'dcobranza':'Fecha de recuperación', 'nsobrepago':'Sobrepago'
+            , 'cxcuentadeposito':'Cuenta de la empresa'
+            , 'ddeposito': 'Fecha de depósito'
+            , 'cxcuentatransferencia': 'Cuenta de origen de transferencia'
+        }
+        # esto sirve para ventana de condonacion. Lo importante es el formato
+        widgets = {
+            'ddeposito': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Select a date',
+                    'type': 'date'
+                    }
+                    ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+        self.fields['nsobrepago'].widget.attrs['readonly']=True
+        self.fields['dcobranza'].widget.attrs['readonly']=True
+        self.fields['dcobranza'].widget.attrs['value']=date.today
+        self.fields['ddeposito'].widget.attrs['readonly']=True
+        self.fields['ddeposito'].widget.attrs['value']=date.today
+
+class CobranzasCargosForm(forms.ModelForm):
+
+    class Meta:
+        model=Cargos_cabecera
+        fields=['cxcliente', 'cxtipofactoring', 'cxformapago'
+            , 'nvalor', 'dcobranza', 'nsobrepago', 'cxcuentadeposito'
+            , 'ddeposito', 'cxcuentatransferencia'
+        ]
+        labels={'cxcliente':'Cliente', 'cxtipofactoring':'Tipo de factoring'
+            , 'cxformapago':'Forma de cobro','nvalor':'Valor recibido'
+            , 'dcobranza':'Fecha de cobro', 'nsobrepago':'Sobrepago'
             , 'cxcuentadeposito':'Cuenta de la empresa'
             , 'ddeposito': 'Fecha de depósito'
             , 'cxcuentatransferencia': 'Cuenta de origen de transferencia'

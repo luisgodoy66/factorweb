@@ -11,7 +11,7 @@ from django.db.models.expressions import RawSQL
 
 from .models import Documentos_cabecera, Documentos_detalle, Liquidacion_cabecera\
     , Cheques_protestados, Cheques, Recuperaciones_cabecera\
-    , Documentos_protestados, Recuperaciones_detalle
+    , Documentos_protestados, Recuperaciones_detalle, Cargos_cabecera
 from operaciones.models import Documentos, ChequesAccesorios, Datos_operativos\
     , Desembolsos, Motivos_protesto_maestro, Cargos_detalle, Notas_debito_cabecera\
     , Notas_debito_detalle
@@ -20,7 +20,8 @@ from empresa.models import Tasas_factoring, Cuentas_bancarias as CuentasEmpresa\
     , Datos_participantes
 
 from .forms import CobranzasDocumentosForm, ChequesForm, LiquidarForm\
-    , MotivoProtestoForm, ProtestoForm, RecuperacionesProtestosForm
+    , MotivoProtestoForm, ProtestoForm, RecuperacionesProtestosForm\
+    , CobranzasCargosForm
 
 from operaciones.forms import DesembolsarForm
 
@@ -124,13 +125,13 @@ class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
         context["deudor_id"] = deudor_id
 
         return context
+
 class CobranzasConsulta(LoginRequiredMixin, generic.ListView):
     model = Documentos_cabecera
     template_name = "cobranzas/consultageneralcobranzas.html"
     context_object_name='consulta'
     login_url = 'bases:login'
  
-
 class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
     # la lista se obtiene desde url en la tabla bt, 
     # el model indicado es solo para fluir con el django. No se usa.
@@ -182,42 +183,6 @@ class CobranzasPendientesLiquidarView(LoginRequiredMixin, generic.ListView):
                 , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'R'",''))
 
         return cobranzas.union(recuperaciones)
-
-# class CobranzaPorCondonarView(LoginRequiredMixin, generic.FormView):
-#     model = Documentos_cabecera
-#     template_name = "cobranzas/detallecobroporcondonar.html"
-#     context_object_name='cobranza'
-#     login_url = 'bases:login'
-#     form_class = CobranzasDocumentosForm
-
-#     def get_context_data(self, **kwargs):
-
-#         tipo = self.kwargs.get('tipo_operacion')
-
-#         # Call the base implementation first to get a context
-#         context = super(CobranzasDocumentosView, self).get_context_data(**kwargs)
-#         context["tipo_operacion"] = tipo
-
-#         return context
-
-def CobranzaPorCondonar(request,pk, tipo_operacion):
-    template_name = "cobranzas/detallecobroporcondonar.html"
-    formulario={}
-    
-    if tipo_operacion=='C':
-        operacion = Documentos_cabecera.objects.filter(pk=pk).first()
-        formulario = CobranzasDocumentosForm
-    else:
-        operacion = Recuperaciones_cabecera.objects.filter(pk=pk).first()
-        formulario = RecuperacionesProtestosForm
-
-    contexto={"operacion": operacion
-        , "form" : formulario
-        , "tipo_operacion": tipo_operacion
-        }
-    
-    return render(request, template_name, contexto)
-
 
 class LiquidacionesPendientesPagarView(LoginRequiredMixin, generic.ListView):
     model = Liquidacion_cabecera
@@ -366,6 +331,71 @@ class ProtestoRecuperacionNew(LoginRequiredMixin, generic.CreateView):
         context["tipo_operacion"]='Recuperacion'
 
         return context
+
+class LiquidacionesEnNegativoPendientesView(LoginRequiredMixin, generic.ListView):
+    model = Notas_debito_cabecera
+    template_name = "cobranzas/listaliquidacionesennegativo.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+
+    def get_queryset(self):
+        return Notas_debito_cabecera.objects\
+        .filter(cxtipooperacion__in = 'LCR', leliminado = False, nsaldo__gt = 0)
+
+class CobranzasCargosView(LoginRequiredMixin, generic.FormView):
+    model = Cargos_cabecera
+    template_name = "cobranzas/datoscobranzascargos_form.html"
+    context_object_name='cobranza'
+    login_url = 'bases:login'
+    form_class = CobranzasCargosForm
+
+    # recibe como parametros los id's de los documentos a cobrar
+    # los pasa al html para que se pasen al js que carga el detalle
+    def get_context_data(self, **kwargs):
+
+        docs = self.kwargs.get('ids_documentos')
+        total_cartera=self.kwargs.get('total_cargos')
+        forma_cobro=self.kwargs.get('forma_cobro')
+        cliente_ruc = self.kwargs.get('cliente_ruc')
+        tipo_factoring = self.kwargs.get('tipo_factoring')
+
+        cliente = Datos_generales.objects.filter(cxcliente = cliente_ruc).first()
+
+        cuentas = Cuentas_bancarias\
+            .objects.filter(cxparticipante = cliente_ruc \
+                , leliminado = False, lpropia = True).all()
+                # , cxtipocuenta = 'C').all()
+        
+        # Call the base implementation first to get a context
+        context = super(CobranzasCargosView, self).get_context_data(**kwargs)
+        context["documentos"] = docs
+        context["total_cargos"] = total_cartera
+        context["forma_cobro"] = forma_cobro
+        context["form_cheque"] = ChequesForm
+        context["cuentas_bancarias_cliente"] = cuentas
+        context["cliente_id"] = cliente_ruc
+        context["cliente"] = cliente
+        context["tipo_factoring"] = tipo_factoring
+
+        return context
+
+def CobranzaPorCondonar(request,pk, tipo_operacion):
+    template_name = "cobranzas/detallecobroporcondonar.html"
+    formulario={}
+    
+    if tipo_operacion=='C':
+        operacion = Documentos_cabecera.objects.filter(pk=pk).first()
+        formulario = CobranzasDocumentosForm
+    else:
+        operacion = Recuperaciones_cabecera.objects.filter(pk=pk).first()
+        formulario = RecuperacionesProtestosForm
+
+    contexto={"operacion": operacion
+        , "form" : formulario
+        , "tipo_operacion": tipo_operacion
+        }
+    
+    return render(request, template_name, contexto)
 
 def GeneraListaCarteraPorVencerJSON(request, fecha_corte = None):
     # Es invocado desde la url de una tabla bt
@@ -1151,7 +1181,6 @@ def GeneraListaProtestosPendientesJSONSalida(doc):
 
     return output
 
-
 def DetalleDocumentosProtesosJSON(request, ids_protestos):
     # filtrar los documentos correspondientes a la lista pasada
     documentos = Documentos_protestados.objects\
@@ -1713,3 +1742,212 @@ def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
         "rows": docjson 
         }
     return JsonResponse( data)
+
+def GeneraListaLiquidacionesEnNegativoPendientesJSON(request):
+    # Es invocado desde la url de una tabla bt
+    movimiento = Notas_debito_cabecera.objects\
+        .filter(cxtipooperacion__in = 'LCR', leliminado = False, nsaldo__gt = 0).all()
+
+    docjson = []
+    for i in range(len(movimiento)):
+        docjson.append(GeneraListaLiquidacionesEnNegativoPendientesJSONSalida(movimiento[i])) 
+
+    # docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": movimiento.count(),
+        "totalNotFiltered": movimiento.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+    
+def GeneraListaLiquidacionesEnNegativoPendientesJSONSalida(transaccion):
+    output = {}
+    output["id"] = transaccion.id
+    output["IdCliente"] = transaccion.cxcliente.cxcliente.cxparticipante
+    output["Cliente"] = transaccion.cxcliente.cxcliente.ctnombre
+    output["ND"] = transaccion.cxnotadebito
+    output["Fecha"] = transaccion.dnotadebito.strftime("%Y-%m-%d")
+    output["Valor"] =  transaccion.nvalor
+    output["Saldo"] = transaccion.nsaldo
+    output["IdTipoFactoring"] = transaccion.cxtipofactoring.cxtipofactoring
+    output["TipoFactoring"] = transaccion.cxtipofactoring.ctabreviacion
+    if transaccion.cxtipooperacion=='L':
+        op = Liquidacion_cabecera.objects.filter(pk = transaccion.operacion).first()
+        opx = op.cxliquidacion
+    if transaccion.cxtipooperacion=='C':
+        op = Documentos_cabecera.objects.filter(pk = transaccion.operacion).first()
+        opx = op.cxcobranza
+    if transaccion.cxtipooperacion=='R':
+        op = Recuperaciones_cabecera.objects.filter(pk = transaccion.operacion).first()
+        opx = op.cxrecuperacion
+    
+    output["Operacion"] = opx
+
+    return output
+
+def DetalleNotasDebitoPendientesJSON(request, ids_documentos):
+    # filtrar los documentos correspondientes a la lista pasada
+    documentos = Notas_debito_cabecera.objects\
+        .filter(id__in = ids_documentos.split(','), leliminado = False)
+    
+    tempBlogs = []
+
+    # Converting `QuerySet` to a Python Dictionary
+    for i in range(len(documentos)):
+        tempBlogs.append(DetalleNotasDebitoPendientesJSONSalida(documentos[i])) # Converting `QuerySet` to a Python Dictionary
+
+    docjson = tempBlogs
+
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+
+    return HttpResponse(JsonResponse( data))
+
+def DetalleNotasDebitoPendientesJSONSalida(doc):
+    # con los datos numericos entre comillas si se calcula el total
+    # de la columna en la tabla. Del otro tipo, no
+
+    # los datos aquí van a obtenerse con el getData de la tb, aunque no se 
+    # presenten en el HTML
+    output = {}
+    output['id'] = doc.id
+    output["ND"] = doc.cxnotadebito
+    output["Emision"] = doc.dnotadebito.strftime("%Y-%m-%d")
+    output["SaldoActual"] = doc.nsaldo
+    output["Cobro"] = doc.nsaldo
+    output["SaldoFinal"] = "0.0"
+    if doc.cxtipooperacion=='L':
+        op = Liquidacion_cabecera.objects.filter(pk = doc.operacion).first()
+        opx = op.cxliquidacion
+    if doc.cxtipooperacion=='C':
+        op = Documentos_cabecera.objects.filter(pk = doc.operacion).first()
+        opx = op.cxcobranza
+    if doc.cxtipooperacion=='R':
+        op = Recuperaciones_cabecera.objects.filter(pk = doc.operacion).first()
+        opx = op.cxrecuperacion
+    output["Operacion"] = opx
+
+    return output
+
+def DatosCobroNotaDebito(request, id, sdo, cobro):
+    template_name = "cobranzas/datoscobronotadebito_modal.html"
+    contexto={
+        "id": id,
+        "saldo" : sdo,
+        "valor_cobrado": cobro,
+    }
+    return render(request, template_name, contexto)
+
+def AceptarCobranzaNotasDebito(request):
+    # ejecuta un store procedure 
+    # Devuelve el control a un proceso js
+    resultado = 'OK'
+    nc=' '; gi=' ';  cd = 0; fd = 'Null'
+
+    objeto=json.loads(request.body.decode("utf-8"))
+
+    id_cliente=objeto["id_cliente"]
+    tipo_factoring=objeto["tipo_factoring"]
+    forma_cobro=objeto["forma_cobro"]
+    fecha_cobro=objeto["fecha_cobro"]
+    valor_recibido=objeto["valor_recibido"]
+    sobrepago=objeto["sobrepago"]
+    cuenta_bancaria = objeto["cuenta_bancaria"]
+    nusuario = request.user.id
+    # los siguientes son maps:
+    # si debo procesar aqui uso json.loads para trabajar como diccionarios
+    # si quiero enviar como parametro al store procedure paso tal cual y se recibe
+    # como objeto json
+    cheque = json.loads(objeto["arr_cheque"])         
+    deposito=json.loads(objeto["arr_deposito"]) 
+    documentos_cobrados=objeto["arr_documentos_cobrados"]
+
+    if cheque:
+        nc = cheque["numero_cheque"]
+        gi = cheque["girador"]
+    
+    if deposito:
+        cd = deposito["cuenta_deposito"]
+        fd = "'"  + deposito["fecha_deposito"] + "'"
+
+        if not cd :
+            return HttpResponse("Debe especificar la cuenta de depósito")
+
+    if not cuenta_bancaria:
+        cuenta_bancaria='Null'
+    
+    # Los 2 ultimos parametros son el id de cheque accesorio y el mensaje de error
+    resultado=enviarPost("CALL uspAceptarCobranzaCargos( '{0}','{1}','{2}','{3}',{4}\
+        ,{5},{6}\
+        ,'{7}','{8}',{9},{10}\
+        ,'{11}', {12},Null,0)"
+        .format(id_cliente, tipo_factoring, forma_cobro, fecha_cobro, valor_recibido
+        ,sobrepago,cuenta_bancaria
+        ,nc,gi, cd, fd
+        ,documentos_cobrados, nusuario))
+
+    return HttpResponse(resultado)
+
+def GeneraListaLiquidacionesRegistradasJSON(request, desde = None, hasta= None):
+    # Es invocado desde la url de una tabla bt
+    print(desde,hasta)
+    if desde == 'None':
+        movimiento = Liquidacion_cabecera.objects.all()\
+                .values('cxcliente__cxcliente__ctnombre','ddesembolso'
+                ,'cxtipofactoring__ctabreviacion','cxliquidacion'
+                ,'ctinstrucciondepago', 'cxtipooperacion'
+                ,'nneto', 'dliquidacion'
+                ,'dregistro', 'leliminado'
+                , 'id')
+    else:
+
+        movimiento = Liquidacion_cabecera.objects\
+            .filter(dregistro__gte = desde, dregistro__lte = hasta)\
+                .values('cxcliente__cxcliente__ctnombre','ddesembolso'
+                ,'cxtipofactoring__ctabreviacion','cxliquidacion'
+                ,'ctinstrucciondepago', 'cxtipooperacion'
+                ,'nneto', 'dliquidacion'
+                ,'dregistro', 'leliminado'
+                , 'id')
+          
+    tempBlogs = []
+    for i in range(len(movimiento)):
+        tempBlogs.append(GeneraListaLiquidacionesJSONSalida(movimiento[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": movimiento.count(),
+        "totalNotFiltered": movimiento.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaLiquidacionesJSONSalida(transaccion):
+    output = {}
+    output['id'] = transaccion['id']
+    output["Cliente"] = transaccion['cxcliente__cxcliente__ctnombre']
+    output["Operacion"] = transaccion['cxliquidacion']
+    output["Fecha"] = transaccion['dliquidacion'].strftime("%Y-%m-%d")
+    if transaccion['leliminado']:
+        output["Estado"] = "E"
+    else:
+        output["Estado"] = "A"
+
+    output["Valor"] =  transaccion['nneto']
+    output["TipoFactoring"] = transaccion['cxtipofactoring__ctabreviacion']
+    output["Registro"] = transaccion["dregistro"]
+
+    # if transaccion['tipo'] =='C':
+    #     output["Movimiento"] = 'Cobranza'
+    # elif transaccion['tipo'] =='R':
+    #     output["Movimiento"] = 'Recuperación'
+
+    # # se necesita el tipo de operacion para saber qué va a imprimir o reversar
+    output["TipoOperacion"] = transaccion["cxtipooperacion"]
+    # output["FormaPago"] = transaccion["cxformapago"]
+
+    return output

@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Cobranza de cargos</title>
+
+    <style type="text/css">
+        @page {
+            size: A4;
+            margin: 1cm;
+            size:  portrait;
+        }
+        .table thead th {
+                vertical-align:  top ;
+                border-bottom: 1px solid #000;
+        }
+        .table td.numero{
+            text-align: right;
+        }
+        .alerta { 
+        font-family: sans-serif; 
+        font-size: 11px; 
+        font-weight: 400; 
+        color: #eb1111; 
+        }        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2>Reporte de cobranza </h2>
+            </div>
+
+            <div class="list-group">
+                <table >
+                    <tbody>
+                        <tr>
+                            <td><h4>Cliente:</h4></td>
+                            <td colspan="3">{{ cobranza.cxcliente.cxcliente.ctnombre }}</td>
+                            <td><h4>Fecha de cobranza:</h4></td>
+                            <td>{{ cobranza.dcobranza|date:"Y/m/d" }}</td>
+                        </tr>
+                        <tr>
+                            <td><h4>Id:</h4></td>
+                            <td colspan="3">{{cobranza.cxcliente.cxcliente.cxparticipante}}</td>
+                            <td><h4>tipo de factoring:</h4></td>
+                            <td>{{ cobranza.cxtipofactoring }}</td>
+                        </tr>
+                        <tr>
+                            <td><h4>Cobranza:</h4></td>
+                            <td colspan="3">{{ cobranza.cxcobranza }}</td>
+                            <td><h4>Total:</h4></td>
+                            <td>{{ cobranza.nvalor}}</td>
+                        </tr>
+                        <tr>
+                            <td><h4>Forma de cobro:</h4></td>
+                            <td colspan="3">{{ datos_forma_cobro }}</td>
+                            <td><h4>Sobrepago:</h4></td>
+                            <td colspan="1">{{ cobranza.nsobrepago}}</td>                           
+                        </tr>
+                    </tbody>
+                </table>
+                <hr>
+            </div>                       
+
+            <div class="row">
+                <div class="col">
+                    <table class="table table-striped table-hover nowrap" style="width:100%">
+                        <thead>
+                            <th>Nota de débito</th>        
+                            <th>Fecha</th>
+                            <th>Tipo de operacion</th>
+                            <th>Operacion</th>
+                            <th>Saldo a la fecha</th>
+                            <th>Valor cobrado</th>
+                            <th>Saldo actual</th>
+                        </thead>
+                        <tbody>
+                            <tr></tr>
+                            {% for item in detalle %}
+                            <tr>
+                                <td>{{ item.notadedebito.cxnotadebito }}</td>
+                                <td>{{ item.notadedebito.dnotadebito|date:"Y/m/d" }}</td>
+                                <td>{{ item.notadedebito.cxtipooperacion }}</td>
+                                <td>{{ item.notadedebito.operacion }}</td>
+                                <td>{{ item.nsaldoaldia }}</td>
+                                <td class="numero">{{ item.nvalorcobranza }}</td>
+                                <td class="numero">{{ item.notadedebito.nsaldo }}</td>
+                            </tr>
+                            {% endfor %}
+                            <!-- totales -->
+                            <tr></tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="numero"><h4>{{ totales.cobrado }}</h4></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+            <table >
+                <tbody>
+                    <tr></tr>
+                    <tr>
+                        <td><h4>Depositado el:</h4></td>
+                        <td colspan="5">{{ datos_deposito }}</td>
+                        {% if cobranza.cxestado == 'E' %}
+                            <td class="alerta"><h4>Reversada</h4></td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                    </tr>
+                    <tr>
+                        <td><h4>Realizado por:</h4></td>
+                        <td colspan="5">{{cobranza.cxusuariocrea}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+
+        </div>
+    </div>
+
+</body>
+</html>

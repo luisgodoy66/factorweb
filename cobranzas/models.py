@@ -1,11 +1,14 @@
 from email.policy import default
 from statistics import mode
 from django.db import models
+from django.contrib.auth.models import User
 
 from bases.models import ClaseModelo
 from empresa.models import Datos_participantes , Tipos_factoring, Cuentas_bancarias
-from operaciones.models import Documentos, ChequesAccesorios, Cargos_detalle
 from clientes import models as Cliente_models
+
+from operaciones.models import Documentos, ChequesAccesorios\
+    , Cargos_detalle as Operaciones_cargos, Motivos_protesto_maestro
 
 class Cheques(ClaseModelo):
     TIPOS_DE_PARTICIPANTES = (
@@ -76,7 +79,6 @@ class Documentos_cabecera(ClaseModelo):
             x = 'Cobranza'
         return x
 
-from django.contrib.auth.models import User
 class Documentos_detalle(ClaseModelo):
     cxcobranza =models.ForeignKey(Documentos_cabecera
         , on_delete=models.CASCADE
@@ -156,14 +158,12 @@ class Liquidacion_detalle(ClaseModelo):
     )
     liquidacion = models.ForeignKey(Liquidacion_cabecera
         , on_delete=models.CASCADE, related_name="liquidacion_detalle")
-    cargo = models.ForeignKey(Cargos_detalle, on_delete=models.RESTRICT)
+    cargo = models.ForeignKey(Operaciones_cargos, on_delete=models.RESTRICT)
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     nvaloraplicado = models.DecimalField(max_digits=10, decimal_places=2
         , default=0, null=True)
     cxtipooperacion = models.CharField(max_length=1, choices= TIPOS_DE_OPERACION)
     operacion = models.BigIntegerField()
-
-from operaciones.models import Motivos_protesto_maestro
 
 class Cheques_protestados(ClaseModelo):
     FORMAS_DE_COBRO = (
@@ -276,3 +276,54 @@ class Recuperaciones_detalle(ClaseModelo):
 
     def aplicado(self):
         return self.nvalorrecuperacion + self.nvalorbaja + self.nvalorbajacobranza
+
+class Cargos_cabecera(ClaseModelo):
+    FORMAS_DE_PAGO = (
+        ('EFE', 'Efectivo'),
+        ('CHE', 'Cheque'),
+        ('MOV', 'Movimiento contable'),
+        ('TRA', 'Transferencia'),
+        ('DEP', 'Deposito de accesorio'),
+    )
+    cxcobranza = models.CharField(max_length=8, )
+    cxcliente=models.ForeignKey(Cliente_models.Datos_generales
+        ,to_field="cxcliente", on_delete=models.CASCADE
+        , related_name="cliente_cobranza_cargos"
+    )
+    cxtipofactoring = models.ForeignKey(Tipos_factoring
+        , to_field="cxtipofactoring", on_delete=models.RESTRICT
+        , related_name="tipofactoring_cobranza_cargos")
+    cxformapago = models.CharField(max_length=3, choices=FORMAS_DE_PAGO)
+    cxlocalidad = models.CharField(max_length=4, blank=True) 
+    dcobranza = models.DateTimeField(auto_created=True) 
+    nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    nsobrepago = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    cxestado = models.CharField(max_length=1, default=' ')
+    cxcheque = models.ForeignKey(Cheques, on_delete=models.RESTRICT
+        , null=True, related_name='cheque_cobranza_cargos')
+    cxcuentatransferencia = models.ForeignKey(Cliente_models.Cuentas_bancarias
+        , null=True, on_delete = models.RESTRICT)
+    cxcuentadeposito = models.ForeignKey(Cuentas_bancarias, on_delete=models.RESTRICT
+        , null = True, related_name="banco_deposito_cargos")
+    # ctreferenciadeposito = models.CharField(max_length=15)
+    ddeposito = models.DateTimeField(null=True) 
+
+    def __str__(self):
+        return self.cxcobranza
+
+    def movimiento(self):
+        # si está protestada debe decir "cobranza ... protestada"
+        if self.cxestado=='P' :
+            x = 'Cobranza de cargos protestada'
+        else:
+            x = 'Cobranza de cargos'
+        return x
+
+from operaciones.models import  Notas_debito_cabecera
+
+class Cargos_detalle(ClaseModelo):
+    cxcobranza =models.ForeignKey(Cargos_cabecera, on_delete=models.CASCADE)
+    notadedebito = models.ForeignKey(Notas_debito_cabecera, on_delete=models.CASCADE)
+    nsaldoaldia= models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    nvalorcobranza = models.DecimalField(max_digits=10, decimal_places=2)
+    jcargos = models.JSONField()

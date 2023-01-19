@@ -6,7 +6,7 @@ from bases.models import ClaseModelo
 from empresa.models import Clases_cliente, Datos_participantes \
     , Tipos_documentos, Tipos_factoring, Cuentas_bancarias
 from clientes.models import Datos_generales as Datos_generales_cliente\
-    , Cuentas_bancarias as Cuentas_bancarias_clientes, Cuenta_transferencia
+    , Cuenta_transferencia
 from pais.models import Bancos
 
 class Datos_operativos(ClaseModelo):
@@ -148,7 +148,6 @@ class ChequesAccesorios_Manager(models.Manager):
                 , leliminado = False)\
             .filter(documento__cxasignacion__in =Asignacion.objects.filter(cxestado = "L"))
         
-
 class ChequesAccesorios(ClaseModelo):
     documento = models.ForeignKey(Documentos
         , on_delete=models.CASCADE, related_name="documento_cheque")
@@ -322,13 +321,12 @@ class Motivos_protesto_maestro(ClaseModelo):
     def __str__(self):
         return self.ctabreviacion
 
-from cobranzas.models import Cheques
+# from cobranzas.models import Documentos_cabecera, Liquidacion_cabecera, Recuperaciones_cabecera
 
 class Notas_debito_cabecera(ClaseModelo):
     TIPOS_DE_OPERACION = (
         ('L', 'Liquidación'),
         ('C', 'Cobranza'),
-        ('P', 'Protesto'),
         ('R', 'Recuperación'),
         ('A', 'Ampliación de plazo'),
     )
@@ -344,10 +342,23 @@ class Notas_debito_cabecera(ClaseModelo):
     nsaldo =  models.DecimalField(max_digits=10, decimal_places=2)
     cxtipooperacion = models.CharField(max_length=1, choices= TIPOS_DE_OPERACION)
     operacion = models.BigIntegerField()
-    cheque = models.ForeignKey(Cheques, on_delete= models.CASCADE, null= True)
+    # cheque = models.ForeignKey(Cheques, on_delete= models.CASCADE, null= True)
 
     def __str__(self):
         return self.cxnotadebito
+
+    # def operacion(self):
+    #     opx = 'No definido'
+    #     if self.cxtipooperacion=='L':
+    #         op = Liquidacion_cabecera.objects.filter(pk = self.operacion).first()
+    #         opx = op.cxliquidacion
+    #     if self.cxtipooperacion=='C':
+    #         op = Documentos_cabecera.objects.filter(pk = self.operacion).first()
+    #         opx = op.cxcobranza
+    #     if self.cxtipooperacion=='R':
+    #         op = Recuperaciones_cabecera.objects.filter(pk = self.operacion).first()
+    #         opx = op.cxrecuperacion
+    #     return opx
 
 class Notas_debito_detalle(ClaseModelo):
     notadebito = models.ForeignKey(Notas_debito_cabecera, on_delete=models.CASCADE)

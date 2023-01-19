@@ -12,10 +12,13 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , ProtestosPendientesView, GeneraListaProtestosPendientesJSON\
     , RecuperacionProtestoView, DetalleDocumentosProtesosJSON, DatosRecuperacion\
     , AceptarRecuperacion, ProtestoRecuperacionNew, ReversaLiquidacion\
-    , ReversaCobranza, GeneraListaCobranzasRegistradasJSON
+    , ReversaCobranza, GeneraListaCobranzasRegistradasJSON, CobranzasCargosView\
+    , LiquidacionesEnNegativoPendientesView, GeneraListaLiquidacionesEnNegativoPendientesJSON\
+    , DetalleNotasDebitoPendientesJSON, DatosCobroNotaDebito, AceptarCobranzaNotasDebito\
+    , GeneraListaLiquidacionesRegistradasJSON
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
-    , ImpresionRecuperacionProtesto
+    , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos
 
 urlpatterns = [
     # cobranzas
@@ -74,6 +77,8 @@ urlpatterns = [
         , name='reporte_liquidacion'),
     path('reversarliquidacion/<int:pid_liquidacion>/<codigo_liquidacion>/<tipo_operacion>'
         ,ReversaLiquidacion),
+    path('liquidacionesregistradasjson/<desde>/<hasta>',GeneraListaLiquidacionesRegistradasJSON
+        , name="liquidacionesregistradas_json"),
 
     # protestos
     path('listamotivosprotesto/',MotivosProtestoView.as_view()
@@ -100,4 +105,19 @@ urlpatterns = [
         , name='reporte_recuperacion_protesto'),
     path('protestorecuperacion/<int:id_cheque>/<int:id_cobranza>',ProtestoRecuperacionNew.as_view()
         , name='protestorecuperacion'),
+
+    # notas de debito
+    path('listaliquidacionesennegativopendientes/',LiquidacionesEnNegativoPendientesView.as_view()
+        , name="listaliquidacionesennegativopendientes"),
+    path('listaliquidacionesennegativopendientesjson/',GeneraListaLiquidacionesEnNegativoPendientesJSON\
+        , name="listaliquidacionesennegativopendientes_json"),
+    path('cobrodecargos/<ids_documentos>/<total_cargos>/<forma_cobro>/<cliente_ruc>/<tipo_factoring>', 
+        CobranzasCargosView.as_view(), name='cobro_cargos'),
+    path('detallenotasdebitojson/<ids_documentos>', DetalleNotasDebitoPendientesJSON
+        , name='detallenotasdebito_json'),
+    path('datoscobronotadedebito/<int:id>/<sdo>/<cobro>'
+        , DatosCobroNotaDebito ,name='datosnotasdebito_cobro'),
+    path('aceptarcobranzanotasdebito/',AceptarCobranzaNotasDebito),
+    path('reportecobranzacargos/<int:cobranza_id>',ImpresionCobranzaCargos
+        , name='reporte_cobranza_cargos'),
 ]

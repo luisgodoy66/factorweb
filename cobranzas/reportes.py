@@ -10,7 +10,7 @@ from django.contrib.staticfiles import finders
 
 from .models import  Documentos_cabecera, Documentos_detalle, Liquidacion_cabecera\
         , Liquidacion_detalle, Recuperaciones_cabecera, Recuperaciones_detalle\
-        , Cheques, Cheques_protestados
+        , Cheques, Cheques_protestados, Cargos_cabecera, Cargos_detalle
 
 from operaciones.models import Notas_debito_cabecera
 
@@ -402,6 +402,78 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="cobranza "' + str(recuperacion.cxrecuperacion) + ".pdf"
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+def ImpresionCobranzaCargos(request, cobranza_id):
+    detalle = {}
+    template_path = 'cobranzas/cobranzas_cargos_reporte.html'
+    forma_cobro = ''
+    datos_deposito='N/A'
+    codigo_forma = ''
+    cobranza = Cargos_cabecera.objects.filter(id= cobranza_id).first()
+    
+    if not cobranza:
+        return HttpResponse("no encontró cobranza ")
+
+    detalle = Cargos_detalle.objects\
+        .filter(cxcobranza = cobranza_id, leliminado = False)
+
+    codigo_forma = cobranza.cxformapago
+
+    # cargar forma de cobro
+    if cobranza.cxformapago=="MOV":
+        forma_cobro = 'Movimiento contable'
+    else:
+        # if cobranza.lpagadoporelcliente:
+                forma_cobro = 'Cliente '
+        # else:
+                # forma_cobro = 'Deudor '
+
+    if cobranza.cxformapago=="EFE":
+        forma_cobro += "paga en efectivo"
+    if cobranza.cxformapago=="TRA":
+        forma_cobro += 'transfiere de ' + cobranza.cxcuentatransferencia.__str__()
+    if cobranza.cxformapago=="CHE":
+        forma_cobro += 'emite cheque ' + cobranza.cxcheque.__str__()
+    
+    if cobranza.cxformapago != "MOV":
+        datos_deposito = cobranza.ddeposito.strftime("%Y/%m/%d")
+
+        # if cobranza.ldepositoencuentaconjunta:
+        #         datos_deposito += ' en cuenta del cliente'
+        # else:
+        datos_deposito += ' en ' + cobranza.cxcuentadeposito.__str__()
+
+    # totales
+    tot_cobro = detalle.aggregate(Sum('nvalorcobranza'))
+
+    totales = {
+        "cobrado":tot_cobro["nvalorcobranza__sum"]
+        , "aplicado":tot_cobro["nvalorcobranza__sum"]
+    }
+
+    context = {
+        "cobranza" : cobranza,
+        "detalle" : detalle,
+        "datos_forma_cobro" : forma_cobro,
+        "datos_deposito" : datos_deposito,
+        "forma_cobro": codigo_forma,
+        "totales": totales,
+    }
+
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="cobranza "' + str(cobranza.cxcobranza) + ".pdf"
     # find the template and render it.
     template = get_template(template_path)
     html = template.render(context)
