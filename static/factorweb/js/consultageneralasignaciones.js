@@ -42,7 +42,7 @@ function operateFormatter(value, row, index) {
         '<a class="revertir" href="javascript:void(0)" title="Reverso de confirmación">',
         '<i class="fa fa-rotate-left"></i>',
         '</a>  ',
-        '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
+        '<a class="imprimir" href="javascript:void(0)" title="Imprimir asignación">',
         '<i class="fa fa-print"></i>',
         '</a>  ',
       ].join('')

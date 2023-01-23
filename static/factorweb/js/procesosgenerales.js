@@ -91,3 +91,11 @@ function ReversarliquidacionCobranza(liquidacion_id, codigo_liquidacion, tipo_op
   })
     
 }
+function ImprimirCobranzaCargos(cobranza_id){
+  // en una nueva ventana abrir el reporte de cobranza
+  url = window.location.origin
+  url = url + "/cobranzas/reportecobranzacargos/"+cobranza_id;
+window.open( url);
+
+}
+

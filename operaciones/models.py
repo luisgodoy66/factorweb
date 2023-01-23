@@ -84,9 +84,9 @@ class Documentos_Manager(models.Manager):
                 , nsaldo__gt = 0
                 , leliminado = False)\
             .filter(cxasignacion__in =Asignacion.objects
-                .filter(cxtipo = "P", cxestado = "L"))\
-
-            # .filter(cxasignacion__in =Asignacion.objects.filter(cxestado = "L"))
+                .filter(cxtipo = "F", cxestado = "P"))
+                # Cambiar a tipo F-actura y estado P-agada
+                # .filter(cxtipo = "P", cxestado = "L"))\
 
 class Documentos(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_participantes
@@ -146,7 +146,9 @@ class ChequesAccesorios_Manager(models.Manager):
     def cheques_a_depositar(self, fecha_corte):
         return self.filter(dvencimiento__lte = fecha_corte, cxestado = 'A'
                 , leliminado = False)\
-            .filter(documento__cxasignacion__in =Asignacion.objects.filter(cxestado = "L"))
+            .filter(documento__cxasignacion__in =Asignacion.objects.filter(cxestado = "P"))
+            # cambiar a estado P-agada
+            # .filter(documento__cxasignacion__in =Asignacion.objects.filter(cxestado = "L"))
         
 class ChequesAccesorios(ClaseModelo):
     documento = models.ForeignKey(Documentos

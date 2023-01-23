@@ -52,7 +52,9 @@ class AsignacionesPendientesDesembolsarView(LoginRequiredMixin, generic.ListView
     login_url = 'bases:login'
 
     def get_queryset(self):
-        return Asignacion.objects.filter(cxestado='A',\
+        # 22-ene-23 l.g.    cambiar A por L(iquidada)
+        # return Asignacion.objects.filter(cxestado='A',\
+        return Asignacion.objects.filter(cxestado='L',\
             leliminado = False, ddesembolso__lte = date.today())
 
 class MaestroMovimientosView(LoginRequiredMixin, generic.ListView):
@@ -163,7 +165,9 @@ def DesembolsarAsignacion(request, pk, cliente_ruc):
 
         with transaction.atomic():
             # 1. Actualizar el estado de la ASIGNACION
-            asignacion.cxestado = 'L'
+            # Cambiar L por P(agada)
+            # asignacion.cxestado = 'L'
+            asignacion.cxestado = 'P'
             asignacion.save()
 
             # 2. Cobrar los cargos generados por la negociación

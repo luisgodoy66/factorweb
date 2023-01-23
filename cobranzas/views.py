@@ -756,7 +756,7 @@ def GeneraListaCobranzasJSONSalida(transaccion):
 
     # se necesita el tipo de operacion para saber que va a imprimir o reversar
     output["TipoOperacion"] = transaccion["tipo"]
-    output["FormaPago"] = transaccion["cxformapago"]
+    # output["FormaPago"] = transaccion["cxformapago"]
 
     return output
 
@@ -1948,6 +1948,78 @@ def GeneraListaLiquidacionesJSONSalida(transaccion):
 
     # # se necesita el tipo de operacion para saber qué va a imprimir o reversar
     output["TipoOperacion"] = transaccion["cxtipooperacion"]
+    # output["FormaPago"] = transaccion["cxformapago"]
+
+    return output
+
+def GeneraListaCobranzasCargosRegistradasJSON(request, desde = None, hasta= None):
+    # Es invocado desde la url de una tabla bt
+    if desde == 'None':
+        movimiento = Cargos_cabecera.objects.all()\
+                .values('cxcliente__cxcliente__ctnombre','ddeposito'
+                ,'cxtipofactoring__ctabreviacion','cxcobranza'
+                ,'cxformapago'
+                ,'nvalor', 'dcobranza'
+                ,'cxcheque', 'cxestado', 'dregistro'
+                , 'id', 'cxcuentatransferencia','nsobrepago')\
+                    .annotate(tipo=RawSQL("select 'C'",''))
+    else:
+
+        movimiento = Cargos_cabecera.objects\
+            .filter(dregistro__gte = desde, dregistro__lte = hasta)\
+                .values('cxcliente__cxcliente__ctnombre','ddeposito'
+                ,'cxtipofactoring__ctabreviacion','cxcobranza'
+                ,'cxformapago','nvalor', 'dcobranza'
+                , 'cxcheque', 'cxestado','dregistro'
+                , 'id', 'cxcuentatransferencia','nsobrepago')\
+                    .annotate(tipo=RawSQL("select 'C'",''))
+                
+
+    tempBlogs = []
+    for i in range(len(movimiento)):
+        tempBlogs.append(GeneraListaCobranzasCargosJSONSalida(movimiento[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": movimiento.count(),
+        "totalNotFiltered": movimiento.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaCobranzasCargosJSONSalida(transaccion):
+    output = {}
+    output['id'] = transaccion['id']
+    output["Cliente"] = transaccion['cxcliente__cxcliente__ctnombre']
+    output["Operacion"] = transaccion['cxcobranza']
+    output["Fecha"] = transaccion['dcobranza'].strftime("%Y-%m-%d")
+    output["Estado"] = transaccion['cxestado']
+    output["Valor"] =  transaccion['nvalor']
+    output["TipoFactoring"] = transaccion['cxtipofactoring__ctabreviacion']
+    output["Registro"] = transaccion["dregistro"]
+
+    # if 'protestada' in transaccion['tipo']:
+    #     output["Detalle"] = transaccion['cxformapago']
+    # else:
+    if transaccion['cxformapago'] =="CHE" or transaccion['cxformapago'] =="DEP":
+        cheque = Cheques.objects.filter(pk = transaccion['cxcheque']).first()
+        output["Detalle"] = cheque.__str__()
+    elif transaccion['cxformapago'] =="TRA":
+        cuenta = Cuentas_bancarias.objects\
+            .filter(pk = transaccion['cxcuentatransferencia']).first()
+        output["Detalle"] = cuenta.__str__()
+
+    if transaccion['ddeposito']:
+        output["Deposito"] = transaccion['ddeposito'].strftime("%Y-%m-%d")
+    output["FormaCobro"] = transaccion['cxformapago']
+    output["Sobrepago"] = transaccion['nsobrepago']
+
+    if transaccion['tipo'] =='C':
+        output["Movimiento"] = 'Cobranza'
+
+    # se necesita el tipo de operacion para saber que va a imprimir o reversar
+    output["TipoOperacion"] = transaccion["tipo"]
     # output["FormaPago"] = transaccion["cxformapago"]
 
     return output

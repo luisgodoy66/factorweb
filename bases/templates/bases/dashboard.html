@@ -5,7 +5,7 @@
     <div class="col-xl-6">
         <div class="card">
             <div class="card-header">
-                <strong>Cobranzas de hoy y ayer</strong>
+                <strong>Cobranzas de cartera de hoy y ayer</strong>
             </div>
 
             <small>
@@ -91,6 +91,39 @@
                     </table>
                 </div>
             </small>
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="card">
+            <div class="card-header">
+                <strong>Cobranzas de cargos de hoy y ayer</strong>
+            </div>
+
+            <small>
+                <div >
+                    <table id="tb_cobcar"  class="table table-striped table-bordered"
+                    data-url="{% url 'cobranzas:cobranzascargosregistradas_json' desde hasta %}"
+                    data-detail-formatter="detailFormatter"
+                    data-id-field="id"
+                    >
+                    <thead>
+                            <tr>
+                            <th data-field="Cliente" >Cliente</th>
+                            <th data-field="Registro" >Registro</th>
+                            <th data-field="Operacion" >Cobranza</th>
+                            <th data-field="Valor" >Valor</th>
+                            <th data-field="Estado" >Estado</th>
+                            <th data-field="operate" data-events="window.operateEventsCobCar"
+                                data-formatter="operateFormatterCobCar" data-click-to-select="false">Acción</th>
+                            </tr>
+                        </thead>
+                    </table>
+
+                </div>
+
+            </small>
+
         </div>
     </div>
 

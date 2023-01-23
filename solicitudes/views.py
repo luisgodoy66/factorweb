@@ -132,7 +132,9 @@ def DatosFacturasPuras(request, cliente_id=None
 
     if request.method=='POST':
 
-        tipoasignacion = "P"
+        # Cambiar P por F(acturas puras)
+        # tipoasignacion = "P"
+        tipoasignacion = 'F'
 
         if not cliente_id:
             # cuando es nuevo no hay parametros, se toma del request
@@ -291,7 +293,9 @@ def EliminarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
         with transaction.atomic():
             asignacion = Asignacion.objects.filter(pk=asignacion_id).first()
 
-            if tipo_asignacion=="P":
+            # cambiar P por F(acturas puras)
+            # if tipo_asignacion=="P":
+            if tipo_asignacion=='F':
                 doc = Documentos.objects.filter(pk=documento_id).first()
             else:
                 # si es cheque actualizar el valor no negociado del documento

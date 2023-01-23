@@ -97,7 +97,7 @@ class Documentos_detalle(ClaseModelo):
     def dias_vencidos(self):
         # si es factura pura, tomo el vencimiento del documento
         # ai es accesorio, busco el cheque accesorio grabado en la cabecera
-        if self.cxdocumento.cxasignacion.cxtipo=='P':
+        if self.cxdocumento.cxasignacion.cxtipo=='F':
             vencimiento = self.cxdocumento.dvencimiento
         else:
             vencimiento = self.cxcobranza.cxaccesorio.dvencimiento
@@ -107,7 +107,7 @@ class Documentos_detalle(ClaseModelo):
     def vencimiento(self):
         # si es factura pura, tomo el vencimiento del documento
         # ai es accesorio, busco el cheque accesorio grabado en la cabecera
-        if self.cxdocumento.cxasignacion.cxtipo=='P':
+        if self.cxdocumento.cxasignacion.cxtipo=='F':
             vencimiento = self.cxdocumento.dvencimiento
         else:
             vencimiento = self.cxcobranza.cxaccesorio.dvencimiento
@@ -257,7 +257,7 @@ class Recuperaciones_detalle(ClaseModelo):
     def dias_vencidos(self):
         # si es factura pura, tomo el vencimiento del documento
         # ai es accesorio, busco el cheque accesorio grabado en la cabecera
-        if self.documentoprotestado.documento.cxasignacion.cxtipo=='P':
+        if self.documentoprotestado.documento.cxasignacion.cxtipo=='F':
             vencimiento = self.documentoprotestado.documento.dvencimiento
         else:
             vencimiento = self.documentoprotestado.accesorio.dvencimiento
@@ -267,7 +267,7 @@ class Recuperaciones_detalle(ClaseModelo):
     def vencimiento(self):
         # si es factura pura, tomo el vencimiento del documento
         # ai es accesorio, busco el cheque accesorio 
-        if self.documentoprotestado.documento.cxasignacion.cxtipo=='P':
+        if self.documentoprotestado.documento.cxasignacion.cxtipo=='F':
             vencimiento = self.documentoprotestado.documento.dvencimiento
         else:
             vencimiento = self.documentoprotestado.accesorio.dvencimiento

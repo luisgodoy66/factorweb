@@ -15,7 +15,7 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , ReversaCobranza, GeneraListaCobranzasRegistradasJSON, CobranzasCargosView\
     , LiquidacionesEnNegativoPendientesView, GeneraListaLiquidacionesEnNegativoPendientesJSON\
     , DetalleNotasDebitoPendientesJSON, DatosCobroNotaDebito, AceptarCobranzaNotasDebito\
-    , GeneraListaLiquidacionesRegistradasJSON
+    , GeneraListaLiquidacionesRegistradasJSON, GeneraListaCobranzasCargosRegistradasJSON
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos
@@ -120,4 +120,6 @@ urlpatterns = [
     path('aceptarcobranzanotasdebito/',AceptarCobranzaNotasDebito),
     path('reportecobranzacargos/<int:cobranza_id>',ImpresionCobranzaCargos
         , name='reporte_cobranza_cargos'),
+    path('cobranzascargosregistradasjson/<desde>/<hasta>',GeneraListaCobranzasCargosRegistradasJSON
+        , name="cobranzascargosregistradas_json"),
 ]
