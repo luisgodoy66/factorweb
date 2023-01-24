@@ -7,7 +7,11 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">operaciones</a></li>
                     <li><a href="#">cobranzas</a></li>
-                    <li class="active">cartera por vencer</li>
+                    {% if filtro == 'Si' %}
+                        <li class="active">cartera por vencer</li>
+                    {% else %}
+                        <li class="active">cartera vencida</li>
+                    {% endif %}
                 </ol>
             </div>
         </div>

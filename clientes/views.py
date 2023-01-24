@@ -120,7 +120,6 @@ class LineaNew(LoginRequiredMixin, generic.CreateView):
         cliente_ruc = self.kwargs.get('cliente_ruc')
         nombre_cliente = self.kwargs.get('cliente')
 
-        # Call the base implementation first to get a context
         context = super(LineaNew, self).get_context_data(**kwargs)
         context["nueva"]=True
         context["nombre_cliente"] = nombre_cliente

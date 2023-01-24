@@ -24,6 +24,7 @@ urlpatterns = [
     path('pais/',include(('pais.urls','pais'),namespace='pais')),
     path('solicitudes/',include(('solicitudes.urls','solicitudes'),namespace='solicitudes')),
     path('cobranzas/',include(('cobranzas.urls','cobranzas'),namespace='cobranzas')),
+    path('cuentasconjuntas/',include(('cuentasconjuntas.urls','cuentasconjuntas'),namespace='cuentasconjuntas')),
     
     path('admin/', admin.site.urls),
 ]

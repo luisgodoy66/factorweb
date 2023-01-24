@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'pais.apps.PaisConfig',
     'cobranzas.apps.CobranzasConfig',
     'storages',
+    'cuentasconjuntas.apps.CuentasconjuntasConfig',
 ]
 
 MIDDLEWARE = [
