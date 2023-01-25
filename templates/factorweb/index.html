@@ -108,7 +108,7 @@
                             <i class="menu-icon fa fa-exclamation"></i>Cargos pendientes</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-exclamation"></i><a href="{% url 'cobranzas:listaliquidacionesennegativopendientes' %}">Por operaciones</a></li>
-                            <li><i class="menu-icon fa fa-exclamation"></i><a href="#">Ampliaciones de plazo</a></li>
+                            <li><i class="menu-icon fa fa-exclamation"></i><a href="#">Ampliaciones plazo</a></li>
                         </ul>
                     </li>
 
@@ -153,7 +153,7 @@
                             <i class="menu-icon fa fa-laptop"></i>Cuentas conjuntas</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-info"></i><a href="{% url 'cuentasconjuntas:listadocuentasconjuntas' %}">Cuentas</a></li>
-                            <li><i class="menu-icon fa fa-wrench"></i><a href="#">Mantenimiento</a></li>
+                            <li><i class="menu-icon fa fa-wrench"></i><a href="{% url 'cuentasconjuntas:listadocobranzasporconfirmar' %}">Confirmar cobranzas</a></li>
                             <li><i class="menu-icon fa fa-forward"></i><a href="#">Transferencias</a></li>
                             <li><i class="menu-icon fa fa-print"></i><a href="#">Movimientos</a></li>
                         </ul>

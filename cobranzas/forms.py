@@ -12,7 +12,7 @@ class CobranzasDocumentosForm(forms.ModelForm):
         model=Documentos_cabecera
         fields=['cxcliente', 'cxtipofactoring', 'cxformapago'
             , 'nvalor', 'dcobranza', 'nsobrepago', 'cxcuentadeposito'
-            , 'ddeposito', 'cxcuentatransferencia'
+            , 'ddeposito', 'cxcuentatransferencia', 'cxcuentaconjunta'
         ]
         labels={'cxcliente':'Cliente', 'cxtipofactoring':'Tipo de factoring'
             , 'cxformapago':'Forma de cobro','nvalor':'Valor recibido'
@@ -20,6 +20,7 @@ class CobranzasDocumentosForm(forms.ModelForm):
             , 'cxcuentadeposito':'Cuenta de la empresa'
             , 'ddeposito': 'Fecha de depósito'
             , 'cxcuentatransferencia': 'Cuenta de origen de transferencia'
+            , 'cxcuentaconjunta': 'Cuenta conjunta'
         }
         # esto sirve para ventana de condonacion. Lo importante es el formato
         widgets = {

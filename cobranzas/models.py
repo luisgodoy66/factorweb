@@ -6,7 +6,6 @@ from django.contrib.auth.models import User
 from bases.models import ClaseModelo
 from empresa.models import Datos_participantes , Tipos_factoring, Cuentas_bancarias
 from clientes import models as Cliente_models
-
 from operaciones.models import Documentos, ChequesAccesorios\
     , Cargos_detalle as Operaciones_cargos, Motivos_protesto_maestro
 
@@ -32,6 +31,7 @@ class Cheques(ClaseModelo):
     def __str__(self):
         return '{} CH/{}'.format(self.cxcuentabancaria, self.ctcheque)
 
+from cuentasconjuntas import models as CuentasConjuntasModels
 class Documentos_cabecera(ClaseModelo):
     FORMAS_DE_PAGO = (
         ('EFE', 'Efectivo'),
@@ -65,6 +65,8 @@ class Documentos_cabecera(ClaseModelo):
     ddeposito = models.DateTimeField(null=True) 
     lpagadoporelcliente = models.BooleanField(default=False)
     ldepositoencuentaconjunta = models.BooleanField(default=False)
+    cxcuentaconjunta = models.ForeignKey(CuentasConjuntasModels.Cuentas_bancarias
+        , on_delete=models.RESTRICT, null = True, related_name="cuenta_deposito")
     cxaccesorio = models.ForeignKey(ChequesAccesorios
         , on_delete = models.RESTRICT, null=True)
 
@@ -327,3 +329,12 @@ class Cargos_detalle(ClaseModelo):
     nsaldoaldia= models.DecimalField(max_digits=10, decimal_places=2, default=0)
     nvalorcobranza = models.DecimalField(max_digits=10, decimal_places=2)
     jcargos = models.JSONField()
+
+class DebitosCuentasConjuntas(ClaseModelo):
+    cuentabancaria = models.ForeignKey(Cuentas_bancarias, on_delete=models.CASCADE)
+    dmovimiento = models.DateField()
+    nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    ctmotivo = models.CharField(max_length=60)
+    notadedebito = models.OneToOneField(Notas_debito_cabecera, on_delete=models.CASCADE)
+    cobranza = models.OneToOneField(Documentos_cabecera, on_delete=models.CASCADE)
+

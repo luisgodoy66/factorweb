@@ -18,6 +18,7 @@ from operaciones.models import Documentos, ChequesAccesorios, Datos_operativos\
 from clientes.models import Cuentas_bancarias, Datos_generales, Cuenta_transferencia
 from empresa.models import Tasas_factoring, Cuentas_bancarias as CuentasEmpresa\
     , Datos_participantes
+from cuentasconjuntas import models as CuentasConjuntasModels
 
 from .forms import CobranzasDocumentosForm, ChequesForm, LiquidarForm\
     , MotivoProtestoForm, ProtestoForm, RecuperacionesProtestosForm\
@@ -110,7 +111,10 @@ class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
                     , leliminado = False, lpropia = True).all()
                     # , cxtipocuenta = 'C').all()   # podría hacer transferencias desde cuenta de ahorros
 
-        # Call the base implementation first to get a context
+        cuentas_conjuntas = CuentasConjuntasModels.Cuentas_bancarias\
+            .objects.filter(cxcliente = cliente_ruc \
+                , leliminado = False, ).all()
+
         context = super(CobranzasDocumentosView, self).get_context_data(**kwargs)
         context["documentos"] = docs
         context["total_cartera"] = total_cartera
@@ -123,6 +127,7 @@ class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
         context["cliente"] = cliente
         context["tipo_factoring"] = tipo_factoring
         context["deudor_id"] = deudor_id
+        context["cuentas_conjuntas"] = cuentas_conjuntas
 
         return context
 
@@ -148,7 +153,9 @@ class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion'
                 ,'cxcobranza','cxformapago','nvalor', 'cxcuentadeposito__cxcuenta'
-                , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'C'",''))
+                , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'C'",'')
+                ,depositoencuentaconjunta=RawSQL("select ldepositoencuentaconjunta",'')
+                )
                 
         recuperaciones = Recuperaciones_cabecera.objects.filter(cxestado='A'\
             , leliminado = False\
@@ -157,7 +164,9 @@ class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion'
                 ,'cxrecuperacion','cxformacobro','nvalor', 'cxcuentadeposito__cxcuenta'
-                , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'R'",''))
+                , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'R'",'')
+                ,depositoencuentaconjunta=RawSQL("select False",'')
+                )
 
         return cobranzas.union(recuperaciones)
 
@@ -499,7 +508,7 @@ def AceptarCobranza(request):
     # ejecuta un store procedure 
     # Devuelve el control a un proceso js
     resultado = 'OK'
-    nc=' '; gi=' '; es_cc = False; cd = 0; fd = 'Null'
+    nc=' '; gi=' '; es_cc = False; cd = 0; fd = 'Null'; cc=0
 
     objeto=json.loads(request.body.decode("utf-8"))
 
@@ -528,6 +537,7 @@ def AceptarCobranza(request):
     if deposito:
         es_cc = deposito["deposito_cuenta_conjunta"]
         cd = deposito["cuenta_deposito"]
+        cc = deposito["cuenta_conjunta"]
         fd = "'"  + deposito["fecha_deposito"] + "'"
 
         if not cd :
@@ -540,14 +550,14 @@ def AceptarCobranza(request):
         cuenta_bancaria='Null'
     
     # Los 2 ultimos parametros son el id de cheque accesorio y el mensaje de error
-    resultado=enviarPost("CALL uspAceptarCobranzaCartera( '{0}','{1}','{2}','{3}',{4}\
-        ,{5},{6},{7}\
+    resultado=enviarPost("CALL uspAceptarCobranzaCartera( '{0}','{1}','{2}','{3}'\
+        ,{4},{5},{6},{7}\
         ,'{8}','{9}',{10},{11},{12}\
-        ,'{13}', '{14}',{15},Null,'',0)"
-        .format(id_cliente, tipo_factoring, forma_cobro, fecha_cobro, valor_recibido
-        ,pagador_por_cliente,sobrepago,cuenta_bancaria
+        ,'{13}', '{14}',{15},Null,{16},'',0)"
+        .format(id_cliente, tipo_factoring, forma_cobro, fecha_cobro
+        , valor_recibido, pagador_por_cliente, sobrepago, cuenta_bancaria
         ,nc,gi,es_cc, cd, fd
-        ,documentos_cobrados, id_deudor,nusuario))
+        ,documentos_cobrados, id_deudor,nusuario, cc))
 
     return HttpResponse(resultado)
 
@@ -763,8 +773,6 @@ def GeneraListaCobranzasJSONSalida(transaccion):
 @login_required(login_url='/login/')
 @permission_required('cobranzas.update_documentos_cabecera', login_url='bases:sin_permisos')
 def ConfirmarCobranza(request, cobranza_id, tipo_operacion):
-    # la eliminacion es lógica
-    # debe devolver: 1 si esta bien, 0 si esta mal
 
     if tipo_operacion=='C':
         cobr = Documentos_cabecera.objects.filter(pk=cobranza_id).first()

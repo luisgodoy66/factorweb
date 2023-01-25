@@ -1,0 +1,146 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Extras</a></li>
+                    <li><a href="#">cuentas conjuntas</a></li>
+                    <li><a href="#">confirmar cobranzas</a></li>
+                    <li class="active">Confirma depósito</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div class="card-header">
+            <strong>Confirmación de cobranza</strong> 
+            aqui va la cuenta
+        </div>
+        <div class="card-body">
+            <div class="col-lg-12">
+                <div class="form-group">
+                    <label class="switch switch-3d switch-danger mr-3">
+                        <input type="checkbox" class="switch-input" checked
+                            name="cargo" id="cargo">
+                        <span class="switch-label"></span> 
+                        <span class="switch-handle"></span>
+                    </label>
+                    Registo de cargos
+                </div>
+                <div id="div_datos_cargo">
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_dcobranza" 
+                            class=" form-control-label">
+                            {{ form_cargos.dmovimiento.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form_cargos.dmovimiento}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+        
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form_cargos.nvalor.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form_cargos.nvalor}}
+                        </div>
+                            
+                    </div>
+                    <div class="row form-group">
+        
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form_cargos.ctmotivo.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form_cargos.ctmotivo}}
+                        </div>
+                            
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <div class="form-group">
+                    <label class="switch switch-3d switch-danger mr-3">
+                        <input type="checkbox" class="switch-input" checked="true" 
+                            name="transferencia"> 
+                        <span class="switch-label"></span> 
+                        <span class="switch-handle"></span>
+                    </label>
+                    Registo de transferencia
+                </div>
+                <div id="div_datos_transferencia">
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_dcobranza" 
+                            class=" form-control-label">
+                            {{ form_transferencias.dmovimiento.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form_transferencias.dmovimiento}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+        
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form_transferencias.nvalor.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form_transferencias.nvalor}}
+                        </div>                        
+                    </div>
+                    <div class="row form-group">
+        
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form_transferencias.ndevolucion.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form_transferencias.ndevolucion}}
+                        </div>                        
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form_transferencias.cuentadestino.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form_transferencias.cuentadestino}}
+                        </div>                        
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <button class="btn btn-success btn-sm"  type="button" onclick="AceptarConfirmacion()">  
+                <i class="fa fa-dot-circle-o"></i> confirmar
+            </button>
+            <a href="{% url 'cuentasconjuntas:listadocobranzasporconfirmar' %}" 
+            class="btn btn-danger btn-sm">
+                <i class="fa fa-ban"></i> Cancelar
+            </a>
+
+        </div>
+
+    </div>
+ 
+
+{% endblock %}
+
+{% block js_page %}
+<script type="text/javascript" 
+    src="{% static 'factorweb/js/datosconfirmacioncobranza.js' %}">
+</script>
+{% endblock %}

@@ -14,7 +14,11 @@ window.onload=function(){
     });
 
     jQuery('input[type=radio][name="pagadopor"]').change(function() {
-      mostrar_cuentas_bancarias();
+      mostrar_cuentas_origen();
+    });
+
+    jQuery('input[type=radio][name="depositaren"]').change(function() {
+      mostrar_cuentas_destino();
     });
 
     $table.bootstrapTable({locale:"es-EC"});
@@ -101,7 +105,7 @@ function calcular_sobrepago(){
 
 }
 
-function mostrar_cuentas_bancarias(){
+function mostrar_cuentas_origen(){
 // obtener el valor de radio button cliente
 // si es on, esconder las cuentas del deudor, mostrar la del cliente
 // si es off, esconder la cuentas del cliente, mostrar la del deudor
@@ -116,6 +120,22 @@ function mostrar_cuentas_bancarias(){
     }
   else{
     div_d.removeAttribute('hidden');
+    div_c.setAttribute('hidden',true);
+  }
+}
+
+function mostrar_cuentas_destino(){
+  const div_e = document.querySelector('#div_cuentas_empresa');
+  const div_c = document.querySelector('#div_cuentas_conjuntas');
+
+  let deposito_en = document.querySelector('input[name="depositaren"]:checked');
+
+  if (deposito_en.id == "cuentacliente"){
+    div_e.setAttribute('hidden',true);
+    div_c.removeAttribute('hidden');
+    }
+  else{
+    div_e.removeAttribute('hidden');
     div_c.setAttribute('hidden',true);
   }
 }
@@ -135,6 +155,7 @@ function AceptarCobranza(){
     mp_deposito.set("deposito_cuenta_conjunta",deposito_cuenta_conjunta);    
     mp_deposito.set("cuenta_deposito",capturaValor("id_cxcuentadeposito"));    
     mp_deposito.set("fecha_deposito",capturaValor("id_ddeposito"));    
+    mp_deposito.set("cuenta_conjunta",capturaValor("cuenta_conjunta"));    
   }
 
   if (forma_de_cobro =="CHE"){

@@ -5,9 +5,9 @@
         <div class="page-header float-right">
             <div class="page-title">
                 <ol class="breadcrumb text-right">
-                    <li><a href="#">Operaciones</a></li>
-                    <li><a href="#">Liquidar cobranzas</a></li>
-                    <li class="active">Confirma depósito</li>
+                    <li><a href="#">Extras</a></li>
+                    <li><a href="#">Cuentas conjuntas</a></li>
+                    <li class="active">Confirmar cobranzas</li>
                 </ol>
             </div>
         </div>
@@ -60,32 +60,21 @@
                     <tbody>
                         {% for item in consulta %}
                         <tr>
-                            <td>{{ item.cxcliente__cxcliente__ctnombre }}</td>
+                            <td>{{ item.cxcliente.cxcliente.ctnombre }}</td>
                             <td>{{ item.ddeposito|date:"Y/m/d" }}</td>
-                            <td>{{ item.cxtipofactoring__ctabreviacion }}</td>
+                            <td>{{ item.cxtipofactoring.ctabreviacion }}</td>
                             <td>{{ item.cxcobranza }} </td>
                             <td>{{ item.cxformapago }}</td>
                             <td>{{ item.nvalor}}</td>
-                            {% if item.depositoencuentaconjunta %}
-                            <td>Cuenta conjunta</td>
-                            {% else %}
-                            <td>{{ item.cxcuentadeposito__cxcuenta}}</td>
-                            {% endif %}
+                            <td>{{ item.cxcuentaconjunta}}</td>
                             <td>
-                                <a href="#" onclick='ConfirmarCobranza("{{item.id}}","{{item.tipo}}")' 
-                                    class="btn btn-success btn-sm" role="button" title="Confirmado">
+                                <a href="{% url 'cuentasconjuntas:confirmarcobranza' item.id item.id %}" 
+                                    class="btn btn-success btn-sm" role="button" title="Confirmación">
                                     <i class="fa fa-check"></i></a>
-                                {% if item.cxformapago in 'CHE, DEP' %}
-                                    {% if item.tipo == 'C' %}
+                                {% if item.cxformapago in 'CHE' %}
                                     <a href="{% url 'cobranzas:protestocobranza' item.cxcheque_id item.id %}" 
                                         class="btn btn-danger btn-sm" role="button" title="Cobranza protestada">
                                         <i class="fa fa-times"></i></a>
-                                    {% endif %}
-                                    {% if item.tipo == 'R' %}
-                                    <a href="{% url 'cobranzas:protestorecuperacion' item.cxcheque_id item.id %}" 
-                                        class="btn btn-danger btn-sm" role="button" title="Recuperacion potestada">
-                                        <i class="fa fa-times"></i></a>
-                                    {% endif %}
                                 {% endif %}
                             </td>
                         </tr>
@@ -102,7 +91,4 @@
 {% endblock %}
 
 {% block js_page %}
-<script type="text/javascript" 
-    src="{% static 'factorweb/js/listacobranzasporconfirmar.js' %}">
-</script>
 {% endblock %}
