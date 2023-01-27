@@ -31,11 +31,14 @@ class Cuentas_bancarias(ClaseModelo):
 class Transferencias(ClaseModelo):
     cuentaorigen = models.ForeignKey(Cuentas_bancarias, on_delete=models.CASCADE)
     cuentadestino = models.ForeignKey(Empresa_modelo.Cuentas_bancarias, on_delete=models.RESTRICT
-        , null = True, related_name="banco_destino")
+        , related_name="banco_destino")
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     ndevolucion = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     dmovimiento = models.DateField()
     cxtransferencia = models.CharField(max_length=10)
+
+    def __str__(self):
+        return 'Desde {} a {}'.format(self.cuentaorigen,self.cuentadestino)
 
 # # por importaciones ciclicas no se puede crear aquí la tabla, se creó en cobranzas
 # from operaciones.models import Notas_debito_cabecera
@@ -60,4 +63,4 @@ class Movimientos(ClaseModelo):
     dmovimiento = models.DateField()
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     cxtipo = models.CharField(max_length=2, choices=TIPOS_DE_MOVIMIENTOS)
-    movimiento = models.CharField(max_length=10)
+    cxmovimiento = models.CharField(max_length=10)

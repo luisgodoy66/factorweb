@@ -55,5 +55,5 @@ class DebitosForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        self.fields['dmovimiento'].widget.attrs['readonly']=True
-        self.fields['dmovimiento'].widget.attrs['value']=date.today
+        # self.fields['dmovimiento'].widget.attrs['readonly']=True
+        # self.fields['dmovimiento'].widget.attrs['value']=date.today

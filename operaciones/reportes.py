@@ -10,6 +10,8 @@ from empresa.models import Tasas_factoring
 from django.db.models import Sum, Count
 from solicitudes import models as SolicitudModels
 
+FACTURAS_PURAS = 'F'
+
 def link_callback(uri, rel):
         """
         Convert HTML URIs to absolute system paths so xhtml2pdf can access those
@@ -60,7 +62,7 @@ def ImpresionAsignacion(request, asignacion_id):
     asignacion = Asignacion.objects.filter(id = asignacion_id).first()
     documentos = {}
 
-    if asignacion.cxtipo=="P":
+    if asignacion.cxtipo==FACTURAS_PURAS:
         template_path = 'operaciones/asignacion_facturas_puras_reporte.html'
         documentos = Documentos.objects.filter(cxasignacion = asignacion)\
                 .filter(leliminado = False)

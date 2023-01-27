@@ -15,12 +15,19 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
+<form  method="post" id="frmConfirmacion" enctype="multipart/form-data" class="form-horizontal">
     <div class="card bg-flat-color-0">
+        {% csrf_token %}
         <div class="card-header">
             <strong>Confirmación de cobranza</strong> 
-            aqui va la cuenta
+            {{cuenta_conjunta}}
+        </div>
+        <div hidden>
+            <input type="text" value={{id_operacion}} id="operacion">
+            <input type="text" value={{id_cuenta_conjunta}} id="cuentaconjunta">
         </div>
         <div class="card-body">
+            <!-- cargos -->
             <div class="col-lg-12">
                 <div class="form-group">
                     <label class="switch switch-3d switch-danger mr-3">
@@ -66,6 +73,7 @@
 
                 </div>
             </div>
+            <!-- transferencia -->
             <div class="col-lg-12">
                 <div class="form-group">
                     <label class="switch switch-3d switch-danger mr-3">
@@ -83,7 +91,9 @@
                             {{ form_transferencias.dmovimiento.label}}</label>
                         </div>
                         <div class="col-md-4">
-                            {{ form_transferencias.dmovimiento}}
+                            <input type="text" name="dmovimiento" 
+                            class="form-control" readonly value="2023-01-25" 
+                            required id="id_dtransferencia">
                         </div>
                     </div>
                     <div class="row form-group">
@@ -93,8 +103,11 @@
                             {{ form_transferencias.nvalor.label}}</label>
                         </div>
                         <div class="col-md-4">
-                            {{ form_transferencias.nvalor}}
-                        </div>                        
+                            <!-- {{ form_transferencias.nvalor}} -->
+                            <input type="number" name="nvalor" value="0" 
+                            step="1" class="form-control" required 
+                            id="id_ntransferencia">
+                        </div>                
                     </div>
                     <div class="row form-group">
         
@@ -124,8 +137,8 @@
         </div>
 
         <div class="card-footer">
-            <button class="btn btn-success btn-sm"  type="button" onclick="AceptarConfirmacion()">  
-                <i class="fa fa-dot-circle-o"></i> confirmar
+            <button class="btn btn-success btn-sm"  type="button" onclick="ConfirmarCobranza()">  
+                <i class="fa fa-dot-circle-o"></i> Confirmar
             </button>
             <a href="{% url 'cuentasconjuntas:listadocobranzasporconfirmar' %}" 
             class="btn btn-danger btn-sm">
@@ -136,7 +149,7 @@
 
     </div>
  
-
+</form>
 {% endblock %}
 
 {% block js_page %}

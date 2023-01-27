@@ -331,7 +331,7 @@ class Cargos_detalle(ClaseModelo):
     jcargos = models.JSONField()
 
 class DebitosCuentasConjuntas(ClaseModelo):
-    cuentabancaria = models.ForeignKey(Cuentas_bancarias, on_delete=models.CASCADE)
+    cuentabancaria = models.ForeignKey(CuentasConjuntasModels.Cuentas_bancarias, on_delete=models.CASCADE)
     dmovimiento = models.DateField()
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     ctmotivo = models.CharField(max_length=60)

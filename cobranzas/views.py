@@ -1554,8 +1554,13 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
             if tipo_operacion  == 'R':
 
                 total_otroscargos += ObtenerCargosDeProtestos(cobranza, listaotroscargos)
+
             # nota:obtener cualkquier cargo cargado a la cobranza
-        
+            total_otroscargos += ObtenerOtrosCargosDeCobranza(tipo_operacion
+                                                            , cobranza.id
+                                                            , codigo_operacion
+                                                            , listaotroscargos)
+
         # fin for cobranzas
         # acumula base IVA de cargos
         if dc.lcargaiva: base_iva += total_dc
@@ -2031,3 +2036,33 @@ def GeneraListaCobranzasCargosJSONSalida(transaccion):
     # output["FormaPago"] = transaccion["cxformapago"]
 
     return output
+
+def ObtenerOtrosCargosDeCobranza(tipo_operacion, cobranza, codigo_operacion, listaotroscargos):
+    total_cargos = 0
+
+    # la nd se registra sobre la recuperacion o cobranza protestada
+    nd = Notas_debito_cabecera.objects\
+        .filter(cxtipooperacion = tipo_operacion, operacion = cobranza)
+
+    for ndx in nd:
+
+        # el detalle de la nota de debito
+        detalle_nd = Notas_debito_detalle.objects\
+            .filter(notadebito = ndx)
+
+        for detallex in detalle_nd:
+
+            # los cargos indicados en el detalle de la nd
+            cargos = Cargos_detalle.objects\
+                .filter(id = detallex.cargo.id )
+
+            for cargo in cargos:
+                
+                listaotroscargos.append(GeneraOtroCargoJSONSalida(
+                    cargo.id, cargo.cxmovimiento.ctmovimiento
+                    , cargo.dregistro, cargo.nsaldo, ndx.id
+                    , codigo_operacion))
+
+                total_cargos += cargo.nsaldo
+
+    return total_cargos

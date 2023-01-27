@@ -27,6 +27,9 @@ from datetime import date
 from decimal import Decimal
 from docxtpl import DocxTemplate, InlineImage
 
+FACTURAS_PURAS = 'F'
+FACTURAS_CON_ACCESORIOS = 'A'
+
 class DatosOperativosView(LoginRequiredMixin, generic.ListView):
     model = ModeloCliente.Datos_generales
     template_name = "operaciones/listadatosoperativos.html"
@@ -350,13 +353,13 @@ def AceptarAsignacion(request, asignacion_id=None):
 
     # si tipo de factoring usa condición operativa cargarla
     if tipo_factoring.lmanejacondicionesoperativas:
-        if asignacion.cxtipo =='P':
+        if asignacion.cxtipo ==FACTURAS_PURAS:
             condicion_operativa = Condiciones_operativas_cabecera.objects \
                 .filter(cxtipofactoring= tipo_factoring\
                     ,leliminado = False\
                     ,laplicaafacturaspuras=True)
         else:
-            if asignacion.cxtipo=="A":
+            if asignacion.cxtipo==FACTURAS_CON_ACCESORIOS:
                 condicion_operativa = Condiciones_operativas_cabecera.objects \
                     .filter(cxtipofactoring= tipo_factoring\
                         ,leliminado = False\
@@ -469,7 +472,7 @@ def DetalleCargosAsignacion(request, asignacion_id = None
     # en caso que se trate de una asignacion con accesorios
     # , debe tomar los cheques
 
-    if asignacion.cxtipo == "P":
+    if asignacion.cxtipo == FACTURAS_PURAS:
         documentos = ModelosSolicitud.Documentos.objects\
             .filter(cxasignacion=asignacion_id\
                 ,leliminado = False)
@@ -499,7 +502,7 @@ def GeneraDetalleParaTabla(asignacion_id, tipo_asignacion):
     # crear detalle de salida para el contexto
     # recuperar los documentos
 
-    if tipo_asignacion=="P":
+    if tipo_asignacion==FACTURAS_PURAS:
         documentos = ModelosSolicitud.Documentos.objects\
             .filter(cxasignacion=asignacion_id\
                 ,leliminado = False)
@@ -528,7 +531,7 @@ def GeneraDetalleParaTabla1(request,asignacion_id):
     # no calcula, ni graba cargos, recupera los documentos
     asignacion = ModelosSolicitud.Asignacion.objects.get(pk=asignacion_id) 
 
-    if asignacion.cxtipo=="P":
+    if asignacion.cxtipo==FACTURAS_PURAS:
         documentos = ModelosSolicitud.Documentos.objects\
             .filter(cxasignacion=asignacion_id\
                 ,leliminado = False)
@@ -572,7 +575,7 @@ def CalcularCargosPorDocumento(doc, gao, dc, fecha_desembolso
         or buscar_descuento_en_condicion_operativa:
 
         # el comprador esta en el documento no en el cheque
-        if tipo_asignacion=="P":
+        if tipo_asignacion==FACTURAS_PURAS:
             comprador = ModeloCliente.Datos_compradores.objects\
                 .filter(cxcomprador = doc.cxcomprador).first()
         else:
@@ -631,7 +634,7 @@ def DetalleDocumentoADiccionario(doc, tipo_asignacion):
     output['id'] = doc.id
     
     # los siguientes 3 campos pertenecen al documento y no se encuentran en los cheques
-    if tipo_asignacion=="P":
+    if tipo_asignacion==FACTURAS_PURAS:
         output["Comprador"] = doc.ctcomprador
         output["Documento"] = doc.ctdocumento
         output["Emision"] = doc.demision.strftime("%Y-%m-%d")
@@ -661,7 +664,7 @@ def SumaCargos(request,asignacion_id, gao_carga_iva, dc_carga_iva, carga_gao, ca
 
     asignacion = ModelosSolicitud.Asignacion.objects.get(pk=asignacion_id) 
 
-    if asignacion.cxtipo=="P":
+    if asignacion.cxtipo==FACTURAS_PURAS:
         documentos = ModelosSolicitud.Documentos.objects\
             .filter(cxasignacion=asignacion_id\
                 ,leliminado = False)
@@ -719,7 +722,7 @@ def EditarTasasDocumentoSolicitud(request, documento_id, fecha_desembolso, asign
     # si son facturas puras los documentos son las facturas
     # si son accesorios los documentos son los cheques
     asignacion = ModelosSolicitud.Asignacion.objects.get(pk=asignacion_id) 
-    if asignacion.cxtipo =="P":
+    if asignacion.cxtipo ==FACTURAS_PURAS:
         documento = ModelosSolicitud.Documentos.objects.filter(pk=documento_id).first()
         es_facturas_puras = True
     else:

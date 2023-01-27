@@ -97,11 +97,11 @@ class CuentasBancariasDeudorEdit(LoginRequiredMixin, generic.UpdateView):
     context_object_name='consulta'
     login_url = 'bases:login'
     form_class=CuentasBancariasForm
-    # success_url=reverse_lazy("clientes:listacuentasbancariascliente")
+    success_url=reverse_lazy("clientes:listacuentasbancarias_deudores")
     success_message="Línea creada satisfactoriamente"
 
     def form_valid(self, form):
-        form.instance.cxusuariocrea = self.request.user
+        form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
 
 class LineaNew(LoginRequiredMixin, generic.CreateView):

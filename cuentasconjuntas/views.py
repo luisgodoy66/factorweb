@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
-# from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse
 # from django.contrib.auth.decorators import login_required, permission_required
 # from django.db import transaction
 from django.urls import reverse_lazy
@@ -9,9 +9,13 @@ from django.urls import reverse_lazy
 from django.db.models.expressions import RawSQL 
 
 from .models import Cuentas_bancarias, Movimientos
-from cobranzas.models import Documentos_cabecera, Recuperaciones_cabecera
+from cobranzas.models import Documentos_cabecera, Recuperaciones_cabecera\
+    , DebitosCuentasConjuntas
 
 from .forms import CuentasBancariasForm, DebitosForm, TransferenciasForm
+from bases.views import enviarPost, numero_a_letras
+
+import json
 
 class CuentasView(LoginRequiredMixin, generic.ListView):
     model = Cuentas_bancarias
@@ -91,30 +95,90 @@ class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
 
     #     return cobranzas.union(recuperaciones)
 
-class ConfirmacionCobranzaEdit(LoginRequiredMixin, generic.UpdateView):
-    model = Documentos_cabecera
+# class ConfirmacionCobranzaEdit(LoginRequiredMixin, generic.UpdateView):
+#     model = Documentos_cabecera
+#     context_object_name='consulta'
+#     form_class = CuentasBancariasForm
+#     success_url= reverse_lazy("cuentasconjuntas:listadocuentas")
+#     login_url = 'bases:login'
+
+#     def form_valid(self, form):
+#         form.instance.cxusuariocrea = self.request.user
+#         return super().form_valid(form)
+
+class CargosPendientesView(LoginRequiredMixin, generic.ListView):
+    model = DebitosCuentasConjuntas
+    template_name = "cuentasconjuntas/listacargospendientes.html"
     context_object_name='consulta'
-    form_class = CuentasBancariasForm
-    success_url= reverse_lazy("cuentasconjuntas:listadocuentas")
     login_url = 'bases:login'
 
+    def get_queryset(self):
+        return DebitosCuentasConjuntas.objects\
+            .filter(leliminado = False, notadedebito__nsaldo__gt = 0)
+
+class DebitoBancarioEdit(LoginRequiredMixin, generic.UpdateView):
+    model = DebitosCuentasConjuntas
+    template_name = "cuentasconjuntas/datosdebitobancario_form.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    form_class = DebitosForm
+    success_url= reverse_lazy("cuentasconjuntas:listadocargospendientes")
+
     def form_valid(self, form):
-        form.instance.cxusuariocrea = self.request.user
+        form.instance.cxusuariomodifica = self.request.user.id
+        # actualizar el resto de tablas involucradas en la grabacion del debito
+        # print(self.request)
         return super().form_valid(form)
 
-def ConfirmarCobranza(request, cobranza_id, tipo_operacion):
+def ConfirmarCobranza(request, cobranza_id, tipo_operacion, cuenta_conjunta):
     template_name = "cuentasconjuntas/datosconfirmacioncobranza_form.html"
-    operacion = None
-    
-    if tipo_operacion=='C':
-        cobr = Documentos_cabecera.objects.filter(pk=cobranza_id).first()
-    else:
-        cobr = Recuperaciones_cabecera.objects.filter(pk=cobranza_id).first()
 
-    contexto={"operacion": operacion
+    cc = Cuentas_bancarias.objects.filter(pk = cuenta_conjunta).first()
+
+    contexto={"id_operacion": cobranza_id
         , "form_cargos" : DebitosForm
         , "form_transferencias" : TransferenciasForm
         , "tipo_operacion": tipo_operacion
+        , 'cuenta_conjunta': cc
+        , 'id_cuenta_conjunta': cuenta_conjunta
         }
     
     return render(request, template_name, contexto)
+
+
+def AceptarConfirmacion(request):
+    # ejecuta un store procedure 
+    # Devuelve el control a un proceso js
+    resultado = 'OK'
+
+    objeto=json.loads(request.body.decode("utf-8"))
+
+    tipo_operacion=objeto["pstipooperacion"]
+    id_cobranza=objeto["pncobranza"]
+    hay_transferencia = objeto ["pltransferencia"] 
+    valor_transferencia = objeto ["pntransferencia"] 
+    valor_devolucion = objeto ["pndevolucion"] 
+    id_cuentadestino = objeto ["pncuentadestino"] 
+    id_cuentaorigen = objeto ["pncuentaorigen"] 
+    fecha_transferencia = objeto ["pdtransferencia"] 
+    hay_cargo = objeto ["plcargo"] 
+    valor_cargo = objeto ["pncargo"] 
+    motivo_cargo = objeto ["psmotivo"] 
+    fecha_cargo = objeto ["pdcargo"]
+
+    nusuario = request.user.id
+    
+    if hay_transferencia :
+        if not id_cuentadestino :
+            return HttpResponse("Debe especificar la cuenta destino de transferencia")
+    else:
+        id_cuentadestino = 'Null'
+
+    resultado=enviarPost("CALL uspConfirmarCobranzaCuentaConjunta( '{0}',{1},{2},{3}\
+        ,{4},{5},{6},{7}\
+        ,'{8}',{9},{10},'{11}','{12}','',0)"
+        .format(tipo_operacion, id_cobranza, nusuario, hay_transferencia
+        , valor_transferencia, valor_devolucion, id_cuentadestino, id_cuentaorigen
+        ,fecha_transferencia,hay_cargo,valor_cargo, motivo_cargo, fecha_cargo))
+
+    return HttpResponse(resultado)
