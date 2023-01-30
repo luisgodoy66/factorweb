@@ -136,6 +136,17 @@ class CobranzasConsulta(LoginRequiredMixin, generic.ListView):
     template_name = "cobranzas/consultageneralcobranzas.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        desde = date.today() + timedelta(days=-7)
+        hasta = date.today()
+
+        context = super(CobranzasConsulta, self).get_context_data(**kwargs)
+        context["desde"] = desde
+        context["hasta"] =hasta
+
+        return context
  
 class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
     # la lista se obtiene desde url en la tabla bt, 
@@ -349,7 +360,7 @@ class LiquidacionesEnNegativoPendientesView(LoginRequiredMixin, generic.ListView
 
     def get_queryset(self):
         return Notas_debito_cabecera.objects\
-        .filter(cxtipooperacion__in = 'LCR', leliminado = False, nsaldo__gt = 0)
+        .filter(cxtipooperacion__in = 'LCRB', leliminado = False, nsaldo__gt = 0)
 
 class CobranzasCargosView(LoginRequiredMixin, generic.FormView):
     model = Cargos_cabecera
@@ -367,7 +378,7 @@ class CobranzasCargosView(LoginRequiredMixin, generic.FormView):
         forma_cobro=self.kwargs.get('forma_cobro')
         cliente_ruc = self.kwargs.get('cliente_ruc')
         tipo_factoring = self.kwargs.get('tipo_factoring')
-
+        print(tipo_factoring)
         cliente = Datos_generales.objects.filter(cxcliente = cliente_ruc).first()
 
         cuentas = Cuentas_bancarias\
@@ -671,6 +682,14 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 ,'cxcheque', 'cxcheque__cheque_protestado__cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'R protestada'",''))
+        cargos = Cargos_cabecera.objects.all()\
+                .values('cxcliente__cxcliente__ctnombre','ddeposito'
+                ,'cxtipofactoring__ctabreviacion','cxcobranza'
+                ,'cxformapago'
+                ,'nvalor', 'dcobranza'
+                , 'cxcheque', 'cxestado','dregistro'
+                , 'id', 'cxcuentatransferencia','nsobrepago')\
+                    .annotate(tipo=RawSQL("select 'CC'",''))
     else:
 
         cobranzas = Documentos_cabecera.objects\
@@ -711,9 +730,18 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'R protestada'",''))
 
-        # Documentos_cabecera.objects.filter(cxestado='P').values('cxcheque__cheque_protestado__motivoprotesto__ctmotivoprotesto')                
+        cargos = Cargos_cabecera.objects\
+            .filter(dcobranza__gte = desde, dcobranza__lte = hasta)\
+                .values('cxcliente__cxcliente__ctnombre','ddeposito'
+                ,'cxtipofactoring__ctabreviacion','cxcobranza'
+                ,'cxformapago'
+                ,'nvalor', 'dcobranza'
+                , 'cxcheque', 'cxestado','dregistro'
+                , 'id', 'cxcuentatransferencia','nsobrepago')\
+                    .annotate(tipo=RawSQL("select 'CC'",''))
 
-    movimiento = cobranzas.union(recuperaciones, protestos_cobranzas, protestos_recuperaciones)
+    movimiento = cobranzas.union(recuperaciones, protestos_cobranzas
+        , protestos_recuperaciones, cargos)
             
     tempBlogs = []
     for i in range(len(movimiento)):
@@ -763,6 +791,8 @@ def GeneraListaCobranzasJSONSalida(transaccion):
         output["Movimiento"] = 'Cobranza protestada'
     elif transaccion['tipo'] =='R protestada':
         output["Movimiento"] = 'Recuperación protestada'
+    elif transaccion['tipo'] =='CC':
+        output["Movimiento"] = 'Cobranza de cargos'
 
     # se necesita el tipo de operacion para saber que va a imprimir o reversar
     output["TipoOperacion"] = transaccion["tipo"]
@@ -1759,7 +1789,7 @@ def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
 def GeneraListaLiquidacionesEnNegativoPendientesJSON(request):
     # Es invocado desde la url de una tabla bt
     movimiento = Notas_debito_cabecera.objects\
-        .filter(cxtipooperacion__in = 'LCR', leliminado = False, nsaldo__gt = 0).all()
+        .filter(cxtipooperacion__in = 'LCRB', leliminado = False, nsaldo__gt = 0).all()
 
     docjson = []
     for i in range(len(movimiento)):
@@ -1783,8 +1813,15 @@ def GeneraListaLiquidacionesEnNegativoPendientesJSONSalida(transaccion):
     output["Fecha"] = transaccion.dnotadebito.strftime("%Y-%m-%d")
     output["Valor"] =  transaccion.nvalor
     output["Saldo"] = transaccion.nsaldo
-    output["IdTipoFactoring"] = transaccion.cxtipofactoring.cxtipofactoring
-    output["TipoFactoring"] = transaccion.cxtipofactoring.ctabreviacion
+
+    # Las ND que vienen de cuentas conjuntas (B) no tienen tipo de factoring
+    if transaccion.cxtipooperacion!='B':
+        output["IdTipoFactoring"] = transaccion.cxtipofactoring.cxtipofactoring
+        output["TipoFactoring"] = transaccion.cxtipofactoring.ctabreviacion
+    else:
+        output["IdTipoFactoring"] = 'NULL'
+    
+    opx = None
     if transaccion.cxtipooperacion=='L':
         op = Liquidacion_cabecera.objects.filter(pk = transaccion.operacion).first()
         opx = op.cxliquidacion
@@ -1832,6 +1869,7 @@ def DetalleNotasDebitoPendientesJSONSalida(doc):
     output["SaldoActual"] = doc.nsaldo
     output["Cobro"] = doc.nsaldo
     output["SaldoFinal"] = "0.0"
+    opx = None
     if doc.cxtipooperacion=='L':
         op = Liquidacion_cabecera.objects.filter(pk = doc.operacion).first()
         opx = op.cxliquidacion
@@ -1892,8 +1930,17 @@ def AceptarCobranzaNotasDebito(request):
     if not cuenta_bancaria:
         cuenta_bancaria='Null'
     
+    # para los debitos de cuentas conjuntas que se registran sin cobranza
+    # no hay tipo de factoring, se carga con NULL 
+    if tipo_factoring != 'NULL':
+        tipo_factoring="'" + tipo_factoring + "'"
+
+    print(id_cliente, tipo_factoring, forma_cobro, fecha_cobro, valor_recibido
+        ,sobrepago,cuenta_bancaria
+        ,nc,gi, cd, fd
+        ,documentos_cobrados, nusuario)
     # Los 2 ultimos parametros son el id de cheque accesorio y el mensaje de error
-    resultado=enviarPost("CALL uspAceptarCobranzaCargos( '{0}','{1}','{2}','{3}',{4}\
+    resultado=enviarPost("CALL uspAceptarCobranzaCargos( '{0}',{1},'{2}','{3}',{4}\
         ,{5},{6}\
         ,'{7}','{8}',{9},{10}\
         ,'{11}', {12},Null,0)"
@@ -1906,7 +1953,6 @@ def AceptarCobranzaNotasDebito(request):
 
 def GeneraListaLiquidacionesRegistradasJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
-    print(desde,hasta)
     if desde == 'None':
         movimiento = Liquidacion_cabecera.objects.all()\
                 .values('cxcliente__cxcliente__ctnombre','ddesembolso'

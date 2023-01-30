@@ -202,7 +202,7 @@ class Movimientos_clientes(ClaseModelo):
         ,to_field="cxcliente", on_delete=models.RESTRICT
         , related_name="movimientos"
     )
-    cxtipofactoring = models.CharField(max_length=3) 
+    cxtipofactoring = models.CharField(max_length=3, null=True) 
     cxmovimiento = models.ForeignKey(Movimientos_maestro
         , to_field="cxmovimiento", on_delete=models.CASCADE
         , related_name="maestro_movimientos") 
@@ -218,7 +218,7 @@ class Cargos_detalle(ClaseModelo):
         ,to_field="cxcliente", on_delete=models.RESTRICT
         , related_name="cargos"
     )
-    cxtipofactoring = models.CharField(max_length=3) 
+    cxtipofactoring = models.CharField(max_length=3, null=True) 
     cxasignacion = models.ForeignKey(Asignacion, on_delete=models.RESTRICT
         , null=True) 
     cxdocumento  = models.ForeignKey(Documentos, on_delete=models.RESTRICT
@@ -330,6 +330,7 @@ class Notas_debito_cabecera(ClaseModelo):
         ('L', 'Liquidación'),
         ('C', 'Cobranza'),
         ('R', 'Recuperación'),
+        ('B', 'Bancaria'),
         ('A', 'Ampliación de plazo'),
     )
     cxcliente=models.ForeignKey(Datos_generales_cliente
@@ -337,14 +338,16 @@ class Notas_debito_cabecera(ClaseModelo):
     )
     dnotadebito = models.DateField()
     cxnotadebito = models.CharField(max_length=10, unique=True)
-    cxtipofactoring = models.ForeignKey(Tipos_factoring
+    cxtipofactoring = models.ForeignKey(Tipos_factoring, null=True
         ,to_field="cxtipofactoring", on_delete=models.CASCADE)
     nvalor =  models.DecimalField(max_digits=10, decimal_places=2)
     cxestado = models.CharField(max_length=1, default="A") 
     nsaldo =  models.DecimalField(max_digits=10, decimal_places=2)
-    cxtipooperacion = models.CharField(max_length=1, choices= TIPOS_DE_OPERACION)
-    operacion = models.BigIntegerField()
-    # cheque = models.ForeignKey(Cheques, on_delete= models.CASCADE, null= True)
+    # permitir nulo en los siguientes dos campos para registrar notas de debito
+    # que no esten asociadas a alguna cobranza. Caso cuentas conjuntas
+    cxtipooperacion = models.CharField(max_length=1, choices= TIPOS_DE_OPERACION
+        ,null=True)
+    operacion = models.BigIntegerField(null=True)
 
     def __str__(self):
         return self.cxnotadebito

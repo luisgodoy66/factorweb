@@ -22,7 +22,7 @@
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                     <div class="dropdown-menu-content">
-                        <a class="dropdown-item" href="#">Nuevo cargo sin cobranza</a>
+                        <a class="dropdown-item" href="{% url 'cuentasconjuntas:debitobancario_nuevo'%}">Nuevo cargo sin cobranza</a>
                     </div>
                 </div>
             </div>
@@ -52,7 +52,8 @@
                         <th>Número</th>
                         <th>Fecha</th>
                         <th>Cobranza</th>
-                        <th>Tipo de factoring</th>
+                        <!-- <th>Tipo de factoring</th> -->
+                        <th>Cuenta de depósito</th>
                         <th>Valor</th>
                         <th>Motivo</th>
                         <th>Saldo</th>
@@ -61,11 +62,12 @@
                     <tbody>
                         {% for item in consulta %}
                         <tr>
-                            <td>{{ item.notadedebito.cxcliente.cxcliente.ctnombre }}</td>
+                            <td>{{ item.notadedebito.cxcliente }}</td>
                             <td>{{ item.notadedebito }}</td>
                             <td>{{ item.dmovimiento|date:"Y/m/d" }}</td>
                             <td>{{ item.cobranza }}</td>
-                            <td>{{ item.cobranza.cxtipofactoring }}</td>
+                            <!-- <td>{{ item.cobranza.cxtipofactoring }}</td> -->
+                            <td>{{ item.cuentabancaria }}</td>
                             <td>{{ item.nvalor}}</td>
                             <td>{{ item.ctmotivo}}</td>
                             <td>{{ item.notadedebito.nsaldo}}</td>

@@ -43,10 +43,22 @@ class TransferenciasForm(forms.ModelForm):
         self.fields['dmovimiento'].widget.attrs['value']=date.today
 
 class DebitosForm(forms.ModelForm):
+    input_formats=["%Y/%m/%d"],
+    
     class Meta:
         model=DebitosCuentasConjuntas
         fields = ['ctmotivo', 'nvalor', 'dmovimiento']
         labels = {'ctmotivo':'Motivo', 'nvalor':'Valor', 'dmovimiento':'Fecha'}
+        # Lo importante es el formato
+        widgets = {
+            'dmovimiento': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'datepicker', 
+                    'placeholder': 'Select a date',
+                    'type': 'date'
+                    }
+                    ),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -55,5 +67,32 @@ class DebitosForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        # self.fields['dmovimiento'].widget.attrs['readonly']=True
-        # self.fields['dmovimiento'].widget.attrs['value']=date.today
+        self.fields['dmovimiento'].widget.attrs['value']=date.today
+
+class DebitosNuevosForm(forms.ModelForm):
+    input_formats=["%Y/%m/%d"],
+    
+    class Meta:
+        model=DebitosCuentasConjuntas
+        fields = ['ctmotivo', 'nvalor', 'dmovimiento', 'cuentabancaria']
+        labels = {'ctmotivo':'Motivo', 'nvalor':'Valor', 'dmovimiento':'Fecha'
+            , 'cuentabancaria':'Cuenta bancaria'}
+        # Lo importante es el formato
+        widgets = {
+            'dmovimiento': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'datepicker', 
+                    'placeholder': 'Select a date',
+                    'type': 'date'
+                    }
+                    ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+        self.fields['dmovimiento'].widget.attrs['value']=date.today

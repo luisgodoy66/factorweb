@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import CuentasView, CuentasBancariasNew, CuentasBancariasEdit\
     , CobranzasPorConfirmarView, ConfirmarCobranza, AceptarConfirmacion\
-    , CargosPendientesView, DebitoBancarioEdit
+    , CargosPendientesView, DebitoBancarioEdit, DebitoBancarioSinCobranza
 
 urlpatterns = [
     # cobranzas
@@ -16,4 +16,5 @@ urlpatterns = [
     path('listadocargospendientes/',CargosPendientesView.as_view()
         , name="listadocargospendientes"),
     path('datosdebitoeditar/<int:pk>',DebitoBancarioEdit.as_view(), name="debitobancario_editar"),
+    path('datosdebitonuevo',DebitoBancarioSinCobranza, name="debitobancario_nuevo"),
 ]

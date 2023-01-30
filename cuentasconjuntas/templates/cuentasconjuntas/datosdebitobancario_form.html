@@ -20,13 +20,29 @@
         {% csrf_token %}
         <div class="card-header">
             <strong>Datos de nota de débito</strong> 
+            {% if notadedebito %}
+            {{notadedebito}} de {{cliente}} en {{cuentaconjunta}} 
+            {% endif %}
+        </div>
+        <div hidden>
+            <input type="text" name="id_nd" value={{id_notadedebito}}>
+            <input type="text" name="nd" value={{notadedebito}}>
         </div>
         <div class="card-body">
             <!-- cargos -->
             <div class="col-lg-12">
                 <div id="div_datos_cargo">
                     <div class="row form-group">
-                        <div class="col-md-4"><label for="id_dcobranza" 
+                        <div class="col-md-4"><label for="id_cuentabancaria" 
+                            class=" form-control-label">
+                            {{ form.cuentabancaria.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.cuentabancaria}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_dmovimiento" 
                             class=" form-control-label">
                             {{ form.dmovimiento.label}}</label>
                         </div>

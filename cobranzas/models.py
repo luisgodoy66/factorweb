@@ -292,7 +292,7 @@ class Cargos_cabecera(ClaseModelo):
         ,to_field="cxcliente", on_delete=models.CASCADE
         , related_name="cliente_cobranza_cargos"
     )
-    cxtipofactoring = models.ForeignKey(Tipos_factoring
+    cxtipofactoring = models.ForeignKey(Tipos_factoring, null=True
         , to_field="cxtipofactoring", on_delete=models.RESTRICT
         , related_name="tipofactoring_cobranza_cargos")
     cxformapago = models.CharField(max_length=3, choices=FORMAS_DE_PAGO)
@@ -336,5 +336,6 @@ class DebitosCuentasConjuntas(ClaseModelo):
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     ctmotivo = models.CharField(max_length=60)
     notadedebito = models.OneToOneField(Notas_debito_cabecera, on_delete=models.CASCADE)
-    cobranza = models.OneToOneField(Documentos_cabecera, on_delete=models.CASCADE)
+    cobranza = models.OneToOneField(Documentos_cabecera, on_delete=models.CASCADE
+        , null=True)
 
