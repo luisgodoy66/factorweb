@@ -13,6 +13,14 @@ window.onload=function(){
         calcular_sobrepago();
     });
 
+    jQuery('input[type=radio][name="pagadopor"]').change(function() {
+      mostrar_cuentas_origen();
+    });
+
+    jQuery('input[type=radio][name="depositaren"]').change(function() {
+      mostrar_cuentas_destino();
+    });
+
     $table.bootstrapTable({locale:"es-EC"});
 
     // inicializar tabla
@@ -45,7 +53,7 @@ function initTable() {
       columns: [
         [{  title: 'Ref.', field: 'id', rowspan: 2
         , align: 'center', valign: 'middle', sortable: true,
-          }, {title: 'Comprador', field: 'Comprador', rowspan: 2
+          }, {title: 'Deudor', field: 'Comprador', rowspan: 2
           , align: 'center', valign: 'middle', sortable: true
           }, {title: 'Asignación', field: 'Asignacion'
           , rowspan: 2, align: 'center', valign: 'middle', sortable: true,
@@ -95,16 +103,57 @@ function calcular_sobrepago(){
 
 }
 
-function AceptarCobranza(){
-  const forma_de_cobro = capturaValor("forma_cobro")
+function mostrar_cuentas_origen(){
+  // obtener el valor de radio button cliente
+  // si es on, esconder las cuentas del deudor, mostrar la del cliente
+  // si es off, esconder la cuentas del cliente, mostrar la del deudor
+    const div_c = document.querySelector('#div_cuentas_cliente');
+    const div_d = document.querySelector('#div_cuentas_deudor');
+  
+    let recibido_por = document.querySelector('input[name="pagadopor"]:checked');
+  
+    if (recibido_por.id == "porcliente"){
+      div_d.setAttribute('hidden',true);
+      div_c.removeAttribute('hidden');
+      }
+    else{
+      div_d.removeAttribute('hidden');
+      div_c.setAttribute('hidden',true);
+    }
+  }
+  
+  function mostrar_cuentas_destino(){
+    const div_e = document.querySelector('#div_cuentas_empresa');
+    const div_c = document.querySelector('#div_cuentas_conjuntas');
+  
+    let deposito_en = document.querySelector('input[name="depositaren"]:checked');
+  
+    if (deposito_en.id == "cuentacliente"){
+      div_e.setAttribute('hidden',true);
+      div_c.removeAttribute('hidden');
+      }
+    else{
+      div_e.removeAttribute('hidden');
+      div_c.setAttribute('hidden',true);
+    }
+  }
+  
+  function AceptarCobranza(){
+    const recibido_por = document.querySelector('input[name="pagadopor"]:checked');
+    const destino_deposito = document.querySelector('input[name="depositaren"]:checked');
+    const forma_de_cobro = capturaValor("forma_cobro")
+    const pagado_por_cliente =  (recibido_por.id == "porcliente")
+    const deposito_cuenta_conjunta =  (destino_deposito.id == "cuentacliente")
   var cuenta_bancaria = null 
 
   mp_deposito = new Map()
   mp_cheque = new Map()
 
   if (forma_de_cobro !='MOV'){
+    mp_deposito.set("deposito_cuenta_conjunta",deposito_cuenta_conjunta);    
     mp_deposito.set("cuenta_deposito",capturaValor("id_cxcuentadeposito"));    
     mp_deposito.set("fecha_deposito",capturaValor("id_ddeposito"));    
+    mp_deposito.set("cuenta_conjunta",capturaValor("cuenta_conjunta"));    
   }
 
   if (forma_de_cobro =="CHE"){
@@ -112,12 +161,13 @@ function AceptarCobranza(){
     mp_cheque.set("girador", capturaValor("id_ctgirador"));
   }
 
-  var JSONdocumentos= JSON.stringify($table.bootstrapTable('getData'));
   var JSONcheque = JSON.stringify(Object.fromEntries(mp_cheque));
   var JSONdeposito = JSON.stringify(Object.fromEntries(mp_deposito));
+  var JSONdocumentos= JSON.stringify($table.bootstrapTable('getData'));
 
   if (forma_de_cobro =='CHE' | forma_de_cobro =='TRA'){
-    cuenta_bancaria = capturaValor("cuenta_cliente")
+    if (pagado_por_cliente){cuenta_bancaria = capturaValor("cuenta_cliente")}
+    else {cuenta_bancaria = capturaValor("cuenta_deudor")}
   }
 
   MensajeConfirmacion("Grabar recuperación del " + capturaValor("id_dcobranza") +"?"
@@ -129,14 +179,15 @@ function AceptarCobranza(){
       "forma_cobro":forma_de_cobro,
       "fecha_cobro":capturaValor("id_dcobranza"),
       "valor_recibido": capturaValor("id_nvalor"), 
-      "modalidad_factoring":capturaValor("modalidad_factoring"), 
+      // "modalidad_factoring":capturaValor("modalidad_factoring"), 
       "sobrepago":capturaValor("id_nsobrepago"), 
       "cuenta_bancaria": cuenta_bancaria,
       "arr_documentos_cobrados": JSONdocumentos,
       "arr_cheque": JSONcheque,
       "arr_deposito": JSONdeposito,
+      "pagador_por_cliente":pagado_por_cliente,
+      "id_deudor":capturaValor("id_deudor"),
     }
-
     fetchPostear("/cobranzas/aceptarrecuperacion/", objeto, function(data){
         // regresar a la lista de solicitudes
         window.location.href = "/cobranzas/listaprotestospendientes";

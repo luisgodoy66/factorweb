@@ -228,6 +228,10 @@ class Recuperaciones_cabecera(ClaseModelo):
         , null = True)
     # ctreferenciadeposito = models.CharField(max_length=15)
     ddeposito = models.DateTimeField(null=True) 
+    lpagadoporelcliente = models.BooleanField(default=False)
+    ldepositoencuentaconjunta = models.BooleanField(default=False)
+    cxcuentaconjunta = models.ForeignKey(CuentasConjuntasModels.Cuentas_bancarias
+        , on_delete=models.RESTRICT, null = True, related_name="cuentaconjunta_deposito")
 
     def __str__(self):
         return self.cxrecuperacion

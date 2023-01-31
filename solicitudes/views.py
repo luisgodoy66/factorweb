@@ -55,11 +55,16 @@ class AsignacionConAccesoriosView(LoginRequiredMixin, generic.UpdateView):
     login_url = 'bases:login'
     form_class = AsignacionesForm
 
-    def get_context_data(self,*args, **kwargs): 
-        context = super(AsignacionConAccesoriosView, self).get_context_data(*args,**kwargs) 
-        context['clientes'] = Clientes.objects.all() 
+    # def get_context_data(self,*args, **kwargs): 
+    #     context = super(AsignacionConAccesoriosView, self).get_context_data(*args,**kwargs) 
+    #     # context['clientes'] = Clientes.objects.all() 
 
-        return context
+    #     return context
+
+    def form_valid(self, form):
+        print('grabar solicitud')
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
 
 class ClienteCrearView(LoginRequiredMixin, generic.CreateView):
     model = Clientes

@@ -280,22 +280,26 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
     # cargar forma de cobro
     if recuperacion.cxformacobro=="MOV":
         forma_cobro = 'Movimiento contable'
-    # else:
-    #     if cobranza.lpagadoporelcliente:
-    #             forma_cobro = 'Cliente '
-    #     else:
-    #             forma_cobro = 'Deudor '
+    else:
+        if recuperacion.lpagadoporelcliente:
+                forma_cobro = 'Cliente '
+        else:
+                forma_cobro = 'Deudor '
 
     if recuperacion.cxformacobro=="EFE":
-        forma_cobro += "Paga en efectivo"
+        forma_cobro += "paga en efectivo"
     if recuperacion.cxformacobro=="TRA":
-        forma_cobro += 'Transfiere de ' + recuperacion.cxcuentatransferencia.__str__()
+        forma_cobro += 'transfiere de ' + recuperacion.cxcuentatransferencia.__str__()
     if recuperacion.cxformacobro=="CHE":
-        forma_cobro += 'Emite cheque ' + recuperacion.cxcheque.__str__()
+        forma_cobro += 'emite cheque ' + recuperacion.cxcheque.__str__()
     
     if recuperacion.cxformacobro != "MOV":
-        datos_deposito = recuperacion.ddeposito.strftime("%Y/%m/%d")\
-            + ' en ' + recuperacion.cxcuentadeposito.__str__()
+        datos_deposito = recuperacion.ddeposito.strftime("%Y/%m/%d")
+
+        if recuperacion.ldepositoencuentaconjunta:
+                datos_deposito += ' en cuenta del cliente'
+        else:
+                datos_deposito += ' en ' + recuperacion.cxcuentadeposito.__str__()
 
     # totales
     tot_cobro = detalle.aggregate(Sum('nvalorrecuperacion'))

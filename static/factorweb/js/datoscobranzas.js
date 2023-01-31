@@ -49,12 +49,11 @@ function operateFormatter(value, row, index) {
 
 function initTable() {
     $table.bootstrapTable('destroy').bootstrapTable({
-      height: 400,
       locale: "es-EC",
       columns: [
         [{  title: 'Ref.', field: 'id', rowspan: 2
         , align: 'center', valign: 'middle', sortable: true,
-          }, {title: 'Comprador', field: 'Comprador', rowspan: 2
+          }, {title: 'Deudor', field: 'Comprador', rowspan: 2
           , align: 'center', valign: 'middle', sortable: true
           }, {title: 'Asignación', field: 'Asignacion'
           , rowspan: 2, align: 'center', valign: 'middle', sortable: true,
@@ -87,7 +86,6 @@ function initTable() {
 function DatosCobro(index, asgn, doc, sdo, cobro, ret, bajas){
     AbrirModal('/cobranzas/datoscobro/'+index+'/'+asgn 
       +'/'+doc +'/'+sdo+'/'+cobro+'/'+ret+'/'+bajas )
-
   }
 
 function calcular_sobrepago(){

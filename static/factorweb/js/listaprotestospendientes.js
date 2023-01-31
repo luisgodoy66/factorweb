@@ -67,7 +67,7 @@ function RecuperacionDeProtesto(forma){
   var id_cliente = ''
   var error = false
   var tipo_factoring=''
-  var id_comprador =''
+  var id_comprador ='nulo'
   var un_solo_comprador = "Si"
 
   seleccion.map(function(row)  {
@@ -86,9 +86,17 @@ function RecuperacionDeProtesto(forma){
     else{ if (tipo_factoring != row.IdTipoFactoring){
         error = true
     }}
-  });
+    if (id_comprador=='nulo')  {
+      id_comprador=row.IdComprador
+    }
+    else{ if (id_comprador != row.IdComprador){
+      un_solo_comprador = "No"
+    }}
+});
+  if (id_comprador==''){
+    un_solo_comprador = "No"
+  }
   // cargar forma de cobro de documentos seleccionados
-
   if (error ){
     alert("Ha seleccionado varios clientes o tipos de factoring. No puede continuar")
   }
@@ -101,7 +109,7 @@ function RecuperacionDeProtesto(forma){
       }, 0)
 
     url = '/cobranzas/recuperaciondeprotesto/'+ids+'/'+total_cartera+'/'+forma+'/'
-      +id_cliente+'/'+tipo_factoring;
+    +id_cliente+'/'+un_solo_comprador+'/'+id_comprador+'/'+tipo_factoring;
     
     location.href=url
   }

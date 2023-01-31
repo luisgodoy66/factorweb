@@ -94,7 +94,7 @@ urlpatterns = [
         name="listaprotestospendientes"),
     path('protestospendientesjson/',GeneraListaProtestosPendientesJSON, 
         name="protestospendientes_json"),
-    path('recuperaciondeprotesto/<ids_protestos>/<total_cartera>/<forma_cobro>/<cliente_ruc>/<tipo_factoring>', 
+    path('recuperaciondeprotesto/<ids_protestos>/<total_cartera>/<forma_cobro>/<cliente_ruc>/<un_comprador>/<deudor_id>/<tipo_factoring>', 
         RecuperacionProtestoView.as_view(), name='recuperacion_protesto'),
     path('detalledocumentosprotestosjson/<ids_protestos>', DetalleDocumentosProtesosJSON
         , name='detalle_documentos_protestos'),

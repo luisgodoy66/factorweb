@@ -128,7 +128,7 @@ class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
         context["tipo_factoring"] = tipo_factoring
         context["deudor_id"] = deudor_id
         context["cuentas_conjuntas"] = cuentas_conjuntas
-
+        context["tipo"]="Cobranza"
         return context
 
 class CobranzasConsulta(LoginRequiredMixin, generic.ListView):
@@ -139,13 +139,13 @@ class CobranzasConsulta(LoginRequiredMixin, generic.ListView):
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
-        desde = date.today() + timedelta(days=-7)
+        # obtener de la fecha actual el día de la semana?
+        desde = date.today() + timedelta(days=-date.today().day +1)
         hasta = date.today()
 
         context = super(CobranzasConsulta, self).get_context_data(**kwargs)
         context["desde"] = desde
         context["hasta"] =hasta
-
         return context
  
 class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
@@ -282,7 +282,9 @@ class ProtestosPendientesView(LoginRequiredMixin, generic.ListView):
 
 class RecuperacionProtestoView(LoginRequiredMixin, generic.FormView):
     model = Recuperaciones_cabecera
-    template_name = "cobranzas/datosrecuperacion_form.html"
+    # 31-ene-23 l.g.    usar la misma forma de cobranzas
+    # template_name = "cobranzas/datosrecuperacion_form.html"
+    template_name = "cobranzas/datoscobranzas_form.html"
     context_object_name='cobranza'
     login_url = 'bases:login'
     form_class = RecuperacionesProtestosForm
@@ -291,34 +293,51 @@ class RecuperacionProtestoView(LoginRequiredMixin, generic.FormView):
     # los pasa al html para que se pasen al js que carga el detalle
     def get_context_data(self, **kwargs):
 
-        protestos = self.kwargs.get('ids_protestos')
+        docs = self.kwargs.get('ids_protestos')
         total_cartera=self.kwargs.get('total_cartera')
         forma_cobro=self.kwargs.get('forma_cobro')
-        participante_id = self.kwargs.get('cliente_ruc')
+        cliente_ruc = self.kwargs.get('cliente_ruc')
+        un_solo_deudor = self.kwargs.get('un_comprador')
+        deudor_id = self.kwargs.get('deudor_id')
         tipo_factoring = self.kwargs.get('tipo_factoring')
         # nota: debe tomar del tipo de factoring el con o sin recurso
         modalidad_factoring='CR'
 
         cliente = Datos_participantes.objects\
-            .filter(cxparticipante = participante_id).first()
-
+            .filter(cxparticipante = cliente_ruc).first()
         cuentas = Cuentas_bancarias\
-            .objects.filter(cxparticipante = participante_id \
+            .objects.filter(cxparticipante = cliente_ruc \
                 , leliminado = False, lpropia = True).all()
                 # , cxtipocuenta = 'C').all()
-        
+        cuentas_deudor = None
+
+        if un_solo_deudor=="Si":
+            cuentas_deudor = Cuentas_bancarias\
+                .objects.filter(cxparticipante = deudor_id \
+                    , leliminado = False, lpropia = True).all()
+                    # , cxtipocuenta = 'C').all()   # podría hacer transferencias desde cuenta de ahorros
+
+        cuentas_conjuntas = CuentasConjuntasModels.Cuentas_bancarias\
+            .objects.filter(cxcliente = cliente_ruc \
+                , leliminado = False, ).all()
+
 
         # Call the base implementation first to get a context
         context = super(RecuperacionProtestoView, self).get_context_data(**kwargs)
-        context["protestos"] = protestos
+        context["documentos"] = docs
         context["total_cartera"] = total_cartera
         context["forma_cobro"] = forma_cobro
         context["form_cheque"] = ChequesForm
-        context["cuentas_bancarias_participante"] = cuentas
-        context["cliente_id"] = participante_id
+        context["cuentas_bancarias_cliente"] = cuentas
+        context["cliente_id"] = cliente_ruc
         context["cliente"] = cliente
         context["tipo_factoring"] = tipo_factoring
-        context["modalidad_factoring"]=modalidad_factoring
+        # context["modalidad_factoring"]=modalidad_factoring
+        context["cuentas_bancarias_deudor"] = cuentas_deudor
+        context["un_solo_comprador"] = un_solo_deudor
+        context["deudor_id"] = deudor_id
+        context["cuentas_conjuntas"] = cuentas_conjuntas
+        context["tipo"]="Recuperación"
 
         return context
 
@@ -378,7 +397,6 @@ class CobranzasCargosView(LoginRequiredMixin, generic.FormView):
         forma_cobro=self.kwargs.get('forma_cobro')
         cliente_ruc = self.kwargs.get('cliente_ruc')
         tipo_factoring = self.kwargs.get('tipo_factoring')
-        print(tipo_factoring)
         cliente = Datos_generales.objects.filter(cxcliente = cliente_ruc).first()
 
         cuentas = Cuentas_bancarias\
@@ -1216,6 +1234,11 @@ def GeneraListaProtestosPendientesJSONSalida(doc):
     output["Protesto"] = doc.dprotesto
     output["Saldo"] = doc.nsaldo
     output["Motivo"] = doc.motivoprotesto.ctmotivoprotesto
+    # determinar si cheque fue pagado por comprador 
+    if doc.cheque.cxtipoparticipante =='D':
+        output["IdComprador"] = doc.cheque.cxparticipante.cxparticipante
+    else:
+        output["IdComprador"] = ''
 
     return output
 
@@ -1298,9 +1321,11 @@ def AceptarRecuperacion(request):
     forma_cobro=objeto["forma_cobro"]
     fecha_cobro=objeto["fecha_cobro"]
     valor_recibido=objeto["valor_recibido"]
+    pagador_por_cliente=objeto["pagador_por_cliente"]
     sobrepago=objeto["sobrepago"]
     cuenta_bancaria = objeto["cuenta_bancaria"]
     nusuario = request.user.id
+    id_deudor=objeto["id_deudor"]
     # los siguientes son maps:
     # si debo procesar aqui uso json.loads para trabajar como diccionarios
     # si quiero enviar como parametro al store procedure paso tal cual y se recibe
@@ -1314,8 +1339,10 @@ def AceptarRecuperacion(request):
         gi = cheque["girador"]
     
     if deposito:
+        es_cc = deposito["deposito_cuenta_conjunta"]
         cd = deposito["cuenta_deposito"]
-        fd = deposito["fecha_deposito"] 
+        cc = deposito["cuenta_conjunta"]
+        fd = "'"  + deposito["fecha_deposito"] + "'"
 
         if not cd :
             if es_cc :
@@ -1325,16 +1352,16 @@ def AceptarRecuperacion(request):
 
     if not cuenta_bancaria:
         cuenta_bancaria='Null'
-    
+    print('ejecutar sp')
     # Los 2 ultimos parametros son el id de nueva recuperacion y el mensaje de error
     resultado=enviarPost("CALL uspAceptarRecuperacionProtesto( '{0}','{1}','{2}'\
         ,'{3}',{4},'{5}',{6},{7}\
-        ,'{8}','{9}',{10},'{11}'\
-        ,{12},'',0)"
+        ,'{8}','{9}',{10},{11}\
+        ,{12},{13},'{14}',{15},{16},'',0)"
         .format(id_cliente, tipo_factoring, forma_cobro
         , fecha_cobro, valor_recibido,documentos_cobrados,sobrepago,cuenta_bancaria
         ,nc, gi, cd, fd
-        , nusuario))
+        , nusuario,pagador_por_cliente,id_deudor,es_cc,cc))
 
     return HttpResponse(resultado)
 
@@ -1935,10 +1962,6 @@ def AceptarCobranzaNotasDebito(request):
     if tipo_factoring != 'NULL':
         tipo_factoring="'" + tipo_factoring + "'"
 
-    print(id_cliente, tipo_factoring, forma_cobro, fecha_cobro, valor_recibido
-        ,sobrepago,cuenta_bancaria
-        ,nc,gi, cd, fd
-        ,documentos_cobrados, nusuario)
     # Los 2 ultimos parametros son el id de cheque accesorio y el mensaje de error
     resultado=enviarPost("CALL uspAceptarCobranzaCargos( '{0}',{1},'{2}','{3}',{4}\
         ,{5},{6}\

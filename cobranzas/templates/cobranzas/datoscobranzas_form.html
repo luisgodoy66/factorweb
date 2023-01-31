@@ -7,8 +7,15 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Operaciones</a></li>
                     <li><a href="#">cobranzas</a></li>
-                    <li><a href="{% url 'cobranzas:listadocumentosporvencer' %}">cartera por vencer</a></li>
+                    {% if tipo == "Cobranza" %}
+                    <li><a href="{% url 'cobranzas:listadocumentosporvencer' %}">
+                        cartera por vencer</a></li>
                     <li class="active">cobro de documentos</li>
+                    {% else %}
+                    <li><a href="{% url 'cobranzas:listaprotestospendientes' %}">
+                        protestos pendiente</a></li>
+                    <li class="active">recuperación de protesto</li>
+                    {% endif %}
                 </ol>
             </div>
         </div>
@@ -16,27 +23,25 @@
 {% endblock breadcrumbs %}
 {% block content %}
 
-<form  method="post" id="frmSolicitud" enctype="multipart/form-data" 
+<form  method="post" id="frmCobranza" enctype="multipart/form-data" 
     class="form-horizontal">
     <!-- <div class="col-lg-6"> -->
     <div class="card">
             {% csrf_token %}
         <div class="card-header">
+            {% if tipo == "Cobranza" %}
             <strong>Cobro de documentos</strong> de {{ cliente }}
+            {% else %}
+            <strong>Recuperación de protestos</strong> de {{ cliente }}
+            {% endif %}
         </div>
         <div hidden>
-            <input type="text" id="documentos" name="documentos" 
-                value="{{ documentos }}" class="form-control">
-            <input type="text" id="total_cartera" name="total_cartera" 
-                value="{{ total_cartera }}" class="form-control">
-            <input type="text" id="id_cliente" name="id_cliente" 
-                value="{{ cliente_id }}"  class="form-control">
-            <input type="text" id="forma_cobro" value="{{ forma_cobro }}"
-                class="form-control">
-            <input type="text" id="tipo_factoring" value="{{ tipo_factoring }}"
-                class="form-control">
-            <input type="text" id="id_deudor" value="{{ deudor_id }}"
-                class="form-control">
+            <input type="text" id="documentos" name="documentos" value="{{ documentos }}">
+            <input type="text" id="total_cartera" name="total_cartera" value="{{ total_cartera }}">
+            <input type="text" id="id_cliente" name="id_cliente" value="{{ cliente_id }}">
+            <input type="text" id="forma_cobro" value="{{ forma_cobro }}">
+            <input type="text" id="tipo_factoring" value="{{ tipo_factoring }}">
+            <input type="text" id="id_deudor" value="{{ deudor_id }}">
         </div>
         <div class="card-body card-block">
             <!-- lista de clientes -->
@@ -175,7 +180,11 @@
                         data-unique-id="id"
                         data-show-footer="true"
                         data-side-pagination="server"
+                        {% if tipo == 'Cobranza' %}
                         data-url="{% url 'cobranzas:detalle_documentos' documentos %}"
+                        {% else %}
+                        data-url="{% url 'cobranzas:detalle_documentos_protestos' documentos %}"
+                        {% endif %}
                         >
                         </table>
 
@@ -236,9 +245,16 @@
             <button class="btn btn-success btn-sm"  type="button" onclick="AceptarCobranza()">  
                 <i class="fa fa-dot-circle-o"></i> Grabar
             </button>
+            {% if tipo == "Cobranza" %}
             <a href="{% url 'cobranzas:listadocumentosporvencer' %}" 
             class="btn btn-danger btn-sm">
                 <i class="fa fa-ban"></i> Cancelar
+            {% else %}
+            <a href="{% url 'cobranzas:listaprotestospendientes' %}" 
+            class="btn btn-danger btn-sm">
+                <i class="fa fa-ban"></i> Cancelar
+            </a>
+            {% endif %}
             </a>
         </div>
     </div>
@@ -246,5 +262,9 @@
 </form>
 {% endblock %}
 {% block js_page %}
+{% if tipo == "Cobranza" %}
 <script type="text/javascript" src="{% static 'factorweb/js/datoscobranzas.js' %}"></script>
+{% else %}
+<script type="text/javascript" src="{% static 'factorweb/js/datosrecuperacion.js' %}"></script>
+{% endif %}
 {% endblock %}

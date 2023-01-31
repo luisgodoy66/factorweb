@@ -7,7 +7,8 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Operaciones</a></li>
                     <li><a href="#">cobranzas</a></li>
-                    <li><a href="{% url 'cobranzas:listaprotestospendientes' %}">protestos pendiente</a></li>
+                    <li><a href="{% url 'cobranzas:listaprotestospendientes' %}">
+                        protestos pendiente</a></li>
                     <li class="active">recuperación de protesto</li>
                 </ol>
             </div>
@@ -25,12 +26,12 @@
             <strong>Recuperación de protestos</strong> de {{ cliente }}
         </div>
         <div hidden>
-            <input type="text" id="documentos" name="documentos" value="{{ protestos }}" >
+            <!-- <input type="text" id="documentos" name="documentos" value="{{ protestos }}" > -->
             <input type="text" id="total_cartera" name="total_cartera" value="{{ total_cartera }}" >
             <input type="text" id="id_cliente" name="id_cliente" value="{{ cliente_id }}">
             <input type="text" id="forma_cobro" value="{{ forma_cobro }}">
             <input type="text" id="tipo_factoring" value="{{ tipo_factoring }}">
-            <input type="text" id="modalidad_factoring" value="{{ modalidad_factoring }}">
+            <input type="text" id="id_deudor" value="{{ deudor_id }}">
         </div>
         <div class="card-body card-block">
             <!-- lista de clientes -->
@@ -51,6 +52,32 @@
                         {{ form.nvalor}}
                 </div>
 
+                <div class="col-md-1">
+                    <label for="id_nvalor" class=" form-control-label">
+                    Recibido de:</label>
+                </div>
+                <div class="btn-group col-md-2 " data-toggle="buttons" aria-label="First group">
+                    <label class="btn btn-outline-secondary  
+                    {% if un_solo_comprador == 'Si' %} active {% endif %}">
+                        <input type="radio" name="pagadopor" 
+                        id="pordeudor" 
+                        {% if un_solo_comprador == 'No' or forma_cobro == 'MOV' %} 
+                            disabled 
+                        {% else %} 
+                            checked="" 
+                        {% endif %}
+                        > Deudor
+                    </label>
+                    <label class="btn btn-outline-secondary 
+                    {% if un_solo_comprador != 'Si' %} active {% endif %}">
+                        <input type="radio" name="pagadopor" 
+                        id="porcliente"
+                        {% if un_solo_comprador != "Si" or forma_cobro == 'MOV' %} 
+                            checked="" 
+                        {% endif %}
+                        > Cliente
+                    </label>
+                </div>
                 <div class="col-md-2 "><label for="id_nvalor" 
                     class=" form-control-label">
                     {{ form.nsobrepago.label}}</label>
@@ -65,20 +92,35 @@
             <div class="dropdown-divider"></div>
 
             <div class="row form-group ">
-                <div class="col-md-2">
+                <div class="col-md-1">
                     <label for="id_cxbanco" class=" form-control-label">
                     {{ form_cheque.cxcuentabancaria.label}}</label>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <!-- dependiendo de si es con recurso o sin recurso -->
                     <!-- presentar la lista de cuentas bancarias -->
                     <div id="div_cuentas_cliente" >
+                        {% if un_solo_comprador == 'Si' %}
+                        <select data-placeholder="Seleccione una cuenta..." 
+                            class="standardSelect" tabindex="1" 
+                            id="cuenta_deudor" name="cuenta_deudor"
+                            >
+                            <option value=""></option>
+                            {% for cuenta in cuentas_bancarias_deudor %}
+                            <option value="{{ cuenta.id}}" >{{ cuenta}} </option>
+                            {% endfor %}
+                        </select>
+
+                    {% endif %}
+                    </div>
+
+                    <div id="div_cuentas_cliente" {% if un_solo_comprador == 'Si'%} hidden {% endif %} %}>
                         <select data-placeholder="Seleccione una cuenta..." 
                             class="standardSelect" tabindex="1" 
                             id="cuenta_cliente" name="cuenta_cliente"
                             >
                             <option value=""></option>
-                            {% for cuenta in cuentas_bancarias_participante %}
+                            {% for cuenta in cuentas_bancarias_cliente %}
                             <option value="{{ cuenta.id}}" >{{ cuenta}} </option>
                             {% endfor %}
                         </select>
@@ -86,21 +128,22 @@
                     </div>
                 </div>
 
+
                 {% if forma_cobro == 'CHE' %}
 
-                <div class="col-md-1"><label for="id_ctcheque" 
-                    class=" form-control-label">
-                    {{ form_cheque.ctcheque.label}}</label>
-                </div>
-                <div class="col-md-1">
-                    {{ form_cheque.ctcheque}}
-                </div>
                 <div class="col-md-1"><label for="id_ctgirador" 
                     class=" form-control-label">
                     {{ form_cheque.ctgirador.label}}</label>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     {{ form_cheque.ctgirador}}
+                </div>
+                <div class="col-md-1"><label for="id_ctcheque" 
+                    class=" form-control-label">
+                    {{ form_cheque.ctcheque.label}}</label>
+                </div>
+                <div class="col-md-2">
+                    {{ form_cheque.ctcheque}}
                 </div>
                 <!-- <div class="col-md-1"><label for="id_demision" 
                     class=" form-control-label">
@@ -127,7 +170,7 @@
                         data-unique-id="id"
                         data-show-footer="true"
                         data-side-pagination="server"
-                        data-url="{% url 'cobranzas:detalle_documentos_protestos' protestos %}"
+                        data-url="{% url 'cobranzas:detalle_documentos_protestos' documentos %}"
                         >
                         </table>
 
@@ -139,11 +182,38 @@
                 <h5 class="heading-title mb-1 text-secondary">Datos del depósito</h5>
 
                 <div class="row form-group mt-3">
-                    <div class="col-md-2"><label for="id_cxcuentadeposito" 
+                    <div class="btn-group col-md-4 " data-toggle="buttons" aria-label="First group">
+                        <label class="btn btn-outline-secondary active">
+                            <input type="radio" name="depositaren" 
+                            id="cuentaempresa"checked=""> Cuenta de la empresa
+                        </label>
+                        <label class="btn btn-outline-secondary ">
+                            <input type="radio" name="depositaren" 
+                            id="cuentacliente" > Cuenta del cliente
+                        </label>
+                    </div>
+
+                    <!-- <div class="col-md-1"><label for="id_cxcuentadeposito" 
                         class=" form-control-label">
-                        {{form.cxcuentadeposito.label}}</label></div>
+                       Cuenta</label>
+                    </div> -->
                     <div class="col-md-4">
+                        <div id="div_cuentas_empresa">
                         {{form.cxcuentadeposito}}
+
+                        </div>
+                        <div id="div_cuentas_conjuntas" hidden>
+                            <select data-placeholder="Seleccione una cuenta..." 
+                            class="standardSelect" tabindex="1" 
+                            id="cuenta_conjunta" name="cuenta_conjunta"
+                            >
+                            <option value=""></option>
+                            {% for cuenta in cuentas_conjuntas %}
+                            <option value="{{ cuenta.id}}" >{{ cuenta}} </option>
+                            {% endfor %}
+                        </select>
+
+                        </div>
                     </div>
                     <div class="col-md-3"><label for="id_ddeposito" 
                         class=" form-control-label">

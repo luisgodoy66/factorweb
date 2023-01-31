@@ -7,19 +7,18 @@ window.onload=function(){
     // inicializar el encabezado
     ActualizarHeader();
 
-    // inicializar valores
-    inicializaValor("cliente_id",cliente_id)
+    // // inicializar valores
+    // inicializaValor("cliente_id",cliente_id)
 
-    // configuar select
-    jQuery(".standardSelect").chosen({
-        disable_search_threshold: 10,
-        no_results_text: "Cliente no encontrado!",
-        width: "100%"
-    });
+    // // configuar select
+    // jQuery(".standardSelect").chosen({
+    //     disable_search_threshold: 10,
+    //     no_results_text: "Cliente no encontrado!",
+    //     width: "100%"
+    // });
 
     // // inicializar tabla de documwntos
     initTable();
-
     // // cerrar side bar
     // CerrarSideBar();
 
@@ -42,7 +41,7 @@ return [
 function initTable() {
 
     $table.bootstrapTable('destroy').bootstrapTable({
-      height: 450,
+      height: 400,
       locale: "es-EC",
       columns: [
         [{title: 'Ref.', field: 'id', rowspan: 2, align: 'center',
@@ -100,7 +99,7 @@ function initTable() {
 }
 
 function NuevaAsignacion(){
-  cliente_id=capturaValor("cliente_id");
+  cliente_id=capturaValor("id_cxcliente");
   tipo_factoring=capturaValor("id_cxtipofactoring");
   
   if (cliente_id == "" || tipo_factoring==""){

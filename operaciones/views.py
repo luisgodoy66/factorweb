@@ -23,7 +23,7 @@ from empresa.models import  Clases_cliente, Datos_participantes, \
 from solicitudes import models as ModelosSolicitud
 from clientes import models as ModeloCliente
 
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from docxtpl import DocxTemplate, InlineImage
 
@@ -47,6 +47,17 @@ class AsignacionesConsulta(LoginRequiredMixin, generic.ListView):
     template_name = "operaciones/consultageneralasignaciones.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        desde = date.today() + timedelta(days=-date.today().day +1)
+        hasta = date.today()
+
+        context = super(AsignacionesConsulta, self).get_context_data(**kwargs)
+        context["desde"] = desde
+        context["hasta"] =hasta
+        print(desde,hasta)
+        return context
 
 class AsignacionesPendientesDesembolsarView(LoginRequiredMixin, generic.ListView):
     model = Asignacion

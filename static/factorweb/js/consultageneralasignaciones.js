@@ -5,9 +5,9 @@ window.onload=function(){
     
     objeto_fechas("#fechadesde")
     objeto_fechas("#fechahasta")
-    let hoy = new Date();
-    inicializaValor("fechadesde", hoy.toISOString())
-    inicializaValor("fechahasta", hoy.toISOString())
+
+    inicializaValor("fechadesde", capturaValor("id_desde"))
+    inicializaValor("fechahasta", capturaValor("id_hasta"))
 
     $table.bootstrapTable({locale:"es-EC"});
 
