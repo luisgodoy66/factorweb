@@ -19,6 +19,9 @@
         .table td.numero{
             text-align: right;
         }
+        .table td.centrado{
+            text-align: center;
+        }
         .caja { 
         font-family: sans-serif; 
         font-size: 11px; 
@@ -78,9 +81,9 @@
                         <thead>
                             <th>Asignación</th>        
                             <th>Documento</th>
+                            <th>Saldo a la fecha</th>
                             <th>Vencimiento</th>
                             <th>Días vencidos</th>
-                            <th>Saldo a la fecha</th>
                             <th>Baja de cobranza</th>
                             <th>Valor recuperado</th>
                             <th>Bajas</th>
@@ -114,9 +117,9 @@
                             <tr>
                                 <td>{{ item.asignacion }}</td>
                                 <td>{{ item.documento }}</td>
-                                <td>{{ item.vencimiento|date:"Y-m-d" }}</td>
-                                <td class="numero">{{ item.dias_vencidos }}</td>
                                 <td class="numero">{{ item.saldo_al_dia_protesto }}</td>
+                                <td class="centrado">{{ item.vencimiento|date:"Y-m-d" }}</td>
+                                <td class="numero">{{ item.dias_vencidos }}</td>
                                 <td class="numero">{{ item.saldo_al_dia_baja_cobranza }}</td>
                                 <td class="numero">{{ item.valor_recuperado }}</td>
                                 <td class="numero">{{ item.valor_baja }}</td>

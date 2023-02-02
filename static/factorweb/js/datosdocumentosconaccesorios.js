@@ -22,7 +22,7 @@ window.onload=function(){
       e.preventDefault();
       
       jQuery("#body_cheques tr").each(function (i,row) {
-            var valor = row.children[5].innerText
+            var valor = row.children[6].innerText
             total_cheques += parseFloat( valor)
       });
     
@@ -37,11 +37,12 @@ window.onload=function(){
       jQuery("#body_cheques tr").each(function (i,row) {
 
         var banco = row.children[0].innerText
-        var cuenta = row.children[1].innerText
-        var cheque = row.children[2].innerText
-        var girador = row.children[3].innerText
-        var vencimiento = row.children[4].innerText
-        var valor = row.children[5].innerText
+        // 1 es el nombre del banco
+        var cuenta = row.children[2].innerText
+        var cheque = row.children[3].innerText
+        var girador = row.children[4].innerText
+        var vencimiento = row.children[5].innerText
+        var valor = row.children[6].innerText
 
         DicCheques.push({          
           banco: banco,
@@ -137,7 +138,9 @@ function AgregarFilaCheque( ){
   var girador = capturaValor("id_ctgirador")
   var vencimiento = capturaValor("id_dvencimiento")
   var valor = capturaValor("cheque_nvalor")
-
+  var select = document.getElementById('id_cxbanco');
+  var nombre_banco = select.options[select.selectedIndex].text;
+  
   if (banco=="" || cuenta=="" || cheque=="" || girador=="")
     return false;
 
@@ -152,6 +155,7 @@ function AgregarFilaCheque( ){
   nuevafila+="<tr>"
 
   nuevafila+="<td>" + banco +"</td>"
+  nuevafila+="<td>" + nombre_banco +"</td>"
   nuevafila+="<td>" + cuenta +"</td>"
   nuevafila+="<td>" + cheque +"</td>"
   nuevafila+="<td>" + girador +"</td>"

@@ -1138,7 +1138,7 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
             else:
                 cuenta_destino = None
 
-            liquidacion = Desembolsos(cxtipooperacion='C'
+            desembolso = Desembolsos(cxtipooperacion='C'
                 , cxoperacion = operacion
                 , cxcliente = cliente
                 , nvalor = liquidacion.nneto
@@ -1150,7 +1150,7 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
                 , cxusuariocrea = request.user
                 )
             
-            liquidacion.save()
+            desembolso.save()
 
         return redirect("cobranzas:listaliquidacionespendientespagar")
 
@@ -1981,7 +1981,7 @@ def GeneraListaLiquidacionesRegistradasJSON(request, desde = None, hasta= None):
                 .values('cxcliente__cxcliente__ctnombre','ddesembolso'
                 ,'cxtipofactoring__ctabreviacion','cxliquidacion'
                 ,'ctinstrucciondepago', 'cxtipooperacion'
-                ,'nneto', 'dliquidacion'
+                ,'nneto', 'dliquidacion','ldesembolsada'
                 ,'dregistro', 'leliminado'
                 , 'id')
     else:
@@ -1991,7 +1991,7 @@ def GeneraListaLiquidacionesRegistradasJSON(request, desde = None, hasta= None):
                 .values('cxcliente__cxcliente__ctnombre','ddesembolso'
                 ,'cxtipofactoring__ctabreviacion','cxliquidacion'
                 ,'ctinstrucciondepago', 'cxtipooperacion'
-                ,'nneto', 'dliquidacion'
+                ,'nneto', 'dliquidacion','ldesembolsada'
                 ,'dregistro', 'leliminado'
                 , 'id')
           
@@ -2016,6 +2016,8 @@ def GeneraListaLiquidacionesJSONSalida(transaccion):
     output["Fecha"] = transaccion['dliquidacion'].strftime("%Y-%m-%d")
     if transaccion['leliminado']:
         output["Estado"] = "E"
+    elif transaccion['ldesembolsada']:
+        output["Estado"] = "P"
     else:
         output["Estado"] = "A"
 

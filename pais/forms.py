@@ -11,6 +11,8 @@ class BancoForm(forms.ModelForm):
         
         fields=['ctbanco', 'llocal']
         labels={'ctbanco':'Nombre', 'llocal':'Banco local'}        
+        widgets={'ctbanco': forms.Textarea(attrs={'rows': '1'})
+                }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

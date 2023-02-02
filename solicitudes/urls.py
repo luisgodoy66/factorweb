@@ -1,10 +1,11 @@
 from django.urls import URLPattern, path
 from solicitudes.views import SolicitudesView, DetalleSolicitudFacturasPuras , \
     DetalleSolicitudConAccesorios, EliminarDocumento, EliminarAsignacion, \
-    DatosAsignacionConAccesorios, DatosChequeAccesorio, DatosFacturasPuras, \
+    DatosAsignacionConAccesorios,  DatosFacturasPuras, \
     AsignacionFacturasPurasView, DatosAsignacionFacturasPurasNueva, \
     DatosAsignacionConAccesoriosNueva, AsignacionConAccesoriosView, \
-        ClienteCrearView
+    ClienteCrearView, DatosAccesorioEditar\
+# ,DatosChequeAccesorio
 
 urlpatterns=[
     path('listasolicitudes/',SolicitudesView.as_view(), \
@@ -34,7 +35,9 @@ urlpatterns=[
     path('detallesolicitudconaccesorios/<int:asignacion_id>',DetalleSolicitudConAccesorios, \
         name='detallesolicitudconaccesorios'),
     path('eliminarasignacion/<int:asignacion_id>',EliminarAsignacion),
-    path('editarchequeaccesorio/',DatosChequeAccesorio, name="editarchequeaccesorio"),
+    # path('editarchequeaccesorio/',DatosChequeAccesorio, name="editarchequeaccesorio"),
+    path('editarchequeaccesorio/',DatosAccesorioEditar, name="editarchequeaccesorio"),
+    path('editarchequeaccesorio/<int:accesorio_id>',DatosAccesorioEditar, name="editarchequeaccesorio"),
     path('eliminardetalleasignacion/<int:asignacion_id>/<int:documento_id>/<tipo_asignacion>',\
         EliminarDocumento),
 

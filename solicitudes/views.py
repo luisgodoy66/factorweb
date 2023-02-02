@@ -32,7 +32,8 @@ class SolicitudesView(LoginRequiredMixin, generic.ListView):
     login_url = 'bases:login'
 
     def get_queryset(self) :
-        qs=Asignacion.objects.filter(cxestado ='P').filter(leliminado = False)
+        qs=Asignacion.objects.filter(cxestado ='P').filter(leliminado = False)\
+            .order_by("dregistro")
         return qs
 
 class AsignacionFacturasPurasView(LoginRequiredMixin, generic.UpdateView):
@@ -41,6 +42,7 @@ class AsignacionFacturasPurasView(LoginRequiredMixin, generic.UpdateView):
     context_object_name='asignacion'
     login_url = 'bases:login'
     form_class = AsignacionesForm
+    success_url=reverse_lazy("solicitudes:listasolicitudes")
 
     def get_context_data(self,*args, **kwargs): 
         context = super(AsignacionFacturasPurasView, self).get_context_data(*args,**kwargs) 
@@ -54,13 +56,14 @@ class AsignacionConAccesoriosView(LoginRequiredMixin, generic.UpdateView):
     context_object_name='asignacion'
     login_url = 'bases:login'
     form_class = AsignacionesForm
+    success_url=reverse_lazy("solicitudes:listasolicitudes")
 
     # def get_context_data(self,*args, **kwargs): 
     #     context = super(AsignacionConAccesoriosView, self).get_context_data(*args,**kwargs) 
     #     # context['clientes'] = Clientes.objects.all() 
 
     #     return context
-
+    print('vista')
     def form_valid(self, form):
         print('grabar solicitud')
         form.instance.cxusuariomodifica = self.request.user.id
@@ -436,7 +439,7 @@ def AccesorioADictionario(doc):
     output["Comprador"] = doc.documento.ctcomprador
     output["Documento"] = doc.documento.ctdocumento
     output["Emision"] = doc.documento.demision.strftime("%Y-%m-%d")
-    output["Banco"] = str(doc.cxbanco.id)
+    output["Banco"] = doc.cxbanco.ctbanco
     output["Cuenta"] = doc.ctcuenta
     output["Cheque"] = doc.ctcheque
     output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
@@ -446,7 +449,8 @@ def AccesorioADictionario(doc):
 
 @login_required(login_url='/login/')
 @permission_required('solicitudes.update_asignaciones', login_url='bases:sin_permisos')
-def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=None, asignacion_id=None):
+def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=None
+    , asignacion_id=None):
     template_name="solicitudes/datosdocumentosconaccesorios_form.html"
     formulario = {}
     asignacion = {}
@@ -620,10 +624,80 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
 
     return render(request, template_name, contexto)
 
-def DatosChequeAccesorio(request):
+# def DatosChequeAccesorio(request):
+#     template_name = "solicitudes/datoschequeaccesorio_modal.html"
+#     contexto={
+#      "form_cheque" : ChequesForm       
+#     }
+
+#     return render(request, template_name, contexto)
+
+def DatosAccesorioEditar(request, accesorio_id = None):
+
     template_name = "solicitudes/datoschequeaccesorio_modal.html"
-    contexto={
-     "form_cheque" : ChequesForm       
-    }
+    form_cheque = ChequesForm
+    valor_cheque = None
+
+    if request.method=='GET':
+        if accesorio_id:
+            accesorio = ChequesAccesorios.objects.get(id=accesorio_id)
+            e = {'documento':accesorio.documento
+                , 'cxbanco':accesorio.cxbanco
+                , 'ctcuenta':accesorio.ctcuenta
+                , 'ctcheque':accesorio.ctcheque
+                , 'ctgirador':accesorio.ctgirador
+                , 'ntotal':accesorio.ntotal
+                , 'dvencimiento':accesorio.dvencimiento
+                , }
+            form_cheque = ChequesForm(e)
+            valor_cheque=accesorio.ntotal
+            
+    contexto={'form_cheque': form_cheque,
+        'cheque':accesorio_id
+        ,'valor': valor_cheque
+       }
+
+    if request.method=='POST':
+
+        if accesorio_id:
+            banco = request.POST.get('cxbanco')
+            cuenta = request.POST.get('ctcuenta')
+            cheque = request.POST.get('ctcheque')
+            girador = request.POST.get('ctgirador')
+            vencimiento = request.POST.get('dvencimiento')
+
+            accesorio = ChequesAccesorios.objects.get(id=accesorio_id)
+
+            asg_id = accesorio.documento.cxasignacion.id
+            tipo_factoring_id = accesorio.documento.cxasignacion\
+                .cxtipofactoring.cxtipofactoring
+
+            tipoFactoring = Tipos_factoring.objects\
+                .filter(cxtipofactoring=tipo_factoring_id).first()
+
+            # segun tipo de factoring no acepte vencimientos en feriados
+            # cambiar la fecha de vencimiento
+            if not tipoFactoring.lpermitediasferiados:
+
+                fecha = parse_date(vencimiento)
+                
+                while Feriados.objects.filter(dferiado = vencimiento)\
+                    .filter(llaborable = False).first() \
+                        or fecha.weekday()== 6 or fecha.weekday() == 5:
+                        
+                    fecha = parse_date(vencimiento)
+                    fecha = fecha + datetime.timedelta(days=1)
+                    vencimiento = date.isoformat(fecha)
+
+            bco = Bancos.objects.filter(pk=banco).first()
+
+            accesorio.cxbanco = bco
+            accesorio.ctcuenta = cuenta
+            accesorio.ctcheque = cheque
+            accesorio.ctgirador = girador
+            accesorio.dvencimiento = vencimiento
+
+            accesorio.save()
+        return redirect("solicitudes:asignacionconaccesorios_editar", pk= asg_id)
 
     return render(request, template_name, contexto)

@@ -67,74 +67,6 @@
                 </table>
                 <!-- <hr> -->
             </div>         
-            <!-- Resumen -->
-            <div class="caja">
-                <td><h2>Resumen:</h2></td>                
-            </div>
-            <div class="row">
-                <table id="table"  class="table">
-                <thead>
-                    <tr>
-                        <th></th>
-                      <th >Vuelto</th>
-                      {% if liquidacion.nsobrepago %}
-                      <th >Sobrepago</th>
-                      {% endif %}
-                      <th >{{nombre_dc}}</th>
-                      {% if liquidacion.ngao %}
-                      <th >{{nombre_gao}}</th>
-                      {% endif %}
-                      {% if liquidacion.ngaoa %}
-                      <th >{{nombre_gaoa}}</th>
-                      {% endif %}
-                      {% if liquidacion.nretenciones %}
-                      <th >Retenciones</th>
-                      {% endif %}
-                      {% if liquidacion.nbajas %}
-                      <th >Bajas</th>
-                      {% endif %}
-                      {% if liquidacion.notros %}
-                      <th >Otros</th>
-                      {% endif %}
-                      {% if liquidacion.niva %}
-                      <th >IVA</th>
-                      {% endif %}
-                      <th >Neto</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr></tr>
-                    <tr>
-                        <td><h3>Totales:</h3></td>
-                        <td class="numero"> {{liquidacion.nvuelto}} </td>
-                        {% if liquidacion.nsobrepago %}
-                        <td class="numero"> {{liquidacion.nsobrepago}} </td>
-                        {% endif %}
-                        <td class="numero"> {{liquidacion.ndescuentodecartera}} </td>
-                        {% if liquidacion.ngao %}
-                        <td class="numero"> {{liquidacion.ngao}} </td>
-                        {% endif %}
-                        {% if liquidacion.ngaoa %}
-                        <td class="numero"> {{liquidacion.ngaoa}} </td>
-                        {% endif %}
-                        {% if liquidacion.nretenciones %}
-                        <td class="numero"> {{liquidacion.nretenciones}} </td>
-                        {% endif %}
-                        {% if liquidacion.nbajas %}
-                        <td class="numero"> {{liquidacion.nbajas}} </td>
-                        {% endif %}
-                        {% if liquidacion.notros %}
-                        <td class="numero"> {{liquidacion.notros}} </td>
-                        {% endif %}
-                        {% if liquidacion.niva %}
-                        <td class="numero"> {{liquidacion.niva}} </td>
-                        {% endif %}
-                        <td class="numero"> {{liquidacion.nneto}} </td>
-                    </tr>
-                  </tbody>
-                </table>
-
-            </div>
             <!-- <hr> -->
             <!-- vueltos y sobrepagos -->
             <div class="caja">
@@ -209,33 +141,83 @@
                             {% endfor %}
                             {% endfor %}
                             <!-- totales -->
-                            <tr></tr>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <!-- <td class="numero"><h4>{{ totales.cobrado }}</h4></td>
-                                <td class="numero"><h4>{{ totales.retenido }}</h4></td>
-                                <td class="numero"><h4>{{ totales.bajas }}</h4></td>
-                                <td class="numero"><h4>{{ totales.aplicado }}</h4></td> -->
-                            </tr>
                         </tbody>
                     </table>
 
                 <!-- </div> -->
             </div>
-            <!-- <div>
-                <p>
-                <h4>Depositado el:</h4>{{ datos_deposito}}
-                </p>
-            </div> -->
+            <!-- Resumen -->
+            <div class="caja">
+                <td><h2>Resumen:</h2></td>                
+            </div>
+            <div class="row">
+                <table id="table"  class="table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                        <th >Vuelto</th>
+                        {% if liquidacion.nsobrepago %}
+                        <th >Sobrepago</th>
+                        {% endif %}
+                        <th >{{nombre_dc}}</th>
+                        {% if liquidacion.ngao %}
+                        <th >{{nombre_gao}}</th>
+                        {% endif %}
+                        {% if liquidacion.ngaoa %}
+                        <th >{{nombre_gaoa}}</th>
+                        {% endif %}
+                        {% if liquidacion.nretenciones %}
+                        <th >Retenciones</th>
+                        {% endif %}
+                        {% if liquidacion.nbajas %}
+                        <th >Bajas</th>
+                        {% endif %}
+                        {% if liquidacion.notros %}
+                        <th >Otros</th>
+                        {% endif %}
+                        {% if liquidacion.niva %}
+                        <th >IVA</th>
+                        {% endif %}
+                        <th >Neto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr></tr>
+                        <tr>
+                            <td><h3>Totales:</h3></td>
+                            <td class="numero"> {{liquidacion.nvuelto}} </td>
+                            {% if liquidacion.nsobrepago %}
+                            <td class="numero"> {{liquidacion.nsobrepago}} </td>
+                            {% endif %}
+                            <td class="numero"> {{liquidacion.ndescuentodecartera}} </td>
+                            {% if liquidacion.ngao %}
+                            <td class="numero"> {{liquidacion.ngao}} </td>
+                            {% endif %}
+                            {% if liquidacion.ngaoa %}
+                            <td class="numero"> {{liquidacion.ngaoa}} </td>
+                            {% endif %}
+                            {% if liquidacion.nretenciones %}
+                            <td class="numero"> {{liquidacion.nretenciones}} </td>
+                            {% endif %}
+                            {% if liquidacion.nbajas %}
+                            <td class="numero"> {{liquidacion.nbajas}} </td>
+                            {% endif %}
+                            {% if liquidacion.notros %}
+                            <td class="numero"> {{liquidacion.notros}} </td>
+                            {% endif %}
+                            {% if liquidacion.niva %}
+                            <td class="numero"> {{liquidacion.niva}} </td>
+                            {% endif %}
+                            <td class="numero"> {{liquidacion.nneto}} </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            <br><br>
             <div class="row">
                 Realizado por: {{ liquidacion.cxusuariocrea}}
             </div>
-
-
         </div>
     </div>
 </body>

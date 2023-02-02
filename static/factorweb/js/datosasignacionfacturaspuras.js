@@ -7,19 +7,18 @@ window.onload=function(){
     // inicializar el encabezado
     ActualizarHeader();
 
-    // inicializar valores
-    inicializaValor("cliente_id",cliente_id)
+    // // inicializar valores
+    // inicializaValor("cliente_id",cliente_id)
     
-    // configuar select
-    jQuery(".standardSelect").chosen({
-        disable_search_threshold: 10,
-        no_results_text: "Cliente no encontrado!",
-        width: "100%"
-    });
+    // // configuar select
+    // jQuery(".standardSelect").chosen({
+    //     disable_search_threshold: 10,
+    //     no_results_text: "Cliente no encontrado!",
+    //     width: "100%"
+    // });
 
     // inicializar tabla
     initTable();
-
     // // cerrar side bar
     // CerrarSideBar();
   
@@ -40,15 +39,15 @@ return [
   '<i class="fa fa-edit"></i>',
   '</a>',
   '<a class="remove" href="javascript:void(0)" title="Eliminar">',
-    '<i class="fa fa-trash"></i>',
-    '</a>'
+  '<i class="fa fa-trash"></i>',
+  '</a>'
 ].join('')
 }
 
 function initTable() {
 
     $table.bootstrapTable('destroy').bootstrapTable({
-      height: 450,
+      height: 400,
       locale: "es-EC",
       columns: [
         [{title: 'Ref.', field: 'id', rowspan: 2, align: 'center',

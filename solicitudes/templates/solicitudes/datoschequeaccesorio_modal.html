@@ -2,9 +2,18 @@
     <div class="modal-content">
 
         <form  method="POST" rol="form"  class="form-horizontal" name="form"
+            {% if cheque %}
+                action="{% url 'solicitudes:editarchequeaccesorio' cheque %}"
+            {% else %}
                 action="{% url 'solicitudes:editarchequeaccesorio' %}"
+            {% endif %}
             >
             <!-- <div class="col-md-12"> -->
+            <div hidden>
+                <input type="text" value={{cheque}} id="id_cheque">
+                <input type="text" name = "asignacion_id" value = "{{ asignacion}}">
+                <input type="text" id = "id_valor" value = "{{ valor }}">
+            </div>
                 <div class="card">
 
                     {% csrf_token %}
@@ -12,8 +21,6 @@
                         <strong>Datos de cheque </strong> 
                     </div>
                     
-                    <input type="text" name = "asignacion_id" hidden value = "{{ asignacion}}">
-
                     <div class="card-body card-block">
                     <!-- <div class="col-lg-6"> -->
                         <div class="row form-group">
@@ -51,21 +58,33 @@
                                 {{ form_cheque.dvencimiento}}
                             </div>
                         </div>
+                        {% if not cheque %}
+                        <!-- en edición no permitir cambiar el valor del cheque -->
                         <div class="row form-group">
                             <div class="col-md-6"><label for="cheque_nvalor" class=" form-control-label">
-                                {{ form_cheque.ntotal.label}}</label></div>
+                                {{ form_cheque.ntotal.label}}</label>
+                            </div>
                             <div class="col-md-6">
+                                <!-- como hay un html abajo y tiene un campo ntotal que es de la asignacion 
+                                hay que usar otro nombre para este campo-->
                                 <input type="number" id="cheque_nvalor" name="cheque_nvalor">
-                                <!-- {{ form_cheque.nvalor}} -->
+                                <!-- {{ form_cheque.nvtotal}} -->
                             </div>
                         </div>
+                        {% endif %}
                     </div>    
                     {{ errors}}
                     <div class="card-footer">
+                        {% if cheque %}
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fa fa-dot-circle-o"></i> Grabar
+                        </button>
+                        {% else %}
                         <button type="button" class="btn btn-primary btn-sm"
                             onclick="AgregarFilaCheque()" >
                             <i class="fa fa-dot-circle-o"></i> Grabar
                         </button>
+                        {% endif %}
                         <button type="buttom" class="btn btn-danger btn-sm" 
                             onclick="return CerrarModal()">
                             <i class="fa fa-dot-circle-o"></i> Cerrar
@@ -79,10 +98,14 @@
 
     {% block js_page %}
     <script>
-
-        objeto_fechas("#id_dvencimiento");
-        inicializaValor("id_ctgirador",capturaValor("id_ctcomprador"))
-        inicializaValor("cheque_nvalor",capturaValor("id_ntotal"))
+        // objeto_fechas("#id_dvencimiento");
+        // este modal viene desde nuevo registro o edicion de cheque. Si es nuevo
+        // (no hay cheque), inicializar los valores del comprador y total
+        if ( capturaValor("id_cheque") == 'None')
+        {
+            inicializaValor("id_ctgirador",capturaValor("id_ctcomprador"))
+            inicializaValor("cheque_nvalor",capturaValor("id_ntotal"))
+        }
         
     </script>
     {% endblock %}

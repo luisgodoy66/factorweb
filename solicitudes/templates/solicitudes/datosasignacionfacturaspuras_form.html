@@ -40,7 +40,7 @@
         <div class="card-body card-block">
             <!-- lista de clientes -->
             <div class="row form-group">
-                <div class="col-md-2"><label for="id_cxtipofactoring" 
+                <!-- <div class="col-md-2"><label for="id_cxtipofactoring" 
                     class=" form-control-label">
                     {{ form.cxcliente.label}}</label>
                 </div>
@@ -55,7 +55,17 @@
                         <option value="{{ cli.id}}" >{{ cli.ctnombre}} </option>
                         {% endfor %}
                     </select>
+                </div> -->
+                <!-- cliente -->
+                <div class="col-md-2">
+                    <label for="id_cxtipocliente" 
+                        class=" form-control-label">
+                    {{ form.cxcliente.label}}</label>
                 </div>
+                <div class="col-md-4">
+                    {{ form.cxcliente}}
+                </div>
+                <!-- tipo de factoring -->
                 <div class="col-md-2"><label for="id_cxtipofactoring" 
                     class=" form-control-label">
                     {{ form.cxtipofactoring.label}}</label>
@@ -64,40 +74,32 @@
                     {{ form.cxtipofactoring}}
                 </div>
             </div>
-            <!-- tipo de factoring -->
+            <!-- numero de documentos -->
             <div class="row form-group">
                 <div class="col-md-2"><label for="id_ncantidaddocumentos" 
                     class=" form-control-label">
-                    {{form.ncantidaddocumentos.label}}</label></div>
+                    {{form.ncantidaddocumentos.label}}</label>
+                </div>
                 <div class="col-md-1">
                     {{form.ncantidaddocumentos}}
                 </div>
                 <div class="col-md-1"><label for="id_nvalor" 
                     class=" form-control-label">
-                    {{form.nvalor.label}}</label></div>
+                    {{form.nvalor.label}}</label>
+                </div>
                 <div class="col-md-2">
                     {{form.nvalor}}
                 </div>
                 <div class="col-md-6">
-                    <button class="btn btn-success btn-sm"  role="button"
-                        {% if asignacion.id %}
-                        onclick="return AbrirModal(
-                            '{% url 'solicitudes:facturaspuras_editar' asignacion.id asignacion.cxcliente_id asignacion.cxtipofactoring_id %}')"
-                        {% else %}
-                        onclick="return NuevaAsignacion()"
-                        {% endif %} 
-                        >  
-                        <i class="fa fa-dot-circle-o"></i> Agregar factura
-                    </button>
-                    <a href="{% url 'solicitudes:listasolicitudes' %}" 
-                    class="btn btn-danger btn-sm">
-                        <i class="fa fa-ban"></i> Salir
-                    </a>
-
+                    {% if asignacion.id %}
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fa fa-dot-circle-o"></i> Actualizar cliente y tipo de factoring
+                        </button>
+                    {% endif %}
                 </div>
             </div>
             <!-- parte inferior -->
-                <small>
+            <small>
             <div class="row">
 
                 <div class="col col-xs-12">
@@ -107,7 +109,7 @@
                         data-show-export="true"
                         data-detail-formatter="detailFormatter"
                         data-minimum-count-columns="2"
-                        data-pagination="true"
+                        data-pagination="false"
                         data-id-field="id"
                         data-page-list="[10, 50, all]"
                         data-show-footer="true"
@@ -121,14 +123,32 @@
                 </div>
 
             </div>
-                </small>
+            </small>
         </div>    
-          
+        <div class="card-footer">
+            <div class="col-md-6">
+                <button class="btn btn-success btn-sm"  role="button"
+                    {% if asignacion.id %}
+                    onclick="return AbrirModal(
+                        '{% url 'solicitudes:facturaspuras_editar' asignacion.id asignacion.cxcliente_id asignacion.cxtipofactoring_id %}')"
+                    {% else %}
+                    onclick="return NuevaAsignacion()"
+                    {% endif %} 
+                    >  
+                    <i class="fa fa-dot-circle-o"></i> Agregar factura
+                </button>
+                <a href="{% url 'solicitudes:listasolicitudes' %}" 
+                class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Salir
+                </a>
+
+            </div>
+        </div>
     </div>
     <!-- </div> -->
 </form>
 {% endblock %}
 {% block js_page %}
-<script src="{% static 'factorweb/vendors/chosen/chosen.jquery.min.js' %}"></script>
+<!-- <script src="{% static 'factorweb/vendors/chosen/chosen.jquery.min.js' %}"></script> -->
 <script type="text/javascript" src="{% static 'factorweb/js/datosasignacionfacturaspuras.js' %}"></script>
 {% endblock %}

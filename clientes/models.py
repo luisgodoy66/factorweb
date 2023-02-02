@@ -261,9 +261,9 @@ class Personas_naturales(ClaseModelo):
     dnacimiento=models.DateField(null=True, default="2000-01-01")
     cxsexo = models.CharField(max_length=1, choices=TIPOS_DE_SEXOS, null=False)
     cxestadocivil = models.CharField( max_length=3, choices=TIPOS_DE_ESTADO_CIVIL) 
-    cxconyuge =models.CharField( max_length=10) 
+    cxconyuge =models.CharField( max_length=10, blank=True) 
     ctnombrenegocio=models.CharField(max_length=60) 
-    ctnombreconyuge =models.CharField(max_length=60) 
+    ctnombreconyuge =models.CharField(max_length=60, blank=True) 
     ctprofesion =models.CharField(max_length=60)  
 
     def __str__(self):

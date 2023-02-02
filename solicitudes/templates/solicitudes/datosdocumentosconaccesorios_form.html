@@ -17,7 +17,7 @@
 
 <form  method="post" id="frmSolicitud" enctype="multipart/form-data" 
         class="form-horizontal">
-<div class="col-md-8">
+<div class="col-md-9">
     <div class="card">
         {% csrf_token %}
         <div class="card-header">
@@ -43,9 +43,9 @@
         
         <div class="card-body">
             <!-- datos de factura texto y fecha -->
-            <div class="col-xs-6 col-sm-6">
+            <div class="col-md-6 col-sm-6">
                 <div class="row form-group">
-                    <div class="col col-xs-3">
+                    <div class="col col-md-5">
                         <select name="cxtipoid" class="form-control" required id="cxtipoid">
                             <option value="" >---------</option>                                            
                             <option value="R" selected>RUC</option>                                            
@@ -54,85 +54,89 @@
                             <option value="O">OTRO</option>                                            
                         </select>
                     </div>
-                    <div class="col-6 col-md-6">
+                    <div class="col-md-7">
                         {{ form_documento.cxcomprador}}
                     </div>
                 </div>  
                 <div class="row form-group">
-                    <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                    <div class="col col-md-5"><label for="id_cxtipocliente" class=" form-control-label">
                         {{ form_documento.ctcomprador.label}}</label></div>
-                    <div class="col-6 col-md-6">
+                    <div class="col-md-7">
                         {{ form_documento.ctcomprador}}
                     </div>
                 </div>  
                 <div class="row form-group">
-                    <div class="col-md-6"><label for="id_cxtipocliente" class=" form-control-label">
-                        Establecimiento / punto de emisión</label></div>
+                    <div class="col-md-5"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{form_documento.ctserie1.label}}</label></div>
                     <div class="col-md-3">
                         {{ form_documento.ctserie1}}
                     </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col-md-5"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{form_documento.ctserie2.label}}</label></div>
                     <div class="col-md-3">
                         {{ form_documento.ctserie2}}
                     </div>
-                </div>  
+                </div> 
                 <div class="row form-group">
-                    <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                    <div class="col col-md-5"><label for="id_cxtipocliente" class=" form-control-label">
                         {{ form_documento.ctdocumento.label}}</label></div>
-                    <div class="col-6 col-md-6">
+                    <div class="col-md-7">
                         {{ form_documento.ctdocumento}}
                     </div>
                 </div>  
                 <div class="row form-group">
-                    <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                    <div class="col col-md-5"><label for="id_cxtipocliente" class=" form-control-label">
                         {{ form_documento.demision.label}}</label></div>
-                    <div class="col-6 col-md-6">
+                    <div class="col-md-7">
                         {{ form_documento.demision}}
-                    </div>
-                </div>  
-                <div class="row form-group">
-                    <div class="col-md-6 col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
-                        {{ form_documento.nvalorantesiva.label}}</label></div>
-                    <div class="col-6 col-md-6">
-                        {{ form_documento.nvalorantesiva}}
                     </div>
                 </div>  
 
             </div>
             <!-- datos de factura valores -->
-            <div class="col-6">
+            <div class="col-md-6">
                 <div class="row form-group">
-                    <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                    <div class="col-md-7 col-xs-6"><label for="id_nvalorantesdeiva" class=" form-control-label">
+                        {{ form_documento.nvalorantesiva.label}}</label></div>
+                    <div class="col-md-5">
+                        {{ form_documento.nvalorantesiva}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col col-md-7"><label for="id_niva" class=" form-control-label">
                         {{ form_documento.niva.label}}</label></div>
-                    <div class="col-6 col-md-6">
+                    <div class="col-md-5">
                         {{ form_documento.niva}}
                     </div>
                 </div>  
                 <div class="row form-group">
-                    <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                    <div class="col col-md-7"><label for="id_cxtipocliente" class=" form-control-label">
                         {{ form_documento.nretencioniva.label}}</label></div>
-                    <div class="col-6 col-md-6">
+                    <div class="col-md-5">
                         {{ form_documento.nretencioniva}}
                     </div>
                 </div>  
                 <div class="row form-group">
-                    <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                    <div class="col col-md-7"><label for="id_cxtipocliente" class=" form-control-label">
                         {{ form_documento.nretencionrenta.label}}</label></div>
-                    <div class="col-6 col-md-6">
+                    <div class="col-md-5">
                         {{ form_documento.nretencionrenta}}
                     </div>
                 </div>  
                 <div class="row form-group">
-                    <div class="col col-xs-3"><label for="id_nvalornonegociado" class=" form-control-label">
+                    <div class="col col-md-7"><label for="id_nvalornonegociado" class=" form-control-label">
                         {{ form_documento.nvalornonegociado.label}}</label></div>
-                    <div class="col-6 col-md-6">
+                    <div class="col-md-5">
                         {{ form_documento.nvalornonegociado}}
     
                     </div>
                 </div>  
                 <div class="row form-group">
-                    <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
+                    <div class="col-md-7"><label for="id_cxtipocliente" class=" form-control-label">
                         {{ form_documento.ntotal.label}}</label></div>
-                    <div class="col-6 col-md-6">
+                    <div class="col-md-5">
                         {{ form_documento.ntotal}}
     
                     </div>
@@ -154,8 +158,9 @@
                     <table class="table table-striped table-bordered" id="tabla_cheques" data-propiedadId="Id">
                         <thead>
                             <tr>
-                                <td data-cabecera="cxbanco">banco</td>
-                                <td data-cabecera="ctcuenta">cuenta</td>
+                                <td data-cabecera="cxbanco">Id. Banco</td>
+                                <td data-cabecera="banco">Banco</td>
+                                <td data-cabecera="ctcuenta">Cuenta</td>
                                 <td data-cabecera="cxcheque">Cheque</td>
                                 <td data-cabecera="ctgirador">Girador</td>
                                 <td data-cabecera="dvencimiento">Vencimiento</td>

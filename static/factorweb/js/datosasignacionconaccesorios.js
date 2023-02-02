@@ -25,6 +25,9 @@ window.onload=function(){
 };
 
 window.operateEvents = {
+  'click .editar': function (e, value, row, index) {
+    EditarDocumento( row.id)
+  },
     'click .remove': function (e, value, row, index) {
       EliminarDocumentoDeSolicitudAsignacion(asignacion_id, row.id,'A', row.Documento)
     }
@@ -32,9 +35,12 @@ window.operateEvents = {
 
 function operateFormatter(value, row, index) {
 return [
-    '<a class="remove" href="javascript:void(0)" title="Eliminar">',
-    '<i class="fa fa-trash"></i>',
-    '</a>'
+  '<a class="editar" href="javascript:void(0)" title="Editar">',
+  '<i class="fa fa-edit"></i>',
+  '</a>',
+  '<a class="remove" href="javascript:void(0)" title="Eliminar">',
+  '<i class="fa fa-trash"></i>',
+  '</a>'
 ].join('')
 }
 
@@ -112,4 +118,8 @@ function NuevaAsignacion(){
     location.href=url
   }
   return false
+}
+
+function EditarDocumento( doc_id){
+  AbrirModal('/solicitudes/editarchequeaccesorio/'+doc_id )
 }

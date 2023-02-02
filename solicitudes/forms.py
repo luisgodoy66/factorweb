@@ -6,11 +6,10 @@ class AsignacionesForm(forms.ModelForm):
 
     class Meta:
         model=Asignacion
-        fields=['cxcliente', 'cxtipofactoring', 'cxtipo'
+        fields=['cxcliente', 'cxtipofactoring'
             ,'nvalor', 'ncantidaddocumentos', 
         ]
         labels={'cxcliente':'Cliente', 'cxtipofactoring':'Tipo de factoring'
-            , 'cxtipo':'Tipo de asignación'
             ,'nvalor':'Valor', 'ncantidaddocumentos':'Cantidad de documentos', 
         }
     def __init__(self, *args, **kwargs):
@@ -34,13 +33,13 @@ class DocumentosForm(forms.ModelForm):
             ,'niva', 'nretencioniva', 'nretencionrenta', 'ntotal', 'nvalornonegociado'
         ]
         labels={
-            'cxcomprador':'Comprador', 'ctcomprador':'Nombre de comprador'
-            , 'ctserie1':'Serie 1', 'ctserie2':'Serie 2'
+            'cxcomprador':'Comprador', 'ctcomprador':'Nombre de deudor'
+            , 'ctserie1':'Establecimiento', 'ctserie2':'Punto de emisión'
             , 'ctdocumento':'Documento', 'demision':'Emisión'
             , 'dvencimiento':'Vencimiento', 'nvalorantesiva':'Valor antes de IVA'
             , 'niva':'IVA', 'nretencioniva':'Retención de IVA'
-            , 'nretencionrenta':'Retencion de impuesto a la renta'
-            , 'ntotal':'Neto', 'nvalornonegociado':'Valor no negociado'
+            , 'nretencionrenta':'Retención de impuesto a la renta'
+            , 'ntotal':'Valor negociado', 'nvalornonegociado':'Valor no negociado'
         }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -68,6 +67,16 @@ class ChequesForm(forms.ModelForm):
             , 'ctgirador':'Girador', 'ntotal':'Valor'
             , 'dvencimiento':'Vencimiento'
         }
+        # Lo importante es el formato
+        widgets = {
+            'dvencimiento': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'datepicker', 
+                    'placeholder': 'Select a date',
+                    'type': 'date'
+                    }
+                    ),
+        }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
@@ -76,7 +85,7 @@ class ChequesForm(forms.ModelForm):
                 'class':'form-control'
             })
         self.fields['dvencimiento'].widget.attrs['value']=date.today
-        self.fields['dvencimiento'].widget.attrs['readonly']=True
+        # self.fields['dvencimiento'].widget.attrs['readonly']=True
 
 class ClientesForm(forms.ModelForm):
     class Meta:

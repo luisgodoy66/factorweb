@@ -44,7 +44,7 @@ class CompradorForm(forms.ModelForm):
             })
 
 class PersonaNaturalForm(forms.ModelForm):
-    dnacimiento = forms.DateInput()
+    # dnacimiento = forms.DateInput()
     
     class Meta:
         model=Personas_naturales
@@ -155,7 +155,7 @@ class CuposCompradoresForm(forms.ModelForm):
         labels={'cxcliente':'Cliente', 'cxcomprador':'Comprador'
             ,'cxmoneda': 'Moneda', 'ncupocartera':'Cupo de cartera'
             , 'cxmodalidadcobranza':'Modalidad de cobranza'
-            , 'lactivo': 'Activo', 'lsenotifica':'Se notifica de operación', }        
+            , 'lactivo': 'Activo', 'lsenotifica':'Se notifica de operación al deudor', }        
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -55,6 +55,7 @@
                         <th>Banco</th>
                         <th>Cuenta</th>
                         <th>Tipo</th>
+                        <th>Propia</th>
                         <!-- <th>Propia</th> -->
                         <th class="all">Acciones</th>
                     </thead>
@@ -66,7 +67,7 @@
                             <td>{{ item.cxbanco }}</td>
                             <td>{{ item.cxcuenta }}</td>
                             <td>{{ item.cxtipocuenta }}</td>
-                            <!-- <td>{{ item.cuenta_cliente.cxcuenta.lpropia }}</td> -->
+                            <td>{{ item.lpropia }}</td>
                             <td>
                                 <a href="{% url 'clientes:cuentabancariadeudor_editar' item.id %}"  title="Editar"
                                     class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>
