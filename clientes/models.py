@@ -8,8 +8,6 @@ class Datos_compradores(ClaseModelo):
     cxcomprador=models.OneToOneField(
         Datos_participantes, related_name="datos_generales_comprador"
         ,to_field="cxparticipante", on_delete=models.CASCADE    )
-    cxactividad=models.CharField( max_length=10, null=True,
-        help_text='actividad comercial segun código ciiu'    )
     # ctemailfacturacionelectronica=models.EmailField( null=True,
     #     help_text='direccion email para facturación electrónica'    )
     cxestado=models.CharField(max_length=1, default='A'    )
@@ -43,14 +41,10 @@ class Datos_generales(ClaseModelo):
         help_text='promedio general de cobro de documentos negociados'    )
     npromediodemoraderecuperacion=models.DecimalField(max_digits=8, decimal_places=2, default=0,
         help_text='promedio de recuperacion de documentos negociados protestados'    )
-    cxactividad=models.CharField(max_length=10, null=True,
-        help_text='actividad comercial segun codigo ciiu'    )
     ctemailfacturacionelectronica=models.EmailField(null=True,
         help_text='direccion email para factracion electronica'    )
     cxreferidopor=models.CharField(max_length=4, null=True,
         help_text='codigo de freelancer que refiere'    )
-    dinicioactividades=models.DateField(null=True,
-        help_text='fecha de inicio de actividades'    )
     cxorigen=models.CharField(max_length=5,null=True,
         help_text='codigo de localidad / oficina asignada del cliente'    )
     cxestado=models.CharField(max_length=1, default='A'    )
@@ -95,8 +89,9 @@ class Cuentas_bancarias(ClaseModelo):
         return '{} Cta. {}'.format(self.cxbanco,self.cxcuenta)
 
 class Cuenta_transferencia_Manager(models.Manager):
-    def cuenta_default(self, cxcliente):
-        return self.filter(leliminado = False, cxcliente = cxcliente)
+    def cuenta_default(self, id_cliente):
+        print(id_cliente)
+        return self.filter(leliminado = False, cxcliente = id_cliente)
 
 class Cuenta_transferencia(ClaseModelo):
     cxcliente=models.OneToOneField(Datos_generales,

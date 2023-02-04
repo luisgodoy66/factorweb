@@ -23,7 +23,6 @@
             {{cuenta_conjunta}}
         </div>
         <div hidden>
-            <input type="text" value={{id_operacion}} id="operacion">
             <input type="text" value={{id_cuenta_conjunta}} id="cuentaconjunta">
         </div>
         <div class="card-body">
@@ -137,7 +136,8 @@
         </div>
 
         <div class="card-footer">
-            <button class="btn btn-success btn-sm"  type="button" onclick="ConfirmarCobranza()">  
+            <button class="btn btn-success btn-sm"  type="button" 
+                onclick="ConfirmarCobranza({{id_operacion}},'{{tipo_operacion}}')">  
                 <i class="fa fa-dot-circle-o"></i> Confirmar
             </button>
             <a href="{% url 'cuentasconjuntas:listadocobranzasporconfirmar' %}" 

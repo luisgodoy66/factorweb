@@ -162,10 +162,9 @@ class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
             , cxformapago__in = ['TRA','CHE','DEP']\
             , cxtipofactoring__lanticipatotalnegociado = False )\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
-                ,'cxtipofactoring__ctabreviacion'
+                ,'cxtipofactoring__ctabreviacion','ldepositoencuentaconjunta'
                 ,'cxcobranza','cxformapago','nvalor', 'cxcuentadeposito__cxcuenta'
                 , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'C'",'')
-                ,depositoencuentaconjunta=RawSQL("select ldepositoencuentaconjunta",'')
                 )
                 
         recuperaciones = Recuperaciones_cabecera.objects.filter(cxestado='A'\
@@ -173,10 +172,9 @@ class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
             , cxformacobro__in = ['TRA','CHE']\
             , cxtipofactoring__lanticipatotalnegociado = False )\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
-                ,'cxtipofactoring__ctabreviacion'
+                ,'cxtipofactoring__ctabreviacion','ldepositoencuentaconjunta'
                 ,'cxrecuperacion','cxformacobro','nvalor', 'cxcuentadeposito__cxcuenta'
                 , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'R'",'')
-                ,depositoencuentaconjunta=RawSQL("select False",'')
                 )
 
         return cobranzas.union(recuperaciones)
@@ -931,20 +929,37 @@ def DatosDiasACondonar(request, id, dias, cobranza_id, tipo_operacion):
 @permission_required('cobranzas.update_documentos_cabecera', login_url='bases:sin_permisos')
 def ReversaConfirmacionCobranza(request, cobranza_id, tipo_operacion):
     # la eliminacion es lógica
-    # debe devolver: 1 si esta bien, 0 si esta mal
+    # debe devolver: OK si esta bien
 
     if tipo_operacion =='C':
         cobr = Documentos_cabecera.objects.filter(pk=cobranza_id).first()
+        if not cobr:
+            return HttpResponse("Cobranza no encontrada")
+        operacion = cobr.cxcobranza
+
     else:
         cobr = Recuperaciones_cabecera.objects.filter(pk=cobranza_id).first()
+        if not cobr:
+            return HttpResponse("Recuperación no encontrada")
+        operacion = cobr.cxrecuperacion
 
-    if not cobr:
-        return HttpResponse("Cobranza no encontrada")
 
     if request.method=="GET":
-        # cobr.cxusuarioatencion = request.user.id
         cobr.cxestado = "A"
         cobr.save()
+        # SI es cobranza en cuenta conjunta debe borrarse el movimiento de la operacion
+        # para borrar necesito la id de cuenta conjunta y codigo de cobranza
+        if cobr.ldepositoencuentaconjunta:
+            cc = cobr.cxcuentaconjunta
+            movimiento_cc = CuentasConjuntasModels.Movimientos.objects\
+                .filter(cxmovimiento = operacion, cxtipo = tipo_operacion, cuentabancaria = cc)\
+                    .first()
+            if movimiento_cc:
+                movimiento_cc.leliminado = True
+                movimiento_cc.cxusuarioelimina = request.user.id
+                movimiento_cc.save()
+
+
 
     return HttpResponse("OK")
 
@@ -1344,10 +1359,13 @@ def AceptarRecuperacion(request):
         cc = deposito["cuenta_conjunta"]
         fd = "'"  + deposito["fecha_deposito"] + "'"
 
-        if not cd :
-            if es_cc :
-                cd = 'Null'
-            else:
+        if  es_cc :
+            cd = 'Null'
+            if not cc :
+                return HttpResponse("Debe especificar la cuenta de depósito")
+        else:
+            cc = 'Null'
+            if not  cd :
                 return HttpResponse("Debe especificar la cuenta de depósito")
 
     if not cuenta_bancaria:
@@ -1714,7 +1732,7 @@ def ObtenerCargosDeProtestos(cobranza, listaotroscargos):
                         
                         listaotroscargos.append(GeneraOtroCargoJSONSalida(
                             cargo.id, cargo.cxmovimiento.ctmovimiento
-                            , cargo.dregistro, cargo.nsaldo, ndx.id
+                            , ndx.dnotadebito, cargo.nsaldo, ndx.id
                             , codigo_operacion))
 
                         total_cargos += cargo.nsaldo
@@ -2131,7 +2149,7 @@ def ObtenerOtrosCargosDeCobranza(tipo_operacion, cobranza, codigo_operacion, lis
                 
                 listaotroscargos.append(GeneraOtroCargoJSONSalida(
                     cargo.id, cargo.cxmovimiento.ctmovimiento
-                    , cargo.dregistro, cargo.nsaldo, ndx.id
+                    , ndx.dnotadebito, cargo.nsaldo, ndx.id
                     , codigo_operacion))
 
                 total_cargos += cargo.nsaldo

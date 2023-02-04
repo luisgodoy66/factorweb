@@ -395,6 +395,9 @@ def AceptarAsignacion(request, asignacion_id=None):
     dic_gao  = {'carga_iva': iva_gao, 'descripcion': gao.ctdescripcionenreporte, 'generar': carga_gao}
     dic_dc = {'carga_iva': iva_dc , 'descripcion': dc.ctdescripcionenreporte,'generar':carga_dc }
 
+    datos_operativos = Datos_operativos.objects\
+                .filter(cxcliente = asignacion.cxcliente.cxcliente).first()
+
     contexto={'form_asignacion':formulario,
         'asignacion': asignacion,
         'gao': dic_gao,
@@ -404,6 +407,7 @@ def AceptarAsignacion(request, asignacion_id=None):
         'porcentaje_iva':12,
         'tipo_asignacion':asignacion.cxtipo,
         "cuenta_transferencia":cuenta_transferencia,
+        "beneficiario": datos_operativos.ctbeneficiarioasignacion,
     }
 
     return render(request, template_name, contexto)

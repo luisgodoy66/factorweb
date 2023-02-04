@@ -73,33 +73,27 @@ class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
     login_url = 'bases:login'
 
     def get_queryset(self):
-        return Documentos_cabecera.objects\
-            .filter(leliminado = False, ldepositoencuentaconjunta = True
-                , cxestado = 'A')
-    # def get_queryset(self):
-    #     cobranzas = Documentos_cabecera.objects.filter(cxestado='A'\
-    #         , leliminado = False\
-    #         , ldepositoencuentaconjunta = True\
-    #         , cxtipofactoring__lanticipatotalnegociado = False )\
-    #             .values('cxcliente__cxcliente__ctnombre','ddeposito'
-    #             ,'cxtipofactoring__ctabreviacion'
-    #             ,'cxcobranza','cxformapago','nvalor', 'cxcuentadeposito__cxcuenta'
-    #             , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'C'",'')
-    #             ,depositoencuentaconjunta=RawSQL("select ldepositoencuentaconjunta",'')
-    #             )
+        cobranzas = Documentos_cabecera.objects.filter(cxestado='A'\
+            , leliminado = False\
+            , ldepositoencuentaconjunta = True\
+            , cxtipofactoring__lanticipatotalnegociado = False )\
+                .values('cxcliente__cxcliente__ctnombre','ddeposito', 'cxcheque_id'
+                ,'cxtipofactoring__ctabreviacion', 'cxcuentaconjunta__cxcuenta'
+                ,'cxcobranza','cxformapago','nvalor', 'id', 'cxcuentaconjunta_id'
+                , 'cxcuentaconjunta__cxbanco__ctbanco').annotate(tipo=RawSQL("select 'C'",'')
+                )
                 
-    #     recuperaciones = Recuperaciones_cabecera.objects.filter(cxestado='A'\
-    #         , leliminado = False\
-    #         , ldepositoencuentaconjunta = True\
-    #         , cxtipofactoring__lanticipatotalnegociado = False )\
-    #             .values('cxcliente__cxcliente__ctnombre','ddeposito'
-    #             ,'cxtipofactoring__ctabreviacion'
-    #             ,'cxrecuperacion','cxformacobro','nvalor', 'cxcuentadeposito__cxcuenta'
-    #             , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'R'",'')
-    #             ,depositoencuentaconjunta=RawSQL("select False",'')
-    #             )
+        recuperaciones = Recuperaciones_cabecera.objects.filter(cxestado='A'\
+            , leliminado = False\
+            , ldepositoencuentaconjunta = True\
+            , cxtipofactoring__lanticipatotalnegociado = False )\
+                .values('cxcliente__cxcliente__ctnombre','ddeposito', 'cxcheque_id'
+                ,'cxtipofactoring__ctabreviacion', 'cxcuentaconjunta__cxcuenta'
+                ,'cxrecuperacion','cxformacobro','nvalor', 'id', 'cxcuentaconjunta_id'
+                , 'cxcuentaconjunta__cxbanco__ctbanco').annotate(tipo=RawSQL("select 'R'",'')
+                )
 
-    #     return cobranzas.union(recuperaciones)
+        return cobranzas.union(recuperaciones)
 
 class CargosPendientesView(LoginRequiredMixin, generic.ListView):
     model = DebitosCuentasConjuntas

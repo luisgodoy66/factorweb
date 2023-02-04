@@ -113,9 +113,9 @@ function Suma_Cargos(asgn, iva_gao, iva_dc, carga_gao, carga_dc, porcentaje_iva)
               +"/"+carga_gao+"/"+carga_dc+"/"+porcentaje_iva
     , function(data){
     if (data){
+      jQuery("#id_nanticipo").val(data['anticipo'])    
       jQuery("#id_ndescuentodecartera").val(data['dc'])
       jQuery("#id_ngao").val(data['gao'])    
-      jQuery("#id_nanticipo").val(data['anticipo'])    
       jQuery("#id_niva").val(data['iva'])    
       jQuery("#neto").val(data['neto'])    
       jQuery("#id_nvalor").val(data['negociado'])    
@@ -126,7 +126,6 @@ function Suma_Cargos(asgn, iva_gao, iva_dc, carga_gao, carga_dc, porcentaje_iva)
 function initTable() {
 
     $table.bootstrapTable('destroy').bootstrapTable({
-      height: 550,
       locale: "es-EC",
       columns: [
         [{title: 'Ref.', field: 'id', rowspan: 2, align: 'center', valign: 'middle', 

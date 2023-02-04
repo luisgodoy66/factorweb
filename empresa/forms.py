@@ -12,13 +12,17 @@ class ParticipanteForm(forms.ModelForm):
         fields=['cxtipoid', 'cxparticipante', 'ctnombre'
             , 'cxlocalidad', 'ctdireccion'
             ,'cttelefono1', 'cttelefono2', 'ctemail'
-            , 'ctemail2', 'ctcelular','ctgirocomercial', 'cxusuariocrea']
+            , 'ctemail2', 'ctcelular','ctgirocomercial', 'cxusuariocrea'
+            , 'cxactividad', 'dinicioactividades']
         labels={'cxtipoid':'Tipo cliente', 'cxparticipante':'Identificación'
             ,'ctnombre': 'Nombre completo', 'cxlocalidad':'Localidad'
             , 'ctdireccion':'Dirección', 'cttelefono1': 'Teléfono principal'
             , 'cttelefono2':'Teléfono secundario', 'ctemail':'Email 1'
             , 'ctemail2':'Email 2', 'ctcelular':'Celular'
-            ,'ctgirocomercial':'Giro comercial'}        
+            ,'ctgirocomercial':'Giro comercial'
+            , 'cxactividad':'Código de actividad'
+            , 'dinicioactividades':'Inicio de actividades'
+            }        
         widgets={'ctdireccion': forms.Textarea(attrs={'rows': '3'})
                 , 'ctgirocomercial':forms.Textarea(attrs={'rows': '5'})}
 
@@ -29,6 +33,7 @@ class ParticipanteForm(forms.ModelForm):
                 'class':'form-control'
             })
         self.fields['cxtipoid'].empty_label="Seleccione tipo de identificación"
+        self.fields['dinicioactividades'].widget.attrs['readonly']=True
 
     def clean(self) :
         try:

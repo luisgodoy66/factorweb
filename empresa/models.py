@@ -64,6 +64,10 @@ class Datos_participantes(ClaseModelo):
     cttelefono2 =models.CharField(max_length=30,null=True, blank=True)
     ctcelular =models.CharField(max_length=30,null=True, blank=True)
     ctgirocomercial =models.TextField(null=True)
+    cxactividad=models.CharField( max_length=10, null=True,
+        help_text='actividad comercial segun código ciiu'    )
+    dinicioactividades=models.DateField(null=True,
+        help_text='fecha de inicio de actividades'    )
 
     def __str__(self):
         return self.ctnombre

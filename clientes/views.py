@@ -229,6 +229,8 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
                 'cttelefono2':datosparticipante.cttelefono2,
                 'ctcelular':datosparticipante.ctcelular,
                 'ctgirocomercial':datosparticipante.ctgirocomercial,
+                'cxactividad':datosparticipante.cxactividad,
+                'dinicioactividades':date.isoformat(datosparticipante.dinicioactividades),
             }
             idcliente=datosparticipante.cxparticipante
             formulario=ParticipanteForm(e)
@@ -240,8 +242,6 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
             if datoscliente:
                 e={
                     'cxtipocliente':datoscliente.cxtipocliente,
-                    'cxactividad':datoscliente.cxactividad,
-                    'dinicioactividades':date.isoformat(datoscliente.dinicioactividades),
                     'cxcliente':datosparticipante.cxparticipante
                 }
                 form_cliente=ClienteForm(e)
@@ -283,7 +283,6 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
         ctnombre=request.POST.get("ctnombre")
         # cxzona=request.POST.get("cxzona")
         cxlocalidad=request.POST.get("cxlocalidad")
-        # cxestado=request.POST.get("cxestado")
         ctdireccion=request.POST.get("ctdireccion")
         cttelefono1=request.POST.get("cttelefono1")
         cttelefono2=request.POST.get("cttelefono2")
@@ -291,15 +290,19 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
         ctemail=request.POST.get("ctemail")
         ctemail2=request.POST.get("ctemail2")
         ctgirocomercial=request.POST.get("ctgirocomercial")
+        cxactividad = request.POST.get("cxactividad")
+        dinicioactividades = request.POST.get("dinicioactividades")
 
-        if not cliente_id:
+        datosparticipante = Datos_participantes.objects\
+            .filter(cxparticipante=idcliente).first()
+
+        if not datosparticipante:
             datosparticipante = Datos_participantes(
                 cxtipoid=cxtipoid,
                 cxparticipante=idcliente,
                 ctnombre=ctnombre,
                 # 'cxzona': datosparticipante.cxzona,
                 cxlocalidad=cxlocalidad,
-                # 'cxestado':datosparticipante.cxestado,
                 ctdireccion=ctdireccion,
                 ctemail=ctemail,
                 ctemail2=ctemail2,
@@ -307,53 +310,46 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
                 cttelefono2=cttelefono2,
                 ctcelular=ctcelular,
                 ctgirocomercial=ctgirocomercial,
-                cxusuariocrea= request.user
+                cxusuariocrea= request.user,
+                cxactividad = cxactividad,
+                dinicioactividades = dinicioactividades,
             )
             if datosparticipante:
                 datosparticipante.save()
         else:
-            datosparticipante = Datos_participantes.objects\
-                .filter(cxparticipante=cliente_id).first()
+            datosparticipante.cxtipoid = cxtipoid
+            datosparticipante.cxparticipante=idcliente
+            datosparticipante.ctnombre=ctnombre
+            # datosparticipante.cxzona=cxzona
+            datosparticipante.cxlocalidad=cxlocalidad
+            # datosparticipante.cxestado=cxestado
+            datosparticipante.ctdireccion=ctdireccion
+            datosparticipante.ctemail=ctemail
+            datosparticipante.ctemail2=ctemail2
+            datosparticipante.cttelefono1=cttelefono1
+            datosparticipante.cttelefono2=cttelefono2
+            datosparticipante.ctcelular=ctcelular
+            datosparticipante.ctgirocomercial=ctgirocomercial
+            datosparticipante.cxusuariomodifica = request.user.id
+            datosparticipante.cxactividad = cxactividad
+            datosparticipante.dinicioactividades = dinicioactividades
 
-            if datosparticipante:
-                datosparticipante.cxtipoid = cxtipoid
-                datosparticipante.cxparticipante=idcliente
-                datosparticipante.ctnombre=ctnombre
-                # datosparticipante.cxzona=cxzona
-                datosparticipante.cxlocalidad=cxlocalidad
-                # datosparticipante.cxestado=cxestado
-                datosparticipante.ctdireccion=ctdireccion
-                datosparticipante.ctemail=ctemail
-                datosparticipante.ctemail2=ctemail2
-                datosparticipante.cttelefono1=cttelefono1
-                datosparticipante.cttelefono2=cttelefono2
-                datosparticipante.ctcelular=ctcelular
-                datosparticipante.ctgirocomercial=ctgirocomercial
-                datosparticipante.cxusuariomodifica = request.user.id
-
-                datosparticipante.save()
-            
+            datosparticipante.save()
+        
         # datos en tabla clientes
-
         datoscliente = Datos_generales.objects.filter(cxcliente=idcliente).first()
 
         cxtipocliente = request.POST.get("cxtipocliente")
-        cxactividad = request.POST.get("cxactividad")
-        dinicioactividades = request.POST.get("dinicioactividades")
 
         if not datoscliente:
             datoscliente= Datos_generales(
                 cxcliente = datosparticipante,
-                cxactividad = cxactividad,
-                dinicioactividades=dinicioactividades,
                 cxtipocliente=cxtipocliente,
                 cxusuariocrea = request.user
             )
             if datoscliente:
                 datoscliente.save()
         else:
-            datoscliente.cxactividad=cxactividad
-            datoscliente.dinicioactividades = dinicioactividades
             datoscliente.cxtipocliente=cxtipocliente
             datoscliente.cxusuariomodifica = request.user.id
 
@@ -441,7 +437,7 @@ def DatosClienteNatural(request, cliente_ruc=None):
 
             datoscliente.save()
 
-            return redirect("clientes:listaclientes")
+        return redirect("clientes:listaclientes")
 
     return render(request, template_name, contexto)
 
@@ -613,7 +609,7 @@ def DetalleCuentasBancarias(request, cliente_ruc = None):
 
     # Converting `QuerySet` to a Python Dictionary
     for i in range(len(cuentas)):
-        tempBlogs.append(DocumentoADictionario(cuentas[i])) # Converting `QuerySet` to a Python Dictionary
+        tempBlogs.append(DetalleCuentasBancariasJSONOutput(cuentas[i])) # Converting `QuerySet` to a Python Dictionary
 
     docjson = tempBlogs
 
@@ -624,7 +620,7 @@ def DetalleCuentasBancarias(request, cliente_ruc = None):
 
     return HttpResponse(JsonResponse( data))
 
-def DocumentoADictionario(doc):
+def DetalleCuentasBancariasJSONOutput(doc):
     output = {}
     output['id'] = doc.id
     output["Banco"] = doc.cxbanco.ctbanco
@@ -693,6 +689,7 @@ def ActualizarCuentaTransferencia(request, pk, cliente_ruc):
             , cxusuariocrea=request.user)
         else:        
             ctacte.cxcuenta = cuenta
+            ctacte.leliminado = False
 
         ctacte.save()
 
@@ -728,6 +725,7 @@ def DatosCompradores(request, comprador_id=None):
                 'cttelefono2':datosparticipante.cttelefono2,
                 'ctcelular':datosparticipante.ctcelular,
                 'ctgirocomercial':datosparticipante.ctgirocomercial,
+                'cxactividad':datosparticipante.cxactividad,
             }
             idcomprador=datosparticipante.cxparticipante
             formulario=ParticipanteForm(e)
@@ -738,7 +736,6 @@ def DatosCompradores(request, comprador_id=None):
             
             if datoscomprador:
                 e={
-                    'cxactividad':datoscomprador.cxactividad,
                     'cxcomprador':datosparticipante.cxparticipante
                 }
                 form_comprador=CompradorForm(e)
@@ -760,7 +757,6 @@ def DatosCompradores(request, comprador_id=None):
         ctnombre=request.POST.get("ctnombre")
         # cxzona=request.POST.get("cxzona")
         cxlocalidad=request.POST.get("cxlocalidad")
-        # cxestado=request.POST.get("cxestado")
         ctdireccion=request.POST.get("ctdireccion")
         cttelefono1=request.POST.get("cttelefono1")
         cttelefono2=request.POST.get("cttelefono2")
@@ -768,6 +764,7 @@ def DatosCompradores(request, comprador_id=None):
         ctemail=request.POST.get("ctemail")
         ctemail2=request.POST.get("ctemail2")
         ctgirocomercial=request.POST.get("ctgirocomercial")
+        cxactividad = request.POST.get("cxactividad")
 
         if not comprador_id:
             datosparticipante = Datos_participantes(
@@ -776,7 +773,6 @@ def DatosCompradores(request, comprador_id=None):
                 ctnombre=ctnombre,
                 # 'cxzona': datosparticipante.cxzona,
                 cxlocalidad=cxlocalidad,
-                # 'cxestado':datosparticipante.cxestado,
                 ctdireccion=ctdireccion,
                 ctemail=ctemail,
                 ctemail2=ctemail2,
@@ -784,7 +780,8 @@ def DatosCompradores(request, comprador_id=None):
                 cttelefono2=cttelefono2,
                 ctcelular=ctcelular,
                 ctgirocomercial=ctgirocomercial,
-                cxusuariocrea= request.user
+                cxusuariocrea= request.user,
+                cxactividad = cxactividad,
             )
             if datosparticipante:
                 datosparticipante.save()
@@ -807,6 +804,7 @@ def DatosCompradores(request, comprador_id=None):
                 datosparticipante.ctcelular=ctcelular
                 datosparticipante.ctgirocomercial=ctgirocomercial
                 datosparticipante.cxusuariomodifica = request.user.id
+                datosparticipante.cxactividad=cxactividad
 
                 datosparticipante.save()
             
@@ -815,18 +813,14 @@ def DatosCompradores(request, comprador_id=None):
         datoscomprador = Datos_compradores.objects\
             .filter(cxcomprador=idcomprador).first()
 
-        cxactividad = request.POST.get("cxactividad")
-
         if not datoscomprador:
             datoscomprador= Datos_compradores(
                 cxcomprador = datosparticipante,
-                cxactividad = cxactividad,
                 cxusuariocrea = request.user
             )
             if datoscomprador:
                 datoscomprador.save()
         else:
-            datoscomprador.cxactividad=cxactividad
             datoscomprador.cxusuariomodifica = request.user.id
 
             datoscomprador.save()

@@ -48,7 +48,7 @@ class AsignacionesForm(forms.ModelForm):
             , 'dnegociacion', 'ddesembolso', 'ctinstrucciondepago', 'niva'
         ]
         labels={'cxcliente':'Cliente', 'nanticipo':'Anticipo'
-            , 'nvalor':'Valor', 'ngao':'Comisión'
+            , 'nvalor':'Total negociado', 'ngao':'Comisión'
             , 'ndescuentodecartera':'Descuento de cartera'
             , 'dnegociacion':'Negociación', 'ddesembolso':'Desembolso'
             , 'ctinstrucciondepago':'Instrucción de pago', 'niva':'IVA'

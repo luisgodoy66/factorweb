@@ -21,13 +21,6 @@
         <div class="card-header">
             <strong>Solicitud de factoring</strong> 
             {% if asignacion.id %} de  {{ asignacion.cxcliente }}  {% else %}  nueva{% endif %} 
-            <a href="{% url 'solicitudes:listasolicitudes' %}" class="btn btn-danger btn-sm float-right">
-                <i class="fa fa-ban"></i> Cancelar
-            </a>
-            <button type="button" onclick="AceptarAsignacion()" class="btn btn-primary btn-sm float-right">
-                <i class="fa fa-dot-circle-o"></i> Aceptar
-            </button>
-
         </div>
         <div class="col-6 col-md-6" hidden>
             <input type="text" 
@@ -91,13 +84,6 @@
                     </div>  
                        
                     <div class="row form-group">
-                        <div class="col-md-3"><label for="id_ctinstrucciondepago" class=" form-control-label">
-                            {{ form_asignacion.ctinstrucciondepago.label}}</label></div>
-                        <div class="col-md-9">
-                            {{ form_asignacion.ctinstrucciondepago}}
-                        </div>
-                    </div>  
-                    <div class="row form-group">
                         <div class="col-md-3"><label for="id_nvalor" class=" form-control-label">
                             {{ form_asignacion.nvalor.label }}
                         </label></div>
@@ -118,48 +104,70 @@
                             </select>
                         </div>
                     </div>  
-                    <!-- datos de ckiebte -->
                     <div class="row form-group">
-                        <div class="col-md-4"><label for="id_nvalor" class=" form-control-label">
-                            Cuenta de transferencia
-                        </label></div>
-                        <div class="col-md-8">
-                            {{ cuenta_transferencia}}
+                        <div class="col-md-3"><label for="id_ctinstrucciondepago" class=" form-control-label">
+                            {{ form_asignacion.ctinstrucciondepago.label}}</label></div>
+                        <div class="col-md-9">
+                            {{ form_asignacion.ctinstrucciondepago}}
                         </div>
                     </div>  
-                    <!-- <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_nvalor" class=" form-control-label">
+                    <!-- datos de cliente -->
+                    <div class="dropdown-divider"></div>
+                    <h5 class="heading-title mb-1 text-secondary">Datos del cliente</h5>
+                    <div class="row form-group">
+                        <div class="col-md-3"><label for="id_nvalor" class=" form-control-label">
+                            Cuenta de transferencia
+                        </label></div>
+                        <div class="col-md-3">
+                            {{ cuenta_transferencia}}
+                        </div>
+                        <div class="col-md-3"><label for="id_nvalor" class=" form-control-label">
                             Beneficiario de cheque
                         </label></div>
                         <div class="col-md-3">
                             {{ beneficiario}}
                         </div>
-                    </div>   -->
+                    </div>  
                 </div>
                 <!-- columna derecha -->
                 <div class="col-5">
+                    <h5 class="heading-title mb-1 text-secondary">Liquidación</h5>
                     <div class="row form-group">
-                        <div class="col col-xs-3"><label for="id_nanticipo" class=" form-control-label">
+                        <div class="col col-xs-9">
+                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
+                            {{ form_asignacion.nanticipo.label }}</h5></div>
+                        <!-- <div class="col"><label for="id_nanticipo" class=" form-control-label">
                             {{ form_asignacion.nanticipo.label }}
-                        </label></div>
-                        <div class="col-6 col-md-6">
+                        </label></div> -->
+                        <div class="col-md-6">
                             {{ form_asignacion.nanticipo}}
                         </div>
                     </div>  
                     <div class="row form-group">
-                        <div class="col col-xs-3"><label for="id_ngao" class=" form-control-label">{{gao.descripcion}}</label></div>
+                        <div class="col col-xs-9">
+                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
+                            - Cargos</h5></div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-1"></div>
+                        <div class="col col-xs-3">
+                            <label for="id_ngao" class=" form-control-label">{{gao.descripcion}}</label></div>
                         <div class="col-6 col-md-6">
                             {{ form_asignacion.ngao}}
                         </div>
                     </div>  
                     <div class="row form-group">
-                        <div class="col col-xs-3"><label for="id_ndescuentodecartera" class=" form-control-label">{{dc.descripcion}}</label></div>
+                        <div class="col-md-1"></div>
+                        <div class="col col-xs-3">
+                            <label for="id_ndescuentodecartera" class=" form-control-label">{{dc.descripcion}}</label></div>
                         <div class="col-6 col-md-6">
                             {{ form_asignacion.ndescuentodecartera}}
                         </div>
                     </div>  
                     <div class="row form-group">
-                        <div class="col col-xs-2"><label for="id_niva" class=" form-control-label">
+                        <div class="col-md-1"></div>
+                        <div class="col col-xs-2">
+                            <label for="id_niva" class=" form-control-label">
                             {{ form_asignacion.niva.label}}
                         </label></div>
                         <div class="col col-xs-1">
@@ -171,8 +179,12 @@
                         </div>
                     </div>  
                     <div class="row form-group">
-                        <div class="col col-xs-3"><label for="id_cxtipocliente" 
-                            class=" form-control-label">Neto</label></div>
+                        <!-- <div class="col col-xs-3"><label for="id_cxtipocliente" 
+                            class=" form-control-label">= Neto</label></div> -->
+                        <div class="col col-xs-3">
+                            <h5 for="id_nvalor" class=" form-control-label">
+                            = Neto
+                            </h5></div>
                         <div class="col-6 col-md-6">
                             <input type="number" name="neto" step="0.01" 
                             class="form-control" readonly id="neto">
@@ -180,17 +192,17 @@
                     </div>  
                 </div>
                 <!-- parte inferior -->
-                <div class="row">
+                <div class="row form-group">
                     <small>
 
-                    <div class="col col-xs-12">
+                    <div class="col-md-12">
                           
                         <table id="table"                      
                             data-show-columns-toggle-all="true"
                             data-show-export="true"
                             data-detail-formatter="detailFormatter"
                             data-minimum-count-columns="2"
-                            data-pagination="true"
+                            data-pagination="false"
                             data-id-field="id"
                             data-page-list="[10, 50, all]"
                             data-show-footer="true"
@@ -215,7 +227,14 @@
                     </small>
                </div>
             </div>    
-          
+        <div class="card-footer">
+            <a href="{% url 'solicitudes:listasolicitudes' %}" class="btn btn-danger btn-sm ">
+                <i class="fa fa-ban"></i> Cancelar
+            </a>
+            <button type="button" onclick="AceptarAsignacion()" class="btn btn-primary btn-sm ">
+                <i class="fa fa-dot-circle-o"></i> Aceptar
+            </button>
+        </div>
     </div>
     <!-- </div> -->
 </form>

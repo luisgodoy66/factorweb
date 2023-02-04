@@ -335,11 +335,28 @@ class Cargos_detalle(ClaseModelo):
     jcargos = models.JSONField()
 
 class DebitosCuentasConjuntas(ClaseModelo):
-    cuentabancaria = models.ForeignKey(CuentasConjuntasModels.Cuentas_bancarias, on_delete=models.CASCADE)
+    TIPOS_DE_OPERACION = (
+        ('R', 'Recuperación'),
+        ('C', 'Cobranzas'),
+    )
+    cuentabancaria = models.ForeignKey(CuentasConjuntasModels.Cuentas_bancarias
+        , on_delete=models.CASCADE)
     dmovimiento = models.DateField()
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     ctmotivo = models.CharField(max_length=60)
     notadedebito = models.OneToOneField(Notas_debito_cabecera, on_delete=models.CASCADE)
-    cobranza = models.OneToOneField(Documentos_cabecera, on_delete=models.CASCADE
+    cxtipooperacion = models.CharField(max_length=1, choices= TIPOS_DE_OPERACION
         , null=True)
+    # cobranza = models.OneToOneField(Documentos_cabecera, on_delete=models.CASCADE
+    #     , null=True)
+    operacion = models.BigIntegerField(null=True)
 
+    def cobranza(self):
+        if self.cxtipooperacion=='C':
+            x = Documentos_cabecera.objects.filter(pk = self.operacion).first()
+            return x.cxcobranza
+        elif self.cxtipooperacion=='R':
+            x = Recuperaciones_cabecera.objects.filter(pk = self.operacion).first()
+            return x.cxrecuperacion
+        else:
+            return ''

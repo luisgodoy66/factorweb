@@ -28,7 +28,9 @@
                 <div class="col-lg-6">
                     
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cxtipocliente" class=" form-control-label">Tipo de cliente</label></div>
+                        <div class="col col-md-3"><label for="id_cxtipocliente" class=" form-control-label">
+                            {{ form_cliente.cxtipocliente.label}}
+                        </label></div>
                         <div class="col-12 col-md-9">
                             {{ form_cliente.cxtipocliente}}
                         </div>
@@ -105,13 +107,13 @@
                     <div class="row form-group">
                         <div class="col col-md-3"><label for="id_cxactividad" class=" form-control-label">Actividad</label></div>
                         <div class="col-12 col-md-9">
-                            {{form_cliente.cxactividad}}
+                            {{form_participante.cxactividad}}
                         </div>
                     </div>
                     <div class="row form-group">
                         <div class="col col-md-3"><label for="id_dinicioactividades" class=" form-control-label">inicio de actividades</label></div>
                         <div class="col-12 col-md-9">
-                            {{form_cliente.dinicioactividades}}
+                            {{form_participante.dinicioactividades}}
                         </div>
                     </div>
                             

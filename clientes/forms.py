@@ -10,11 +10,8 @@ class ClienteForm(forms.ModelForm):
     
     class Meta:
         model=Datos_generales
-        fields=['cxcliente','cxtipocliente', 'cxactividad'
-            , 'dinicioactividades']
+        fields=['cxcliente','cxtipocliente',]
         labels={'cxcliente':'Identificación','cxtipocliente':'Tipo'
-            , 'cxactividad':'Código de actividad'
-            , 'dinicioactividades':'Inicio de actividades'
 
         }
     def __init__(self, *args, **kwargs):
@@ -24,16 +21,12 @@ class ClienteForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        self.fields['dinicioactividades'].widget.attrs['readonly']=True
-
 class CompradorForm(forms.ModelForm):
     
     class Meta:
         model=Datos_compradores
-        fields=['cxcomprador','cxactividad']
+        fields=['cxcomprador']
         labels={'cxcomprador':'Identificación'
-            , 'cxactividad':'Código de actividad'
-            
         }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

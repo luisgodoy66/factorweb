@@ -66,25 +66,30 @@
                             <td>{{ item.cxcobranza }} </td>
                             <td>{{ item.cxformapago }}</td>
                             <td>{{ item.nvalor}}</td>
-                            {% if item.depositoencuentaconjunta %}
+                            {% if item.ldepositoencuentaconjunta %}
                             <td>Cuenta conjunta</td>
                             {% else %}
                             <td>{{ item.cxcuentadeposito__cxcuenta}}</td>
                             {% endif %}
                             <td>
-                                <a href="#" onclick='ConfirmarCobranza("{{item.id}}","{{item.tipo}}")' 
-                                    class="btn btn-success btn-sm" role="button" title="Confirmado">
-                                    <i class="fa fa-check"></i></a>
+                                <button href="#" onclick='ConfirmarCobranza("{{item.id}}","{{item.tipo}}")' 
+                                    class="btn btn-success btn-sm" role="button" title="Confirmado"
+                                    {% if item.ldepositoencuentaconjunta %} disabled {% endif %}
+                                    >
+                                    <i class="fa fa-check"></i>
+                                </button>
                                 {% if item.cxformapago in 'CHE, DEP' %}
                                     {% if item.tipo == 'C' %}
                                     <a href="{% url 'cobranzas:protestocobranza' item.cxcheque_id item.id %}" 
                                         class="btn btn-danger btn-sm" role="button" title="Cobranza protestada">
-                                        <i class="fa fa-times"></i></a>
+                                        <i class="fa fa-times"></i>
+                                    </a>
                                     {% endif %}
                                     {% if item.tipo == 'R' %}
                                     <a href="{% url 'cobranzas:protestorecuperacion' item.cxcheque_id item.id %}" 
-                                        class="btn btn-danger btn-sm" role="button" title="Recuperacion potestada">
-                                        <i class="fa fa-times"></i></a>
+                                        class="btn btn-danger btn-sm" role="button" title="Recuperación potestada">
+                                        <i class="fa fa-times"></i>
+                                    </a>
                                     {% endif %}
                                 {% endif %}
                             </td>

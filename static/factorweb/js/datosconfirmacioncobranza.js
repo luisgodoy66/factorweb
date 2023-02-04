@@ -41,7 +41,7 @@ function toggle_transferencia(){
 }
   }
 
-function ConfirmarCobranza(){
+function ConfirmarCobranza(cobranza_id, tipo_operacion){
   let encendido_tr = document.querySelector('input[name="transferencia"]:checked');
   let encendido_cg = document.querySelector('input[name="cargo"]:checked');
   let valor_tr = capturaValor("id_ntransferencia")
@@ -62,8 +62,8 @@ function ConfirmarCobranza(){
   MensajeConfirmacion("Confirmar cobranza ?",function(){
 
     var objeto={
-      "pstipooperacion": "C",
-      "pncobranza": capturaValor("operacion"),
+      "pstipooperacion": tipo_operacion,
+      "pncobranza": cobranza_id,
       "pltransferencia": hay_transferencia,
       "pntransferencia":capturaValor("id_ntransferencia"),
       "pndevolucion": capturaValor("id_ndevolucion"),
