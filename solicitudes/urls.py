@@ -32,13 +32,14 @@ urlpatterns=[
         DatosAsignacionConAccesorios),
     path('detallesolicitud/<int:asignacion_id>',DetalleSolicitudFacturasPuras, \
         name='detallesolicitudfacturaspuras'),
-    path('detallesolicitudconaccesorios/<int:asignacion_id>',DetalleSolicitudConAccesorios, \
-        name='detallesolicitudconaccesorios'),
+    path('detallesolicitudconaccesorios/<int:asignacion_id>',DetalleSolicitudConAccesorios
+        ,name='detallesolicitudconaccesorios'),
     path('eliminarasignacion/<int:asignacion_id>',EliminarAsignacion),
-    # path('editarchequeaccesorio/',DatosChequeAccesorio, name="editarchequeaccesorio"),
-    path('editarchequeaccesorio/',DatosAccesorioEditar, name="editarchequeaccesorio"),
-    path('editarchequeaccesorio/<int:accesorio_id>',DatosAccesorioEditar, name="editarchequeaccesorio"),
-    path('eliminardetalleasignacion/<int:asignacion_id>/<int:documento_id>/<tipo_asignacion>',\
-        EliminarDocumento),
+    path('editarchequeaccesorio/<tipo_factoring_id>',DatosAccesorioEditar
+        , name="editarchequeaccesorio"),
+    path('editarchequeaccesorio/<int:accesorio_id>/<tipo_factoring_id>',DatosAccesorioEditar
+        , name="editarchequeaccesorio"),
+    path('eliminardetalleasignacion/<int:asignacion_id>/<int:documento_id>/<tipo_asignacion>'
+        ,EliminarDocumento),
 
 ]

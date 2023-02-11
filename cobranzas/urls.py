@@ -87,8 +87,8 @@ urlpatterns = [
         , name='motivoprotesto_nuevo'),
     path('motivoprotestoeditar/<int:pk>', MotivoProtestoEdit.as_view()
         , name='motivoprotesto_editar'),
-    path('protestocobranza/<int:id_cheque>/<int:id_cobranza>',ProtestoCobranzaNew.as_view()
-        , name='protestocobranza'),
+    path('protestocobranza/<int:id_cheque>/<int:id_cobranza>/<lista_deposito>'
+        ,ProtestoCobranzaNew.as_view(), name='protestocobranza'),
     path('aceptarprotesto/',AceptarProtesto),
     path('listaprotestospendientes/',ProtestosPendientesView.as_view(), 
         name="listaprotestospendientes"),
@@ -103,8 +103,8 @@ urlpatterns = [
     path('aceptarrecuperacion/',AceptarRecuperacion),
     path('reporterecuperacion/<int:cobranza_id>',ImpresionRecuperacionProtesto
         , name='reporte_recuperacion_protesto'),
-    path('protestorecuperacion/<int:id_cheque>/<int:id_cobranza>',ProtestoRecuperacionNew.as_view()
-        , name='protestorecuperacion'),
+    path('protestorecuperacion/<int:id_cheque>/<int:id_cobranza>/<lista_deposito>'
+        ,ProtestoRecuperacionNew.as_view(), name='protestorecuperacion'),
 
     # notas de debito
     path('listaliquidacionesennegativopendientes/',LiquidacionesEnNegativoPendientesView.as_view()

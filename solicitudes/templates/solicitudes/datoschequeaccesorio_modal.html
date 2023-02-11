@@ -3,9 +3,9 @@
 
         <form  method="POST" rol="form"  class="form-horizontal" name="form"
             {% if cheque %}
-                action="{% url 'solicitudes:editarchequeaccesorio' cheque %}"
+                action="{% url 'solicitudes:editarchequeaccesorio' cheque tipo_factoring %}"
             {% else %}
-                action="{% url 'solicitudes:editarchequeaccesorio' %}"
+                action="{% url 'solicitudes:editarchequeaccesorio' tipo_factoring %}"
             {% endif %}
             >
             <!-- <div class="col-md-12"> -->
@@ -72,18 +72,25 @@
                             </div>
                         </div>
                         {% endif %}
+                        {% if not vencimiento_en_feriado %}
+                        <div class="col-md-12">
+                            <div class="alert alert-info" role="alert">
+                                Este tipo de factoring no acepta vencimiento en sábados, domingos y feriados registrados. La fecha se trasladará al siguiente día hábil
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>    
                     {{ errors}}
                     <div class="card-footer">
                         {% if cheque %}
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            <i class="fa fa-dot-circle-o"></i> Grabar
-                        </button>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fa fa-dot-circle-o"></i> Grabar
+                            </button>
                         {% else %}
-                        <button type="button" class="btn btn-primary btn-sm"
-                            onclick="AgregarFilaCheque()" >
-                            <i class="fa fa-dot-circle-o"></i> Grabar
-                        </button>
+                            <button type="button" class="btn btn-primary btn-sm"
+                                onclick="AgregarFilaCheque()" >
+                                <i class="fa fa-dot-circle-o"></i> Grabar
+                            </button>
                         {% endif %}
                         <button type="buttom" class="btn btn-danger btn-sm" 
                             onclick="return CerrarModal()">

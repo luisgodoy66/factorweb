@@ -31,6 +31,15 @@ class FeriadoForm(forms.ModelForm):
             'dferiado':'Fecha',
             'llaborable':'Es laborable'
         }
+        widgets={
+            'dferiado': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'datepicker', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -40,4 +49,4 @@ class FeriadoForm(forms.ModelForm):
                 'class':'form-control'
             })
         self.fields['dferiado'].widget.attrs['value']=date.today
-        self.fields['dferiado'].widget.attrs['readonly']=True
+        # self.fields['dferiado'].widget.attrs['readonly']=True

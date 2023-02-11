@@ -257,6 +257,7 @@ class ProtestoCobranzaNew(LoginRequiredMixin, generic.CreateView):
     def get_context_data(self, **kwargs):
         id_cheque = self.kwargs.get('id_cheque')
         id_cobranza = self.kwargs.get('id_cobranza')
+        lista_deposito =self.kwargs.get('lista_deposito')
 
         cheque = Cheques.objects.filter(pk=id_cheque).first()
         cobranza = Documentos_cabecera.objects.filter(pk = id_cobranza).first()
@@ -269,6 +270,7 @@ class ProtestoCobranzaNew(LoginRequiredMixin, generic.CreateView):
         context["forma_cobro"] = cobranza.cxformapago
         context["codigo_cobranza"] = cobranza.cxcobranza
         context["tipo_operacion"]='Cobranza'
+        context["lista_deposito"]=lista_deposito
 
         return context
 
@@ -354,6 +356,7 @@ class ProtestoRecuperacionNew(LoginRequiredMixin, generic.CreateView):
     def get_context_data(self, **kwargs):
         id_cheque = self.kwargs.get('id_cheque')
         id_cobranza = self.kwargs.get('id_cobranza')
+        lista_deposito =self.kwargs.get('lista_deposito')
 
         cheque = Cheques.objects.filter(pk=id_cheque).first()
         cobranza = Recuperaciones_cabecera.objects.filter(pk = id_cobranza).first()
@@ -366,6 +369,7 @@ class ProtestoRecuperacionNew(LoginRequiredMixin, generic.CreateView):
         context["forma_cobro"] = cobranza.cxformacobro
         context["codigo_cobranza"] = cobranza.cxrecuperacion
         context["tipo_operacion"]='Recuperacion'
+        context["lista_deposito"]=lista_deposito
 
         return context
 

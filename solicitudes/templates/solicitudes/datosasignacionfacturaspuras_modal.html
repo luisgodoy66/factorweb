@@ -34,46 +34,55 @@
                             </div>
                         </div>  
                         <div class="row form-group">
-                            <div class="col-md-6"><label for="id_cxtipocliente" class=" form-control-label">
+                            <div class="col-md-6">
+                                <label for="id_cxtipocliente" class=" form-control-label">
                                 {{ form_documento.ctcomprador.label}}
-                            </label></div>
+                                </label>
+                            </div>
                             <div class="col-6 col-md-6">
                                 {{ form_documento.ctcomprador}}
                             </div>
                         </div>  
                         <div class="row form-group">
-                            <div class="col-md-6"><label for="id_cxtipocliente" class=" form-control-label">
+                            <div class="col-md-6">
+                                <label for="id_cxtipocliente" class=" form-control-label">
                                 {{ form_documento.ctserie1.label}}
-                            </label></div>
+                                </label>
+                            </div>
                             <div class="col-md-3">
                                 {{ form_documento.ctserie1}}
                             </div>
                         </div>  
                         <div class="row form-group">
-                            <div class="col-md-6"><label for="id_cxtipocliente" class=" form-control-label">
+                            <div class="col-md-6">
+                                <label for="id_cxtipocliente" class=" form-control-label">
                                 {{ form_documento.ctserie2.label}}
-                            </label></div>
+                                </label>
+                            </div>
                             <div class="col-md-3">
                                 {{ form_documento.ctserie2}}
                             </div>
                         </div>  
                         <div class="row form-group">
                             <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
-                                {{ form_documento.ctdocumento.label}}</label></div>
+                                {{ form_documento.ctdocumento.label}}</label>
+                            </div>
                             <div class="col-6 col-md-6">
                                 {{ form_documento.ctdocumento}}
                             </div>
                         </div>  
                         <div class="row form-group">
                             <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
-                                {{ form_documento.demision.label}}</label></div>
+                                {{ form_documento.demision.label}}</label>
+                            </div>
                             <div class="col-6 col-md-6">
                                 {{ form_documento.demision}}
                             </div>
                         </div>  
                         <div class="row form-group">
                             <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
-                                {{ form_documento.dvencimiento.label}}</label></div>
+                                {{ form_documento.dvencimiento.label}}</label>
+                            </div>
                             <div class="col-6 col-md-6">
                                 {{ form_documento.dvencimiento}}
                             </div>
@@ -83,35 +92,40 @@
                     <div class="col-md-6">
                         <div class="row form-group">
                             <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
-                                {{ form_documento.nvalorantesiva.label}}</label></div>
+                                {{ form_documento.nvalorantesiva.label}}</label>
+                            </div>
                             <div class="col-6 col-md-6">
                                 {{ form_documento.nvalorantesiva}}
                             </div>
                         </div>  
                         <div class="row form-group">
                             <div class="col col-xs-3"><label for="id_cxtipocliente" class=" form-control-label">
-                                {{ form_documento.niva.label}}</label></div>
+                                {{ form_documento.niva.label}}</label>
+                            </div>
                             <div class="col-6 col-md-6">
                                 {{ form_documento.niva}}
                             </div>
                         </div>  
                         <div class="row form-group">
                             <div class="col col-xs-3"><label for="id_nretencioniva" class=" form-control-label">
-                                {{ form_documento.nretencioniva.label}}</label></div>
+                                {{ form_documento.nretencioniva.label}}</label>
+                            </div>
                             <div class="col-6 col-md-6">
                                 {{ form_documento.nretencioniva}}
                             </div>
                         </div>  
                         <div class="row form-group">
                             <div class="col col-xs-3"><label for="id_nretencionrenta" class=" form-control-label">
-                                {{ form_documento.nretencionrenta.label}}</label></div>
+                                {{ form_documento.nretencionrenta.label}}</label>
+                            </div>
                             <div class="col-6 col-md-6">
                                 {{ form_documento.nretencionrenta}}
                             </div>
                         </div>  
                         <div class="row form-group">
                             <div class="col col-xs-3"><label for="id_nvalornonegociado" class=" form-control-label">
-                                {{ form_documento.nvalornonegociado.label}}</label></div>
+                                {{ form_documento.nvalornonegociado.label}}</label>
+                            </div>
                             <div class="col-6 col-md-6">
                                 {{ form_documento.nvalornonegociado}}
             
@@ -119,13 +133,21 @@
                         </div>  
                         <div class="row form-group">
                             <div class="col col-xs-3"><label for="id_ntotal" class=" form-control-label">
-                                {{ form_documento.ntotal.label}}</label></div>
+                                {{ form_documento.ntotal.label}}</label>
+                            </div>
                             <div class="col-6 col-md-6">
                                 {{ form_documento.ntotal}}
             
                             </div>
                         </div>  
-                    </div>
+                     </div>
+                    {% if not vencimiento_en_feriado %}
+                    <div class="col-md-12">
+                        <div class="alert alert-info" role="alert">
+                            Este tipo de factoring no acepta vencimiento en sábados, domingos y feriados registrados. La fecha se trasladará al siguiente día hábil
+                        </div>
+                     </div>
+                    {% endif %}
                 </div>
                 <div class="card-footer">
                     <button type="button" class="btn btn-danger btn-sm" onclick="return CerrarModal()">

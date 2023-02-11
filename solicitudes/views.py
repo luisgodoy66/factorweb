@@ -110,8 +110,10 @@ def DatosFacturasPuras(request, cliente_id=None
 
     template_name="solicitudes/datosasignacionfacturaspuras_modal.html"
     form_documento = DocumentosForm()
+    acepta_vencimiento_en_feriado = False
 
     if request.method=='GET':
+        
         if doc_id:
             detalle = Documentos.objects.filter(pk=doc_id).first()
             e = {
@@ -131,11 +133,18 @@ def DatosFacturasPuras(request, cliente_id=None
             }
             form_documento = DocumentosForm(e)
 
+        if tipo_factoring_id:
+            tipoFactoring = Tipos_factoring.objects\
+            .filter(cxtipofactoring=tipo_factoring_id).first()
+
+            acepta_vencimiento_en_feriado = tipoFactoring.lpermitediasferiados
+
     contexto={'form_documento':form_documento,
         'cliente': cliente_id,
         'tipo_factoring': tipo_factoring_id,
         'asignacion_id': asignacion_id,
         'doc_id' : doc_id,
+        'vencimiento_en_feriado':acepta_vencimiento_en_feriado
        }
 
     if request.method=='POST':
@@ -629,11 +638,12 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
     return render(request, template_name, contexto)
 
 
-def DatosAccesorioEditar(request, accesorio_id = None):
+def DatosAccesorioEditar(request, accesorio_id = None, tipo_factoring_id = None):
 
     template_name = "solicitudes/datoschequeaccesorio_modal.html"
     form_cheque = ChequesForm
     valor_cheque = None
+    acepta_vencimiento_en_feriado = False
 
     if request.method=='GET':
         if accesorio_id:
@@ -648,11 +658,19 @@ def DatosAccesorioEditar(request, accesorio_id = None):
                 , }
             form_cheque = ChequesForm(e)
             valor_cheque=accesorio.ntotal
+
+        if tipo_factoring_id:
+            tipoFactoring = Tipos_factoring.objects\
+            .filter(cxtipofactoring=tipo_factoring_id).first()
+
+            acepta_vencimiento_en_feriado = tipoFactoring.lpermitediasferiados
             
     contexto={'form_cheque': form_cheque,
-        'cheque':accesorio_id
-        ,'valor': valor_cheque
-       }
+        'cheque':accesorio_id,
+        'valor': valor_cheque,
+        'tipo_factoring':tipo_factoring_id,
+        'vencimiento_en_feriado':acepta_vencimiento_en_feriado
+}
 
     if request.method=='POST':
 

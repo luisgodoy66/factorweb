@@ -121,5 +121,6 @@ function NuevaAsignacion(){
 }
 
 function EditarDocumento( doc_id){
-  AbrirModal('/solicitudes/editarchequeaccesorio/'+doc_id )
+  tipo_factoring=capturaValor("id_cxtipofactoring");
+  AbrirModal('/solicitudes/editarchequeaccesorio/'+doc_id+'/'+tipo_factoring )
 }

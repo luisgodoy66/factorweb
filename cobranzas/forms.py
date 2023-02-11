@@ -156,6 +156,7 @@ class ProtestoForm(forms.ModelForm):
             })
         # self.fields['dprotesto'].widget.attrs['readonly']=True
         self.fields['dprotesto'].widget.attrs['value']=date.today
+        self.fields['nvalornotadebito'].widget.attrs['value']=0.00
 
 class RecuperacionesProtestosForm(forms.ModelForm):
 

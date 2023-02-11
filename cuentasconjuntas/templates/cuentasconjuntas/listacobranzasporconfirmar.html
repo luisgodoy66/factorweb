@@ -74,9 +74,17 @@
                                     class="btn btn-success btn-sm" role="button" title="Confirmación">
                                     <i class="fa fa-check"></i></a>
                                 {% if item.cxformapago in 'CHE' %}
-                                    <a href="{% url 'cobranzas:protestocobranza' item.cxcheque_id item.id %}" 
-                                        class="btn btn-danger btn-sm" role="button" title="Cobranza protestada">
-                                        <i class="fa fa-times"></i></a>
+                                    {% if item.tipo == 'C' %}
+                                        <a href="{% url 'cobranzas:protestocobranza' item.cxcheque_id item.id 'Cuentas cliente' %}" 
+                                            class="btn btn-danger btn-sm" role="button" title="Cobranza protestada">
+                                            <i class="fa fa-times"></i></a>
+                                    {% endif %}
+                                    {% if item.tipo == 'R' %}
+                                        <a href="{% url 'cobranzas:protestorecuperacion' item.cxcheque_id item.id 'Cuentas cliente'%}" 
+                                            class="btn btn-danger btn-sm" role="button" title="Recuperación potestada">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    {% endif %}
                                 {% endif %}
                             </td>
                         </tr>

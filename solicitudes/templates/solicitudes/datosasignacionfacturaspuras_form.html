@@ -130,10 +130,10 @@
             <div class="col-md-6">
                 <button class="btn btn-success btn-sm"  role="button"
                     {% if asignacion.id %}
-                    onclick="return AbrirModal(
-                        '{% url 'solicitudes:facturaspuras_editar' asignacion.id asignacion.cxcliente_id asignacion.cxtipofactoring_id %}')"
+                        onclick="return AbrirModal(
+                            '{% url 'solicitudes:facturaspuras_editar' asignacion.id asignacion.cxcliente_id asignacion.cxtipofactoring_id %}')"
                     {% else %}
-                    onclick="return NuevaAsignacion()"
+                        onclick="return NuevaAsignacion()"
                     {% endif %} 
                     >  
                     <i class="fa fa-dot-circle-o"></i> Agregar factura

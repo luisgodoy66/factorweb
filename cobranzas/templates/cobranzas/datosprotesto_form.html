@@ -108,8 +108,13 @@
                 <!-- </div> -->
             </div>    
             <div class="card-footer">
-                <a href="{% url 'cobranzas:listacobranzasporconfirmar' %}" class="btn btn-danger btn-sm ">
-                    <i class="fa fa-ban"></i> Cancelar
+                <a 
+                {% if lista_deposito == 'Cuentas cliente' %}
+                    href="{% url 'cuentasconjuntas:listacobranzasporconfirmar' %}"
+                {% else %}
+                    href="{% url 'cobranzas:listacobranzasporconfirmar' %}"
+                {% endif %}
+                class="btn btn-danger btn-sm "><i class="fa fa-ban"></i> Cancelar
                 </a>
                 <button type="button" class="btn btn-primary btn-sm" onclick="AceptarProtesto()">  
                     <i class="fa fa-dot-circle-o"></i> Protestar
