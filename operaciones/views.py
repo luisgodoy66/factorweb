@@ -203,7 +203,7 @@ def DesembolsarAsignacion(request, pk, cliente_ruc):
                     cargo.save()
                     valor = 0
 
-            # 3. grabar la liquidacion
+            # 3. grabar el desembolso
             operacion = request.POST.get("cxoperacion")
             forma_pago = request.POST.get("cxformapago")
 
@@ -715,8 +715,8 @@ def SumaCargos(request,asignacion_id, gao_carga_iva, dc_carga_iva, carga_gao, ca
         base += g
     if dc_carga_iva=="Si":
         base += d
-    iva = base * porcentaje_iva / 100
-    
+    iva = round( base * porcentaje_iva / 100,2)
+    # redondear a 2 decimales?
     # neto
     neto =   a -g - d - iva
 

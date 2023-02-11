@@ -7,7 +7,8 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Operaciones</a></li>
                     <li><a href="#">Negociación</a></li>
-                    <li class="active">Solicitudes pendientes</li>
+                    <li><a href="{% url 'solicitudes:listasolicitudes' %}">solicitudes</a></li>
+                    <li class="active">facturas con accesorio</li>
                 </ol>
             </div>
         </div>
@@ -21,7 +22,7 @@
     <div class="card">
             {% csrf_token %}
         <div class="card-header">
-            <strong>Solicitud de factoring</strong> 
+            <strong>Solicitud con accesorios de factoring</strong> 
             {% if asignacion.id %} de  {{ asignacion.cxcliente }}  
             {% else %}  nueva {% endif %} 
         </div>
@@ -67,20 +68,18 @@
                         class=" form-control-label">
                     {{ form.cxcliente.label}}</label>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-5">
                     {{ form.cxcliente}}
                 </div>
-                <!-- tipo de factoring -->
                 <div class="col-md-2">
                     <label for="id_cxtipocliente" 
                         class=" form-control-label">
                     {{ form.cxtipofactoring.label}}</label>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     {{ form.cxtipofactoring}}
                 </div>
             </div>
-            <!-- numero de documentos -->
             <div class="row form-group">
                 <div class="col-md-2">
                     <label for="id_cxactividad" 
@@ -90,14 +89,14 @@
                 <div class="col-md-1">
                     {{form.ncantidaddocumentos}}
                 </div>
-                <div class="col-md-1">
+                <div class="col-md-2">
                     <label for="id_cxactividad" class=" form-control-label">
                     {{form.nvalor.label}}</label>
                 </div>
                 <div class="col-md-2">
                     {{form.nvalor}}
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-5">
                     {% if asignacion.id %}
                         <button type="submit" class="btn btn-primary btn-sm">
                             <i class="fa fa-dot-circle-o"></i> Actualizar cliente y tipo de factoring

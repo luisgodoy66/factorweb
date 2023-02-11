@@ -157,6 +157,7 @@ class Liquidacion_detalle(ClaseModelo):
         ('R', 'Recuperación'),
         ('C', 'Cobranzas'),
         ('L', 'Liquidación'),
+        ('D', 'Debito bancario'),
     )
     liquidacion = models.ForeignKey(Liquidacion_cabecera
         , on_delete=models.CASCADE, related_name="liquidacion_detalle")

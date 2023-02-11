@@ -29,7 +29,7 @@ window.operateEvents = {
     EditarDocumento(asignacion_id,cliente_id,capturaValor("id_cxtipofactoring"), row.id)
   },
     'click .remove': function (e, value, row, index) {
-      EliminarDocumentoDeSolicitudAsignacion(asignacion_id, row.id,'P', row.Documento)
+      EliminarDocumentoDeSolicitudAsignacion(asignacion_id, row.id,'F', row.Documento)
     }
 };
 
@@ -53,7 +53,7 @@ function initTable() {
         [{title: 'Ref.', field: 'id', rowspan: 2, align: 'center',
           valign: 'middle', sortable: true,
           footerFormatter: LineaTotalEnPieDePaginaDeTabla
-        }, {title: 'Comprador', field: 'Comprador', rowspan: 2,
+        }, {title: 'Deudor', field: 'Comprador', rowspan: 2,
             align: 'center', valign: 'middle', sortable: true,
             footerFormatter: LineaCantidadEnPieDePaginaDeTabla
           }, {title: 'Documento', field: 'Documento', rowspan: 2,
@@ -62,7 +62,7 @@ function initTable() {
             align: 'center', valign: 'middle', sortable: true,
           }, {title: 'Vencimiento', field: 'Vencimiento', rowspan: 2,
             align: 'center', valign: 'middle', sortable: true,
-          }, {title: 'Valores', colspan: 4, align: 'center'
+          }, {title: 'Valores', colspan: 5, align: 'center'
         }, {
             field: 'operate', title: 'Acción', align: 'center',rowspan: 2,
           clickToSelect: false, events: window.operateEvents,valign: 'middle',
@@ -78,8 +78,12 @@ function initTable() {
             field: 'Retenciones', title: 'Retenciones',
             sortable: true, align: 'center',
             footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+        }, {
+            field: 'NoNegociado', title: 'Descartado',
+            sortable: true, align: 'center',
+            footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
           }, {
-            field: 'Total', title: 'Total', sortable: true,
+            field: 'Total', title: 'Negociado', sortable: true,
             align: 'center', footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
           }]
       ]

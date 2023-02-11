@@ -211,7 +211,8 @@ def ImpresionLiquidacion(request, liquidacion_id):
             operacion = Liquidacion_cabecera.objects.filter(pk=item.operacion).first()
 
         jsdet["cobranza"] = operacion
-
+        # cuando el tipo es D (nota de debito), se puede buscar si es de cuenta conjunta
+        # y tomar el motivo para mostrarlo en el reporte
         jsdet["valor_base"] = item.cargo.ctvalorbase
         jsdet["tasa_calculo"]=item.cargo.ntasacalculo
         jsdet["dias_calculo"] = item.cargo.ndiascalculo

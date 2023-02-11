@@ -37,39 +37,51 @@
                     </div>  
     
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cxparticipante" class=" form-control-label">Identificación</label></div>
+                        <div class="col col-md-3"><label for="id_cxparticipante" class=" form-control-label">
+                            {{form_participante.cxparticipante.label}}
+                        </label></div>
                         <div class="col-12 col-md-9">
                             {{form_participante.cxparticipante}}
                             <small class="form-text text-muted">Máximo 13 caracteres</small></div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_ctnombre" class=" form-control-label">Nombre de cliente</label></div>
+                        <div class="col col-md-3"><label for="id_ctnombre" class=" form-control-label">
+                            {{form_participante.ctnombre.label}}
+                        </label></div>
                         <div class="col-12 col-md-9">
                             {{form_participante.ctnombre}}
                             <small class="form-text text-muted">Máximo 100 caracteres</small></div>
                     </div>
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cxlocalidad" class=" form-control-label">Localidad</label></div>
+                        <div class="col col-md-3"><label for="id_cxlocalidad" class=" form-control-label">
+                            {{form_cliente.cxlocalidad.label}}
+                        </label></div>
                         <div class="col-12 col-md-9">
-                            {{form_participante.cxlocalidad}}
+                            {{form_cliente.cxlocalidad}}
                         </div>
                     </div>
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_ctdireccion" class=" form-control-label">Dirección de cliente</label></div>
+                        <div class="col col-md-3"><label for="id_ctdireccion" class=" form-control-label">
+                            {{form_participante.ctdireccion.label}}
+                        </label></div>
                         <div class="col-12 col-md-9">
                             {{form_participante.ctdireccion}}
                         </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cttelefono1" class=" form-control-label">Teléfono principal</label></div>
+                        <div class="col col-md-3"><label for="id_cttelefono1" class=" form-control-label">
+                            {{form_participante.cttelefono1.label}}
+                        </label></div>
                         <div class="col-12 col-md-9">
                             {{form_participante.cttelefono1}}
                             <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
                     </div>
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cttelefono2" class=" form-control-label">Teléfono secundario</label></div>
+                        <div class="col col-md-3"><label for="id_cttelefono2" class=" form-control-label">
+                            {{form_participante.cttelefono2.label}}
+                        </label></div>
                         <div class="col-12 col-md-9">
                             {{form_participante.cttelefono2}}
                             <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
@@ -79,39 +91,51 @@
                 <!-- columna derecha -->
                 <div class="col-lg-6">
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_ctcelular" class=" form-control-label">Teléfono movil</label></div>
+                        <div class="col col-md-3"><label for="id_ctcelular" class=" form-control-label">
+                            {{form_participante.ctcelular.label}}
+                        </label></div>
                         <div class="col-12 col-md-9">
                             {{form_participante.ctcelular}}
                             <small class="form-text text-muted">Máximo 30 caracteres. Incluya el código de país</small></div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_ctemail" class=" form-control-label">Email principal</label></div>
+                        <div class="col col-md-3"><label for="id_ctemail" class=" form-control-label">
+                            {{form_participante.ctemail.label}}
+                        </label></div>
                         <div class="col-12 col-md-9">
                             {{form_participante.ctemail}}
                             <small class="text-muted form-text">Ingrese el email principal</small></div>
                     </div>
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_ctemail2" class=" form-control-label">Email secundario</label></div>
+                        <div class="col col-md-3"><label for="id_ctemail2" class=" form-control-label">
+                            {{form_participante.ctemail2.label}}
+                        </label></div>
                         <div class="col-12 col-md-9">
                             {{form_participante.ctemail2}}
                             <small class="text-muted form-text">Ingrese el email secundario</small></div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_ctgirocomercial" class=" form-control-label">Giro comercial</label></div>
+                        <div class="col col-md-3"><label for="id_ctgirocomercial" class=" form-control-label">
+                            {{form_participante.ctgirocomercial.label}}
+                        </label></div>
                         <div class="col-12 col-md-9">
                             {{form_participante.ctgirocomercial}}
                         </div>
                     </div> 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cxactividad" class=" form-control-label">Actividad</label></div>
+                        <div class="col col-md-3"><label for="id_cxactividad" class=" form-control-label">
+                            {{form_participante.cxactividad.label}}
+                        </label></div>
                         <div class="col-12 col-md-9">
                             {{form_participante.cxactividad}}
                         </div>
                     </div>
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_dinicioactividades" class=" form-control-label">inicio de actividades</label></div>
+                        <div class="col col-md-3"><label for="id_dinicioactividades" class=" form-control-label">
+                            {{form_participante.dinicioactividades.label}}
+                        </label></div>
                         <div class="col-12 col-md-9">
                             {{form_participante.dinicioactividades}}
                         </div>

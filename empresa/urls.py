@@ -1,8 +1,9 @@
 from django.urls import URLPattern, path
 from .views import TiposFactoringView, TipoFactoringNew , TipoFactoringEdit\
     , TasasFactoringView, TasaFactoringNew, TasaFactoringEdit\
-    , ClasesParticipanteView, ClasesParticipanteNew, CuentasBancariasView\
-    , CuentaBancariaNew, CuentaBancariaEdit
+    , ClasesParticipanteView, ClasesParticipanteNew\
+    , CuentasBancariasView, CuentaBancariaNew, CuentaBancariaEdit\
+    , LocalidadesView, LocalidadesNew, LocalidadesEdit
 
 urlpatterns = [
     path('listatiposfactoring/',TiposFactoringView.as_view()
@@ -27,4 +28,7 @@ urlpatterns = [
     ,name='cuentabancaria_nueva'),
     path('cuentabancariaedit/<int:pk>',CuentaBancariaEdit.as_view()
     ,name='cuentabancaria_editar'),
-]
+    path('listalocalidades/',LocalidadesView.as_view(),name='listalocalidades'),
+    path('localidadnueva/',LocalidadesNew.as_view(),name='localidad_nueva'),
+    path('localidadedit/<int:pk>',LocalidadesEdit.as_view(),name='localidad_editar'),
+ ]

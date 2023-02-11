@@ -24,7 +24,7 @@ class Clientes(ClaseModelo):
 class Asignacion(ClaseModelo):
     TIPOS_DE_ASIGNACION = (
         ('A', 'Con accesorios'),
-        ('P', 'Facturas puras'),
+        ('F', 'Facturas puras'),
     )
     TIPOS_DE_ESTADO = (
         ('A', 'Aceptada'),

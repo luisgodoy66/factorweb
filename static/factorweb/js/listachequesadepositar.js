@@ -8,7 +8,7 @@ window.onload=function(){
     ActualizarHeader();
     $table.bootstrapTable({locale:"es-EC"});
     
-    objeto_fechas("#fechacorte")
+    // objeto_fechas("#fechacorte")
     let hoy = new Date();
     inicializaValor("fechacorte", hoy.toISOString())
 

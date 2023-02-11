@@ -11,7 +11,7 @@ from .models import Cuenta_transferencia, Datos_generales, Personas_juridicas, P
 
 from solicitudes.models import Clientes as Solicitante
 
-from empresa.models import Datos_participantes
+from empresa.models import Datos_participantes, Localidades
 from empresa.forms import ParticipanteForm
 
 from .forms import  ClienteForm, PersonaNaturalForm, PersonaJuridicaForm\
@@ -220,7 +220,6 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
                 'cxparticipante':datosparticipante.cxparticipante,
                 'ctnombre':datosparticipante.ctnombre,
                 # 'cxzona': datosparticipante.cxzona,
-                'cxlocalidad':datosparticipante.cxlocalidad,
                 # 'cxestado':datosparticipante.cxestado,
                 'ctdireccion':datosparticipante.ctdireccion,
                 'ctemail':datosparticipante.ctemail,
@@ -242,7 +241,8 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
             if datoscliente:
                 e={
                     'cxtipocliente':datoscliente.cxtipocliente,
-                    'cxcliente':datosparticipante.cxparticipante
+                    'cxcliente':datosparticipante.cxparticipante,
+                    'cxlocalidad':datoscliente.cxlocalidad,
                 }
                 form_cliente=ClienteForm(e)
         else:
@@ -302,7 +302,6 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
                 cxparticipante=idcliente,
                 ctnombre=ctnombre,
                 # 'cxzona': datosparticipante.cxzona,
-                cxlocalidad=cxlocalidad,
                 ctdireccion=ctdireccion,
                 ctemail=ctemail,
                 ctemail2=ctemail2,
@@ -321,7 +320,6 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
             datosparticipante.cxparticipante=idcliente
             datosparticipante.ctnombre=ctnombre
             # datosparticipante.cxzona=cxzona
-            datosparticipante.cxlocalidad=cxlocalidad
             # datosparticipante.cxestado=cxestado
             datosparticipante.ctdireccion=ctdireccion
             datosparticipante.ctemail=ctemail
@@ -340,18 +338,21 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
         datoscliente = Datos_generales.objects.filter(cxcliente=idcliente).first()
 
         cxtipocliente = request.POST.get("cxtipocliente")
+        local = Localidades.objects.filter(pk=cxlocalidad).first()
 
         if not datoscliente:
             datoscliente= Datos_generales(
                 cxcliente = datosparticipante,
                 cxtipocliente=cxtipocliente,
-                cxusuariocrea = request.user
+                cxusuariocrea = request.user,
+                cxlocalidad=local,
             )
             if datoscliente:
                 datoscliente.save()
         else:
             datoscliente.cxtipocliente=cxtipocliente
             datoscliente.cxusuariomodifica = request.user.id
+            datoscliente.cxlocalidad=local
 
             datoscliente.save()
 
@@ -716,7 +717,6 @@ def DatosCompradores(request, comprador_id=None):
                 'cxparticipante':datosparticipante.cxparticipante,
                 'ctnombre':datosparticipante.ctnombre,
                 # 'cxzona': datosparticipante.cxzona,
-                'cxlocalidad':datosparticipante.cxlocalidad,
                 # 'cxestado':datosparticipante.cxestado,
                 'ctdireccion':datosparticipante.ctdireccion,
                 'ctemail':datosparticipante.ctemail,
@@ -756,7 +756,6 @@ def DatosCompradores(request, comprador_id=None):
         idcomprador=request.POST.get("cxparticipante")
         ctnombre=request.POST.get("ctnombre")
         # cxzona=request.POST.get("cxzona")
-        cxlocalidad=request.POST.get("cxlocalidad")
         ctdireccion=request.POST.get("ctdireccion")
         cttelefono1=request.POST.get("cttelefono1")
         cttelefono2=request.POST.get("cttelefono2")
@@ -772,7 +771,6 @@ def DatosCompradores(request, comprador_id=None):
                 cxparticipante=idcomprador,
                 ctnombre=ctnombre,
                 # 'cxzona': datosparticipante.cxzona,
-                cxlocalidad=cxlocalidad,
                 ctdireccion=ctdireccion,
                 ctemail=ctemail,
                 ctemail2=ctemail2,
@@ -794,7 +792,6 @@ def DatosCompradores(request, comprador_id=None):
                 datosparticipante.cxparticipante=idcomprador
                 datosparticipante.ctnombre=ctnombre
                 # datosparticipante.cxzona=cxzona
-                datosparticipante.cxlocalidad=cxlocalidad
                 # datosparticipante.cxestado=cxestado
                 datosparticipante.ctdireccion=ctdireccion
                 datosparticipante.ctemail=ctemail

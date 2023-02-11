@@ -8,9 +8,9 @@ window.onload=function(){
             calcular_factura();
         });
 
-    // inicializar valores
-    objeto_fechas("#id_demision");
-    objeto_fechas("#id_dvencimiento");
+    // // inicializar valores
+    // objeto_fechas("#id_demision");
+    // objeto_fechas("#id_dvencimiento");
     
     // cerrar side bar
     // CerrarSideBar();

@@ -6,13 +6,13 @@ from .models import  Cuentas_bancarias, Datos_generales\
 from datetime import date
 
 class ClienteForm(forms.ModelForm):
-    dinicioactividades = forms.DateInput()
+    # dinicioactividades = forms.DateInput()
     
     class Meta:
         model=Datos_generales
-        fields=['cxcliente','cxtipocliente',]
+        fields=['cxcliente','cxtipocliente', 'cxlocalidad',]
         labels={'cxcliente':'Identificación','cxtipocliente':'Tipo'
-
+            , 'cxlocalidad':'Sucursal de atención'
         }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -21,6 +21,7 @@ class ClienteForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
+
 class CompradorForm(forms.ModelForm):
     
     class Meta:
@@ -50,6 +51,16 @@ class PersonaNaturalForm(forms.ModelForm):
             , 'ctnombreconyuge':'Nombre de conyuge'
             , 'ctprofesion':'Profesión'
         }
+        widgets = {
+            'dnacimiento': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+        }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
@@ -57,7 +68,7 @@ class PersonaNaturalForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        self.fields['dnacimiento'].widget.attrs['readonly']=True
+        # self.fields['dnacimiento'].widget.attrs['readonly']=True
 
 class PersonaJuridicaForm(forms.ModelForm):
     dvencimientocargorepresentante1 = forms.DateInput
@@ -83,19 +94,19 @@ class PersonaJuridicaForm(forms.ModelForm):
             , 'ladministrasocios':'Administran socios'
             , 'ladministraindividual':'Administración individual'
             , 'ctobjetosocial':'Objeto social'
-            , 'cxrepresentante1':'Id. representante legal'
+            , 'cxrepresentante1':'Cédula de representante legal'
             , 'ctrepresentante1':'Nombre de representate legal'
             , 'dvencimientocargorepresentante1':'Vencimiento de cargo'
             , 'ctcargorepresentante1':'Cargo de representate legal'
             , 'cxestadocivilrepresentante1':'Estado civil'
             , 'cttelefonorepresentante1':'Teléfono '
-            , 'cxrepresentante2':'Id. representante legal'
+            , 'cxrepresentante2':'Cédula de representante legal'
             , 'ctrepresentante2':'Nombre de representate legal'
             , 'dvencimientocargorepresentante2':'Vencimiento de cargo'
             , 'ctcargorepresentante2':'Cargo de representate legal'
             , 'cxestadocivilrepresentante2':'Estado civil'
             , 'cttelefonorepresentante2':'Teléfono '
-            , 'cxrepresentante3':'Id. representante legal'
+            , 'cxrepresentante3':'Cédula de representante legal'
             , 'ctrepresentante3':'Nombre de representate legal'
             , 'dvencimientocargorepresentante3':'Vencimiento de cargo'
             , 'ctcargorepresentante3':'Cargo de representate legal'
@@ -103,12 +114,33 @@ class PersonaJuridicaForm(forms.ModelForm):
             , 'cttelefonorepresentante3':'Teléfono '
         }
         widgets={'ctnombrecorto': forms.Textarea(attrs={'rows': '1'})
-                , 'ctcontacto':forms.Textarea(attrs={'rows': '1'})
-                , 'ctobjetosocial':forms.Textarea(attrs={'rows': '3'})
-                , 'ctrepresentante1':forms.Textarea(attrs={'rows': '1'})
-                , 'ctrepresentante2':forms.Textarea(attrs={'rows': '1'})
-                , 'ctrepresentante3':forms.Textarea(attrs={'rows': '1'})
-                }
+            , 'ctcontacto':forms.Textarea(attrs={'rows': '1'})
+            , 'ctobjetosocial':forms.Textarea(attrs={'rows': '3'})
+            , 'ctrepresentante1':forms.Textarea(attrs={'rows': '1'})
+            , 'ctrepresentante2':forms.Textarea(attrs={'rows': '1'})                , 'ctrepresentante3':forms.Textarea(attrs={'rows': '1'})
+            ,'dvencimientocargorepresentante1': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+            'dvencimientocargorepresentante2': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+            'dvencimientocargorepresentante3': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+        }
+
                 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -117,9 +149,9 @@ class PersonaJuridicaForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        self.fields['dvencimientocargorepresentante1'].widget.attrs['readonly']=True
-        self.fields['dvencimientocargorepresentante2'].widget.attrs['readonly']=True
-        self.fields['dvencimientocargorepresentante3'].widget.attrs['readonly']=True
+        # self.fields['dvencimientocargorepresentante1'].widget.attrs['readonly']=True
+        # self.fields['dvencimientocargorepresentante2'].widget.attrs['readonly']=True
+        # self.fields['dvencimientocargorepresentante3'].widget.attrs['readonly']=True
         self.fields['dvencimientocargorepresentante1'].widget.attrs['value']=date.today
         self.fields['dvencimientocargorepresentante2'].widget.attrs['value']=date.today
         self.fields['dvencimientocargorepresentante3'].widget.attrs['value']=date.today

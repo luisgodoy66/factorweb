@@ -1,7 +1,7 @@
 const tipo_operacion = capturaValor("tipo_operacion")
 
 window.onload=function(){
-    objeto_fechas("#id_dprotesto")
+    // objeto_fechas("#id_dprotesto")
 }
 
 function AceptarProtesto(){

@@ -10,7 +10,7 @@ class AsignacionesForm(forms.ModelForm):
             ,'nvalor', 'ncantidaddocumentos', 
         ]
         labels={'cxcliente':'Cliente', 'cxtipofactoring':'Tipo de factoring'
-            ,'nvalor':'Valor', 'ncantidaddocumentos':'Cantidad de documentos', 
+            ,'nvalor':'Total negociado', 'ncantidaddocumentos':'Cantidad de documentos', 
         }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -39,7 +39,23 @@ class DocumentosForm(forms.ModelForm):
             , 'dvencimiento':'Vencimiento', 'nvalorantesiva':'Valor antes de IVA'
             , 'niva':'IVA', 'nretencioniva':'Retención de IVA'
             , 'nretencionrenta':'Retención de impuesto a la renta'
-            , 'ntotal':'Valor negociado', 'nvalornonegociado':'Valor no negociado'
+            , 'ntotal':'Valor negociado', 'nvalornonegociado':'Valor descartado'
+        }
+        widgets = {
+            'demision': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'datepicker', 
+                    'placeholder': 'Seleccione  una fecha',
+                    'type': 'date'
+                    }
+                    ),
+            'dvencimiento': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'datepicker', 
+                    'placeholder': 'Seleccione  una fecha',
+                    'type': 'date'
+                    }
+                    ),
         }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -49,9 +65,9 @@ class DocumentosForm(forms.ModelForm):
                 'class':'form-control'
             })
         self.fields['demision'].widget.attrs['value']=date.today
-        self.fields['demision'].widget.attrs['readonly']=True
+        # self.fields['demision'].widget.attrs['readonly']=True
         self.fields['dvencimiento'].widget.attrs['value']=date.today
-        self.fields['dvencimiento'].widget.attrs['readonly']=True
+        # self.fields['dvencimiento'].widget.attrs['readonly']=True
         self.fields['ntotal'].widget.attrs['readonly']=True
 
 class ChequesForm(forms.ModelForm):

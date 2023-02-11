@@ -295,6 +295,8 @@ def DatosFacturasPuras(request, cliente_id=None
 def EliminarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
     # la eliminacion es lógica
     # el documento_id debe ser el id del accesorio cuando es asignacin con accesorios
+    # el valor no negociado se encuentra en el total del documento, no debe restar adicional
+
     if request.method=="GET":
         # marcar como eliminado el doc o el cheque
 
@@ -309,10 +311,13 @@ def EliminarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
                 # si es cheque actualizar el valor no negociado del documento
                 # si es un solo cheque, eliminar la factura
                 doc = ChequesAccesorios.objects.filter(pk = documento_id).first()
-                factura = doc.documento
+                factura =  Documentos.objects.filter(pk=doc.documento.id).first()
+
                 factura.nvalornonegociado += doc.ntotal
-                if factura.nvalornonegociado == factura.ntotal:
+                factura.ntotal -= doc.ntotal
+                if factura.nvalornonegociado == 0:
                     factura.leliminado = True
+                    factura.cxusuarioelimina = request.user.id
                 factura.save()
 
             doc.leliminado = True
@@ -322,31 +327,29 @@ def EliminarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
             # actualizar la asignacion
             total_facturas = Documentos.objects.filter(cxasignacion=asignacion_id \
                 , leliminado=False).aggregate(Sum('ntotal'))
-            total_nonegociado = Documentos.objects.filter(cxasignacion=asignacion_id \
-                , leliminado=False).aggregate(Sum('nvalornonegociado'))
+            # total_nonegociado = Documentos.objects.filter(cxasignacion=asignacion_id \
+            #     , leliminado=False).aggregate(Sum('nvalornonegociado'))
             numero_documentos = Documentos.objects.filter(cxasignacion=asignacion_id\
                 , leliminado=False).aggregate(Count('ctdocumento'))
             
             total = total_facturas["ntotal__sum"] 
-            nonegociado = total_nonegociado["nvalornonegociado__sum"]
+            # nonegociado = total_nonegociado["nvalornonegociado__sum"]
             cantidad = numero_documentos["ctdocumento__count"]
 
             if not total: 
                 total = 0
                 cantidad = 0
-            if not nonegociado:
-                nonegociado=0
+            # if not nonegociado:
+            #     nonegociado=0
 
             if numero_documentos:
-                asignacion.nvalor = total - nonegociado
+                asignacion.nvalor = total #- nonegociado
                 asignacion.ncantidaddocumentos = cantidad
             else:
                 asignacion.nvalor = 0
                 asignacion.ncantidaddocumentos = 0
 
             asignacion.save()
-
-        # nota: falta marcar como eliminados los cheques accesorios, si tuviese
 
     return HttpResponse("OK")
 
@@ -374,7 +377,7 @@ def EliminarAsignacion(request, asignacion_id):
 from django.http import JsonResponse
 from . import models
 
-def DocumentoADictionario(doc):
+def DetalleSolicitudFacturasPurasOutput(doc):
     output = {}
     output['id'] = doc.id
     output["Comprador"] = doc.ctcomprador
@@ -384,6 +387,7 @@ def DocumentoADictionario(doc):
     output["ValorAntesDeIVA"] = doc.nvalorantesiva
     output["IVA"] = doc.niva
     output["Retenciones"] = doc.nretencioniva +doc.nretencionrenta
+    output["NoNegociado"] = doc.nvalornonegociado
     output["Total"] = doc.ntotal
 
     return output
@@ -398,7 +402,7 @@ def DetalleSolicitudFacturasPuras(request, asignacion_id = None):
 
     # Converting `QuerySet` to a Python Dictionary
     for i in range(len(documentos)):
-        tempBlogs.append(DocumentoADictionario(documentos[i])) # Converting `QuerySet` to a Python Dictionary
+        tempBlogs.append(DetalleSolicitudFacturasPurasOutput(documentos[i])) # Converting `QuerySet` to a Python Dictionary
 
     docjson = tempBlogs
 
@@ -420,7 +424,7 @@ def DetalleSolicitudConAccesorios(request, asignacion_id = None):
 
     # Converting `QuerySet` to a Python Dictionary
     for i in range(len(documentos)):
-        tempBlogs.append(AccesorioADictionario(documentos[i])) # Converting `QuerySet` to a Python Dictionary
+        tempBlogs.append(DetalleSolicitudConAccesoriosOuput(documentos[i])) # Converting `QuerySet` to a Python Dictionary
 
     docjson = tempBlogs
 
@@ -431,7 +435,7 @@ def DetalleSolicitudConAccesorios(request, asignacion_id = None):
 
     return HttpResponse(JsonResponse( data))
 
-def AccesorioADictionario(doc):
+def DetalleSolicitudConAccesoriosOuput(doc):
     output = {}
     # se va a mostrar id de accesorio para borrar el cheque y no la factura
     # output['id'] = str(doc.documento.id)
@@ -624,13 +628,6 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
 
     return render(request, template_name, contexto)
 
-# def DatosChequeAccesorio(request):
-#     template_name = "solicitudes/datoschequeaccesorio_modal.html"
-#     contexto={
-#      "form_cheque" : ChequesForm       
-#     }
-
-#     return render(request, template_name, contexto)
 
 def DatosAccesorioEditar(request, accesorio_id = None):
 

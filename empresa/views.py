@@ -3,9 +3,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 from django.urls import reverse_lazy
 from .models import Tipos_factoring, Tasas_factoring, Clases_cliente\
-    , Cuentas_bancarias
+    , Cuentas_bancarias, Localidades
 from .forms import CuentaBancariaForm, TipoFactoringForm, TasaFactoringForm\
-    , ClasesParticipantesForm
+    , ClasesParticipantesForm, LocalidadForm
 
 
 class TiposFactoringView(LoginRequiredMixin, generic.ListView):
@@ -115,3 +115,35 @@ class CuentaBancariaEdit(LoginRequiredMixin, generic.UpdateView):
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user
         return super().form_valid(form)
+
+class LocalidadesView(LoginRequiredMixin, generic.ListView):
+    model = Localidades
+    template_name = "empresa/listalocalidades.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+
+class LocalidadesNew(LoginRequiredMixin, generic.CreateView):
+    model = Localidades
+    template_name="empresa/datoslocalidad_form.html"
+    form_class=LocalidadForm
+    context_object_name='localidad'
+    success_url= reverse_lazy("empresa:listalocalidades")
+    login_url = 'bases:login'
+
+    def form_valid(self, form):
+        form.instance.cxusuariocrea = self.request.user
+        return super().form_valid(form)
+
+class LocalidadesEdit(LoginRequiredMixin, generic.UpdateView):
+    model = Localidades
+    template_name="empresa/datoslocalidad_form.html"
+    form_class=LocalidadForm
+    context_object_name='localidad'
+    success_url= reverse_lazy("empresa:listalocalidades")
+    login_url = 'bases:login'
+
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+
+

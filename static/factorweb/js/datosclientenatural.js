@@ -1,4 +1,4 @@
 window.onload=function(){
-    objeto_fechas("#id_dnacimiento");
+    // objeto_fechas("#id_dnacimiento");
 }
 

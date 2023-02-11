@@ -23,7 +23,6 @@ class CuentasBancariasForm(forms.ModelForm):
                 'class':'form-control'
             })
 
-
 class TransferenciasForm(forms.ModelForm):
     class Meta:
         model = Transferencias
@@ -31,6 +30,16 @@ class TransferenciasForm(forms.ModelForm):
         labels = {'cuentadestino':'Cuenta destino'
             , 'nvalor':'Valor transferido'
             , 'ndevolucion':'Valor a devolver', 'dmovimiento':'Fecha'}
+        widgets={'dmovimiento': forms.Textarea(attrs={'rows': '2'})
+            , 'ctbeneficiariocobranzas': forms.Textarea(attrs={'rows': '2'}), 
+            'dalta': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -39,7 +48,7 @@ class TransferenciasForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        self.fields['dmovimiento'].widget.attrs['readonly']=True
+        # self.fields['dmovimiento'].widget.attrs['readonly']=True
         self.fields['dmovimiento'].widget.attrs['value']=date.today
 
 class DebitosForm(forms.ModelForm):

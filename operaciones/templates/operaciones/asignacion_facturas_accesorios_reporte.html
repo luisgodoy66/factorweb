@@ -1,4 +1,3 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -29,9 +28,20 @@
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <h2>Liquidación de asignación </h2>
+                <table >
+                    <tbody>
+                        <tr>
+                            <td width="80%"><h2>Liquidación de asignación </h2></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>{% now "Y/m/d" %}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
             </div>
-
+            <br>
             <div class="list-group">
                 <table >
                     <tbody>
@@ -54,8 +64,8 @@
                         <tr>
                             <td><h4>Asignación:</h4></td>
                             <td colspan="3">{{ asignacion.cxasignacion }}</td>
-                            <td><h4>Id. de negociacion:</h4></td>
-                            <td>{{ asignacion.id}}</td>
+                            <!-- <td><h4>Id. de negociacion:</h4></td>
+                            <td>{{ asignacion.id}}</td> -->
                         </tr>
                     </tbody>
                 </table>
@@ -88,7 +98,7 @@
                                 <td>{{ item.id }}</td>
                                 <td>{{ item.documento.cxcomprador.ctnombre }}</td>
                                 <td>{{ item.documento.ctdocumento }}</td>
-                                <td class="fecha">{{ item.documento.demision|date:"Y/m/d"  }}</td>
+                                <td class="fecha">{{ item.documento.demision|date:"y/m/d"  }}</td>
                                 <td width="20%">{{ item }}</td>
                                 <td class="fecha">{{ item.dvencimiento|date:"Y/m/d"  }}</td>
                                 <td class="numero">{{ item.ntotal }}</td>
@@ -101,7 +111,6 @@
                                 {% if asignacion.ndescuentodecartera > 0 %}<td class="numero">{{ item.ndescuentocartera }}</td>{% endif %}
                             </tr>
                             {% endfor %}
-                            <!-- totales -->
                             <tr></tr>
                             <tr>
                                 <td></td>
@@ -148,7 +157,7 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td><h4>Sub total</h4></td>
+                                <td colspan="2"><h4>Anticipo menos cargos</h4></td>
                                 <td class="numero"><h4>{{ subtotal}}</h4></td>
                             </tr>
                             <tr>
@@ -161,7 +170,7 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td><h4>I.V.A.</h4></td>
+                                <td colspan="2"><h4>I.V.A.</h4></td>
                                 <td class="numero"><h4>{{ asignacion.niva}}</h4></td>
                             </tr>
                             <tr>
@@ -174,27 +183,33 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td><h4>Neto</h4></td>
+                                <td colspan="2"><h4>Neto a recibir</h4></td>
                                 <td class="numero"><h4>{{ neto}}</h4></td>
                             </tr>
                         </tbody>
                     </table>
 
                 </div>
-                <!-- instruccion de pago -->
             </div>
             <div class="row">
                 <p>
                 <h4>instrucción de pago:</h4>{{ asignacion.ctinstrucciondepago}}
                 </p>
             </div>
-            <div class="row">
-                Elaborado por: {{ asignacion.cxusuariocrea}}
+            <div class="row ">
+            <table >
+                <tbody>
+                    <tr>
+                        <td></td>
+                        <td>                        Elaborado por: {{ asignacion.cxusuariocrea}}</td>
+                        <td>                        Revisado por:                        </td>
+                        <td>                        Recibido por:                        </td>
+                    </tr>
+                </tbody>
+            </table>
             </div>
-
 
         </div>
     </div>
-
 </body>
 </html>

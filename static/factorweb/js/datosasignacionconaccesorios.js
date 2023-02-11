@@ -35,7 +35,7 @@ window.operateEvents = {
 
 function operateFormatter(value, row, index) {
 return [
-  '<a class="editar" href="javascript:void(0)" title="Editar">',
+  '<a class="editar" href="javascript:void(0)" title="Editar cheque">',
   '<i class="fa fa-edit"></i>',
   '</a>',
   '<a class="remove" href="javascript:void(0)" title="Eliminar">',

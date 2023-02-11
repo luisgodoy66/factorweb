@@ -10,8 +10,8 @@ var $tableotros = jQuery('#table_otros')
 
 window.onload= function(){
 
-    objeto_fechas("#id_ddesembolso")    
-    objeto_fechas("#id_dliquidacion")    
+    // objeto_fechas("#id_ddesembolso")    
+    // objeto_fechas("#id_dliquidacion")    
 
     // para cargar la data en la tabla se necesita convertir, se usa JSON.parse
     data = JSON.parse(cargostxt)

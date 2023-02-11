@@ -30,7 +30,16 @@ class DatosOperativosForm(forms.ModelForm):
             , 'ctbeneficiariocobranzas': 'Nombre de beneficiario de cobranzas'
         }
         widgets={'ctbeneficiarioasignacion': forms.Textarea(attrs={'rows': '2'})
-            , 'ctbeneficiariocobranzas': forms.Textarea(attrs={'rows': '2'}), }
+            , 'ctbeneficiariocobranzas': forms.Textarea(attrs={'rows': '2'}), 
+            'dalta': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+        }
+
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -39,7 +48,7 @@ class DatosOperativosForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        self.fields['dalta'].widget.attrs['readonly']=True
+        # self.fields['dalta'].widget.attrs['readonly']=True
 
 class AsignacionesForm(forms.ModelForm):
     class Meta:
@@ -53,7 +62,22 @@ class AsignacionesForm(forms.ModelForm):
             , 'dnegociacion':'Negociación', 'ddesembolso':'Desembolso'
             , 'ctinstrucciondepago':'Instrucción de pago', 'niva':'IVA'
         }
-        widgets={'ctinstrucciondepago': forms.Textarea(attrs={'rows': '2'}), }
+        widgets={'ctinstrucciondepago': forms.Textarea(attrs={'rows': '2'}), 
+            'dnegociacion': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'datepicker', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+            'ddesembolso': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'datepicker', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -71,7 +95,7 @@ class AsignacionesForm(forms.ModelForm):
         self.fields['dnegociacion'].widget.attrs['value']=date.today
         self.fields['dnegociacion'].widget.attrs['readonly']=True
         self.fields['ddesembolso'].widget.attrs['value']=date.today
-        self.fields['ddesembolso'].widget.attrs['readonly']=True
+        # self.fields['ddesembolso'].widget.attrs['readonly']=True
 
 class DesembolsarForm(forms.ModelForm):
     class Meta:

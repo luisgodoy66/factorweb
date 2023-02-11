@@ -7,8 +7,8 @@ window.onload=function(){
     // inicializar el encabezado
     ActualizarHeader();
     
-    objeto_fechas("#id_dmovimiento")
-    objeto_fechas("#id_dtransferencia")
+    // objeto_fechas("#id_dmovimiento")
+    // objeto_fechas("#id_dtransferencia")
 
     jQuery('input[type=checkbox][name="cargo"]').change(function() {
         toggle_cargo();

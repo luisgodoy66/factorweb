@@ -90,8 +90,8 @@
                             {{ form_transferencias.dmovimiento.label}}</label>
                         </div>
                         <div class="col-md-4">
-                            <input type="text" name="dmovimiento" 
-                            class="form-control" readonly value="2023-01-25" 
+                            <input type="date" name="dmovimiento" 
+                            class="form-control" value={% now "Y-m-d" %}
                             required id="id_dtransferencia">
                         </div>
                     </div>

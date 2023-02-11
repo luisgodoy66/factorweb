@@ -35,17 +35,24 @@
                         </div>  
                         <div class="row form-group">
                             <div class="col-md-6"><label for="id_cxtipocliente" class=" form-control-label">
-                                {{ form_documento.ctcomprador.label}}</label></div>
+                                {{ form_documento.ctcomprador.label}}
+                            </label></div>
                             <div class="col-6 col-md-6">
                                 {{ form_documento.ctcomprador}}
                             </div>
                         </div>  
                         <div class="row form-group">
                             <div class="col-md-6"><label for="id_cxtipocliente" class=" form-control-label">
-                                Establecimiento / punto de emisión</label></div>
+                                {{ form_documento.ctserie1.label}}
+                            </label></div>
                             <div class="col-md-3">
                                 {{ form_documento.ctserie1}}
                             </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="id_cxtipocliente" class=" form-control-label">
+                                {{ form_documento.ctserie2.label}}
+                            </label></div>
                             <div class="col-md-3">
                                 {{ form_documento.ctserie2}}
                             </div>
@@ -135,8 +142,8 @@
     </div>
     <script>
 
-        objeto_fechas("#id_demision");
-        objeto_fechas("#id_dvencimiento");
+        // objeto_fechas("#id_demision");
+        // objeto_fechas("#id_dvencimiento");
 
         // configuar cambios en ls campos de valores
         jQuery('#id_nvalorantesiva, #id_niva, #id_nretencioniva, #id_nretencionrenta, #id_nvalornonegociado')
@@ -171,7 +178,9 @@
             valor_nonegociado = valor_nonegociado<0 ? 0 : valor_nonegociado
 
             stotal = antes_de_iva + iva;
+
             total  = stotal - retencion_iva - retencion_renta - valor_nonegociado;
+            total = total.toFixed(2)
 
             jQuery('#id_nvalorantesiva').val(antes_de_iva);
             jQuery('#id_niva').val(iva);

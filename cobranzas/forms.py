@@ -22,12 +22,18 @@ class CobranzasDocumentosForm(forms.ModelForm):
             , 'cxcuentatransferencia': 'Cuenta de origen de transferencia'
             , 'cxcuentaconjunta': 'Cuenta conjunta'
         }
-        # esto sirve para ventana de condonacion. Lo importante es el formato
         widgets = {
+            'dcobranza': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
             'ddeposito': forms.DateInput(
                 format=('%Y-%m-%d'),
                 attrs={'class': 'form-control', 
-                    'placeholder': 'Select a date',
+                    'placeholder': 'Seleccione una fecha',
                     'type': 'date'
                     }
                     ),
@@ -41,9 +47,9 @@ class CobranzasDocumentosForm(forms.ModelForm):
                 'class':'form-control'
             })
         self.fields['nsobrepago'].widget.attrs['readonly']=True
-        self.fields['dcobranza'].widget.attrs['readonly']=True
+        # self.fields['dcobranza'].widget.attrs['readonly']=True
         self.fields['dcobranza'].widget.attrs['value']=date.today
-        self.fields['ddeposito'].widget.attrs['readonly']=True
+        # self.fields['ddeposito'].widget.attrs['readonly']=True
         self.fields['ddeposito'].widget.attrs['value']=date.today
 
 class ChequesForm(forms.ModelForm):
@@ -73,7 +79,22 @@ class LiquidarForm(forms.ModelForm):
             , 'ddesembolso':'Desembolso', 'cxcuentapago': 'Cuenta de origen'
             , 'dliquidacion': 'Liquidación', 'nneto': 'Neto'
         }
-        widgets={'ctinstrucciondepago': forms.Textarea(attrs={'rows': '2'}), }
+        widgets={'ctinstrucciondepago': forms.Textarea(attrs={'rows': '2'}), 
+            'dliquidacion': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+            'ddesembolso': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -82,9 +103,9 @@ class LiquidarForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        self.fields['ddesembolso'].widget.attrs['readonly']=True
+        # self.fields['ddesembolso'].widget.attrs['readonly']=True
         self.fields['ddesembolso'].widget.attrs['value']=date.today
-        self.fields['dliquidacion'].widget.attrs['readonly']=True
+        # self.fields['dliquidacion'].widget.attrs['readonly']=True
         self.fields['dliquidacion'].widget.attrs['value']=date.today
 
 class MotivoProtestoForm(forms.ModelForm):
@@ -116,6 +137,15 @@ class ProtestoForm(forms.ModelForm):
         , 'motivoprotesto':'Motivo'
         ,'nvalornotadebito':'Nota de débito bancaria'
         }
+        widgets = {
+            'dprotesto': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -124,7 +154,7 @@ class ProtestoForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        self.fields['dprotesto'].widget.attrs['readonly']=True
+        # self.fields['dprotesto'].widget.attrs['readonly']=True
         self.fields['dprotesto'].widget.attrs['value']=date.today
 
 class RecuperacionesProtestosForm(forms.ModelForm):
@@ -142,9 +172,15 @@ class RecuperacionesProtestosForm(forms.ModelForm):
             , 'ddeposito': 'Fecha de depósito'
             , 'cxcuentatransferencia': 'Cuenta de origen de transferencia'
         }
-        # esto sirve para ventana de condonacion. Lo importante es el formato
         widgets = {
             'ddeposito': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Select a date',
+                    'type': 'date'
+                    }
+                    ),
+            'dcobranza': forms.DateInput(
                 format=('%Y-%m-%d'),
                 attrs={'class': 'form-control', 
                     'placeholder': 'Select a date',
@@ -161,9 +197,9 @@ class RecuperacionesProtestosForm(forms.ModelForm):
                 'class':'form-control'
             })
         self.fields['nsobrepago'].widget.attrs['readonly']=True
-        self.fields['dcobranza'].widget.attrs['readonly']=True
+        # self.fields['dcobranza'].widget.attrs['readonly']=True
         self.fields['dcobranza'].widget.attrs['value']=date.today
-        self.fields['ddeposito'].widget.attrs['readonly']=True
+        # self.fields['ddeposito'].widget.attrs['readonly']=True
         self.fields['ddeposito'].widget.attrs['value']=date.today
 
 class CobranzasCargosForm(forms.ModelForm):
@@ -181,12 +217,18 @@ class CobranzasCargosForm(forms.ModelForm):
             , 'ddeposito': 'Fecha de depósito'
             , 'cxcuentatransferencia': 'Cuenta de origen de transferencia'
         }
-        # esto sirve para ventana de condonacion. Lo importante es el formato
         widgets = {
+            'dcobranza': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
             'ddeposito': forms.DateInput(
                 format=('%Y-%m-%d'),
                 attrs={'class': 'form-control', 
-                    'placeholder': 'Select a date',
+                    'placeholder': 'Seleccione una fecha',
                     'type': 'date'
                     }
                     ),
@@ -200,7 +242,7 @@ class CobranzasCargosForm(forms.ModelForm):
                 'class':'form-control'
             })
         self.fields['nsobrepago'].widget.attrs['readonly']=True
-        self.fields['dcobranza'].widget.attrs['readonly']=True
+        # self.fields['dcobranza'].widget.attrs['readonly']=True
         self.fields['dcobranza'].widget.attrs['value']=date.today
-        self.fields['ddeposito'].widget.attrs['readonly']=True
+        # self.fields['ddeposito'].widget.attrs['readonly']=True
         self.fields['ddeposito'].widget.attrs['value']=date.today

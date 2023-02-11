@@ -30,22 +30,18 @@ window.onload=function(){
           
     jQuery('#id_ddesembolso')
         .change(function(){
-          RecalcularCargos(asignacion_id
-            ,capturaValor("id_ddesembolso")
-            ,capturaValor("condicion_id"));
+          RecalcularCargos(asignacion_id,capturaValor("id_ddesembolso"), capturaValor("condicion_id"));
         });
 
-    // inicializar valores
-    objeto_fechas("#id_dnegociacion");
-    objeto_fechas("#id_ddesembolso");
+    // // inicializar valores
+    // objeto_fechas("#id_dnegociacion");
+    // objeto_fechas("#id_ddesembolso");
     
     // inicializar tabla
     initTable();
 
     // mostrar valores
-    RecalcularCargos(asignacion_id
-        ,capturaValor("id_ddesembolso")
-        , capturaValor("condicion_id"));
+    RecalcularCargos(asignacion_id, capturaValor("id_ddesembolso"), capturaValor("condicion_id"));
 
   
 };
@@ -78,7 +74,7 @@ window.operateEvents = {
     })
   },
   'click .remove': function (e, value, row, index) {
-  EliminarDocumentoDeSolicitudAsignacion(asignacion_id, row.id, tipo_asignacion)
+  EliminarDocumentoDeSolicitudAsignacion(asignacion_id, row.id, tipo_asignacion, row.Documento)
   }
 };
 
@@ -130,7 +126,7 @@ function initTable() {
       columns: [
         [{title: 'Ref.', field: 'id', rowspan: 2, align: 'center', valign: 'middle', 
           sortable: true, footerFormatter: LineaTotalEnPieDePaginaDeTabla
-          }, {title: 'Comprador', field: 'Comprador', rowspan: 2, align: 'center', 
+          }, {title: 'Deudor', field: 'Comprador', rowspan: 2, align: 'center', 
           valign: 'middle', sortable: true, footerFormatter: LineaCantidadEnPieDePaginaDeTabla
           }, {title: 'Documento', field: 'Documento', rowspan: 2, align: 'center', 
           valign: 'middle', sortable: true,
@@ -138,7 +134,7 @@ function initTable() {
           valign: 'middle', sortable: true,
           }, {title: 'Vencimiento', field: 'Vencimiento', rowspan: 2, align: 'center', 
           valign: 'middle', sortable: true,
-          }, {title: 'Total', field: 'Total', rowspan: 2, align: 'center', valign: 'middle', 
+          }, {title: 'Negociado', field: 'Total', rowspan: 2, align: 'center', valign: 'middle', 
           sortable: true, footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
           }, {title: 'Plazo', field: 'Plazo', rowspan: 2, align: 'center', valign: 'middle', 
           sortable: true, 
@@ -170,7 +166,7 @@ function CambiarTasasDocumento(doc_id, fecha_desembolso, callback){
 }
 
 function AceptarAsignacion(){
-  MensajeConfirmacion("Aceptar asignación con desembolso el " 
+  MensajeConfirmacion("Aceptar solicitud con desembolso el " 
     + capturaValor("id_ddesembolso") +"?",function(){
     
     var objeto={

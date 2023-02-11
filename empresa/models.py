@@ -54,7 +54,7 @@ class Datos_participantes(ClaseModelo):
     cxparticipante = models.CharField(max_length=13, unique=True)
     ctnombre =models.CharField(max_length=100)
     cxzona =models.CharField(max_length=5, null=True)
-    cxlocalidad =models.CharField(max_length=4, null=True)
+    # cxlocalidad =models.CharField(max_length=4, null=True)
     cxestado =models.CharField(max_length=1, default='A')
     # cxpais =models.ForeignKey('Pais',to_field="cxpais", on_delete=models.CASCADE)
     ctdireccion =models.TextField(null=True)
@@ -86,7 +86,7 @@ class Funcionarios(ClaseModelo):
         return self.ctfuncionario
 
 class Localidades(ClaseModelo):
-    cxlocalidad = models.CharField(max_length=4, unique=True)
+    # cxlocalidad = models.CharField(max_length=4, unique=True)
     ctlocalidad = models.CharField(max_length=80, blank=True)
     lactiva = models.BooleanField(default=True)
 

@@ -131,7 +131,7 @@
                 </div>
                 <!-- columna derecha -->
                 <div class="col-5">
-                    <h5 class="heading-title mb-1 text-secondary">Liquidación</h5>
+                    <h5 class="heading-title mb-1 text-secondary">Liquidación de asignación</h5>
                     <div class="row form-group">
                         <div class="col col-xs-9">
                             <h5 for="id_ctinstrucciondepago" class=" form-control-label">
@@ -166,14 +166,15 @@
                     </div>  
                     <div class="row form-group">
                         <div class="col-md-1"></div>
-                        <div class="col col-xs-2">
+                        <div class="col-md-1">
                             <label for="id_niva" class=" form-control-label">
                             {{ form_asignacion.niva.label}}
                         </label></div>
-                        <div class="col col-xs-1">
+                        <div class="col-md-3">
                             <input type="number" name="neto" step="0.01" class="form-control" 
                             readonly id="porcentaje_iva" value="{{ porcentaje_iva }}">
                         </div>
+                        <div class="col-md-1"></div>
                         <div class="col-6 col-md-6">
                             {{ form_asignacion.niva}}
                         </div>
@@ -183,7 +184,7 @@
                             class=" form-control-label">= Neto</label></div> -->
                         <div class="col col-xs-3">
                             <h5 for="id_nvalor" class=" form-control-label">
-                            = Neto
+                            = Neto a recibir
                             </h5></div>
                         <div class="col-6 col-md-6">
                             <input type="number" name="neto" step="0.01" 

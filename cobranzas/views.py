@@ -1127,11 +1127,11 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
     if request.method=="POST":
 
         with transaction.atomic():
-            # 1. Actualizar el estado de la ASIGNACION
+            # 1. Actualizar el estado de la liquidacion
             liquidacion.ldesembolsada = True
             liquidacion.save()
 
-            # 2. grabar la liquidacion
+            # 2. grabar el desembolso
             operacion = request.POST.get("cxoperacion")
             forma_pago = request.POST.get("cxformapago")
 
@@ -2126,7 +2126,8 @@ def GeneraListaCobranzasCargosJSONSalida(transaccion):
 
     return output
 
-def ObtenerOtrosCargosDeCobranza(tipo_operacion, cobranza, codigo_operacion, listaotroscargos):
+def ObtenerOtrosCargosDeCobranza(tipo_operacion, cobranza, codigo_operacion\
+        , listaotroscargos):
     total_cargos = 0
 
     # la nd se registra sobre la recuperacion o cobranza protestada

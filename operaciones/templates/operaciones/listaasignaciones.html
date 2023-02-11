@@ -66,11 +66,15 @@
                             <td>{{ item.cxcliente.ctnombre }}</td>
                             <td>{{ item.cxasignacion }}</td>
                             <td>{{ item.cxtipofactoring }}</td>
-                            <td>{{ item.cxtipo }} </td>
-                            <td>{{ item.ddesembolso|date:"Y/m/d" }}</td>
+                            {% if item.cxtipo == 'F' %}
+                                <td>Facturas puras</td>
+                            {% else %}
+                                <td>Con accesorios </td>
+                            {% endif %}
+                            <td>{{ item.ddesembolso|date:"Y-m-d" }}</td>
                             <td>{{ item.nvalor }}</td>
                             <td>{{ item.cxestado }}</td>
-                            <td>{{ item.dregistro|date:"Y/m/d H:i:s" }}</td>
+                            <td>{{ item.dregistro|date:"Y-m-d H:i:s" }}</td>
                             <td>
                                 <a href="{% url 'operaciones:reporteasignacion' item.id %}" 
                                     class="btn btn-success btn-sm" role="button" target="reporte"

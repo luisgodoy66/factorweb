@@ -1,21 +1,19 @@
 from dataclasses import fields
 from django import forms
 from .models import Clases_cliente, Datos_participantes, \
-    Tipos_factoring, Tasas_factoring, Cuentas_bancarias
+    Tipos_factoring, Tasas_factoring, Cuentas_bancarias, Localidades
 
 class ParticipanteForm(forms.ModelForm):
-    # ctnombre = forms.CharField(widget=forms.TextInput, label="Nombre completo")
-    # cxparticipante = forms.CharField(widget=forms.HiddenInput)
     class Meta:
         model=Datos_participantes
         
         fields=['cxtipoid', 'cxparticipante', 'ctnombre'
-            , 'cxlocalidad', 'ctdireccion'
+            , 'ctdireccion'
             ,'cttelefono1', 'cttelefono2', 'ctemail'
             , 'ctemail2', 'ctcelular','ctgirocomercial', 'cxusuariocrea'
             , 'cxactividad', 'dinicioactividades']
         labels={'cxtipoid':'Tipo cliente', 'cxparticipante':'Identificación'
-            ,'ctnombre': 'Nombre completo', 'cxlocalidad':'Localidad'
+            ,'ctnombre': 'Nombre completo'
             , 'ctdireccion':'Dirección', 'cttelefono1': 'Teléfono principal'
             , 'cttelefono2':'Teléfono secundario', 'ctemail':'Email 1'
             , 'ctemail2':'Email 2', 'ctcelular':'Celular'
@@ -23,8 +21,16 @@ class ParticipanteForm(forms.ModelForm):
             , 'cxactividad':'Código de actividad'
             , 'dinicioactividades':'Inicio de actividades'
             }        
-        widgets={'ctdireccion': forms.Textarea(attrs={'rows': '3'})
-                , 'ctgirocomercial':forms.Textarea(attrs={'rows': '5'})}
+        widgets={'ctdireccion': forms.Textarea(attrs={'rows': '3'}),
+            'ctgirocomercial':forms.Textarea(attrs={'rows': '5'}),
+            'dinicioactividades': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -33,7 +39,7 @@ class ParticipanteForm(forms.ModelForm):
                 'class':'form-control'
             })
         self.fields['cxtipoid'].empty_label="Seleccione tipo de identificación"
-        self.fields['dinicioactividades'].widget.attrs['readonly']=True
+        # self.fields['dinicioactividades'].widget.attrs['readonly']=True
 
     def clean(self) :
         try:
@@ -138,6 +144,20 @@ class CuentaBancariaForm(forms.ModelForm):
             'cxbanco':'Banco', 'cxcuenta':'Número de cuenta'
             , 'lactiva':'Activa',
         }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+
+class LocalidadForm(forms.ModelForm):
+    class Meta:
+        model = Localidades
+
+        fields = [ 'ctlocalidad', 'lactiva']
+        labels={'ctlocalidad':'Descripción', 'lactiva':'Activa'}
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for f in iter(self.fields):

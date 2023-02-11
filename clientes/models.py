@@ -1,15 +1,13 @@
 from django.db import models
 
 from bases.models import ClaseModelo
-from empresa.models import Datos_participantes, Clases_cliente
+from empresa.models import Datos_participantes, Clases_cliente, Localidades
 from pais.models import Bancos
 
 class Datos_compradores(ClaseModelo):
     cxcomprador=models.OneToOneField(
         Datos_participantes, related_name="datos_generales_comprador"
         ,to_field="cxparticipante", on_delete=models.CASCADE    )
-    # ctemailfacturacionelectronica=models.EmailField( null=True,
-    #     help_text='direccion email para facturación electrónica'    )
     cxestado=models.CharField(max_length=1, default='A'    )
     cxclase =models.ForeignKey(Clases_cliente
         ,to_field="cxclase", default='A', on_delete=models.DO_NOTHING    )
@@ -52,6 +50,7 @@ class Datos_generales(ClaseModelo):
         help_text='fecha que cae en estado de pre legal'    )
     dlegal=models.DateTimeField(null=True,
         help_text='fecha que cae en estado de legal en proceso de envio a legal del sistema'    )
+    cxlocalidad =models.ForeignKey(Localidades, on_delete=models.DO_NOTHING, null=True)
     
     def __str__(self):
         return self.cxcliente.ctnombre
