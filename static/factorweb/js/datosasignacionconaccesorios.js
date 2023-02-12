@@ -82,26 +82,6 @@ function initTable() {
           }]
       ]
     })
-    // $table.on('check.bs.table uncheck.bs.table ' +
-    //   'check-all.bs.table uncheck-all.bs.table',
-    // function () {
-    //   $remove.prop('disabled', !$table.bootstrapTable('getSelections').length)
-
-    //   // save your data, here just save the current page
-    //   selections = getIdSelections()
-    //   // push or splice the selections if you want to save all data selections
-    // })
-    // $table.on('all.bs.table', function (e, name, args) {
-    //   console.log(name, args)
-    // })
-    // $remove.click(function () {
-    //   var ids = getIdSelections()
-    //   $table.bootstrapTable('remove', {
-    //     field: 'id',
-    //     values: ids
-    //   })
-    //   $remove.prop('disabled', true)
-    // })
 }
 
 function NuevaAsignacion(){
@@ -112,8 +92,8 @@ function NuevaAsignacion(){
     alert("debe especificar cliente y tipo de factoring")
   }
   else{
-    url = '/solicitudes/nuevodocumentoconaccesorios/'+cliente_id
-    +'/'+tipo_factoring;
+    url = '/solicitudes/nuevodocumentoconaccesorios/'
+    +cliente_id+'/'+tipo_factoring;
     
     location.href=url
   }

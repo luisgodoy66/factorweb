@@ -90,10 +90,17 @@ function operateFormatter(value, row, index) {
 }
   
 function RecalcularCargos(asgn,fecha_desembolso, cond){
-  fetchProcesar("/operaciones/detallecargosasignacion/" + asgn + "/" 
-       + fecha_desembolso + "/" + cond, function(){
-          RefrescarTabla(asgn)
-       }) 
+  // el formato usado es yyyy-mm-dd. Esta validación necesaria pues al digitar la fecha
+  // su pueden tener meses y dias como '00'
+  var isValid = fecha_desembolso.match(/^\d{4}(\-)(((0)[0-9])|((1)[0-2]))(\-)([0-2][0-9]|(3)[0-1])$/);
+
+  if (isValid) {
+    fetchProcesar("/operaciones/detallecargosasignacion/" + asgn + "/" 
+        + fecha_desembolso + "/" + cond, function(){
+            RefrescarTabla(asgn)
+        }) 
+  } 
+
 }
 
 function RefrescarTabla(asgn){

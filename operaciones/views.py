@@ -341,14 +341,16 @@ def AceptarAsignacion(request, asignacion_id=None):
     asignacion = {}
     formulario = {}
     contexto={}
-    asignacion = ModelosSolicitud.Asignacion.objects\
-        .filter(pk=asignacion_id).first()
     iva_gao = 'No'
     iva_dc = 'No'
     formulario=AsignacionesForm()
     carga_gao= "No"
     carga_dc = "No"
     condicion_operativa={}
+    beneficiario = ''
+
+    asignacion = ModelosSolicitud.Asignacion.objects\
+        .filter(pk=asignacion_id).first()
 
     cuenta_transferencia = ModeloCliente.Cuenta_transferencia\
             .objects.cuenta_default(asignacion.cxcliente.cxcliente).first()
@@ -395,8 +397,11 @@ def AceptarAsignacion(request, asignacion_id=None):
     dic_gao  = {'carga_iva': iva_gao, 'descripcion': gao.ctdescripcionenreporte, 'generar': carga_gao}
     dic_dc = {'carga_iva': iva_dc , 'descripcion': dc.ctdescripcionenreporte,'generar':carga_dc }
 
+    # buscar en datos operativos el beneficiario del cheque
     datos_operativos = Datos_operativos.objects\
                 .filter(cxcliente = asignacion.cxcliente.cxcliente).first()
+    if datos_operativos:
+        beneficiario=datos_operativos.ctbeneficiarioasignacion
 
     contexto={'form_asignacion':formulario,
         'asignacion': asignacion,
@@ -407,7 +412,7 @@ def AceptarAsignacion(request, asignacion_id=None):
         'porcentaje_iva':12,
         'tipo_asignacion':asignacion.cxtipo,
         "cuenta_transferencia":cuenta_transferencia,
-        "beneficiario": datos_operativos.ctbeneficiarioasignacion,
+        "beneficiario": beneficiario,
     }
 
     return render(request, template_name, contexto)

@@ -1258,7 +1258,10 @@ def GeneraListaProtestosPendientesJSONSalida(doc):
         output["IdComprador"] = doc.cheque.cxparticipante.cxparticipante
     else:
         output["IdComprador"] = ''
-
+    if cobranza.ldepositoencuentaconjunta:
+        output["CuentaDeposito"] = 'Cuenta cliente'
+    else:
+        output["CuentaDeposito"] = cobranza.cxcuentadeposito.__str__()
     return output
 
 def DetalleDocumentosProtesosJSON(request, ids_protestos):

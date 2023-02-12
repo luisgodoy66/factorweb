@@ -616,13 +616,29 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
             #accedemos a cada elemento de la lista (en este caso cada elemento es un dictionario)
             bco = Bancos.objects.filter(id = elem.get("banco")).first()
 
+            vencimiento = elem.get("vencimiento")
+            
+            # segun tipo de factoring no acepte vencimientos en feriados
+            # cambiar la fecha de vencimiento
+            if not tipoFactoring.lpermitediasferiados:
+
+                fecha = parse_date(vencimiento)
+                
+                while Feriados.objects.filter(dferiado = vencimiento)\
+                    .filter(llaborable = False).first() \
+                        or fecha.weekday()== 6 or fecha.weekday() == 5:
+                        
+                    fecha = parse_date(vencimiento)
+                    fecha = fecha + datetime.timedelta(days=1)
+                    vencimiento = date.isoformat(fecha)
+
             cheque = ChequesAccesorios(
                 documento = det,
                 cxbanco=bco,
                 ctcuenta = elem.get("cuenta"),
                 ctcheque = elem.get("cheque"),
                 ctgirador = elem.get("girador"),
-                dvencimiento = elem.get("vencimiento"),
+                dvencimiento = vencimiento,
                 ntotal = elem.get("valor"),
                 cxusuariocrea = request.user
             )
