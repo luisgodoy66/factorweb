@@ -6,8 +6,8 @@
             <div class="page-title">
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Operaciones</a></li>
-                    <li><a href="#">cobranzas</a></li>
-                    <li><a href="{% url 'cobranzas:listadocumentosporvencer' %}">cartera por vencer</a></li>
+                    <li><a href="#">cargos pendientes</a></li>
+                    <li><a href="{% url 'cobranzas:listadocumentosporvencer' %}">por operaciones</a></li>
                     <li class="active">cobro de cargos</li>
                 </ol>
             </div>
@@ -162,13 +162,13 @@
         </div>    
           
         <div class="card-footer">
-            <button class="btn btn-success btn-sm"  type="button" onclick="AceptarCobranza()">  
-                <i class="fa fa-dot-circle-o"></i> Grabar
-            </button>
             <a href="{% url 'cobranzas:listaliquidacionesennegativopendientes' %}" 
             class="btn btn-danger btn-sm">
                 <i class="fa fa-ban"></i> Cancelar
             </a>
+            <button class="btn btn-primary btn-sm"  type="button" onclick="AceptarCobranza()">  
+                <i class="fa fa-dot-circle-o"></i> Grabar
+            </button>
         </div>
     </div>
     <!-- </div> -->

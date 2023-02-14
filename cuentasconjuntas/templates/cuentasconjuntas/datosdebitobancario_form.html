@@ -7,8 +7,8 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Extras</a></li>
                     <li><a href="#">cuentas conjuntas</a></li>
-                    <li><a href="#">confirmar cobranzas</a></li>
-                    <li class="active">Confirma depósito</li>
+                    <li><a href="{% url 'cuentasconjuntas:listacargospendientes' %}">débitos pendientes</a></li>
+                    <li class="active">editar</li>
                 </ol>
             </div>
         </div>
@@ -78,13 +78,13 @@
         </div>
 
         <div class="card-footer">
+            <a href="{% url 'cuentasconjuntas:listacargospendientes' %}" 
+                class="btn btn-danger btn-sm">
+                <i class="fa fa-ban"></i> Cancelar
+            </a>
             <button type="submit" class="btn btn-primary btn-sm">
                 <i class="fa fa-dot-circle-o"></i> Grabar
             </button>
-        <a href="{% url 'cuentasconjuntas:listadocargospendientes' %}" 
-            class="btn btn-danger btn-sm">
-                <i class="fa fa-ban"></i> Cancelar
-            </a>
 
         </div>
 

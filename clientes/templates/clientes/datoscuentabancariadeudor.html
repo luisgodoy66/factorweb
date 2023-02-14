@@ -6,7 +6,8 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Participantes</a></li>
                     <li><a href="#">Deudores</a></li>
-                    <li class="active">Cuentas bancarias</li>
+                    <li><a href="{% url 'clientes:listacuentasbancarias_deudores' %}">Cuentas bancarias</a></li>
+                    <li class="active">editar</li>
                 </ol>
             </div>
         </div>
@@ -15,14 +16,16 @@
 {% block content %}
 <form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal" name="form"    >
     <!-- columna izquierda -->
-    <div class="card">
-        {% csrf_token %}
-        <div class="card-header">
-            <strong>Detalle de cuenta</strong> 
-        </div>
-        <div class="card-body">
+    <div class="col-lg-6">
+
+        <div class="card">
+            {% csrf_token %}
+            <div class="card-header">
+                <strong>Detalle de cuenta</strong> 
+            </div>
+            <div class="card-body">
             <!-- datos de factura texto y fecha -->
-            <div class="col-md-6">
+            <!-- <div class="col-md-6"> -->
                 <div class="row form-group">
                     <div class="col col-md-4"><label for="id_cxtipocliente" 
                         class=" form-control-label">
@@ -71,16 +74,17 @@
                         {{ form.lactiva}}
                     </div>
                 </div>  
+            <!-- </div> -->
             </div>
-        </div>
-        <div class="card-footer">
-            <a href="{% url 'clientes:listacuentasbancarias_deudores' %}" class="btn btn-danger btn-sm">
-                <i class="fa fa-ban"></i> Cancelar
-            </a>
-        <button type="submit" class="btn btn-primary btn-sm ">
-                <i class="fa fa-dot-circle-o"></i> Grabar
-            </button>
+            <div class="card-footer">
+                <a href="{% url 'clientes:listacuentasbancarias_deudores' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+            <button type="submit" class="btn btn-primary btn-sm ">
+                    <i class="fa fa-dot-circle-o"></i> Grabar
+                </button>
 
+            </div>
         </div>
     </div>
 </form>

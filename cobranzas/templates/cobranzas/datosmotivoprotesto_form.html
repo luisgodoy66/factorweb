@@ -7,7 +7,8 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Extras</a></li>
                     <li><a href="#">Tablas</a></li>
-                    <li class="active">Motivos de protesto</li>
+                    <li><a href="{% url 'cobranzas:listamotivosprotesto' %}">Motivos de protesto</a></li>
+                    <li class="active">editar</li>
                 </ol>
             </div>
         </div>
@@ -59,12 +60,12 @@
             </div>    
 
             <div class="card-footer">
-                    <button type="submit" class="btn btn-primary btn-sm">
-                        <span class="fa fa-dot-circle-o"></span> Grabar
-                    </button>
-                    <a href="{% url 'cobranzas:listamotivosprotesto' %}" class="btn btn-danger btn-sm">
-                        <i class="fa fa-ban"></i> Cancelar
-                    </a>
+                <a href="{% url 'cobranzas:listamotivosprotesto' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <span class="fa fa-dot-circle-o"></span> Grabar
+                </button>
                     {{ form.errors}}
             </div>
         </div>

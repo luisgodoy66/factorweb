@@ -131,21 +131,21 @@
         </div>    
         <div class="card-footer">
             <div class="col-md-6">
+                <a href="{% url 'solicitudes:listasolicitudes' %}" 
+                    class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Salir
+                </a>
                 {% if asignacion.id %}
                     <a href="{% url 'solicitudes:documentoconaccesorios_editar' asignacion.id asignacion.cxcliente_id asignacion.cxtipofactoring_id %}"
                     class="btn btn-success btn-sm">
-                        <i class="fa fa-ban"></i> Agregar factura
+                        <i class="fa fa-plus-circle"></i> Agregar factura
                     </a>
                 {% else %}
                     <button class="btn btn-success btn-sm"  role="button"
                         onclick="return NuevaAsignacion()">  
-                        <i class="fa fa-dot-circle-o"></i> Agregar factura
+                        <i class="fa fa-plus-circle"></i> Agregar factura
                     </button>
                 {% endif %}
-                <a href="{% url 'solicitudes:listasolicitudes' %}" 
-                class="btn btn-danger btn-sm">
-                    <i class="fa fa-ban"></i> Salir
-                </a>
 
             </div>
         

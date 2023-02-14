@@ -5,9 +5,10 @@
         <div class="page-header float-right">
             <div class="page-title">
                 <ol class="breadcrumb text-right">
-                    <li><a href="#">Dashboard</a></li>
+                    <li><a href="#">participantes</a></li>
                     <li><a href="#">Clientes</a></li>
-                    <li class="active">Datos operativos</li>
+                    <li><a href="{% url 'operaciones:listadatosoperativos' %}">Datos operativos</a></li>
+                    <li class="active">editar</li>
                 </ol>
             </div>
         </div>
@@ -15,7 +16,7 @@
 {% endblock breadcrumbs %}
 {% block content %}
 <form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal">
-    <div class="col-lg-6">
+    <!-- <div class="col-lg-6"> -->
         <div class="card">
             {% csrf_token %}
             <div class="card-header">
@@ -24,7 +25,7 @@
             </div>
             <div class="card-body card-block">
                 <!-- columna izquierda -->
-                <!-- <div class="col-lg-6"> -->
+                <div class="col-lg-4">
                     
                     <div class="row form-group">
                         <div class="col col-md-6"><label for="id_cxparticipante" 
@@ -77,6 +78,17 @@
                             <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
                         </div>
                     </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="row form-group">
+                        <div class="col col-md-6"><label for="id_cttelefono2" 
+                            class=" form-control-label">{{form_cliente.cxestado.label}}</label></div>
+                        <div class="col-md-6">
+                            {{form_cliente.cxestado}}
+                            <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
+                        </div>
+                    </div>
+                    <h5 class="heading-title mb-1 text-secondary">Beneficiario de Liquidación de asignación</h5>
 
                     <div class="row form-group">
                         <div class="col col-md-6"><label for="id_cttelefono2" 
@@ -95,6 +107,7 @@
                         </div>
                     </div>
 
+                    <h5 class="heading-title mb-1 text-secondary">Beneficiario de Liquidación de cobranzas</h5>
                     <div class="row form-group">
                         <div class="col col-md-6"><label for="id_cttelefono2" 
                             class=" form-control-label">{{form_cliente.cxbeneficiariocobranzas.label}}</label></div>
@@ -111,19 +124,20 @@
                             <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
                         </div>
                     </div>
+                </div>
 
             </div>    
             
             <div class="card-footer">
-                <button type="submit" class="btn btn-primary btn-sm">
-                    <i class="fa fa-dot-circle-o"></i> Grabar
-                </button>
                 <a href="{% url 'operaciones:listadatosoperativos' %}" class="btn btn-danger btn-sm">
                     <i class="fa fa-ban"></i> Cancelar
                 </a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Grabar
+                </button>
             </div>
         </div>
-    </div>
+    <!-- </div> -->
 </form>
 {% endblock %}
 {% block js_page %}

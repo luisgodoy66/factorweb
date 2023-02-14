@@ -102,6 +102,7 @@ class Tasas_factoring(ClaseModelo):
     limprimeenreporte = models.BooleanField(default=False)
     lcargaiva = models.BooleanField(default=True)
     lsobreanticipo = models.BooleanField(default=True)
+    ctinicialesentablas = models.CharField(max_length=4,null=True)
 
     def __str__(self):
         return self.cttasa

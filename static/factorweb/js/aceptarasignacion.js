@@ -1,12 +1,14 @@
-var $table = jQuery('#table')
+const $table = jQuery('#table')
+const asignacion_id = capturaValor("asignacion_id")
+const carga_gao = capturaValor("carga_gao")
+const carga_dc = capturaValor("carga_dc")
+const tipo_asignacion = capturaValor("tipo_asignacion")
+const porcentaje_iva = capturaValor("porcentaje_iva")
+var iniciales_dc = capturaValor("iniciales_dc")
+var iniciales_gao = capturaValor("iniciales_gao")
 var selections = []
-var asignacion_id = capturaValor("asignacion_id")
 var iva_gao = capturaValor("iva_gao")
 var iva_dc = capturaValor("iva_dc")
-var carga_gao = capturaValor("carga_gao")
-var carga_dc = capturaValor("carga_dc")
-var tipo_asignacion = capturaValor("tipo_asignacion")
-var porcentaje_iva = capturaValor("porcentaje_iva")
 
 window.onload=function(){
   //  // cerrar side bar
@@ -38,7 +40,10 @@ window.onload=function(){
     // objeto_fechas("#id_ddesembolso");
     
     // inicializar tabla
-    initTable();
+    if (iniciales_dc==''){iniciales_dc='DCAR'}
+    if (iniciales_gao==''){iniciales_dc='GAO'}
+
+    initTable(iniciales_gao,iniciales_dc);
 
     // mostrar valores
     RecalcularCargos(asignacion_id, capturaValor("id_ddesembolso"), capturaValor("condicion_id"));
@@ -126,7 +131,7 @@ function Suma_Cargos(asgn, iva_gao, iva_dc, carga_gao, carga_dc, porcentaje_iva)
   })
 }
 
-function initTable() {
+function initTable(iniciales_GAO, iniciales_DC) {
 
     $table.bootstrapTable('destroy').bootstrapTable({
       locale: "es-EC",
@@ -146,8 +151,8 @@ function initTable() {
           }, {title: 'Plazo', field: 'Plazo', rowspan: 2, align: 'center', valign: 'middle', 
           sortable: true, 
           }, {title: 'Anticipo', colspan: 2, align: 'center'
-          }, {title: 'GAO', colspan: 2, align: 'center'
-          }, {title: 'DC', colspan: 2, align: 'center'
+          }, {title: iniciales_GAO, colspan: 2, align: 'center'
+          }, {title: iniciales_DC, colspan: 2, align: 'center'
           
           }, {field: 'operate', title: 'Acción',rowspan: 2, align: 'center', valign: 'middle'
           , clickToSelect: false, events: window.operateEvents, formatter: operateFormatter

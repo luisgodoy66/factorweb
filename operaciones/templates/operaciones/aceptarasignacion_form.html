@@ -7,7 +7,8 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Operaciones</a></li>
                     <li><a href="#">Negociación</a></li>
-                    <li class="active">Solicitudes pendientes</li>
+                    <li><a href="{% url 'solicitudes:listasolicitudes' %}" >solicitudes</a></li>
+                    <li class="active">Aceptar</li>
                 </ol>
             </div>
         </div>
@@ -23,46 +24,26 @@
             {% if asignacion.id %} de  {{ asignacion.cxcliente }}  {% else %}  nueva{% endif %} 
         </div>
         <div class="col-6 col-md-6" hidden>
-            <input type="text" 
-            id="asignacion_id" 
-            name="asignacion_id" 
-            value="{{ asignacion.id }}"
-            class="form-control">
-            <input type="text" 
-            id="id_cliente" 
-            name="id_cliente" 
-            value="{{ asignacion.cxcliente_id }}"
-            class="form-control">
-            <input type="text" 
-            id="iva_gao" 
-            name="iva_gao" 
-            value="{{ gao.carga_iva }}"
-            class="form-control">
-            <input type="text" 
-            id="iva_dc" 
-            name="iva_dc" 
-            value="{{ dc.carga_iva }}"
-            class="form-control">
-            <input type="text" 
-            id="carga_dc" 
-            name="carga_dc" 
-            value="{{ dc.generar }}"
-            class="form-control">
-            <input type="text" 
-            id="carga_gao" 
-            name="carga_gao" 
-            value="{{ gao.generar }}"
-            class="form-control">
-            <input type="text" 
-            id="usa_linea_factoring" 
-            name="usa_linea_factoring" 
-            value="{{ usa_linea_factoring }}"
-            class="form-control">
-            <input type="text" 
-            id="tipo_asignacion" 
-            name="tipo_asignacion" 
-            value="{{ tipo_asignacion }}"
-            class="form-control">
+            <input type="text"  id="asignacion_id" name="asignacion_id" 
+                value="{{ asignacion.id }}" class="form-control">
+            <input type="text" id="id_cliente" name="id_cliente" 
+                value="{{ asignacion.cxcliente_id }}" class="form-control">
+            <input type="text" id="iva_gao" name="iva_gao" 
+                value="{{ gao.carga_iva }}" class="form-control">
+            <input type="text" id="carga_gao" name="carga_gao" 
+                value="{{ gao.generar }}" class="form-control">
+            <input type="text" id="iniciales_gao" name="iniciales_gao" 
+                value="{{ gao.iniciales }}" class="form-control">
+            <input type="text" id="iva_dc" name="iva_dc" 
+                value="{{ dc.carga_iva }}" class="form-control">
+            <input type="text" id="carga_dc" name="carga_dc" 
+                value="{{ dc.generar }}" class="form-control">
+            <input type="text" id="iniciales_dc" name="iniciales_dc" 
+                value="{{ dc.iniciales }}" class="form-control">
+            <input type="text" id="usa_linea_factoring" name="usa_linea_factoring" 
+                value="{{ usa_linea_factoring }}" class="form-control">
+            <input type="text" id="tipo_asignacion" name="tipo_asignacion" 
+                value="{{ tipo_asignacion }}" class="form-control">
         </div>
             <div class="card-body card-block">
                 <!-- columna izquierda -->

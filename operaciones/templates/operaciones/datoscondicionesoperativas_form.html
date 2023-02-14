@@ -7,7 +7,8 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Extras</a></li>
                     <li><a href="#">configuración</a></li>
-                    <li class="active">condiciones operativas</li>
+                    <li><a href="{% url 'operaciones:listacondicionesoperativas' %}">condiciones operativas</a></li>
+                    <li class="active">editar</li>
                 </ol>
             </div>
         </div>
@@ -21,9 +22,6 @@
         <div class="card-header">
             <strong>Condición operativa</strong> 
             {% if condicion.id %} de  {{ condicion.ctcondicion }}  {% else %}  nueva{% endif %} 
-            <a href="{% url 'operaciones:listacondicionesoperativas' %}" class="btn btn-danger btn-sm float-right">
-                <i class="fa fa-ban"></i> Cancelar
-            </a>
         </div>
         <div class="card-body card-block">
             <!-- columna superior -->
@@ -135,8 +133,8 @@
                         </div>
                     </div>  
                     <div class="row form-group float-right">
-                        <button type="submit" class="btn btn-primary btn-sm float-right">
-                        <i class="fa fa-dot-circle-o"></i> Agregar
+                        <button type="submit" class="btn btn-success btn-sm float-right">
+                        <i class="fa fa-plus-circle"></i> Agregar
                         </button>
                     </div>  
                 </div>
@@ -166,6 +164,12 @@
 
             </div>
         </div>    
+        <div class="card-footer">
+            <a href="{% url 'operaciones:listacondicionesoperativas' %}" class="btn btn-danger btn-sm">
+                <i class="fa fa-ban"></i> Salir
+            </a>
+
+        </div>
           
     </div>
     <!-- </div> -->

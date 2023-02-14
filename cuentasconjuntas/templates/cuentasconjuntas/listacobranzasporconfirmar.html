@@ -71,7 +71,7 @@
                             <td>{{ item.cxcuentaconjunta__cxcuenta}}</td>
                             <td>
                                 <a href="{% url 'cuentasconjuntas:confirmarcobranza' item.id item.tipo item.cxcuentaconjunta_id %}" 
-                                    class="btn btn-success btn-sm" role="button" title="Confirmación">
+                                    class="btn btn-success btn-sm" role="button" title="Confirmar">
                                     <i class="fa fa-check"></i></a>
                                 {% if item.cxformapago in 'CHE' %}
                                     {% if item.tipo == 'C' %}

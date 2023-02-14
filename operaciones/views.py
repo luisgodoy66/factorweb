@@ -56,7 +56,6 @@ class AsignacionesConsulta(LoginRequiredMixin, generic.ListView):
         context = super(AsignacionesConsulta, self).get_context_data(**kwargs)
         context["desde"] = desde
         context["hasta"] =hasta
-        print(desde,hasta)
         return context
 
 class AsignacionesPendientesDesembolsarView(LoginRequiredMixin, generic.ListView):
@@ -271,6 +270,7 @@ def DatosOperativos(request, cliente_ruc=None):
                 'ctbeneficiarioasignacion':datoscliente.ctbeneficiarioasignacion,
                 'cxbeneficiariocobranzas':datoscliente.cxbeneficiariocobranzas,
                 'ctbeneficiariocobranzas':datoscliente.ctbeneficiariocobranzas,
+                'cxestado':datoscliente.cxestado
             }
             formulario=DatosOperativosForm(e)
         else:
@@ -292,9 +292,11 @@ def DatosOperativos(request, cliente_ruc=None):
         beneficiario_asgn = request.POST.get("ctbeneficiarioasignacion")
         id_beneficiario_cobr = request.POST.get("cxbeneficiariocobranzas")
         beneficiario_cobr = request.POST.get("ctbeneficiariocobranzas")
+        estado = request.POST.get('cxestado')
 
         idclase = Clases_cliente.objects\
             .filter(cxclase = cxclase).first()
+
         datoscliente = Datos_operativos.objects\
             .filter(cxcliente=cliente).first()
 
@@ -311,7 +313,8 @@ def DatosOperativos(request, cliente_ruc=None):
                 ctbeneficiarioasignacion = beneficiario_asgn,
                 cxbeneficiariocobranzas = id_beneficiario_cobr,
                 ctbeneficiariocobranzas = beneficiario_cobr,
-                cxusuariocrea = request.user
+                cxusuariocrea = request.user,
+                cxestado = estado
             )
             if datoscliente:
                 datoscliente.save()
@@ -327,8 +330,11 @@ def DatosOperativos(request, cliente_ruc=None):
             datoscliente.cxbeneficiariocobranzas = id_beneficiario_cobr
             datoscliente.ctbeneficiariocobranzas = beneficiario_cobr
             datoscliente.cxusuariomodifica = request.user.id
+            datoscliente.cxestado= estado
 
             datoscliente.save()
+
+        # nota: crear un registro historico del cambio realizado
 
         return redirect("operaciones:listadatosoperativos")
 
@@ -394,8 +400,15 @@ def AceptarAsignacion(request, asignacion_id=None):
         return HttpResponse("no encontró tasa de descuento de catera")
     if dc.lcargaiva: iva_dc='Si'
 
-    dic_gao  = {'carga_iva': iva_gao, 'descripcion': gao.ctdescripcionenreporte, 'generar': carga_gao}
-    dic_dc = {'carga_iva': iva_dc , 'descripcion': dc.ctdescripcionenreporte,'generar':carga_dc }
+    dic_gao  = {'carga_iva': iva_gao
+        , 'descripcion': gao.ctdescripcionenreporte
+        , 'generar': carga_gao
+        , 'iniciales': gao.ctinicialesentablas}
+
+    dic_dc = {'carga_iva': iva_dc
+        , 'descripcion': dc.ctdescripcionenreporte
+        , 'generar':carga_dc
+        , 'iniciales': dc.ctinicialesentablas}
 
     # buscar en datos operativos el beneficiario del cheque
     datos_operativos = Datos_operativos.objects\
@@ -830,7 +843,7 @@ def AceptarDocumentos(request):
 @login_required(login_url='/login/')
 @permission_required('operaciones.view_asignaciones', login_url='bases:sin_permisos')
 def CondicionesOperativas(request,condicion_id=None):
-    template_name='operaciones/condicionesoperativas_form.html'
+    template_name='operaciones/datoscondicionesoperativas_form.html'
     formulario={}
     condicion={}
 
@@ -1068,7 +1081,11 @@ def GeneraListaAsignacionesJSONSalida(asignacion):
     output["Cliente"] = asignacion.cxcliente.ctnombre
     output["Asignacion"] = asignacion.cxasignacion
     output["TipoFactoring"] = asignacion.cxtipofactoring.cttipofactoring
-    output["TipoAsignacion"] = asignacion.cxtipo
+    # output["TipoAsignacion"] = asignacion.cxtipo
+    if asignacion.cxtipo =='F':
+        output["TipoAsignacion"] = "Facturas puras"
+    else:
+        output["TipoAsignacion"] = "Con accesorios"
     output["FechaDesembolso"] = asignacion.ddesembolso.strftime("%Y-%m-%d")
     output["ValorNegociado"] =  asignacion.nvalor
     output["PlazoMayor"] = asignacion.nmayorplazonegociacion

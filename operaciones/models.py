@@ -10,6 +10,14 @@ from clientes.models import Datos_generales as Datos_generales_cliente\
 from pais.models import Bancos
 
 class Datos_operativos(ClaseModelo):
+    ESTADOS_DE_CLIENTES = (
+        ('A', 'Activo'),
+        ('B', 'Baja'),
+        ('I', 'Inactivo'),
+        ('P', 'Pre legal'),
+        ('L', 'Legal'),
+        ('X', 'Bloqueado'),
+    )
     cxcliente=models.ForeignKey(Datos_generales_cliente
         ,to_field="cxcliente", on_delete=models.RESTRICT
         , related_name="datos_operativos"
@@ -27,6 +35,7 @@ class Datos_operativos(ClaseModelo):
     ctbeneficiarioasignacion = models.TextField(blank=True, null=True)
     cxbeneficiariocobranzas = models.CharField(max_length=13, blank=True, null=True)
     ctbeneficiariocobranzas = models.TextField(blank=True, null=True)
+    cxestado=models.CharField(max_length=1, default='A', choices=ESTADOS_DE_CLIENTES  )
 
     def __str__(self):
         return self.cxcliente.cxcliente.ctnombre
@@ -44,7 +53,7 @@ class Asignacion(ClaseModelo):
         ,to_field="cxparticipante", on_delete=models.CASCADE
         , related_name="cliente_asignacion"
     )
-    cxasignacion = models.CharField(max_length=8 , unique=True) 
+    cxasignacion = models.CharField(max_length=8 ) 
     cxtipofactoring = models.ForeignKey(Tipos_factoring
         , to_field="cxtipofactoring", on_delete=models.RESTRICT
         , related_name="tipofactoring_asignacion")
@@ -185,7 +194,7 @@ class Movimientos_maestro(ClaseModelo):
     cxmovimiento = models.CharField(max_length=4, unique=True) 
     ctmovimiento= models.CharField(max_length=60) 
     cxsigno= models.CharField(max_length=1, choices=TIPOS_DE_SIGNOS) 
-    lcargadescuentocartera = models.BooleanField()
+    # lcargadescuentocartera = models.BooleanField()
     nprioridad = models.SmallIntegerField()
     lcolateral = models.BooleanField()
     cxmovimientopadre = models.CharField(max_length=4) 

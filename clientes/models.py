@@ -5,10 +5,14 @@ from empresa.models import Datos_participantes, Clases_cliente, Localidades
 from pais.models import Bancos
 
 class Datos_compradores(ClaseModelo):
+    ESTADOS_DE_COMPRADORES = (
+        ('A', 'Activo'),
+        ('X', 'Bloqueado'),
+    )
     cxcomprador=models.OneToOneField(
         Datos_participantes, related_name="datos_generales_comprador"
-        ,to_field="cxparticipante", on_delete=models.CASCADE    )
-    cxestado=models.CharField(max_length=1, default='A'    )
+        ,to_field="cxparticipante", on_delete=models.CASCADE )
+    cxestado=models.CharField(max_length=1, default='A', choices=ESTADOS_DE_COMPRADORES )
     cxclase =models.ForeignKey(Clases_cliente
         ,to_field="cxclase", default='A', on_delete=models.DO_NOTHING    )
 
@@ -45,7 +49,7 @@ class Datos_generales(ClaseModelo):
         help_text='codigo de freelancer que refiere'    )
     cxorigen=models.CharField(max_length=5,null=True,
         help_text='codigo de localidad / oficina asignada del cliente'    )
-    cxestado=models.CharField(max_length=1, default='A'    )
+    # cxestado=models.CharField(max_length=1, default='A'    )
     dprelegal=models.DateTimeField(null=True,
         help_text='fecha que cae en estado de pre legal'    )
     dlegal=models.DateTimeField(null=True,
@@ -85,7 +89,7 @@ class Cuentas_bancarias(ClaseModelo):
     ctnombrepropietario=models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return '{} Cta. {}'.format(self.cxbanco,self.cxcuenta)
+        return '{} C.{}. N°{}'.format(self.cxbanco, self.cxtipocuenta,self.cxcuenta)
 
 class Cuenta_transferencia_Manager(models.Manager):
     def cuenta_default(self, id_cliente):

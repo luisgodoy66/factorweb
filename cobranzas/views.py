@@ -44,7 +44,7 @@ class DocumentosVencidosView(LoginRequiredMixin, generic.ListView):
         context = super(DocumentosVencidosView, self).get_context_data(*args,**kwargs) 
         fecha_corte = date.today() 
         context['fecha_corte'] =  fecha_corte
-        context['filtro'] = 'No'
+        context['por_vencer'] = 'No'
 
         return context
 
@@ -58,7 +58,7 @@ class DocumentosPorVencerView(LoginRequiredMixin, generic.ListView):
         context = super(DocumentosPorVencerView, self).get_context_data(*args,**kwargs) 
         fecha_corte = date.today() + timedelta(days=7)
         context['fecha_corte'] =  fecha_corte
-        context['filtro'] = 'Si'
+        context['por_vencer'] = 'Si'
 
         return context
 

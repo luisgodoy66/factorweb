@@ -2,41 +2,29 @@
     <div class="modal-content">
 
         <form  method="POST" rol="form" id="frmLinea" class="form-horizontal" enctype="multipart/form-data"
-            {% if nueva %}
-                action="{% url 'clientes:lineafactoring_nueva' nombre_cliente cliente_id %}"
-            {% else %}
-                action="{% url 'clientes:lineafactoring_editar' nombre_cliente cliente_id pk %}"
-            {% endif %}
+                action="{% url 'clientes:estadoclasecomprador_editar' pk %}"
             >
             <!-- <div class="col"> -->
             <div class="card">
 
                 {% csrf_token %}
                 <div class="card-header">
-                    <strong>Linea de factoring </strong> 
-                    de  {{ nombre_cliente }}
+                    <strong>Datos del deudor </strong> {{ nombre_deudor }}
                 </div>
                 
                 <div class="card-body card-block">
                     <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_nvalor" 
+                            class=" form-control-label">{{ form.cxclase.label}}</label></div>
                         <div class="col-12 col-md-9">
-                            <input type="text" id="id_cxcliente" 
-                            name="cxcliente" value="{{ cliente_id }}" 
-                            class="form-control" hidden>
+                            {{ form.cxclase}}
                         </div>
                     </div>
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_nvalor" class=" form-control-label">Valor</label></div>
+                        <div class="col col-md-3"><label for="id_cxparticipante" 
+                            class=" form-control-label">{{ form.cxestado.label}}</label></div>
                         <div class="col-12 col-md-9">
-                            {{ form.nvalor}}
-                            <!-- <small class="form-text text-muted">Máximo 30 caracteres</small> -->
-                        </div>
-                    </div>
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cxparticipante" class=" form-control-label">Moneda</label></div>
-                        <div class="col-12 col-md-9">
-                            {{ form.cxmoneda}}
-                            <small class="form-text text-muted">Máximo 3 caracteres</small>
+                            {{ form.cxestado}}
                         </div>
                     </div>
 

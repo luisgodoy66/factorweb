@@ -7,7 +7,8 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Participantes</a></li>
                     <li><a href="#">Clientes</a></li>
-                    <li class="active">Ficha general</li>
+                    <li><a href="{% url 'clientes:listaclientes' %}">ficha general</a></li>
+                    <li class="active">editar</li>
                 </ol>
             </div>
         </div>
@@ -261,12 +262,12 @@
         </div>    
         
         <div class="card-footer">
-            <button type="submit" class="btn btn-primary btn-sm">
-                <i class="fa fa-dot-circle-o"></i> Grabar y continuar
-            </button>
             <a href="{% url 'clientes:listaclientes' %}" class="btn btn-danger btn-sm">
                 <i class="fa fa-ban"></i> Cancelar
             </a>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa fa-dot-circle-o"></i> Grabar y continuar
+            </button>
         </div>
     </div>
     <!-- </div> -->

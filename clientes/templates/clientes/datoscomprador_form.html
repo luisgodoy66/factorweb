@@ -6,8 +6,9 @@
             <div class="page-title">
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Participantes</a></li>
-                    <li><a href="#">Compradores</a></li>
-                    <li class="active">Ficha general</li>
+                    <li><a href="#">deudores</a></li>
+                    <li><a href="{% url 'clientes:listacompradores' %}">Ficha general</a></li>
+                    <li class="active">editar</li>
                 </ol>
             </div>
         </div>
@@ -76,9 +77,6 @@
                             <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
                     </div>
 
-                </div>
-                <!-- columna derecha -->
-                <div class="col-lg-6">
                     <div class="row form-group">
                         <div class="col col-md-3"><label for="id_ctcelular" class=" form-control-label">
                             {{form_participante.ctcelular.label}}
@@ -87,6 +85,9 @@
                             {{form_participante.ctcelular}}
                             <small class="form-text text-muted">Máximo 30 caracteres. Incluya el código de país</small></div>
                     </div>
+                </div>
+                <!-- columna derecha -->
+                <div class="col-lg-6">
 
                     <div class="row form-group">
                         <div class="col col-md-3"><label for="id_ctemail" class=" form-control-label">
@@ -134,12 +135,12 @@
             </div>    
             
             <div class="card-footer">
-                <button type="submit" class="btn btn-primary btn-sm">
-                    <i class="fa fa-dot-circle-o"></i> Grabar
-                </button>
                 <a href="{% url 'clientes:listacompradores' %}" class="btn btn-danger btn-sm">
                     <i class="fa fa-ban"></i> Cancelar
                 </a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Grabar
+                </button>
             </div>
         </div>
     <!-- </div> -->

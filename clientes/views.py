@@ -144,7 +144,7 @@ class LineaEdit(LoginRequiredMixin, generic.UpdateView):
         cliente_ruc = self.kwargs.get('cliente_ruc')
 
         context = super(LineaEdit, self).get_context_data(**kwargs)
-        context["consulta"] = Linea_Factoring.objects.filter(pk=id).first()
+        # context["consulta"] = Linea_Factoring.objects.filter(pk=id).first()
         context["nueva"]=False
         context["nombre_cliente"] = nombre_cliente
         context["cliente_id"] = cliente_ruc
@@ -179,9 +179,10 @@ class CuposCompradoresEdit(LoginRequiredMixin, generic.UpdateView):
     model=Cupos_compradores
     template_name="clientes/datoscupo_modal.html"
     context_object_name = "consulta"
+    login_url = 'bases:login'
     form_class=CuposCompradoresForm
     success_url=reverse_lazy("clientes:listacupos")
-    success_message="Cupo actualizado satisfactoriamente"
+
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
@@ -198,6 +199,25 @@ class ClientesSolicitudesView(LoginRequiredMixin, generic.ListView):
 
         return Solicitante.objects\
             .filter(cxcliente__in = solicitantes.difference(clientes))
+
+class CompradorEdit(LoginRequiredMixin, generic.UpdateView):
+    model=Datos_compradores
+    template_name="clientes/datosestadoyclasecomprador_modal.html"
+    context_object_name = "consulta"
+    form_class=CompradorForm
+    success_url=reverse_lazy("clientes:listacompradores")
+    success_message="Datos actualizados satisfactoriamente"
+
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        id = self.kwargs.get('pk')
+
+        context = super(CompradorEdit, self).get_context_data(**kwargs)
+        context["pk"] = id
+        return context
 
 @login_required(login_url='/login/')
 @permission_required('clientes.view_datos_generales', login_url='bases:sin_permisos')
@@ -704,8 +724,8 @@ def DatosCompradores(request, comprador_id=None):
     idcomprador={}
     datosparticipante={}
     formulario={}
-    form_comprador={}
-    datoscomprador={}
+    # form_comprador={}
+    # datoscomprador={}
     
     if request.method=='GET':
         datosparticipante = Datos_participantes.objects\
@@ -729,25 +749,24 @@ def DatosCompradores(request, comprador_id=None):
             }
             idcomprador=datosparticipante.cxparticipante
             formulario=ParticipanteForm(e)
-            # si encuentra registro de datos participantes buscar en datos de cliente
 
-            datoscomprador = Datos_compradores.objects\
-                .filter(cxcomprador=idcomprador).first()
+            # datoscomprador = Datos_compradores.objects\
+            #     .filter(cxcomprador=idcomprador).first()
             
-            if datoscomprador:
-                e={
-                    'cxcomprador':datosparticipante.cxparticipante
-                }
-                form_comprador=CompradorForm(e)
+            # if datoscomprador:
+            #     e={
+            #         'cxcomprador':datosparticipante.cxparticipante
+            #     }
+            #     form_comprador=CompradorForm(e)
         else:
             formulario=ParticipanteForm()
-            form_comprador=CompradorForm()
+            # form_comprador=CompradorForm()
 
             # datoscliente=Datos_generales.objects.filter(pk=0)
             
     contexto={'datosparticipante':datosparticipante
             , 'form_participante':formulario
-            , 'form_comprador':form_comprador
+            # , 'form_comprador':form_comprador
             }
 
     if request.method=='POST':
@@ -817,10 +836,10 @@ def DatosCompradores(request, comprador_id=None):
             )
             if datoscomprador:
                 datoscomprador.save()
-        else:
-            datoscomprador.cxusuariomodifica = request.user.id
+        # else:
+        #     datoscomprador.cxusuariomodifica = request.user.id
 
-            datoscomprador.save()
+        #     datoscomprador.save()
 
         return redirect("clientes:listacompradores")
 

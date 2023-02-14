@@ -18,12 +18,12 @@ window.onload=function(){
   
     $table.bootstrapTable({locale:"es-EC"});
     
-    // objeto_fechas("#fechacorte")
-    let hoy = new Date();
-    let semanaEnMilisegundos = 1000 * 60 * 60 * 24 * 7;
-    let suma = hoy.getTime() + semanaEnMilisegundos; //getTime devuelve milisegundos de esa fecha
-    let fechaDentroDeUnaSemana = new Date(suma);
-    inicializaValor("fechacorte", fechaDentroDeUnaSemana.toISOString())
+    // // objeto_fechas("#fechacorte")
+    // let hoy = new Date();
+    // let semanaEnMilisegundos = 1000 * 60 * 60 * 24 * 7;
+    // let suma = hoy.getTime() + semanaEnMilisegundos; //getTime devuelve milisegundos de esa fecha
+    // let fechaDentroDeUnaSemana = new Date(suma);
+    // inicializaValor("fechacorte", fechaDentroDeUnaSemana.toISOString())
 
     // boton de refrescar filtro
     $btnFiltrar.click(function () {

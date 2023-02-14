@@ -6,8 +6,13 @@
             <div class="page-title">
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Operaciones</a></li>
-                    <li><a href="#">Negociación</a></li>
-                    <li class="active">Pendientes de liquidar</li>
+                    <li><a href="#">pagos a clientes</a></li>
+                    {% if tipo_operacion == 'A' %}
+                        <li><a href="#">negociaciones</a></li>
+                    {% else %}
+                        <li><a href="#">cobranzas</a></li>
+                    {% endif %}
+                    <li class="active">pagar</li>
                 </ol>
             </div>
         </div>

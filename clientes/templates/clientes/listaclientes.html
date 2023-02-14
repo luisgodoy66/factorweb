@@ -53,7 +53,7 @@
                         <th>Dirección</th>
                         <th>Telefonos</th>
                         <th>Email</th>
-                        <th>Estado</th>
+                        <th>Sucursal</th>
                         <th>Registro</th>
                         <th class="all">Acciones</th>
                     </thead>
@@ -65,7 +65,7 @@
                             <td>{{ item.cxcliente.ctdireccion }}</td>
                             <td>{{ item.cxcliente.cttelefono1 }} / {{ item.cxcliente.cttelefono2 }} / {{ item.cxcliente.ctcelular }}</td>
                             <td>{{ item.cxcliente.ctemail }}</td>
-                            <td>{{ item.cxestado }}</td>
+                            <td>{{ item.cxlocalidad }}</td>
                             <td>{{ item.dregistro|date:"Y/m/d H:i:s" }}</td>
                             <td>
                                 <a href="{% url 'clientes:cliente_editar' item.cxcliente.cxparticipante %}"  title="Editar"

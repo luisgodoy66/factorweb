@@ -85,9 +85,12 @@ def ImpresionAsignacion(request, asignacion_id):
                 +"catera en el sistema.Registre el cargo con código DCAR")
 
     dic_gao  = {'imprimir':gao.limprimeenreporte
-        , 'descripcion': gao.ctdescripcionenreporte}
+        , 'descripcion': gao.ctdescripcionenreporte
+        , 'iniciales': gao.ctinicialesentablas}
+        
     dic_dc = {'imprimir':dc.limprimeenreporte
-        , 'descripcion': dc.ctdescripcionenreporte}
+        , 'descripcion': dc.ctdescripcionenreporte
+        , 'iniciales': dc.ctinicialesentablas}
     
     subtotal = asignacion.nanticipo - asignacion.ngao - asignacion.ndescuentodecartera
     neto = subtotal - asignacion.niva

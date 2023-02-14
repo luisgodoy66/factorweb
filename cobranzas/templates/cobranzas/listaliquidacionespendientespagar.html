@@ -5,9 +5,9 @@
         <div class="page-header float-right">
             <div class="page-title">
                 <ol class="breadcrumb text-right">
+                    <li><a href="#">operaciones</a></li>
                     <li><a href="#">pagos a clientes</a></li>
-                    <li><a href="#">negociación</a></li>
-                    <li class="active">por desembolsar</li>
+                    <li class="active">cobranzas</li>
                 </ol>
             </div>
         </div>
@@ -68,7 +68,7 @@
                             <td>{{ item.nneto }}</td>
                             <td>
                                 <a href="{% url 'cobranzas:desembolsarliquidacion' item.id item.cxcliente.cxcliente.cxparticipante %}" 
-                                class="btn btn-primary btn-sm" role="button" >
+                                class="btn btn-primary btn-sm" role="button" title="Pagar">
                                 <i class="fa fa-money"></i></a>
                                 <button onclick="ReversarLiquidacion( {{item.id}}, '{{item.cxliquidacion}}', '{{ item.cxtipooperacion}}')" 
                                     class="btn btn-danger btn-sm"

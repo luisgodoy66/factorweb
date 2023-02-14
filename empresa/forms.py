@@ -99,18 +99,21 @@ class TasaFactoringForm(forms.ModelForm):
         fields=[
             'cxtasa', 'cttasa', 'lflat','ndiasperiocidad'
             ,'limprimeenreporte', 'ctdescripcionenreporte'
-            , 'lcargaiva', 'lsobreanticipo'
+            , 'lcargaiva', 'lsobreanticipo', 'ctinicialesentablas'
         ]
         labels={
             'cxtasa':'Código', 'cttasa':'Descripción'
-            , 'lflat':'Flat','ndiasperiocidad': 'Días de periocidad'
+            , 'lflat':'Cálculo con tasa flat'
+            , 'ndiasperiocidad': 'Días de periocidad'
             , 'limprimeenreporte':'Se imprime en reportes'
             , 'ctdescripcionenreporte':'Nombre en reportes'
             , 'lcargaiva':'Carga IVA'
             , 'lsobreanticipo': 'Cálculo sobre el valor anticipado'
+            , 'inicialesentablas':'Iniciales a mostrarse en tablas'
         }
         widgets={'ctdescripcionenreporte': forms.Textarea(attrs={'rows': '1'})
                 }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for f in iter(self.fields):

@@ -50,10 +50,11 @@
                         <th>Id</th>
                         <th>Nombre</th>
                         <th>Clase</th>
-                        <th>Porentaje de anticipo</th>
+                        <th>% anticipo</th>
                         <th>Tasa GAO</th>
                         <th>Tasa de descuento </th>
                         <th>Tasa de GAO adicional </th>
+                        <th>Estado</th>
                         <th>Alta</th>
                         <th class="all">Acciones</th>
                     </thead>
@@ -67,6 +68,7 @@
                             <td>{{ item.datos_operativos.get.ntasacomision }}</td>
                             <td>{{ item.datos_operativos.get.ntasadescuentocartera }}</td>
                             <td>{{ item.datos_operativos.get.ntasagaoa }}</td>
+                            <td>{{ item.datos_operativos.get.cxestado}}</td>
                             <td>{{ item.datos_operativos.get.dalta|date:"Y/m/d" }}</td>
                             <td>
                                 <a href="{% url 'operaciones:datosoperativos_editar' item.cxcliente.cxparticipante %}" 

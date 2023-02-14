@@ -20,11 +20,12 @@
                 <div class="col-md-3">
                     <label for="fechacorte">Fecha de corte de vencimiento:</label>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <input type="date" class="form-control" name="fechacorte"  
-                    id="fechacorte" placeholder="Ingrese fecha de corte" >
+                    id="fechacorte" placeholder="Ingrese fecha de corte" 
+                    value='{{ fecha_corte|date:"Y-m-d"}}'>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <button class="btn btn-success btn-sm"  role="button" id="btnFiltrar">  
                         <i class="fa fa-filter"></i> Filtrar
                     </button>

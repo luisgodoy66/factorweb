@@ -6,7 +6,8 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Extras</a></li>
                     <li><a href="#">configuración</a></li>
-                    <li class="active">Anexos</li>
+                    <li><a href="{% url 'operaciones:listaanexos' %}">Anexos</a></li>
+                    <li class="active">editar</li>
                 </ol>
             </div>
         </div>
@@ -72,12 +73,12 @@
                 </div>    
 
             <div class="card-footer">
-                    <button type="submit" class="btn btn-primary btn-sm">
-                        <span class="fa fa-dot-circle-o"></span> Grabar
-                    </button>
-                    <a href="{% url 'operaciones:listaanexos' %}" class="btn btn-danger btn-sm">
-                        <i class="fa fa-ban"></i> Cancelar
-                    </a>
+                <a href="{% url 'operaciones:listaanexos' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <span class="fa fa-dot-circle-o"></span> Grabar
+                </button>
                     {{ form.errors}}
             </div>
         </div>

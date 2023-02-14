@@ -5,10 +5,17 @@
         <div class="page-header float-right">
             <div class="page-title">
                 <ol class="breadcrumb text-right">
+                    {% if lista_deposito != 'Cuentas cliente' %}
+                    <li><a href="#">operaciones</a></li>
                     <li><a href="#">cobranzas</a></li>
-                    <li><a href="#">liquidar cobranzas</a></li>
-                    <li><a href="#">confirma depósito</a></li>
+                    <li><a href="#">confirma o protesta</a></li>
                     <li class="active">protesto de cheque</li>
+                    {% else %}
+                    <li><a href="#">Extras</a></li>
+                    <li><a href="#">Cuentas conjuntas</a></li>
+                    <li><a href="#">Confirmar cobranzas</a></li>
+                    <li class="active">protesto de cheque</li>
+                    {% endif %}
                 </ol>
             </div>
         </div>

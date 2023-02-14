@@ -7,7 +7,8 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Participantes</a></li>
                     <li><a href="#">Clientes</a></li>
-                    <li class="active">Cuentas bancarias</li>
+                    <li><a href="#">Cuentas bancarias</a></li>
+                    <li class="active">editar</li>
                 </ol>
             </div>
         </div>
@@ -28,21 +29,6 @@
                     <input type="text" id="id_cxparticipante" 
                     name="cxparticipante" value="{{ cliente.cxcliente.cxparticipante }}" 
                     class="form-control" >
-            </div>
-            <div class="row form-group">
-                <div class="col-md-6">
-                    <button class="btn btn-success btn-sm"  role="button"
-                        onclick="return AbrirModal(
-                            '{% url 'clientes:cuentabancaria_nueva' cliente.cxcliente.cxparticipante %}')"
-                        >  
-                        <i class="fa fa-dot-circle-o"></i> Agregar cuenta
-                    </button>
-                    <a href="{% url 'clientes:listacuentasbancarias' %}" 
-                    class="btn btn-danger btn-sm">
-                        <i class="fa fa-ban"></i> Cancelar
-                    </a>
-
-                </div>
             </div>
             <!-- parte inferior -->
                 <small>
@@ -69,7 +55,24 @@
             </div>
                 </small>
         </div>    
-          
+        <div class="card-footer">
+            <div class="row form-group">
+                <div class="col-md-6">
+                    <a href="{% url 'clientes:listacuentasbancarias' %}" 
+                    class="btn btn-danger btn-sm">
+                        <i class="fa fa-ban"></i> Cancelar
+                    </a>
+                    <button class="btn btn-success btn-sm"  role="button"
+                        onclick="return AbrirModal(
+                            '{% url 'clientes:cuentabancaria_nueva' cliente.cxcliente.cxparticipante %}')"
+                        >  
+                        <i class="fa fa-plus-circle"></i> Agregar cuenta
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
     </div>
     <!-- </div> -->
 </form>

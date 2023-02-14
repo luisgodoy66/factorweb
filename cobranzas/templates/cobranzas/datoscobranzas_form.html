@@ -242,9 +242,6 @@
         </div>    
           
         <div class="card-footer">
-            <button class="btn btn-success btn-sm"  type="button" onclick="AceptarCobranza()">  
-                <i class="fa fa-dot-circle-o"></i> Grabar
-            </button>
             {% if tipo == "Cobranza" %}
             <a href="{% url 'cobranzas:listadocumentosporvencer' %}" 
             class="btn btn-danger btn-sm">
@@ -256,6 +253,9 @@
             </a>
             {% endif %}
             </a>
+            <button class="btn btn-primary btn-sm"  type="button" onclick="AceptarCobranza()">  
+                <i class="fa fa-dot-circle-o"></i> Grabar
+            </button>
         </div>
     </div>
     <!-- </div> -->

@@ -62,15 +62,27 @@
                     <div class="row form-group">
                         <div class="col-md-6"><label for="id_lsenotifica" class=" form-control-label"> 
                             {{ form.lsenotifica.label}}</label></div>
-                        <div class="col-md-6">
-                            {{ form.lsenotifica}}
+                        <div class="col ">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  consulta.lsenotifica %} checked {% endif %} 
+                                id = "id_lsenotifica" name = "lsenotifica"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
                         </div>
                     </div>
                     <div class="row form-group">
                         <div class="col-md-6"><label for="id_lactivo" class=" form-control-label">
                             {{ form.lactivo.label}}</label></div>
-                        <div class="col-md-6">
-                            {{ form.lactivo}}
+                        <div class="col ">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  consulta.lactivo %} checked {% endif %} 
+                                id = "id_lactivo" name = "lactivo"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
                         </div>
                     </div>
                 <!-- </div> -->
@@ -78,11 +90,11 @@
                 </div>    
                 {{ errors}}
                 <div class="card-footer">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="return CerrarModal()">
+                        <i class="fa fa-ban"></i> Cerrar
+                    </button>
                     <button type="submit" class="btn btn-primary btn-sm">
                         <i class="fa fa-dot-circle-o"></i> Grabar
-                    </button>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="return CerrarModal()">
-                        <i class="fa fa-dot-circle-o"></i> Cerrar
                     </button>
                 </div>
                 </div>

@@ -136,14 +136,14 @@
         </div>
 
         <div class="card-footer">
-            <button class="btn btn-success btn-sm"  type="button" 
-                onclick="ConfirmarCobranza({{id_operacion}},'{{tipo_operacion}}')">  
-                <i class="fa fa-dot-circle-o"></i> Confirmar
-            </button>
             <a href="{% url 'cuentasconjuntas:listacobranzasporconfirmar' %}" 
             class="btn btn-danger btn-sm">
                 <i class="fa fa-ban"></i> Cancelar
             </a>
+            <button class="btn btn-primary btn-sm"  type="button" 
+                onclick="ConfirmarCobranza({{id_operacion}},'{{tipo_operacion}}')">  
+                <i class="fa fa-dot-circle-o"></i> Confirmar
+            </button>
 
         </div>
 

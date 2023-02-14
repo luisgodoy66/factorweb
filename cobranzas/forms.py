@@ -52,6 +52,19 @@ class CobranzasDocumentosForm(forms.ModelForm):
         # self.fields['ddeposito'].widget.attrs['readonly']=True
         self.fields['ddeposito'].widget.attrs['value']=date.today
 
+    def clean_ddeposito(self):
+        data = self.cleaned_data['ddeposito']
+
+        # #Check date is not in past.
+        # if data < datetime.date.today():
+        #     raise ValidationError(_('Invalid date - renewal in past'))
+
+        # #Check date is in range librarian allowed to change (+4 weeks).
+        # if data > datetime.date.today() + datetime.timedelta(weeks=4):
+        #     raise ValidationError(_('Invalid date - renewal more than 4 weeks ahead'))
+
+        # Remember to always return the cleaned data.
+        return data
 class ChequesForm(forms.ModelForm):
     class Meta:
         model = Cheques

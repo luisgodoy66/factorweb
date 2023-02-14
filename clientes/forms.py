@@ -26,9 +26,9 @@ class CompradorForm(forms.ModelForm):
     
     class Meta:
         model=Datos_compradores
-        fields=['cxcomprador']
-        labels={'cxcomprador':'Identificación'
-        }
+        fields=[ 'cxclase', 'cxestado']
+        labels={'cxclase':'Clase', 'cxestado':'Estado'}
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         

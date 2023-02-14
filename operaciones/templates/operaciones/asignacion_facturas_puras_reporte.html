@@ -85,9 +85,9 @@
                             <th>Plazo</th>
                             <th>% Anticipo</th>
                             <th>Anticipo</th>
-                            {% if gao.imprimir %}<th>% GAO</th>{% endif %}
+                            {% if gao.imprimir %}<th>% {{gao.iniciales}}</th>{% endif %}
                             <th>{{ gao.descripcion }}</th>
-                            {% if dc.imprimir %}<th>% DC</th>{% endif %}
+                            {% if dc.imprimir %}<th>% {{dc.iniciales}}</th>{% endif %}
                             {% if asignacion.ndescuentodecartera > 0 %}<th>{{ dc.descripcion }}</th>{% endif %}
                         </thead>
                         <tbody>

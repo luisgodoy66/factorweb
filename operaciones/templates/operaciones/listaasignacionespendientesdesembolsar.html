@@ -6,8 +6,8 @@
             <div class="page-title">
                 <ol class="breadcrumb text-right">
                     <li><a href="#">operaciones</a></li>
-                    <li><a href="#">negociación</a></li>
-                    <li class="active">por liquidar</li>
+                    <li><a href="#">pagos a clientes</a></li>
+                    <li class="active">negociaciones</li>
                 </ol>
             </div>
         </div>
@@ -71,7 +71,7 @@
                                     class="btn btn-success btn-sm" role="button" target="reporte">
                                     <i class="fa fa-paperclip"></i></a>
                                 <a href="{% url 'operaciones:desembolsarasignacion' item.id item.cxcliente.cxparticipante %}" 
-                                    class="btn btn-primary btn-sm" role="button"  title="Desembolsar">
+                                    class="btn btn-primary btn-sm" role="button"  title="pagar">
                                     <i class="fa fa-money"></i></a>
                             </td>
                         </tr>

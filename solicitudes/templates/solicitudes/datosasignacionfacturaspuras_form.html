@@ -128,6 +128,10 @@
         </div>    
         <div class="card-footer">
             <div class="col-md-6">
+                <a href="{% url 'solicitudes:listasolicitudes' %}" 
+                class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Salir
+                </a>
                 <button class="btn btn-success btn-sm"  role="button"
                     {% if asignacion.id %}
                         onclick="return AbrirModal(
@@ -136,12 +140,8 @@
                         onclick="return NuevaAsignacion()"
                     {% endif %} 
                     >  
-                    <i class="fa fa-dot-circle-o"></i> Agregar factura
+                    <i class="fa fa-plus-circle"></i> Agregar factura
                 </button>
-                <a href="{% url 'solicitudes:listasolicitudes' %}" 
-                class="btn btn-danger btn-sm">
-                    <i class="fa fa-ban"></i> Salir
-                </a>
 
             </div>
         </div>

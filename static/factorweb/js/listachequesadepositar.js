@@ -8,9 +8,10 @@ window.onload=function(){
     ActualizarHeader();
     $table.bootstrapTable({locale:"es-EC"});
     
-    // objeto_fechas("#fechacorte")
-    let hoy = new Date();
-    inicializaValor("fechacorte", hoy.toISOString())
+    // // objeto_fechas("#fechacorte")
+    // let hoy = new Date();
+    // alert(hoy)
+    // inicializaValor("fechacorte", hoy.toISOString())
 
     // boton de refrescar filtro
     $btnFiltrar.click(function () {

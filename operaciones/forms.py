@@ -18,19 +18,21 @@ class DatosOperativosForm(forms.ModelForm):
             ,'ntasacomision', 'ntasadescuentocartera', 'ntasagaoa'
             , 'cxbeneficiarioasignacion', 'ctbeneficiarioasignacion'
             , 'cxbeneficiariocobranzas', 'ctbeneficiariocobranzas'
+            , 'cxestado'
         ]
         labels={'cxcliente':'Cliente', 'dalta':'Fecha de alta'
             , 'cxclase':'Clase', 'nporcentajeanticipo':'% Anticipo'
             ,'ntasacomision':'Tasa comisión'
             , 'ntasadescuentocartera':'Tasa de descuento de cartera'
             , 'ntasagaoa':'Tasa de comisión adicional'
-            , 'cxbeneficiarioasignacion': 'Id. beneficiario asignación'
-            , 'ctbeneficiarioasignacion': 'Nombre de beneficiario de asignación'
-            , 'cxbeneficiariocobranzas':'Id. beneficiario cobranzas'
-            , 'ctbeneficiariocobranzas': 'Nombre de beneficiario de cobranzas'
+            , 'cxbeneficiarioasignacion': 'Id. de beneficiario de cheque'
+            , 'ctbeneficiarioasignacion': 'Nombre de beneficiario de cheque'
+            , 'cxbeneficiariocobranzas':'Id. de beneficiario de cheque'
+            , 'ctbeneficiariocobranzas': 'Nombre de beneficiario de cheque'
+            , 'cxestado':'Estado'
         }
-        widgets={'ctbeneficiarioasignacion': forms.Textarea(attrs={'rows': '2'})
-            , 'ctbeneficiariocobranzas': forms.Textarea(attrs={'rows': '2'}), 
+        widgets={'ctbeneficiarioasignacion': forms.Textarea(attrs={'rows': '1'})
+            , 'ctbeneficiariocobranzas': forms.Textarea(attrs={'rows': '1'}), 
             'dalta': forms.DateInput(
                 format=('%Y-%m-%d'),
                 attrs={'class': 'form-control', 
@@ -124,12 +126,12 @@ class MaestroMovimientosForm(forms.ModelForm):
     class Meta:
         model=Movimientos_maestro
         fields=['cxmovimiento', 'ctmovimiento', 'cxsigno', 'nprioridad'
-            , 'lcargadescuentocartera', 'lcolateral', 'cxmovimientopadre']
+            , 'lcolateral', 'cxmovimientopadre']
         labels={'cxmovimiento':'Código', 'ctmovimiento':'Descripción'
             , 'cxsigno': 'Signo', 'nprioridad': 'Prioridad'
-            , 'lcargadescuentocartera':'Carga descuento de cartera'
             , 'lcolateral': 'Afecta a cartera'
             , 'cxmovimientopadre':'Movimiento padre'}
+            # , 'lcargadescuentocartera':'Carga descuento de cartera'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

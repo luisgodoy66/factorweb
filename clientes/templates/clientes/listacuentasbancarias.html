@@ -50,7 +50,6 @@
                         <th>Id</th>
                         <th>Nombre</th>
                         <th>Cuenta que recibe transferencias</th>
-                        <th>Tipo</th>
                         <th>Propia</th>
                         <th class="all">Acciones</th>
                     </thead>
@@ -60,7 +59,6 @@
                             <td>{{ item.cxcliente.cxparticipante }}</td>
                             <td>{{ item }}</td>
                             <td>{{ item.cuenta_cliente.cxcuenta}}</td>
-                            <td>{{ item.cuenta_cliente.cxcuenta.cxtipocuenta }}</td>
                             <td>{{ item.cuenta_cliente.cxcuenta.lpropia }}</td>
                             <td>
                                 <a href="{% url 'clientes:listacuentasbancariascliente' item.cxcliente.cxparticipante %}" 
