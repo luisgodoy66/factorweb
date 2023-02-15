@@ -57,6 +57,21 @@ window.onload=function(){
     })
 
 };
+
+window.operateEvents = {
+  'click .revertir': function (e, value, row, index) {
+    ReversaProtesto(row.IdCobranza, row.id, row.TipoOperacion, row.Cobranza
+      , row.IdCliente, row.IdTipoFactoring)
+  },
+};
+
+function operateFormatter(value, row, index) {
+return [
+  '<a class="revertir" href="javascript:void(0)" title="Reverso de protesto">',
+  '<i class="fa fa-rotate-left"></i>',
+  '</a>  ',
+].join('')
+}
     
 function RecuperacionDeProtesto(forma){
   // validar que los elementos seleccionados sean del mismo cliente
@@ -115,3 +130,13 @@ function RecuperacionDeProtesto(forma){
   }
   return false
 }
+
+function ReversaProtesto(cobranza_id, protesto_id, tipo_operacion, cobranza
+    , id_cliente, id_factoring){
+    MensajeConfirmacion("Reversa el protesto de " +  cobranza_id +"?",function(){
+      fetchProcesar("/cobranzas/reversaprotesto/"+cobranza_id+"/"+tipo_operacion
+        +"/"+protesto_id+"/"+cobranza+"/"+id_cliente+"/"+id_factoring, function(){
+            location.reload();
+          })
+      })
+  }

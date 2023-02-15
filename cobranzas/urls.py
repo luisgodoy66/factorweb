@@ -15,7 +15,8 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , ReversaCobranza, GeneraListaCobranzasRegistradasJSON, CobranzasCargosView\
     , LiquidacionesEnNegativoPendientesView, GeneraListaLiquidacionesEnNegativoPendientesJSON\
     , DetalleNotasDebitoPendientesJSON, DatosCobroNotaDebito, AceptarCobranzaNotasDebito\
-    , GeneraListaLiquidacionesRegistradasJSON, GeneraListaCobranzasCargosRegistradasJSON
+    , GeneraListaLiquidacionesRegistradasJSON, GeneraListaCobranzasCargosRegistradasJSON\
+    , ReversaProtesto
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos
@@ -105,6 +106,8 @@ urlpatterns = [
         , name='reporte_recuperacion_protesto'),
     path('protestorecuperacion/<int:id_cheque>/<int:id_cobranza>/<lista_deposito>'
         ,ProtestoRecuperacionNew.as_view(), name='protestorecuperacion'),
+    path('reversaprotesto/<int:id_cobranza>/<tipo_operacion>/<int:id_protesto>/<cobranza>/<cliente_id>/<factoring_id>'
+         ,ReversaProtesto),
 
     # notas de debito
     path('listaliquidacionesennegativopendientes/',LiquidacionesEnNegativoPendientesView.as_view()

@@ -54,7 +54,7 @@ class Documentos_cabecera(ClaseModelo):
     dliquidacion = models.DateTimeField(null=True) 
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     nsobrepago = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    cxestado = models.CharField(max_length=1, default=' ')
+    cxestado = models.CharField(max_length=1, default='A')
     cxcheque = models.ForeignKey(Cheques, on_delete=models.RESTRICT
         , null=True, related_name='cheque_cobranza')
     cxcuentatransferencia = models.ForeignKey(Cliente_models.Cuentas_bancarias
@@ -168,6 +168,8 @@ class Liquidacion_detalle(ClaseModelo):
     cxtipooperacion = models.CharField(max_length=1, choices= TIPOS_DE_OPERACION)
     operacion = models.BigIntegerField()
 
+from operaciones.models import  Notas_debito_cabecera
+
 class Cheques_protestados(ClaseModelo):
     FORMAS_DE_COBRO = (
         ('CHE', 'Cheque'),
@@ -178,13 +180,15 @@ class Cheques_protestados(ClaseModelo):
         , related_name="cheque_protestado")
     cxformacobro = models.CharField(max_length=3, choices=FORMAS_DE_COBRO)
     dprotesto = models.DateField()
-    motivoprotesto = models.ForeignKey(Motivos_protesto_maestro, on_delete=models.RESTRICT)
-    nvalornotadebito = models.DecimalField(max_digits=10, decimal_places=2)
+    motivoprotesto = models.ForeignKey(Motivos_protesto_maestro
+        , on_delete=models.RESTRICT)
+    # nvalornotadebito = models.DecimalField(max_digits=10, decimal_places=2)
     nvalor =  models.DecimalField(max_digits=10, decimal_places=2)
     nsaldo =  models.DecimalField(max_digits=10, decimal_places=2)
     cxestado = models.CharField(max_length=1, default="A") 
     dultimacobranza = models.DateTimeField(null=True) 
     cxtipooperacion = models.CharField(max_length=1)
+    notadedebito = models.ForeignKey(Notas_debito_cabecera, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return '{} CH/{}'.format(self.cheque.cxcuentabancaria, self.cheque.ctcheque)        
@@ -196,8 +200,10 @@ class Documentos_protestados(ClaseModelo):
         ,null=True, default=None)
     nvalor = models.DecimalField(max_digits=10, decimal_places=2)
     nsaldo = models.DecimalField(max_digits=10, decimal_places=2)
-    nvalorbajacobranza =  models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    nsaldobajacobranza =  models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    nvalorbajacobranza =  models.DecimalField(max_digits=10, decimal_places=2
+        , default=0)
+    nsaldobajacobranza =  models.DecimalField(max_digits=10, decimal_places=2
+        , default=0)
     cxestado = models.CharField(max_length=1, default="A") 
     dultimacobranza = models.DateTimeField(null=True) 
 
@@ -220,7 +226,7 @@ class Recuperaciones_cabecera(ClaseModelo):
     dliquidacion = models.DateTimeField(null=True) 
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     nsobrepago = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    cxestado = models.CharField(max_length=1, default=' ')
+    cxestado = models.CharField(max_length=1, default='A')
     cxcheque = models.ForeignKey(Cheques, on_delete=models.RESTRICT
         , null=True, related_name='cheque_recuperacion')
     cxcuentatransferencia = models.ForeignKey(Cliente_models.Cuentas_bancarias
@@ -325,8 +331,6 @@ class Cargos_cabecera(ClaseModelo):
         else:
             x = 'Cobranza de cargos'
         return x
-
-from operaciones.models import  Notas_debito_cabecera
 
 class Cargos_detalle(ClaseModelo):
     cxcobranza =models.ForeignKey(Cargos_cabecera, on_delete=models.CASCADE)

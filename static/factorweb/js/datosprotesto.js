@@ -6,13 +6,13 @@ window.onload=function(){
 
 function AceptarProtesto(){
   
-    MensajeConfirmacion("Aceptar el protesto de " + capturaValor("codigo_cobranza") +"?"
-      ,function(){
+  MensajeConfirmacion("Aceptar el protesto de " + capturaValor("codigo_cobranza") +"?"
+    ,function(){
       var tipo
 
-      if (tipo_operacion=='Cobranza') {tipo = 'C'} else {tipo = 'R'}
+    if (tipo_operacion=='Cobranza') {tipo = 'C'} else {tipo = 'R'}
 
-      var objeto={
+    var objeto={
         "id_cliente":capturaValor("id_cliente"),
         "tipo_factoring":capturaValor("tipo_factoring"),
         "forma_cobro":capturaValor("forma_cobro"),

@@ -19,32 +19,26 @@
 <form  method="post" id="frmSolicitud" enctype="multipart/form-data" 
         class="form-horizontal">
     <!-- <div class="col-lg-6"> -->
-    <div class="col-md-6" hidden>
-        <input type="number" id="id_cobranza" value={{ operacion.id }}>
-        <input id="tipo_operacion" value={{ tipo_operacion }}>
-    </div>
     <div class="card">
             {% csrf_token %}
         <div class="card-header">
             <strong>Cobranza</strong> 
             {{ operacion }} de  {{ operacion.cxcliente }}  
         </div>
+        <div class="col-md-6" hidden>
+            <input type="number" id="id_cobranza" value={{ operacion.id }}>
+            <input id="tipo_operacion" value={{ tipo_operacion }}>
+            <input type="text" id="id_dcobranza" value="{{ operacion.dcobranza |date:'Y-m-d' }}">
+        </div>
         <div class="card-body card-block">
                 <!-- numero de documentos -->
                 <div class="row form-group">
                     <div class="col-md-2">
-                        <label for="id_cxactividad" class=" form-control-label">
-                        {{form.ddeposito.label}}</label>
+                        <label for="id_fechacobro" class=" form-control-label">
+                        Fecha de cobro</label>
                     </div>
                     <div class="col-md-2" >
-                        {{form.ddeposito}}
-                    </div>
-                    <div class="col-md-2">
-                        <label for="id_cxactividad" class=" form-control-label">
-                        {{form.nvalor.label}}</label>
-                    </div>
-                    <div class="col-md-2" >
-                        {{form.nvalor}}
+                        {{operacion.dcobranza |date:'Y-m-d'}}
                     </div>
                 </div>
             <!-- parte inferior -->

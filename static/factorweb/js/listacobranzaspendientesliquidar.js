@@ -68,6 +68,7 @@ function ReversaConfirmacion(cobranza_id, tipo_operacion){
   }
 
 function Condonar(cobranza_id, tipo_operacion){
+  alert('condonar')
   window.location.href = "/cobranzas/cobranzaporcondonar/" + cobranza_id+"/"+tipo_operacion
 }
 

@@ -421,17 +421,14 @@ class CobranzasCargosView(LoginRequiredMixin, generic.FormView):
 
 def CobranzaPorCondonar(request,pk, tipo_operacion):
     template_name = "cobranzas/detallecobroporcondonar.html"
-    formulario={}
     
     if tipo_operacion=='C':
         operacion = Documentos_cabecera.objects.filter(pk=pk).first()
-        formulario = CobranzasDocumentosForm
+        
     else:
         operacion = Recuperaciones_cabecera.objects.filter(pk=pk).first()
-        formulario = RecuperacionesProtestosForm
-
+        
     contexto={"operacion": operacion
-        , "form" : formulario
         , "tipo_operacion": tipo_operacion
         }
     
@@ -910,6 +907,7 @@ def DatosDiasACondonar(request, id, dias, cobranza_id, tipo_operacion):
         "tipo_operacion": tipo_operacion
     }
     if request.method =="POST":
+
         dias = request.POST.get("dias_id")
         
         if tipo_operacion =='C':
@@ -927,6 +925,7 @@ def DatosDiasACondonar(request, id, dias, cobranza_id, tipo_operacion):
         return redirect("cobranzas:cobranzaporcondonar", pk=cobranza_id, tipo_operacion=tipo_operacion)
         
         
+    print(contexto)
     return render(request, template_name, contexto)
 
 @login_required(login_url='/login/')
@@ -1143,7 +1142,7 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
                 cuenta_pago = None
             else:
                 x = request.POST.get("cxcuentapago")
-                cuenta_pago = Cuentas_bancarias.objects.filter(pk = x).first()
+                cuenta_pago = CuentasEmpresa.objects.filter(pk = x).first()
 
             if forma_pago=="CHE":
                 id_beneficiario = datosoperativos.cxbeneficiarioasignacion
@@ -1249,7 +1248,12 @@ def GeneraListaProtestosPendientesJSONSalida(doc):
     output["Deposito"] = cobranza.ddeposito.strftime("%Y-%m-%d")
     output["Girador"] = doc.cheque.ctgirador
     output["Cheque"] = doc.cheque.__str__()
-    output["NotaDebito"] = doc.nvalornotadebito
+    
+    if doc.notadedebito:
+        output["NotaDebito"] = doc.notadedebito.nvalor
+    else:
+        output["NotaDebito"] = None
+
     output["Protesto"] = doc.dprotesto
     output["Saldo"] = doc.nsaldo
     output["Motivo"] = doc.motivoprotesto.ctmotivoprotesto
@@ -1262,6 +1266,9 @@ def GeneraListaProtestosPendientesJSONSalida(doc):
         output["CuentaDeposito"] = 'Cuenta cliente'
     else:
         output["CuentaDeposito"] = cobranza.cxcuentadeposito.__str__()
+    output["IdCobranza"] = cobranza.id
+    output["TipoOperacion"] = doc.cxtipooperacion
+
     return output
 
 def DetalleDocumentosProtesosJSON(request, ids_protestos):
@@ -2163,3 +2170,14 @@ def ObtenerOtrosCargosDeCobranza(tipo_operacion, cobranza, codigo_operacion\
                 total_cargos += cargo.nsaldo
 
     return total_cargos
+
+def ReversaProtesto(request, id_cobranza,tipo_operacion,id_protesto, cobranza
+                    , cliente_id, factoring_id):
+    # # ejecuta un store procedure 
+    nusuario = request.user.id
+    resultado=enviarPost("CALL uspReversaProtesto( '{0}',{1},{2},'{3}','{4}'\
+        ,'{5}',{6},'')"
+    .format(tipo_operacion,id_cobranza,id_protesto, cobranza,cliente_id
+        ,factoring_id, nusuario))
+
+    return HttpResponse(resultado)

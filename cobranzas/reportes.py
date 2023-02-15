@@ -118,7 +118,10 @@ def ImpresionCobranzaCartera(request, cobranza_id):
         if protesto:
             fecha_protesto = protesto.dprotesto
             motivo_protesto = protesto.motivoprotesto.ctmotivoprotesto
-            nd_protesto = protesto.nvalornotadebito
+            if protesto.notadedebito:
+                nd_protesto = protesto.notadedebito.nvalor
+            else:
+                nd_protesto = None
 
     context = {
         "cobranza" : cobranza,

@@ -141,6 +141,9 @@ class MotivoProtestoForm(forms.ModelForm):
             })
 
 class ProtestoForm(forms.ModelForm):
+
+    nvalornotadebito = forms.DecimalField( initial=0.00)
+    
     class Meta:
         model = Cheques_protestados
 
@@ -169,7 +172,6 @@ class ProtestoForm(forms.ModelForm):
             })
         # self.fields['dprotesto'].widget.attrs['readonly']=True
         self.fields['dprotesto'].widget.attrs['value']=date.today
-        self.fields['nvalornotadebito'].widget.attrs['value']=0.00
 
 class RecuperacionesProtestosForm(forms.ModelForm):
 
