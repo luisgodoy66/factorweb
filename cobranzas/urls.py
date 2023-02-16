@@ -76,8 +76,7 @@ urlpatterns = [
         name='desembolsarliquidacion'),
     path('reporteliquidacion/<int:liquidacion_id>',ImpresionLiquidacion
         , name='reporte_liquidacion'),
-    path('reversarliquidacion/<int:pid_liquidacion>/<codigo_liquidacion>/<tipo_operacion>'
-        ,ReversaLiquidacion),
+    path('reversarliquidacion/<int:pid_liquidacion>/',ReversaLiquidacion),
     path('liquidacionesregistradasjson/<desde>/<hasta>',GeneraListaLiquidacionesRegistradasJSON
         , name="liquidacionesregistradas_json"),
 

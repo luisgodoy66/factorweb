@@ -20,6 +20,9 @@
         .table td.numero{
             text-align: right;
         }
+        .table td.centrado{
+            text-align: center;
+        }
         .caja { 
         font-family: sans-serif; 
         font-size: 18px; 
@@ -131,7 +134,7 @@
                                 <td>{{ item.asignacion }}</td>
                                 <td>{{ item.desembolso|date:"Y-m-d" }}</td>
                                 <td>{{ item.documento }}</td>
-                                <td>{{ item.cobranza }}</td>
+                                <td class="centrado">{{ item.cobranza }}</td>
                                 <td class="numero">{{ item.valor_base }}</td>
                                 <td class="numero">{{ item.tasa_calculo }}</td>
                                 <td class="numero">{{ item.dias_calculo }}</td>

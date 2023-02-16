@@ -55,7 +55,7 @@ return [
 
 window.operateEventsLiqCob = {
   'click .revertir': function (e, value, row, index) {
-    ReversarliquidacionCobranza(row.id, row.Operacion, row.TipoOperacion)
+    ReversarliquidacionCobranza(row.id, )
   },
   'click .imprimir': function (e, value, row, index) {
     ImprimirLiquidacionCobranza( row.id, )

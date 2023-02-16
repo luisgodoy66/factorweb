@@ -70,7 +70,7 @@
                                 <a href="{% url 'cobranzas:desembolsarliquidacion' item.id item.cxcliente.cxcliente.cxparticipante %}" 
                                 class="btn btn-primary btn-sm" role="button" title="Pagar">
                                 <i class="fa fa-money"></i></a>
-                                <button onclick="ReversarLiquidacion( {{item.id}}, '{{item.cxliquidacion}}', '{{ item.cxtipooperacion}}')" 
+                                <button onclick="ReversarLiquidacion( {{item.id}})" 
                                     class="btn btn-danger btn-sm"
                                     role="button">
                                     <i class="fa fa-rotate-left"></i>

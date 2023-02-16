@@ -139,7 +139,7 @@ class CobranzasConsulta(LoginRequiredMixin, generic.ListView):
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
-        # obtener de la fecha actual el día de la semana?
+        # obtener primer día del mes actual
         desde = date.today() + timedelta(days=-date.today().day +1)
         hasta = date.today()
 
@@ -707,6 +707,22 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 , 'cxcheque', 'cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'CC'",''))
+        liquidaciones = Liquidacion_cabecera.objects.all()\
+                .values('cxcliente__cxcliente__ctnombre','ddeposito'
+                ,'cxtipofactoring__ctabreviacion','cxcobranza'
+                ,'cxformapago'
+                ,'nvalor', 'dcobranza'
+                , 'cxcheque', 'cxestado','dregistro'
+                , 'id', 'cxcuentatransferencia','nsobrepago')\
+                    .annotate(tipo=RawSQL("select 'CC'",''))
+        liquidaciones = Liquidacion_cabecera.objects.all()\
+                .values('cxcliente__cxcliente__ctnombre','ddesembolso'
+                ,'cxtipofactoring__ctabreviacion','cxliquidacion'
+                ,'jcobranzas'
+                ,'nneto', 'dliquidacion'
+                , 'nneto', 'cxtipofactoring','dregistro'
+                , 'id', 'nneto','nsobrepago')\
+                    .annotate(tipo=RawSQL("select 'L'",''))
     else:
 
         cobranzas = Documentos_cabecera.objects\
@@ -757,8 +773,18 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'CC'",''))
 
+        liquidaciones = Liquidacion_cabecera.objects\
+            .filter(dliquidacion__gte = desde, dliquidacion__lte = hasta)\
+                .values('cxcliente__cxcliente__ctnombre','ddesembolso'
+                ,'cxtipofactoring__ctabreviacion','cxliquidacion'
+                ,'ctinstrucciondepago'
+                ,'nneto', 'dliquidacion'
+                , 'nneto', 'cxestado','dregistro'
+                , 'id', 'nneto','nsobrepago')\
+                    .annotate(tipo=RawSQL("select 'L'",''))
+
     movimiento = cobranzas.union(recuperaciones, protestos_cobranzas
-        , protestos_recuperaciones, cargos)
+        , protestos_recuperaciones, cargos, liquidaciones)
             
     tempBlogs = []
     for i in range(len(movimiento)):
@@ -784,7 +810,7 @@ def GeneraListaCobranzasJSONSalida(transaccion):
     output["TipoFactoring"] = transaccion['cxtipofactoring__ctabreviacion']
     output["Registro"] = transaccion["dregistro"]
 
-    if 'protestada' in transaccion['tipo']:
+    if 'protestada' in transaccion['tipo'] or transaccion['tipo']=='L':
         output["Detalle"] = transaccion['cxformapago']
     else:
         if transaccion['cxformapago'] =="CHE" or transaccion['cxformapago'] =="DEP":
@@ -795,9 +821,9 @@ def GeneraListaCobranzasJSONSalida(transaccion):
                 .filter(pk = transaccion['cxcuentatransferencia']).first()
             output["Detalle"] = cuenta.__str__()
 
+        output["FormaCobro"] = transaccion['cxformapago']
         if transaccion['ddeposito']:
             output["Deposito"] = transaccion['ddeposito'].strftime("%Y-%m-%d")
-        output["FormaCobro"] = transaccion['cxformapago']
         output["Sobrepago"] = transaccion['nsobrepago']
 
     if transaccion['tipo'] =='C':
@@ -810,6 +836,8 @@ def GeneraListaCobranzasJSONSalida(transaccion):
         output["Movimiento"] = 'Recuperación protestada'
     elif transaccion['tipo'] =='CC':
         output["Movimiento"] = 'Cobranza de cargos'
+    elif transaccion['tipo'] =='L':
+        output["Movimiento"] = 'Liquidación'
 
     # se necesita el tipo de operacion para saber que va a imprimir o reversar
     output["TipoOperacion"] = transaccion["tipo"]
@@ -1132,6 +1160,7 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
         with transaction.atomic():
             # 1. Actualizar el estado de la liquidacion
             liquidacion.ldesembolsada = True
+            liquidacion.cxestado = 'P'
             liquidacion.save()
 
             # 2. grabar el desembolso
@@ -1768,11 +1797,11 @@ def GeneraOtroCargoJSONSalida(id_cargo, nombre_cargo, fecha,  valor
 
     return output
 
-def ReversaLiquidacion(request, pid_liquidacion,codigo_liquidacion,tipo_operacion):
+def ReversaLiquidacion(request, pid_liquidacion):
     # # ejecuta un store procedure 
     nusuario = request.user.id
-    resultado=enviarPost("CALL uspReversaLiquidarCobranzas( {0},'{1}','{2}',{3},'')"
-    .format(pid_liquidacion,codigo_liquidacion,tipo_operacion, nusuario))
+    resultado=enviarPost("CALL uspReversaLiquidarCobranzas( {0},{1},'')"
+    .format(pid_liquidacion, nusuario))
 
     return HttpResponse(resultado)
 
@@ -2014,7 +2043,7 @@ def GeneraListaLiquidacionesRegistradasJSON(request, desde = None, hasta= None):
                 ,'cxtipofactoring__ctabreviacion','cxliquidacion'
                 ,'ctinstrucciondepago', 'cxtipooperacion'
                 ,'nneto', 'dliquidacion','ldesembolsada'
-                ,'dregistro', 'leliminado'
+                ,'dregistro', 'leliminado', 'cxestado'
                 , 'id')
     else:
 
@@ -2024,7 +2053,7 @@ def GeneraListaLiquidacionesRegistradasJSON(request, desde = None, hasta= None):
                 ,'cxtipofactoring__ctabreviacion','cxliquidacion'
                 ,'ctinstrucciondepago', 'cxtipooperacion'
                 ,'nneto', 'dliquidacion','ldesembolsada'
-                ,'dregistro', 'leliminado'
+                ,'dregistro', 'leliminado', 'cxestado'
                 , 'id')
           
     tempBlogs = []
@@ -2046,25 +2075,12 @@ def GeneraListaLiquidacionesJSONSalida(transaccion):
     output["Cliente"] = transaccion['cxcliente__cxcliente__ctnombre']
     output["Operacion"] = transaccion['cxliquidacion']
     output["Fecha"] = transaccion['dliquidacion'].strftime("%Y-%m-%d")
-    if transaccion['leliminado']:
-        output["Estado"] = "E"
-    elif transaccion['ldesembolsada']:
-        output["Estado"] = "P"
-    else:
-        output["Estado"] = "A"
-
+    output["Estado"] = transaccion['cxestado']
     output["Valor"] =  transaccion['nneto']
     output["TipoFactoring"] = transaccion['cxtipofactoring__ctabreviacion']
     output["Registro"] = transaccion["dregistro"]
 
-    # if transaccion['tipo'] =='C':
-    #     output["Movimiento"] = 'Cobranza'
-    # elif transaccion['tipo'] =='R':
-    #     output["Movimiento"] = 'Recuperación'
-
-    # # se necesita el tipo de operacion para saber qué va a imprimir o reversar
     output["TipoOperacion"] = transaccion["cxtipooperacion"]
-    # output["FormaPago"] = transaccion["cxformapago"]
 
     return output
 
