@@ -1,7 +1,8 @@
-from email.policy import default
-from statistics import mode
+# from email.policy import default
+# from statistics import mode
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import timedelta
 
 from bases.models import ClaseModelo
 from empresa.models import Datos_participantes , Tipos_factoring, Cuentas_bancarias
@@ -103,8 +104,8 @@ class Documentos_detalle(ClaseModelo):
             vencimiento = self.cxdocumento.dvencimiento
         else:
             vencimiento = self.cxcobranza.cxaccesorio.dvencimiento
-
-        return self.cxcobranza.dcobranza - vencimiento
+# obtener dias de la resta de fechas?
+        return (self.cxcobranza.dcobranza - vencimiento)/timedelta(days=1)
 
     def vencimiento(self):
         # si es factura pura, tomo el vencimiento del documento
@@ -276,7 +277,7 @@ class Recuperaciones_detalle(ClaseModelo):
         else:
             vencimiento = self.documentoprotestado.accesorio.dvencimiento
 
-        return self.recuperacion.dcobranza - vencimiento
+        return (self.recuperacion.dcobranza - vencimiento)/timedelta(days=1)
 
     def vencimiento(self):
         # si es factura pura, tomo el vencimiento del documento

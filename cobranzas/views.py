@@ -784,8 +784,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                     .annotate(tipo=RawSQL("select 'L'",''))
 
     movimiento = cobranzas.union(recuperaciones, protestos_cobranzas
-        , protestos_recuperaciones, cargos, liquidaciones)
-            
+        , protestos_recuperaciones, cargos, liquidaciones).order_by('dcobranza')
+
     tempBlogs = []
     for i in range(len(movimiento)):
         tempBlogs.append(GeneraListaCobranzasJSONSalida(movimiento[i])) 
@@ -1757,7 +1757,8 @@ def ObtenerCargosDeProtestos(cobranza, listaotroscargos):
             # la nd se registra sobre la recuperacion o cobranza protestada
             nd = Notas_debito_cabecera.objects\
                 .filter(cxtipooperacion = prox.cxtipooperacion
-                    , operacion = cobranza_protestada.id)
+                    , operacion = cobranza_protestada.id
+                    , leliminado = False, nsaldo__gt = 0)
 
             for ndx in nd:
 
@@ -1772,13 +1773,19 @@ def ObtenerCargosDeProtestos(cobranza, listaotroscargos):
                         .filter(id = detallex.cargo.id )
 
                     for cargo in cargos:
-                        
-                        listaotroscargos.append(GeneraOtroCargoJSONSalida(
+                        # verificar que la nd no se encuentre ya registrada, para no duplicar.
+                        # eso pasa con recuperaciones del mismo protesto
+
+                        elemento = (GeneraOtroCargoJSONSalida(
                             cargo.id, cargo.cxmovimiento.ctmovimiento
                             , ndx.dnotadebito, cargo.nsaldo, ndx.id
                             , codigo_operacion))
 
-                        total_cargos += cargo.nsaldo
+                        try:
+                            x = listaotroscargos.index(elemento)
+                        except:
+                            listaotroscargos.append(elemento)
+                            total_cargos += cargo.nsaldo
         return total_cargos
 
 def GeneraOtroCargoJSONSalida(id_cargo, nombre_cargo, fecha,  valor

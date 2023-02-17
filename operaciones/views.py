@@ -1053,10 +1053,11 @@ def GeneraListaAsignacionesJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
 
     if desde == 'None':
-        asignacion = Asignacion.objects.all()
+        asignacion = Asignacion.objects.all().order_by('ddesembolso')
     else:
         asignacion = Asignacion.objects\
-            .filter(ddesembolso__gte = desde, ddesembolso__lte = hasta)
+            .filter(ddesembolso__gte = desde, ddesembolso__lte = hasta)\
+            .order_by('ddesembolso')
     tempBlogs = []
     for i in range(len(asignacion)):
         tempBlogs.append(GeneraListaAsignacionesJSONSalida(asignacion[i])) 
