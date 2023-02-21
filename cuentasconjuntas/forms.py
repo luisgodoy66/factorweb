@@ -7,8 +7,8 @@ from datetime import date
 class CuentasBancariasForm(forms.ModelForm):
     class Meta:
         model=Cuentas_bancarias
-        fields=['cxbanco', 'cxtipocuenta', 'cxcuenta'
-            , 'lactiva', 'cxcliente'
+        fields=[ 'cxcliente','cxbanco', 'cxtipocuenta', 'cxcuenta'
+            , 'lactiva'
         ]
         labels={'cxbanco':'Banco', 'cxtipocuenta':'Tipo de cuenta'
             , 'cxcuenta':'Número de cuenta'

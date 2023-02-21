@@ -130,7 +130,7 @@ function CobroDeDocumentos(forma){
       }, 0)
 
     url = '/cobranzas/cobrodedocumentos/'+ids+'/'+total_cartera+'/'+forma+'/'
-      +id_cliente+'/'+un_solo_comprador+'/'+id_comprador+'/'+tipo_factoring;
+      +id_cliente+'/'+un_solo_comprador+'/'+id_comprador+'/'+tipo_factoring+'/'+filtro;
     
     location.href=url
   }

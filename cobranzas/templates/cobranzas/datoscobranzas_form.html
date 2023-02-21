@@ -8,13 +8,20 @@
                     <li><a href="#">Operaciones</a></li>
                     <li><a href="#">cobranzas</a></li>
                     {% if tipo == "Cobranza" %}
-                    <li><a href="{% url 'cobranzas:listadocumentosporvencer' %}">
-                        cartera por vencer</a></li>
-                    <li class="active">cobro de documentos</li>
+                        {% if por_vencer == 'Si' %}
+                        <li><a href="{% url 'cobranzas:listadocumentosporvencer' %}">
+                            cartera por vencer</a></li>
+                        {% else %}
+                        <li><a href="{% url 'cobranzas:listadocumentosvencidos' %}">
+                            Cartera vencida
+                        </a>
+                        </li>
+                        {% endif %}
+                        <li class="active">cobro de documentos</li>
                     {% else %}
-                    <li><a href="{% url 'cobranzas:listaprotestospendientes' %}">
-                        protestos pendiente</a></li>
-                    <li class="active">recuperación de protesto</li>
+                        <li><a href="{% url 'cobranzas:listaprotestospendientes' %}">
+                            protestos pendiente</a></li>
+                        <li class="active">recuperación de protesto</li>
                     {% endif %}
                 </ol>
             </div>
@@ -243,16 +250,23 @@
           
         <div class="card-footer">
             {% if tipo == "Cobranza" %}
-            <a href="{% url 'cobranzas:listadocumentosporvencer' %}" 
-            class="btn btn-danger btn-sm">
-                <i class="fa fa-ban"></i> Cancelar
+                {% if por_vencer == 'Si' %}
+                <a href="{% url 'cobranzas:listadocumentosporvencer' %}" 
+                class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                {% else %}
+                <a href="{% url 'cobranzas:listadocumentosvencidos' %}" 
+                class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                {% endif %}
             {% else %}
-            <a href="{% url 'cobranzas:listaprotestospendientes' %}" 
-            class="btn btn-danger btn-sm">
-                <i class="fa fa-ban"></i> Cancelar
-            </a>
+                <a href="{% url 'cobranzas:listaprotestospendientes' %}" 
+                class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
             {% endif %}
-            </a>
             <button class="btn btn-primary btn-sm"  type="button" onclick="AceptarCobranza()">  
                 <i class="fa fa-dot-circle-o"></i> Grabar
             </button>

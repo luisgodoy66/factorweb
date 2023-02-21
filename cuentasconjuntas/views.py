@@ -34,7 +34,7 @@ class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
     template_name = "cuentasconjuntas/datoscuentabancaria_modal.html"
     context_object_name='cuentas'
     form_class = CuentasBancariasForm
-    success_url= reverse_lazy("cuentasconjuntas:listadocuentasconjuntas")
+    success_url= reverse_lazy("cuentasconjuntas:listacuentasconjuntas")
     login_url = 'bases:login'
 
     def form_valid(self, form):
@@ -51,7 +51,7 @@ class CuentasBancariasEdit(LoginRequiredMixin, generic.UpdateView):
     template_name = "cuentasconjuntas/datoscuentabancaria_modal.html"
     context_object_name='cuentas'
     form_class = CuentasBancariasForm
-    success_url= reverse_lazy("cuentasconjuntas:listadocuentas")
+    success_url= reverse_lazy("cuentasconjuntas:listacuentasconjuntas")
     login_url = 'bases:login'
 
     def form_valid(self, form):

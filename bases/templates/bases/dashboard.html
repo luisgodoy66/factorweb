@@ -53,17 +53,17 @@
             </div>
         </div>
     </div>
-
-    <div class="col-lg-6">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="mb-3">Line Chart </h4>
-                <canvas id="lineChart"></canvas>
+    <div class="animated fadeIn">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-3">Antigüedad de la cartera </h4>
+                    <canvas id="singelBarChart"></canvas>
+                </div>
             </div>
-        </div>
+        </div><!-- /# column -->
 
-    </div><!-- /# column -->
-
+   </div>
     <div class="col-xl-6">
         <div class="card">
             <div class="card-header">
@@ -196,4 +196,10 @@
 {% endblock %}
 {% block js_page %}
 <script type="text/javascript" src="{% static 'factorweb/js/dashboard.js' %}"></script>
+<!-- Chart js -->
+<script src="{% static 'factorweb/vendors/chart.js/dist/Chart.bundle.min.js' %}"></script>
+<script src="{% static 'factorweb/assets/js/dashboard.js' %}"></script>
+<script src="{% static 'factorweb/assets/js/widgets.js' %}"></script>
+<script src="{% static 'factorweb/assets/js/init-scripts/chart-js/chartjs-init.js' %}"></script>
+    
 {% endblock %}

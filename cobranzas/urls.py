@@ -35,7 +35,8 @@ urlpatterns = [
         name="carteraporvencer_json"),
     path('chequesadepositarjson/<fecha_corte>',GeneraListaChequesADepositarJSON, 
         name="chequesadepositar_json"),
-    path('cobrodedocumentos/<ids_documentos>/<total_cartera>/<forma_cobro>/<cliente_ruc>/<un_comprador>/<deudor_id>/<tipo_factoring>', 
+    path('cobrodedocumentos/<ids_documentos>/<total_cartera>/<forma_cobro>'\
+         '/<cliente_ruc>/<un_comprador>/<deudor_id>/<tipo_factoring>/<por_vencer>', 
         CobranzasDocumentosView.as_view(), name='cobro_documentos'),
     path('depositodecheques/<ids_cheques>/<total_cartera>/', 
         DepositoCheques, name='deposito_cheques'),

@@ -16,7 +16,7 @@ from .forms import DatosOperativosForm, AsignacionesForm, \
 
 from .models import Cargos_detalle, Condiciones_operativas_detalle, Datos_operativos \
     , Asignacion,  Movimientos_maestro, Condiciones_operativas_cabecera, Anexos\
-    , Desembolsos
+    , Desembolsos, Documentos
 from empresa.models import  Clases_cliente, Datos_participantes, \
     Tasas_factoring, Tipos_factoring, Cuentas_bancarias
 
@@ -1120,3 +1120,20 @@ def GeneraListaAsignacionesRegistradasJSON(request, desde = None, hasta= None):
         }
     return JsonResponse( data)
 
+def GeneraListaAntigüedadCarteraJSON(request):
+    # Es invocado desde la url de una tabla bt
+
+    documentos = Documentos.objects.antigüedad_cartera()
+        
+    output = {}
+
+    output["vencido_mas_90"] = documentos.vencido_mas_90
+    output["vencido_90"] = documentos.vencido_90
+    output["TipoFactoring"] = documentos.cxtipofactoring.cttipofactoring
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)

@@ -33,6 +33,7 @@ class Cheques(ClaseModelo):
         return '{} CH/{}'.format(self.cxcuentabancaria, self.ctcheque)
 
 from cuentasconjuntas import models as CuentasConjuntasModels
+
 class Documentos_cabecera(ClaseModelo):
     FORMAS_DE_PAGO = (
         ('EFE', 'Efectivo'),
@@ -81,7 +82,7 @@ class Documentos_cabecera(ClaseModelo):
         else:
             x = 'Cobranza'
         return x
-
+    
 class Documentos_detalle(ClaseModelo):
     cxcobranza =models.ForeignKey(Documentos_cabecera
         , on_delete=models.CASCADE

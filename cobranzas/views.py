@@ -95,6 +95,7 @@ class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
         un_solo_deudor = self.kwargs.get('un_comprador')
         deudor_id = self.kwargs.get('deudor_id')
         tipo_factoring = self.kwargs.get('tipo_factoring')
+        por_vencer = self.kwargs.get('por_vencer')
 
         cliente = Datos_generales.objects.filter(cxcliente = cliente_ruc).first()
 
@@ -129,6 +130,7 @@ class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
         context["deudor_id"] = deudor_id
         context["cuentas_conjuntas"] = cuentas_conjuntas
         context["tipo"]="Cobranza"
+        context["por_vencer"]=por_vencer
         return context
 
 class CobranzasConsulta(LoginRequiredMixin, generic.ListView):
@@ -1061,22 +1063,22 @@ def GeneraCargoJSONSalida(cobranza, id_cobranza, fecha_cobranza, id_asignacion
     output["documento"] = documento
     output["dias_vencidos"] = dias_vencidos
     output["dias_negociados"] =  dias_negociados
-    output["valor_cobrado"] = str(round(valor_cobrado,3))
+    output["valor_cobrado"] = str(round(valor_cobrado,2))
     output["porcentaje_anticipo"] = str(porcentaje_anticipo)
     output["base_dc"] = str(base_dc)
-    output["tasa_dc"] = str(round(tasa_dc,3))
-    output["dc"] = str(round(dc,3))
-    output["dcv"] = str(round(dcv,3))
+    output["tasa_dc"] = str(round(tasa_dc,2))
+    output["dc"] = str(round(dc,2))
+    output["dcv"] = str(round(dcv,2))
     output["base_gao"] = str(base_gao)
-    output["tasa_gao"] = str(round(tasa_gao,3))
-    output["gao"] = str(round(gao,3))
+    output["tasa_gao"] = str(round(tasa_gao,2))
+    output["gao"] = str(round(gao,2))
     output["base_gaoa"] = str(base_gaoa)
-    output["tasa_gaoa"] = str(round(tasa_gaoa,3))
-    output["gaoa"] = str(round(gaoa,3))
-    output["base_retenciones"] = str(round(base_retenciones,3))
-    output["retenciones"] = str(round(retenciones,3))
-    output["base_bajas"] = str(round(base_bajas,3))
-    output["bajas"] = str(round(bajas,3))
+    output["tasa_gaoa"] = str(round(tasa_gaoa,2))
+    output["gaoa"] = str(round(gaoa,2))
+    output["base_retenciones"] = str(round(base_retenciones,2))
+    output["retenciones"] = str(round(retenciones,2))
+    output["base_bajas"] = str(round(base_bajas,2))
+    output["bajas"] = str(round(bajas,2))
 
     return output
 

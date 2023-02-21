@@ -114,7 +114,8 @@ def ImpresionCobranzaCartera(request, cobranza_id):
     # si cobranza esta protstada, enviar datos del protestp
     if cobranza.cxestado=='P':
         cheque = Cheques.objects.filter(pk = cobranza.cxcheque.id).first()
-        protesto = Cheques_protestados.objects.filter(cheque = cheque).first()
+        protesto = Cheques_protestados.objects.filter(cheque = cheque
+                                                      , leliminado = False).first()
         if protesto:
             fecha_protesto = protesto.dprotesto
             motivo_protesto = protesto.motivoprotesto.ctmotivoprotesto
@@ -137,7 +138,8 @@ def ImpresionCobranzaCartera(request, cobranza_id):
 
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="cobranza "' + str(cobranza.cxcobranza) + ".pdf"
+    response['Content-Disposition'] = 'inline; filename="cobranza "' \
+        + str(cobranza.cxcobranza) + ".pdf"
     # find the template and render it.
     template = get_template(template_path)
     html = template.render(context)
@@ -388,12 +390,16 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
     # si cobranza esta protstada, enviar datos del protestp
     if recuperacion.cxestado=='P':
         cheque = Cheques.objects.filter(pk = recuperacion.cxcheque.id).first()
-        protesto = Cheques_protestados.objects.filter(cheque = cheque).first()
+        protesto = Cheques_protestados.objects.filter(cheque = cheque
+                                                      , leliminado = False).first()
         if protesto:
             fecha_protesto = protesto.dprotesto
             motivo_protesto = protesto.motivoprotesto.ctmotivoprotesto
-            nd_protesto = protesto.nvalornotadebito
-
+            print(protesto.notadedebito)
+            if protesto.notadedebito:
+                nd_protesto = protesto.notadedebito.nvalor
+            else:
+                nd_protesto = None
 
     context = {
         "cobranza" : recuperacion,
@@ -409,7 +415,8 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
 
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="cobranza "' + str(recuperacion.cxrecuperacion) + ".pdf"
+    response['Content-Disposition'] = 'inline; filename="cobranza "'\
+          + str(recuperacion.cxrecuperacion) + ".pdf"
     # find the template and render it.
     template = get_template(template_path)
     html = template.render(context)

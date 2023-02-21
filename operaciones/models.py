@@ -1,13 +1,16 @@
 from random import choices
 from django.db import models
 from django.forms import BooleanField
-from bases.models import ClaseModelo
+from django.db.models import Sum, Q
 
+from bases.models import ClaseModelo
 from empresa.models import Clases_cliente, Datos_participantes \
     , Tipos_documentos, Tipos_factoring, Cuentas_bancarias
 from clientes.models import Datos_generales as Datos_generales_cliente\
     , Cuenta_transferencia
 from pais.models import Bancos
+
+from datetime import datetime, timedelta
 
 class Datos_operativos(ClaseModelo):
     ESTADOS_DE_CLIENTES = (
@@ -89,13 +92,42 @@ class Asignacion(ClaseModelo):
 
 class Documentos_Manager(models.Manager):
     def cartera_pendiente(self,fecha_corte):
-        return self.filter(dvencimiento__lte = fecha_corte
-                , nsaldo__gt = 0
-                , leliminado = False)\
-            .filter(cxasignacion__in =Asignacion.objects
-                .filter(cxtipo = "F", cxestado = "P"))
+        return self.filter(dvencimiento__lte = fecha_corte, nsaldo__gt = 0
+                , leliminado = False
+                ,cxasignacion__in =Asignacion.objects.filter(cxtipo = "F"
+                                                            , cxestado = "P"
+                                                            , leliminado = False))
                 # Cambiar a tipo F-actura y estado P-agada
                 # .filter(cxtipo = "P", cxestado = "L"))\
+
+    def antigüedad_cartera(self):
+        # reporte de antigüedad de cartera 
+        vcdo90 = datetime.today()+timedelta(days=-90)
+        vcdo60 = datetime.today()+timedelta(days=-60)
+        vcdo30 = datetime.today()+timedelta(days=-30)
+        xver30 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=30)
+        xver90 = datetime.today()+timedelta(days=30)
+
+        return self.filter( leliminado = False
+                ,cxasignacion__in =Asignacion.objects
+                .filter(cxestado = "P", leliminado = False))\
+            .aggregate(
+                vencido_mas_90 = Sum('nsaldo', filter=Q(dvencimiento__lt = vcdo90) ) 
+                , vencido_90 = Sum('nsaldo', filter=Q(dvencimiento__lt = vcdo60
+                    , dvencimiento__gte = vcdo90))
+                , vencido_60 = Sum('nsaldo', filter=Q(dvencimiento__lt = vcdo30
+                    , dvencimiento__gte = vcdo60))
+                , vencido_30 = Sum('nsaldo', filter=Q(dvencimiento__lt = datetime.today()
+                    , dvencimiento__gte = vcdo30))
+                ,porvencer_30 = Sum('nsaldo', filter=Q(dvencimiento__gte = datetime.today()
+                    , dvencimiento__lte = xver30))
+                ,porvencer_60 = Sum('nsaldo', filter=Q(dvencimiento__gt = xver30
+                    , dvencimiento__lte = xver60))
+                ,porvencer_90 = Sum('nsaldo', filter=Q(dvencimiento__gt = xver60
+                    , dvencimiento__lte = xver90))
+                , porvencer_mas_90 = Sum('nsaldo', filter=Q(dvencimiento__gt = xver90) ) 
+                )
 
 class Documentos(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_participantes
@@ -150,6 +182,9 @@ class Documentos(ClaseModelo):
 
     def __str__(self):
         return self.ctdocumento
+
+    def dias_vencidos(self):
+        return (datetime.today() - self.dvencimiento)/timedelta(days=1)
 
 class ChequesAccesorios_Manager(models.Manager):
     def cheques_a_depositar(self, fecha_corte):
