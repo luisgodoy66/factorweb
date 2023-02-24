@@ -1,18 +1,19 @@
 from django.urls import URLPattern, path
 
 from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
-    DatosOperativos, \
+    DatosOperativos, AsignacionesConsulta, \
     AceptarAsignacion, DetalleCargosAsignacion, MaestroMovimientosView, \
     SumaCargos, AceptarDocumentos,MaestroMovimientosView, MaestroMovimientoNew, \
     MaestroMovimientoEdit, CondicionesOperativasView, CondicionesOperativas,\
-    DetalleCondicionOperativa, EliminarDetalleCondicionOperativa,\
-    EditarTasasDocumentoSolicitud, GeneraDetalleParaTabla1, \
-    AsignacionesPendientesDesembolsarView, DesembolsarAsignacion, \
-    GenerarAnexos, AnexosView, AnexosEdit, ReversaAceptacionAsignacion, \
-    GeneraListaAsignacionesJSON, AsignacionesConsulta, GeneraListaAsignacionesRegistradasJSON
+    DetalleCondicionOperativa, EliminarDetalleCondicionOperativa, AnexosView, \
+    EditarTasasDocumentoSolicitud, GeneraDetalleParaTabla1, AnexosEdit,\
+    AsignacionesPendientesDesembolsarView, DesembolsarAsignacion, GenerarAnexos, \
+    ReversaAceptacionAsignacion, GeneraListaAsignacionesJSON, \
+    GeneraListaAsignacionesRegistradasJSON, GeneraListaAntigüedadCarteraJSON
 
 
-from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud
+from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
+    ImpresionCartera
 
 urlpatterns = [
 # datos operativos
@@ -73,5 +74,7 @@ urlpatterns = [
     path('asignacionesjson/<desde>/<hasta>',GeneraListaAsignacionesJSON, name="asignaciones_json"),
     path('asignacionesregistradasjson/<desde>/<hasta>',GeneraListaAsignacionesRegistradasJSON
         , name="asignacionesregistradas_json"),
-
+    path('antigüedadcartera', GeneraListaAntigüedadCarteraJSON),
+    path('antigüedadporcliente', GeneraListaAntigüedadCarteraJSON),
+    path('impresioncartera', ImpresionCartera, name='antigüedad_por_cliente'),
     ]

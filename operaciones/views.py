@@ -16,7 +16,7 @@ from .forms import DatosOperativosForm, AsignacionesForm, \
 
 from .models import Cargos_detalle, Condiciones_operativas_detalle, Datos_operativos \
     , Asignacion,  Movimientos_maestro, Condiciones_operativas_cabecera, Anexos\
-    , Desembolsos, Documentos
+    , Desembolsos, Documentos, ChequesAccesorios
 from empresa.models import  Clases_cliente, Datos_participantes, \
     Tasas_factoring, Tipos_factoring, Cuentas_bancarias
 
@@ -1074,31 +1074,6 @@ def GeneraListaAsignacionesJSON(request, desde = None, hasta= None):
     # data = docjson         
     # return JsonResponse( data, safe=False)
 
-def GeneraListaAsignacionesJSONSalida(asignacion):
-    output = {}
-
-    neto = asignacion.nanticipo - asignacion.ngao - asignacion.ndescuentodecartera - asignacion.niva
-    output["id"] = asignacion.id
-    output["Cliente"] = asignacion.cxcliente.ctnombre
-    output["Asignacion"] = asignacion.cxasignacion
-    output["TipoFactoring"] = asignacion.cxtipofactoring.cttipofactoring
-    # output["TipoAsignacion"] = asignacion.cxtipo
-    if asignacion.cxtipo =='F':
-        output["TipoAsignacion"] = "Facturas puras"
-    else:
-        output["TipoAsignacion"] = "Con accesorios"
-    output["FechaDesembolso"] = asignacion.ddesembolso.strftime("%Y-%m-%d")
-    output["ValorNegociado"] =  asignacion.nvalor
-    output["PlazoMayor"] = asignacion.nmayorplazonegociacion
-    output["InstruccionDePago"] = asignacion.ctinstrucciondepago
-    output["Cargos"] = asignacion.ngao + asignacion.ndescuentodecartera
-    output["IVA"] = asignacion.niva
-    output["Neto"] = neto
-    output["Estado"] = asignacion.cxestado
-    output["Registro"] = asignacion.dregistro
-
-    return output
-
 def GeneraListaAsignacionesRegistradasJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
 
@@ -1120,20 +1095,58 @@ def GeneraListaAsignacionesRegistradasJSON(request, desde = None, hasta= None):
         }
     return JsonResponse( data)
 
-def GeneraListaAntigüedadCarteraJSON(request):
-    # Es invocado desde la url de una tabla bt
-
-    documentos = Documentos.objects.antigüedad_cartera()
-        
+def GeneraListaAsignacionesJSONSalida(asignacion):
     output = {}
 
-    output["vencido_mas_90"] = documentos.vencido_mas_90
-    output["vencido_90"] = documentos.vencido_90
-    output["TipoFactoring"] = documentos.cxtipofactoring.cttipofactoring
+    neto = asignacion.nanticipo - asignacion.ngao - asignacion.ndescuentodecartera - asignacion.niva
+    output["id"] = asignacion.id
+    output["Cliente"] = asignacion.cxcliente.ctnombre
+    output["Asignacion"] = asignacion.cxasignacion
+    output["TipoFactoring"] = asignacion.cxtipofactoring.cttipofactoring
+    # output["TipoAsignacion"] = asignacion.cxtipo
+    if asignacion.cxtipo =='F':
+        output["TipoAsignacion"] = "Facturas puras"
+    else:
+        output["TipoAsignacion"] = "Con accesorios"
+    output["InstruccionDePago"] = asignacion.ctinstrucciondepago
+    output["FechaDesembolso"] = asignacion.ddesembolso.strftime("%Y-%m-%d")
+    output["ValorNegociado"] =  asignacion.nvalor
+    output["PlazoMayor"] = asignacion.nmayorplazonegociacion
+    output["Cargos"] = asignacion.ngao + asignacion.ndescuentodecartera
+    output["IVA"] = asignacion.niva
+    output["Neto"] = neto
+    output["Estado"] = asignacion.cxestado
+    output["Registro"] = asignacion.dregistro
 
-    # crear el contexto
-    data = {"total": documentos.count(),
-        "totalNotFiltered": documentos.count(),
-        "rows": docjson 
-        }
+    return output
+
+def GeneraListaAntigüedadCarteraJSON(request):
+
+    facturas = {}
+    accesorios={}
+    
+    documentos = Documentos.objects.antigüedad_cartera()
+    cheques = ChequesAccesorios.objects.antigüedad_cartera()
+
+    facturas["vencido_mas_90"] = documentos["vencido_mas_90"]
+    facturas["vencido_90"] = documentos["vencido_90"]
+    facturas["vencido_60"] = documentos["vencido_60"]
+    facturas["vencido_30"] = documentos["vencido_30"]
+    facturas["porvencer_30"] = documentos["porvencer_30"]
+    facturas["porvencer_60"] = documentos["porvencer_60"]
+    facturas["porvencer_90"] = documentos["porvencer_90"]
+    facturas["porvencer_mas_90"] = documentos["porvencer_mas_90"]
+
+    accesorios["vencido_mas_90"] = cheques["vencido_mas_90"]
+    accesorios["vencido_90"] = cheques["vencido_90"]
+    accesorios["vencido_60"] = cheques["vencido_60"]
+    accesorios["vencido_30"] = cheques["vencido_30"]
+    accesorios["porvencer_30"] = cheques["porvencer_30"]
+    accesorios["porvencer_60"] = cheques["porvencer_60"]
+    accesorios["porvencer_90"] = cheques["porvencer_90"]
+    accesorios["porvencer_mas_90"] = cheques["porvencer_mas_90"]
+
+    data = {"facturas":facturas
+            , "accesorios":accesorios}
+    
     return JsonResponse( data)

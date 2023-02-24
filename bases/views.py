@@ -7,6 +7,8 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 
 from solicitudes.models import Asignacion
+from operaciones.models import Documentos
+from cobranzas.models import Cheques_protestados
 from datetime import date, timedelta
 
 class Home(LoginRequiredMixin, generic.TemplateView):
@@ -144,7 +146,12 @@ def dashboard(request):
     desde = date.today() + timedelta(days=-1)
     hasta = date.today() + timedelta(days=1)
 
+    docs = Documentos.objects.TotalCartera()
+    prot = Cheques_protestados.objects.TotalProtestos()
+
     datos = { 'desde':desde
         , 'hasta':hasta
+        , 'total_cartera':docs['Total']
+        , 'total_protestos':prot['Total']
     }
     return render(request, template_name, datos)

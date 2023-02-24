@@ -43,14 +43,15 @@ class Datos_operativos(ClaseModelo):
     def __str__(self):
         return self.cxcliente.cxcliente.ctnombre
 
+  
 class Asignacion(ClaseModelo):
     TIPOS_DE_ASIGNACION = (
         ('A', 'Con accesorios'),
-        ('P', 'Facturas puras'),
+        ('F', 'Facturas puras'),
     )
     ESTADOS_DE_ASIGNACION = (
-        ('A', 'Aceptada'),
         ('L', 'Liquidada'),
+        ('P', 'Pagada'),
     )
     cxcliente=models.ForeignKey(Datos_participantes
         ,to_field="cxparticipante", on_delete=models.CASCADE
@@ -68,7 +69,7 @@ class Asignacion(ClaseModelo):
     nvalor = models.DecimalField(max_digits=15, decimal_places =2) 
     nanticipo = models.DecimalField(max_digits=10, decimal_places= 2, default=0)
     # cxexcesolineafactoring = models.CharField(max_length=6) 
-    cxestado = models.CharField(max_length=1, default="A", 
+    cxestado = models.CharField(max_length=1, default="L", 
         choices=ESTADOS_DE_ASIGNACION) 
     ctbancochequegarantia = models.CharField(max_length=25, blank=True, null=True) 
     ctcuentachequegarantia = models.CharField(max_length=15, blank=True, null=True) 
@@ -91,27 +92,27 @@ class Asignacion(ClaseModelo):
         return self.nanticipo - self.ngao - self.ndescuentodecartera - self.niva
 
 class Documentos_Manager(models.Manager):
-    def cartera_pendiente(self,fecha_corte):
-        return self.filter(dvencimiento__lte = fecha_corte, nsaldo__gt = 0
-                , leliminado = False
-                ,cxasignacion__in =Asignacion.objects.filter(cxtipo = "F"
-                                                            , cxestado = "P"
-                                                            , leliminado = False))
+    def facturas_pendientes(self,fecha_corte):
+        return self.filter(dvencimiento__lte = fecha_corte
+                , leliminado = False, nsaldo__gt = 0
+                , cxasignacion__in = Asignacion.objects
+                    .filter(cxtipo = "F", cxestado = "P", leliminado = False))
                 # Cambiar a tipo F-actura y estado P-agada
                 # .filter(cxtipo = "P", cxestado = "L"))\
 
     def antigüedad_cartera(self):
-        # reporte de antigüedad de cartera 
+        # grafico de antigüedad de cartera 
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
         vcdo30 = datetime.today()+timedelta(days=-30)
         xver30 = datetime.today()+timedelta(days=30)
-        xver60 = datetime.today()+timedelta(days=30)
-        xver90 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=60)
+        xver90 = datetime.today()+timedelta(days=90)
 
-        return self.filter( leliminado = False
-                ,cxasignacion__in =Asignacion.objects
-                .filter(cxestado = "P", leliminado = False))\
+        return self.filter( leliminado = False, nsaldo__gt = 0
+            , cxasignacion__cxtipo = "F"
+            , cxasignacion__cxestado = "P"
+            , cxasignacion__leliminado = False)\
             .aggregate(
                 vencido_mas_90 = Sum('nsaldo', filter=Q(dvencimiento__lt = vcdo90) ) 
                 , vencido_90 = Sum('nsaldo', filter=Q(dvencimiento__lt = vcdo60
@@ -128,6 +129,44 @@ class Documentos_Manager(models.Manager):
                     , dvencimiento__lte = xver90))
                 , porvencer_mas_90 = Sum('nsaldo', filter=Q(dvencimiento__gt = xver90) ) 
                 )
+    
+    def antigüedad_por_cliente(self):
+        vcdo90 = datetime.today()+timedelta(days=-90)
+        vcdo60 = datetime.today()+timedelta(days=-60)
+        vcdo30 = datetime.today()+timedelta(days=-30)
+        xver30 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=60)
+        xver90 = datetime.today()+timedelta(days=90)
+
+        return self.filter( leliminado = False, nsaldo__gt = 0
+            , cxasignacion__cxtipo = "F"
+            , cxasignacion__cxestado = "P"
+            , cxasignacion__leliminado = False)\
+            .values('cxcliente__ctnombre')\
+            .annotate(
+                vencido_mas_90 = Sum('nsaldo', filter=Q(dvencimiento__lt = vcdo90) ) 
+                , vencido_90 = Sum('nsaldo', filter=Q(dvencimiento__lt = vcdo60
+                    , dvencimiento__gte = vcdo90))
+                , vencido_60 = Sum('nsaldo', filter=Q(dvencimiento__lt = vcdo30
+                    , dvencimiento__gte = vcdo60))
+                , vencido_30 = Sum('nsaldo', filter=Q(dvencimiento__lt = datetime.today()
+                    , dvencimiento__gte = vcdo30))
+                ,porvencer_30 = Sum('nsaldo', filter=Q(dvencimiento__gte = datetime.today()
+                    , dvencimiento__lte = xver30))
+                ,porvencer_60 = Sum('nsaldo', filter=Q(dvencimiento__gt = xver30
+                    , dvencimiento__lte = xver60))
+                ,porvencer_90 = Sum('nsaldo', filter=Q(dvencimiento__gt = xver60
+                    , dvencimiento__lte = xver90))
+                , porvencer_mas_90 = Sum('nsaldo', filter=Q(dvencimiento__gt = xver90) ) 
+                , total = Sum('nsaldo')
+                )\
+            .order_by()
+
+    def TotalCartera(self):
+        return self.filter(leliminado = False, nsaldo__gt = 0
+                           , cxasignacion__cxestado = "P"
+                           , cxasignacion__leliminado = False)\
+            .aggregate(Total = Sum('nsaldo'))
 
 class Documentos(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_participantes
@@ -187,12 +226,76 @@ class Documentos(ClaseModelo):
         return (datetime.today() - self.dvencimiento)/timedelta(days=1)
 
 class ChequesAccesorios_Manager(models.Manager):
+
     def cheques_a_depositar(self, fecha_corte):
         return self.filter(dvencimiento__lte = fecha_corte, cxestado = 'A'
-                , leliminado = False)\
-            .filter(documento__cxasignacion__in =Asignacion.objects.filter(cxestado = "P"))
+                , leliminado = False
+                , documento__cxasignacion__cxestado = "P"
+                , documento__cxasignacion__leliminado = False)
             # cambiar a estado P-agada
             # .filter(documento__cxasignacion__in =Asignacion.objects.filter(cxestado = "L"))
+
+    def antigüedad_cartera(self):
+        # grafico de antigüedad de cartera 
+        vcdo90 = datetime.today()+timedelta(days=-90)
+        vcdo60 = datetime.today()+timedelta(days=-60)
+        vcdo30 = datetime.today()+timedelta(days=-30)
+        xver30 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=60)
+        xver90 = datetime.today()+timedelta(days=90)
+
+        return self.filter(cxestado = 'A'
+                , leliminado = False
+                , documento__cxasignacion__cxestado = "P"
+                , documento__cxasignacion__leliminado = False)\
+            .aggregate(
+                vencido_mas_90 = Sum('ntotal', filter=Q(dvencimiento__lt = vcdo90) ) 
+                , vencido_90 = Sum('ntotal', filter=Q(dvencimiento__lt = vcdo60
+                    , dvencimiento__gte = vcdo90))
+                , vencido_60 = Sum('ntotal', filter=Q(dvencimiento__lt = vcdo30
+                    , dvencimiento__gte = vcdo60))
+                , vencido_30 = Sum('ntotal', filter=Q(dvencimiento__lt = datetime.today()
+                    , dvencimiento__gte = vcdo30))
+                ,porvencer_30 = Sum('ntotal', filter=Q(dvencimiento__gte = datetime.today()
+                    , dvencimiento__lte = xver30))
+                ,porvencer_60 = Sum('ntotal', filter=Q(dvencimiento__gt = xver30
+                    , dvencimiento__lte = xver60))
+                ,porvencer_90 = Sum('ntotal', filter=Q(dvencimiento__gt = xver60
+                    , dvencimiento__lte = xver90))
+                , porvencer_mas_90 = Sum('ntotal', filter=Q(dvencimiento__gt = xver90) ) 
+                )
+
+    def antigüedad_por_cliente(self):
+        vcdo90 = datetime.today()+timedelta(days=-90)
+        vcdo60 = datetime.today()+timedelta(days=-60)
+        vcdo30 = datetime.today()+timedelta(days=-30)
+        xver30 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=60)
+        xver90 = datetime.today()+timedelta(days=90)
+
+        return self.filter(cxestado = 'A'
+                , leliminado = False
+                , documento__cxasignacion__cxestado = "P"
+                , documento__cxasignacion__leliminado = False)\
+            .values('documento__cxcliente__ctnombre')\
+            .annotate(
+                vencido_mas_90 = Sum('ntotal', filter=Q(dvencimiento__lt = vcdo90) ) 
+                , vencido_90 = Sum('ntotal', filter=Q(dvencimiento__lt = vcdo60
+                    , dvencimiento__gte = vcdo90))
+                , vencido_60 = Sum('ntotal', filter=Q(dvencimiento__lt = vcdo30
+                    , dvencimiento__gte = vcdo60))
+                , vencido_30 = Sum('ntotal', filter=Q(dvencimiento__lt = datetime.today()
+                    , dvencimiento__gte = vcdo30))
+                ,porvencer_30 = Sum('ntotal', filter=Q(dvencimiento__gte = datetime.today()
+                    , dvencimiento__lte = xver30))
+                ,porvencer_60 = Sum('ntotal', filter=Q(dvencimiento__gt = xver30
+                    , dvencimiento__lte = xver60))
+                ,porvencer_90 = Sum('ntotal', filter=Q(dvencimiento__gt = xver60
+                    , dvencimiento__lte = xver90))
+                , porvencer_mas_90 = Sum('ntotal', filter=Q(dvencimiento__gt = xver90) ) 
+                , total = Sum('ntotal')
+                )\
+            .order_by()
         
 class ChequesAccesorios(ClaseModelo):
     documento = models.ForeignKey(Documentos

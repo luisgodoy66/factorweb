@@ -324,7 +324,7 @@ def EliminarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
 
                 factura.nvalornonegociado += doc.ntotal
                 factura.ntotal -= doc.ntotal
-                if factura.nvalornonegociado == 0:
+                if factura.ntotal == 0:
                     factura.leliminado = True
                     factura.cxusuarioelimina = request.user.id
                 factura.save()

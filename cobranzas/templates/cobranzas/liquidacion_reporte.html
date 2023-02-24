@@ -28,7 +28,14 @@
         font-size: 18px; 
         font-weight: 400; 
         color: #090909; 
-        background:#a9b7b7 }        
+        background:#a9b7b7 
+        }        
+        .alerta { 
+        font-family: sans-serif; 
+        font-size: 11px; 
+        font-weight: 400; 
+        color: #eb1111; 
+        }        
     </style>
     <!-- <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.1/dist/bootstrap-table.min.css">    -->
 </head>
@@ -218,9 +225,19 @@
 
             </div>
             <br><br>
-            <div class="row">
-                Realizado por: {{ liquidacion.cxusuariocrea}}
-            </div>
+            <table >
+                <tbody>
+                    <tr></tr>
+                    <tr>
+                        <td><h4>Realizado por:</h4></td>
+                        <td colspan="5">{{ liquidacion.cxusuariocrea}}</td>
+                        {% if liquidacion.cxestado == 'E' %}
+                            <td class="alerta"><h4>Reversada</h4></td>
+                        {% endif %}
+                    </tr>
+                </tbody>
+            </table>
+
         </div>
     </div>
 </body>

@@ -50,7 +50,7 @@ def ImpresionAsignacionDesdeSolicitud(request, asignacion_id):
         cliente_id = solicitud.cxcliente.cxcliente
         
         asgn = Asignacion.objects\
-                .filter(cxasignacion = solicitud.cxasignacion)\
+                .filter(id = solicitud.asignacion)\
                 .filter(cxcliente_id = cliente_id).first()
 
         if asgn:
@@ -107,6 +107,78 @@ def ImpresionAsignacion(request, asignacion_id):
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="asgn"' + str(asignacion_id) + ".pdf"
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+def ImpresionCartera(request, ):
+    facturas = Documentos.objects.antigüedad_por_cliente()
+    accesorios = ChequesAccesorios.objects.antigüedad_por_cliente()
+    total_facturas = Documentos.objects.antigüedad_cartera()
+    total_accesorios = ChequesAccesorios.objects.antigüedad_cartera()
+
+    fvm90 = total_facturas['vencido_mas_90'] 
+    fv90 = total_facturas['vencido_90']
+    fv60 = total_facturas['vencido_60']
+    fv30 = total_facturas['vencido_30']
+    fx30 = total_facturas['porvencer_30']
+    fx60 = total_facturas['porvencer_60']
+    fx90 = total_facturas['porvencer_90']
+    fxm90 = total_facturas['porvencer_mas_90']
+    if not fvm90: fvm90=0
+    if not fv90: fv90=0
+    if not fv60: fv60=0
+    if not fv30: fv30=0
+    if not fx30: fx30=0
+    if not fx60: fx60=0
+    if not fx90: fx90=0
+    if not fxm90: fxm90=0
+
+    avm90 = total_accesorios['vencido_mas_90']
+    av90 = total_accesorios['vencido_90']
+    av60 = total_accesorios['vencido_60']
+    av30 = total_accesorios['vencido_30']
+    ax30 = total_accesorios['porvencer_30']
+    ax60 = total_accesorios['porvencer_60']
+    ax90 = total_accesorios['porvencer_90']
+    axm90 = total_accesorios['porvencer_mas_90']
+    if not avm90: avm90=0
+    if not av90: av90 = 0
+    if not av60: av60 = 0
+    if not av30: av30 = 0
+    if not ax30: ax30 = 0
+    if not ax60: ax60 = 0
+    if not ax90: ax90 = 0
+    if not axm90: axm90 = 0
+
+    template_path = 'operaciones/cartera_reporte.html'
+
+    context = {
+        "documentos" : facturas.union(accesorios),
+        "accesorios" : accesorios,
+        "totalvm90"  : fvm90+avm90,
+        "totalv90"   : fv90+av90,
+        "totalv60"   : fv60+av60,
+        "totalv30"   : fv30+av30,
+        "totalx30"   : fx30+ax30,
+        "totalx60"   : fx60+ax60,
+        "totalx90"   : fx90+ax90,
+        "totalxm90"  : fxm90+axm90,
+        "total" : fvm90+fv90+fv60+fv30+avm90+av90+av60+av30
+                +fxm90+fx90+fx60+fx30+axm90+ax90+ax60+ax30
+    }
+
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="cartera.pdf"'
     # find the template and render it.
     template = get_template(template_path)
     html = template.render(context)

@@ -109,7 +109,7 @@ class TasaFactoringForm(forms.ModelForm):
             , 'ctdescripcionenreporte':'Nombre en reportes'
             , 'lcargaiva':'Carga IVA'
             , 'lsobreanticipo': 'Cálculo sobre el valor anticipado'
-            , 'inicialesentablas':'Iniciales a mostrarse en tablas'
+            , 'ctinicialesentablas':'Iniciales a mostrarse en tablas'
         }
         widgets={'ctdescripcionenreporte': forms.Textarea(attrs={'rows': '1'})
                 }

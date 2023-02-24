@@ -2,6 +2,8 @@
 # from statistics import mode
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import Sum
+
 from datetime import timedelta
 
 from bases.models import ClaseModelo
@@ -105,7 +107,6 @@ class Documentos_detalle(ClaseModelo):
             vencimiento = self.cxdocumento.dvencimiento
         else:
             vencimiento = self.cxcobranza.cxaccesorio.dvencimiento
-# obtener dias de la resta de fechas?
         return (self.cxcobranza.dcobranza - vencimiento)/timedelta(days=1)
 
     def vencimiento(self):
@@ -173,6 +174,16 @@ class Liquidacion_detalle(ClaseModelo):
 
 from operaciones.models import  Notas_debito_cabecera
 
+class Protestos_Manager(models.Manager):
+    def TotalProtestos(self):
+        return self.filter(leliminado=False)\
+            .aggregate(Total = Sum('nsaldo'))
+
+    def protestos_pendientes(self):
+        return self.filter(
+            leliminado=False, nsaldo__gt=0
+        )
+
 class Cheques_protestados(ClaseModelo):
     FORMAS_DE_COBRO = (
         ('CHE', 'Cheque'),
@@ -192,6 +203,9 @@ class Cheques_protestados(ClaseModelo):
     dultimacobranza = models.DateTimeField(null=True) 
     cxtipooperacion = models.CharField(max_length=1)
     notadedebito = models.ForeignKey(Notas_debito_cabecera, on_delete=models.CASCADE, null=True)
+    naplicadoacartera = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    objects = Protestos_Manager()
 
     def __str__(self):
         return '{} CH/{}'.format(self.cheque.cxcuentabancaria, self.cheque.ctcheque)        

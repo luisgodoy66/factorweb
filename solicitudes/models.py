@@ -43,7 +43,8 @@ class Asignacion(ClaseModelo):
         , default='P')
     datencion = models.DateTimeField(null=True)
     cxusuarioatencion = models.IntegerField(null=True)
-    cxasignacion = models.CharField(max_length=8 , null=True) 
+    # cxasignacion = models.CharField(max_length=8 , null=True) 
+    asignacion = models.BigIntegerField(null=True)
     
 class Documentos(ClaseModelo):
     cxasignacion=models.ForeignKey(Asignacion

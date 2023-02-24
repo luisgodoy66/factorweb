@@ -442,7 +442,7 @@ def GeneraListaCarteraPorVencerJSON(request, fecha_corte = None):
     #     fecha = date.today()
     #     fecha = fecha + timedelta(days=7)
 
-    documentos = Documentos.objects.cartera_pendiente(fecha_corte).all()
+    documentos = Documentos.objects.facturas_pendientes(fecha_corte).all()
 
     tempBlogs = []
     for i in range(len(documentos)):
@@ -575,10 +575,13 @@ def AceptarCobranza(request):
                 cd = 'Null'
             else:
                 return HttpResponse("Debe especificar la cuenta de depósito")
+        else:
+            cc='Null'
 
     if not cuenta_bancaria:
         cuenta_bancaria='Null'
     
+    print(documentos_cobrados, id_deudor,nusuario, cc)
     # Los 2 ultimos parametros son el id de cheque accesorio y el mensaje de error
     resultado=enviarPost("CALL uspAceptarCobranzaCartera( '{0}','{1}','{2}','{3}'\
         ,{4},{5},{6},{7}\
@@ -1293,6 +1296,7 @@ def GeneraListaProtestosPendientesJSONSalida(doc):
         output["IdComprador"] = doc.cheque.cxparticipante.cxparticipante
     else:
         output["IdComprador"] = ''
+        
     if cobranza.ldepositoencuentaconjunta:
         output["CuentaDeposito"] = 'Cuenta cliente'
     else:
