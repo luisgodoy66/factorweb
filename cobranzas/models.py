@@ -240,7 +240,7 @@ class Documentos_protestados_Manager(models.Manager):
         xver60 = datetime.today()+timedelta(days=60)
         xver90 = datetime.today()+timedelta(days=90)
 
-        return self.filter( leliminado = False, nsaldo__gt = 0)\
+        protestados = self.filter( leliminado = False, nsaldo__gt = 0)\
             .aggregate(
                 fvencido_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo90
                                 , accesorio__isnull = True) ) 
@@ -287,6 +287,109 @@ class Documentos_protestados_Manager(models.Manager):
                 , aporvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__gt = xver90
                                 , accesorio__isnull = False)) 
                 )
+        fvm90 = protestados["fvencido_mas_90"]
+        avm90=protestados["avencido_mas_90"]
+        fv90 = protestados["fvencido_90"]
+        av90=protestados["avencido_90"]
+        fv60 = protestados["fvencido_60"]
+        av60=protestados["avencido_60"]
+        fv30 = protestados["fvencido_30"]
+        av30=protestados["avencido_30"]
+        fx30 = protestados["fporvencer_30"]
+        ax30=protestados["aporvencer_30"]
+        fx60 = protestados["fporvencer_60"]
+        ax60=protestados["aporvencer_60"]
+        fx90 = protestados["fporvencer_90"]
+        ax90=protestados["aporvencer_90"]
+        fxm90 = protestados["fporvencer_mas_90"]
+        axm90=protestados["aporvencer_mas_90"]
+        if not fvm90: fvm90=0
+        if not fv90: fv90=0
+        if not fv60: fv60=0
+        if not fv30: fv30=0
+        if not fx30: fx30=0
+        if not fx60: fx60=0
+        if not fx90: fx90=0
+        if not fxm90: fxm90=0
+        if not avm90: avm90=0
+        if not av90: av90 = 0
+        if not av60: av60 = 0
+        if not av30: av30 = 0
+        if not ax30: ax30 = 0
+        if not ax60: ax60 = 0
+        if not ax90: ax90 = 0
+        if not axm90: axm90 = 0
+
+        protestos={}
+
+        protestos["vencido_mas_90"] = fvm90+avm90
+        protestos["vencido_90"] = fv90+av90
+        protestos["vencido_60"] = fv60+av60
+        protestos["vencido_30"] = fv30+av30
+        protestos["porvencer_30"] = fx30+ax30
+        protestos["porvencer_60"] = fx60+ax60
+        protestos["porvencer_90"] = fx90+ax90
+        protestos["porvencer_mas_90"] = fxm90+axm90
+
+        return protestos
+    
+    def antigüedad_por_cliente_facturas(self):
+        vcdo90 = datetime.today()+timedelta(days=-90)
+        vcdo60 = datetime.today()+timedelta(days=-60)
+        vcdo30 = datetime.today()+timedelta(days=-30)
+        xver30 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=60)
+        xver90 = datetime.today()+timedelta(days=90)
+
+        return self.filter( leliminado = False, nsaldo__gt = 0, accesorio__isnull = True)\
+            .values('documento__cxcliente__ctnombre')\
+            .annotate(
+                vencido_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo90) ) 
+                , vencido_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo60
+                                , documento__dvencimiento__gte = vcdo90) ) 
+                , vencido_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo30
+                                , documento__dvencimiento__gte = vcdo60))
+                , vencido_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = datetime.today()
+                                , documento__dvencimiento__gte = vcdo30))
+                ,porvencer_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__gte = datetime.today()
+                                , documento__dvencimiento__lte = xver30))
+                ,porvencer_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver30
+                                , documento__dvencimiento__lte = xver60))
+                ,porvencer_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver60
+                                , documento__dvencimiento__lte = xver90))
+                , porvencer_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver90))
+                , total = Sum('nsaldo')
+                )\
+            .order_by()
+    
+    def antigüedad_por_cliente_accesorios(self):
+        vcdo90 = datetime.today()+timedelta(days=-90)
+        vcdo60 = datetime.today()+timedelta(days=-60)
+        vcdo30 = datetime.today()+timedelta(days=-30)
+        xver30 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=60)
+        xver90 = datetime.today()+timedelta(days=90)
+
+        return self.filter( leliminado = False, nsaldo__gt = 0, accesorio__isnull = False)\
+            .values('documento__cxcliente__ctnombre')\
+            .annotate(
+                vencido_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo90) ) 
+                , vencido_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo60
+                                , documento__dvencimiento__gte = vcdo90))
+                , vencido_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo30
+                                , documento__dvencimiento__gte = vcdo60))
+                , vencido_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = datetime.today()
+                                , documento__dvencimiento__gte = vcdo30))
+                ,porvencer_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__gte = datetime.today()
+                                , documento__dvencimiento__lte = xver30))
+                ,porvencer_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver30
+                                , documento__dvencimiento__lte = xver60))
+                ,porvencer_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver60
+                                , documento__dvencimiento__lte = xver90))
+                , porvencer_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver90))
+                , total = Sum('nsaldo')
+                )\
+            .order_by()
     
 class Documentos_protestados(ClaseModelo):
     chequeprotestado = models.ForeignKey(Cheques_protestados, on_delete= models.RESTRICT)

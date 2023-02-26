@@ -5,6 +5,7 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.contrib.staticfiles import finders
 from .models import Asignacion, Documentos, ChequesAccesorios
+from cobranzas.models import Documentos_protestados
 from django.shortcuts import render
 from empresa.models import Tasas_factoring
 from django.db.models import Sum, Count
@@ -122,8 +123,12 @@ def ImpresionAsignacion(request, asignacion_id):
 def ImpresionCartera(request, ):
     facturas = Documentos.objects.antigüedad_por_cliente()
     accesorios = ChequesAccesorios.objects.antigüedad_por_cliente()
+    prot_facturas = Documentos_protestados.objects.antigüedad_por_cliente_facturas()
+    prot_accesorios = Documentos_protestados.objects.antigüedad_por_cliente_accesorios()
+
     total_facturas = Documentos.objects.antigüedad_cartera()
     total_accesorios = ChequesAccesorios.objects.antigüedad_cartera()
+    total_protestos = Documentos_protestados.objects.antigüedad_cartera()
 
     fvm90 = total_facturas['vencido_mas_90'] 
     fv90 = total_facturas['vencido_90']
@@ -159,21 +164,37 @@ def ImpresionCartera(request, ):
     if not ax90: ax90 = 0
     if not axm90: axm90 = 0
 
+    pvm90 = total_protestos['vencido_mas_90']
+    pv90 = total_protestos['vencido_90']
+    pv60 = total_protestos['vencido_60']
+    pv30 = total_protestos['vencido_30']
+    px30 = total_protestos['porvencer_30']
+    px60 = total_protestos['porvencer_60']
+    px90 = total_protestos['porvencer_90']
+    pxm90 = total_protestos['porvencer_mas_90']
+    if not pvm90: pvm90=0
+    if not pv90: pv90 = 0
+    if not pv60: pv60 = 0
+    if not pv30: pv30 = 0
+    if not px30: px30 = 0
+    if not px60: px60 = 0
+    if not px90: px90 = 0
+    if not pxm90: pxm90 = 0
+
     template_path = 'operaciones/cartera_reporte.html'
 
     context = {
-        "documentos" : facturas.union(accesorios),
-        "accesorios" : accesorios,
-        "totalvm90"  : fvm90+avm90,
-        "totalv90"   : fv90+av90,
-        "totalv60"   : fv60+av60,
-        "totalv30"   : fv30+av30,
-        "totalx30"   : fx30+ax30,
-        "totalx60"   : fx60+ax60,
-        "totalx90"   : fx90+ax90,
-        "totalxm90"  : fxm90+axm90,
-        "total" : fvm90+fv90+fv60+fv30+avm90+av90+av60+av30
-                +fxm90+fx90+fx60+fx30+axm90+ax90+ax60+ax30
+        "documentos" : facturas.union(accesorios, prot_facturas, prot_accesorios),
+        "totalvm90"  : fvm90+avm90+pvm90,
+        "totalv90"   : fv90+av90+pv90,
+        "totalv60"   : fv60+av60+pv60,
+        "totalv30"   : fv30+av30+pv30,
+        "totalx30"   : fx30+ax30+px30,
+        "totalx60"   : fx60+ax60+px60,
+        "totalx90"   : fx90+ax90+px90,
+        "totalxm90"  : fxm90+axm90+pxm90,
+        "total" : fvm90+fv90+fv60+fv30+avm90+av90+av60+av30+pvm90+pv90+pv60+pv30
+                +fxm90+fx90+fx60+fx30+axm90+ax90+ax60+ax30+pxm90+px90+px60+px30
     }
 
     # Create a Django response object, and specify content_type as pdf

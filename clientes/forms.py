@@ -177,7 +177,7 @@ class CuposCompradoresForm(forms.ModelForm):
         model=Cupos_compradores
         fields=['cxcliente', 'cxcomprador','cxmoneda', 'ncupocartera'
             , 'cxmodalidadcobranza', 'lactivo', 'lsenotifica']
-        labels={'cxcliente':'Cliente', 'cxcomprador':'Comprador'
+        labels={'cxcliente':'Cliente', 'cxcomprador':'Deudor'
             ,'cxmoneda': 'Moneda', 'ncupocartera':'Cupo de cartera'
             , 'cxmodalidadcobranza':'Modalidad de cobranza'
             , 'lactivo': 'Activo', 'lsenotifica':'Se notifica de operación al deudor', }        

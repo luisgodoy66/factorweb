@@ -1121,7 +1121,7 @@ def GeneraListaAsignacionesJSONSalida(asignacion):
 
     return output
 
-def GeneraListaAntigüedadCarteraJSON(request):
+def GeneraResumenAntigüedadCarteraJSON(request):
 
     facturas = {}
     accesorios={}
@@ -1149,48 +1149,15 @@ def GeneraListaAntigüedadCarteraJSON(request):
     accesorios["porvencer_90"] = cheques["porvencer_90"]
     accesorios["porvencer_mas_90"] = cheques["porvencer_mas_90"]
 
-    fvm90 = protestados["fvencido_mas_90"]
-    avm90=protestados["avencido_mas_90"]
-    fv90 = protestados["fvencido_90"]
-    av90=protestados["avencido_90"]
-    fv60 = protestados["fvencido_60"]
-    av60=protestados["avencido_60"]
-    fv30 = protestados["fvencido_30"]
-    av30=protestados["avencido_30"]
-    fx30 = protestados["fporvencer_30"]
-    ax30=protestados["aporvencer_30"]
-    fx60 = protestados["fporvencer_60"]
-    ax60=protestados["aporvencer_60"]
-    fx90 = protestados["fporvencer_90"]
-    ax90=protestados["aporvencer_90"]
-    fxm90 = protestados["fporvencer_mas_90"]
-    axm90=protestados["aporvencer_mas_90"]
-    if not fvm90: fvm90=0
-    if not fv90: fv90=0
-    if not fv60: fv60=0
-    if not fv30: fv30=0
-    if not fx30: fx30=0
-    if not fx60: fx60=0
-    if not fx90: fx90=0
-    if not fxm90: fxm90=0
-    if not avm90: avm90=0
-    if not av90: av90 = 0
-    if not av60: av60 = 0
-    if not av30: av30 = 0
-    if not ax30: ax30 = 0
-    if not ax60: ax60 = 0
-    if not ax90: ax90 = 0
-    if not axm90: axm90 = 0
-
-    protestos["vencido_mas_90"] = fvm90+avm90
-    protestos["vencido_90"] = fv90+av90
-    protestos["vencido_60"] = fv60+av60
-    protestos["vencido_30"] = fv30+av30
-    protestos["porvencer_30"] = fx30+ax30
-    protestos["porvencer_60"] = fx60+ax60
-    protestos["porvencer_90"] = fx90+ax90
-    protestos["porvencer_mas_90"] = fxm90+axm90
-    
+    protestos["vencido_mas_90"] = protestados["vencido_mas_90"]
+    protestos["vencido_90"] = protestados["vencido_90"]
+    protestos["vencido_60"] = protestados["vencido_60"]
+    protestos["vencido_30"] = protestados["vencido_30"]
+    protestos["porvencer_30"] = protestados["porvencer_30"]
+    protestos["porvencer_60"] = protestados["porvencer_60"]
+    protestos["porvencer_90"] = protestados["porvencer_90"]
+    protestos["porvencer_mas_90"] = protestados["porvencer_mas_90"]
+   
     data = {"facturas":facturas
             , "accesorios":accesorios
             , "protestos":protestos}

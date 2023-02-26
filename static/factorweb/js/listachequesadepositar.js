@@ -109,3 +109,24 @@ function DepositoCuentaCliente(){
   }
 
 }
+
+window.operateEvents = {
+  'click .revertir': function (e, value, row, index) {
+    CanjearCheque(row.id, row.TipoOperacion)
+  },
+  'click .imprimir': function (e, value, row, index) {
+    QuitarAccesorio( row.id, row.TipoOperacion)
+  },
+};
+
+function operateFormatter(value, row, index) {
+return [
+  '<a class="revertir" href="javascript:void(0)" title="Canjear">',
+  '<i class="fa fa-exchange"></i>',
+  '</a>  ',
+  '<a class="imprimir" href="javascript:void(0)" title="Quitar accesorio">',
+  '<i class="fa fa-unlink"></i>',
+  '</a>  ',
+].join('')
+}
+

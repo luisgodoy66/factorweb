@@ -153,5 +153,6 @@ def dashboard(request):
         , 'hasta':hasta
         , 'total_cartera':docs['Total']
         , 'total_protestos':prot['Total']
+        , 'total_cartera_protestos':docs['Total']+prot["Total"]
     }
     return render(request, template_name, datos)

@@ -9,7 +9,7 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     EditarTasasDocumentoSolicitud, GeneraDetalleParaTabla1, AnexosEdit,\
     AsignacionesPendientesDesembolsarView, DesembolsarAsignacion, GenerarAnexos, \
     ReversaAceptacionAsignacion, GeneraListaAsignacionesJSON, \
-    GeneraListaAsignacionesRegistradasJSON, GeneraListaAntigüedadCarteraJSON
+    GeneraListaAsignacionesRegistradasJSON, GeneraResumenAntigüedadCarteraJSON
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
@@ -74,7 +74,6 @@ urlpatterns = [
     path('asignacionesjson/<desde>/<hasta>',GeneraListaAsignacionesJSON, name="asignaciones_json"),
     path('asignacionesregistradasjson/<desde>/<hasta>',GeneraListaAsignacionesRegistradasJSON
         , name="asignacionesregistradas_json"),
-    path('antigüedadcartera', GeneraListaAntigüedadCarteraJSON),
-    path('antigüedadporcliente', GeneraListaAntigüedadCarteraJSON),
+    path('antigüedadcartera', GeneraResumenAntigüedadCarteraJSON),
     path('impresioncartera', ImpresionCartera, name='antigüedad_por_cliente'),
     ]
