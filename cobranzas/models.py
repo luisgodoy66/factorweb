@@ -2,9 +2,9 @@
 # from statistics import mode
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models import Sum
+from django.db.models import Sum, Q
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from bases.models import ClaseModelo
 from empresa.models import Datos_participantes , Tipos_factoring, Cuentas_bancarias
@@ -177,12 +177,31 @@ from operaciones.models import  Notas_debito_cabecera
 class Protestos_Manager(models.Manager):
     def TotalProtestos(self):
         return self.filter(leliminado=False)\
-            .aggregate(Total = Sum('nsaldo'))
+            .aggregate(Total = Sum('nsaldocartera'))
 
     def protestos_pendientes(self):
-        return self.filter(
-            leliminado=False, nsaldo__gt=0
-        )
+        cp = self.filter(nsaldocartera__gt=0, leliminado = False, cxtipooperacion='C')\
+            .values('id','cheque__cheque_cobranza'
+                    ,'cheque__cheque_cobranza__cxcliente__cxcliente__ctnombre'
+                    ,'cheque__cheque_cobranza__cxcobranza'
+                    ,'cheque__cheque_cobranza__dcobranza'
+                    ,'cheque__cheque_cobranza__ddeposito'
+                    ,'cheque__ctgirador','dprotesto'
+                    ,'motivoprotesto__ctmotivoprotesto'
+                    ,'nvalor','nsaldocartera','nvalorcartera'
+                    )
+        rp = self.filter(nsaldocartera__gt=0, leliminado = False, cxtipooperacion='R')\
+            .values('id','cheque__cheque_recuperacion'
+                    ,'cheque__cheque_recuperacion__cxcliente__cxcliente__ctnombre'
+                    ,'cheque__cheque_recuperacion__cxrecuperacion'
+                    ,'cheque__cheque_recuperacion__dcobranza'
+                    ,'cheque__cheque_recuperacion__ddeposito'
+                    ,'cheque__ctgirador','dprotesto'
+                    ,'motivoprotesto__ctmotivoprotesto'
+                    ,'nvalor','nsaldocartera','nvalorcartera'
+                    )
+        return cp.union(rp)
+        
 
 class Cheques_protestados(ClaseModelo):
     FORMAS_DE_COBRO = (
@@ -198,18 +217,77 @@ class Cheques_protestados(ClaseModelo):
         , on_delete=models.RESTRICT)
     # nvalornotadebito = models.DecimalField(max_digits=10, decimal_places=2)
     nvalor =  models.DecimalField(max_digits=10, decimal_places=2)
-    nsaldo =  models.DecimalField(max_digits=10, decimal_places=2)
+    nvalorcartera = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    nsaldocartera =  models.DecimalField(max_digits=10, decimal_places=2)
     cxestado = models.CharField(max_length=1, default="A") 
     dultimacobranza = models.DateTimeField(null=True) 
     cxtipooperacion = models.CharField(max_length=1)
     notadedebito = models.ForeignKey(Notas_debito_cabecera, on_delete=models.CASCADE, null=True)
-    naplicadoacartera = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     objects = Protestos_Manager()
 
     def __str__(self):
         return '{} CH/{}'.format(self.cheque.cxcuentabancaria, self.cheque.ctcheque)        
 
+class Documentos_protestados_Manager(models.Manager):
+
+    def antigüedad_cartera(self):
+        # grafico de antigüedad de cartera 
+        vcdo90 = datetime.today()+timedelta(days=-90)
+        vcdo60 = datetime.today()+timedelta(days=-60)
+        vcdo30 = datetime.today()+timedelta(days=-30)
+        xver30 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=60)
+        xver90 = datetime.today()+timedelta(days=90)
+
+        return self.filter( leliminado = False, nsaldo__gt = 0)\
+            .aggregate(
+                fvencido_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo90
+                                , accesorio__isnull = True) ) 
+                , avencido_mas_90 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__lt = vcdo90
+                                , accesorio__isnull = False) ) 
+                , fvencido_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo60
+                                , documento__dvencimiento__gte = vcdo90
+                                , accesorio__isnull = True) ) 
+                , avencido_90 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__lt = vcdo60
+                                , documento__dvencimiento__gte = vcdo90
+                                , accesorio__isnull = False) ) 
+                , fvencido_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo30
+                                , documento__dvencimiento__gte = vcdo60
+                                , accesorio__isnull = True) ) 
+                , avencido_60 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__lt = vcdo30
+                                , documento__dvencimiento__gte = vcdo60
+                                , accesorio__isnull = False) ) 
+                , fvencido_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = datetime.today()
+                                , documento__dvencimiento__gte = vcdo30
+                                , accesorio__isnull = True) ) 
+                , avencido_30 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__lt = datetime.today()
+                                , documento__dvencimiento__gte = vcdo30
+                                , accesorio__isnull = False) ) 
+                ,fporvencer_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__gte = datetime.today()
+                                , documento__dvencimiento__lte = xver30
+                                , accesorio__isnull = True) ) 
+                ,aporvencer_30 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__gte = datetime.today()
+                                , documento__dvencimiento__lte = xver30
+                                , accesorio__isnull = False ) )
+                ,fporvencer_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver30
+                                , documento__dvencimiento__lte = xver60
+                                , accesorio__isnull = True) ) 
+                ,aporvencer_60 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__gt = xver30
+                                , documento__dvencimiento__lte = xver60
+                                , accesorio__isnull = False) ) 
+                ,fporvencer_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver60
+                                , documento__dvencimiento__lte = xver90
+                                , accesorio__isnull = True) ) 
+                ,aporvencer_90 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__gt = xver60
+                                , documento__dvencimiento__lte = xver90
+                                , accesorio__isnull = False) ) 
+                , fporvencer_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver90
+                                , accesorio__isnull = True)) 
+                , aporvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__gt = xver90
+                                , accesorio__isnull = False)) 
+                )
+    
 class Documentos_protestados(ClaseModelo):
     chequeprotestado = models.ForeignKey(Cheques_protestados, on_delete= models.RESTRICT)
     documento = models.ForeignKey(Documentos, on_delete=models.CASCADE)
@@ -223,6 +301,8 @@ class Documentos_protestados(ClaseModelo):
         , default=0)
     cxestado = models.CharField(max_length=1, default="A") 
     dultimacobranza = models.DateTimeField(null=True) 
+
+    objects = Documentos_protestados_Manager()
 
 class Recuperaciones_cabecera(ClaseModelo):
     FORMAS_DE_PAGO = (

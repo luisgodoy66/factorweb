@@ -630,10 +630,12 @@ def GeneraListaChequesADepositarJSONSalida(doc):
 
     return output
 
-def DepositoCheques(request, ids_cheques, total_cartera):
+def DepositoCheques(request, ids_cheques, total_cartera, cuenta_destino
+                    , id_cliente=None):
     template_name = "cobranzas/depositocheques_form.html"
     contexto={}
     result={}
+    cuentas_conjuntas=None
 
     if request.method =='GET':
 
@@ -643,20 +645,35 @@ def DepositoCheques(request, ids_cheques, total_cartera):
             .annotate(total = Sum('ntotal'))
             .order_by()
         )        
-    # Call the base implementation first to get a context
+        if cuenta_destino=='CC':
+            cuentas_conjuntas = CuentasConjuntasModels.Cuentas_bancarias\
+                .objects.filter(cxcliente = id_cliente , leliminado = False, )\
+                .all()
+            print(cuentas_conjuntas)
+
     contexto = {"cheques" : result
-        ,"total_cartera" : total_cartera
-        ,"form": CobranzasDocumentosForm
+        , "total_cartera" : total_cartera
+        , "form": CobranzasDocumentosForm
+        , "cuenta_destino" : cuenta_destino
+        , "cuentas_conjuntas": cuentas_conjuntas
         }
 
     if request.method == 'POST':
 
-        cd=request.POST.get("cxcuentadeposito")
+        # si cuenta de destino es de la empresa:
+        if cuenta_destino=='CE':
+            cd=request.POST.get("cxcuentadeposito")
+            cc='Null'
+        else:
+        # si cuenta de destino es del cliente
+            cc=request.POST.get("cuenta_conjunta")
+            cd='Null'
+
         fd=request.POST.get("ddeposito")
 
         resultado=enviarPost("CALL uspDepositarChequesAccesorios( '{0}',{1},'{2}'\
-            ,{3},'')"
-            .format(ids_cheques,cd, fd, request.user.id))
+            ,{3},{4},'')"
+            .format(ids_cheques,cd, fd, request.user.id, cc))
 
         if resultado[0] !='OK':
             return HttpResponse(resultado)
@@ -1246,7 +1263,7 @@ def GeneraListaProtestosPendientesJSON(request):
     # Es invocado desde la url de una tabla bt
 
     documentos = Cheques_protestados.objects\
-        .filter(leliminado=False, nsaldo__gt = 0).all()
+        .filter(leliminado=False, nsaldocartera__gt = 0).all()
 
     tempBlogs = []
     for i in range(len(documentos)):
@@ -1264,9 +1281,11 @@ def GeneraListaProtestosPendientesJSON(request):
 def GeneraListaProtestosPendientesJSONSalida(doc):
     output = {}
     if doc.cxtipooperacion=='C':
-        cobranza = Documentos_cabecera.objects.filter(cxcheque = doc.cheque).first()
+        cobranza = Documentos_cabecera.objects.filter(cxcheque = doc.cheque)\
+        .first()
     else:
-        cobranza = Recuperaciones_cabecera.objects.filter(cxcheque = doc.cheque).first()
+        cobranza = Recuperaciones_cabecera.objects.filter(cxcheque = doc.cheque)\
+            .first()
 
     output['id'] = doc.id
     # los datos mostrados deben ser del cliente, no del emisor del cheque.
@@ -1289,7 +1308,7 @@ def GeneraListaProtestosPendientesJSONSalida(doc):
         output["NotaDebito"] = None
 
     output["Protesto"] = doc.dprotesto
-    output["Saldo"] = doc.nsaldo
+    output["Saldo"] = doc.nsaldocartera
     output["Motivo"] = doc.motivoprotesto.ctmotivoprotesto
     # determinar si cheque fue pagado por comprador 
     if doc.cheque.cxtipoparticipante =='D':
@@ -1309,7 +1328,8 @@ def GeneraListaProtestosPendientesJSONSalida(doc):
 def DetalleDocumentosProtesosJSON(request, ids_protestos):
     # filtrar los documentos correspondientes a la lista pasada
     documentos = Documentos_protestados.objects\
-        .filter(chequeprotestado__in = ids_protestos.split(','), leliminado = False)
+        .filter(chequeprotestado__in = ids_protestos.split(',')
+                , leliminado = False)
     
     tempBlogs = []
 

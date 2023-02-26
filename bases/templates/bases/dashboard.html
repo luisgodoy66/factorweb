@@ -60,7 +60,8 @@
                 <div class="b-b-1 pt-3"></div>
                 <hr>
                 <div class="more-info pt-2" style="margin-bottom:-10px;">
-                    <a class="font-weight-bold font-xs btn-block text-muted small" href="#">
+                    <a class="font-weight-bold font-xs btn-block text-muted small" 
+                    href="{% url 'cobranzas:protestos_pendientes' %}" target="protestos">
                         Listado de cheques protestados
                     <i class="fa fa-angle-right float-right font-lg"></i></a>
                 </div>
@@ -71,7 +72,7 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="mb-3">Antigüedad de la cartera </h4>
+                    <h4 class="mb-3">Antigüedad de la cartera y protestos</h4>
                     <canvas id="singelBarChart"></canvas>
                 </div>
             </div>

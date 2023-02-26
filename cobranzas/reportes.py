@@ -93,7 +93,7 @@ def ImpresionCobranzaCartera(request, cobranza_id):
         datos_deposito = cobranza.ddeposito.strftime("%Y/%m/%d")
 
         if cobranza.ldepositoencuentaconjunta:
-                datos_deposito += ' en cuenta del cliente'
+                datos_deposito += ' en cuenta compartida'
         else:
                 datos_deposito += ' en ' + cobranza.cxcuentadeposito.__str__()
 
@@ -372,8 +372,8 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
         # datos del protesto para guardar
         fechaprotesto = item.documentoprotestado.chequeprotestado.dprotesto
         motivoprotesto = item.documentoprotestado.chequeprotestado.motivoprotesto.ctmotivoprotesto
-        valorprotesto = item.documentoprotestado.chequeprotestado.nvalor
-        saldoprotesto = item.documentoprotestado.chequeprotestado.nsaldo
+        valorprotesto = item.documentoprotestado.chequeprotestado.nvalorcartera
+        saldoprotesto = item.documentoprotestado.chequeprotestado.nsaldocartera
     
     # el ultimo
     jscab={}
@@ -489,6 +489,31 @@ def ImpresionCobranzaCargos(request, cobranza_id):
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="cobranza "' + str(cobranza.cxcobranza) + ".pdf"
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+def ImpresionProtestosPendientes(request):
+     
+    protestos = Cheques_protestados.objects.protestos_pendientes()
+
+    template_path = 'cobranzas/protestos_reporte.html'
+
+    context={
+          "protestos" : protestos
+    }
+
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="protestos_pendientes.pdf"'
     # find the template and render it.
     template = get_template(template_path)
     html = template.render(context)

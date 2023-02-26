@@ -26,7 +26,6 @@ window.onload=function(){
     // inicializar tabla
     initTable();
 
-
     // // cerrar side bar
     // CerrarSideBar();
   
@@ -139,11 +138,11 @@ function mostrar_cuentas_origen(){
   }
   
   function AceptarCobranza(){
-    const recibido_por = document.querySelector('input[name="pagadopor"]:checked');
-    const destino_deposito = document.querySelector('input[name="depositaren"]:checked');
-    const forma_de_cobro = capturaValor("forma_cobro")
-    const pagado_por_cliente =  (recibido_por.id == "porcliente")
-    const deposito_cuenta_conjunta =  (destino_deposito.id == "cuentacliente")
+  const recibido_por = document.querySelector('input[name="pagadopor"]:checked');
+  const destino_deposito = document.querySelector('input[name="depositaren"]:checked');
+  const forma_de_cobro = capturaValor("forma_cobro")
+  const pagado_por_cliente =  (recibido_por.id == "porcliente")
+  const deposito_cuenta_conjunta =  (destino_deposito.id == "cuentacliente")
   var cuenta_bancaria = null 
 
   mp_deposito = new Map()

@@ -19,7 +19,7 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , ReversaProtesto
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
-    , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos
+    , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos, ImpresionProtestosPendientes
 
 urlpatterns = [
     # cobranzas
@@ -38,7 +38,7 @@ urlpatterns = [
     path('cobrodedocumentos/<ids_documentos>/<total_cartera>/<forma_cobro>'\
          '/<cliente_ruc>/<un_comprador>/<deudor_id>/<tipo_factoring>/<por_vencer>', 
         CobranzasDocumentosView.as_view(), name='cobro_documentos'),
-    path('depositodecheques/<ids_cheques>/<total_cartera>/', 
+    path('depositodecheques/<ids_cheques>/<total_cartera>/<cuenta_destino>/<id_cliente>', 
         DepositoCheques, name='deposito_cheques'),
     path('detalledocumentos/<ids_documentos>', DetalleDocumentosFacturasPuras
         , name='detalle_documentos'),
@@ -108,6 +108,7 @@ urlpatterns = [
         ,ProtestoRecuperacionNew.as_view(), name='protestorecuperacion'),
     path('reversaprotesto/<int:id_cobranza>/<tipo_operacion>/<int:id_protesto>/<cobranza>/<cliente_id>/<factoring_id>'
          ,ReversaProtesto),
+    path('impresionprotestos', ImpresionProtestosPendientes, name='protestos_pendientes'),
 
     # notas de debito
     path('listaliquidacionesennegativopendientes/',LiquidacionesEnNegativoPendientesView.as_view()

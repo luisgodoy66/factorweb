@@ -121,6 +121,15 @@ function antigüedadcartera(){
     ap90 = data["accesorios"]["porvencer_90"]
     ap90m = data["accesorios"]["porvencer_mas_90"]
     
+    pv90m = data["protestos"]["vencido_mas_90"]
+    pv90 = data["protestos"]["vencido_90"]
+    pv60 = data["protestos"]["vencido_60"]
+    pv30 = data["protestos"]["vencido_30"]
+    pp30 = data["protestos"]["porvencer_30"]
+    pp60 = data["protestos"]["porvencer_60"]
+    pp90 = data["protestos"]["porvencer_90"]
+    pp90m = data["protestos"]["porvencer_mas_90"]
+    
     var myChart = new Chart( ctx, {
         type: 'bar',
         data: {
@@ -139,6 +148,13 @@ function antigüedadcartera(){
                     borderColor: "rgba(0, 123, 255, 0.9)",
                     borderWidth: "0",
                     backgroundColor: "rgba(0, 255, 255, 0.5)"
+                            },
+                {
+                    label: "Protestos",
+                    data: [ pv90m, pv90, pv60, pv30, pp30, pp60, pp90, pp90m ],
+                    borderColor: "rgba(0, 123, 255, 0.9)",
+                    borderWidth: "0",
+                    backgroundColor: "rgba(255, 0, 0, 0.5)"
                             }
                         ]
         },
