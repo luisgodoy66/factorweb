@@ -158,12 +158,16 @@ class Linea_Factoring(ClaseModelo):
     def __str__(self):
         return self.cxcliente.ctnombre
 
-    def excede_monto_de_linea(self):
-        return self.nvalor + self.nvalorexceso < self.nutilizado
+    # def excede_monto_de_linea(self):
+    #     return self.nvalor + self.nvalorexceso < self.nutilizado
 
     def disponible(self):
         return self.nvalor - self.nutilizado + self.nvalorexceso
+    
+    def porcentaje_disponible(self):
+        return round( self.disponible() / self.nvalor * 100,2)
 
+    
 class Linea_factoring_hist(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales
         , to_field="cxcliente", on_delete=models.RESTRICT

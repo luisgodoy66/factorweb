@@ -9,11 +9,12 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     EditarTasasDocumentoSolicitud, GeneraDetalleParaTabla1, AnexosEdit,\
     AsignacionesPendientesDesembolsarView, DesembolsarAsignacion, GenerarAnexos, \
     ReversaAceptacionAsignacion, GeneraListaAsignacionesJSON, \
-    GeneraListaAsignacionesRegistradasJSON, GeneraResumenAntigüedadCarteraJSON
+    GeneraListaAsignacionesRegistradasJSON, GeneraResumenAntigüedadCarteraJSON,\
+    EstadosOperativosView
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
-    ImpresionCartera
+    ImpresionCartera, EstadoOperativoCliente
 
 urlpatterns = [
 # datos operativos
@@ -21,6 +22,10 @@ urlpatterns = [
         name='listadatosoperativos'),
     path('editardatooperativo/<cliente_ruc>',DatosOperativos, \
         name='datosoperativos_editar'),
+    path('listaestadosoperativos',EstadosOperativosView.as_view(), \
+         name='listaestadosoperativos'),
+    path('estadosoperativocliente/<cliente_id>',EstadoOperativoCliente, \
+         name='estadooperativocliente'),
 # movimientos
     path('listamaestromovimientos/',MaestroMovimientosView.as_view(), \
         name='listamaestromovimientos'),

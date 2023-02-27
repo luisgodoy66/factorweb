@@ -39,10 +39,10 @@ class Datos_operativos(ClaseModelo):
     cxbeneficiariocobranzas = models.CharField(max_length=13, blank=True, null=True)
     ctbeneficiariocobranzas = models.TextField(blank=True, null=True)
     cxestado=models.CharField(max_length=1, default='A', choices=ESTADOS_DE_CLIENTES  )
+    dultimanegociacion = models.DateField(null=True)
 
     def __str__(self):
         return self.cxcliente.cxcliente.ctnombre
-
   
 class Asignacion(ClaseModelo):
     TIPOS_DE_ASIGNACION = (

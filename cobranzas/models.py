@@ -565,3 +565,13 @@ class DebitosCuentasConjuntas(ClaseModelo):
             return x.cxrecuperacion
         else:
             return ''
+            
+    def cobranza_liquidada(self):
+        if self.cxtipooperacion=='C':
+            x = Documentos_cabecera.objects.filter(pk = self.operacion).first()
+            return x.cxestado =='L'
+        elif self.cxtipooperacion=='R':
+            x = Recuperaciones_cabecera.objects.filter(pk = self.operacion).first()
+            return x.cxestado =='L'
+        else:
+            return False

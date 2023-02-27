@@ -139,6 +139,12 @@ class AnexosEdit(LoginRequiredMixin, generic.UpdateView):
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
+class EstadosOperativosView(LoginRequiredMixin, generic.ListView):
+    model = ModeloCliente.Datos_generales
+    template_name = "operaciones/listaestadosoperativos.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+
 @login_required(login_url='/login/')
 @permission_required('operativos.update_asignacion', login_url='bases:sin_permisos')
 def DesembolsarAsignacion(request, pk, cliente_ruc):
@@ -1071,9 +1077,6 @@ def GeneraListaAsignacionesJSON(request, desde = None, hasta= None):
         "rows": docjson 
         }
     return JsonResponse( data)
-    # prueba de bootstrap con filtro de columna
-    # data = docjson         
-    # return JsonResponse( data, safe=False)
 
 def GeneraListaAsignacionesRegistradasJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
@@ -1123,43 +1126,12 @@ def GeneraListaAsignacionesJSONSalida(asignacion):
 
 def GeneraResumenAntigüedadCarteraJSON(request):
 
-    facturas = {}
-    accesorios={}
-    protestos={}
-    
     documentos = Documentos.objects.antigüedad_cartera()
     cheques = ChequesAccesorios.objects.antigüedad_cartera()
     protestados = Documentos_protestados.objects.antigüedad_cartera()
-
-    facturas["vencido_mas_90"] = documentos["vencido_mas_90"]
-    facturas["vencido_90"] = documentos["vencido_90"]
-    facturas["vencido_60"] = documentos["vencido_60"]
-    facturas["vencido_30"] = documentos["vencido_30"]
-    facturas["porvencer_30"] = documentos["porvencer_30"]
-    facturas["porvencer_60"] = documentos["porvencer_60"]
-    facturas["porvencer_90"] = documentos["porvencer_90"]
-    facturas["porvencer_mas_90"] = documentos["porvencer_mas_90"]
-
-    accesorios["vencido_mas_90"] = cheques["vencido_mas_90"]
-    accesorios["vencido_90"] = cheques["vencido_90"]
-    accesorios["vencido_60"] = cheques["vencido_60"]
-    accesorios["vencido_30"] = cheques["vencido_30"]
-    accesorios["porvencer_30"] = cheques["porvencer_30"]
-    accesorios["porvencer_60"] = cheques["porvencer_60"]
-    accesorios["porvencer_90"] = cheques["porvencer_90"]
-    accesorios["porvencer_mas_90"] = cheques["porvencer_mas_90"]
-
-    protestos["vencido_mas_90"] = protestados["vencido_mas_90"]
-    protestos["vencido_90"] = protestados["vencido_90"]
-    protestos["vencido_60"] = protestados["vencido_60"]
-    protestos["vencido_30"] = protestados["vencido_30"]
-    protestos["porvencer_30"] = protestados["porvencer_30"]
-    protestos["porvencer_60"] = protestados["porvencer_60"]
-    protestos["porvencer_90"] = protestados["porvencer_90"]
-    protestos["porvencer_mas_90"] = protestados["porvencer_mas_90"]
-   
-    data = {"facturas":facturas
-            , "accesorios":accesorios
-            , "protestos":protestos}
+  
+    data = {"facturas":documentos
+            , "accesorios":cheques
+            , "protestos":protestados}
     
     return JsonResponse( data)

@@ -211,3 +211,32 @@ def ImpresionCartera(request, ):
     if pisa_status.err:
        return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
+
+def EstadoOperativoCliente(request, cliente_id):
+    
+    facturas = Documentos.objects.antigüedad_por_cliente()\
+        .filter(cxcliente=cliente_id)
+    accesorios = ChequesAccesorios.objects.antigüedad_por_cliente()\
+        .filter(documento__cxcliente=cliente_id)
+
+    template_path = 'operaciones/estadooperativo_reporte.html'
+    context={
+      'facturas':facturas
+      ,'accesorios':accesorios
+        }
+    return render(request, template_path, context)
+
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="estado_operativo.pdf"'
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response

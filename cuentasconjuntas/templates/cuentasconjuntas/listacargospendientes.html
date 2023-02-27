@@ -72,12 +72,12 @@
                             <td>{{ item.ctmotivo}}</td>
                             <td>{{ item.notadedebito.nsaldo}}</td>
                             <td>
+                                {% if item.nvalor == item.notadedebito.nsaldo and not item.cobranza_liquidada %}
                                 <a 
                                     href="{% url 'cuentasconjuntas:debitobancario_editar' item.id %}" 
                                     class="btn btn-warning btn-sm" role="button" title="Editar"><i class="fa fa-edit"></i>
                                 </a>
-                                <a href="#" onclick='EliminarAsignacion("{{item.id}}")' title="Eliminar"
-                                    class="btn btn-danger btn-sm" role="button"><i class="fa fa-trash"></i></a>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}

@@ -50,10 +50,12 @@
                     <thead>
                         <th>Id</th>
                         <th>Nombre</th>
+                        <th>Clase</th>
                         <th>Monto de línea</th>
                         <th>Utilizado</th>
                         <th>Exceso</th>
                         <th>Disponible</th>
+                        <th>Estado</th>
                         <th class="all">Acciones</th>
                     </thead>
                     <tbody>
@@ -61,10 +63,12 @@
                         <tr>
                             <td>{{ item.cxcliente.cxparticipante }}</td>
                             <td>{{ item }}</td>
+                            <td>{{ item.datos_operativos.get.cxclase }}</td>
                             <td>{{ item.linea_factoring.get.nvalor }}</td>
                             <td>{{ item.linea_factoring.get.nutilizado }}</td>
                             <td>{{ item.linea_factoring.get.nvalorexceso }}</td>
                             <td>{{ item.linea_factoring.get.disponible }}</td>
+                            <td>{{ item.datos_operativos.get.cxestado }}</td>
                             <td>
                                 <button class="btn btn-warning btn-sm"  title="Editar"
                                     {% if item.linea_factoring.get.nvalor %}
