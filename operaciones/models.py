@@ -10,7 +10,7 @@ from clientes.models import Datos_generales as Datos_generales_cliente\
     , Cuenta_transferencia
 from pais.models import Bancos
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 class Datos_operativos(ClaseModelo):
     ESTADOS_DE_CLIENTES = (
@@ -190,8 +190,8 @@ class Documentos(ClaseModelo):
         , related_name="tipo_documento"
     )
     ctdocumento = models.CharField(max_length=20) 
-    demision  = models.DateTimeField() 
-    dvencimiento  = models.DateTimeField() 
+    demision  = models.DateField() 
+    dvencimiento  = models.DateField() 
     ntotal = models.DecimalField(max_digits= 15,decimal_places= 2) 
     nsaldo = models.DecimalField(max_digits= 15,decimal_places= 2) 
     cxestado = models.CharField(max_length=1, default="A") 
@@ -223,11 +223,12 @@ class Documentos(ClaseModelo):
         return self.ctdocumento
 
     def dias_vencidos(self):
-        return (datetime.today() - self.dvencimiento)/timedelta(days=1)
+        return (date.today() - self.dvencimiento)/timedelta(days=1)
 
 class ChequesAccesorios_Manager(models.Manager):
 
     def cheques_a_depositar(self, fecha_corte):
+        print(fecha_corte)
         return self.filter(dvencimiento__lte = fecha_corte, cxestado = 'A'
                 , leliminado = False
                 , documento__cxasignacion__cxestado = "P"
@@ -308,7 +309,7 @@ class ChequesAccesorios(ClaseModelo):
     ctgirador = models.CharField(max_length=60) 
     cxestado = models.CharField(max_length=1, default="A") 
     ntotal = models.DecimalField(max_digits= 10,decimal_places= 2) 
-    dvencimiento  = models.DateTimeField() 
+    dvencimiento  = models.DateField() 
     nporcentajeanticipo = models.DecimalField(max_digits=5,decimal_places= 2)
     ntasadescuento = models.DecimalField(max_digits=11,decimal_places= 8)
     ntasacomision = models.DecimalField(max_digits=11,decimal_places= 8)

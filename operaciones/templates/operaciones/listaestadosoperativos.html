@@ -72,7 +72,7 @@
                             <td>{{ item.datos_operativos.get.cxestado }}</td>
                             <td>{{ item.datos_operativos.get.dultimanegociacion |date:"Y-m-d"}}</td>
                             <td>
-                                <a href="{% url 'operaciones:estadooperativocliente' item %}" 
+                                <a href= "{% url 'operaciones:estadooperativocliente' item.cxcliente.cxparticipante %}"
                                     class="btn btn-warning btn-sm" title="Editar" role="button"><i class="fa fa-eye"></i></a>
                             </td>
                         </tr>

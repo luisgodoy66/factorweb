@@ -10,11 +10,13 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     AsignacionesPendientesDesembolsarView, DesembolsarAsignacion, GenerarAnexos, \
     ReversaAceptacionAsignacion, GeneraListaAsignacionesJSON, \
     GeneraListaAsignacionesRegistradasJSON, GeneraResumenAntigüedadCarteraJSON,\
-    EstadosOperativosView
+    EstadosOperativosView, EstadoOperativoCliente, AntigüedadCarteraClienteJSON,\
+    GeneraListaCarteraClienteJSON, GeneraListaChequesADepositarClienteJSON,\
+    GeneraListaCargosPendientesClienteJSON, GeneraListaProtestosPendientesClienteJSON
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
-    ImpresionCartera, EstadoOperativoCliente
+    ImpresionCartera
 
 urlpatterns = [
 # datos operativos
@@ -24,8 +26,17 @@ urlpatterns = [
         name='datosoperativos_editar'),
     path('listaestadosoperativos',EstadosOperativosView.as_view(), \
          name='listaestadosoperativos'),
-    path('estadosoperativocliente/<cliente_id>',EstadoOperativoCliente, \
-         name='estadooperativocliente'),
+    path('estadosoperativocliente/<cliente_id>/'
+         ,EstadoOperativoCliente, name='estadooperativocliente'),
+    path('antigüedadcarteracliente/<cliente_id>', AntigüedadCarteraClienteJSON),
+    path('carteraclientejson/<cliente_id>/<fecha_corte>',GeneraListaCarteraClienteJSON, 
+        name="carteracliente_json"),
+    path('chequesadepositarclientejson/<cliente_id>/<fecha_corte>'
+         ,GeneraListaChequesADepositarClienteJSON, name="chequesadepositarcliente_json"),
+    path('listacargospendientesclientejson/<cliente_id>',\
+         GeneraListaCargosPendientesClienteJSON, name="listacargospendientescliente_json"),
+    path('protestospendientesjson/<cliente_id>',GeneraListaProtestosPendientesClienteJSON, 
+        name="protestospendientescliente_json"),
 # movimientos
     path('listamaestromovimientos/',MaestroMovimientosView.as_view(), \
         name='listamaestromovimientos'),

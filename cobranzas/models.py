@@ -202,7 +202,6 @@ class Protestos_Manager(models.Manager):
                     )
         return cp.union(rp)
         
-
 class Cheques_protestados(ClaseModelo):
     FORMAS_DE_COBRO = (
         ('CHE', 'Cheque'),
@@ -322,14 +321,14 @@ class Documentos_protestados_Manager(models.Manager):
 
         protestos={}
 
-        protestos["vencido_mas_90"] = fvm90+avm90
-        protestos["vencido_90"] = fv90+av90
-        protestos["vencido_60"] = fv60+av60
-        protestos["vencido_30"] = fv30+av30
-        protestos["porvencer_30"] = fx30+ax30
-        protestos["porvencer_60"] = fx60+ax60
-        protestos["porvencer_90"] = fx90+ax90
-        protestos["porvencer_mas_90"] = fxm90+axm90
+        protestos["pvencido_mas_90"] = fvm90+avm90
+        protestos["pvencido_90"] = fv90+av90
+        protestos["pvencido_60"] = fv60+av60
+        protestos["pvencido_30"] = fv30+av30
+        protestos["pporvencer_30"] = fx30+ax30
+        protestos["pporvencer_60"] = fx60+ax60
+        protestos["pporvencer_90"] = fx90+ax90
+        protestos["pporvencer_mas_90"] = fxm90+axm90
 
         return protestos
     

@@ -16,15 +16,16 @@ from .forms import DatosOperativosForm, AsignacionesForm, \
 
 from .models import Cargos_detalle, Condiciones_operativas_detalle, Datos_operativos \
     , Asignacion,  Movimientos_maestro, Condiciones_operativas_cabecera, Anexos\
-    , Desembolsos, Documentos, ChequesAccesorios
+    , Desembolsos, Documentos, ChequesAccesorios, Notas_debito_cabecera
 from empresa.models import  Clases_cliente, Datos_participantes, \
     Tasas_factoring, Tipos_factoring, Cuentas_bancarias
-from cobranzas.models import Documentos_protestados
+from cobranzas.models import Documentos_protestados, Liquidacion_cabecera\
+    , Documentos_cabecera, Recuperaciones_cabecera, Cheques_protestados
 
 from solicitudes import models as ModelosSolicitud
 from clientes import models as ModeloCliente
 
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from decimal import Decimal
 from docxtpl import DocxTemplate, InlineImage
 
@@ -1135,3 +1136,210 @@ def GeneraResumenAntigüedadCarteraJSON(request):
             , "protestos":protestados}
     
     return JsonResponse( data)
+
+def EstadoOperativoCliente(request, cliente_id, ):
+    valor_linea=0
+    porc_disponible=0
+    dias_ultima_operacion  =None
+
+    template_path = 'operaciones/estadooperativo_reporte.html'
+
+    linea = ModeloCliente.Linea_Factoring.objects.filter(cxcliente = cliente_id).first()
+    if linea:
+        valor_linea = linea.nvalor
+        porc_disponible = linea.porcentaje_disponible()
+
+    operativos = Datos_operativos.objects.filter(cxcliente=cliente_id).first()
+    if operativos:
+        if operativos.dultimanegociacion:
+            dias_ultima_operacion = (date.today() - operativos.dultimanegociacion)/timedelta(days=1)
+
+    context={
+        'cliente_id':cliente_id,
+        'valor_linea':valor_linea,
+        'porc_disponible':porc_disponible,
+        'dias_ultima_operacion':dias_ultima_operacion,
+        'hoy' : date.today()
+        }
+    return render(request, template_path, context)
+
+def AntigüedadCarteraClienteJSON(request, cliente_id):
+    
+    documentos = None
+    cheques = None
+
+    facturas = Documentos.objects.antigüedad_por_cliente()\
+        .filter(cxcliente = cliente_id)
+    accesorios = ChequesAccesorios.objects.antigüedad_por_cliente()\
+        .filter(documento__cxcliente = cliente_id)
+
+    prot_fac = Documentos_protestados.objects.antigüedad_por_cliente_facturas()\
+        .filter(documento__cxcliente= cliente_id)
+    prot_acces = Documentos_protestados.objects.antigüedad_por_cliente_accesorios()\
+        .filter(documento__cxcliente= cliente_id)
+
+    prot = prot_fac.union(prot_acces)
+    protestos = prot.aggregate(pvencido_mas_90 = Sum('vencido_mas_90')
+                        , pvencido_90 = Sum('vencido_90')
+                        , pvencido_60 = Sum('vencido_60')
+                        , pvencido_30 = Sum('vencido_30')
+                        , pporvencer_30 = Sum('porvencer_30')
+                        , pporvencer_60 = Sum('porvencer_60')
+                        , pporvencer_90 = Sum('porvencer_90')
+                        , pporvencer_mas_90 = Sum('porvencer_mas_90')
+                        , ptotal = Sum('total')
+                        )
+
+    if facturas: 
+        documentos = facturas[0]
+    if accesorios:
+        cheques = accesorios[0]
+
+    data={
+      'facturas':documentos,
+      'accesorios':cheques,
+      'protestos':protestos,
+        }
+    return JsonResponse( data)
+
+def GeneraListaCarteraClienteJSON(request, cliente_id, fecha_corte = None):
+    # Es invocado desde la url de una tabla bt
+    # if not fecha_corte: 
+    #     fecha = date.today()
+    #     fecha = fecha + timedelta(days=7)
+    documentos = Documentos.objects.facturas_pendientes(fecha_corte)\
+    .filter(cxcliente = cliente_id)
+
+    tempBlogs = []
+    for i in range(len(documentos)):
+        tempBlogs.append(GeneraListaCarterClienteJSONSalida(documentos[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaCarterClienteJSONSalida(doc):
+    output = {}
+
+    output["Comprador"] = doc.cxcomprador.ctnombre
+    output["Asignacion"] = doc.cxasignacion.cxasignacion
+    output["Documento"] = doc.ctdocumento
+    # output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
+    output["Vencimiento"] = doc.dias_vencidos()
+    output["Saldo"] = doc.nsaldo
+
+    return output
+
+def GeneraListaChequesADepositarClienteJSON(request, cliente_id, fecha_corte):
+    # Es invocado desde la url de una tabla bt
+
+    documentos = ChequesAccesorios.objects.cheques_a_depositar(fecha_corte)\
+    .filter(documento__cxcliente = cliente_id)
+
+    tempBlogs = []
+    for i in range(len(documentos)):
+        tempBlogs.append(GeneraListaChequesADepositarClienteJSONSalida(documentos[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    return HttpResponse(JsonResponse( data))
+
+def GeneraListaChequesADepositarClienteJSONSalida(doc):
+    output = {}
+
+    output["Comprador"] = doc.documento.cxcomprador.ctnombre
+    output["Asignacion"] = doc.documento.cxasignacion.cxasignacion
+    output["Documento"] = doc.documento.ctdocumento
+    output["Vencimiento"] = doc.documento.dias_vencidos()
+    output["Valor"] = doc.ntotal
+    output["Datos"] = doc.cxbanco.ctbanco +' CTA.'+ doc.ctcuenta + ' CH/' + doc.ctcheque
+
+    return output
+
+def GeneraListaCargosPendientesClienteJSON(request, cliente_id):
+    # Es invocado desde la url de una tabla bt
+    movimiento = Notas_debito_cabecera.objects\
+        .filter( leliminado = False, nsaldo__gt = 0, cxcliente=cliente_id).all()
+
+    docjson = []
+    for i in range(len(movimiento)):
+        docjson.append(GeneraListaCargosPendientesClienteJSONSalida(movimiento[i])) 
+
+    # docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": movimiento.count(),
+        "totalNotFiltered": movimiento.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+    
+def GeneraListaCargosPendientesClienteJSONSalida(transaccion):
+    output = {}
+    output["ND"] = transaccion.cxnotadebito
+    output["Fecha"] = transaccion.dnotadebito.strftime("%Y-%m-%d")
+    output["Saldo"] = transaccion.nsaldo
+    output["Tipo"] = transaccion.cxtipooperacion
+    opx = None
+    if transaccion.cxtipooperacion=='L':
+        op = Liquidacion_cabecera.objects.filter(pk = transaccion.operacion).first()
+        opx = op.cxliquidacion
+    if transaccion.cxtipooperacion=='C':
+        op = Documentos_cabecera.objects.filter(pk = transaccion.operacion).first()
+        opx = op.cxcobranza
+    if transaccion.cxtipooperacion=='R':
+        op = Recuperaciones_cabecera.objects.filter(pk = transaccion.operacion).first()
+        opx = op.cxrecuperacion
+    
+    output["Operacion"] = opx
+
+    return output
+
+def GeneraListaProtestosPendientesClienteJSON(request, cliente_id):
+    # Es invocado desde la url de una tabla bt
+
+    documentos = Cheques_protestados.objects\
+        .filter(leliminado=False, nsaldocartera__gt = 0
+                , cxtipooperacion = 'C', cheque__cheque_cobranza__cxcliente = cliente_id).all()
+
+    recuperciones = Cheques_protestados.objects\
+        .filter(leliminado=False, nsaldocartera__gt = 0
+                , cxtipooperacion = 'R', cheque__cheque_recuperacion__cxcliente = cliente_id).all()
+
+    documentos = documentos.union(recuperciones)
+
+    tempBlogs = []
+    for i in range(len(documentos)):
+        tempBlogs.append(GeneraListaProtestosPendientesClienteJSONSalida(documentos[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaProtestosPendientesClienteJSONSalida(doc):
+    output = {}
+    output["Girador"] = doc.cheque.ctgirador
+    output["Cheque"] = doc.cheque.__str__()
+    
+    output["Protesto"] = doc.dprotesto
+    output["Saldo"] = doc.nsaldocartera
+    output["Motivo"] = doc.motivoprotesto.ctmotivoprotesto
+    # determinar si cheque fue pagado por comprador 
+
+    return output
+

@@ -13,7 +13,7 @@ window.onload=function(){
   $tb_liqcob.bootstrapTable({locale:"es-EC"});
   $tb_cobcar.bootstrapTable({locale:"es-EC"});
 
-  antigüedadcartera();
+  antigüedadcartera("/operaciones/antigüedadcartera");
 
 }
 
@@ -97,77 +97,3 @@ return [
 ].join('')
 }
 
-function antigüedadcartera(){
-  // chart antigüedad de la cartera
-  fetchRecuperar("/operaciones/antigüedadcartera",function(data){
-    var ctx = document.getElementById( "singelBarChart" );
-    ctx.height = 150;
-
-    v90m = data["facturas"]["vencido_mas_90"]
-    v90 = data["facturas"]["vencido_90"]
-    v60 = data["facturas"]["vencido_60"]
-    v30 = data["facturas"]["vencido_30"]
-    p30 = data["facturas"]["porvencer_30"]
-    p60 = data["facturas"]["porvencer_60"]
-    p90 = data["facturas"]["porvencer_90"]
-    p90m = data["facturas"]["porvencer_mas_90"]
-    
-    av90m = data["accesorios"]["vencido_mas_90"]
-    av90 = data["accesorios"]["vencido_90"]
-    av60 = data["accesorios"]["vencido_60"]
-    av30 = data["accesorios"]["vencido_30"]
-    ap30 = data["accesorios"]["porvencer_30"]
-    ap60 = data["accesorios"]["porvencer_60"]
-    ap90 = data["accesorios"]["porvencer_90"]
-    ap90m = data["accesorios"]["porvencer_mas_90"]
-    
-    pv90m = data["protestos"]["vencido_mas_90"]
-    pv90 = data["protestos"]["vencido_90"]
-    pv60 = data["protestos"]["vencido_60"]
-    pv30 = data["protestos"]["vencido_30"]
-    pp30 = data["protestos"]["porvencer_30"]
-    pp60 = data["protestos"]["porvencer_60"]
-    pp90 = data["protestos"]["porvencer_90"]
-    pp90m = data["protestos"]["porvencer_mas_90"]
-    
-    var myChart = new Chart( ctx, {
-        type: 'bar',
-        data: {
-            labels: [ "v+90", "v90", "v60", "v30", "x30", "x60", "x90", "x+90" ],
-            datasets: [
-                {
-                    label: "Facturas",
-                    data: [ v90m, v90, v60, v30, p30, p60, p90, p90m ],
-                    borderColor: "rgba(0, 123, 255, 0.9)",
-                    borderWidth: "0",
-                    backgroundColor: "rgba(0, 123, 255, 0.5)"
-                            },
-                {
-                    label: "Accesorios",
-                    data: [ av90m, av90, av60, av30, ap30, ap60, ap90, ap90m ],
-                    borderColor: "rgba(0, 123, 255, 0.9)",
-                    borderWidth: "0",
-                    backgroundColor: "rgba(0, 255, 255, 0.5)"
-                            },
-                {
-                    label: "Protestos",
-                    data: [ pv90m, pv90, pv60, pv30, pp30, pp60, pp90, pp90m ],
-                    borderColor: "rgba(0, 123, 255, 0.9)",
-                    borderWidth: "0",
-                    backgroundColor: "rgba(255, 0, 0, 0.5)"
-                            }
-                        ]
-        },
-        options: {
-            scales: {
-                yAxes: [ {
-                    ticks: {
-                        beginAtZero: true
-                    }
-                                } ]
-            }
-        }
-    } );
-
-  })
-}

@@ -1,4 +1,4 @@
-var $btnFiltrar = jQuery('#btnFiltrar')
+var $btnFiltrar = jQuery("#btnFiltrar")
 var $table = jQuery('#table')
 var selections = []
 var $deposito_empresa = jQuery("#deposito")
