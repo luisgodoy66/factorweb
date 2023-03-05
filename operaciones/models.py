@@ -228,9 +228,8 @@ class Documentos(ClaseModelo):
 class ChequesAccesorios_Manager(models.Manager):
 
     def cheques_a_depositar(self, fecha_corte):
-        print(fecha_corte)
         return self.filter(dvencimiento__lte = fecha_corte, cxestado = 'A'
-                , leliminado = False
+                , leliminado = False, lcanjeado = False
                 , documento__cxasignacion__cxestado = "P"
                 , documento__cxasignacion__leliminado = False)
             # cambiar a estado P-agada
@@ -299,6 +298,12 @@ class ChequesAccesorios_Manager(models.Manager):
             .order_by()
         
 class ChequesAccesorios(ClaseModelo):
+    PROPIETARIO = (
+        ('C', 'Cliente'),
+        ('D', 'Deudor'),
+    )
+    cxpropietariocuenta = models.CharField(max_length=1, choices= PROPIETARIO
+        , default='D')
     documento = models.ForeignKey(Documentos
         , on_delete=models.CASCADE, related_name="documento_cheque")
     cxbanco = models.ForeignKey(Bancos, on_delete=models.RESTRICT
@@ -307,18 +312,19 @@ class ChequesAccesorios(ClaseModelo):
     ctcheque = models.CharField(max_length=8) 
     ctplaza = models.CharField(max_length=30, null=True)  
     ctgirador = models.CharField(max_length=60) 
-    cxestado = models.CharField(max_length=1, default="A") 
     ntotal = models.DecimalField(max_digits= 10,decimal_places= 2) 
     dvencimiento  = models.DateField() 
     nporcentajeanticipo = models.DecimalField(max_digits=5,decimal_places= 2)
-    ntasadescuento = models.DecimalField(max_digits=11,decimal_places= 8)
     ntasacomision = models.DecimalField(max_digits=11,decimal_places= 8)
-    lcanjeado = models.BooleanField(default=False)
-    ddeposito = models.DateTimeField( null= True) 
+    ntasadescuento = models.DecimalField(max_digits=11,decimal_places= 8)
     nanticipo = models.DecimalField(max_digits=10,decimal_places= 2, default=0)
     ngao = models.DecimalField(max_digits=10,decimal_places= 2, default=0)
     ndescuentocartera = models.DecimalField(max_digits=10,decimal_places= 2, default=0)
     nplazo = models.IntegerField(default=0)
+    cxestado = models.CharField(max_length=1, default="A") 
+    lcanjeado = models.BooleanField(default=False)
+    ncanjeadopor = models.BigIntegerField(null=True)
+    ddeposito = models.DateTimeField( null= True) 
 
     objects= ChequesAccesorios_Manager()
 
@@ -517,4 +523,15 @@ class Notas_debito_detalle(ClaseModelo):
     notadebito = models.ForeignKey(Notas_debito_cabecera, on_delete=models.CASCADE)
     cargo = models.OneToOneField(Cargos_detalle, on_delete=models.RESTRICT)
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+class Cheques_canjeados(ClaseModelo):
+    cxcliente=models.ForeignKey(Datos_generales_cliente
+        ,to_field="cxcliente", on_delete=models.RESTRICT
+        , related_name="cliente_canje"
+    )
+    accesoriooriginal = models.ForeignKey(ChequesAccesorios
+        , on_delete= models.RESTRICT, related_name='cheque_original')
+    accesorionuevo = models.ForeignKey(ChequesAccesorios
+        , on_delete= models.RESTRICT, related_name='cheque_nuevo')
+    ctmotivocanje = models.CharField(max_length=60)
 

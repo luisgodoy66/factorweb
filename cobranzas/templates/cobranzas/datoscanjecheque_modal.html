@@ -1,0 +1,152 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" rol="form"  class="form-horizontal" name="form"
+                action="{% url 'cobranzas:canjearchequeaccesorio' cheque cliente_ruc deudor_id %}"
+            >
+            <!-- <div class="col-md-12"> -->
+            <div hidden>
+                <input type="text" value={{cheque}} id="id_cheque">
+            </div>
+            <div class="card">
+
+                {% csrf_token %}
+                <div class="card-header">
+                    <strong>Datos de nuevo cheque </strong> 
+                </div>
+                
+                <div class="card-body card-block">
+                <!-- <div class="col-lg-6"> -->
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_cxpropietariocuenta" 
+                            class=" form-control-label">
+                            {{ form_cheque.cxpropietariocuenta.label}}</label>
+                        </div>
+                        <div class="col-md-8">
+                            {{ form_cheque.cxpropietariocuenta}}
+                        </div>
+                    </div>
+                    <div class="row form-group ">
+                        <div class="col-md-4">
+                            <label for="id_cxbanco" class=" form-control-label">
+                            Cuenta bancaria</label>
+                        </div>
+                            <div class="col-md-8">
+                            <!-- dependiendo de si pagó el cliente o el deudor -->
+                            <!-- presentar la lista de cuentas bancarias -->
+                            <div id="div_cuentas_deudor">
+                                <select data-placeholder="Seleccione una cuenta..." 
+                                    class="standardSelect" tabindex="1" 
+                                    id="cuenta_deudor" name="cuenta_deudor"
+                                    >
+                                    <option value=""></option>
+                                    {% for cuenta in cuentas_bancarias_deudor %}
+                                    <option value="{{ cuenta.id}}" >{{ cuenta}} </option>
+                                    {% endfor %}
+                                </select>        
+                            </div>
+        
+                            <div id="div_cuentas_cliente"  hidden >
+                                <select data-placeholder="Seleccione una cuenta..." 
+                                    class="standardSelect" tabindex="1" 
+                                    id="cuenta_cliente" name="cuenta_cliente"
+                                    >
+                                    <option value=""></option>
+                                    {% for cuenta in cuentas_bancarias_cliente %}
+                                    <option value="{{ cuenta.id}}" >{{ cuenta}} </option>
+                                    {% endfor %}
+                                </select>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_ctcheque" class=" form-control-label">
+                            {{ form_cheque.ctcheque.label}}</label></div>
+                        <div class="col-md-8">
+                            {{ form_cheque.ctcheque}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_ctgirador" class=" form-control-label">
+                            {{ form_cheque.ctgirador.label}}</label></div>
+                        <div class="col-md-8">
+                            {{ form_cheque.ctgirador}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_ctmotivo" class=" form-control-label">
+                            Motivo</label></div>
+                        <div class="col-md-8">
+                            <input type="text" name="motivo" maxlength="60" class="form-control" required id="motivo">
+                        </div>
+                    </div>
+                </div>    
+                {{ errors}}
+                <div class="card-footer">
+                    <button type="buttom" class="btn btn-danger btn-sm" 
+                        onclick="return CerrarModal()">
+                        <i class="fa fa-dot-circle-o"></i> Cerrar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+                </div>
+            </div>
+            <!-- </div> -->
+        </form>
+
+    </div>
+
+    {% block js_page %}
+    <script>
+        var url = jQuery("[name=form]").attr("action");
+        var token = jQuery("[name=csrfmiddlewaretoken]").val();
+        var asgn = jQuery("[name=asignacion_id]").val();
+
+        jQuery('#id_cxpropietariocuenta').change(function(){
+        mostrar_cuentas_origen();
+        });
+        jQuery("form").submit(function(e){
+            e.preventDefault();
+           var formData = jQuery("form").serializeArray();
+            // console.log(formData);
+            jQuery.ajax({
+                url:url,
+                method:"POST",
+                headers: {'X-CSRFToken': token },
+                data: formData
+            })
+            .done(function(r,textStatus,xhr){
+                if(xhr.status=200){
+                    jQuery("#popup").modal('hide');
+                }
+                else{
+                    alert(textStatus);
+                }
+            }).fail(function (error) {
+                MensajeError(error.responseText);
+            });
+        });
+
+        function mostrar_cuentas_origen(){
+        // obtener el valor de radio button cliente
+        // si es on, esconder las cuentas del deudor, mostrar la del cliente
+        // si es off, esconder la cuentas del cliente, mostrar la del deudor
+        const div_c = document.querySelector('#div_cuentas_cliente');
+        const div_d = document.querySelector('#div_cuentas_deudor');
+
+        let recibido_por = capturaValor('id_cxpropietariocuenta');
+        if (recibido_por == "C"){
+            div_d.setAttribute('hidden',true);
+            div_c.removeAttribute('hidden');
+            }
+        else{
+            div_d.removeAttribute('hidden');
+            div_c.setAttribute('hidden',true);
+        }
+        }
+        
+    </script>
+    {% endblock %}
+</div>    

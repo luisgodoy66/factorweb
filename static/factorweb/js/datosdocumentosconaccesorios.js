@@ -43,6 +43,7 @@ window.onload=function(){
         var girador = row.children[4].innerText
         var vencimiento = row.children[5].innerText
         var valor = row.children[6].innerText
+        var propietariocuenta = row.children[7].innerText
 
         DicCheques.push({          
           banco: banco,
@@ -51,6 +52,7 @@ window.onload=function(){
           girador: girador,
           vencimiento: vencimiento,
           valor: valor,        
+          propietariocuenta :propietariocuenta,
         });
 
       });
@@ -140,6 +142,7 @@ function AgregarFilaCheque( ){
   var valor = capturaValor("cheque_nvalor")
   var select = document.getElementById('id_cxbanco');
   var nombre_banco = select.options[select.selectedIndex].text;
+  var propietariocuenta = capturaValor("id_cxpropietariocuenta")
   
   if (banco=="" || cuenta=="" || cheque=="" || girador=="")
     return false;
@@ -161,6 +164,7 @@ function AgregarFilaCheque( ){
   nuevafila+="<td>" + girador +"</td>"
   nuevafila+="<td>" + vencimiento +"</td>"
   nuevafila+="<td>" + valor +"</td>"
+  nuevafila+="<td>" + propietariocuenta +"</td>"
 
   nuevafila+= `<td><a class="remove" onclick='eliminarFila(this)'"
               title="Eliminar"><i class="fa fa-trash"></i></a></td>`

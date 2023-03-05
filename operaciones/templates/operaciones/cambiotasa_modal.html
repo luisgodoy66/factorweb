@@ -43,11 +43,12 @@
                 </div>    
                 {{ errors}}
                 <div class="card-footer">
+                    <button type="button" class="btn btn-danger btn-sm" 
+                        onclick="return CerrarModal()">
+                        <i class="fa fa-dot-circle-o"></i> Cerrar
+                    </button>
                     <button type="submit" class="btn btn-primary btn-sm">
                         <i class="fa fa-dot-circle-o"></i> Grabar
-                    </button>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="return CerrarModal()">
-                        <i class="fa fa-dot-circle-o"></i> Cerrar
                     </button>
                 </div>
             </div>
@@ -87,3 +88,4 @@
     </script>
     {% endblock %}
     
+</div>

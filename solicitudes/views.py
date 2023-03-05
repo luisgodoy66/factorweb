@@ -640,11 +640,11 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
                 ctgirador = elem.get("girador"),
                 dvencimiento = vencimiento,
                 ntotal = elem.get("valor"),
-                cxusuariocrea = request.user
+                cxusuariocrea = request.user,
+                cxpropietariocuenta = elem.get("propietariocuenta"),
             )
             if cheque:
                 cheque.save()
-
 
         # la ejecucion de esta vista POST se hace por jquery.ajax 
         # y ese proceso traslada a la forma de edición de la 
@@ -671,7 +671,7 @@ def DatosAccesorioEditar(request, accesorio_id = None, tipo_factoring_id = None)
                 , 'ctgirador':accesorio.ctgirador
                 , 'ntotal':accesorio.ntotal
                 , 'dvencimiento':accesorio.dvencimiento
-                , }
+                , 'cxpropietariocuenta': accesorio.cxpropietariocuenta}
             form_cheque = ChequesForm(e)
             valor_cheque=accesorio.ntotal
 
@@ -696,6 +696,7 @@ def DatosAccesorioEditar(request, accesorio_id = None, tipo_factoring_id = None)
             cheque = request.POST.get('ctcheque')
             girador = request.POST.get('ctgirador')
             vencimiento = request.POST.get('dvencimiento')
+            propietario = request.POST.get('cxpropietariocuenta')
 
             accesorio = ChequesAccesorios.objects.get(id=accesorio_id)
 
@@ -727,8 +728,10 @@ def DatosAccesorioEditar(request, accesorio_id = None, tipo_factoring_id = None)
             accesorio.ctcheque = cheque
             accesorio.ctgirador = girador
             accesorio.dvencimiento = vencimiento
+            accesorio.cxpropietariocuenta = propietario
 
             accesorio.save()
+
         return redirect("solicitudes:asignacionconaccesorios_editar", pk= asg_id)
 
     return render(request, template_name, contexto)

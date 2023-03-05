@@ -254,3 +254,4 @@ class AnexosForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
+

@@ -75,6 +75,12 @@ class Documentos(ClaseModelo):
         return self.ntotal - self.nvalornonegociado
         
 class ChequesAccesorios(ClaseModelo):
+    PROPIETARIO = (
+        ('C', 'Cliente'),
+        ('D', 'Deudor'),
+    )
+    cxpropietariocuenta = models.CharField(max_length=1, choices= PROPIETARIO
+        , default='D')
     documento = models.ForeignKey(Documentos
         , on_delete=models.CASCADE)
     cxbanco = models.ForeignKey(Bancos, on_delete=models.RESTRICT

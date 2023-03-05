@@ -32,7 +32,8 @@ window.onload=function(){
           
     jQuery('#id_ddesembolso')
         .change(function(){
-          RecalcularCargos(asignacion_id,capturaValor("id_ddesembolso"), capturaValor("condicion_id"));
+          RecalcularCargos(asignacion_id,capturaValor("id_ddesembolso")
+            , capturaValor("condicion_id"));
         });
 
     // // inicializar valores
@@ -46,7 +47,8 @@ window.onload=function(){
     initTable(iniciales_gao,iniciales_dc);
 
     // mostrar valores
-    RecalcularCargos(asignacion_id, capturaValor("id_ddesembolso"), capturaValor("condicion_id"));
+    RecalcularCargos(asignacion_id, capturaValor("id_ddesembolso")
+      , capturaValor("condicion_id"));
 
   
 };
@@ -79,7 +81,8 @@ window.operateEvents = {
     })
   },
   'click .remove': function (e, value, row, index) {
-  EliminarDocumentoDeSolicitudAsignacion(asignacion_id, row.id, tipo_asignacion, row.Documento)
+  EliminarDocumentoDeSolicitudAsignacion(asignacion_id, row.id, tipo_asignacion
+    , row.Documento)
   }
 };
 
@@ -173,7 +176,8 @@ function initTable(iniciales_GAO, iniciales_DC) {
 }
 
 function CambiarTasasDocumento(doc_id, fecha_desembolso, callback){
-  AbrirModal("/operaciones/editartasasdocumento/"+ doc_id+"/"+fecha_desembolso+"/"+asignacion_id)
+  AbrirModal("/operaciones/editartasasdocumento/"+ doc_id+"/"+fecha_desembolso+"/"
+    +asignacion_id)
   
 }
 

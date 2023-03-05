@@ -164,14 +164,14 @@ def ImpresionCartera(request, ):
     if not ax90: ax90 = 0
     if not axm90: axm90 = 0
 
-    pvm90 = total_protestos['vencido_mas_90']
-    pv90 = total_protestos['vencido_90']
-    pv60 = total_protestos['vencido_60']
-    pv30 = total_protestos['vencido_30']
-    px30 = total_protestos['porvencer_30']
-    px60 = total_protestos['porvencer_60']
-    px90 = total_protestos['porvencer_90']
-    pxm90 = total_protestos['porvencer_mas_90']
+    pvm90 = total_protestos['pvencido_mas_90']
+    pv90 = total_protestos['pvencido_90']
+    pv60 = total_protestos['pvencido_60']
+    pv30 = total_protestos['pvencido_30']
+    px30 = total_protestos['pporvencer_30']
+    px60 = total_protestos['pporvencer_60']
+    px90 = total_protestos['pporvencer_90']
+    pxm90 = total_protestos['pporvencer_mas_90']
     if not pvm90: pvm90=0
     if not pv90: pv90 = 0
     if not pv60: pv60 = 0

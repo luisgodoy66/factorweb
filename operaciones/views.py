@@ -9,10 +9,9 @@ from django.shortcuts import redirect, render
 from django.db.models import Sum, Count
 from django.utils.dateparse import parse_date
 
-from .forms import DatosOperativosForm, AsignacionesForm, \
-    MaestroMovimientosForm, CondicionesOperativasForm, \
-    DetalleCondicionesOperativasForm, TasasDocumentosForm, \
-    TasasAccesoriosForm, DesembolsarForm, AnexosForm
+from .forms import DatosOperativosForm, AsignacionesForm, MaestroMovimientosForm, \
+    CondicionesOperativasForm, DetalleCondicionesOperativasForm, \
+    TasasDocumentosForm, TasasAccesoriosForm, DesembolsarForm, AnexosForm
 
 from .models import Cargos_detalle, Condiciones_operativas_detalle, Datos_operativos \
     , Asignacion,  Movimientos_maestro, Condiciones_operativas_cabecera, Anexos\

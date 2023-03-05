@@ -74,12 +74,13 @@ class ChequesForm(forms.ModelForm):
     class Meta:
         model=ChequesAccesorios
         fields=[
-            'cxbanco', 'ctcuenta', 'ctcheque'
+            'cxbanco', 'ctcuenta', 'ctcheque', 'cxpropietariocuenta'
             ,'ctgirador', 'ntotal', 'dvencimiento'
         ]
         labels={
             'cxbanco':'Banco', 'ctcuenta':'Número de cuenta'
             , 'ctcheque':'Número de cheque'
+            , 'cxpropietariocuenta':'Propietario de cuenta'
             , 'ctgirador':'Girador', 'ntotal':'Valor'
             , 'dvencimiento':'Vencimiento'
         }

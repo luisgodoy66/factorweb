@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum, Q
 
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, date
 
 from bases.models import ClaseModelo
 from empresa.models import Datos_participantes , Tipos_factoring, Cuentas_bancarias
@@ -54,7 +54,7 @@ class Documentos_cabecera(ClaseModelo):
         , related_name="tipofactoring_cobranza")
     cxformapago = models.CharField(max_length=3, choices=FORMAS_DE_PAGO)
     cxlocalidad = models.CharField(max_length=4, blank=True) 
-    dcobranza = models.DateTimeField(auto_created=True) 
+    dcobranza = models.DateField(auto_created=True) 
     dliquidacion = models.DateTimeField(null=True) 
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     nsobrepago = models.DecimalField(max_digits=10, decimal_places=2, default=0)

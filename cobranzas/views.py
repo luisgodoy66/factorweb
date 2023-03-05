@@ -14,7 +14,7 @@ from .models import Documentos_cabecera, Documentos_detalle, Liquidacion_cabecer
     , Documentos_protestados, Recuperaciones_detalle, Cargos_cabecera
 from operaciones.models import Documentos, ChequesAccesorios, Datos_operativos\
     , Desembolsos, Motivos_protesto_maestro, Cargos_detalle, Notas_debito_cabecera\
-    , Notas_debito_detalle
+    , Notas_debito_detalle, Cheques_canjeados
 from clientes.models import Cuentas_bancarias, Datos_generales, Cuenta_transferencia
 from empresa.models import Tasas_factoring, Cuentas_bancarias as CuentasEmpresa\
     , Datos_participantes
@@ -22,7 +22,8 @@ from cuentasconjuntas import models as CuentasConjuntasModels
 
 from .forms import CobranzasDocumentosForm, ChequesForm, LiquidarForm\
     , MotivoProtestoForm, ProtestoForm, RecuperacionesProtestosForm\
-    , CobranzasCargosForm
+    , CobranzasCargosForm, AccesoriosForm
+
 
 from operaciones.forms import DesembolsarForm
 
@@ -581,7 +582,6 @@ def AceptarCobranza(request):
     if not cuenta_bancaria:
         cuenta_bancaria='Null'
     
-    print(documentos_cobrados, id_deudor,nusuario, cc)
     # Los 2 ultimos parametros son el id de cheque accesorio y el mensaje de error
     resultado=enviarPost("CALL uspAceptarCobranzaCartera( '{0}','{1}','{2}','{3}'\
         ,{4},{5},{6},{7}\
@@ -649,7 +649,6 @@ def DepositoCheques(request, ids_cheques, total_cartera, cuenta_destino
             cuentas_conjuntas = CuentasConjuntasModels.Cuentas_bancarias\
                 .objects.filter(cxcliente = id_cliente , leliminado = False, )\
                 .all()
-            print(cuentas_conjuntas)
 
     contexto = {"cheques" : result
         , "total_cartera" : total_cartera
@@ -975,7 +974,6 @@ def DatosDiasACondonar(request, id, dias, cobranza_id, tipo_operacion):
         return redirect("cobranzas:cobranzaporcondonar", pk=cobranza_id, tipo_operacion=tipo_operacion)
         
         
-    print(contexto)
     return render(request, template_name, contexto)
 
 @login_required(login_url='/login/')
@@ -1439,7 +1437,6 @@ def AceptarRecuperacion(request):
 
     if not cuenta_bancaria:
         cuenta_bancaria='Null'
-    print('ejecutar sp')
     # Los 2 ultimos parametros son el id de nueva recuperacion y el mensaje de error
     resultado=enviarPost("CALL uspAceptarRecuperacionProtesto( '{0}','{1}','{2}'\
         ,'{3}',{4},'{5}',{6},{7}\
@@ -2230,3 +2227,86 @@ def ReversaProtesto(request, id_cobranza,tipo_operacion,id_protesto, cobranza
         ,factoring_id, nusuario))
 
     return HttpResponse(resultado)
+
+def CanjeDeCheque(request, cheque_id, cliente_ruc, deudor_id):
+    template_path = 'cobranzas/datoscanjecheque_modal.html'
+    cuentas = Cuentas_bancarias\
+        .objects.filter(cxparticipante = cliente_ruc \
+            , leliminado = False, lpropia = True\
+            , cxtipocuenta = 'C').all()
+    cuentas_deudor = Cuentas_bancarias\
+        .objects.filter(cxparticipante = deudor_id \
+            , leliminado = False, lpropia = True\
+            , cxtipocuenta = 'C').all()
+
+    context={
+        'cheque':cheque_id,
+        'form_cheque': AccesoriosForm,
+        "cuentas_bancarias_cliente" : cuentas,
+        "cuentas_bancarias_deudor" : cuentas_deudor,
+        'cliente_ruc':cliente_ruc,
+        'deudor_id':deudor_id,
+        }
+    
+    if request.method =='POST':
+        with transaction.atomic():
+            # marcar el cheque como canjeado
+            cheque = ChequesAccesorios.objects.filter(id = cheque_id).first()
+
+            cheque.lcanjeado = True
+            cheque.save()
+
+            # crear nuevo cheque
+            propietario  = request.POST.get('cxpropietariocuenta')
+            numero_cheque  = request.POST.get('ctcheque')
+            girador  = request.POST.get('ctgirador')
+
+            if propietario=='C':
+                cuenta_banco = request.POST.get('cuenta_cliente')
+            else:
+                cuenta_banco = request.POST.get('cuenta_deudor')
+
+            cuenta = Cuentas_bancarias.objects.filter(pk = cuenta_banco).first()
+            bco_id = cuenta.cxbanco
+            cta_id = cuenta.cxcuenta
+            
+            nuevo_cheque = ChequesAccesorios(
+                cxpropietariocuenta = propietario,
+                cxbanco = bco_id,
+                ctcuenta = cta_id,
+                ctcheque = numero_cheque,
+                ctgirador = girador,
+                documento = cheque.documento,
+                ntotal = cheque.ntotal,
+                dvencimiento = cheque.dvencimiento,
+                nporcentajeanticipo = cheque.nporcentajeanticipo,
+                ntasacomision = cheque.ntasacomision,
+                ntasadescuento = cheque.ntasadescuento,
+                nanticipo = cheque.nanticipo,
+                ngao = cheque.ngao,
+                ndescuentocartera = cheque.ndescuentocartera,
+                nplazo = cheque.nplazo,
+                cxestado = cheque.cxestado,
+                ncanjeadopor = cheque.id,
+                cxusuariocrea = request.user,            
+            )
+            if nuevo_cheque:
+                nuevo_cheque.save()
+
+            # registrar canje con el motivo
+            motivo  = request.POST.get('motivo')
+            cliente = Datos_generales.objects.filter(cxcliente = cliente_ruc).first()
+            canje = Cheques_canjeados(
+                cxcliente = cliente,
+                accesoriooriginal = cheque,
+                accesorionuevo = nuevo_cheque,
+                ctmotivocanje = motivo,
+                cxusuariocrea = request.user,            
+            )
+            if canje:
+                canje.save()
+
+        return redirect("cobranzas:listachequesadepositar")
+
+    return render(request, template_path, context)
+

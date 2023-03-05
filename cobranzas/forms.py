@@ -2,7 +2,7 @@ from pyexpat import model
 from django import forms
 from .models import Cheques, Documentos_cabecera, Liquidacion_cabecera\
     , Cheques_protestados, Recuperaciones_cabecera, Cargos_cabecera
-from operaciones.models import Motivos_protesto_maestro
+from operaciones.models import Motivos_protesto_maestro, ChequesAccesorios
 
 from datetime import date
 
@@ -262,3 +262,23 @@ class CobranzasCargosForm(forms.ModelForm):
         self.fields['dcobranza'].widget.attrs['value']=date.today
         # self.fields['ddeposito'].widget.attrs['readonly']=True
         self.fields['ddeposito'].widget.attrs['value']=date.today
+
+class AccesoriosForm(forms.ModelForm):
+    class Meta:
+        model=ChequesAccesorios
+        fields=[
+            'ctcheque', 'cxpropietariocuenta'
+            ,'ctgirador', 
+        ]
+        labels={
+            'ctcheque':'Número de cheque'
+            , 'cxpropietariocuenta':'Propietario de cuenta'
+            , 'ctgirador':'Girador'
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })

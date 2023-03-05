@@ -111,22 +111,26 @@ function DepositoCuentaCliente(){
 }
 
 window.operateEvents = {
-  'click .revertir': function (e, value, row, index) {
-    CanjearCheque(row.id, row.TipoOperacion)
+  'click .canjear': function (e, value, row, index) {
+    CanjearCheque(row.id, row.IdCliente, row.IdComprador)
   },
-  'click .imprimir': function (e, value, row, index) {
+  'click .quitar': function (e, value, row, index) {
     QuitarAccesorio( row.id, row.TipoOperacion)
   },
 };
 
 function operateFormatter(value, row, index) {
 return [
-  '<a class="revertir" href="javascript:void(0)" title="Canjear">',
+  '<a class="canjear" href="javascript:void(0)" title="Canjear">',
   '<i class="fa fa-exchange"></i>',
   '</a>  ',
-  '<a class="imprimir" href="javascript:void(0)" title="Quitar accesorio">',
+  '<a class="quitar" href="javascript:void(0)" title="Quitar accesorio">',
   '<i class="fa fa-unlink"></i>',
   '</a>  ',
 ].join('')
 }
 
+
+function CanjearCheque(cheque_id, cliente_id, deudor_id){
+  AbrirModal("/cobranzas/canjearchequeaccesorio/"+ cheque_id + '/' + cliente_id + '/' + deudor_id)
+}

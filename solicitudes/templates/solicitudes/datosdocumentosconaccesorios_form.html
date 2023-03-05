@@ -165,6 +165,7 @@
                                 <td data-cabecera="ctgirador">Girador</td>
                                 <td data-cabecera="dvencimiento">Vencimiento</td>
                                 <td data-cabecera="nvalor">Valor</td>
+                                <td data-cabecera="cxpropietariocuenta">Propietario</td>
                                 <td data-cabecera="Acciones"class="all">Acciones</td>
                             </tr>
                         </thead>
@@ -174,9 +175,6 @@
             </small>
         </div>
         <div class="card-footer">
-            <button type="submit" class="btn btn-primary btn-sm">
-                <i class="fa fa-dot-circle-o"></i> Agregar
-            </button>
             <a class="btn btn-danger btn-sm "
             {% if asignacion_id %}
                 href="{% url 'solicitudes:asignacionconaccesorios_editar' asignacion_id %}" 
@@ -185,6 +183,9 @@
             {% endif %}
             ><i class="fa fa-ban"></i> Cancelar
             </a>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa fa-dot-circle-o"></i> Agregar
+            </button>
             
         </div>
     </div>
