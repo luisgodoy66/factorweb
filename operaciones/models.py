@@ -229,11 +229,18 @@ class ChequesAccesorios_Manager(models.Manager):
 
     def cheques_a_depositar(self, fecha_corte):
         return self.filter(dvencimiento__lte = fecha_corte, cxestado = 'A'
-                , leliminado = False, lcanjeado = False
+                , leliminado = False, lcanjeado = False, laccesorioquitado = False
                 , documento__cxasignacion__cxestado = "P"
                 , documento__cxasignacion__leliminado = False)
             # cambiar a estado P-agada
             # .filter(documento__cxasignacion__in =Asignacion.objects.filter(cxestado = "L"))
+
+    def facturas_pendientes(self, fecha_corte):
+        return self.filter(dvencimiento__lte = fecha_corte
+                , laccesorioquitado = True, chequequitado__cxestado = 'A'
+                , leliminado = False, lcanjeado = False
+                , documento__cxasignacion__cxestado = "P"
+                , documento__cxasignacion__leliminado = False)
 
     def antigüedad_cartera(self):
         # grafico de antigüedad de cartera 
@@ -296,7 +303,16 @@ class ChequesAccesorios_Manager(models.Manager):
                 , total = Sum('ntotal')
                 )\
             .order_by()
-        
+
+class Cheques_quitados(ClaseModelo):
+    cxcliente=models.ForeignKey(Datos_generales_cliente
+        ,to_field="cxcliente", on_delete=models.RESTRICT
+    )
+    cxestado = models.CharField(max_length=1, default="A") 
+    nsaldo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    ctmotivoquitado = models.CharField(max_length=60)
+    dultimacobranza = models.DateTimeField(null=True) 
+            
 class ChequesAccesorios(ClaseModelo):
     PROPIETARIO = (
         ('C', 'Cliente'),
@@ -319,13 +335,17 @@ class ChequesAccesorios(ClaseModelo):
     ntasadescuento = models.DecimalField(max_digits=11,decimal_places= 8)
     nanticipo = models.DecimalField(max_digits=10,decimal_places= 2, default=0)
     ngao = models.DecimalField(max_digits=10,decimal_places= 2, default=0)
-    ndescuentocartera = models.DecimalField(max_digits=10,decimal_places= 2, default=0)
+    ndescuentocartera = models.DecimalField(max_digits=10,decimal_places= 2
+                                            , default=0)
     nplazo = models.IntegerField(default=0)
     cxestado = models.CharField(max_length=1, default="A") 
+    ddeposito = models.DateTimeField( null= True) 
     lcanjeado = models.BooleanField(default=False)
     ncanjeadopor = models.BigIntegerField(null=True)
-    ddeposito = models.DateTimeField( null= True) 
-
+    laccesorioquitado = models.BooleanField(default= False)
+    chequequitado = models.ForeignKey(Cheques_quitados, on_delete=models.RESTRICT
+                                        , null=True)
+    
     objects= ChequesAccesorios_Manager()
 
     def __str__(self):
@@ -476,8 +496,6 @@ class Motivos_protesto_maestro(ClaseModelo):
 
     def __str__(self):
         return self.ctabreviacion
-
-# from cobranzas.models import Documentos_cabecera, Liquidacion_cabecera, Recuperaciones_cabecera
 
 class Notas_debito_cabecera(ClaseModelo):
     TIPOS_DE_OPERACION = (

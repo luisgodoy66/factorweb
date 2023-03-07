@@ -14,7 +14,7 @@ from .models import Documentos_cabecera, Documentos_detalle, Liquidacion_cabecer
     , Documentos_protestados, Recuperaciones_detalle, Cargos_cabecera
 from operaciones.models import Documentos, ChequesAccesorios, Datos_operativos\
     , Desembolsos, Motivos_protesto_maestro, Cargos_detalle, Notas_debito_cabecera\
-    , Notas_debito_detalle, Cheques_canjeados
+    , Notas_debito_detalle, Cheques_canjeados, Cheques_quitados
 from clientes.models import Cuentas_bancarias, Datos_generales, Cuenta_transferencia
 from empresa.models import Tasas_factoring, Cuentas_bancarias as CuentasEmpresa\
     , Datos_participantes
@@ -442,12 +442,19 @@ def GeneraListaCarteraPorVencerJSON(request, fecha_corte = None):
     # if not fecha_corte: 
     #     fecha = date.today()
     #     fecha = fecha + timedelta(days=7)
+    # Se incluyen los registros de cheques a los que se le quitó el acesorio
+    tempBlogs = []
 
     documentos = Documentos.objects.facturas_pendientes(fecha_corte).all()
 
-    tempBlogs = []
     for i in range(len(documentos)):
         tempBlogs.append(GeneraListaCarterPorVencerJSONSalida(documentos[i])) 
+
+    # los accesorios que fueron quitados se convierten en facturas pendientes
+    quitados = ChequesAccesorios.objects.facturas_pendientes(fecha_corte).all()
+
+    for i in range(len(quitados)):
+        tempBlogs.append(GeneraListaAccesoriosQuitadosJSONSalida(quitados[i])) 
 
     docjson = tempBlogs
 
@@ -479,16 +486,49 @@ def GeneraListaCarterPorVencerJSONSalida(doc):
 
     return output
 
+def GeneraListaAccesoriosQuitadosJSONSalida(acc):
+    output = {}
+    # para diferenciar de facturas puras usar un indice negativo
+    output['id'] = -acc.id
+    output["IdCliente"] = acc.documento.cxcliente.cxparticipante
+    output["Cliente"] = acc.documento.cxcliente.ctnombre
+    output["IdComprador"] = acc.documento.cxcomprador.cxparticipante
+    output["Comprador"] = acc.documento.cxcomprador.ctnombre
+    output["IdTipoFactoring"] = acc.documento.cxtipofactoring.cxtipofactoring
+    output["TipoFactoring"] = acc.documento.cxtipofactoring.ctabreviacion
+    output["Asignacion"] = acc.documento.cxasignacion.cxasignacion
+    output["Documento"] = acc.documento.ctdocumento
+    output["Vencimiento"] = acc.dvencimiento.strftime("%Y-%m-%d")
+    output["Saldo"] = acc.chequequitado.nsaldo
+    if acc.chequequitado.dultimacobranza:
+        output["UltimaCobranza"] = acc.chequequitado.dultimacobranza.strftime("%Y-%m-%d")
+    else:
+        output["UltimaCobranza"] =''
+
+    return output
+
 def DetalleDocumentosFacturasPuras(request, ids_documentos):
     # filtrar los documentos correspondientes a la lista pasada
-    documentos = Documentos.objects\
-        .filter(id__in = ids_documentos.split(','), leliminado = False)
-    
+    arr_acc = []
+    arr_fac = []
     tempBlogs = []
+    x=[]
+    ids = ids_documentos.split(',')
+    for id in ids:
+        if int(id) < 0:
+            arr_acc.append(-int(id))
+        else:
+            arr_fac.append(id)
 
-    # Converting `QuerySet` to a Python Dictionary
-    for i in range(len(documentos)):
-        tempBlogs.append(DocumentoADictionario(documentos[i])) # Converting `QuerySet` to a Python Dictionary
+    documentos = Documentos.objects.filter(id__in = arr_fac, leliminado = False)
+    
+    for id in range(len(documentos)):
+        tempBlogs.append(GeneraListaDocumentosSeleccionadosOutput(documentos[id])) # Converting `QuerySet` to a Python Dictionary
+
+    quitados = ChequesAccesorios.objects.filter(id__in = arr_acc, leliminado = False)
+
+    for i in range(len(quitados)):
+        tempBlogs.append(GeneraListaAccesoriosQuitadosSeleccionadosOutput(quitados[i])) 
 
     docjson = tempBlogs
 
@@ -499,7 +539,7 @@ def DetalleDocumentosFacturasPuras(request, ids_documentos):
 
     return HttpResponse(JsonResponse( data))
 
-def DocumentoADictionario(doc):
+def GeneraListaDocumentosSeleccionadosOutput(doc):
     # con los datos numericos entre comillas si se calcula el total
     # de la columna en la tabla. Del otro tipo, no
 
@@ -519,6 +559,32 @@ def DocumentoADictionario(doc):
     output["Retenido"] = "0.0"
     output["Bajas"] = "0.00"
     output["SaldoFinal"] = "0.0"
+    output["AccesorioQuitado"] = None
+
+    return output
+
+def GeneraListaAccesoriosQuitadosSeleccionadosOutput(acc):
+    # con los datos numericos entre comillas si se calcula el total
+    # de la columna en la tabla. Del otro tipo, no
+
+    # los datos aquí van a obtenerse con el getData de la tb, aunque no se 
+    # presenten en el HTML
+    print(acc)
+    output = {}
+    output['id'] = acc.documento.id
+    output["IdComprador"] = acc.documento.cxcomprador.cxparticipante
+    output["Comprador"] = acc.documento.cxcomprador.ctnombre
+    output["Asignacion"] = acc.documento.cxasignacion.cxasignacion
+    output["Documento"] = acc.documento.ctdocumento
+    output["Emision"] = acc.documento.demision.strftime("%Y-%m-%d")
+    output["PorcentajeAnticipo"] = acc.nporcentajeanticipo
+    output["Vencimiento"] = acc.dvencimiento.strftime("%Y-%m-%d")
+    output["SaldoActual"] = acc.chequequitado.nsaldo
+    output["Cobro"] = acc.chequequitado.nsaldo
+    output["Retenido"] = "0.0"
+    output["Bajas"] = "0.00"
+    output["SaldoFinal"] = "0.0"
+    output["AccesorioQuitado"] = acc.chequequitado.id
 
     return output
 
@@ -2249,6 +2315,7 @@ def CanjeDeCheque(request, cheque_id, cliente_ruc, deudor_id):
         }
     
     if request.method =='POST':
+
         with transaction.atomic():
             # marcar el cheque como canjeado
             cheque = ChequesAccesorios.objects.filter(id = cheque_id).first()
@@ -2296,6 +2363,7 @@ def CanjeDeCheque(request, cheque_id, cliente_ruc, deudor_id):
             # registrar canje con el motivo
             motivo  = request.POST.get('motivo')
             cliente = Datos_generales.objects.filter(cxcliente = cliente_ruc).first()
+
             canje = Cheques_canjeados(
                 cxcliente = cliente,
                 accesoriooriginal = cheque,
@@ -2310,3 +2378,37 @@ def CanjeDeCheque(request, cheque_id, cliente_ruc, deudor_id):
 
     return render(request, template_path, context)
 
+def QuitarAccesorio(request, cheque_id, cliente_ruc):
+    template_path = 'cobranzas/datosquitaraccesorio_modal.html'
+
+    context={
+        'cheque':cheque_id,
+        'cliente_ruc':cliente_ruc,
+        }
+    
+    if request.method =='POST':
+        with transaction.atomic():
+
+            cheque = ChequesAccesorios.objects.filter(id = cheque_id).first()
+
+            # registrar quitada con el motivo
+            motivo  = request.POST.get('motivo')
+            cliente = Datos_generales.objects.filter(cxcliente = cliente_ruc).first()
+            
+            quitado = Cheques_quitados(
+                cxcliente = cliente,
+                nsaldo = cheque.ntotal,
+                ctmotivoquitado = motivo,
+                cxusuariocrea = request.user,
+            )
+            if quitado:
+                quitado.save()
+
+
+            cheque.laccesorioquitado = True
+            cheque.chequequitado = quitado
+            cheque.save()
+
+        return redirect("cobranzas:listachequesadepositar")
+
+    return render(request, template_path, context)

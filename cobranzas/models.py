@@ -99,14 +99,19 @@ class Documentos_detalle(ClaseModelo):
     ndiasacondonar = models.SmallIntegerField(default=0)
     cxusuariocondona = models.ForeignKey(User, on_delete= models.CASCADE,
         related_name="usuariocondona", null= True)
+    accesorioquitado = models.ForeignKey(ChequesAccesorios, on_delete=models.RESTRICT
+                                        , null=True)
 
     def dias_vencidos(self):
         # si es factura pura, tomo el vencimiento del documento
         # ai es accesorio, busco el cheque accesorio grabado en la cabecera
         if self.cxdocumento.cxasignacion.cxtipo=='F':
             vencimiento = self.cxdocumento.dvencimiento
-        else:
+        elif self.cxcobranza.cxformapago =='DEP':
             vencimiento = self.cxcobranza.cxaccesorio.dvencimiento
+        else:
+            vencimiento = self.accesorioquitado.dvencimiento
+
         return (self.cxcobranza.dcobranza - vencimiento)/timedelta(days=1)
 
     def vencimiento(self):
@@ -114,8 +119,10 @@ class Documentos_detalle(ClaseModelo):
         # ai es accesorio, busco el cheque accesorio grabado en la cabecera
         if self.cxdocumento.cxasignacion.cxtipo=='F':
             vencimiento = self.cxdocumento.dvencimiento
-        else:
+        elif self.cxcobranza.cxformapago =='DEP':
             vencimiento = self.cxcobranza.cxaccesorio.dvencimiento
+        else:
+            vencimiento = self.accesorioquitado.dvencimiento
 
         return vencimiento
 

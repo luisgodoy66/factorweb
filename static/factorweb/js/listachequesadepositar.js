@@ -115,7 +115,7 @@ window.operateEvents = {
     CanjearCheque(row.id, row.IdCliente, row.IdComprador)
   },
   'click .quitar': function (e, value, row, index) {
-    QuitarAccesorio( row.id, row.TipoOperacion)
+    QuitarAccesorio( row.id, row.IdCliente)
   },
 };
 
@@ -130,7 +130,10 @@ return [
 ].join('')
 }
 
-
 function CanjearCheque(cheque_id, cliente_id, deudor_id){
   AbrirModal("/cobranzas/canjearchequeaccesorio/"+ cheque_id + '/' + cliente_id + '/' + deudor_id)
+}
+
+function QuitarAccesorio(cheque_id, cliente_id){
+  AbrirModal("/cobranzas/quitaraccesorio/"+ cheque_id + '/' + cliente_id)
 }

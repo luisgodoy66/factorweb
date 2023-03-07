@@ -120,6 +120,8 @@
             .done(function(r,textStatus,xhr){
                 if(xhr.status=200){
                     jQuery("#popup").modal('hide');
+                    // refrescar la pagina html con java script?
+                    location.reload()
                 }
                 else{
                     alert(textStatus);

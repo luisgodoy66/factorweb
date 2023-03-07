@@ -16,7 +16,7 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , LiquidacionesEnNegativoPendientesView, GeneraListaLiquidacionesEnNegativoPendientesJSON\
     , DetalleNotasDebitoPendientesJSON, DatosCobroNotaDebito, AceptarCobranzaNotasDebito\
     , GeneraListaLiquidacionesRegistradasJSON, GeneraListaCobranzasCargosRegistradasJSON\
-    , ReversaProtesto, CanjeDeCheque
+    , ReversaProtesto, CanjeDeCheque, QuitarAccesorio
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos, ImpresionProtestosPendientes
@@ -56,6 +56,8 @@ urlpatterns = [
     path('reversarcobranza/<int:pid_cobranza>/<tipo_operacion>',ReversaCobranza),
     path('canjearchequeaccesorio/<int:cheque_id>/<cliente_ruc>/<deudor_id>'
          , CanjeDeCheque, name='canjearchequeaccesorio'),
+    path('quitaraccesorio/<int:cheque_id>/<cliente_ruc>'
+         , QuitarAccesorio, name='quitarchequeaccesorio'),
     
     # liquidaciones
     path('confirmarcobranza/<int:cobranza_id>/<tipo_operacion>',ConfirmarCobranza),
