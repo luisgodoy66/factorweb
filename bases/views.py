@@ -145,14 +145,20 @@ def dashboard(request):
     # para que tome todo el día de hoy estoy poniendo hasta mañana
     desde = date.today() + timedelta(days=-1)
     hasta = date.today() + timedelta(days=1)
+    cartera = 0
+    protestos = 0
 
     docs = Documentos.objects.TotalCartera()
+    if docs['Total']:
+        cartera = docs['Total']
     prot = Cheques_protestados.objects.TotalProtestos()
+    if prot['Total']:
+        protestos = prot['Total']
 
     datos = { 'desde':desde
         , 'hasta':hasta
-        , 'total_cartera':docs['Total']
-        , 'total_protestos':prot['Total']
-        , 'total_cartera_protestos':docs['Total']+prot["Total"]
+        , 'total_cartera': cartera
+        , 'total_protestos':protestos
+        , 'total_cartera_protestos':cartera+protestos
     }
     return render(request, template_name, datos)

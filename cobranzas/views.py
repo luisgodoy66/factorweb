@@ -605,7 +605,7 @@ def AceptarCobranza(request):
     # ejecuta un store procedure 
     # Devuelve el control a un proceso js
     resultado = 'OK'
-    nc=' '; gi=' '; es_cc = False; cd = 0; fd = 'Null'; cc=0
+    nc=' '; gi=' '; es_cc = False; cd = 'Null'; fd = 'Null'; cc='Null'
 
     objeto=json.loads(request.body.decode("utf-8"))
 
@@ -1460,7 +1460,7 @@ def AceptarRecuperacion(request):
     # ejecuta un store procedure 
     # Devuelve el control a un proceso js
     resultado = 'OK'
-    nc=' '; gi=' '; es_cc = False; cd = 0; fd = 'Null'
+    nc=' '; gi=' '; es_cc = False; cd = 'Null'; fd = 'Null'; cc='Null'
 
     objeto=json.loads(request.body.decode("utf-8"))
 

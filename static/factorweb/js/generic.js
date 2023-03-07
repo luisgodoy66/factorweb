@@ -252,14 +252,14 @@ function antigüedadcartera(url){
         ctx.height = 150;
 
         if (data["facturas"]){
-            v90m = data["facturas"]["vencido_mas_90"]
-            v90 = data["facturas"]["vencido_90"]
-            v60 = data["facturas"]["vencido_60"]
-            v30 = data["facturas"]["vencido_30"]
-            p30 = data["facturas"]["porvencer_30"]
-            p60 = data["facturas"]["porvencer_60"]
-            p90 = data["facturas"]["porvencer_90"]
-            p90m = data["facturas"]["porvencer_mas_90"]
+            v90m = data["facturas"]["fvencido_mas_90"]
+            v90 = data["facturas"]["fvencido_90"]
+            v60 = data["facturas"]["fvencido_60"]
+            v30 = data["facturas"]["fvencido_30"]
+            p30 = data["facturas"]["fporvencer_30"]
+            p60 = data["facturas"]["fporvencer_60"]
+            p90 = data["facturas"]["fporvencer_90"]
+            p90m = data["facturas"]["fporvencer_mas_90"]
         }
         else{
             v90m=0;v90=0;v60=0;v30=0; p30=0; p60=0; p90=0; p90m=0

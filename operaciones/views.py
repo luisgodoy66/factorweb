@@ -15,7 +15,8 @@ from .forms import DatosOperativosForm, AsignacionesForm, MaestroMovimientosForm
 
 from .models import Cargos_detalle, Condiciones_operativas_detalle, Datos_operativos \
     , Asignacion,  Movimientos_maestro, Condiciones_operativas_cabecera, Anexos\
-    , Desembolsos, Documentos, ChequesAccesorios, Notas_debito_cabecera
+    , Desembolsos, Documentos, ChequesAccesorios, Notas_debito_cabecera\
+    , Cheques_quitados
 from empresa.models import  Clases_cliente, Datos_participantes, \
     Tasas_factoring, Tipos_factoring, Cuentas_bancarias
 from cobranzas.models import Documentos_protestados, Liquidacion_cabecera\
@@ -1127,10 +1128,53 @@ def GeneraListaAsignacionesJSONSalida(asignacion):
 def GeneraResumenAntigüedadCarteraJSON(request):
 
     documentos = Documentos.objects.antigüedad_cartera()
+    acc_quitados =  Cheques_quitados.objects.antigüedad_cartera()
     cheques = ChequesAccesorios.objects.antigüedad_cartera()
     protestados = Documentos_protestados.objects.antigüedad_cartera()
-  
-    data = {"facturas":documentos
+
+    fvm90 = documentos["vencido_mas_90"]
+    avm90=acc_quitados["vencido_mas_90"]
+    fv90 = documentos["vencido_90"]
+    av90=acc_quitados["vencido_90"]
+    fv60 = documentos["vencido_60"]
+    av60=acc_quitados["vencido_60"]
+    fv30 = documentos["vencido_30"]
+    av30=acc_quitados["vencido_30"]
+    fx30 = documentos["porvencer_30"]
+    ax30=acc_quitados["porvencer_30"]
+    fx60 = documentos["porvencer_60"]
+    ax60=acc_quitados["porvencer_60"]
+    fx90 = documentos["porvencer_90"]
+    ax90=acc_quitados["porvencer_90"]
+    fxm90 = documentos["porvencer_mas_90"]
+    axm90=acc_quitados["porvencer_mas_90"]
+    cartera={}
+    if not fvm90: fvm90=0
+    if not fv90: fv90=0
+    if not fv60: fv60=0
+    if not fv30: fv30=0
+    if not fx30: fx30=0
+    if not fx60: fx60=0
+    if not fx90: fx90=0
+    if not fxm90: fxm90=0
+    if not avm90: avm90=0
+    if not av90: av90 = 0
+    if not av60: av60 = 0
+    if not av30: av30 = 0
+    if not ax30: ax30 = 0
+    if not ax60: ax60 = 0
+    if not ax90: ax90 = 0
+    if not axm90: axm90 = 0
+    cartera["fvencido_mas_90"] = fvm90+avm90
+    cartera["fvencido_90"] = fv90+av90
+    cartera["fvencido_60"] = fv60+av60
+    cartera["fvencido_30"] = fv30+av30
+    cartera["fporvencer_30"] = fx30+ax30
+    cartera["fporvencer_60"] = fx60+ax60
+    cartera["fporvencer_90"] = fx90+ax90
+    cartera["fporvencer_mas_90"] = fxm90+axm90
+
+    data = {"facturas":cartera
             , "accesorios":cheques
             , "protestos":protestados}
     
@@ -1169,6 +1213,21 @@ def AntigüedadCarteraClienteJSON(request, cliente_id):
 
     facturas = Documentos.objects.antigüedad_por_cliente()\
         .filter(cxcliente = cliente_id)
+    acc_quitados = Cheques_quitados.objects.antigüedad_por_cliente()\
+        .filter(accesorio_quitado__documento__cxcliente = cliente_id)
+    
+    docs = facturas.union(acc_quitados)
+    cartera = docs.aggregate(fvencido_mas_90 = Sum('vencido_mas_90')
+                        , fvencido_90 = Sum('vencido_90')
+                        , fvencido_60 = Sum('vencido_60')
+                        , fvencido_30 = Sum('vencido_30')
+                        , fporvencer_30 = Sum('porvencer_30')
+                        , fporvencer_60 = Sum('porvencer_60')
+                        , fporvencer_90 = Sum('porvencer_90')
+                        , fporvencer_mas_90 = Sum('porvencer_mas_90')
+                        , ftotal = Sum('total')
+                        )
+
     accesorios = ChequesAccesorios.objects.antigüedad_por_cliente()\
         .filter(documento__cxcliente = cliente_id)
 
@@ -1195,7 +1254,7 @@ def AntigüedadCarteraClienteJSON(request, cliente_id):
         cheques = accesorios[0]
 
     data={
-      'facturas':documentos,
+      'facturas':cartera,
       'accesorios':cheques,
       'protestos':protestos,
         }
@@ -1211,7 +1270,14 @@ def GeneraListaCarteraClienteJSON(request, cliente_id, fecha_corte = None):
 
     tempBlogs = []
     for i in range(len(documentos)):
-        tempBlogs.append(GeneraListaCarterClienteJSONSalida(documentos[i])) 
+        tempBlogs.append(GeneraListaCarteraClienteJSONSalida(documentos[i])) 
+
+    # los accesorios que fueron quitados se convierten en facturas pendientes
+    quitados = ChequesAccesorios.objects.facturas_pendientes(fecha_corte)\
+    .filter(documento__cxcliente = cliente_id)
+
+    for i in range(len(quitados)):
+        tempBlogs.append(GeneraListaAccesoriosQuitadosClienteJSONSalida(quitados[i])) 
 
     docjson = tempBlogs
 
@@ -1222,7 +1288,7 @@ def GeneraListaCarteraClienteJSON(request, cliente_id, fecha_corte = None):
         }
     return JsonResponse( data)
 
-def GeneraListaCarterClienteJSONSalida(doc):
+def GeneraListaCarteraClienteJSONSalida(doc):
     output = {}
 
     output["Comprador"] = doc.cxcomprador.ctnombre
@@ -1231,6 +1297,22 @@ def GeneraListaCarterClienteJSONSalida(doc):
     # output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
     output["Vencimiento"] = doc.dias_vencidos()
     output["Saldo"] = doc.nsaldo
+
+    return output
+
+def GeneraListaAccesoriosQuitadosClienteJSONSalida(acc):
+    output = {}
+
+    output["Comprador"] = acc.documento.cxcomprador.ctnombre
+    output["Asignacion"] = acc.documento.cxasignacion.cxasignacion
+    output["Documento"] = acc.documento.ctdocumento
+    # output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
+    output["Vencimiento"] = acc.dias_vencidos()
+    # si se quitó el accesorio el saldo está en el registro de la quitada
+    if acc.chequequitado:
+        output["Saldo"] = acc.chequequitado.nsaldo
+    else:
+        output["Saldo"] = acc.nsaldo
 
     return output
 
@@ -1253,15 +1335,15 @@ def GeneraListaChequesADepositarClienteJSON(request, cliente_id, fecha_corte):
         }
     return HttpResponse(JsonResponse( data))
 
-def GeneraListaChequesADepositarClienteJSONSalida(doc):
+def GeneraListaChequesADepositarClienteJSONSalida(acc):
     output = {}
 
-    output["Comprador"] = doc.documento.cxcomprador.ctnombre
-    output["Asignacion"] = doc.documento.cxasignacion.cxasignacion
-    output["Documento"] = doc.documento.ctdocumento
-    output["Vencimiento"] = doc.documento.dias_vencidos()
-    output["Valor"] = doc.ntotal
-    output["Datos"] = doc.cxbanco.ctbanco +' CTA.'+ doc.ctcuenta + ' CH/' + doc.ctcheque
+    output["Comprador"] = acc.documento.cxcomprador.ctnombre
+    output["Asignacion"] = acc.documento.cxasignacion.cxasignacion
+    output["Documento"] = acc.documento.ctdocumento
+    output["Vencimiento"] = acc.dias_vencidos()
+    output["Valor"] = acc.ntotal
+    output["Datos"] = acc.cxbanco.ctbanco +' CTA.'+ acc.ctcuenta + ' CH/' + acc.ctcheque
 
     return output
 

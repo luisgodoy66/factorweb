@@ -252,7 +252,7 @@ class ChequesAccesorios_Manager(models.Manager):
         xver90 = datetime.today()+timedelta(days=90)
 
         return self.filter(cxestado = 'A'
-                , leliminado = False
+                , leliminado = False, lcanjeado  = False, laccesorioquitado = False
                 , documento__cxasignacion__cxestado = "P"
                 , documento__cxasignacion__leliminado = False)\
             .aggregate(
@@ -281,7 +281,7 @@ class ChequesAccesorios_Manager(models.Manager):
         xver90 = datetime.today()+timedelta(days=90)
 
         return self.filter(cxestado = 'A'
-                , leliminado = False
+                , leliminado = False, lcanjeado  = False, laccesorioquitado = False
                 , documento__cxasignacion__cxestado = "P"
                 , documento__cxasignacion__leliminado = False)\
             .values('documento__cxcliente__ctnombre')\
@@ -304,6 +304,69 @@ class ChequesAccesorios_Manager(models.Manager):
                 )\
             .order_by()
 
+class Cheques_quitados_Manager(models.Manager):
+    def antigüedad_cartera(self):
+        # grafico de antigüedad de cartera 
+        vcdo90 = datetime.today()+timedelta(days=-90)
+        vcdo60 = datetime.today()+timedelta(days=-60)
+        vcdo30 = datetime.today()+timedelta(days=-30)
+        xver30 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=60)
+        xver90 = datetime.today()+timedelta(days=90)
+
+        return self.filter(cxestado = 'A'
+                , leliminado = False
+                , accesorio_quitado__documento__cxasignacion__cxestado = "P"
+                , accesorio_quitado__documento__cxasignacion__leliminado = False)\
+            .aggregate(
+                vencido_mas_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt = vcdo90) ) 
+                , vencido_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt = vcdo60
+                    , accesorio_quitado__dvencimiento__gte = vcdo90))
+                , vencido_60 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt = vcdo30
+                    , accesorio_quitado__dvencimiento__gte = vcdo60))
+                , vencido_30 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt = datetime.today()
+                    , accesorio_quitado__dvencimiento__gte = vcdo30))
+                ,porvencer_30 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__gte = datetime.today()
+                    , accesorio_quitado__dvencimiento__lte = xver30))
+                ,porvencer_60 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__gt = xver30
+                    , accesorio_quitado__dvencimiento__lte = xver60))
+                ,porvencer_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__gt = xver60
+                    , accesorio_quitado__dvencimiento__lte = xver90))
+                , porvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__gt = xver90) ) 
+                )
+
+    def antigüedad_por_cliente(self):
+        vcdo90 = datetime.today()+timedelta(days=-90)
+        vcdo60 = datetime.today()+timedelta(days=-60)
+        vcdo30 = datetime.today()+timedelta(days=-30)
+        xver30 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=60)
+        xver90 = datetime.today()+timedelta(days=90)
+
+        return self.filter(cxestado = 'A'
+                , leliminado = False
+                , accesorio_quitado__documento__cxasignacion__cxestado = "P"
+                , accesorio_quitado__documento__cxasignacion__leliminado = False)\
+            .values('accesorio_quitado__documento__cxcliente__ctnombre')\
+            .annotate(
+                vencido_mas_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt = vcdo90) ) 
+                , vencido_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt = vcdo60
+                    , accesorio_quitado__dvencimiento__gte = vcdo90))
+                , vencido_60 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt = vcdo30
+                    , accesorio_quitado__dvencimiento__gte = vcdo60))
+                , vencido_30 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt = datetime.today()
+                    , accesorio_quitado__dvencimiento__gte = vcdo30))
+                ,porvencer_30 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__gte = datetime.today()
+                    , accesorio_quitado__dvencimiento__lte = xver30))
+                ,porvencer_60 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__gt = xver30
+                    , accesorio_quitado__dvencimiento__lte = xver60))
+                ,porvencer_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__gt = xver60
+                    , accesorio_quitado__dvencimiento__lte = xver90))
+                , porvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__gt = xver90) ) 
+                , total = Sum('nsaldo')
+                )
+
+
 class Cheques_quitados(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
         ,to_field="cxcliente", on_delete=models.RESTRICT
@@ -313,6 +376,8 @@ class Cheques_quitados(ClaseModelo):
     ctmotivoquitado = models.CharField(max_length=60)
     dultimacobranza = models.DateTimeField(null=True) 
             
+    objects = Cheques_quitados_Manager()
+
 class ChequesAccesorios(ClaseModelo):
     PROPIETARIO = (
         ('C', 'Cliente'),
@@ -342,14 +407,17 @@ class ChequesAccesorios(ClaseModelo):
     ddeposito = models.DateTimeField( null= True) 
     lcanjeado = models.BooleanField(default=False)
     ncanjeadopor = models.BigIntegerField(null=True)
-    laccesorioquitado = models.BooleanField(default= False)
+    laccesorioquitado = models.BooleanField(default= False, null=True)
     chequequitado = models.ForeignKey(Cheques_quitados, on_delete=models.RESTRICT
-                                        , null=True)
+        , related_name="accesorio_quitado", null=True)
     
     objects= ChequesAccesorios_Manager()
 
     def __str__(self):
         return '{} CTA.{} CH/{}'.format(self.cxbanco,self.ctcuenta, self.ctcheque)
+
+    def dias_vencidos(self):
+        return (date.today() - self.dvencimiento)/timedelta(days=1)
 
 class Movimientos_maestro(ClaseModelo):
     TIPOS_DE_SIGNOS = (
