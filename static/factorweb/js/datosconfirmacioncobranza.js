@@ -78,7 +78,7 @@ function ConfirmarCobranza(cobranza_id, tipo_operacion){
 
     fetchPostear("/cuentasconjuntas/aceptarconfirmacion/", objeto, function(data){
         // regresar a la lista de solicitudes
-        window.location.href = "/cuentasconjuntas/listadocobranzasporconfirmar";
+        window.location.href = "/cuentasconjuntas/listacobranzasporconfirmar";
         // // en una nueva ventana abrir el reporte de cobranza
         // // hay que saber el id de la cobranza
         //  url = window.location.origin

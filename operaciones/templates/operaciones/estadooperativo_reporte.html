@@ -1,5 +1,18 @@
 {% extends 'bases/home.html' %}
 {% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">clientes</a></li>
+                    <li><a href="{% url 'operaciones:listaestadosoperativos' %}">estados operativos</a></li>
+                    <li class="active">{{nombre_cliente}}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
 {% block content %}
 <div class="content mt-3">
     <div hidden>
@@ -58,6 +71,39 @@
                         <div class="stat-digit">{{ dias_ultima_operacion }}</div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="stat-widget-one">
+                    <div class="stat-icon dib"><i class="ti-user text-info border-info"></i></div>
+                    <div class="stat-content dib">
+                        <div class="stat-text">Clase</div>
+                        <div class="stat-digit">{{clase}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-lg-3">
+        <div class="card
+        {% if color_estado == 1 %} 
+            bg-flat-color-1
+        {% elif color_estado == 2 %}
+            bg-flat-color-2
+        {% elif color_estado == 3 %}
+            bg-flat-color-3
+        {% elif color_estado == 4 %}
+            bg-flat-color-4
+        {% elif color_estado == 5 %}
+            bg-flat-color-5
+        {% endif %}
+        text-light">
+            <div class="card-body">
+                <div class="h4 m-0">{{estado}}</div>
+                <div>Estado</div>
             </div>
         </div>
     </div>

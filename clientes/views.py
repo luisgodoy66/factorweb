@@ -608,7 +608,7 @@ def DatosClienteJuridico(request, cliente_ruc=None):
 
             datoscliente.save()
 
-            return redirect("clientes:listaclientes")
+        return redirect("clientes:listaclientes")
 
     return render(request, template_name, contexto)
 

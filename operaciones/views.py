@@ -1180,10 +1180,13 @@ def GeneraResumenAntigüedadCarteraJSON(request):
     
     return JsonResponse( data)
 
-def EstadoOperativoCliente(request, cliente_id, ):
+def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
     valor_linea=0
     porc_disponible=0
     dias_ultima_operacion  =None
+    estado_cliente=''
+    clase_cliente =''
+    color_estado = 1
 
     template_path = 'operaciones/estadooperativo_reporte.html'
 
@@ -1194,15 +1197,40 @@ def EstadoOperativoCliente(request, cliente_id, ):
 
     operativos = Datos_operativos.objects.filter(cxcliente=cliente_id).first()
     if operativos:
+        estado_cliente = operativos.cxestado
+        clase_cliente = operativos.cxclase
         if operativos.dultimanegociacion:
             dias_ultima_operacion = (date.today() - operativos.dultimanegociacion)/timedelta(days=1)
+
+    if estado_cliente=='A':
+        estado_cliente = 'Activo'
+        color_estado = 5
+    elif estado_cliente=='B':
+        estado_cliente = 'Baja'
+        color_estado = 2
+    elif estado_cliente=='I':
+        estado_cliente = 'Inactivo'
+        color_estado = 2
+    elif estado_cliente=='P':
+        estado_cliente = 'Pre legal'
+        color_estado = 3
+    elif estado_cliente=='L':
+        estado_cliente = 'Legal'
+        color_estado = 4
+    elif estado_cliente=='X':
+        estado_cliente = 'Bloqueado'
+        color_estado = 4
 
     context={
         'cliente_id':cliente_id,
         'valor_linea':valor_linea,
         'porc_disponible':porc_disponible,
         'dias_ultima_operacion':dias_ultima_operacion,
-        'hoy' : date.today()
+        'hoy' : date.today(),
+        'nombre_cliente': nombre_cliente,
+        'estado': estado_cliente,
+        'clase':clase_cliente,
+        'color_estado':color_estado,
         }
     return render(request, template_path, context)
 

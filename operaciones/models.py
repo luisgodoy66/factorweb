@@ -65,7 +65,7 @@ class Asignacion(ClaseModelo):
     cxmodalidadfactoring = models.CharField(max_length=1) 
     cxlocalidad = models.CharField(max_length=4, blank=True) 
     dnegociacion = models.DateTimeField(auto_created=True) 
-    ddesembolso= models.DateTimeField(auto_created=True) 
+    ddesembolso= models.DateField(auto_created=True) 
     nvalor = models.DecimalField(max_digits=15, decimal_places =2) 
     nanticipo = models.DecimalField(max_digits=10, decimal_places= 2, default=0)
     # cxexcesolineafactoring = models.CharField(max_length=6) 
@@ -365,7 +365,6 @@ class Cheques_quitados_Manager(models.Manager):
                 , porvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__gt = xver90) ) 
                 , total = Sum('nsaldo')
                 )
-
 
 class Cheques_quitados(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
