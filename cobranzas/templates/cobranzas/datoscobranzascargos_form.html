@@ -7,7 +7,7 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Operaciones</a></li>
                     <li><a href="#">cargos pendientes</a></li>
-                    <li><a href="{% url 'cobranzas:listadocumentosporvencer' %}">por operaciones</a></li>
+                    <li><a href="{% url 'cobranzas:listaliquidacionesennegativopendientes' %}">por operaciones</a></li>
                     <li class="active">cobro de cargos</li>
                 </ol>
             </div>
@@ -78,7 +78,7 @@
                     <!-- presentar la lista de cuentas bancarias -->
                     <div id="div_cuentas_cliente" >
                         <select data-placeholder="Seleccione una cuenta..." 
-                            class="standardSelect" tabindex="1" 
+                            class="form-control" tabindex="1" 
                             id="cuenta_cliente" name="cuenta_cliente"
                             >
                             <option value=""></option>

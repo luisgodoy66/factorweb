@@ -48,11 +48,22 @@
                             </div>
                         </div>  
                         <div class="row form-group">
-                            <div class="col col-md-4"><label for="id_cxtipocliente" 
+                            <!-- <div class="col col-md-4"><label for="id_cxtipocliente" 
                                 class=" form-control-label">
                                 {{ form.lactiva.label}}</label></div>
                             <div class="col-8 col-md-8">
                                 {{ form.lactiva}}
+                            </div> -->
+                            <div class="col col-md-9"><label for="id_cxlocalidad" class=" form-control-label">
+                                {{form.lactiva.label}}</label></div>
+                            <div class="col">
+                                <label class="switch switch-3d switch-success mr-3">
+                                    <input type="checkbox" class="switch-input" 
+                                    {% if  cuentas.lactiva %} checked {% endif %} 
+                                    id = "id_lactiva" name = "id_lactiva"> 
+                                    <span class="switch-label"></span> 
+                                    <span class="switch-handle"></span>
+                                </label>
                             </div>
                         </div>  
                     <!-- </div> -->

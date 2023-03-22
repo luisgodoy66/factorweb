@@ -120,7 +120,7 @@
                     <div id="div_cuentas_deudor">
                     {% if un_solo_comprador == 'Si' %}
                         <select data-placeholder="Seleccione una cuenta..." 
-                            class="standardSelect" tabindex="1" 
+                            class="form-control"  tabindex="1" 
                             id="cuenta_deudor" name="cuenta_deudor"
                             >
                             <option value=""></option>
@@ -134,7 +134,7 @@
 
                     <div id="div_cuentas_cliente" {% if un_solo_comprador == 'Si'%} hidden {% endif %} %}>
                         <select data-placeholder="Seleccione una cuenta..." 
-                            class="standardSelect" tabindex="1" 
+                            class="form-control"  tabindex="1" 
                             id="cuenta_cliente" name="cuenta_cliente"
                             >
                             <option value=""></option>
@@ -210,7 +210,7 @@
                         </label>
                         <label class="btn btn-outline-secondary ">
                             <input type="radio" name="depositaren" 
-                            id="cuentacliente" > Cuenta del cliente
+                            id="cuentacliente" > Cuenta compartida
                         </label>
                     </div>
 
@@ -225,7 +225,7 @@
                         </div>
                         <div id="div_cuentas_conjuntas" hidden>
                             <select data-placeholder="Seleccione una cuenta..." 
-                            class="standardSelect" tabindex="1" 
+                            tabindex="1" class="form-control" 
                             id="cuenta_conjunta" name="cuenta_conjunta"
                             >
                             <option value=""></option>
