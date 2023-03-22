@@ -6,6 +6,7 @@ var $cobroconefectivo = jQuery("#cobroconefectivo")
 var $cobroconmovimiento = jQuery("#cobroconmovimiento")
 var $cobrocontransferencia = jQuery("#cobrocontransferencia")
 const filtro = capturaValor("filtro")
+var $ampliar_plazo = jQuery("#ampliarplazo")
 
 window.onload=function(){
     // inicializar el encabezado
@@ -18,13 +19,6 @@ window.onload=function(){
   
     $table.bootstrapTable({locale:"es-EC"});
     
-    // // objeto_fechas("#fechacorte")
-    // let hoy = new Date();
-    // let semanaEnMilisegundos = 1000 * 60 * 60 * 24 * 7;
-    // let suma = hoy.getTime() + semanaEnMilisegundos; //getTime devuelve milisegundos de esa fecha
-    // let fechaDentroDeUnaSemana = new Date(suma);
-    // inicializaValor("fechacorte", fechaDentroDeUnaSemana.toISOString())
-
     // boton de refrescar filtro
     $btnFiltrar.click(function () {
         fecha = capturaValor("fechacorte");
@@ -42,6 +36,7 @@ window.onload=function(){
         $cobroconefectivo.prop('disabled', !$table.bootstrapTable('getSelections').length)
         $cobroconmovimiento.prop('disabled', !$table.bootstrapTable('getSelections').length)
         $cobrocontransferencia.prop('disabled', !$table.bootstrapTable('getSelections').length)
+        $ampliar_plazo.prop('disabled', !$table.bootstrapTable('getSelections').length)
 
         // save your data, here just save the current page
         selections = getIdSelections()
@@ -55,29 +50,29 @@ window.onload=function(){
 
     // acciones ejecutada sobre registros seleccionados
     $cobroconcheque.click(function () {
-
       CobroDeDocumentos('CHE');
       $cobroconcheque.prop('disabled', true)
     })
 
     $cobroconefectivo.click(function () {
-
       CobroDeDocumentos('EFE');
       $cobroconefectivo.prop('disabled', true)
     })
 
     $cobroconmovimiento.click(function () {
-
       CobroDeDocumentos('MOV');
       $cobroconmovimiento.prop('disabled', true)
     })
 
     $cobrocontransferencia.click(function () {
-
       CobroDeDocumentos('TRA');
       $cobrocontransferencia.prop('disabled', true)
     })
 
+    $ampliar_plazo.click(function () {
+      AmpliacionDePlazo('F');
+      $ampliar_plazo.prop('disabled', true)
+    })
 };
     
 function CobroDeDocumentos(forma){
@@ -136,3 +131,18 @@ function CobroDeDocumentos(forma){
   }
   return false
 }
+
+window.operateEvents = {
+  'click .prorroga': function (e, value, row, index) {
+    Prorroga(row.id)
+  },
+};
+
+function operateFormatter(value, row, index) {
+return [
+  '<a class="prorroga" href="javascript:void(0)" title="Prorroga">',
+  '<i class="fa fa-exchange"></i>',
+  '</a>  ',
+].join('')
+}
+

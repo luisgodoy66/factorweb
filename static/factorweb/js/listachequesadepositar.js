@@ -3,17 +3,13 @@ var $table = jQuery('#table')
 var selections = []
 var $deposito_empresa = jQuery("#deposito")
 var $deposito_cliente = jQuery("#deposito_cc")
+var $ampliar_plazo = jQuery("#ampliarplazo")
 
 window.onload=function(){
     // inicializar el encabezado
     ActualizarHeader();
     $table.bootstrapTable({locale:"es-EC"});
     
-    // // objeto_fechas("#fechacorte")
-    // let hoy = new Date();
-    // alert(hoy)
-    // inicializaValor("fechacorte", hoy.toISOString())
-
     // boton de refrescar filtro
     $btnFiltrar.click(function () {
 
@@ -31,6 +27,7 @@ window.onload=function(){
         function () {
         $deposito_empresa.prop('disabled', !$table.bootstrapTable('getSelections').length)
         $deposito_cliente.prop('disabled', !$table.bootstrapTable('getSelections').length)
+        $ampliar_plazo.prop('disabled', !$table.bootstrapTable('getSelections').length)
 
         // save your data, here just save the current page
         selections = getIdSelections()
@@ -44,14 +41,18 @@ window.onload=function(){
 
     // acciones ejecutada sobre registros seleccionados
     $deposito_empresa.click(function () {
-
       DepositoDeCheques();
       $deposito_empresa.prop('disabled', true)
     })
-    $deposito_cliente.click(function () {
 
+    $deposito_cliente.click(function () {
       DepositoCuentaCliente();
       $deposito_cliente.prop('disabled', true)
+    })
+
+    $ampliar_plazo.click(function () {
+      AmpliacionDePlazo('A');
+      $ampliar_plazo.prop('disabled', true)
     })
 
 };

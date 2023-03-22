@@ -16,7 +16,8 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , LiquidacionesEnNegativoPendientesView, GeneraListaLiquidacionesEnNegativoPendientesJSON\
     , DetalleNotasDebitoPendientesJSON, DatosCobroNotaDebito, AceptarCobranzaNotasDebito\
     , GeneraListaLiquidacionesRegistradasJSON, GeneraListaCobranzasCargosRegistradasJSON\
-    , ReversaProtesto, CanjeDeCheque, QuitarAccesorio
+    , ReversaProtesto, CanjeDeCheque, QuitarAccesorio, AmpliacionDePlazo\
+    , DetalleCargosAmpliacionPlazo, GeneraDetalleCargosAmpliacionPlazo, SumaCargos
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos, ImpresionProtestosPendientes
@@ -117,17 +118,31 @@ urlpatterns = [
     # notas de debito
     path('listaliquidacionesennegativopendientes/',LiquidacionesEnNegativoPendientesView.as_view()
         , name="listaliquidacionesennegativopendientes"),
-    path('listaliquidacionesennegativopendientesjson/',GeneraListaLiquidacionesEnNegativoPendientesJSON\
+    path('listaliquidacionesennegativopendientesjson/'
+         ,GeneraListaLiquidacionesEnNegativoPendientesJSON\
         , name="listaliquidacionesennegativopendientes_json"),
     path('cobrodecargos/<ids_documentos>/<total_cargos>/<forma_cobro>/<cliente_ruc>/<tipo_factoring>', 
         CobranzasCargosView.as_view(), name='cobro_cargos'),
-    path('detallenotasdebitojson/<ids_documentos>', DetalleNotasDebitoPendientesJSON
+    path('detallenotasdebitojson/<ids_documentos>'
+         , DetalleNotasDebitoPendientesJSON
         , name='detallenotasdebito_json'),
     path('datoscobronotadedebito/<int:id>/<sdo>/<cobro>'
         , DatosCobroNotaDebito ,name='datosnotasdebito_cobro'),
     path('aceptarcobranzanotasdebito/',AceptarCobranzaNotasDebito),
     path('reportecobranzacargos/<int:cobranza_id>',ImpresionCobranzaCargos
         , name='reporte_cobranza_cargos'),
-    path('cobranzascargosregistradasjson/<desde>/<hasta>',GeneraListaCobranzasCargosRegistradasJSON
+    path('cobranzascargosregistradasjson/<desde>/<hasta>'
+         ,GeneraListaCobranzasCargosRegistradasJSON
         , name="cobranzascargosregistradas_json"),
+
+    # ampliaciones de plazo
+    path('ampliaciondeplazo/<ids>/<tipo_factoring>/<tipo_asignacion>/<id_cliente>'
+         ,AmpliacionDePlazo),
+    path('detallecargosampliaciondeplazo/<ids>/<tipo_asignacion>/<fecha_corte>/<carga_dc>/<acumula_gao>/<id_cliente>'
+         ,DetalleCargosAmpliacionPlazo),
+    path('refrescadetallecargosampliacionplazo/<ids>/<tipo_asignacion>'
+         ,GeneraDetalleCargosAmpliacionPlazo),
+    path('sumacargos/<ids>/<tipo_asignacion>/<gaoa_carga_iva>/<dc_carga_iva>/<carga_gaoa>/<carga_dc>/<int:porcentaje_iva>',\
+        SumaCargos),
+
 ]

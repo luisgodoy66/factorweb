@@ -42,7 +42,7 @@ window.onload=function(){
     
     // inicializar tabla
     if (iniciales_dc==''){iniciales_dc='DCAR'}
-    if (iniciales_gao==''){iniciales_dc='GAO'}
+    if (iniciales_gao==''){iniciales_gao='GAO'}
 
     initTable(iniciales_gao,iniciales_dc);
 

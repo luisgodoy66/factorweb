@@ -17,7 +17,7 @@ from operaciones.models import Documentos, ChequesAccesorios, Datos_operativos\
     , Notas_debito_detalle, Cheques_canjeados, Cheques_quitados
 from clientes.models import Cuentas_bancarias, Datos_generales, Cuenta_transferencia
 from empresa.models import Tasas_factoring, Cuentas_bancarias as CuentasEmpresa\
-    , Datos_participantes
+    , Datos_participantes, Tipos_factoring
 from cuentasconjuntas import models as CuentasConjuntasModels
 
 from .forms import CobranzasDocumentosForm, ChequesForm, LiquidarForm\
@@ -34,6 +34,9 @@ import json
 import math
 
 from bases.views import enviarPost, numero_a_letras
+
+FACTURAS_PURAS = 'F'
+FACTURAS_CON_ACCESORIOS = 'A'
 
 class DocumentosVencidosView(LoginRequiredMixin, generic.ListView):
     model = Documentos
@@ -483,6 +486,7 @@ def GeneraListaCarterPorVencerJSONSalida(doc):
         output["UltimaCobranza"] = doc.dultimacobranza.strftime("%Y-%m-%d")
     else:
         output["UltimaCobranza"] =''
+    output["Anticipa100"] = doc.cxtipofactoring.lanticipatotalnegociado
 
     return output
 
@@ -505,6 +509,8 @@ def GeneraListaAccesoriosQuitadosJSONSalida(acc):
     else:
         output["UltimaCobranza"] =''
 
+    output["Anticipa100"] = acc.documento.cxtipofactoring.lanticipatotalnegociado
+
     return output
 
 def DetalleDocumentosFacturasPuras(request, ids_documentos):
@@ -512,7 +518,7 @@ def DetalleDocumentosFacturasPuras(request, ids_documentos):
     arr_acc = []
     arr_fac = []
     tempBlogs = []
-    x=[]
+
     ids = ids_documentos.split(',')
     for id in ids:
         if int(id) < 0:
@@ -693,6 +699,7 @@ def GeneraListaChequesADepositarJSONSalida(doc):
     output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
     output["Valor"] = doc.ntotal
     output["Datos"] = doc.cxbanco.ctbanco +' CTA.'+ doc.ctcuenta + ' CH/' + doc.ctcheque
+    output["Anticipa100"] = doc.documento.cxtipofactoring.lanticipatotalnegociado
 
     return output
 
@@ -2412,3 +2419,297 @@ def QuitarAccesorio(request, cheque_id, cliente_ruc):
         return redirect("cobranzas:listachequesadepositar")
 
     return render(request, template_path, context)
+
+def AmpliacionDePlazo(request, ids, tipo_factoring, tipo_asignacion, id_cliente):
+    template_path = 'cobranzas/datosampliacionplazo_form.html'
+    carga_dc = "No"
+    acumula_gao='No'
+    iva_gaoa = 'No'
+    iva_dc = 'No'
+
+    # buscar en la configuracion del tipo de factoring las condiciones para menajer 
+    # las ampliaciones de plazo
+
+        # buscar el tipo de factoring 
+    tipo_factoring = Tipos_factoring.objects.get(cxtipofactoring=tipo_factoring)
+    if not tipo_factoring:
+        return HttpResponse("Tipo de factoring no existe:" + tipo_factoring)
+    if tipo_factoring.lcargadcenampliacionplazo:
+        carga_dc="Si"
+    if tipo_factoring.lacumulagaoaatasagao:
+        acumula_gao="Si"
+
+    # datos de tasa gaoa/dc
+    gaoa = Tasas_factoring.objects.filter(cxtasa="GAOA").first()
+    if not gaoa:
+        return HttpResponse("no encontró tasa de gaoa")
+    if gaoa.lcargaiva: iva_gaoa = 'Si'
+
+    dc = Tasas_factoring.objects.filter(cxtasa="DCAR").first()
+    if not dc:
+        return HttpResponse("no encontró tasa de descuento de cartera")
+    if dc.lcargaiva: iva_dc='Si'
+
+    dic_gaoa  = {'carga_iva': iva_gaoa
+        , 'descripcion': gaoa.ctdescripcionenreporte
+        , 'acumula_gao': acumula_gao
+        , 'iniciales': gaoa.ctinicialesentablas}
+
+    dic_dc = {'carga_iva': iva_dc
+        , 'descripcion': dc.ctdescripcionenreporte
+        , 'generar':carga_dc
+        , 'iniciales': dc.ctinicialesentablas}
+
+
+    context={
+        'ids':ids,
+        'tipo_asignacion':tipo_asignacion,
+        'gaoa': dic_gaoa,
+        'dc' : dic_dc,
+        'porcentaje_iva':12,
+        'id_cliente': id_cliente, 
+        }
+    return render(request, template_path, context)
+
+from django.utils.dateparse import parse_date
+
+def DetalleCargosAmpliacionPlazo(request, ids, tipo_asignacion, fecha_corte
+                                 , carga_dc, acumula_gao, id_cliente):
+    # GRABA EN LA TABLA DE DOCUMENTOS LAS TASAS Y CARGOS POR AMPLIACION
+    # inicializar variables
+    tasa_gaoa = 0
+    dc=None
+    arr_acc = []    # estos dos arreglos son
+    arr_fac = []    # usados para separar facturas de accesorio quitados
+
+    # obtener las tasas de los datos operativos del ciente
+    datos_operativos = Datos_operativos.objects\
+                .filter(cxcliente = id_cliente).first()
+    if not datos_operativos:
+        return HttpResponse("no encontró registro de datos operativos")
+    
+    tasa_gaoa = datos_operativos.ntasagaoa
+
+    # datos de tasa gao/dc
+    gaoa = Tasas_factoring.objects.filter(cxtasa="GAOA").first()
+    if not gaoa:
+        return HttpResponse("no encontró registro de tasa de gao en tabla de tasas de factoring")
+
+    if carga_dc=='Si':
+        dc = Tasas_factoring.objects.filter(cxtasa="DCAR").first()
+        if not dc:
+            return HttpResponse("no encontró registro de tasa de descuento de catera en tabla de tasas de factoring")
+
+    fecha_corte = parse_date(fecha_corte)
+
+    # recuperar los documentos
+    # si es Factura pura podría ser un accesorio quitado
+
+    if tipo_asignacion == FACTURAS_PURAS:
+
+        ids = ids.split(',')
+
+        for id in ids:
+            if int(id) < 0:
+                arr_acc.append(-int(id))
+            else:
+                arr_fac.append(id)
+
+        documentos = Documentos.objects.filter(id__in=arr_fac)
+    else:
+       documentos = ChequesAccesorios.objects.filter(id__in = ids.split(','))
+            
+    # calcular cargos
+    for i in range(len(documentos)):
+        CalcularCargosPorDocumento(documentos[i], gaoa ,dc, fecha_corte
+                                    , tasa_gaoa, acumula_gao)
+        
+    if arr_acc:
+        quitados = ChequesAccesorios.objects.filter(id__in = arr_acc)
+        for i in range(len(quitados)):
+            CalcularCargosPorDocumento(quitados[i], gaoa ,dc, fecha_corte
+                                        , tasa_gaoa, acumula_gao)
+    
+    return HttpResponse("OK")
+
+def CalcularCargosPorDocumento(doc, gaoa, dc, fecha_hasta, tasa_gaoa, acumula_gao):
+    # los dos ultimos parametros se omiten cuando se trata de edicion de tasas
+
+    if doc.dultimageneraciondecargos:
+        plazo =fecha_hasta- doc.dultimageneraciondecargos 
+    else:
+        plazo = fecha_hasta - doc.dvencimiento
+    
+    plazo = plazo.days
+
+    if plazo < 0 : plazo = 0
+
+    doc.nplazoap = plazo  
+
+    if acumula_gao == 'Si':
+        tasa_gaoa += doc.ntasacomision
+
+    doc.ntasacomisionap = tasa_gaoa
+
+    # gaoa
+    if gaoa.lsobreanticipo:
+        doc.ngaoaap = (doc.ntotal * doc.nporcentajeanticipo * doc.ntasacomisionap / 10000)
+    else:
+        doc.ngaoaap = (doc.ntotal * doc.ntasacomisionap / 100)
+
+    if not gaoa.lflat:
+        doc.ngaoaap = (doc.ngaoaap * plazo / gaoa.ndiasperiocidad)
+
+    # dc
+    if dc:
+        doc.ntasadescuentoap = doc.ntasadescuento
+
+        if dc.lsobreanticipo:
+            doc.ndescuentocarteraap = (doc.ntotal * doc.nporcentajeanticipo * doc.ntasadescuentoap / 10000)
+        else:
+            doc.ndescuentocarteraap = (doc.ntotal * doc.ntasadescuentoap / 100)
+
+        if not dc.lflat:
+            doc.ndescuentocarteraap = (doc.ndescuentocarteraap * plazo / dc.ndiasperiocidad)
+    else:
+        doc.ntasadescuentoap = 0
+        doc.ndescuentocarteraap = 0
+
+    doc.save()
+
+def GeneraDetalleCargosAmpliacionPlazo(request, ids, tipo_asignacion):
+    # Es invocado desde la url
+    # crear detalle de salida para el contexto
+    # no calcula, ni graba cargos, recupera los documentos
+    arr_acc = []    # estos dos arreglos son
+    arr_fac = []    # usados para separar facturas de accesorio quitados
+
+    if tipo_asignacion==FACTURAS_PURAS:
+        ids = ids.split(',')
+
+        for id in ids:
+            if int(id) < 0:
+                arr_acc.append(-int(id))
+            else:
+                arr_fac.append(id)
+
+        documentos = Documentos.objects.filter(id__in=arr_fac)
+    else:
+        documentos = ChequesAccesorios.objects\
+            .filter(id__in=ids.split(','),leliminado = False)
+
+    tempBlogs = []
+    for i in range(len(documentos)):
+        tempBlogs.append(GeneraDetalleCargosAmpliacionPlazoOutput(documentos[i]
+                                                                  ,tipo_asignacion )) 
+    if arr_acc:
+        quitados = ChequesAccesorios.objects.filter(id__in = arr_acc)
+        for i in range(len(quitados)):
+            tempBlogs.append(GeneraDetalleCargosAmpliacionPlazoOutput(quitados[i]
+                                                                  ,'A' )) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    
+    return JsonResponse( data)
+
+def GeneraDetalleCargosAmpliacionPlazoOutput(doc, tipo_asignacion):
+    output = {}
+
+    # el id debe ser del documento o el accesorio, para poder editar las tasas
+    output['id'] = doc.id
+    
+    # los siguientes 3 campos pertenecen al documento y no se encuentran en los cheques
+    if tipo_asignacion==FACTURAS_PURAS:
+        output["Asignacion"] = doc.cxasignacion.cxasignacion
+        output["Documento"] = doc.ctdocumento
+        output["Saldo"] = doc.nsaldo
+    else:
+        output["Asignacion"] = doc.documento.cxasignacion.cxasignacion
+        output["Documento"] = doc.documento.ctdocumento
+        output["Saldo"] = doc.ntotal
+    
+    if doc.dultimageneraciondecargos:
+        output["UltimaGeneracioncargos"] = doc.dultimageneraciondecargos
+    else:
+        output["UltimaGeneracioncargos"] = doc.dvencimiento
+
+    output["Plazo"] = doc.nplazoap
+    output["Tasa_GAOA"] = round( doc.ntasacomisionap,2)
+    output["Valor_GAOA"] = doc.ngaoaap
+    output["Tasa_DC"] = round(doc.ntasadescuentoap,2)
+    output["Valor_DC"] = doc.ndescuentocarteraap
+
+    return output
+
+def SumaCargos(request,ids, tipo_asignacion, gaoa_carga_iva, dc_carga_iva
+               , carga_gaoa, carga_dc, porcentaje_iva=12):
+    # lee los datos de la tabla solicutid documentos
+    arr_acc = []    # estos dos arreglos son
+    arr_fac = []    # usados para separar facturas de accesorio quitados
+
+    g=Decimal(0); d=Decimal(0); 
+    iva=0.0; total=0.0
+
+    if tipo_asignacion==FACTURAS_PURAS:
+        ids = ids.split(',')
+
+        for id in ids:
+            if int(id) < 0:
+                arr_acc.append(-int(id))
+            else:
+                arr_fac.append(id)
+
+        documentos = Documentos.objects.filter(id__in=arr_fac)\
+            .values('ngaoaap', 'ndescuentocarteraap')
+        quitados = ChequesAccesorios.objects.filter(id__in = arr_acc)\
+            .values('ngaoaap', 'ndescuentocarteraap')
+    else:
+        documentos = ChequesAccesorios.objects\
+            .filter(id__in=ids.split(','),leliminado = False)
+
+    # gaoa
+    if carga_gaoa=="Si":
+        total_gaoa = documentos.aggregate(suma_gaoa = Sum('ngaoaap'))
+        
+        g = total_gaoa["suma_gaoa"]
+        
+        if arr_acc:
+            if not g: g = 0
+
+            total_gaoa = quitados.aggregate(suma_gaoa = Sum('ngaoaap'))
+            g += total_gaoa["suma_gaoa"]
+
+    # dc
+    if carga_dc=="Si":
+        total_dc = documentos.aggregate(suma_dc = Sum('ndescuentocarteraap'))
+        d = total_dc["suma_dc"]
+
+        if arr_acc:
+            if not d: d = 0
+
+            total_dc = quitados.aggregate(suma_dc = Sum('ndescuentocarteraap'))
+            d += total_dc["suma_dc"]
+
+    # iva
+    base = 0
+    if gaoa_carga_iva=="Si":
+        base += g
+    if dc_carga_iva=="Si":
+        base += d
+    iva = round( base * porcentaje_iva / 100,2)
+    # redondear a 2 decimales?
+    # neto
+    total =   g + d + iva
+
+    data={'gaoa':str(g)
+        , 'dc':str(d)
+        , 'iva': str(iva)
+        , 'total':str(total)}
+
+    return HttpResponse(json.dumps(data), content_type = "application/json")

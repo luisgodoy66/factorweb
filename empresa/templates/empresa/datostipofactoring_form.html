@@ -92,18 +92,18 @@
                         </div>
                     </div>
 
-                </div>
-                <!-- PANEL DERECHO -->
-                <div class="col-lg-6">
                     <div class="row form-group">
-                        <div class="col col-md-9">
+                        <div class="col col-md-6">
                             <label for="id_cxparticipante" class=" form-control-label">
                             {{ form.cxmoneda.label}}</label></div>
-                        <div class="col-12 col-md-3">
+                        <div class="col-md-6">
                             {{ form.cxmoneda}}
                             <!-- <small class="form-text text-muted">Máximo 3 caracteres</small> -->
                         </div>
                     </div>
+                </div>
+                <!-- PANEL DERECHO -->
+                <div class="col-lg-6">
 
                     <div class="row form-group">
                         <div class="col col-md-9">
@@ -206,6 +206,19 @@
                                 <input type="checkbox" class="switch-input" 
                                 {% if  tipofactoring.lacumulagaoaatasagao %} checked {% endif %} 
                                 id = "id_lacumulagaoaatasagao" name = "lacumulagaoaatasagao"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-9"><label for="id_lcargadcenampliacionplazo" class=" form-control-label">
+                            {{form.lcargadcenampliacionplazo.label}}</label></div>
+                        <div class="col">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  tipofactoring.lcargadcenampliacionplazo %} checked {% endif %} 
+                                id = "id_lcargadcenampliacionplazo" name = "lcargadcenampliacionplazo"> 
                                 <span class="switch-label"></span> 
                                 <span class="switch-handle"></span>
                             </label>

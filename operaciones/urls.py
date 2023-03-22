@@ -71,6 +71,8 @@ urlpatterns = [
         name='aceptarasignacion'),
     path('sumacargos/<int:asignacion_id>/<gao_carga_iva>/<dc_carga_iva>/<carga_gao>/<carga_dc>/<int:porcentaje_iva>',\
         SumaCargos),
+    path('detallecargosasignacion/<int:asignacion_id>/<fecha_desembolso>/',\
+        DetalleCargosAsignacion, name='detallecargosasignacion'),
     path('detallecargosasignacion/<int:asignacion_id>/<fecha_desembolso>/<int:condicion_id>',\
         DetalleCargosAsignacion, name='detallecargosasignacion'),
     path('refrescadetallesolicitud/<int:asignacion_id>',\

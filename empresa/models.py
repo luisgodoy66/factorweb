@@ -143,6 +143,7 @@ class Tipos_factoring(ClaseModelo):
     lacumulagaoaatasagao = models.BooleanField(default= False)
     lfactoringproveedores = models.BooleanField(default= False)
     ctinicialesasignacion = models.CharField(max_length=3, blank=True, null=True)
+    lcargadcenampliacionplazo = models.BooleanField(default= False)
 
     def __str__(self):
         return self.ctabreviacion

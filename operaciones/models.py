@@ -200,9 +200,12 @@ class Documentos(ClaseModelo):
     ntasacomision = models.DecimalField(max_digits=11,decimal_places= 8)
     nvalorantesiva = models.DecimalField(max_digits=15,decimal_places= 2)
     niva = models.DecimalField(max_digits=10,decimal_places= 2, default=0)
-    nretencioniva = models.DecimalField(max_digits=10,decimal_places= 2, default=0)
-    nretencionrenta = models.DecimalField(max_digits=10,decimal_places= 2, default=0) 
-    nvalornonegociado = models.DecimalField(max_digits=10,decimal_places= 2, default=0) 
+    nretencioniva = models.DecimalField(max_digits=10,decimal_places= 2
+                                        , default=0)
+    nretencionrenta = models.DecimalField(max_digits=10,decimal_places= 2
+                                          , default=0) 
+    nvalornonegociado = models.DecimalField(max_digits=10,decimal_places= 2
+                                            , default=0) 
     dultimacobranza = models.DateTimeField(null=True) 
     ndiasprorroga= models.SmallIntegerField(default=0, null=True)
     lnotificaciongenerada=models.BooleanField(default=False)
@@ -210,13 +213,23 @@ class Documentos(ClaseModelo):
     # npreciocompra = models.DecimalField(max_digits=10,6),
     cxpignorado = models.CharField(max_length=3, null=True) 
     cxusuarioprorroga = models.CharField(max_length=10, null=True) 
-    dultimageneraciondecargos= models.DateTimeField(null=True) 
+    dultimageneraciondecargos= models.DateField(null=True) 
     lcastigada=models.BooleanField(default=False, null=True)
     nanticipo = models.DecimalField(max_digits=10,decimal_places= 2, default=0)
     ngao = models.DecimalField(max_digits=10,decimal_places= 2, default=0)
-    ndescuentocartera = models.DecimalField(max_digits=10,decimal_places= 2, default=0)
+    ndescuentocartera = models.DecimalField(max_digits=10,decimal_places= 2
+                                            , default=0)
     nplazo = models.IntegerField(default=0)
-
+    nplazoap = models.IntegerField(default=0, null=True)
+    ntasacomisionap = models.DecimalField(max_digits=11,decimal_places= 8
+                                          , default=0, null=True)
+    ntasadescuentoap = models.DecimalField(max_digits=11,decimal_places= 8
+                                           , default=0, null=True)
+    ngaoaap = models.DecimalField(max_digits=10,decimal_places= 2, default=0
+                                  , null=True)
+    ndescuentocarteraap = models.DecimalField(max_digits=10,decimal_places= 2
+                                              , default=0, null=True)
+                                            
     objects= Documentos_Manager()
 
     def __str__(self):
@@ -409,6 +422,16 @@ class ChequesAccesorios(ClaseModelo):
     laccesorioquitado = models.BooleanField(default= False, null=True)
     chequequitado = models.ForeignKey(Cheques_quitados, on_delete=models.RESTRICT
         , related_name="accesorio_quitado", null=True)
+    dultimageneraciondecargos= models.DateField(null=True) 
+    nplazoap = models.IntegerField(default=0, null=True)
+    ntasacomisionap = models.DecimalField(max_digits=11,decimal_places= 8
+                                          , default=0, null=True)
+    ntasadescuentoap = models.DecimalField(max_digits=11,decimal_places= 8
+                                           , default=0, null=True)
+    ngaoaap = models.DecimalField(max_digits=10,decimal_places= 2, default=0
+                                  , null=True)
+    ndescuentocarteraap = models.DecimalField(max_digits=10,decimal_places= 2
+                                              , default=0, null=True)
     
     objects= ChequesAccesorios_Manager()
 
@@ -591,19 +614,6 @@ class Notas_debito_cabecera(ClaseModelo):
     def __str__(self):
         return self.cxnotadebito
 
-    # def operacion(self):
-    #     opx = 'No definido'
-    #     if self.cxtipooperacion=='L':
-    #         op = Liquidacion_cabecera.objects.filter(pk = self.operacion).first()
-    #         opx = op.cxliquidacion
-    #     if self.cxtipooperacion=='C':
-    #         op = Documentos_cabecera.objects.filter(pk = self.operacion).first()
-    #         opx = op.cxcobranza
-    #     if self.cxtipooperacion=='R':
-    #         op = Recuperaciones_cabecera.objects.filter(pk = self.operacion).first()
-    #         opx = op.cxrecuperacion
-    #     return opx
-
 class Notas_debito_detalle(ClaseModelo):
     notadebito = models.ForeignKey(Notas_debito_cabecera, on_delete=models.CASCADE)
     cargo = models.OneToOneField(Cargos_detalle, on_delete=models.RESTRICT)
@@ -620,3 +630,24 @@ class Cheques_canjeados(ClaseModelo):
         , on_delete= models.RESTRICT, related_name='cheque_nuevo')
     ctmotivocanje = models.CharField(max_length=60)
 
+class Ampliaciones_plazo_cabecera(ClaseModelo):
+    cxcliente=models.ForeignKey(Datos_generales_cliente
+        ,to_field="cxcliente", on_delete=models.RESTRICT
+    )
+    dampliacionhasta =models.DateField()
+    ncomision = models.DecimalField(max_digits=10, decimal_places=2)
+    ndescuentodecartera = models.DecimalField(max_digits=10,
+        decimal_places= 2, default= 0)
+    niva = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
+    notadedebito = models.OneToOneField(Notas_debito_cabecera
+        , to_field="cxnotadebito", on_delete=models.CASCADE)
+
+class Ampliaciones_plazo_detalle(ClaseModelo):
+    TIPOS_ASIGNACION = (
+        ('F', 'Factura pura'),
+        ('A', 'Accesorio'),
+    )
+    ampliacion = models.ForeignKey(Ampliaciones_plazo_cabecera, on_delete=models.CASCADE)
+    cxtipoasignacion = models.CharField( max_length=1, choices=TIPOS_ASIGNACION)
+    documentoaccesorio = models.BigIntegerField()
+    dampliaciondesde = models.DateField()

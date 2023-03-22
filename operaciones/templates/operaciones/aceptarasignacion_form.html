@@ -50,10 +50,10 @@
                 <div class="col-7">
                         <!-- fechas -->
                     <div class="row form-group">
-                        <div class="col-md-3"><label for="id_dnegociacion" class=" form-control-label">
+                        <div class="col-md-2"><label for="id_dnegociacion" class=" form-control-label">
                             {{ form_asignacion.dnegociacion.label}}
                         </label></div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             {{ form_asignacion.dnegociacion}}
                         </div>
                         <div class="col-md-2"><label for="id_ddesembolso" class=" form-control-label">
@@ -65,10 +65,10 @@
                     </div>  
                        
                     <div class="row form-group">
-                        <div class="col-md-3"><label for="id_nvalor" class=" form-control-label">
+                        <div class="col-md-2"><label for="id_nvalor" class=" form-control-label">
                             {{ form_asignacion.nvalor.label }}
                         </label></div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             {{ form_asignacion.nvalor}}
                         </div>
                         <div class="col col-md-2"{% if not condicion_operativa %} hidden {% endif %}>
@@ -86,9 +86,9 @@
                         </div>
                     </div>  
                     <div class="row form-group">
-                        <div class="col-md-3"><label for="id_ctinstrucciondepago" class=" form-control-label">
+                        <div class="col-md-2"><label for="id_ctinstrucciondepago" class=" form-control-label">
                             {{ form_asignacion.ctinstrucciondepago.label}}</label></div>
-                        <div class="col-md-9">
+                        <div class="col-md-10">
                             {{ form_asignacion.ctinstrucciondepago}}
                         </div>
                     </div>  
@@ -96,14 +96,14 @@
                     <div class="dropdown-divider"></div>
                     <h5 class="heading-title mb-1 text-secondary">Datos del cliente</h5>
                     <div class="row form-group">
-                        <div class="col-md-3"><label for="id_nvalor" class=" form-control-label">
-                            Cuenta de transferencia
+                        <div class="col-md-2"><label for="id_nvalor" class=" form-control-label">
+                            Cuenta de transferencia:
                         </label></div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             {{ cuenta_transferencia}}
                         </div>
                         <div class="col-md-3"><label for="id_nvalor" class=" form-control-label">
-                            Beneficiario de cheque
+                            Beneficiario de cheque:
                         </label></div>
                         <div class="col-md-3">
                             {{ beneficiario}}
@@ -180,28 +180,14 @@
                     <div class="col-md-12">
                           
                         <table id="table"                      
-                            data-show-columns-toggle-all="true"
                             data-show-export="true"
                             data-detail-formatter="detailFormatter"
                             data-minimum-count-columns="2"
                             data-pagination="false"
                             data-id-field="id"
-                            data-page-list="[10, 50, all]"
                             data-show-footer="true"
                             data-side-pagination="server"
-                            data-search="true"
                             >
-                            <thead>
-                                <tr>
-                                <th data-field="id" data-filter-control="input">id</th>
-                                <th data-field="Comprador" data-filter-control="input">comp</th>
-                                <th data-field="Documento" data-filter-control="input">docu</th>
-                                <th data-field="Emision" data-filter-control="input">emision</th>
-                                <th data-field="Vencimiento" data-filter-control="input">vencimiento</th>
-                                <th data-field="Total" data-filter-control="select">total</th>
-                                <th data-field="Plazo" data-filter-control="select">plazo</th>
-                                </tr>
-                            </thead>
                         </table>
 
                     </div>

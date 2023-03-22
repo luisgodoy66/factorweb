@@ -405,7 +405,7 @@ def AceptarAsignacion(request, asignacion_id=None):
 
     dc = Tasas_factoring.objects.filter(cxtasa="DCAR").first()
     if not dc:
-        return HttpResponse("no encontró tasa de descuento de catera")
+        return HttpResponse("no encontró tasa de descuento de cartera")
     if dc.lcargaiva: iva_dc='Si'
 
     dic_gao  = {'carga_iva': iva_gao

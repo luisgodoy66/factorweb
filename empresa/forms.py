@@ -61,10 +61,11 @@ class TipoFactoringForm(forms.ModelForm):
 
         fields=[
             'cxtipofactoring', 'cttipofactoring', 'ctabreviacion','cxmoneda'
-            ,'lmanejalineafactoring', 'lanticipatotalnegociado', 'ndiasgracia', 'lpermitediasferiados'
-            ,'lmanejacondicionesoperativas', 'lcargagaoa', 'lgeneradcenaceptacion', 'lgeneragaoenaceptacion'
-            ,'lesnegociada', 'lcobramorabc', 'ctinicialesliquidacioncobranza'
-            ,'lacumulagaoaatasagao', 'lfactoringproveedores', 'ctinicialesasignacion'
+            , 'lmanejalineafactoring', 'lanticipatotalnegociado', 'ndiasgracia', 'lpermitediasferiados'
+            , 'lmanejacondicionesoperativas', 'lcargagaoa', 'lgeneradcenaceptacion', 'lgeneragaoenaceptacion'
+            , 'lesnegociada', 'lcobramorabc', 'ctinicialesliquidacioncobranza'
+            , 'lacumulagaoaatasagao', 'lfactoringproveedores', 'ctinicialesasignacion'
+            , 'lcargadcenampliacionplazo'
         ]
         labels={
             'cxtipofactoring':'Código', 'cttipofactoring':'Descripción'
@@ -83,6 +84,7 @@ class TipoFactoringForm(forms.ModelForm):
             , 'lacumulagaoaatasagao':'Suma la tasa de comisión adicional a la tasa negociada'
             , 'lfactoringproveedores':'Factoring proveedores'
             , 'ctinicialesasignacion':'Iniciales de asignaciones aceptadas'
+            , 'lcargadcenampliacionplazo':'Carga descuento en ampliaciones de plazo'
         }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

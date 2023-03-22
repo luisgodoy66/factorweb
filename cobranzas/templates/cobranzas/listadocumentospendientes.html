@@ -80,6 +80,9 @@
                     <button id="cobroconmovimiento" class="btn btn-danger" disabled>
                         <i class="fa fa-retweet"></i> Movimiento contable
                     </button>
+                    <button id="ampliarplazo" class="btn btn-info" disabled>
+                        <i class="fa fa-calendar"></i> Ampliar plazo
+                    </button>
     
                 </div>
             </div>        
@@ -101,7 +104,6 @@
                     data-page-list="[10, 25, 50, 100, all]"
                     data-toolbar="#toolbar"
                     data-id-field="id"
-                    data-search="true"
                     data-click-to-select="true"
                     >
                     <thead>
@@ -122,6 +124,8 @@
                         <th data-field="Vencimiento" data-sortable="true" >Vencimiento</th>
                         <th data-field="Saldo" data-sortable="true" >Saldo</th>
                         <th data-field="UltimaCobranza" data-sortable="true" >Última cobranza</th>
+                        <th data-field="operate" data-sortable="false" data-events="window.operateEvents"
+                            data-formatter="operateFormatter" data-click-to-select="false">Acción</th>
                         </tr>
                     </thead>
                 </table>
