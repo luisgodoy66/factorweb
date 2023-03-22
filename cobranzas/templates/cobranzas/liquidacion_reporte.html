@@ -138,9 +138,13 @@
                             </tr>
                             {% for item in cargo.detalle %}
                             <tr>
+                                {% if item.asignacion == 'N/A' %}
+                                <td colspan="3">{{ item.documento }}</td>
+                                {% else %}
                                 <td>{{ item.asignacion }}</td>
                                 <td>{{ item.desembolso|date:"Y-m-d" }}</td>
                                 <td>{{ item.documento }}</td>
+                                {% endif %}
                                 <td class="centrado">{{ item.cobranza }}</td>
                                 <td class="numero">{{ item.valor_base }}</td>
                                 <td class="numero">{{ item.tasa_calculo }}</td>
@@ -225,7 +229,8 @@
 
             </div>
             <br><br>
-            <table >
+            <br><br>
+            <!-- <table >
                 <tbody>
                     <tr></tr>
                     <tr>
@@ -236,8 +241,23 @@
                         {% endif %}
                     </tr>
                 </tbody>
-            </table>
-
+            </table> -->
+            <div class="row ">
+                <table >
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td>Elaborado por: {{ liquidacion.cxusuariocrea}}</td>
+                            <td>Revisado por:</td>
+                            <td>Recibido por:</td>
+                            {% if liquidacion.cxestado == 'E' %}
+                            <td class="alerta"><h4>Reversada</h4></td>
+                            {% endif %}
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+    
         </div>
     </div>
 </body>

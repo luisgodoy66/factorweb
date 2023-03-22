@@ -555,11 +555,10 @@ class DebitosCuentasConjuntas(ClaseModelo):
     dmovimiento = models.DateField()
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     ctmotivo = models.CharField(max_length=60)
-    notadedebito = models.OneToOneField(Notas_debito_cabecera, on_delete=models.CASCADE)
+    notadedebito = models.OneToOneField(Notas_debito_cabecera
+        , related_name="debito_cuentaconjunta", on_delete=models.CASCADE)
     cxtipooperacion = models.CharField(max_length=1, choices= TIPOS_DE_OPERACION
         , null=True)
-    # cobranza = models.OneToOneField(Documentos_cabecera, on_delete=models.CASCADE
-    #     , null=True)
     operacion = models.BigIntegerField(null=True)
 
     def cobranza(self):

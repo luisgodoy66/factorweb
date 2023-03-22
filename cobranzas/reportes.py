@@ -10,7 +10,8 @@ from django.contrib.staticfiles import finders
 
 from .models import  Documentos_cabecera, Documentos_detalle, Liquidacion_cabecera\
         , Liquidacion_detalle, Recuperaciones_cabecera, Recuperaciones_detalle\
-        , Cheques, Cheques_protestados, Cargos_cabecera, Cargos_detalle
+        , Cheques, Cheques_protestados, Cargos_cabecera, Cargos_detalle\
+        , DebitosCuentasConjuntas
 
 from operaciones.models import Notas_debito_cabecera
 
@@ -197,13 +198,6 @@ def ImpresionLiquidacion(request, liquidacion_id):
         idcargo = item.cargo.cxmovimiento.ctmovimiento
 
         jsdet={}
-        if item.cargo.cxasignacion != None:
-            jsdet["asignacion"] = item.cargo.cxasignacion
-        # el IVA no tiene documento, porque es general a la Liquidacion
-        if item.cargo.cxasignacion:
-            jsdet["documento"] = item.cargo.cxdocumento.ctdocumento
-            jsdet["desembolso"] = item.cargo.cxasignacion.ddesembolso
-        
         # se guarda el código de la operación y no el pk
         # la operacion puede ser cobranza o recuperacion
         if item.cxtipooperacion=="C":
@@ -215,14 +209,30 @@ def ImpresionLiquidacion(request, liquidacion_id):
         elif item.cxtipooperacion =='L':
             operacion = Liquidacion_cabecera.objects.filter(pk=item.operacion).first()
 
+        # el IVA no tiene documento, porque es general a la Liquidacion
+        if item.cargo.cxasignacion != None:
+            jsdet["asignacion"] = item.cargo.cxasignacion
+            jsdet["documento"] = item.cargo.cxdocumento.ctdocumento
+            jsdet["desembolso"] = item.cargo.cxasignacion.ddesembolso
+        else:
+        #     jsdet["asignacion"] = 'N/A'
+            # cuando el tipo es D (nota de debito), se puede buscar si es de cuenta conjunta
+            # y tomar el motivo para mostrarlo en el reporte
+            # pero la busqueda es inversa ya que la id de la nd esta en la tabla de
+            # debitos de cuentas controladas
+            if item.cxtipooperacion=='D':
+                ndb = DebitosCuentasConjuntas.objects.filter(notadedebito=operacion.id).first()
+                if ndb:
+                    jsdet["asignacion"] = 'N/A'
+                    jsdet["documento"] = ndb.ctmotivo
+                    jsdet["desembolso"] = ''
+
         jsdet["cobranza"] = operacion
-        # cuando el tipo es D (nota de debito), se puede buscar si es de cuenta conjunta
-        # y tomar el motivo para mostrarlo en el reporte
         jsdet["valor_base"] = item.cargo.ctvalorbase
         jsdet["tasa_calculo"]=item.cargo.ntasacalculo
         jsdet["dias_calculo"] = item.cargo.ndiascalculo
         jsdet["valor"] = item.cargo.nvalor
-
+        print(jsdet)
         listadetalle.append(jsdet)
 
         totalcargo += item.cargo.nvalor
@@ -274,7 +284,7 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
     if not recuperacion:
         return HttpResponse("no encontró cobranza ")
 
-    # cuando la forma de pago es DEP es deposito de accesorios y de ahí debe
+    # cuando la forma de pago es DEP es deposito de accesorios y de ahí DebitosCuentasConjuntase
     # tomar la fecha de vencimiento
     detalle = Recuperaciones_detalle.objects\
         .filter(recuperacion = cobranza_id, leliminado = False)\
