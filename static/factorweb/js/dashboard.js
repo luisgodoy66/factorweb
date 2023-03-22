@@ -19,7 +19,7 @@ window.onload=function(){
 
 window.operateEvents = {
   'click .revertir': function (e, value, row, index) {
-    ReversarCobranza(row.id, row.TipoOperacion)
+    ReversarCobranza(row.id, row.TipoOperacion, row.Cliente)
   },
   'click .imprimir': function (e, value, row, index) {
     ImprimirCobranza( row.id, row.TipoOperacion)
@@ -68,10 +68,10 @@ window.operateEventsLiqCob = {
 
 function operateFormatterLiqCob(value, row, index) {
 return [
-  '<a class="revertir" href="javascript:void(0)" title="Reverso de asignación">',
+  '<a class="revertir" href="javascript:void(0)" title="Reverso de liquidación">',
   '<i class="fa fa-rotate-left"></i>',
   '</a>  ',
-  '<a class="imprimir" href="javascript:void(0)" title="Imprimir asignación">',
+  '<a class="imprimir" href="javascript:void(0)" title="Imprimir liquidación">',
   '<i class="fa fa-print"></i>',
   '</a>  ',
 ].join('')
@@ -88,10 +88,10 @@ window.operateEventsCobCar = {
 
 function operateFormatterCobCar(value, row, index) {
 return [
-  '<a class="revertir" href="javascript:void(0)" title="Reverso de asignación">',
+  '<a class="revertir" href="javascript:void(0)" title="Reverso de cobranza">',
   '<i class="fa fa-rotate-left"></i>',
   '</a>  ',
-  '<a class="imprimir" href="javascript:void(0)" title="Imprimir asignación">',
+  '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
   '<i class="fa fa-print"></i>',
   '</a>  ',
 ].join('')

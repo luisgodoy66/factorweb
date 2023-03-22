@@ -31,7 +31,7 @@ window.onload=function(){
 
 window.operateEvents = {
     'click .revertir': function (e, value, row, index) {
-      ReversarCobranza(row.id, row.TipoOperacion)
+      ReversarCobranza(row.id, row.TipoOperacion, row.Cliente)
       },
       'click .imprimir': function (e, value, row, index) {
         ImprimirCobranza( row.id, row.TipoOperacion)

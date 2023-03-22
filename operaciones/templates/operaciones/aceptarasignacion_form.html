@@ -53,13 +53,13 @@
                         <div class="col-md-2"><label for="id_dnegociacion" class=" form-control-label">
                             {{ form_asignacion.dnegociacion.label}}
                         </label></div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             {{ form_asignacion.dnegociacion}}
                         </div>
                         <div class="col-md-2"><label for="id_ddesembolso" class=" form-control-label">
                             {{ form_asignacion.ddesembolso.label}}
                         </label></div>
-                        <div class="col-md-4">
+                        <div class="col-md-5">
                             {{ form_asignacion.ddesembolso}}
                         </div>
                     </div>  
@@ -68,15 +68,15 @@
                         <div class="col-md-2"><label for="id_nvalor" class=" form-control-label">
                             {{ form_asignacion.nvalor.label }}
                         </label></div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             {{ form_asignacion.nvalor}}
                         </div>
                         <div class="col col-md-2"{% if not condicion_operativa %} hidden {% endif %}>
                             <label for="id_nvalor" class=" form-control-label">
                             Condición operativa
                         </label></div>
-                        <div class="col col-md-4"{% if not condicion_operativa %} hidden {% endif %}>
-                            <select data-placeholder="Seleccione una condición operativa..." class="standardSelect" tabindex="1" 
+                        <div class="col col-md-5"{% if not condicion_operativa %} hidden {% endif %}>
+                            <select data-placeholder="Seleccione una condición operativa..." class="form-control" tabindex="1" 
                             id="condicion_id" name="condicion_id"
                             >
                             {% for cond in condicion_operativa %}
@@ -97,16 +97,16 @@
                     <h5 class="heading-title mb-1 text-secondary">Datos del cliente</h5>
                     <div class="row form-group">
                         <div class="col-md-2"><label for="id_nvalor" class=" form-control-label">
-                            Cuenta de transferencia:
-                        </label></div>
-                        <div class="col-md-4">
-                            {{ cuenta_transferencia}}
-                        </div>
-                        <div class="col-md-3"><label for="id_nvalor" class=" form-control-label">
                             Beneficiario de cheque:
                         </label></div>
                         <div class="col-md-3">
                             {{ beneficiario}}
+                        </div>
+                        <div class="col-md-2"><label for="id_nvalor" class=" form-control-label">
+                            Cuenta de transferencia:
+                        </label></div>
+                        <div class="col-md-5">
+                            {{ cuenta_transferencia}}
                         </div>
                     </div>  
                 </div>

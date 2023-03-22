@@ -118,7 +118,7 @@ class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
 
         cuentas_conjuntas = CuentasConjuntasModels.Cuentas_bancarias\
             .objects.filter(cxcliente = cliente_ruc \
-                , leliminado = False, ).all()
+                , leliminado = False, lactiva = True).all()
 
         context = super(CobranzasDocumentosView, self).get_context_data(**kwargs)
         context["documentos"] = docs
@@ -325,7 +325,7 @@ class RecuperacionProtestoView(LoginRequiredMixin, generic.FormView):
 
         cuentas_conjuntas = CuentasConjuntasModels.Cuentas_bancarias\
             .objects.filter(cxcliente = cliente_ruc \
-                , leliminado = False, ).all()
+                , leliminado = False, lactiva = True).all()
 
 
         # Call the base implementation first to get a context
@@ -720,7 +720,8 @@ def DepositoCheques(request, ids_cheques, total_cartera, cuenta_destino
         )        
         if cuenta_destino=='CC':
             cuentas_conjuntas = CuentasConjuntasModels.Cuentas_bancarias\
-                .objects.filter(cxcliente = id_cliente , leliminado = False, )\
+                .objects.filter(cxcliente = id_cliente , leliminado = False
+                                , lactiva = True)\
                 .all()
 
     contexto = {"cheques" : result
