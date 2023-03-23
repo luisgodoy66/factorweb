@@ -1,0 +1,90 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" rol="form"  class="form-horizontal" name="form"
+                action="{% url 'cobranzas:prorroga' id tipo_asignacion vencimiento documento %}"
+            >
+            <!-- <div class="col-md-12"> -->
+            <div class="card">
+
+                {% csrf_token %}
+                <div class="card-header">
+                    <strong>Prorroga </strong> de documento {{ documento }}
+                </div>
+                
+                <input type="text" id = "id_vencimiento"  hidden  value = "{{ vencimiento }}" >
+
+                <!-- body -->
+                <div class="card-body card-block">
+                    <!-- dias -->
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="dias" class=" form-control-label">
+                            Días de prorroga</label></div>
+                        <div class="col-md-6">
+                            <input type="number" id="dias_id" name="dias_id" 
+                            value={{dias}}>
+                        </div>
+                    </div>
+                    <!-- fecha -->
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="fecha_id" class=" form-control-label">
+                            Fecha de prorroga</label></div>
+                        <div class="col-md-6">
+                            <input type="text" name="fecha_id" class="form-control" 
+                            readonly required id="fecha_id" value="{{ vencimiento }}">
+                        </div>
+                    </div>
+                </div>    
+                <!-- footer -->
+                <div class="card-footer">
+                    <!-- <button id="button" class="btn btn-secondary">updateCell</button> -->
+                    <button type="buttom" class="btn btn-danger btn-sm" 
+                        onclick="return CerrarModal()">
+                        <i class="fa fa-dot-circle-o"></i> Cerrar
+                    </button>
+                    <button id="btnCondonar" class="btn btn-primary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+                </div>
+            </div>
+            <!-- </div> -->
+        </form>
+
+    </div>
+
+    <script>
+
+        var vencimiento = capturaValor('id_vencimiento');
+        calcular_fecha();
+
+        // configuar cambios en ls campos de fechas
+        jQuery('#dias_id').change(function(){
+                calcular_fecha();
+            });
+        jQuery('#fecha_id').change(function(){
+                calcular_dias();
+            });
+
+        function calcular_dias(){
+            // restar la fecha de cobro de la fecha ingresada
+            // para evitar la convercion a zona horaria agregar la hora 00:00
+            let x = Date.parse(vencimiento + " 00:00:00") 
+            let nuevafecha = Date.parse( capturaValor('fecha_id') + " 00:00:00")
+            let dias = (nuevafecha - x)/ 1000 / 60 /60 / 24
+
+            jQuery('#dias_id').val(dias );
+
+        };
+        
+        function calcular_fecha(){
+            // operaciones entre fechas se llevan en milisegundos
+            let DiasEnMilisegundos = 1000 * 60 * 60 * 24 * capturaValor("dias_id");
+            let x = Date.parse(vencimiento + " 00:00:00") + DiasEnMilisegundos;
+            let nuevafecha = new Date(x)
+
+            d = nuevafecha.getFullYear() + "-" + (nuevafecha.getMonth()+1) + "-" + nuevafecha.getDate()
+            objeto_fechas("#fecha_id", d);
+            // inicializaValor("fecha_id", d)
+        }
+    </script>
+</div>

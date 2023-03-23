@@ -118,6 +118,9 @@ window.operateEvents = {
   'click .quitar': function (e, value, row, index) {
     QuitarAccesorio( row.id, row.IdCliente)
   },
+  'click .prorroga': function (e, value, row, index) {
+    Prorroga( row.id, 'A', row.Vencimiento, row.Documento)
+  },
 };
 
 function operateFormatter(value, row, index) {
@@ -127,6 +130,9 @@ return [
   '</a>  ',
   '<a class="quitar" href="javascript:void(0)" title="Quitar accesorio">',
   '<i class="fa fa-unlink"></i>',
+  '</a>  ',
+  '<a class="prorroga" href="javascript:void(0)" title="Prorroga">',
+  '<i class="fa fa-mail-forward"></i>',
   '</a>  ',
 ].join('')
 }

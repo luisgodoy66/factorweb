@@ -110,7 +110,6 @@ window.open( url);
 
 }
 
-
 function AmpliacionDePlazo(tipo_asignacion){
   // la ampliacion sólo aplica a documentos que se han anticipado el 100%
   var seleccion=  $table.bootstrapTable('getSelections')
@@ -152,4 +151,14 @@ function AmpliacionDePlazo(tipo_asignacion){
     location.href=url
   }
   return false
+}
+
+function Prorroga(id, tipo_asignacion, vencimiento, documento){
+  // si el id es negativo es un accesorio quitado que aparece en la cartera vencida
+  if (id < 0){
+    id = -id
+    tipo_asignacion='A'
+  }
+  AbrirModal("/cobranzas/prorroga/"+ id + '/' + tipo_asignacion
+    +'/'+vencimiento+'/'+documento)
 }

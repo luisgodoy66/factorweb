@@ -229,6 +229,7 @@ class Documentos(ClaseModelo):
                                   , null=True)
     ndescuentocarteraap = models.DecimalField(max_digits=10,decimal_places= 2
                                               , default=0, null=True)
+    ncontadorprorrogas = models.SmallIntegerField(default=0)
                                             
     objects= Documentos_Manager()
 
@@ -238,6 +239,9 @@ class Documentos(ClaseModelo):
     def dias_vencidos(self):
         return (date.today() - self.dvencimiento)/timedelta(days=1)
 
+    def vencimiento(self):
+        return self.dvencimiento + timedelta(days=self.ndiasprorroga)
+        
 class ChequesAccesorios_Manager(models.Manager):
 
     def cheques_a_depositar(self, fecha_corte):
@@ -432,6 +436,8 @@ class ChequesAccesorios(ClaseModelo):
                                   , null=True)
     ndescuentocarteraap = models.DecimalField(max_digits=10,decimal_places= 2
                                               , default=0, null=True)
+    ndiasprorroga= models.SmallIntegerField(default=0, null=True)
+    ncontadorprorrogas = models.SmallIntegerField(default=0)
     
     objects= ChequesAccesorios_Manager()
 
@@ -440,6 +446,9 @@ class ChequesAccesorios(ClaseModelo):
 
     def dias_vencidos(self):
         return (date.today() - self.dvencimiento)/timedelta(days=1)
+
+    def vencimiento(self):
+        return self.dvencimiento + timedelta(days=self.ndiasprorroga)
 
 class Movimientos_maestro(ClaseModelo):
     TIPOS_DE_SIGNOS = (

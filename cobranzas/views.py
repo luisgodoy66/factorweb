@@ -480,7 +480,7 @@ def GeneraListaCarterPorVencerJSONSalida(doc):
     output["TipoFactoring"] = doc.cxtipofactoring.ctabreviacion
     output["Asignacion"] = doc.cxasignacion.cxasignacion
     output["Documento"] = doc.ctdocumento
-    output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
+    output["Vencimiento"] = doc.vencimiento().strftime("%Y-%m-%d")
     output["Saldo"] = doc.nsaldo
     if doc.dultimacobranza:
         output["UltimaCobranza"] = doc.dultimacobranza.strftime("%Y-%m-%d")
@@ -502,7 +502,7 @@ def GeneraListaAccesoriosQuitadosJSONSalida(acc):
     output["TipoFactoring"] = acc.documento.cxtipofactoring.ctabreviacion
     output["Asignacion"] = acc.documento.cxasignacion.cxasignacion
     output["Documento"] = acc.documento.ctdocumento
-    output["Vencimiento"] = acc.dvencimiento.strftime("%Y-%m-%d")
+    output["Vencimiento"] = acc.vencimiento().strftime("%Y-%m-%d")
     output["Saldo"] = acc.chequequitado.nsaldo
     if acc.chequequitado.dultimacobranza:
         output["UltimaCobranza"] = acc.chequequitado.dultimacobranza.strftime("%Y-%m-%d")
@@ -696,7 +696,7 @@ def GeneraListaChequesADepositarJSONSalida(doc):
     output["TipoFactoring"] = doc.documento.cxtipofactoring.ctabreviacion
     output["Asignacion"] = doc.documento.cxasignacion.cxasignacion
     output["Documento"] = doc.documento.ctdocumento
-    output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
+    output["Vencimiento"] = doc.vencimiento().strftime("%Y-%m-%d")
     output["Valor"] = doc.ntotal
     output["Datos"] = doc.cxbanco.ctbanco +' CTA.'+ doc.ctcuenta + ' CH/' + doc.ctcheque
     output["Anticipa100"] = doc.documento.cxtipofactoring.lanticipatotalnegociado
@@ -2714,3 +2714,37 @@ def SumaCargos(request,ids, tipo_asignacion, gaoa_carga_iva, dc_carga_iva
         , 'total':str(total)}
 
     return HttpResponse(json.dumps(data), content_type = "application/json")
+
+def Prorroga(request, id, tipo_asignacion, vencimiento, documento):
+    template_path = 'cobranzas/datosdiasprorroga_modal.html'
+    context={
+        'id':id,
+        'tipo_asignacion':tipo_asignacion,
+        'vencimiento': vencimiento,
+        'documento' : documento, 
+        'dias':0,
+        }
+    
+    if request.method =="POST":
+
+        dias = request.POST.get("dias_id")
+        dias = Decimal(dias)
+        
+        if tipo_asignacion =='F':
+            documento = Documentos.objects.filter(pk=id).first()
+        else:
+            documento = ChequesAccesorios.objects.filter(pk=id).first()
+
+        if documento:
+            documento.ndiasprorroga += dias
+            documento.ncontadorprorrogas += 1
+            documento.save()
+        else:
+            return "docuemnto no encontrada"
+
+        if tipo_asignacion==FACTURAS_PURAS:
+            return redirect("cobranzas:listadocumentosvencidos",)
+        else:
+            return redirect("cobranzas:listachequesadepositar",)
+
+    return render(request, template_path, context)

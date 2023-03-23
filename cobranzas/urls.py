@@ -17,7 +17,8 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , DetalleNotasDebitoPendientesJSON, DatosCobroNotaDebito, AceptarCobranzaNotasDebito\
     , GeneraListaLiquidacionesRegistradasJSON, GeneraListaCobranzasCargosRegistradasJSON\
     , ReversaProtesto, CanjeDeCheque, QuitarAccesorio, AmpliacionDePlazo\
-    , DetalleCargosAmpliacionPlazo, GeneraDetalleCargosAmpliacionPlazo, SumaCargos
+    , DetalleCargosAmpliacionPlazo, GeneraDetalleCargosAmpliacionPlazo, SumaCargos\
+    , Prorroga
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos, ImpresionProtestosPendientes
@@ -59,6 +60,7 @@ urlpatterns = [
          , CanjeDeCheque, name='canjearchequeaccesorio'),
     path('quitaraccesorio/<int:cheque_id>/<cliente_ruc>'
          , QuitarAccesorio, name='quitarchequeaccesorio'),
+    path('prorroga/<int:id>/<tipo_asignacion>/<vencimiento>/<documento>', Prorroga, name='prorroga' ),
     
     # liquidaciones
     path('confirmarcobranza/<int:cobranza_id>/<tipo_operacion>',ConfirmarCobranza),

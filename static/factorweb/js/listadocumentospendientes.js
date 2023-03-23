@@ -134,14 +134,14 @@ function CobroDeDocumentos(forma){
 
 window.operateEvents = {
   'click .prorroga': function (e, value, row, index) {
-    Prorroga(row.id)
+    Prorroga(row.id, 'F', row.Vencimiento, row.Documento)
   },
 };
 
 function operateFormatter(value, row, index) {
 return [
   '<a class="prorroga" href="javascript:void(0)" title="Prorroga">',
-  '<i class="fa fa-exchange"></i>',
+  '<i class="fa fa-mail-forward"></i>',
   '</a>  ',
 ].join('')
 }
