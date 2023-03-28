@@ -65,7 +65,6 @@
                                 <td class="numero">{{ item.cheque__cheque_cobranza__cxcobranza}}</td>
                                 <td class="numero">{{ item.cheque__cheque_cobranza__ddeposito|date:"Y-m-d"}}</td>
                                 <td class="numero">{{ item.cheque__ctgirador }}</td>
-                                <!-- <td class="numero">{{ item.vencido_30 |default:'' }}</td> -->
                                 <td class="numero">{{ item.dprotesto|date:"Y-m-d"}}</td>
                                 <td class="numero">{{ item.motivoprotesto__ctmotivoprotesto}}</td>
                                 <td class="numero">{{ item.nvalor}}</td>
@@ -74,19 +73,11 @@
                             </tr>
                             {% endfor %}
                             <!-- totales -->
-                            <!-- <tr></tr>
+                            <tr></tr>
                             <tr>
                                 <td></td>
-                                <td class="numero">{{ totalvm90 |default:0.00}} </td>
-                                <td class="numero">{{ totalv90  |default:0.00}} </td>
-                                <td class="numero">{{ totalv60  |default:0.00}} </td>
-                                <td class="numero">{{ totalv30  |default:0.00}} </td>
-                                <td class="numero">{{ totalx30  |default:0.00}} </td>
-                                <td class="numero">{{ totalx60  |default:0.00}} </td>
-                                <td class="numero">{{ totalx90  |default:0.00}} </td>
-                                <td class="numero">{{ totalxm90 |default:0.00}} </td>
-                                <td class="numero">{{ total |default:0.00}} </td>
-                            </tr> -->
+                                <td class="numero" colspan="8">{{ total |default:0.00}} </td>
+                            </tr>
                         </tbody>
                     </table>
 

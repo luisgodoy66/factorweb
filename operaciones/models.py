@@ -1,7 +1,8 @@
 from random import choices
 from django.db import models
 from django.forms import BooleanField
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, F
+from django.utils.dateparse import parse_date
 
 from bases.models import ClaseModelo
 from empresa.models import Clases_cliente, Datos_participantes \
@@ -93,12 +94,11 @@ class Asignacion(ClaseModelo):
 
 class Documentos_Manager(models.Manager):
     def facturas_pendientes(self,fecha_corte):
-        return self.filter(dvencimiento__lte = fecha_corte
+        fecha = parse_date(fecha_corte)
+        return self.filter(dvencimiento__lte = fecha - F('ndiasprorroga')
                 , leliminado = False, nsaldo__gt = 0
                 , cxasignacion__in = Asignacion.objects
                     .filter(cxtipo = "F", cxestado = "P", leliminado = False))
-                # Cambiar a tipo F-actura y estado P-agada
-                # .filter(cxtipo = "P", cxestado = "L"))\
 
     def antigüedad_cartera(self):
         # grafico de antigüedad de cartera 
@@ -245,15 +245,16 @@ class Documentos(ClaseModelo):
 class ChequesAccesorios_Manager(models.Manager):
 
     def cheques_a_depositar(self, fecha_corte):
-        return self.filter(dvencimiento__lte = fecha_corte, cxestado = 'A'
+        fecha = parse_date(fecha_corte)
+        return self.filter(dvencimiento__lte = fecha - F('ndiasprorroga')
+                , cxestado = 'A'
                 , leliminado = False, lcanjeado = False, laccesorioquitado = False
                 , documento__cxasignacion__cxestado = "P"
                 , documento__cxasignacion__leliminado = False)
-            # cambiar a estado P-agada
-            # .filter(documento__cxasignacion__in =Asignacion.objects.filter(cxestado = "L"))
 
     def facturas_pendientes(self, fecha_corte):
-        return self.filter(dvencimiento__lte = fecha_corte
+        fecha = parse_date(fecha_corte)
+        return self.filter(dvencimiento__lte = fecha - F('ndiasprorroga')
                 , laccesorioquitado = True, chequequitado__cxestado = 'A'
                 , leliminado = False, lcanjeado = False
                 , documento__cxasignacion__cxestado = "P"
