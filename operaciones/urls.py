@@ -16,7 +16,7 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
-    ImpresionCartera
+    ImpresionAntiguedadCartera, ImpresionFacturasPendientes
 
 urlpatterns = [
 # datos operativos
@@ -93,5 +93,6 @@ urlpatterns = [
     path('asignacionesregistradasjson/<desde>/<hasta>',GeneraListaAsignacionesRegistradasJSON
         , name="asignacionesregistradas_json"),
     path('antigüedadcartera', GeneraResumenAntigüedadCarteraJSON),
-    path('impresioncartera', ImpresionCartera, name='antigüedad_por_cliente'),
+    path('impresioncartera', ImpresionAntiguedadCartera, name='antigüedad_por_cliente'),
+    path('impresioncarterapendiente', ImpresionFacturasPendientes, name='detalle_facturas_pendientes'),
     ]

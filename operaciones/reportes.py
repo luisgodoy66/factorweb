@@ -120,7 +120,7 @@ def ImpresionAsignacion(request, asignacion_id):
        return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
-def ImpresionCartera(request, ):
+def ImpresionAntiguedadCartera(request, ):
     facturas = Documentos.objects.antigüedad_por_cliente()
     accesorios = ChequesAccesorios.objects.antigüedad_por_cliente()
     prot_facturas = Documentos_protestados.objects.antigüedad_por_cliente_facturas()
@@ -219,6 +219,34 @@ def ImpresionCartera(request, ):
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="cartera.pdf"'
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+def ImpresionFacturasPendientes(request):
+     
+    facturas = Documentos.objects.cartera_pendiente()
+    cheques_quitados = ChequesAccesorios.objects.cartera_pendiente()
+
+    cartera = facturas.union(cheques_quitados)
+    
+    template_path = 'operaciones/detalle_facturaspendientes_reporte.html'
+
+    context={
+          "detalle" : cartera
+    }
+#     return render(request, template_path, context)
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
     # find the template and render it.
     template = get_template(template_path)
     html = template.render(context)

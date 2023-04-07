@@ -168,6 +168,15 @@ class Documentos_Manager(models.Manager):
                            , cxasignacion__leliminado = False)\
             .aggregate(Total = Sum('nsaldo'))
 
+    def cartera_pendiente(self,):
+        return self.filter(leliminado = False, nsaldo__gt = 0
+                , cxasignacion__in = Asignacion.objects
+                    .filter(cxtipo = "F", cxestado = "P", leliminado = False))\
+                    .values("cxcomprador__ctnombre","cxcliente__ctnombre"
+                            , "cxasignacion__cxasignacion"
+                            , "ctdocumento"
+                            , "dvencimiento", "cxasignacion__ddesembolso", "nsaldo")
+    
 class Documentos(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_participantes
         ,to_field="cxparticipante", on_delete=models.CASCADE
@@ -238,6 +247,9 @@ class Documentos(ClaseModelo):
 
     def dias_vencidos(self):
         return (date.today() - self.dvencimiento)/timedelta(days=1)
+
+    def dias_negociados(self):
+        return (self.dvencimiento - self.cxasignacion.ddesembolso)/timedelta(days=1)
 
     def vencimiento(self):
         return self.dvencimiento + timedelta(days=self.ndiasprorroga)
@@ -321,6 +333,18 @@ class ChequesAccesorios_Manager(models.Manager):
                 , total = Sum('ntotal')
                 )\
             .order_by()
+
+    def cartera_pendiente(self,):
+        return self.filter(laccesorioquitado = True, chequequitado__cxestado = 'A'
+                , leliminado = False, lcanjeado = False
+                , documento__cxasignacion__cxestado = "P"
+                , documento__cxasignacion__leliminado = False)\
+                .values("documento__cxcomprador__ctnombre"
+                        , "documento__cxcliente__ctnombre"
+                        , "documento__cxasignacion__cxasignacion"
+                        , "documento__ctdocumento"
+                        , "dvencimiento", "documento__cxasignacion__ddesembolso"
+                        , "chequequitado__nsaldo")
 
 class Cheques_quitados_Manager(models.Manager):
     def antigüedad_cartera(self):
