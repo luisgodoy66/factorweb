@@ -82,7 +82,7 @@ class MaestroMovimientoNew(LoginRequiredMixin, generic.CreateView):
     # permission_required="clientes.add_Linea_factoring"
     model = Movimientos_maestro
     template_name="operaciones/datosmovimiento_form.html"
-    context_object_name = "consulta"
+    context_object_name = "movimiento"
     form_class=MaestroMovimientosForm
     success_url=reverse_lazy("operaciones:listamaestromovimientos")
     success_message="Movimiento creada satisfactoriamente"
@@ -94,7 +94,7 @@ class MaestroMovimientoNew(LoginRequiredMixin, generic.CreateView):
 class MaestroMovimientoEdit(LoginRequiredMixin, generic.UpdateView):
     model = Movimientos_maestro
     template_name="operaciones/datosmovimiento_form.html"
-    context_object_name = "consulta"
+    context_object_name = "movimiento"
     form_class=MaestroMovimientosForm
     success_url=reverse_lazy("operaciones:listamaestromovimientos")
     success_message="Movimiento actualizada satisfactoriamente"

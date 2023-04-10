@@ -101,9 +101,9 @@
                         <td> {{c.cobranza}} </td>
                         <td> {{c.fecha_cobranza}} </td>
                         <td class="numero"> {{c.valor_cobrado}} </td>
-                        <td class="numero"> {{c.vuelto}} </td>
-                        <td class="numero"> {{c.sobrepago}} </td>
-                        <td class="numero"> {{c.total}} </td>
+                        <td class="numero"> {{c.vuelto|floatformat:2}} </td>
+                        <td class="numero"> {{c.sobrepago|floatformat:2}} </td>
+                        <td class="numero"> {{c.total|floatformat:2}} </td>
                     </tr>
                     {% endfor %}
                   </tbody>
@@ -146,7 +146,7 @@
                                 <td>{{ item.documento }}</td>
                                 {% endif %}
                                 <td class="centrado">{{ item.cobranza }}</td>
-                                <td class="numero">{{ item.valor_base }}</td>
+                                <td class="numero">{{ item.valor_base|floatformat:2 }}</td>
                                 <td class="numero">{{ item.tasa_calculo }}</td>
                                 <td class="numero">{{ item.dias_calculo }}</td>
                                 <td class="numero">{{ item.valor }}</td>

@@ -45,35 +45,55 @@
 
                     <div class="row form-group">
                         <div class="col col-md-5">
+                            <label for="id_lcolateral" class=" form-control-label">
+                                {{form.lcolateral.label}}</label>
+                        </div>
+                        <!-- <div class="col-12 col-md-7">
+                            {{form.lcolateral}}
+                        </div> -->
+                        <div class="col col-md-7">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  movimiento.lcolateral %} checked {% endif %} 
+                                id = "id_lcolateral" name = "lcolateral"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-5">
                             <label for="id_cxlocalidad" class=" form-control-label">{{form.cxsigno.label}}</label></div>
                         <div class="col-12 col-md-7">
                             {{form.cxsigno}}
-                            <!-- <small class="form-text text-muted">Máximo 10 caracteres.</small> -->
+                            <small class="form-text text-muted">Signo en que afecta a la cartera.</small>
                         </div>
                     </div>
-                    <!-- <div class="row form-group">
-                        <div class="col col-md-5">
-                            <label for="id_ctdireccion" class=" form-control-label">{{form.lcargadescuentocartera.label}}</label></div>
-                        <div class="col-12 col-md-7">
-                            {{form.lcargadescuentocartera}}
-                        </div>
-                    </div> -->
 
-                    <div class="row form-group">
+                    <!-- <div class="row form-group">
                         <div class="col col-md-5">
                             <label for="id_cttelefono2" class=" form-control-label">{{form.nprioridad.label}}</label></div>
                         <div class="col-12 col-md-7">
                             {{form.nprioridad}}
-                            <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
                         </div>
-                    </div>
+                    </div> -->
 
                     <div class="row form-group">
-                        <div class="col col-md-5">
-                            <label for="id_cttelefono2" class=" form-control-label">{{form.lcolateral.label}}</label></div>
-                        <div class="col-12 col-md-7">
-                            {{form.lcolateral}}
-                            <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
+                        <div class="col col-md-5"><label for="id_cttelefono2" class=" form-control-label">
+                                {{form.lcargo.label}}</label>
+                        </div>
+                        <!-- <div class="col-12 col-md-7">
+                            {{form.nprioridad}}
+                        </div> -->
+                        <div class="col col-md-7">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  movimiento.lcargo %} checked {% endif %} 
+                                id = "id_lcargo" name = "lcargo"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
                         </div>
                     </div>
 

@@ -97,16 +97,22 @@
                                 <td>{{ item.id }}</td>
                                 <td>{{ item.cxcomprador.ctnombre }}</td>
                                 <td>{{ item.ctdocumento }}</td>
-                                <td class="fecha">{{ item.demision|date:"y/m/d"  }}</td>
-                                <td class="fecha">{{ item.dvencimiento|date:"Y/m/d"  }}</td>
+                                <td class="fecha">{{ item.demision|date:"y-m-d"  }}</td>
+                                <td class="fecha">{{ item.dvencimiento|date:"Y-m-d"  }}</td>
                                 <td class="numero">{{ item.ntotal }}</td>
                                 <td class="numero">{{ item.nplazo }}</td>
                                 <td class="numero">{{ item.nporcentajeanticipo }}</td>
                                 <td class="numero">{{ item.nanticipo }}</td>
-                                {% if gao.imprimir %}<td class="numero">{{ item.ntasacomision }}</td>{% endif %}
+                                {% if gao.imprimir %}
+                                    <td class="numero">{{ item.ntasacomision|floatformat:2 }}</td>
+                                {% endif %}
                                 <td class="numero">{{ item.ngao }}</td>
-                                {% if dc.imprimir %}<td class="numero">{{ item.ntasadescuento }}</td>{% endif %}
-                                {% if asignacion.ndescuentodecartera > 0 %}<td class="numero">{{ item.ndescuentocartera }}</td>{% endif %}
+                                {% if dc.imprimir %}
+                                    <td class="numero">{{ item.ntasadescuento|floatformat:2 }}</td>
+                                {% endif %}
+                                {% if asignacion.ndescuentodecartera > 0 %}
+                                    <td class="numero">{{ item.ndescuentocartera }}</td>
+                                {% endif %}
                             </tr>
                             {% endfor %}
                             <!-- totales -->

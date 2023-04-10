@@ -51,7 +51,7 @@
                             <td></td>
                             <td></td>
                             <td><h4>Fecha de negociacion:</h4></td>
-                            <td>{{ asignacion.dnegociacion|date:"Y/m/d" }}</td>
+                            <td>{{ asignacion.dnegociacion|date:"Y-m-d" }}</td>
                         </tr>
                         <tr>
                             <td><h4>Id:</h4></td>
@@ -59,7 +59,7 @@
                             <td></td>
                             <td></td>
                             <td><h4>Fecha de desembolso:</h4></td>
-                            <td>{{ asignacion.ddesembolso|date:"Y/m/d" }}</td>
+                            <td>{{ asignacion.ddesembolso|date:"Y-m-d" }}</td>
                         </tr>
                         <tr>
                             <td><h4>Asignación:</h4></td>
@@ -98,16 +98,20 @@
                                 <td>{{ item.id }}</td>
                                 <td>{{ item.documento.cxcomprador.ctnombre }}</td>
                                 <td>{{ item.documento.ctdocumento }}</td>
-                                <td class="fecha">{{ item.documento.demision|date:"y/m/d"  }}</td>
+                                <td class="fecha">{{ item.documento.demision|date:"y-m-d"  }}</td>
                                 <td width="20%">{{ item }}</td>
-                                <td class="fecha">{{ item.dvencimiento|date:"Y/m/d"  }}</td>
+                                <td class="fecha">{{ item.dvencimiento|date:"Y-m-d"  }}</td>
                                 <td class="numero">{{ item.ntotal }}</td>
                                 <td class="numero">{{ item.nplazo }}</td>
                                 <td class="numero">{{ item.nporcentajeanticipo }}</td>
                                 <td class="numero">{{ item.nanticipo }}</td>
-                                {% if gao.imprimir %}<td class="numero">{{ item.ntasacomision }}</td>{% endif %}
+                                {% if gao.imprimir %}<td class="numero">
+                                    {{ item.ntasacomision|floatformat:2 }}</td>
+                                {% endif %}
                                 <td class="numero">{{ item.ngao }}</td>
-                                {% if dc.imprimir %}<td class="numero">{{ item.ntasadescuento }}</td>{% endif %}
+                                {% if dc.imprimir %}
+                                    <td class="numero">{{ item.ntasadescuento|floatformat:2 }}</td>
+                                {% endif %}
                                 {% if asignacion.ndescuentodecartera > 0 %}<td class="numero">{{ item.ndescuentocartera }}</td>{% endif %}
                             </tr>
                             {% endfor %}

@@ -483,11 +483,12 @@ class Movimientos_maestro(ClaseModelo):
     cxmovimiento = models.CharField(max_length=4, unique=True) 
     ctmovimiento= models.CharField(max_length=60) 
     cxsigno= models.CharField(max_length=1, choices=TIPOS_DE_SIGNOS) 
-    # lcargadescuentocartera = models.BooleanField()
-    nprioridad = models.SmallIntegerField()
+    # omitir prioridad y agregar si el movimiento es un cargo
+    # nprioridad = models.SmallIntegerField()
+    lcargo = models.BooleanField(default=False)
     lcolateral = models.BooleanField()
     cxmovimientopadre = models.CharField(max_length=4) 
-
+    
     def __str__(self):
         return self.ctmovimiento
 
