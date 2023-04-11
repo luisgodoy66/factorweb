@@ -50,8 +50,7 @@ class Documentos_cabecera(ClaseModelo):
         , related_name="cliente_cobranza"
     )
     cxtipofactoring = models.ForeignKey(Tipos_factoring
-        , to_field="cxtipofactoring", on_delete=models.RESTRICT
-        , related_name="tipofactoring_cobranza")
+        , on_delete=models.RESTRICT, related_name="tipofactoring_cobranza")
     cxformapago = models.CharField(max_length=3, choices=FORMAS_DE_PAGO)
     cxlocalidad = models.CharField(max_length=4, blank=True) 
     dcobranza = models.DateField(auto_created=True) 
@@ -138,9 +137,9 @@ class Liquidacion_cabecera(ClaseModelo):
         ,to_field="cxcliente", on_delete=models.CASCADE
         , related_name="cliente_liquidacion"
     )
-    cxliquidacion = models.CharField(max_length=8 , unique=True) 
+    cxliquidacion = models.CharField(max_length=8 ) 
     cxtipofactoring = models.ForeignKey(Tipos_factoring
-        , to_field="cxtipofactoring", on_delete=models.RESTRICT
+        , on_delete=models.RESTRICT
         , related_name="tipofactoring_liquidacioncobranzas")
     cxtipooperacion = models.CharField(max_length=1, choices= TIPOS_DE_OPERACION)
     jcobranzas = models.JSONField()
@@ -425,7 +424,7 @@ class Recuperaciones_cabecera(ClaseModelo):
         ,to_field="cxcliente", on_delete=models.CASCADE
     )
     cxtipofactoring = models.ForeignKey(Tipos_factoring
-        , to_field="cxtipofactoring", on_delete=models.RESTRICT)
+        , on_delete=models.RESTRICT)
     cxformacobro = models.CharField(max_length=3, choices=FORMAS_DE_PAGO)
     cxlocalidad = models.CharField(max_length=4, blank=True) 
     dcobranza = models.DateField(auto_created=True) 
@@ -510,7 +509,7 @@ class Cargos_cabecera(ClaseModelo):
         , related_name="cliente_cobranza_cargos"
     )
     cxtipofactoring = models.ForeignKey(Tipos_factoring, null=True
-        , to_field="cxtipofactoring", on_delete=models.RESTRICT
+        , on_delete=models.RESTRICT
         , related_name="tipofactoring_cobranza_cargos")
     cxformapago = models.CharField(max_length=3, choices=FORMAS_DE_PAGO)
     cxlocalidad = models.CharField(max_length=4, blank=True) 

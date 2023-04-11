@@ -34,7 +34,7 @@ class Asignacion(ClaseModelo):
     cxcliente=models.ForeignKey(Clientes, on_delete=models.CASCADE
         , related_name="cliente_asignacion")
     cxtipofactoring = models.ForeignKey(Tipos_factoring
-        , to_field="cxtipofactoring", on_delete=models.RESTRICT)
+        , on_delete=models.RESTRICT)
     cxtipo = models.CharField(max_length=1, choices=TIPOS_DE_ASIGNACION) 
     nvalor = models.DecimalField(max_digits=15, decimal_places =2
         , default=0) 

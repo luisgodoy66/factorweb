@@ -73,7 +73,7 @@ class Datos_participantes(ClaseModelo):
         return self.ctnombre
 
 class Funcionarios(ClaseModelo):
-    cxfuncionario = models.CharField(max_length=5, unique=True)
+    cxfuncionario = models.CharField(max_length=5)
     ctfuncionario = models.CharField(max_length=100)
     nporcentajecomision = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     lcomisionflat = models.BooleanField()
@@ -86,7 +86,6 @@ class Funcionarios(ClaseModelo):
         return self.ctfuncionario
 
 class Localidades(ClaseModelo):
-    # cxlocalidad = models.CharField(max_length=4, unique=True)
     ctlocalidad = models.CharField(max_length=80, blank=True)
     lactiva = models.BooleanField(default=True)
 
@@ -94,7 +93,7 @@ class Localidades(ClaseModelo):
         return self.ctlocalidad
 
 class Tasas_factoring(ClaseModelo):
-    cxtasa = models.CharField(max_length=4, unique=True)
+    cxtasa = models.CharField(max_length=4)
     cttasa = models.CharField(max_length=60, blank=True)
     lflat = models.BooleanField(default=False)
     ndiasperiocidad = models.DecimalField(max_digits=3, decimal_places=0, default=0)

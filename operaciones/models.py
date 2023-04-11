@@ -60,7 +60,7 @@ class Asignacion(ClaseModelo):
     )
     cxasignacion = models.CharField(max_length=8 ) 
     cxtipofactoring = models.ForeignKey(Tipos_factoring
-        , to_field="cxtipofactoring", on_delete=models.RESTRICT
+        , on_delete=models.RESTRICT
         , related_name="tipofactoring_asignacion")
     cxtipo = models.CharField(max_length=1, choices=TIPOS_DE_ASIGNACION) 
     cxmodalidadfactoring = models.CharField(max_length=1) 
@@ -186,7 +186,7 @@ class Documentos(ClaseModelo):
         , on_delete=models.CASCADE
     )
     cxtipofactoring=models.ForeignKey(Tipos_factoring
-        ,to_field="cxtipofactoring", on_delete=models.CASCADE
+        , on_delete=models.CASCADE
         , related_name="tipo_factoring"
     )
     nreferencia = models.BigIntegerField(null=True)  
@@ -501,7 +501,7 @@ class Movimientos_clientes(ClaseModelo):
         ,to_field="cxcliente", on_delete=models.RESTRICT
         , related_name="movimientos"
     )
-    cxtipofactoring = models.CharField(max_length=3, null=True) 
+    cxtipofactoring = models.BigIntegerField(null=True) 
     cxmovimiento = models.ForeignKey(Movimientos_maestro
         , to_field="cxmovimiento", on_delete=models.CASCADE
         , related_name="maestro_movimientos") 
@@ -517,7 +517,7 @@ class Cargos_detalle(ClaseModelo):
         ,to_field="cxcliente", on_delete=models.RESTRICT
         , related_name="cargos"
     )
-    cxtipofactoring = models.CharField(max_length=3, null=True) 
+    cxtipofactoring = models.BigIntegerField(null=True) 
     cxasignacion = models.ForeignKey(Asignacion, on_delete=models.RESTRICT
         , null=True) 
     cxdocumento  = models.ForeignKey(Documentos, on_delete=models.RESTRICT
@@ -538,7 +538,7 @@ class Cargos_detalle(ClaseModelo):
 class Condiciones_operativas_cabecera(ClaseModelo):
     ctcondicion = models.CharField(max_length=40)
     cxtipofactoring = models.ForeignKey(Tipos_factoring
-        ,to_field="cxtipofactoring", on_delete=models.CASCADE)
+        , on_delete=models.CASCADE)
     lactiva = models.BooleanField(default=True)
     laplicaafacturaspuras = models.BooleanField(default=True)
     laplicaaaccesorios = models.BooleanField(default=True)
@@ -574,7 +574,7 @@ class Condiciones_operativas_detalle(ClaseModelo):
         return self.cxcondicion
 
 class Anexos(ClaseModelo):
-    ctnombre = models.TextField(unique=True)
+    ctnombre = models.TextField()
     lactivo = models.BooleanField(default=True)
     ctrutageneracion = models.TextField()
     ctrutaanexo = models.TextField()
@@ -636,7 +636,7 @@ class Notas_debito_cabecera(ClaseModelo):
     dnotadebito = models.DateField()
     cxnotadebito = models.CharField(max_length=10, unique=True)
     cxtipofactoring = models.ForeignKey(Tipos_factoring, null=True
-        ,to_field="cxtipofactoring", on_delete=models.CASCADE)
+        , on_delete=models.CASCADE)
     nvalor =  models.DecimalField(max_digits=10, decimal_places=2)
     cxestado = models.CharField(max_length=1, default="A") 
     nsaldo =  models.DecimalField(max_digits=10, decimal_places=2)

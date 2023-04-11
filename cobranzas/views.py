@@ -8,7 +8,6 @@ from django.urls import reverse_lazy
 from django.db.models import Count, Sum, Q
 from django.db.models.expressions import RawSQL 
 
-
 from .models import Documentos_cabecera, Documentos_detalle, Liquidacion_cabecera\
     , Cheques_protestados, Cheques, Recuperaciones_cabecera\
     , Documentos_protestados, Recuperaciones_detalle, Cargos_cabecera
@@ -23,7 +22,6 @@ from cuentasconjuntas import models as CuentasConjuntasModels
 from .forms import CobranzasDocumentosForm, ChequesForm, LiquidarForm\
     , MotivoProtestoForm, ProtestoForm, RecuperacionesProtestosForm\
     , CobranzasCargosForm, AccesoriosForm
-
 
 from operaciones.forms import DesembolsarForm
 
