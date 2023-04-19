@@ -11,8 +11,7 @@ class Cuentas_bancarias(ClaseModelo):
         ('A', 'Ahorro'),
         ('C', 'Corriente'),
     )
-    cxcliente=models.OneToOneField(Datos_generales,
-        to_field="cxcliente", on_delete=models.CASCADE)
+    cxcliente=models.OneToOneField(Datos_generales, on_delete=models.CASCADE)
     cxbanco = models.ForeignKey(Bancos, on_delete=models.RESTRICT
         , related_name="banco_cuenta")
     cxtipocuenta=models.CharField(

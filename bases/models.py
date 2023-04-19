@@ -9,6 +9,9 @@ class Empresas(models.Model):
     lbloqueada = models.BooleanField(default=False)
     dcreacion = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.ctnombre
+    
 class ClaseModelo(models.Model):
     dregistro = models.DateTimeField(auto_now_add=True)
     dmodificacion = models.DateTimeField(auto_now=True)
@@ -25,8 +28,8 @@ class ClaseModelo(models.Model):
         abstract=True
 
 class Usuario_empresa(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    empresa =models.ForeignKey(Empresas, on_delete=models.CASCADE,
-        related_name="usuario_empresa",)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, 
+                             related_name="usuario_empresa")
+    empresa =models.ForeignKey(Empresas, on_delete=models.CASCADE,)
 
         

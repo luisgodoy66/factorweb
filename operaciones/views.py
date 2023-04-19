@@ -21,6 +21,7 @@ from empresa.models import  Clases_cliente, Datos_participantes, \
     Tasas_factoring, Tipos_factoring, Cuentas_bancarias
 from cobranzas.models import Documentos_protestados, Liquidacion_cabecera\
     , Documentos_cabecera, Recuperaciones_cabecera, Cheques_protestados
+from bases.models import Usuario_empresa
 
 from solicitudes import models as ModelosSolicitud
 from clientes import models as ModeloCliente
@@ -38,17 +39,32 @@ class DatosOperativosView(LoginRequiredMixin, generic.ListView):
     context_object_name='consulta'
     login_url = 'bases:login'
 
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=ModeloCliente.Datos_generales.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
+
 class AsignacionesView(LoginRequiredMixin, generic.ListView):
     model = Asignacion
     template_name = "operaciones/listaasignaciones.html"
     context_object_name='consulta'
     login_url = 'bases:login'
 
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Asignacion.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
+
 class AsignacionesConsulta(LoginRequiredMixin, generic.ListView):
     model = Asignacion
     template_name = "operaciones/consultageneralasignaciones.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Asignacion.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -67,10 +83,9 @@ class AsignacionesPendientesDesembolsarView(LoginRequiredMixin, generic.ListView
     login_url = 'bases:login'
 
     def get_queryset(self):
-        # 22-ene-23 l.g.    cambiar A por L(iquidada)
-        # return Asignacion.objects.filter(cxestado='A',\
-        return Asignacion.objects.filter(cxestado='L',\
-            leliminado = False, ddesembolso__lte = date.today())
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        return Asignacion.objects.filter(cxestado='L', empresa = id_empresa.empresa\
+            ,leliminado = False, ddesembolso__lte = date.today())
 
 class MaestroMovimientosView(LoginRequiredMixin, generic.ListView):
     model = Movimientos_maestro
@@ -78,6 +93,11 @@ class MaestroMovimientosView(LoginRequiredMixin, generic.ListView):
     context_object_name='consulta'
     login_url = 'bases:login'
     
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Movimientos_maestro.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
+
 class MaestroMovimientoNew(LoginRequiredMixin, generic.CreateView):
     # permission_required="clientes.add_Linea_factoring"
     model = Movimientos_maestro
@@ -88,6 +108,8 @@ class MaestroMovimientoNew(LoginRequiredMixin, generic.CreateView):
     success_message="Movimiento creada satisfactoriamente"
 
     def form_valid(self, form):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
@@ -109,11 +131,21 @@ class CondicionesOperativasView(LoginRequiredMixin, generic.ListView):
     context_object_name= 'consulta'
     login_url = 'bases:login'
 
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Condiciones_operativas_cabecera.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
+
 class AnexosView(LoginRequiredMixin, generic.ListView):
     model = Anexos
     template_name = "operaciones/listaanexos.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Anexos.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
 
 class AnexosNew(LoginRequiredMixin, generic.CreateView):
     model = Anexos
@@ -125,6 +157,8 @@ class AnexosNew(LoginRequiredMixin, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
 class AnexosEdit(LoginRequiredMixin, generic.UpdateView):
@@ -138,6 +172,8 @@ class AnexosEdit(LoginRequiredMixin, generic.UpdateView):
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
 class EstadosOperativosView(LoginRequiredMixin, generic.ListView):
@@ -145,6 +181,12 @@ class EstadosOperativosView(LoginRequiredMixin, generic.ListView):
     template_name = "operaciones/listaestadosoperativos.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=ModeloCliente.Datos_generales.objects.filter(leliminado = False
+                                                        , empresa = id_empresa.empresa)
+        return qs
 
 @login_required(login_url='/login/')
 @permission_required('operativos.update_asignacion', login_url='bases:sin_permisos')
@@ -183,6 +225,8 @@ def DesembolsarAsignacion(request, pk, cliente_ruc):
         }
 
     if request.method=="POST":
+
+        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
         with transaction.atomic():
             # 1. Actualizar el estado de la ASIGNACION
@@ -241,7 +285,8 @@ def DesembolsarAsignacion(request, pk, cliente_ruc):
                 , cxbeneficiario =id_beneficiario
                 , ctbeneficiario = beneficiario
                 , cxcuentadestino = cuenta_destino
-                , cxusuariocrea = request.user
+                , cxusuariocrea = request.user,
+                empresa = id_empresa.empresa,
                 )
             
             liquidacion.save()
@@ -252,18 +297,20 @@ def DesembolsarAsignacion(request, pk, cliente_ruc):
 
 @login_required(login_url='/login/')
 @permission_required('operativos.view_datos_operativos', login_url='bases:sin_permisos')
-def DatosOperativos(request, cliente_ruc=None):
+def DatosOperativos(request, cliente_id=None):
     template_name="operaciones/datosoperativos_form.html"
     contexto={}
     formulario={}
     datoscliente={}
     
     cliente = ModeloCliente.Datos_generales.objects\
-        .filter(cxcliente=cliente_ruc).first()
+        .filter(cxcliente=cliente_id).first()
 
     if request.method=='GET':
+
         datoscliente = Datos_operativos.objects\
-            .filter(cxcliente=cliente_ruc).first()
+            .filter(cxcliente=cliente_id).first()
+        
         if datoscliente:
             dalta= date.isoformat(datoscliente.dalta)
             e={ 
@@ -290,6 +337,8 @@ def DatosOperativos(request, cliente_ruc=None):
 
     if request.method=='POST':
 
+        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
         dalta = request.POST.get("dalta")
         cxclase = request.POST.get("cxclase")
         nporcentajeanticipo = request.POST.get("nporcentajeanticipo")
@@ -303,10 +352,10 @@ def DatosOperativos(request, cliente_ruc=None):
         estado = request.POST.get('cxestado')
 
         idclase = Clases_cliente.objects\
-            .filter(cxclase = cxclase).first()
+            .filter(pk = cxclase).first()
 
         datoscliente = Datos_operativos.objects\
-            .filter(cxcliente=cliente).first()
+            .filter(cxcliente=cliente_id).first()
 
         if not datoscliente:
             datoscliente= Datos_operativos(
@@ -322,7 +371,8 @@ def DatosOperativos(request, cliente_ruc=None):
                 cxbeneficiariocobranzas = id_beneficiario_cobr,
                 ctbeneficiariocobranzas = beneficiario_cobr,
                 cxusuariocrea = request.user,
-                cxestado = estado
+                cxestado = estado,
+                empresa = id_empresa.empresa,
             )
             if datoscliente:
                 datoscliente.save()
@@ -363,6 +413,8 @@ def AceptarAsignacion(request, asignacion_id=None):
     condicion_operativa={}
     beneficiario = ''
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     asignacion = ModelosSolicitud.Asignacion.objects\
         .filter(pk=asignacion_id).first()
 
@@ -370,7 +422,7 @@ def AceptarAsignacion(request, asignacion_id=None):
             .objects.cuenta_default(asignacion.cxcliente.cxcliente).first()
             
     # buscar el tipo de factoring 
-    tipo_factoring = Tipos_factoring.objects.get(cxtipofactoring=asignacion.cxtipofactoring_id)
+    tipo_factoring = Tipos_factoring.objects.get(pk=asignacion.cxtipofactoring_id)
     if not tipo_factoring:
         return HttpResponse("Tipo de factoring no existe:" + asignacion.cxtipofactoring_id)
     if tipo_factoring.lgeneradcenaceptacion:
@@ -382,28 +434,32 @@ def AceptarAsignacion(request, asignacion_id=None):
     if tipo_factoring.lmanejacondicionesoperativas:
         if asignacion.cxtipo ==FACTURAS_PURAS:
             condicion_operativa = Condiciones_operativas_cabecera.objects \
-                .filter(cxtipofactoring= tipo_factoring\
-                    ,leliminado = False\
+                .filter(cxtipofactoring= tipo_factoring
+                    ,leliminado = False
+                    , empresa = id_empresa.empresa
                     ,laplicaafacturaspuras=True)
         else:
             if asignacion.cxtipo==FACTURAS_CON_ACCESORIOS:
                 condicion_operativa = Condiciones_operativas_cabecera.objects \
-                    .filter(cxtipofactoring= tipo_factoring\
-                        ,leliminado = False\
+                    .filter(cxtipofactoring= tipo_factoring
+                        ,leliminado = False
+                        , empresa = id_empresa.empresa
                         ,laplicaaaccesorios=True)
             else:
-                return ("Tipo de asignación no aceptado")
+                return ("Tipo de asignación " + asignacion.cxtipo + " no aceptado")
 
         if not condicion_operativa:
             return HttpResponse("No hay condiciones operativas activas para este tipo de factoring")
             
     # datos de tasa gao/dc
-    gao = Tasas_factoring.objects.filter(cxtasa="GAO").first()
+    gao = Tasas_factoring.objects.filter(cxtasa="GAO"
+                                         , empresa = id_empresa.empresa).first()
     if not gao:
         return HttpResponse("no encontró tasa de gao")
     if gao.lcargaiva: iva_gao = 'Si'
 
-    dc = Tasas_factoring.objects.filter(cxtasa="DCAR").first()
+    dc = Tasas_factoring.objects.filter(cxtasa="DCAR"
+                                        , empresa = id_empresa.empresa).first()
     if not dc:
         return HttpResponse("no encontró tasa de descuento de cartera")
     if dc.lcargaiva: iva_dc='Si'
@@ -420,7 +476,9 @@ def AceptarAsignacion(request, asignacion_id=None):
 
     # buscar en datos operativos el beneficiario del cheque
     datos_operativos = Datos_operativos.objects\
-                .filter(cxcliente = asignacion.cxcliente.cxcliente).first()
+                .filter(cxcliente = asignacion.cxcliente.cxcliente
+                        , empresa = id_empresa.empresa).first()
+    
     if datos_operativos:
         beneficiario=datos_operativos.ctbeneficiarioasignacion
 
@@ -442,32 +500,41 @@ from django.http import HttpResponse, JsonResponse
 
 def DetalleCargosAsignacion(request, asignacion_id = None
                         , fecha_desembolso = None, condicion_id=None):
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     asignacion = ModelosSolicitud.Asignacion.objects.get(pk=asignacion_id) 
 
     if not asignacion:
         return HttpResponse("Asignación "+ str(asignacion_id) + " no encontrada")
 
     # buscar el tipo de factoring 
-    tipo_factoring = Tipos_factoring.objects.filter(cxtipofactoring=asignacion.cxtipofactoring_id).first()
+    tipo_factoring = Tipos_factoring.objects\
+        .filter(pk=asignacion.cxtipofactoring_id
+                , empresa = id_empresa.empresa).first()
     if not tipo_factoring:
         return HttpResponse("Tipo de factoring "+ asignacion.cxtipofactoring + " no existe")
 
-    # buscar el cliente 
-    cliente = ModelosSolicitud.Clientes.objects.filter(pk=asignacion.cxcliente_id).first()
+    cliente = Datos_participantes.objects\
+        .filter(cxparticipante=asignacion.cxcliente.cxcliente
+                , empresa = id_empresa.empresa).first()
     if not cliente:
-        return HttpResponse("cliente "+asignacion.cxcliente_id + " no encontrado")
+        return HttpResponse("solicitante no encontrado en lista de clientes")
     
     # buscar los datos operativos 
-    datos_operativos = Datos_operativos.objects.filter(cxcliente=cliente.cxcliente).first()
+    datos_operativos = Datos_operativos.objects\
+        .filter(cxcliente=cliente.id).first()
     if not datos_operativos:
         return HttpResponse("No se ha encontrado datos operativos del cliente.")
 
     # datos de tasa gao/dc
-    gao = Tasas_factoring.objects.filter(cxtasa="GAO").first()
+    gao = Tasas_factoring.objects.filter(cxtasa="GAO"
+                                         , empresa = id_empresa.empresa).first()
     if not gao:
         return HttpResponse("no encontró registro de tasa de gao en tabla de tasas de factoring")
 
-    dc = Tasas_factoring.objects.filter(cxtasa="DCAR").first()
+    dc = Tasas_factoring.objects.filter(cxtasa="DCAR"
+                                        , empresa = id_empresa.empresa).first()
     if not dc:
         return HttpResponse("no encontró registro de tasa de descuento de catera en tabla de tasas de factoring")
 
@@ -526,17 +593,98 @@ def DetalleCargosAsignacion(request, asignacion_id = None
     # calcular cargos
     for i in range(len(documentos)):
         CalcularCargosPorDocumento(documentos[i], gao ,dc, fecha_desembolso
-                                    ,buscar_anticipo_en_condicion_operativa
+                                    , buscar_anticipo_en_condicion_operativa
                                     , buscar_gao_en_condicion_operativa
                                     , buscar_descuento_en_condicion_operativa 
                                     , porcentaje_anticipo, tasa_gao, tasa_dc
-                                    , asignacion.cxtipo
-                                    , clase_cliente, condicion_id)
+                                    , asignacion.cxtipo, clase_cliente
+                                    , condicion_id)
     # crea página con datos json de cargos de documentos
     # return HttpResponse(GeneraDetalleParaTabla(asignacion_id, asignacion.cxtipo ))
     # 09-SEP-22 L.G.    no crea datos json, solo grabó datos. otro proceso crea los 
     #                   datos json
     return HttpResponse("OK")
+
+def CalcularCargosPorDocumento(doc, gao, dc, fecha_desembolso
+                            , buscar_anticipo_en_condicion_operativa
+                            , buscar_gao_en_condicion_operativa
+                            , buscar_descuento_en_condicion_operativa
+                            , porcentaje_anticipo, tasa_gao, tasa_dc
+                            , tipo_asignacion, clase_cliente
+                            , condicion_id = None):
+    # los dos ultimos parametros se omiten cuando se trata de edicion de tasas
+
+    plazo = doc.dvencimiento - fecha_desembolso
+    plazo = plazo.days
+    clase_comprador = ''
+    doc.nplazo = plazo
+
+    # si usa condicion operativa buscar clase de comprador
+    if buscar_anticipo_en_condicion_operativa \
+        or buscar_gao_en_condicion_operativa \
+        or buscar_descuento_en_condicion_operativa:
+
+        # el comprador esta en el documento no en el cheque
+        if tipo_asignacion==FACTURAS_PURAS:
+            # comprador = ModeloCliente.Datos_compradores.objects\
+            #     .filter(cxcomprador = doc.cxcomprador).first()
+            comprador = Datos_participantes.objects\
+                .filter(cxparticipante=doc.cxcomprador
+                        , empresa = doc.empresa).first()
+        else:
+            fac = ModelosSolicitud.Documentos.objects\
+                .filter(id = doc.documento_id).first()
+            # comprador = ModeloCliente.Datos_compradores.objects\
+            #     .filter(cxcomprador_id = fac.cxcomprador).first()
+            comprador = Datos_participantes.objects\
+                .filter(cxparticipante=fac.cxcomprador
+                        , empresa = fac.empresa).first()
+
+        if comprador:
+            clase_comprador = comprador.datos_generales_comprador.cxclase
+        else:
+            return HttpResponse("comprador no encontrado")
+
+        # ubicar el plazo en las condiciones operativas    
+        condicion_plazo = Condiciones_operativas_detalle.objects\
+            .ubicar_plazo(condicion_id, clase_cliente, clase_comprador, plazo).first()
+
+        if condicion_plazo:
+            if buscar_anticipo_en_condicion_operativa:
+                porcentaje_anticipo= condicion_plazo.nporcentajeanticipo
+            
+            if buscar_gao_en_condicion_operativa :
+                tasa_gao = condicion_plazo.ntasagao
+
+            if buscar_descuento_en_condicion_operativa :
+                tasa_dc = condicion_plazo.ntasadescuento
+    
+    doc.nporcentajeanticipo = porcentaje_anticipo
+    doc.ntasacomision = tasa_gao
+    doc.ntasadescuento = tasa_dc
+
+    # anticipo
+    doc.nanticipo = doc.ntotal * doc.nporcentajeanticipo / 100
+    
+    # gao
+    if gao.lsobreanticipo:
+        doc.ngao = (doc.ntotal * doc.nporcentajeanticipo * doc.ntasacomision / 10000)
+    else:
+        doc.ngao = (doc.ntotal * doc.ntasacomision / 100)
+
+    if not gao.lflat:
+        doc.ngao = (doc.ngao * plazo / gao.ndiasperiocidad)
+
+    # dc
+    if dc.lsobreanticipo:
+        doc.ndescuentocartera = (doc.ntotal * doc.nporcentajeanticipo * doc.ntasadescuento / 10000)
+    else:
+        doc.ndescuentocartera = (doc.ntotal * doc.ntasadescuento / 100)
+
+    if not dc.lflat:
+        doc.ndescuentocartera = (doc.ndescuentocartera * plazo / dc.ndiasperiocidad)
+
+    doc.save()
 
 def GeneraDetalleParaTabla(asignacion_id, tipo_asignacion):
     # es llamado en el proceso DetalleCargosAsignacion
@@ -594,79 +742,6 @@ def GeneraDetalleParaTabla1(request,asignacion_id):
         "rows": docjson 
         }
     return JsonResponse( data)
-
-def CalcularCargosPorDocumento(doc, gao, dc, fecha_desembolso
-                            , buscar_anticipo_en_condicion_operativa
-                            , buscar_gao_en_condicion_operativa
-                            , buscar_descuento_en_condicion_operativa
-                            , porcentaje_anticipo, tasa_gao, tasa_dc
-                            , tipo_asignacion
-                            , clase_cliente = "A"
-                            , condicion_id = None):
-    # los dos ultimos parametros se omiten cuando se trata de edicion de tasas
-
-    plazo = doc.dvencimiento - fecha_desembolso
-    plazo = plazo.days
-    clase_comprador = ''
-    doc.nplazo = plazo
-
-    # si usa condicion operativa buscar classe de comprador
-    if buscar_anticipo_en_condicion_operativa \
-        or buscar_gao_en_condicion_operativa \
-        or buscar_descuento_en_condicion_operativa:
-
-        # el comprador esta en el documento no en el cheque
-        if tipo_asignacion==FACTURAS_PURAS:
-            comprador = ModeloCliente.Datos_compradores.objects\
-                .filter(cxcomprador = doc.cxcomprador).first()
-        else:
-            fac = ModelosSolicitud.Documentos.objects.filter(id = doc.documento_id).first()
-            comprador = ModeloCliente.Datos_compradores.objects\
-                .filter(cxcomprador_id = fac.cxcomprador).first()
-
-        if comprador:
-            clase_comprador = comprador.cxclase
-        
-        # ubicar el plazo en las condiciones operativas    
-        condicion_plazo = Condiciones_operativas_detalle.objects\
-            .ubicar_plazo(condicion_id, clase_cliente, clase_comprador, plazo).first()
-
-        if condicion_plazo:
-            if buscar_anticipo_en_condicion_operativa:
-                porcentaje_anticipo= condicion_plazo.nporcentajeanticipo
-            
-            if buscar_gao_en_condicion_operativa :
-                tasa_gao = condicion_plazo.ntasagao
-
-            if buscar_descuento_en_condicion_operativa :
-                tasa_dc = condicion_plazo.ntasadescuento
-    
-    doc.nporcentajeanticipo = porcentaje_anticipo
-    doc.ntasacomision = tasa_gao
-    doc.ntasadescuento = tasa_dc
-
-    # anticipo
-    doc.nanticipo = doc.ntotal * doc.nporcentajeanticipo / 100
-    
-    # gao
-    if gao.lsobreanticipo:
-        doc.ngao = (doc.ntotal * doc.nporcentajeanticipo * doc.ntasacomision / 10000)
-    else:
-        doc.ngao = (doc.ntotal * doc.ntasacomision / 100)
-
-    if not gao.lflat:
-        doc.ngao = (doc.ngao * plazo / gao.ndiasperiocidad)
-
-    # dc
-    if dc.lsobreanticipo:
-        doc.ndescuentocartera = (doc.ntotal * doc.nporcentajeanticipo * doc.ntasadescuento / 10000)
-    else:
-        doc.ndescuentocartera = (doc.ntotal * doc.ntasadescuento / 100)
-
-    if not dc.lflat:
-        doc.ndescuentocartera = (doc.ndescuentocartera * plazo / dc.ndiasperiocidad)
-
-    doc.save()
 
 def DetalleDocumentoADiccionario(doc, tipo_asignacion):
     output = {}
@@ -877,6 +952,9 @@ def CondicionesOperativas(request,condicion_id=None):
     }
     
     if request.method=='POST':
+
+        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
         ctcondicion = request.POST.get("ctcondicion")
         cxtipofactoring = request.POST.get("cxtipofactoring")
         laplicaafacturaspuras = request.POST.get("laplicaafacturaspuras")
@@ -887,7 +965,7 @@ def CondicionesOperativas(request,condicion_id=None):
         if laplicaafacturaspuras: aplica_facturaspuras_on = True
         if laplicaaaccesorios: aplica_accesorios_on = True
 
-        tipo_factoring = Tipos_factoring.objects.filter(cxtipofactoring=cxtipofactoring).first()
+        tipo_factoring = Tipos_factoring.objects.filter(pk=cxtipofactoring).first()
 
         if not condicion_id:
             condicion = Condiciones_operativas_cabecera(
@@ -895,7 +973,8 @@ def CondicionesOperativas(request,condicion_id=None):
                 cxtipofactoring=tipo_factoring,
                 laplicaafacturaspuras=aplica_facturaspuras_on,
                 laplicaaaccesorios=aplica_accesorios_on,
-                cxusuariocrea = request.user
+                cxusuariocrea = request.user,
+                empresa = id_empresa.empresa,
             )
             if condicion:
                 condicion.save()
@@ -933,7 +1012,8 @@ def CondicionesOperativas(request,condicion_id=None):
             nporcentajeanticipo = nporcentajeanticipo,
             ntasadescuento = ntasadescuento,
             ntasagao = ntasagao,
-            cxusuariocrea = request.user
+            cxusuariocrea = request.user,
+            empresa = id_empresa.empresa,
         )
 
         if det:
@@ -946,9 +1026,11 @@ def CondicionesOperativas(request,condicion_id=None):
 
 def DetalleCondicionOperativa(request, condicion_id = None):
     
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     detalle = Condiciones_operativas_detalle.objects\
-        .filter(cxcondicion=condicion_id)\
-            .filter( leliminado = False)\
+        .filter(cxcondicion=condicion_id, leliminado = False
+                , empresa = id_empresa.empresa)\
                 .order_by('cxclasecliente', 'cxclasecomprador', 'nplazodesde')
 
     tempBlogs = []
@@ -1060,12 +1142,17 @@ def ReversaAceptacionAsignacion(request, pid_asignacion):
 def GeneraListaAsignacionesJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     if desde == 'None':
-        asignacion = Asignacion.objects.all().order_by('ddesembolso')
+        asignacion = Asignacion.objects\
+            .filter(empresa = id_empresa.empresa).order_by('ddesembolso')
     else:
         asignacion = Asignacion.objects\
-            .filter(ddesembolso__gte = desde, ddesembolso__lte = hasta)\
+            .filter(ddesembolso__gte = desde, ddesembolso__lte = hasta
+                    , empresa = id_empresa.empresa)\
             .order_by('ddesembolso')
+        
     tempBlogs = []
     for i in range(len(asignacion)):
         tempBlogs.append(GeneraListaAsignacionesJSONSalida(asignacion[i])) 
@@ -1082,11 +1169,16 @@ def GeneraListaAsignacionesJSON(request, desde = None, hasta= None):
 def GeneraListaAsignacionesRegistradasJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     if desde == 'None':
-        asignacion = Asignacion.objects.all()
+        asignacion = Asignacion.objects\
+            .filter(empresa = id_empresa.empresa).order_by("dregistro")
     else:
         asignacion = Asignacion.objects\
-            .filter(dregistro__gte = desde, dregistro__lte = hasta)
+            .filter(dregistro__gte = desde, dregistro__lte = hasta
+                    , empresa = id_empresa.empresa)\
+        
     tempBlogs = []
     for i in range(len(asignacion)):
         tempBlogs.append(GeneraListaAsignacionesJSONSalida(asignacion[i])) 
@@ -1108,7 +1200,6 @@ def GeneraListaAsignacionesJSONSalida(asignacion):
     output["Cliente"] = asignacion.cxcliente.ctnombre
     output["Asignacion"] = asignacion.cxasignacion
     output["TipoFactoring"] = asignacion.cxtipofactoring.cttipofactoring
-    # output["TipoAsignacion"] = asignacion.cxtipo
     if asignacion.cxtipo =='F':
         output["TipoAsignacion"] = "Facturas puras"
     else:
@@ -1127,10 +1218,12 @@ def GeneraListaAsignacionesJSONSalida(asignacion):
 
 def GeneraResumenAntigüedadCarteraJSON(request):
 
-    documentos = Documentos.objects.antigüedad_cartera()
-    acc_quitados =  Cheques_quitados.objects.antigüedad_cartera()
-    cheques = ChequesAccesorios.objects.antigüedad_cartera()
-    protestados = Documentos_protestados.objects.antigüedad_cartera()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    documentos = Documentos.objects.antigüedad_cartera(id_empresa.empresa)
+    acc_quitados =  Cheques_quitados.objects.antigüedad_cartera(id_empresa.empresa)
+    cheques = ChequesAccesorios.objects.antigüedad_cartera(id_empresa.empresa)
+    protestados = Documentos_protestados.objects.antigüedad_cartera(id_empresa.empresa)
 
     fvm90 = documentos["vencido_mas_90"]
     avm90=acc_quitados["vencido_mas_90"]

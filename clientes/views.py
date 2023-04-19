@@ -10,8 +10,9 @@ from .models import Cuenta_transferencia, Datos_generales, Personas_juridicas, P
     , Datos_compradores, Cupos_compradores, Cuentas_bancarias
 
 from solicitudes.models import Clientes as Solicitante
-
+from bases.models import Usuario_empresa
 from empresa.models import Datos_participantes, Localidades
+
 from empresa.forms import ParticipanteForm
 
 from .forms import  ClienteForm, PersonaNaturalForm, PersonaJuridicaForm\
@@ -25,6 +26,11 @@ class ClientesView(LoginRequiredMixin, generic.ListView):
     template_name = "clientes/listaclientes.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Datos_generales.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
     
 class LineasView(LoginRequiredMixin, generic.ListView):
     model = Datos_generales
@@ -32,12 +38,22 @@ class LineasView(LoginRequiredMixin, generic.ListView):
     context_object_name='consulta'
     login_url = 'bases:login'
 
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Datos_generales.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
+
 class CuentasBancariasView(LoginRequiredMixin, generic.ListView):
     model = Datos_generales
     template_name = "clientes/listacuentasbancarias.html"
     context_object_name='consulta'
     login_url = 'bases:login'
     
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Datos_generales.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
+
 class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
     model = Cuentas_bancarias
     template_name = "clientes/datoscuentabancaria_modal.html"
@@ -47,8 +63,15 @@ class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
     # success_url=reverse_lazy("clientes:listacuentasbancariascliente")
     success_message="Línea creada satisfactoriamente"
 
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Datos_generales.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
+
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -74,9 +97,11 @@ class CuentasBancariasDeudoresView(LoginRequiredMixin, generic.ListView):
     def get_queryset(self):
         participantes = Datos_participantes.objects.values_list('cxparticipante')
         dedudores = Datos_compradores.objects.values_list('cxcomprador')
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
 
         return Cuentas_bancarias.objects\
-            .filter(cxparticipante__in = participantes.intersection(dedudores))
+            .filter(cxparticipante__in = participantes.intersection(dedudores)
+                    , empresa = id_empresa.empresa)
 
 class CuentasBancariasDeudorNew(LoginRequiredMixin, generic.CreateView):
     model = Cuentas_bancarias
@@ -89,6 +114,8 @@ class CuentasBancariasDeudorNew(LoginRequiredMixin, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
 class CuentasBancariasDeudorEdit(LoginRequiredMixin, generic.UpdateView):
@@ -114,6 +141,8 @@ class LineaNew(LoginRequiredMixin, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -156,12 +185,22 @@ class CompradoresView(LoginRequiredMixin, generic.ListView):
     template_name = "clientes/listacompradores.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Datos_compradores.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
     
 class CuposCompradoresView(LoginRequiredMixin, generic.ListView):
     model = Cupos_compradores
     template_name = "clientes/listacuposcompradores.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Cupos_compradores.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
 
 class CuposCompradoresNew(LoginRequiredMixin, generic.CreateView):
     model=Cupos_compradores
@@ -173,6 +212,8 @@ class CuposCompradoresNew(LoginRequiredMixin, generic.CreateView):
     
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
 class CuposCompradoresEdit(LoginRequiredMixin, generic.UpdateView):
@@ -192,13 +233,15 @@ class ClientesSolicitudesView(LoginRequiredMixin, generic.ListView):
     template_name = "clientes/listaclientessolicitudes.html"
     context_object_name='consulta'
     login_url = 'bases:login'
-    # solo cuentas de deudores
+
     def get_queryset(self):
         solicitantes = Solicitante.objects.values_list('cxcliente')
-        clientes = Datos_generales.objects.values_list('cxcliente')
+        clientes = Datos_generales.objects.values_list('cxcliente__cxparticipante')
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
 
         return Solicitante.objects\
-            .filter(cxcliente__in = solicitantes.difference(clientes))
+            .filter(cxcliente__in = solicitantes.difference(clientes)
+                    , empresa = id_empresa.empresa)
 
 class CompradorEdit(LoginRequiredMixin, generic.UpdateView):
     model=Datos_compradores
@@ -230,9 +273,11 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
     form_cliente={}
     datoscliente={}
     
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
     if request.method=='GET':
         datosparticipante = Datos_participantes.objects\
-            .filter(cxparticipante=cliente_id).first()
+            .filter(cxparticipante=cliente_id, empresa = id_empresa.empresa).first()
             
         if datosparticipante:
             e={ 
@@ -256,7 +301,7 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
             # si encuentra registro de datos participantes buscar en datos de cliente
 
             datoscliente = Datos_generales.objects\
-                .filter(cxcliente=idcliente).first()
+                .filter(cxcliente=datosparticipante).first()
             
             if datoscliente:
                 e={
@@ -288,15 +333,13 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
                     }
                     formulario=ParticipanteForm(e)
 
-            # 14-ene-23 l.g.    no sé porqué estaba esta línea
-            # datoscliente=Datos_generales.objects.filter(pk=0)
-            
     contexto={'datosparticipante':datosparticipante
             , 'form_participante':formulario
             , 'form_cliente':form_cliente
             }
 
     if request.method=='POST':
+
         # cxtipoid=request.POST.get("cxtipoid")
         cxtipoid="R"
         idcliente=request.POST.get("cxparticipante")
@@ -314,7 +357,7 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
         dinicioactividades = request.POST.get("dinicioactividades")
 
         datosparticipante = Datos_participantes.objects\
-            .filter(cxparticipante=idcliente).first()
+            .filter(cxparticipante=idcliente, empresa = id_empresa.empresa).first()
 
         if not datosparticipante:
             datosparticipante = Datos_participantes(
@@ -332,6 +375,7 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
                 cxusuariocrea= request.user,
                 cxactividad = cxactividad,
                 dinicioactividades = dinicioactividades,
+                empresa = id_empresa.empresa,
             )
             if datosparticipante:
                 datosparticipante.save()
@@ -355,7 +399,8 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
             datosparticipante.save()
         
         # datos en tabla clientes
-        datoscliente = Datos_generales.objects.filter(cxcliente=idcliente).first()
+        datoscliente = Datos_generales.objects\
+            .filter(cxcliente=datosparticipante).first()
 
         cxtipocliente = request.POST.get("cxtipocliente")
         local = Localidades.objects.filter(pk=cxlocalidad).first()
@@ -366,6 +411,7 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
                 cxtipocliente=cxtipocliente,
                 cxusuariocrea = request.user,
                 cxlocalidad=local,
+                empresa = id_empresa.empresa,
             )
             if datoscliente:
                 datoscliente.save()
@@ -378,26 +424,28 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
 
         # bifurcar dependiendo del tipo de cliente: natural o juridico
         if cxtipocliente=="N":
-            return redirect("clientes:clientenatural_editar",cliente_ruc=idcliente)
+            return redirect("clientes:clientenatural_editar"
+                            ,cliente_id=datosparticipante.id)
         else:
-            return redirect("clientes:clientejuridico_editar",cliente_ruc=idcliente)
+            return redirect("clientes:clientejuridico_editar"
+                            ,cliente_id=datosparticipante.id)
 
     return render(request, template_name, contexto)
 
 @login_required(login_url='/login/')
 @permission_required('clientes.update_datos_generales', login_url='bases:sin_permisos')
-def DatosClienteNatural(request, cliente_ruc=None):
+def DatosClienteNatural(request, cliente_id=None):
     template_name="clientes/datosclientenatural_form.html"
     contexto={}
     formulario={}
     datoscliente={}
     
     cliente = Datos_generales.objects\
-        .filter(cxcliente=cliente_ruc).first()
+        .filter(cxcliente=cliente_id).first()
 
     if request.method=='GET':
         datoscliente = Personas_naturales.objects\
-            .filter(cxcliente=cliente_ruc).first()
+            .filter(cxcliente=cliente_id).first()
 
         if datoscliente:
             nacimiento= date.isoformat(datoscliente.dnacimiento)
@@ -421,6 +469,8 @@ def DatosClienteNatural(request, cliente_ruc=None):
 
     if request.method=='POST':
 
+        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+        
         dnacimiento = request.POST.get("dnacimiento")
         cxsexo = request.POST.get("cxsexo")
         cxestadocivil = request.POST.get("cxestadocivil")
@@ -429,7 +479,8 @@ def DatosClienteNatural(request, cliente_ruc=None):
         ctnombreconyuge = request.POST.get("ctnombreconyuge")
         ctprofesion = request.POST.get("ctprofesion")
 
-        datoscliente = Personas_naturales.objects.filter(cxcliente=cliente.cxcliente).first()
+        datoscliente = Personas_naturales.objects\
+            .filter(cxcliente=cliente.cxcliente).first()
 
         if not datoscliente:
             datoscliente= Personas_naturales(
@@ -441,7 +492,8 @@ def DatosClienteNatural(request, cliente_ruc=None):
                 ctnombrenegocio = ctnombrenegocio,
                 ctprofesion = ctprofesion,
                 ctnombreconyuge=ctnombreconyuge,
-                cxusuariocrea = request.user
+                cxusuariocrea = request.user,
+                empresa = id_empresa.empresa,
             )
             if datoscliente:
                 datoscliente.save()
@@ -464,18 +516,19 @@ def DatosClienteNatural(request, cliente_ruc=None):
 
 @login_required(login_url='/login/')
 @permission_required('clientes.update_datos_generales', login_url='bases:sin_permisos')
-def DatosClienteJuridico(request, cliente_ruc=None):
+def DatosClienteJuridico(request, cliente_id=None):
     template_name="clientes/datosclientejuridico_form.html"
     contexto={}
     formulario={}
     datoscliente={}
     
     cliente = Datos_generales.objects\
-        .filter(cxcliente=cliente_ruc).first()
+        .filter(cxcliente=cliente_id).first()
 
     if request.method=='GET':
+
         datoscliente = Personas_juridicas.objects\
-            .filter(cxcliente=cliente_ruc).first()
+            .filter(cxcliente=cliente_id).first()
         if datoscliente:
             e={ 
                 'cxcliente':datoscliente.cxcliente,
@@ -514,6 +567,8 @@ def DatosClienteJuridico(request, cliente_ruc=None):
 
     if request.method=='POST':
 
+        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+        
         ctnombrecorto = request.POST.get("ctnombrecorto")
         cxtipoempresa = request.POST.get("cxtipoempresa")
         ctcontacto = request.POST.get("ctcontacto")
@@ -574,7 +629,8 @@ def DatosClienteJuridico(request, cliente_ruc=None):
                 ctcargorepresentante3 = ctcargorepresentante3,
                 cxestadocivilrepresentante3 = cxestadocivilrepresentante3,
                 cttelefonorepresentante3 = cttelefonorepresentante3,
-                cxusuariocrea = request.user
+                cxusuariocrea = request.user,
+                empresa = id_empresa.empresa,
             )
             if datoscliente:
                 datoscliente.save()
@@ -702,12 +758,16 @@ def ActualizarCuentaTransferencia(request, pk, cliente_ruc):
         return HttpResponse(0)
 
     if request.method=="GET":
+        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+        
         cliente = Datos_generales.objects.filter(cxcliente=cliente_ruc).first()
         ctacte = Cuenta_transferencia.objects.filter(cxcliente=cliente).first()
         if not ctacte:
             ctacte = Cuenta_transferencia(cxcliente=cliente
             , cxcuenta=cuenta
-            , cxusuariocrea=request.user)
+            , cxusuariocrea=request.user,
+                empresa = id_empresa.empresa,
+            )
         else:        
             ctacte.cxcuenta = cuenta
             ctacte.leliminado = False
@@ -770,6 +830,9 @@ def DatosCompradores(request, comprador_id=None):
             }
 
     if request.method=='POST':
+
+        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+        
         # cxtipoid=request.POST.get("cxtipoid")
         cxtipoid="R"
         idcomprador=request.POST.get("cxparticipante")
@@ -799,6 +862,7 @@ def DatosCompradores(request, comprador_id=None):
                 ctgirocomercial=ctgirocomercial,
                 cxusuariocrea= request.user,
                 cxactividad = cxactividad,
+                empresa = id_empresa.empresa,
             )
             if datosparticipante:
                 datosparticipante.save()
@@ -832,7 +896,8 @@ def DatosCompradores(request, comprador_id=None):
         if not datoscomprador:
             datoscomprador= Datos_compradores(
                 cxcomprador = datosparticipante,
-                cxusuariocrea = request.user
+                cxusuariocrea = request.user,
+                empresa = id_empresa.empresa,
             )
             if datoscomprador:
                 datoscomprador.save()

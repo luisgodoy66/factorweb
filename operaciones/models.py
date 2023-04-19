@@ -23,13 +23,12 @@ class Datos_operativos(ClaseModelo):
         ('X', 'Bloqueado'),
     )
     cxcliente=models.ForeignKey(Datos_generales_cliente
-        ,to_field="cxcliente", on_delete=models.RESTRICT
+        , on_delete=models.RESTRICT
         , related_name="datos_operativos"
     )
     dalta = models.DateTimeField(auto_created=True) 
     cxtipoliquidacioncobranza = models.CharField(max_length=1, default="L", null=True) 
-    cxclase =models.ForeignKey(Clases_cliente
-        ,to_field="cxclase", default='A', on_delete=models.DO_NOTHING
+    cxclase =models.ForeignKey(Clases_cliente, on_delete=models.DO_NOTHING
     )
     nporcentajeanticipo = models.SmallIntegerField(default= 80)
     ntasacomision = models.DecimalField(max_digits=11, decimal_places=8, default=0) 
@@ -55,7 +54,7 @@ class Asignacion(ClaseModelo):
         ('P', 'Pagada'),
     )
     cxcliente=models.ForeignKey(Datos_participantes
-        ,to_field="cxparticipante", on_delete=models.CASCADE
+        , on_delete=models.CASCADE
         , related_name="cliente_asignacion"
     )
     cxasignacion = models.CharField(max_length=8 ) 
@@ -93,14 +92,15 @@ class Asignacion(ClaseModelo):
         return self.nanticipo - self.ngao - self.ndescuentodecartera - self.niva
 
 class Documentos_Manager(models.Manager):
-    def facturas_pendientes(self,fecha_corte):
+    def facturas_pendientes(self, fecha_corte, id_empresa):
         fecha = parse_date(fecha_corte)
         return self.filter(dvencimiento__lte = fecha - F('ndiasprorroga')
                 , leliminado = False, nsaldo__gt = 0
+                , empresa = id_empresa
                 , cxasignacion__in = Asignacion.objects
                     .filter(cxtipo = "F", cxestado = "P", leliminado = False))
 
-    def antigüedad_cartera(self):
+    def antigüedad_cartera(self, id_empresa):
         # grafico de antigüedad de cartera 
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
@@ -112,7 +112,8 @@ class Documentos_Manager(models.Manager):
         return self.filter( leliminado = False, nsaldo__gt = 0
             , cxasignacion__cxtipo = "F"
             , cxasignacion__cxestado = "P"
-            , cxasignacion__leliminado = False)\
+            , cxasignacion__leliminado = False
+            , empresa = id_empresa)\
             .aggregate(
                 vencido_mas_90 = Sum('nsaldo', filter=Q(dvencimiento__lt = vcdo90) ) 
                 , vencido_90 = Sum('nsaldo', filter=Q(dvencimiento__lt = vcdo60
@@ -179,7 +180,7 @@ class Documentos_Manager(models.Manager):
     
 class Documentos(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_participantes
-        ,to_field="cxparticipante", on_delete=models.CASCADE
+        , on_delete=models.CASCADE
         , related_name="cliente_documento"
     )
     cxasignacion=models.ForeignKey(Asignacion
@@ -191,11 +192,11 @@ class Documentos(ClaseModelo):
     )
     nreferencia = models.BigIntegerField(null=True)  
     cxcomprador=models.ForeignKey(Datos_participantes
-        ,to_field="cxparticipante", on_delete=models.CASCADE
+        , on_delete=models.CASCADE
         , related_name="comprador"
     )
     cxtipodocumento=models.ForeignKey(Tipos_documentos
-        ,to_field="cxtipodocumento", on_delete=models.CASCADE
+        , on_delete=models.CASCADE
         , related_name="tipo_documento"
     )
     ctdocumento = models.CharField(max_length=20) 
@@ -256,23 +257,27 @@ class Documentos(ClaseModelo):
         
 class ChequesAccesorios_Manager(models.Manager):
 
-    def cheques_a_depositar(self, fecha_corte):
+    def cheques_a_depositar(self, fecha_corte, id_empresa):
         fecha = parse_date(fecha_corte)
         return self.filter(dvencimiento__lte = fecha - F('ndiasprorroga')
                 , cxestado = 'A'
                 , leliminado = False, lcanjeado = False, laccesorioquitado = False
                 , documento__cxasignacion__cxestado = "P"
-                , documento__cxasignacion__leliminado = False)
+                , documento__cxasignacion__leliminado = False
+                , empresa = id_empresa
+                )
 
-    def facturas_pendientes(self, fecha_corte):
+    def facturas_pendientes(self, fecha_corte, id_empresa):
         fecha = parse_date(fecha_corte)
         return self.filter(dvencimiento__lte = fecha - F('ndiasprorroga')
                 , laccesorioquitado = True, chequequitado__cxestado = 'A'
                 , leliminado = False, lcanjeado = False
                 , documento__cxasignacion__cxestado = "P"
-                , documento__cxasignacion__leliminado = False)
+                , documento__cxasignacion__leliminado = False
+                , empresa = id_empresa
+                )
 
-    def antigüedad_cartera(self):
+    def antigüedad_cartera(self, id_empresa):
         # grafico de antigüedad de cartera 
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
@@ -284,7 +289,8 @@ class ChequesAccesorios_Manager(models.Manager):
         return self.filter(cxestado = 'A'
                 , leliminado = False, lcanjeado  = False, laccesorioquitado = False
                 , documento__cxasignacion__cxestado = "P"
-                , documento__cxasignacion__leliminado = False)\
+                , documento__cxasignacion__leliminado = False
+                , empresa = id_empresa)\
             .aggregate(
                 vencido_mas_90 = Sum('ntotal', filter=Q(dvencimiento__lt = vcdo90) ) 
                 , vencido_90 = Sum('ntotal', filter=Q(dvencimiento__lt = vcdo60
@@ -347,7 +353,7 @@ class ChequesAccesorios_Manager(models.Manager):
                         , "chequequitado__nsaldo")
 
 class Cheques_quitados_Manager(models.Manager):
-    def antigüedad_cartera(self):
+    def antigüedad_cartera(self, id_empresa):
         # grafico de antigüedad de cartera 
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
@@ -359,7 +365,8 @@ class Cheques_quitados_Manager(models.Manager):
         return self.filter(cxestado = 'A'
                 , leliminado = False
                 , accesorio_quitado__documento__cxasignacion__cxestado = "P"
-                , accesorio_quitado__documento__cxasignacion__leliminado = False)\
+                , accesorio_quitado__documento__cxasignacion__leliminado = False
+                , empresa = id_empresa)\
             .aggregate(
                 vencido_mas_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt = vcdo90) ) 
                 , vencido_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt = vcdo60
@@ -410,7 +417,7 @@ class Cheques_quitados_Manager(models.Manager):
 
 class Cheques_quitados(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
-        ,to_field="cxcliente", on_delete=models.RESTRICT
+        , on_delete=models.RESTRICT
     )
     cxestado = models.CharField(max_length=1, default="A") 
     nsaldo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -480,7 +487,7 @@ class Movimientos_maestro(ClaseModelo):
         ('+', 'Suma'),
         ('-', 'Resta'),
     )
-    cxmovimiento = models.CharField(max_length=4, unique=True) 
+    cxmovimiento = models.CharField(max_length=4) 
     ctmovimiento= models.CharField(max_length=60) 
     cxsigno= models.CharField(max_length=1, choices=TIPOS_DE_SIGNOS) 
     # omitir prioridad y agregar si el movimiento es un cargo
@@ -498,12 +505,12 @@ class Movimientos_maestro(ClaseModelo):
 
 class Movimientos_clientes(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
-        ,to_field="cxcliente", on_delete=models.RESTRICT
+        , on_delete=models.RESTRICT
         , related_name="movimientos"
     )
     cxtipofactoring = models.BigIntegerField(null=True) 
     cxmovimiento = models.ForeignKey(Movimientos_maestro
-        , to_field="cxmovimiento", on_delete=models.CASCADE
+        , on_delete=models.CASCADE
         , related_name="maestro_movimientos") 
     nvalor = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
     cxoperacion = models.CharField(max_length=10) 
@@ -514,8 +521,7 @@ class Movimientos_clientes(ClaseModelo):
 
 class Cargos_detalle(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
-        ,to_field="cxcliente", on_delete=models.RESTRICT
-        , related_name="cargos"
+        , on_delete=models.RESTRICT, related_name="cargos"
     )
     cxtipofactoring = models.BigIntegerField(null=True) 
     cxasignacion = models.ForeignKey(Asignacion, on_delete=models.RESTRICT
@@ -523,7 +529,7 @@ class Cargos_detalle(ClaseModelo):
     cxdocumento  = models.ForeignKey(Documentos, on_delete=models.RESTRICT
         , null=True)  
     cxmovimiento = models.ForeignKey(Movimientos_maestro
-        ,to_field="cxmovimiento", on_delete=models.RESTRICT)
+        , on_delete=models.RESTRICT)
     nvalor = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
     nsaldo = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
     dultimageneracioncargos = models.DateField()
@@ -631,10 +637,10 @@ class Notas_debito_cabecera(ClaseModelo):
         ('A', 'Ampliación de plazo'),
     )
     cxcliente=models.ForeignKey(Datos_generales_cliente
-        ,to_field="cxcliente", on_delete=models.RESTRICT
+        , on_delete=models.RESTRICT
     )
     dnotadebito = models.DateField()
-    cxnotadebito = models.CharField(max_length=10, unique=True)
+    cxnotadebito = models.CharField(max_length=10)
     cxtipofactoring = models.ForeignKey(Tipos_factoring, null=True
         , on_delete=models.CASCADE)
     nvalor =  models.DecimalField(max_digits=10, decimal_places=2)
@@ -656,7 +662,7 @@ class Notas_debito_detalle(ClaseModelo):
 
 class Cheques_canjeados(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
-        ,to_field="cxcliente", on_delete=models.RESTRICT
+        , on_delete=models.RESTRICT
         , related_name="cliente_canje"
     )
     accesoriooriginal = models.ForeignKey(ChequesAccesorios
@@ -667,7 +673,7 @@ class Cheques_canjeados(ClaseModelo):
 
 class Ampliaciones_plazo_cabecera(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
-        ,to_field="cxcliente", on_delete=models.RESTRICT
+        , on_delete=models.RESTRICT
     )
     dampliacionhasta =models.DateField()
     ncomision = models.DecimalField(max_digits=10, decimal_places=2)
@@ -675,7 +681,7 @@ class Ampliaciones_plazo_cabecera(ClaseModelo):
         decimal_places= 2, default= 0)
     niva = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
     notadedebito = models.OneToOneField(Notas_debito_cabecera
-        , to_field="cxnotadebito", on_delete=models.CASCADE)
+        , on_delete=models.CASCADE)
 
 class Ampliaciones_plazo_detalle(ClaseModelo):
     TIPOS_ASIGNACION = (

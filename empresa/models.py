@@ -5,7 +5,7 @@ from pais.models import Bancos
 # Create your models here.
 
 class Clases_cliente(ClaseModelo):
-    cxclase=models.CharField(max_length=3, unique=True)
+    cxclase=models.CharField(max_length=3)
 
     def __str__(self):
         return self.cxclase
@@ -111,7 +111,7 @@ class Tasas_factoring(ClaseModelo):
         return super(Tasas_factoring, self).save()
 
 class Tipos_documentos(ClaseModelo):
-    cxtipodocumento = models.CharField(max_length=1, unique=True)
+    cxtipodocumento = models.CharField(max_length=1)
     cttipodocumento = models.CharField(max_length=15)
     ctabreviacion = models.CharField(max_length=5, blank=True)
     lprincipal = models.BooleanField(default=True)
@@ -122,7 +122,7 @@ class Tipos_documentos(ClaseModelo):
         return self.cttipodocumento
     
 class Tipos_factoring(ClaseModelo):
-    cxtipofactoring = models.CharField(max_length=3 , unique=True)
+    cxtipofactoring = models.CharField(max_length=3 , )
     cttipofactoring = models.CharField(max_length= 40) 
     ctabreviacion = models.CharField(max_length= 30) 
     cxmoneda = models.CharField(max_length=3) 

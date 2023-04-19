@@ -11,10 +11,11 @@ class Datos_compradores(ClaseModelo):
     )
     cxcomprador=models.OneToOneField(
         Datos_participantes, related_name="datos_generales_comprador"
-        ,to_field="cxparticipante", on_delete=models.CASCADE )
-    cxestado=models.CharField(max_length=1, default='A', choices=ESTADOS_DE_COMPRADORES )
-    cxclase =models.ForeignKey(Clases_cliente
-        ,to_field="cxclase", default='A', on_delete=models.DO_NOTHING    )
+        , on_delete=models.CASCADE )
+    cxestado=models.CharField(max_length=1, default='A'
+                              , choices=ESTADOS_DE_COMPRADORES )
+    cxclase =models.ForeignKey(Clases_cliente, on_delete=models.DO_NOTHING 
+                               ,null=True,)
 
     def __str__(self):
         return self.cxcomprador.ctnombre
@@ -26,7 +27,7 @@ class Datos_generales(ClaseModelo):
     )
     cxcliente=models.OneToOneField(
         Datos_participantes, related_name="datos_generales"
-        ,to_field="cxparticipante", on_delete=models.CASCADE    )
+        , on_delete=models.CASCADE    )
     cxtipocliente=models.CharField(max_length=1, choices=TIPOS_DE_CLIENTES,
         help_text='tipo de cliente: natural , juridico, etc'    )
     dcontrato=models.DateField( null=True,
@@ -69,8 +70,8 @@ class Cuentas_bancarias(ClaseModelo):
         ('R', 'RUC'),
         ('E','extranjero'),
     )
-    cxparticipante=models.ForeignKey(Datos_participantes,
-        to_field="cxparticipante", on_delete=models.CASCADE
+    cxparticipante=models.ForeignKey(Datos_participantes
+        , on_delete=models.CASCADE
         , related_name="cuenta_bancaria")
     cxbanco = models.ForeignKey(Bancos, on_delete=models.RESTRICT
         , related_name="banco_cliente")
@@ -96,8 +97,8 @@ class Cuenta_transferencia_Manager(models.Manager):
         return self.filter(leliminado = False, cxcliente = id_cliente)
 
 class Cuenta_transferencia(ClaseModelo):
-    cxcliente=models.OneToOneField(Datos_generales,
-        to_field="cxcliente", on_delete=models.CASCADE
+    cxcliente=models.OneToOneField(Datos_generales
+        , on_delete=models.CASCADE
         , related_name="cuenta_cliente")
     cxcuenta=models.OneToOneField(Cuentas_bancarias,
         on_delete=models.CASCADE
@@ -110,11 +111,11 @@ class Cuenta_transferencia(ClaseModelo):
     objects= Cuenta_transferencia_Manager()
 
 class Cupos_compradores(ClaseModelo):
-    cxcliente=models.ForeignKey(Datos_generales,
-        to_field="cxcliente", on_delete=models.RESTRICT
+    cxcliente=models.ForeignKey(Datos_generales
+        , on_delete=models.RESTRICT
         , related_name='comprador_cliente')
-    cxcomprador = models.ForeignKey(Datos_compradores,
-        to_field="cxcomprador", on_delete=models.RESTRICT
+    cxcomprador = models.ForeignKey(Datos_compradores
+        , on_delete=models.RESTRICT
         , related_name='comprador_comprador')
     cxmoneda = models.CharField(
         max_length=3, null=False,
@@ -140,7 +141,7 @@ class Cupos_compradores(ClaseModelo):
 
 class Linea_Factoring(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales
-        , to_field="cxcliente", on_delete=models.RESTRICT
+        , on_delete=models.RESTRICT
         , related_name="linea_factoring"
     )
     cxmoneda = models.CharField( max_length=3, null=False,
@@ -166,8 +167,7 @@ class Linea_Factoring(ClaseModelo):
     
     def porcentaje_disponible(self):
         return round( self.disponible() / self.nvalor * 100,2)
-
-    
+   
 class Linea_factoring_hist(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales
         , to_field="cxcliente", on_delete=models.RESTRICT
@@ -194,7 +194,7 @@ class Personas_juridicas(ClaseModelo):
         ('D', 'Divorciado')
     )
     cxcliente = models.OneToOneField(Datos_participantes,
-        to_field="cxparticipante", on_delete=models.CASCADE,
+        on_delete=models.CASCADE,
         related_name="persona_juridica")
     ctnombrecorto = models.TextField( blank=True, help_text='nombre de fantasia')
     cxtipoempresa = models.CharField( max_length=3
@@ -258,7 +258,7 @@ class Personas_naturales(ClaseModelo):
         ('D','Divorciado'),
         ('U','Unión libre')
     )
-    cxcliente = models.ForeignKey(Datos_participantes, to_field="cxparticipante", on_delete=models.CASCADE)
+    cxcliente = models.ForeignKey(Datos_participantes, on_delete=models.CASCADE)
     dnacimiento=models.DateField(null=True, default="2000-01-01")
     cxsexo = models.CharField(max_length=1, choices=TIPOS_DE_SEXOS, null=False)
     cxestadocivil = models.CharField( max_length=3, choices=TIPOS_DE_ESTADO_CIVIL) 
@@ -276,10 +276,8 @@ class Personas_naturales(ClaseModelo):
 
 class Socios(ClaseModelo):
     cxcliente = models.ForeignKey(Datos_participantes,
-        to_field="cxparticipante", on_delete=models.CASCADE)
-    cxsocio=models.CharField(
-        max_length=13, null=False
-    )
+        on_delete=models.CASCADE)
+    cxsocio=models.CharField( max_length=13, null=False)
     ctsocio=models.TextField(null=False)
     ncapitalaportado=models.DecimalField(
         max_digits=10, decimal_places=2, default=0

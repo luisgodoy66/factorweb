@@ -22,7 +22,7 @@ urlpatterns = [
 # datos operativos
     path('listadatosoperativos/',DatosOperativosView.as_view(), \
         name='listadatosoperativos'),
-    path('editardatooperativo/<cliente_ruc>',DatosOperativos, \
+    path('editardatooperativo/<cliente_id>',DatosOperativos, \
         name='datosoperativos_editar'),
     path('listaestadosoperativos',EstadosOperativosView.as_view(), \
          name='listaestadosoperativos'),

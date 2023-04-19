@@ -18,6 +18,7 @@ from clientes.models import Cuentas_bancarias, Datos_generales, Cuenta_transfere
 from empresa.models import Tasas_factoring, Cuentas_bancarias as CuentasEmpresa\
     , Datos_participantes, Tipos_factoring
 from cuentasconjuntas import models as CuentasConjuntasModels
+from bases.models import Usuario_empresa
 
 from .forms import CobranzasDocumentosForm, ChequesForm, LiquidarForm\
     , MotivoProtestoForm, ProtestoForm, RecuperacionesProtestosForm\
@@ -42,6 +43,11 @@ class DocumentosVencidosView(LoginRequiredMixin, generic.ListView):
     context_object_name='consulta'
     login_url = 'bases:login'
 
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Documentos.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
+
     def get_context_data(self,*args, **kwargs): 
         context = super(DocumentosVencidosView, self).get_context_data(*args,**kwargs) 
         fecha_corte = date.today() 
@@ -55,6 +61,11 @@ class DocumentosPorVencerView(LoginRequiredMixin, generic.ListView):
     template_name = "cobranzas/listadocumentospendientes.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Documentos.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
 
     def get_context_data(self,*args, **kwargs): 
         context = super(DocumentosPorVencerView, self).get_context_data(*args,**kwargs) 
@@ -71,6 +82,11 @@ class ChequesADepositarView(LoginRequiredMixin, generic.ListView):
     template_name = "cobranzas/listachequesadepositar.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=ChequesAccesorios.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
 
     def get_context_data(self,*args, **kwargs): 
         context = super(ChequesADepositarView, self).get_context_data(*args,**kwargs) 
@@ -141,6 +157,13 @@ class CobranzasConsulta(LoginRequiredMixin, generic.ListView):
     context_object_name='consulta'
     login_url = 'bases:login'
 
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Documentos_cabecera.objects.filter(leliminado = False
+                                              , empresa = id_empresa.empresa
+                                              )
+        return qs
+
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
         # obtener primer día del mes actual
@@ -161,9 +184,12 @@ class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
     login_url = 'bases:login'
 
     def get_queryset(self):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+
         cobranzas = Documentos_cabecera.objects.filter(cxestado='A'\
             , leliminado = False\
             , cxformapago__in = ['TRA','CHE','DEP']\
+            , empresa = id_empresa.empresa
             , cxtipofactoring__lanticipatotalnegociado = False )\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','ldepositoencuentaconjunta'
@@ -174,6 +200,7 @@ class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
         recuperaciones = Recuperaciones_cabecera.objects.filter(cxestado='A'\
             , leliminado = False\
             , cxformacobro__in = ['TRA','CHE']\
+            , empresa = id_empresa.empresa
             , cxtipofactoring__lanticipatotalnegociado = False )\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','ldepositoencuentaconjunta'
@@ -190,15 +217,19 @@ class CobranzasPendientesLiquidarView(LoginRequiredMixin, generic.ListView):
     login_url = 'bases:login'
 
     def get_queryset(self):
-        cobranzas= Documentos_cabecera.objects.filter(Q(cxestado='C',\
-            leliminado = False) | Q(cxformapago__in=["EFE", "MOV"], cxestado='A'))\
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+
+        cobranzas= Documentos_cabecera.objects.filter(Q(cxestado='C'\
+            , empresa = id_empresa.empresa
+            , leliminado = False) | Q(cxformapago__in=["EFE", "MOV"], cxestado='A'))\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion'
                 ,'cxcobranza','cxformapago','nvalor', 'cxcuentadeposito__cxcuenta'
                 , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'C'",''))
 
-        recuperaciones = Recuperaciones_cabecera.objects.filter(Q(cxestado='C',\
-            leliminado = False) | Q(cxformacobro__in=["EFE", "MOV"], cxestado='A'))\
+        recuperaciones = Recuperaciones_cabecera.objects.filter(Q(cxestado='C'\
+            , empresa = id_empresa.empresa
+            , leliminado = False) | Q(cxformacobro__in=["EFE", "MOV"], cxestado='A'))\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion'
                 ,'cxrecuperacion','cxformacobro','nvalor', 'cxcuentadeposito__cxcuenta'
@@ -213,14 +244,23 @@ class LiquidacionesPendientesPagarView(LoginRequiredMixin, generic.ListView):
     login_url = 'bases:login'
 
     def get_queryset(self):
-        return Liquidacion_cabecera.objects.filter(ldesembolsada=False,\
-            leliminado = False, ddesembolso__lte = date.today())
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        return Liquidacion_cabecera.objects.filter(ldesembolsada=False\
+            , empresa = id_empresa.empresa
+            , leliminado = False, ddesembolso__lte = date.today())
 
 class MotivosProtestoView(LoginRequiredMixin, generic.ListView):
     model = Motivos_protesto_maestro
     template_name = "cobranzas/listamotivosprotesto.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Motivos_protesto_maestro.objects.filter(leliminado = False
+                                              , empresa = id_empresa.empresa
+                                              )
+        return qs
 
 class MotivoProtestoNew(LoginRequiredMixin, generic.CreateView):
     model = Motivos_protesto_maestro
@@ -231,6 +271,8 @@ class MotivoProtestoNew(LoginRequiredMixin, generic.CreateView):
     login_url = 'bases:login'
 
     def form_valid(self, form):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
@@ -255,6 +297,8 @@ class ProtestoCobranzaNew(LoginRequiredMixin, generic.CreateView):
     success_message="Protesto creada satisfactoriamente"
 
     def form_valid(self, form):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
@@ -283,6 +327,11 @@ class ProtestosPendientesView(LoginRequiredMixin, generic.ListView):
     template_name = "cobranzas/listaprotestospendientes.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Cheques_protestados.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
 
 class RecuperacionProtestoView(LoginRequiredMixin, generic.FormView):
     model = Recuperaciones_cabecera
@@ -354,6 +403,8 @@ class ProtestoRecuperacionNew(LoginRequiredMixin, generic.CreateView):
     success_message="Protesto creada satisfactoriamente"
 
     def form_valid(self, form):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
@@ -384,8 +435,11 @@ class LiquidacionesEnNegativoPendientesView(LoginRequiredMixin, generic.ListView
     login_url = 'bases:login'
 
     def get_queryset(self):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         return Notas_debito_cabecera.objects\
-        .filter(cxtipooperacion__in = 'LCRB', leliminado = False, nsaldo__gt = 0)
+        .filter(cxtipooperacion__in = 'LCRB', leliminado = False
+                , empresa = id_empresa.empresa
+                , nsaldo__gt = 0)
 
 class CobranzasCargosView(LoginRequiredMixin, generic.FormView):
     model = Cargos_cabecera
@@ -444,15 +498,18 @@ def GeneraListaCarteraPorVencerJSON(request, fecha_corte = None):
     #     fecha = date.today()
     #     fecha = fecha + timedelta(days=7)
     # Se incluyen los registros de cheques a los que se le quitó el acesorio
-    tempBlogs = []
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    documentos = Documentos.objects.facturas_pendientes(fecha_corte).all()
+    tempBlogs = []
+    documentos = Documentos.objects.facturas_pendientes(fecha_corte
+                                                        , id_empresa.empresa).all()
 
     for i in range(len(documentos)):
         tempBlogs.append(GeneraListaCarterPorVencerJSONSalida(documentos[i])) 
 
     # los accesorios que fueron quitados se convierten en facturas pendientes
-    quitados = ChequesAccesorios.objects.facturas_pendientes(fecha_corte).all()
+    quitados = ChequesAccesorios.objects.facturas_pendientes(fecha_corte
+                                                             , id_empresa.empresa).all()
 
     for i in range(len(quitados)):
         tempBlogs.append(GeneraListaAccesoriosQuitadosJSONSalida(quitados[i])) 
@@ -666,8 +723,10 @@ def AceptarCobranza(request):
 
 def GeneraListaChequesADepositarJSON(request, fecha_corte):
     # Es invocado desde la url de una tabla bt
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    documentos = ChequesAccesorios.objects.cheques_a_depositar(fecha_corte).all()
+    documentos = ChequesAccesorios.objects\
+        .cheques_a_depositar(fecha_corte, id_empresa.empresa).all()
 
     tempBlogs = []
     for i in range(len(documentos)):
@@ -756,9 +815,11 @@ def DepositoCheques(request, ids_cheques, total_cartera, cuenta_destino
 
 def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     if desde == 'None':
-        cobranzas = Documentos_cabecera.objects.all()\
+        cobranzas = Documentos_cabecera.objects\
+            .filter(empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxcobranza'
                 ,'cxformapago'
@@ -766,7 +827,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 ,'cxcheque', 'cxestado', 'dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'C'",''))
-        recuperaciones = Recuperaciones_cabecera.objects.all()\
+        recuperaciones = Recuperaciones_cabecera.objects\
+            .filter(empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxrecuperacion'
                 ,'cxformacobro'
@@ -775,7 +837,7 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'R'",''))
         protestos_cobranzas = Documentos_cabecera.objects\
-            .filter(cxestado='P')\
+            .filter(cxestado='P', empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxcobranza'
                 ,'cxcheque__cheque_protestado__motivoprotesto__ctmotivoprotesto'
@@ -784,7 +846,7 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'C protestada'",''))
         protestos_recuperaciones = Recuperaciones_cabecera.objects\
-            .filter(cxestado='P')\
+            .filter(cxestado='P', empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxrecuperacion'
                 ,'cxcheque__cheque_protestado__motivoprotesto__ctmotivoprotesto'
@@ -792,7 +854,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 ,'cxcheque', 'cxcheque__cheque_protestado__cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'R protestada'",''))
-        cargos = Cargos_cabecera.objects.all()\
+        cargos = Cargos_cabecera.objects\
+            .filter(empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxcobranza'
                 ,'cxformapago'
@@ -800,7 +863,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 , 'cxcheque', 'cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'CC'",''))
-        liquidaciones = Liquidacion_cabecera.objects.all()\
+        liquidaciones = Liquidacion_cabecera.objects\
+            .filter(empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxcobranza'
                 ,'cxformapago'
@@ -808,7 +872,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 , 'cxcheque', 'cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'CC'",''))
-        liquidaciones = Liquidacion_cabecera.objects.all()\
+        liquidaciones = Liquidacion_cabecera.objects\
+            .filter(empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddesembolso'
                 ,'cxtipofactoring__ctabreviacion','cxliquidacion'
                 ,'jcobranzas'
@@ -819,7 +884,9 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
     else:
 
         cobranzas = Documentos_cabecera.objects\
-            .filter(dcobranza__gte = desde, dcobranza__lte = hasta)\
+            .filter(dcobranza__gte = desde
+                    , empresa = id_empresa.empresa
+                    , dcobranza__lte = hasta)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxcobranza'
                 ,'cxformapago','nvalor', 'dcobranza'
@@ -828,7 +895,9 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                     .annotate(tipo=RawSQL("select 'C'",''))
                 
         recuperaciones = Recuperaciones_cabecera.objects\
-            .filter(dcobranza__gte = desde, dcobranza__lte = hasta)\
+            .filter(dcobranza__gte = desde
+                    , empresa = id_empresa.empresa
+                    , dcobranza__lte = hasta)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxrecuperacion'
                 ,'cxformacobro','nvalor', 'dcobranza'
@@ -837,7 +906,9 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                     .annotate(tipo=RawSQL("select 'R'",''))
 
         protestos_cobranzas = Documentos_cabecera.objects\
-            .filter(dcobranza__gte = desde, dcobranza__lte = hasta, cxestado='P')\
+            .filter(dcobranza__gte = desde, dcobranza__lte = hasta
+                    , empresa = id_empresa.empresa
+                    , cxestado='P')\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxcobranza'
                 ,'cxcheque__cheque_protestado__motivoprotesto__ctmotivoprotesto'
@@ -847,7 +918,9 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                     .annotate(tipo=RawSQL("select 'C protestada'",''))
                     
         protestos_recuperaciones = Recuperaciones_cabecera.objects\
-            .filter(dcobranza__gte = desde, dcobranza__lte = hasta, cxestado='P')\
+            .filter(dcobranza__gte = desde, dcobranza__lte = hasta
+                    , empresa = id_empresa.empresa
+                    , cxestado='P')\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxrecuperacion'
                 ,'cxcheque__cheque_protestado__motivoprotesto__ctmotivoprotesto'
@@ -857,7 +930,9 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                     .annotate(tipo=RawSQL("select 'R protestada'",''))
 
         cargos = Cargos_cabecera.objects\
-            .filter(dcobranza__gte = desde, dcobranza__lte = hasta)\
+            .filter(dcobranza__gte = desde, dcobranza__lte = hasta
+                    , empresa = id_empresa.empresa
+                    )\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxcobranza'
                 ,'cxformapago'
@@ -867,7 +942,9 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                     .annotate(tipo=RawSQL("select 'CC'",''))
 
         liquidaciones = Liquidacion_cabecera.objects\
-            .filter(dliquidacion__gte = desde, dliquidacion__lte = hasta)\
+            .filter(dliquidacion__gte = desde, dliquidacion__lte = hasta
+                    , empresa = id_empresa.empresa
+                    )\
                 .values('cxcliente__cxcliente__ctnombre','ddesembolso'
                 ,'cxtipofactoring__ctabreviacion','cxliquidacion'
                 ,'ctinstrucciondepago'
@@ -1092,15 +1169,22 @@ def GeneraListaCobranzasPendientesProcesarJSON(request):
     # movimientos contables
     # movimiento = Documentos_cabecera.objects.filter(Q(cxestado='C',\
     #         leliminado = False) | Q(cxformapago__in=["EFE", "MOV"], cxestado='A'))
-    cobranzas= Documentos_cabecera.objects.filter(Q(cxestado='C',\
-        leliminado = False) | Q(cxformapago__in=["EFE", "MOV"], cxestado='A'))\
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    cobranzas= Documentos_cabecera.objects\
+        .filter(Q(cxestado='C', empresa = id_empresa.empresa\
+                  ,leliminado = False) | Q(cxformapago__in=["EFE", "MOV"]
+                                           , cxestado='A'))\
             .values('cxcliente__cxcliente__ctnombre','ddeposito'
             ,'cxtipofactoring__ctabreviacion', 'dcobranza', 'nsobrepago'
             ,'cxcobranza','cxformapago','nvalor', 'cxcuentadeposito__cxcuenta'
             , 'id', 'cxcheque_id','cxcliente').annotate(tipo=RawSQL("select 'C'",''))
 
-    recuperaciones = Recuperaciones_cabecera.objects.filter(Q(cxestado='C',\
-        leliminado = False) | Q(cxformacobro__in=["EFE", "MOV"], cxestado='A'))\
+    recuperaciones = Recuperaciones_cabecera.objects\
+        .filter(Q(cxestado='C', empresa = id_empresa.empresa\
+                  ,leliminado = False) | Q(cxformacobro__in=["EFE", "MOV"]
+                                           , cxestado='A'))\
             .values('cxcliente__cxcliente__ctnombre','ddeposito'
             ,'cxtipofactoring__ctabreviacion', 'dcobranza', 'nsobrepago'
             ,'cxrecuperacion','cxformacobro','nvalor', 'cxcuentadeposito__cxcuenta'
@@ -1332,8 +1416,12 @@ def AceptarProtesto(request):
 def GeneraListaProtestosPendientesJSON(request):
     # Es invocado desde la url de una tabla bt
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     documentos = Cheques_protestados.objects\
-        .filter(leliminado=False, nsaldocartera__gt = 0).all()
+        .filter(leliminado=False
+                , empresa = id_empresa.empresa
+                , nsaldocartera__gt = 0).all()
 
     tempBlogs = []
     for i in range(len(documentos)):
@@ -1924,8 +2012,11 @@ def ReversaCobranza(request, pid_cobranza, tipo_operacion):
 
 def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     if desde == 'None':
-        cobranzas = Documentos_cabecera.objects.all()\
+        cobranzas = Documentos_cabecera.objects\
+            .filter(empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxcobranza'
                 ,'cxformapago'
@@ -1933,7 +2024,8 @@ def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
                 ,'cxcheque', 'cxestado', 'dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'C'",''))
-        recuperaciones = Recuperaciones_cabecera.objects.all()\
+        recuperaciones = Recuperaciones_cabecera.objects\
+            .filter(empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxrecuperacion'
                 ,'cxformacobro'
@@ -1944,7 +2036,8 @@ def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
     else:
 
         cobranzas = Documentos_cabecera.objects\
-            .filter(dregistro__gte = desde, dregistro__lte = hasta)\
+            .filter(dregistro__gte = desde, dregistro__lte = hasta
+                    , empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxcobranza'
                 ,'cxformapago','nvalor', 'dcobranza'
@@ -1953,7 +2046,8 @@ def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
                     .annotate(tipo=RawSQL("select 'C'",''))
                 
         recuperaciones = Recuperaciones_cabecera.objects\
-            .filter(dregistro__gte = desde, dregistro__lte = hasta)\
+            .filter(dregistro__gte = desde, dregistro__lte = hasta
+                    , empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxrecuperacion'
                 ,'cxformacobro','nvalor', 'dcobranza'
@@ -2139,8 +2233,11 @@ def AceptarCobranzaNotasDebito(request):
 
 def GeneraListaLiquidacionesRegistradasJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     if desde == 'None':
-        movimiento = Liquidacion_cabecera.objects.all()\
+        movimiento = Liquidacion_cabecera.objects\
+            .filter(empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddesembolso'
                 ,'cxtipofactoring__ctabreviacion','cxliquidacion'
                 ,'ctinstrucciondepago', 'cxtipooperacion'
@@ -2150,7 +2247,8 @@ def GeneraListaLiquidacionesRegistradasJSON(request, desde = None, hasta= None):
     else:
 
         movimiento = Liquidacion_cabecera.objects\
-            .filter(dregistro__gte = desde, dregistro__lte = hasta)\
+            .filter(dregistro__gte = desde, dregistro__lte = hasta
+                    ,empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddesembolso'
                 ,'cxtipofactoring__ctabreviacion','cxliquidacion'
                 ,'ctinstrucciondepago', 'cxtipooperacion'
@@ -2188,8 +2286,11 @@ def GeneraListaLiquidacionesJSONSalida(transaccion):
 
 def GeneraListaCobranzasCargosRegistradasJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     if desde == 'None':
-        movimiento = Cargos_cabecera.objects.all()\
+        movimiento = Cargos_cabecera.objects\
+            .filter(empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxcobranza'
                 ,'cxformapago'
@@ -2200,7 +2301,8 @@ def GeneraListaCobranzasCargosRegistradasJSON(request, desde = None, hasta= None
     else:
 
         movimiento = Cargos_cabecera.objects\
-            .filter(dregistro__gte = desde, dregistro__lte = hasta)\
+            .filter(dregistro__gte = desde, dregistro__lte = hasta
+                    , empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxcobranza'
                 ,'cxformapago','nvalor', 'dcobranza'

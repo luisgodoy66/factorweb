@@ -37,7 +37,16 @@
                             {{ form.lactiva.label}}
                         </label></div>
                         <div class="col col-md-6">
-                            {{ form.lactiva}}
+                            <!-- {{ form.lactiva}}
+                        </div>
+                        <div class="col"> -->
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  localidad.lactiva %} checked {% endif %} 
+                                id = "id_lactiva" name = "lactiva"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
                         </div>
                     </div>  
 

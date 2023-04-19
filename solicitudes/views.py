@@ -20,7 +20,7 @@ from .models import Asignacion, ChequesAccesorios, Documentos, Clientes
 from clientes.models import Datos_compradores
 from operaciones.models import Datos_participantes
 from pais.models import Bancos, Feriados
-
+from bases.models import Usuario_empresa
 
 import datetime
 
@@ -32,8 +32,10 @@ class SolicitudesView(LoginRequiredMixin, generic.ListView):
     login_url = 'bases:login'
 
     def get_queryset(self) :
-        qs=Asignacion.objects.filter(cxestado ='P').filter(leliminado = False)\
-            .order_by("dregistro")
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Asignacion.objects.filter(cxestado ='P',leliminado = False
+                                     , empresa = id_empresa.empresa)\
+                                     .order_by("dregistro")
         return qs
 
 class AsignacionFacturasPurasView(LoginRequiredMixin, generic.UpdateView):
@@ -58,14 +60,7 @@ class AsignacionConAccesoriosView(LoginRequiredMixin, generic.UpdateView):
     form_class = AsignacionesForm
     success_url=reverse_lazy("solicitudes:listasolicitudes")
 
-    # def get_context_data(self,*args, **kwargs): 
-    #     context = super(AsignacionConAccesoriosView, self).get_context_data(*args,**kwargs) 
-    #     # context['clientes'] = Clientes.objects.all() 
-
-    #     return context
-    print('vista')
     def form_valid(self, form):
-        print('grabar solicitud')
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
 
@@ -78,6 +73,9 @@ class ClienteCrearView(LoginRequiredMixin, generic.CreateView):
     success_url= reverse_lazy("solicitudes:listasolicitudes")
 
     def form_valid(self, form):
+
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
@@ -135,8 +133,7 @@ def DatosFacturasPuras(request, cliente_id=None
 
         if tipo_factoring_id:
             tipoFactoring = Tipos_factoring.objects\
-            .filter(cxtipofactoring=tipo_factoring_id).first()
-
+            .filter(pk=tipo_factoring_id).first()
             acepta_vencimiento_en_feriado = tipoFactoring.lpermitediasferiados
 
     contexto={'form_documento':form_documento,
@@ -149,8 +146,8 @@ def DatosFacturasPuras(request, cliente_id=None
 
     if request.method=='POST':
 
-        # Cambiar P por F(acturas puras)
-        # tipoasignacion = "P"
+        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+        
         tipoasignacion = 'F'
 
         if not cliente_id:
@@ -163,137 +160,143 @@ def DatosFacturasPuras(request, cliente_id=None
             tipo_factoring_id =request.POST.get("id_tipofactoring")
 
         tipoFactoring = Tipos_factoring.objects\
-            .filter(cxtipofactoring=tipo_factoring_id).first()
+            .filter(pk=tipo_factoring_id).first()
 
-        if not asignacion_id:
+        with transaction.atomic():
 
-            asignacion = Asignacion(
-                cxcliente = cliente,
-                cxtipofactoring = tipoFactoring,
-                cxtipo = tipoasignacion,
-                nvalor = 0,
-                ncantidaddocumentos = 0,
-                cxusuariocrea = request.user
-            )
-            if asignacion:
-                asignacion.save()
-                asignacion_id = asignacion.id
-        else:
-            asignacion = Asignacion.objects.filter(pk= asignacion_id).first()
-            if asignacion:
+            if not asignacion_id:
 
-                asignacion.cxcliente = cliente
-                asignacion.cxtipofactoring = tipoFactoring
-                asignacion.cxtipo = tipoasignacion
-                asignacion.cxusuariomodifica = request.user.id
-                asignacion.save()
+                asignacion = Asignacion(
+                    cxcliente = cliente,
+                    cxtipofactoring = tipoFactoring,
+                    cxtipo = tipoasignacion,
+                    nvalor = 0,
+                    ncantidaddocumentos = 0,
+                    cxusuariocrea = request.user,
+                    empresa = id_empresa.empresa,
+                )
+                if asignacion:
+                    asignacion.save()
+                    asignacion_id = asignacion.id
+            else:
+                asignacion = Asignacion.objects.filter(pk= asignacion_id).first()
+                if asignacion:
 
-        if not asignacion_id:
-            return redirect("solicitudes:listasolicitudes")
+                    asignacion.cxcliente = cliente
+                    asignacion.cxtipofactoring = tipoFactoring
+                    asignacion.cxtipo = tipoasignacion
+                    asignacion.cxusuariomodifica = request.user.id
+                    asignacion.save()
 
-        id_comprador=request.POST.get("cxcomprador")
-        nombre_comprador=request.POST.get("ctcomprador")
-        documento=request.POST.get("ctdocumento")
-        emision =request.POST.get("demision")
-        vencimiento =request.POST.get("dvencimiento")
-        valor_antes_de_iva =request.POST.get("nvalorantesiva")
-        iva =request.POST.get("niva")
-        retencion_iva =request.POST.get("nretencioniva")
-        retencion_renta =request.POST.get("nretencionrenta")
-        total = request.POST.get("ntotal")
-        valornonegociado = request.POST.get("nvalornonegociado")
-        serie1=request.POST.get("ctserie1")
-        serie2=request.POST.get("ctserie2")
+            if not asignacion_id:
+                return redirect("solicitudes:listasolicitudes")
 
-        # segun tipo de factoring no acepte vencimientos en feriados
-        # cambiar la fecha de vencimiento
+            id_comprador=request.POST.get("cxcomprador")
+            nombre_comprador=request.POST.get("ctcomprador")
+            documento=request.POST.get("ctdocumento")
+            emision =request.POST.get("demision")
+            vencimiento =request.POST.get("dvencimiento")
+            valor_antes_de_iva =request.POST.get("nvalorantesiva")
+            iva =request.POST.get("niva")
+            retencion_iva =request.POST.get("nretencioniva")
+            retencion_renta =request.POST.get("nretencionrenta")
+            total = request.POST.get("ntotal")
+            valornonegociado = request.POST.get("nvalornonegociado")
+            serie1=request.POST.get("ctserie1")
+            serie2=request.POST.get("ctserie2")
 
-        if not tipoFactoring.lpermitediasferiados:
+            # segun tipo de factoring no acepte vencimientos en feriados
+            # cambiar la fecha de vencimiento
 
-            fecha = parse_date(vencimiento)
-            
-            while Feriados.objects.filter(dferiado = vencimiento)\
-                .filter(llaborable = False).first() \
-                    or fecha.weekday()== 6 or fecha.weekday() == 5:
-                    
+            if not tipoFactoring.lpermitediasferiados:
+
                 fecha = parse_date(vencimiento)
-                fecha = fecha + datetime.timedelta(days=1)
-                vencimiento = date.isoformat(fecha)
+                
+                while Feriados.objects.filter(dferiado = vencimiento)\
+                    .filter(llaborable = False).first() \
+                        or fecha.weekday()== 6 or fecha.weekday() == 5:
+                        
+                    fecha = parse_date(vencimiento)
+                    fecha = fecha + datetime.timedelta(days=1)
+                    vencimiento = date.isoformat(fecha)
 
-        if not doc_id:
-            detalle = Documentos(
-                cxasignacion=asignacion,
-                cxcomprador = id_comprador,
-                ctcomprador = nombre_comprador,
-                ctdocumento = documento,
-                demision  = emision,
-                dvencimiento  = vencimiento,
-                nvalorantesiva = valor_antes_de_iva,
-                niva = iva,
-                nretencioniva = retencion_iva,
-                nretencionrenta = retencion_renta,
-                ntotal = total,
-                nvalornonegociado = valornonegociado,
-                ctserie1 = serie1,
-                ctserie2 = serie2,
-                cxusuariocrea = request.user
-            )
-        else:
+            if not doc_id:
+                detalle = Documentos(
+                    cxasignacion=asignacion,
+                    cxcomprador = id_comprador,
+                    ctcomprador = nombre_comprador,
+                    ctdocumento = documento,
+                    demision  = emision,
+                    dvencimiento  = vencimiento,
+                    nvalorantesiva = valor_antes_de_iva,
+                    niva = iva,
+                    nretencioniva = retencion_iva,
+                    nretencionrenta = retencion_renta,
+                    ntotal = total,
+                    nvalornonegociado = valornonegociado,
+                    ctserie1 = serie1,
+                    ctserie2 = serie2,
+                    cxusuariocrea = request.user,
+                    empresa = id_empresa.empresa,
+                )
+            else:
 
-            detalle = Documentos.objects.filter(pk=doc_id).first()
+                detalle = Documentos.objects.filter(pk=doc_id).first()
 
-            detalle.cxcomprador = id_comprador
-            detalle.ctcomprador = nombre_comprador
-            detalle.ctdocumento = documento
-            detalle.demision  = emision
-            detalle.dvencimiento  = vencimiento
-            detalle.nvalorantesiva = valor_antes_de_iva
-            detalle.niva = iva
-            detalle.nretencioniva = retencion_iva
-            detalle.nretencionrenta = retencion_renta
-            detalle.ntotal = total
-            detalle.nvalornonegociado = valornonegociado
-            detalle.ctserie1 = serie1
-            detalle.ctserie2 = serie2
-            detalle.cxusuariomodifica = request.user.id
+                detalle.cxcomprador = id_comprador
+                detalle.ctcomprador = nombre_comprador
+                detalle.ctdocumento = documento
+                detalle.demision  = emision
+                detalle.dvencimiento  = vencimiento
+                detalle.nvalorantesiva = valor_antes_de_iva
+                detalle.niva = iva
+                detalle.nretencioniva = retencion_iva
+                detalle.nretencionrenta = retencion_renta
+                detalle.ntotal = total
+                detalle.nvalornonegociado = valornonegociado
+                detalle.ctserie1 = serie1
+                detalle.ctserie2 = serie2
+                detalle.cxusuariomodifica = request.user.id
 
-        if detalle:
-            detalle.save()
+            if detalle:
+                detalle.save()
 
-            total_factura = Documentos.objects.filter(cxasignacion=asignacion_id)\
-                .filter(leliminado=False).aggregate(Sum('ntotal'))
-            numero_documentos = Documentos.objects.filter(cxasignacion=asignacion_id)\
-                .filter(leliminado=False).aggregate(Count('ctdocumento'))
-            asignacion.nvalor = total_factura["ntotal__sum"]
-            asignacion.ncantidaddocumentos = numero_documentos["ctdocumento__count"]
-            asignacion.save()
+                total_factura = Documentos.objects.filter(cxasignacion=asignacion_id)\
+                    .filter(leliminado=False).aggregate(Sum('ntotal'))
+                numero_documentos = Documentos.objects.filter(cxasignacion=asignacion_id)\
+                    .filter(leliminado=False).aggregate(Count('ctdocumento'))
+                asignacion.nvalor = total_factura["ntotal__sum"]
+                asignacion.ncantidaddocumentos = numero_documentos["ctdocumento__count"]
+                asignacion.save()
 
-        # grabar comprador , si es nuevo
-        comprador = Datos_compradores.objects\
-            .filter(cxcomprador = id_comprador).first()
-        datosparticipante = Datos_participantes.objects\
-            .filter(cxparticipante = id_comprador).first()
+            # grabar comprador , si es nuevo
+            comprador = Datos_compradores.objects\
+                .filter(cxcomprador = id_comprador).first()
+            datosparticipante = Datos_participantes.objects\
+                .filter(cxparticipante = id_comprador).first()
 
-        if not datosparticipante:
+            if not datosparticipante:
 
-            cxtipoid = request.POST.get("cxtipoid")
+                cxtipoid = request.POST.get("cxtipoid")
 
-            datosparticipante=Datos_participantes(
-                cxtipoid=cxtipoid,
-                cxparticipante=id_comprador,
-                ctnombre=nombre_comprador,
-                cxusuariocrea = request.user
-            )
-            if datosparticipante:
-                datosparticipante.save()
+                datosparticipante=Datos_participantes(
+                    cxtipoid=cxtipoid,
+                    cxparticipante=id_comprador,
+                    ctnombre=nombre_comprador,
+                    cxusuariocrea = request.user,
+                    empresa = id_empresa.empresa,
+                )
+                if datosparticipante:
+                    datosparticipante.save()
 
-        if not comprador:
-            datoscomprador=Datos_compradores(
-                cxcomprador = datosparticipante,
-                cxusuariocrea = request.user
-            )
-            if datoscomprador:
-                datoscomprador.save()
+            if not comprador:
+                datoscomprador=Datos_compradores(
+                    cxcomprador = datosparticipante,
+                    cxusuariocrea = request.user,
+                    empresa = id_empresa.empresa
+                )
+                if datoscomprador:
+                    datoscomprador.save()
 
         return redirect("solicitudes:asignacionfacturaspuras_editar", pk= asignacion_id)
 
@@ -498,6 +501,8 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
 
     if request.method=='POST':
 
+        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+        
         idcliente = request.POST.get("id_cliente")
         tipo_factoring = request.POST.get("id_tipofactoring")
         tipoasignacion = "A"
@@ -505,7 +510,7 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
         cliente = Clientes.objects.get(pk=idcliente)
 
         tipoFactoring = Tipos_factoring.objects\
-            .filter(cxtipofactoring=tipo_factoring).first()
+            .filter(pk=tipo_factoring).first()
 
         if not asignacion_id:
 
@@ -513,7 +518,8 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
                 cxcliente = cliente,
                 cxtipofactoring = tipoFactoring,
                 cxtipo = tipoasignacion,
-                cxusuariocrea = request.user
+                cxusuariocrea = request.user,
+                empresa = id_empresa.empresa,
             )
             if asignacion:
                 asignacion.save()
@@ -566,7 +572,8 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
             nvalornonegociado = valornonegociado,
             ctserie1 = serie1,
             ctserie2 = serie2,
-            cxusuariocrea = request.user
+            cxusuariocrea = request.user,
+            empresa = id_empresa.empresa,
         )
 
         if det:
@@ -592,7 +599,8 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
                 cxtipoid=cxtipoid,
                 cxparticipante=id_comprador,
                 ctnombre=nombre_comprador,
-                cxusuariocrea = request.user
+                cxusuariocrea = request.user,
+                empresa = id_empresa.empresa,
             )
             if datosparticipante:
                 datosparticipante.save()
@@ -600,7 +608,8 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
         if not comprador:
             datoscomprador=Datos_compradores(
                 cxcomprador = datosparticipante,
-                cxusuariocrea = request.user
+                cxusuariocrea = request.user,
+                empresa = id_empresa.empresa,
             )
             if datoscomprador:
                 datoscomprador.save()
@@ -642,6 +651,7 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
                 ntotal = elem.get("valor"),
                 cxusuariocrea = request.user,
                 cxpropietariocuenta = elem.get("propietariocuenta"),
+                empresa = id_empresa.empresa,
             )
             if cheque:
                 cheque.save()
@@ -652,7 +662,6 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
         return HttpResponse( asignacion_id)
 
     return render(request, template_name, contexto)
-
 
 def DatosAccesorioEditar(request, accesorio_id = None, tipo_factoring_id = None):
 
@@ -677,7 +686,7 @@ def DatosAccesorioEditar(request, accesorio_id = None, tipo_factoring_id = None)
 
         if tipo_factoring_id:
             tipoFactoring = Tipos_factoring.objects\
-            .filter(cxtipofactoring=tipo_factoring_id).first()
+            .filter(pk=tipo_factoring_id).first()
 
             acepta_vencimiento_en_feriado = tipoFactoring.lpermitediasferiados
             
@@ -705,7 +714,7 @@ def DatosAccesorioEditar(request, accesorio_id = None, tipo_factoring_id = None)
                 .cxtipofactoring.cxtipofactoring
 
             tipoFactoring = Tipos_factoring.objects\
-                .filter(cxtipofactoring=tipo_factoring_id).first()
+                .filter(pk=tipo_factoring_id).first()
 
             # segun tipo de factoring no acepte vencimientos en feriados
             # cambiar la fecha de vencimiento

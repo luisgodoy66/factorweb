@@ -2,8 +2,11 @@ from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 from django.urls import reverse_lazy
+
 from .models import Tipos_factoring, Tasas_factoring, Clases_cliente\
     , Cuentas_bancarias, Localidades
+from bases.models import Usuario_empresa
+
 from .forms import CuentaBancariaForm, TipoFactoringForm, TasaFactoringForm\
     , ClasesParticipantesForm, LocalidadForm
 
@@ -14,6 +17,13 @@ class TiposFactoringView(LoginRequiredMixin, generic.ListView):
     context_object_name='consulta'
     login_url = 'bases:login'
 
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Tipos_factoring.objects.filter(leliminado = False
+                                     , empresa = id_empresa.empresa)\
+                                     .order_by("cttipofactoring")
+        return qs
+    
 class TipoFactoringNew(LoginRequiredMixin, generic.CreateView):
     model = Tipos_factoring
     template_name="empresa/datostipofactoring_form.html"
@@ -24,6 +34,8 @@ class TipoFactoringNew(LoginRequiredMixin, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
 class TipoFactoringEdit(LoginRequiredMixin, generic.UpdateView):
@@ -44,6 +56,13 @@ class TasasFactoringView(LoginRequiredMixin, generic.ListView):
     context_object_name='consulta'
     login_url = 'bases:login'
 
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Tasas_factoring.objects.filter(leliminado = False
+                                     , empresa = id_empresa.empresa)\
+                                     .order_by("cttasa")
+        return qs
+
 class TasaFactoringNew(LoginRequiredMixin, generic.CreateView):
     model = Tasas_factoring
     template_name="empresa/datostasafactoring_form.html"
@@ -54,6 +73,8 @@ class TasaFactoringNew(LoginRequiredMixin, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
 class TasaFactoringEdit(LoginRequiredMixin, generic.UpdateView):
@@ -74,6 +95,13 @@ class ClasesParticipanteView(LoginRequiredMixin, generic.ListView):
     context_object_name='consulta'
     login_url = 'bases:login'
 
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Clases_cliente.objects.filter(leliminado = False
+                                     , empresa = id_empresa.empresa)\
+                                     .order_by("cxclase")
+        return qs
+
 class ClasesParticipanteNew(LoginRequiredMixin, generic.CreateView):
     model = Clases_cliente
     template_name="empresa/datosclaseparticipante_form.html"
@@ -84,6 +112,8 @@ class ClasesParticipanteNew(LoginRequiredMixin, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
 class CuentasBancariasView(LoginRequiredMixin, generic.ListView):
@@ -91,6 +121,12 @@ class CuentasBancariasView(LoginRequiredMixin, generic.ListView):
     template_name = "empresa/listacuentasbancarias.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Cuentas_bancarias.objects.filter(leliminado = False
+                                     , empresa = id_empresa.empresa)
+        return qs
 
 class CuentaBancariaNew(LoginRequiredMixin, generic.CreateView):
     model = Cuentas_bancarias
@@ -102,6 +138,8 @@ class CuentaBancariaNew(LoginRequiredMixin, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
 class CuentaBancariaEdit(LoginRequiredMixin, generic.UpdateView):
@@ -122,6 +160,13 @@ class LocalidadesView(LoginRequiredMixin, generic.ListView):
     context_object_name='consulta'
     login_url = 'bases:login'
 
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Localidades.objects.filter(leliminado = False
+                                     , empresa = id_empresa.empresa)\
+                                     .order_by("ctlocalidad")
+        return qs
+
 class LocalidadesNew(LoginRequiredMixin, generic.CreateView):
     model = Localidades
     template_name="empresa/datoslocalidad_form.html"
@@ -132,6 +177,8 @@ class LocalidadesNew(LoginRequiredMixin, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
 class LocalidadesEdit(LoginRequiredMixin, generic.UpdateView):

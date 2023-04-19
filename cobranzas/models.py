@@ -18,7 +18,7 @@ class Cheques(ClaseModelo):
         ('C', 'Cliente'),
     )
     cxparticipante = models.ForeignKey(Datos_participantes
-        ,to_field="cxparticipante", on_delete=models.CASCADE
+        , on_delete=models.CASCADE
         , related_name="cliente_cheque"
     )
     cxtipoparticipante = models.CharField(max_length=1, choices=TIPOS_DE_PARTICIPANTES) 
@@ -46,7 +46,7 @@ class Documentos_cabecera(ClaseModelo):
     )
     cxcobranza = models.CharField(max_length=8, )
     cxcliente=models.ForeignKey(Cliente_models.Datos_generales
-        ,to_field="cxcliente", on_delete=models.CASCADE
+        , on_delete=models.CASCADE
         , related_name="cliente_cobranza"
     )
     cxtipofactoring = models.ForeignKey(Tipos_factoring
@@ -134,7 +134,7 @@ class Liquidacion_cabecera(ClaseModelo):
         ('C', 'Cobranzas'),
     )
     cxcliente=models.ForeignKey(Cliente_models.Datos_generales
-        ,to_field="cxcliente", on_delete=models.CASCADE
+        , on_delete=models.CASCADE
         , related_name="cliente_liquidacion"
     )
     cxliquidacion = models.CharField(max_length=8 ) 
@@ -236,7 +236,7 @@ class Cheques_protestados(ClaseModelo):
 
 class Documentos_protestados_Manager(models.Manager):
 
-    def antigüedad_cartera(self):
+    def antigüedad_cartera(self, id_empresa):
         # grafico de antigüedad de cartera 
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
@@ -245,7 +245,8 @@ class Documentos_protestados_Manager(models.Manager):
         xver60 = datetime.today()+timedelta(days=60)
         xver90 = datetime.today()+timedelta(days=90)
 
-        protestados = self.filter( leliminado = False, nsaldo__gt = 0)\
+        protestados = self.filter( leliminado = False, nsaldo__gt = 0
+                                , empresa = id_empresa)\
             .aggregate(
                 fvencido_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo90
                                 , accesorio__isnull = True) ) 
@@ -421,7 +422,7 @@ class Recuperaciones_cabecera(ClaseModelo):
     )
     cxrecuperacion = models.CharField(max_length=8, )
     cxcliente = models.ForeignKey(Cliente_models.Datos_generales
-        ,to_field="cxcliente", on_delete=models.CASCADE
+        , on_delete=models.CASCADE
     )
     cxtipofactoring = models.ForeignKey(Tipos_factoring
         , on_delete=models.RESTRICT)
@@ -505,7 +506,7 @@ class Cargos_cabecera(ClaseModelo):
     )
     cxcobranza = models.CharField(max_length=8, )
     cxcliente=models.ForeignKey(Cliente_models.Datos_generales
-        ,to_field="cxcliente", on_delete=models.CASCADE
+        , on_delete=models.CASCADE
         , related_name="cliente_cobranza_cargos"
     )
     cxtipofactoring = models.ForeignKey(Tipos_factoring, null=True

@@ -71,7 +71,7 @@
                             <td>{{ item.datos_operativos.get.cxestado}}</td>
                             <td>{{ item.datos_operativos.get.dalta|date:"Y-m-d" }}</td>
                             <td>
-                                <a href="{% url 'operaciones:datosoperativos_editar' item.cxcliente.cxparticipante %}" 
+                                <a href="{% url 'operaciones:datosoperativos_editar' item.cxcliente.id %}" 
                                     class="btn btn-warning btn-sm" title="Editar" role="button"><i class="fa fa-edit"></i></a>
                                 <a href="#" class="btn btn-danger btn-sm" role="button"><i class="fa fa-exclamation"></i></a>
                             </td>

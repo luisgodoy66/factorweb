@@ -28,9 +28,9 @@ urlpatterns = [
     path('clientenuevo/<solicitante_id>',DatosClientes, name='solicitante_nuevo'),
     path('compradornuevo/',DatosCompradores, name='comprador_nuevo'),
     path('editcomprador/<comprador_id>',DatosCompradores, name='comprador_editar'),
-    path('editnatural/<cliente_ruc>',DatosClienteNatural
+    path('editnatural/<cliente_id>',DatosClienteNatural
         , name='clientenatural_editar'),
-    path('editjuridico/<cliente_ruc>',DatosClienteJuridico
+    path('editjuridico/<cliente_id>',DatosClienteJuridico
         , name='clientejuridico_editar'),
     path('lineafactoringnueva/<cliente>/<cliente_ruc>',LineaNew.as_view()
         , name='lineafactoring_nueva'),

@@ -5,7 +5,7 @@ from empresa.models import Tipos_factoring
 from pais.models import Bancos
 
 class Clientes(ClaseModelo):
-    cxcliente = models.CharField(max_length=13, unique=True)
+    cxcliente = models.CharField(max_length=13)
     ctnombre =models.CharField(max_length=100)
     cxzona =models.CharField(max_length=5, null=True)
     cxlocalidad =models.CharField(max_length=4, null=True)
@@ -20,7 +20,11 @@ class Clientes(ClaseModelo):
 
     def __str__(self):
         return self.ctnombre
-
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['cxcliente', 'empresa'], name='cliente_solicitud')
+        ]
 class Asignacion(ClaseModelo):
     TIPOS_DE_ASIGNACION = (
         ('A', 'Con accesorios'),
@@ -43,7 +47,6 @@ class Asignacion(ClaseModelo):
         , default='P')
     datencion = models.DateTimeField(null=True)
     cxusuarioatencion = models.IntegerField(null=True)
-    # cxasignacion = models.CharField(max_length=8 , null=True) 
     asignacion = models.BigIntegerField(null=True)
     
 class Documentos(ClaseModelo):
