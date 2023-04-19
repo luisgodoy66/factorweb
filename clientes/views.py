@@ -146,13 +146,13 @@ class LineaNew(LoginRequiredMixin, generic.CreateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        cliente_ruc = self.kwargs.get('cliente_ruc')
+        cliente_id = self.kwargs.get('cliente_id')
         nombre_cliente = self.kwargs.get('cliente')
 
         context = super(LineaNew, self).get_context_data(**kwargs)
         context["nueva"]=True
         context["nombre_cliente"] = nombre_cliente
-        context["cliente_id"] = cliente_ruc
+        context["cliente_id"] = cliente_id
         return context
 
 class LineaEdit(LoginRequiredMixin, generic.UpdateView):
@@ -170,13 +170,12 @@ class LineaEdit(LoginRequiredMixin, generic.UpdateView):
     def get_context_data(self, **kwargs):
         id = self.kwargs.get('pk')
         nombre_cliente = self.kwargs.get('cliente')
-        cliente_ruc = self.kwargs.get('cliente_ruc')
+        cliente_id = self.kwargs.get('cliente_id')
 
         context = super(LineaEdit, self).get_context_data(**kwargs)
-        # context["consulta"] = Linea_Factoring.objects.filter(pk=id).first()
         context["nueva"]=False
         context["nombre_cliente"] = nombre_cliente
-        context["cliente_id"] = cliente_ruc
+        context["cliente_id"] = cliente_id
         context["pk"] = id
         return context
 

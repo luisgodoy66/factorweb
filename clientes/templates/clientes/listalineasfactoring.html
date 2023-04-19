@@ -73,10 +73,10 @@
                                 <button class="btn btn-warning btn-sm"  title="Editar"
                                     {% if item.linea_factoring.get.nvalor %}
                                         onclick="return AbrirModal(
-                                            '{% url 'clientes:lineafactoring_editar' item item.cxcliente.cxparticipante item.linea_factoring.get.id %}')"
+                                            '{% url 'clientes:lineafactoring_editar' item item.id item.linea_factoring.get.id %}')"
                                     {% else %}
                                         onclick="return AbrirModal(
-                                            '{% url 'clientes:lineafactoring_nueva' item item.cxcliente.cxparticipante %}')"
+                                            '{% url 'clientes:lineafactoring_nueva' item item.id %}')"
                                     {% endif %}
                                     role="button">
                                     <i class="fa fa-edit"></i>

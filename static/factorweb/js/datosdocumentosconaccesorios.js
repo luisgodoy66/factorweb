@@ -27,7 +27,10 @@ window.onload=function(){
       });
     
       if (total_cheques != capturaValor("id_ntotal")){
-          alert("Valor de cheques "+total_cheques +" no coincide con el neto a negociar")
+          alert("Valor de cheques "
+          +total_cheques 
+          +", no coincide con el neto a negociar: "
+          +capturaValor("id_ntotal"))
           return false;
       };
 

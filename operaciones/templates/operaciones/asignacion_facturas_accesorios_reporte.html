@@ -160,7 +160,7 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td></td>
+                                {% if gao.imprimir %}<td></td>{% endif %}
                                 <td colspan="2"><h4>Anticipo menos cargos</h4></td>
                                 <td class="numero"><h4>{{ subtotal}}</h4></td>
                             </tr>
@@ -173,7 +173,7 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td></td>
+                                {% if gao.imprimir %}<td></td>{% endif %}
                                 <td colspan="2"><h4>I.V.A.</h4></td>
                                 <td class="numero"><h4>{{ asignacion.niva}}</h4></td>
                             </tr>
@@ -186,7 +186,7 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td></td>
+                                {% if gao.imprimir %}<td></td>{% endif %}
                                 <td colspan="2"><h4>Neto a recibir</h4></td>
                                 <td class="numero"><h4>{{ neto}}</h4></td>
                             </tr>

@@ -46,13 +46,10 @@ def link_callback(uri, rel):
 
 def ImpresionAsignacionDesdeSolicitud(request, asignacion_id):
 
-        # tomar el codigo de asignacion grabado en la solicitud
         solicitud = SolicitudModels.Asignacion.objects.filter(id= asignacion_id).first()
-        cliente_id = solicitud.cxcliente.cxcliente
         
         asgn = Asignacion.objects\
-                .filter(id = solicitud.asignacion)\
-                .filter(cxcliente_id = cliente_id).first()
+                .filter(id = solicitud.asignacion).first()
 
         if asgn:
                 return ImpresionAsignacion(request, asgn.id)

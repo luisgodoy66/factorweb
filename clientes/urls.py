@@ -32,9 +32,9 @@ urlpatterns = [
         , name='clientenatural_editar'),
     path('editjuridico/<cliente_id>',DatosClienteJuridico
         , name='clientejuridico_editar'),
-    path('lineafactoringnueva/<cliente>/<cliente_ruc>',LineaNew.as_view()
+    path('lineafactoringnueva/<cliente>/<cliente_id>',LineaNew.as_view()
         , name='lineafactoring_nueva'),
-    path('editlineafactoring/<cliente>/<cliente_ruc>/<int:pk>',LineaEdit.as_view()
+    path('editlineafactoring/<cliente>/<cliente_id>/<int:pk>',LineaEdit.as_view()
         , name='lineafactoring_editar'),
     path('cuponuevo/',CuposCompradoresNew.as_view(), name='cupo_nuevo'),
     path('editcupo/<int:pk>',CuposCompradoresEdit.as_view(), name='cupo_editar'),

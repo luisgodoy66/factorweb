@@ -306,11 +306,11 @@ def DatosOperativos(request, cliente_id=None):
     cliente = ModeloCliente.Datos_generales.objects\
         .filter(cxcliente=cliente_id).first()
 
+    datoscliente = Datos_operativos.objects\
+        .filter(cxcliente=cliente).first()
+    
     if request.method=='GET':
 
-        datoscliente = Datos_operativos.objects\
-            .filter(cxcliente=cliente_id).first()
-        
         if datoscliente:
             dalta= date.isoformat(datoscliente.dalta)
             e={ 
@@ -351,11 +351,10 @@ def DatosOperativos(request, cliente_id=None):
         beneficiario_cobr = request.POST.get("ctbeneficiariocobranzas")
         estado = request.POST.get('cxestado')
 
-        idclase = Clases_cliente.objects\
-            .filter(pk = cxclase).first()
+        idclase = Clases_cliente.objects.filter(pk = cxclase).first()
 
-        datoscliente = Datos_operativos.objects\
-            .filter(cxcliente=cliente_id).first()
+        # datoscliente = Datos_operativos.objects\
+        #     .filter(cxcliente=cliente_id).first()
 
         if not datoscliente:
             datoscliente= Datos_operativos(

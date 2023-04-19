@@ -6,7 +6,7 @@ from django.utils.dateparse import parse_date
 
 from bases.models import ClaseModelo
 from empresa.models import Clases_cliente, Datos_participantes \
-    , Tipos_documentos, Tipos_factoring, Cuentas_bancarias
+    , Tipos_factoring, Cuentas_bancarias
 from clientes.models import Datos_generales as Datos_generales_cliente\
     , Cuenta_transferencia
 from pais.models import Bancos
@@ -195,10 +195,10 @@ class Documentos(ClaseModelo):
         , on_delete=models.CASCADE
         , related_name="comprador"
     )
-    cxtipodocumento=models.ForeignKey(Tipos_documentos
-        , on_delete=models.CASCADE
-        , related_name="tipo_documento"
-    )
+    # cxtipodocumento=models.ForeignKey(Tipos_documentos
+    #     , on_delete=models.CASCADE
+    #     , related_name="tipo_documento"
+    # )
     ctdocumento = models.CharField(max_length=20) 
     demision  = models.DateField() 
     dvencimiento  = models.DateField() 

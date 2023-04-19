@@ -110,16 +110,16 @@ class Tasas_factoring(ClaseModelo):
         self.cttasa=self.cttasa.upper()
         return super(Tasas_factoring, self).save()
 
-class Tipos_documentos(ClaseModelo):
-    cxtipodocumento = models.CharField(max_length=1)
-    cttipodocumento = models.CharField(max_length=15)
-    ctabreviacion = models.CharField(max_length=5, blank=True)
-    lprincipal = models.BooleanField(default=True)
-    laccesorio = models.BooleanField(default=False)
-    lefectocobro = models.BooleanField(default=True)
+# class Tipos_documentos(ClaseModelo):
+#     cxtipodocumento = models.CharField(max_length=1)
+#     cttipodocumento = models.CharField(max_length=15)
+#     ctabreviacion = models.CharField(max_length=5, blank=True)
+#     lprincipal = models.BooleanField(default=True)
+#     laccesorio = models.BooleanField(default=False)
+#     lefectocobro = models.BooleanField(default=True)
 
-    def __str__(self):
-        return self.cttipodocumento
+#     def __str__(self):
+#         return self.cttipodocumento
     
 class Tipos_factoring(ClaseModelo):
     cxtipofactoring = models.CharField(max_length=3 , )
