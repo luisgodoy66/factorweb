@@ -159,7 +159,7 @@ def ImpresionLiquidacion(request, liquidacion_id):
     liquidacion = Liquidacion_cabecera.objects.filter(pk = liquidacion_id).first()
 
     detalle_cargos = Liquidacion_detalle.objects.filter(liquidacion = liquidacion)\
-        .order_by('-cargo__cxmovimiento__nprioridad', 'cargo__cxmovimiento')
+        .order_by('cargo__cxmovimiento')
 
     # datos de tasa gao/dc
     gao = Tasas_factoring.objects.filter(cxtasa="GAO").first()

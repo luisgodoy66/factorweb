@@ -14,6 +14,7 @@ from cobranzas.models import Documentos_cabecera, Recuperaciones_cabecera\
 from operaciones.models import Notas_debito_cabecera, Notas_debito_detalle\
     , Cargos_detalle
 from empresa.models import Datos_participantes
+from bases.models import Usuario_empresa
 
 from .forms import CuentasBancariasForm, DebitosForm, TransferenciasForm\
     , DebitosNuevosForm
@@ -29,6 +30,11 @@ class CuentasView(LoginRequiredMixin, generic.ListView):
     context_object_name='consulta'
     login_url = 'bases:login'
 
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Cuentas_bancarias.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
+
 class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
     model = Cuentas_bancarias
     template_name = "cuentasconjuntas/datoscuentabancaria_modal.html"
@@ -38,6 +44,8 @@ class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
     login_url = 'bases:login'
 
     def form_valid(self, form):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
@@ -73,8 +81,10 @@ class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
     login_url = 'bases:login'
 
     def get_queryset(self):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         cobranzas = Documentos_cabecera.objects.filter(cxestado='A'\
             , leliminado = False\
+            , empresa = id_empresa.empresa
             , ldepositoencuentaconjunta = True\
             , cxtipofactoring__lanticipatotalnegociado = False )\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito', 'cxcheque_id'
@@ -85,6 +95,7 @@ class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
                 
         recuperaciones = Recuperaciones_cabecera.objects.filter(cxestado='A'\
             , leliminado = False\
+            , empresa = id_empresa.empresa
             , ldepositoencuentaconjunta = True\
             , cxtipofactoring__lanticipatotalnegociado = False )\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito', 'cxcheque_id'
@@ -102,8 +113,11 @@ class CargosPendientesView(LoginRequiredMixin, generic.ListView):
     login_url = 'bases:login'
 
     def get_queryset(self):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         return DebitosCuentasConjuntas.objects\
-            .filter(leliminado = False, notadedebito__nsaldo__gt = 0)
+            .filter(leliminado = False
+                    , empresa = id_empresa.empresa
+                    , notadedebito__nsaldo__gt = 0)
 
 class DebitoBancarioEdit(LoginRequiredMixin, generic.UpdateView):
     model = DebitosCuentasConjuntas

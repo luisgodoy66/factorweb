@@ -190,18 +190,18 @@ class EstadosOperativosView(LoginRequiredMixin, generic.ListView):
 
 @login_required(login_url='/login/')
 @permission_required('operativos.update_asignacion', login_url='bases:sin_permisos')
-def DesembolsarAsignacion(request, pk, cliente_ruc):
+def DesembolsarAsignacion(request, pk, cliente_id):
     template_name = "operaciones/datosdesembolsoaclientes_form.html"
     contexto = {}
     formulario={}
 
     cliente = ModeloCliente.Datos_generales.objects\
-        .filter(cxcliente=cliente_ruc).first()
+        .filter(cxcliente=cliente_id).first()
 
-    datosoperativos = Datos_operativos.objects.filter(cxcliente = cliente_ruc).first()
+    datosoperativos = Datos_operativos.objects.filter(cxcliente = cliente_id).first()
     
     cuenta_transferencia = ModeloCliente.Cuenta_transferencia\
-            .objects.cuenta_default(cliente_ruc).first()
+            .objects.cuenta_default(cliente_id).first()
     
     asignacion = Asignacion.objects.filter(pk=pk).first()
 
@@ -242,7 +242,7 @@ def DesembolsarAsignacion(request, pk, cliente_ruc):
 
             cargos = Cargos_detalle.objects\
                 .filter(cxasignacion=asignacion\
-                    , cxcliente_id=cliente_ruc).all()
+                    , cxcliente_id=cliente_id).all()
 
             for cargo in cargos:
                 if valor >= cargo.nsaldo:
@@ -785,12 +785,11 @@ def SumaCargos(request,asignacion_id, gao_carga_iva, dc_carga_iva, carga_gao, ca
                 ,leliminado = False)
     else:
         documentos = ModelosSolicitud.ChequesAccesorios.objects\
-            .filter(documento__in=ModelosSolicitud.Documentos.objects
-            .filter(cxasignacion=asignacion_id))\
-            .filter(documento__in=ModelosSolicitud.Documentos.objects
-            .filter(leliminado = False))\
-                .filter( leliminado = False)
-
+            .filter(leliminado = False
+                    , documento__in=ModelosSolicitud.Documentos.objects
+                        .filter(cxasignacion=asignacion_id, leliminado = False))
+        
+    print(documentos)
     # total negociado
     negociado = documentos.aggregate(Sum('ntotal'))
     n = negociado["ntotal__sum"]
@@ -811,10 +810,10 @@ def SumaCargos(request,asignacion_id, gao_carga_iva, dc_carga_iva, carga_gao, ca
 
     # iva
     base = 0
-    if gao_carga_iva=="Si":
-        base += g
-    if dc_carga_iva=="Si":
-        base += d
+    if gao_carga_iva=="Si": base += g
+
+    if dc_carga_iva=="Si":  base += d
+
     iva = round( base * porcentaje_iva / 100,2)
     # redondear a 2 decimales?
     # neto
@@ -1086,8 +1085,8 @@ def GenerarAnexos(request,asignacion_id):
     asignacion = Asignacion.objects.filter(pk=asignacion_id).first()
     
     cliente = Datos_participantes.objects\
-        .filter(cxparticipante=asignacion.cxcliente.cxparticipante).first()
-        
+        .filter(id=asignacion.cxcliente.id).first()
+    print(cliente)
     anexos = Anexos.objects.filter(lactivo = True).all()
 
     if cliente.datos_generales.cxtipocliente =="J":
@@ -1196,7 +1195,7 @@ def GeneraListaAsignacionesJSONSalida(asignacion):
 
     neto = asignacion.nanticipo - asignacion.ngao - asignacion.ndescuentodecartera - asignacion.niva
     output["id"] = asignacion.id
-    output["Cliente"] = asignacion.cxcliente.ctnombre
+    output["Cliente"] = asignacion.cxcliente.cxcliente.ctnombre
     output["Asignacion"] = asignacion.cxasignacion
     output["TipoFactoring"] = asignacion.cxtipofactoring.cttipofactoring
     if asignacion.cxtipo =='F':
@@ -1328,12 +1327,14 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
 
 def AntigüedadCarteraClienteJSON(request, cliente_id):
     
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     documentos = None
     cheques = None
 
-    facturas = Documentos.objects.antigüedad_por_cliente()\
+    facturas = Documentos.objects.antigüedad_por_cliente(id_empresa.empresa)\
         .filter(cxcliente = cliente_id)
-    acc_quitados = Cheques_quitados.objects.antigüedad_por_cliente()\
+    acc_quitados = Cheques_quitados.objects.antigüedad_por_cliente(id_empresa.empresa)\
         .filter(accesorio_quitado__documento__cxcliente = cliente_id)
     
     docs = facturas.union(acc_quitados)
@@ -1348,12 +1349,12 @@ def AntigüedadCarteraClienteJSON(request, cliente_id):
                         , ftotal = Sum('total')
                         )
 
-    accesorios = ChequesAccesorios.objects.antigüedad_por_cliente()\
+    accesorios = ChequesAccesorios.objects.antigüedad_por_cliente(id_empresa.empresa)\
         .filter(documento__cxcliente = cliente_id)
 
-    prot_fac = Documentos_protestados.objects.antigüedad_por_cliente_facturas()\
+    prot_fac = Documentos_protestados.objects.antigüedad_por_cliente_facturas(id_empresa.empresa)\
         .filter(documento__cxcliente= cliente_id)
-    prot_acces = Documentos_protestados.objects.antigüedad_por_cliente_accesorios()\
+    prot_acces = Documentos_protestados.objects.antigüedad_por_cliente_accesorios(id_empresa.empresa)\
         .filter(documento__cxcliente= cliente_id)
 
     prot = prot_fac.union(prot_acces)
@@ -1382,19 +1383,20 @@ def AntigüedadCarteraClienteJSON(request, cliente_id):
 
 def GeneraListaCarteraClienteJSON(request, cliente_id, fecha_corte = None):
     # Es invocado desde la url de una tabla bt
-    # if not fecha_corte: 
-    #     fecha = date.today()
-    #     fecha = fecha + timedelta(days=7)
-    documentos = Documentos.objects.facturas_pendientes(fecha_corte)\
-    .filter(cxcliente = cliente_id)
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    documentos = Documentos.objects\
+        .facturas_pendientes(fecha_corte, id_empresa.empresa)\
+        .filter(cxcliente = cliente_id)
 
     tempBlogs = []
     for i in range(len(documentos)):
         tempBlogs.append(GeneraListaCarteraClienteJSONSalida(documentos[i])) 
 
     # los accesorios que fueron quitados se convierten en facturas pendientes
-    quitados = ChequesAccesorios.objects.facturas_pendientes(fecha_corte)\
-    .filter(documento__cxcliente = cliente_id)
+    quitados = ChequesAccesorios.objects\
+        .facturas_pendientes(fecha_corte, id_empresa.empresa)\
+        .filter(documento__cxcliente = cliente_id)
 
     for i in range(len(quitados)):
         tempBlogs.append(GeneraListaAccesoriosQuitadosClienteJSONSalida(quitados[i])) 
@@ -1423,10 +1425,9 @@ def GeneraListaCarteraClienteJSONSalida(doc):
 def GeneraListaAccesoriosQuitadosClienteJSONSalida(acc):
     output = {}
 
-    output["Comprador"] = acc.documento.cxcomprador.ctnombre
+    output["Comprador"] = acc.documento.cxcomprador.cxcomprador.ctnombre
     output["Asignacion"] = acc.documento.cxasignacion.cxasignacion
     output["Documento"] = acc.documento.ctdocumento
-    # output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
     output["Vencimiento"] = acc.dias_vencidos()
     # si se quitó el accesorio el saldo está en el registro de la quitada
     if acc.chequequitado:
@@ -1439,8 +1440,11 @@ def GeneraListaAccesoriosQuitadosClienteJSONSalida(acc):
 def GeneraListaChequesADepositarClienteJSON(request, cliente_id, fecha_corte):
     # Es invocado desde la url de una tabla bt
 
-    documentos = ChequesAccesorios.objects.cheques_a_depositar(fecha_corte)\
-    .filter(documento__cxcliente = cliente_id)
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    documentos = ChequesAccesorios.objects\
+        .cheques_a_depositar(fecha_corte, id_empresa.empresa)\
+        .filter(documento__cxcliente = cliente_id)
 
     tempBlogs = []
     for i in range(len(documentos)):
@@ -1458,7 +1462,7 @@ def GeneraListaChequesADepositarClienteJSON(request, cliente_id, fecha_corte):
 def GeneraListaChequesADepositarClienteJSONSalida(acc):
     output = {}
 
-    output["Comprador"] = acc.documento.cxcomprador.ctnombre
+    output["Comprador"] = acc.documento.cxcomprador.cxcomprador.ctnombre
     output["Asignacion"] = acc.documento.cxasignacion.cxasignacion
     output["Documento"] = acc.documento.ctdocumento
     output["Vencimiento"] = acc.dias_vencidos()
@@ -1511,11 +1515,13 @@ def GeneraListaProtestosPendientesClienteJSON(request, cliente_id):
 
     documentos = Cheques_protestados.objects\
         .filter(leliminado=False, nsaldocartera__gt = 0
-                , cxtipooperacion = 'C', cheque__cheque_cobranza__cxcliente = cliente_id).all()
+                , cxtipooperacion = 'C'
+                , cheque__cheque_cobranza__cxcliente = cliente_id).all()
 
     recuperciones = Cheques_protestados.objects\
         .filter(leliminado=False, nsaldocartera__gt = 0
-                , cxtipooperacion = 'R', cheque__cheque_recuperacion__cxcliente = cliente_id).all()
+                , cxtipooperacion = 'R'
+                , cheque__cheque_recuperacion__cxcliente = cliente_id).all()
 
     documentos = documentos.union(recuperciones)
 

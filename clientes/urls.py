@@ -18,9 +18,9 @@ urlpatterns = [
     , name='listacuentasbancarias'),
     path('listacuentasbancariasdeudores/',CuentasBancariasDeudoresView.as_view()
         , name='listacuentasbancarias_deudores'),
-    path('listacuentasbancariascliente/<cliente_ruc>/',CuentasBancariasCliente
+    path('listacuentasbancariascliente/<cliente_id>/',CuentasBancariasCliente
         , name='listacuentasbancariascliente'),
-    path('detallecuentasbancariascliente/<cliente_ruc>/',DetalleCuentasBancarias
+    path('detallecuentasbancariascliente/<cliente_id>/',DetalleCuentasBancarias
         , name='detallecuentasbancariascliente'),
     path('listacupos/',CuposCompradoresView.as_view(), name='listacupos'),
     path('clientenuevo/',DatosClientes, name='datoscliente_nuevo'),
@@ -38,7 +38,7 @@ urlpatterns = [
         , name='lineafactoring_editar'),
     path('cuponuevo/',CuposCompradoresNew.as_view(), name='cupo_nuevo'),
     path('editcupo/<int:pk>',CuposCompradoresEdit.as_view(), name='cupo_editar'),
-    path('cuentabancarianueva/<cliente_ruc>',CuentasBancariasNew.as_view()
+    path('cuentabancarianueva/<cliente_id>',CuentasBancariasNew.as_view()
         , name='cuentabancaria_nueva'),
     path('cuentabancariadeudornueva/',CuentasBancariasDeudorNew.as_view()
         , name='cuentabancariadeudor_nueva'),

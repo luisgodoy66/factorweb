@@ -10,6 +10,7 @@ from django.shortcuts import render
 from empresa.models import Tasas_factoring
 from django.db.models import Sum, Count
 from solicitudes import models as SolicitudModels
+from bases.models import Usuario_empresa
 
 FACTURAS_PURAS = 'F'
 
@@ -67,8 +68,9 @@ def ImpresionAsignacion(request, asignacion_id):
     else:
         template_path = 'operaciones/asignacion_facturas_accesorios_reporte.html'
         documentos = ChequesAccesorios.objects\
-            .filter(leliminado = False, documento__in=Documentos.objects
-            .filter(cxasignacion=asignacion_id))\
+            .filter(leliminado = False
+                    , ncanjeadopor = None
+                    , documento__in=Documentos.objects.filter(cxasignacion=asignacion_id))\
                 .filter( leliminado = False)
 
     # datos de tasa gao/dc
@@ -118,16 +120,18 @@ def ImpresionAsignacion(request, asignacion_id):
     return response
 
 def ImpresionAntiguedadCartera(request, ):
-    facturas = Documentos.objects.antigüedad_por_cliente()
-    accesorios = ChequesAccesorios.objects.antigüedad_por_cliente()
-    prot_facturas = Documentos_protestados.objects.antigüedad_por_cliente_facturas()
-    prot_accesorios = Documentos_protestados.objects.antigüedad_por_cliente_accesorios()
-    acc_quitados = Cheques_quitados.objects.antigüedad_por_cliente()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    total_facturas = Documentos.objects.antigüedad_cartera()
-    total_accesorios = ChequesAccesorios.objects.antigüedad_cartera()
-    total_protestos = Documentos_protestados.objects.antigüedad_cartera()
-    total_quitados = Cheques_quitados.objects.antigüedad_cartera()
+    facturas = Documentos.objects.antigüedad_por_cliente(id_empresa.empresa)
+    accesorios = ChequesAccesorios.objects.antigüedad_por_cliente(id_empresa.empresa)
+    prot_facturas = Documentos_protestados.objects.antigüedad_por_cliente_facturas(id_empresa.empresa)
+    prot_accesorios = Documentos_protestados.objects.antigüedad_por_cliente_accesorios(id_empresa.empresa)
+    acc_quitados = Cheques_quitados.objects.antigüedad_por_cliente(id_empresa.empresa)
+
+    total_facturas = Documentos.objects.antigüedad_cartera(id_empresa.empresa)
+    total_accesorios = ChequesAccesorios.objects.antigüedad_cartera(id_empresa.empresa)
+    total_protestos = Documentos_protestados.objects.antigüedad_cartera(id_empresa.empresa)
+    total_quitados = Cheques_quitados.objects.antigüedad_cartera(id_empresa.empresa)
 
     fvm90 = total_facturas['vencido_mas_90'] 
     fv90 = total_facturas['vencido_90']

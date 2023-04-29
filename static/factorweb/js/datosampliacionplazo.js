@@ -73,12 +73,12 @@ function RefrescarTabla(ids, tipo_asignacion){
   $table.bootstrapTable('refresh', {
     url: "/cobranzas/refrescadetallecargosampliacionplazo/" + ids + "/" + tipo_asignacion
   });
-  Suma_Cargos(ids, iva_gaoa, iva_dc, acumula_gao, carga_dc, porcentaje_iva )
+  Suma_Cargos(ids, iva_gaoa, iva_dc, porcentaje_iva )
 }
 
-function Suma_Cargos(ids, iva_gaoa, iva_dc, carga_gao, carga_dc, porcentaje_iva){
-  fetchRecuperar("/cobranzas/sumacargos/"+ids+"/"+tipo_asignacion+"/"+iva_gaoa+"/"+iva_dc
-              +"/"+carga_gao+"/"+carga_dc+"/"+porcentaje_iva
+function Suma_Cargos(ids, iva_gaoa, iva_dc, porcentaje_iva){
+  fetchRecuperar("/cobranzas/sumacargos/"+ids+"/"+tipo_asignacion+"/"+iva_gaoa+"/"
+              +iva_dc+"/"+porcentaje_iva
     , function(data){
     if (data){
       jQuery("#id_ndescuentodecartera").val(data['dc'])

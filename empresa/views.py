@@ -151,7 +151,7 @@ class CuentaBancariaEdit(LoginRequiredMixin, generic.UpdateView):
     login_url = 'bases:login'
 
     def form_valid(self, form):
-        form.instance.cxusuariomodifica = self.request.user
+        form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
 
 class LocalidadesView(LoginRequiredMixin, generic.ListView):

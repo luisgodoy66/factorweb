@@ -35,7 +35,7 @@
                 <input type="text" value="{{ forma_cobro }}" id="forma_cobro">
                 <input type="text" value="{{ codigo_cobranza }}" id="codigo_cobranza">
                 <input type="text" value="{{ cobranza.id }}" id="id_cobranza">
-                <input type="text" value="{{ cobranza.cxtipofactoring.cxtipofactoring }}" id="tipo_factoring">
+                <input type="text" value="{{ cobranza.cxtipofactoring.id }}" id="tipo_factoring">
                 <input type="text" value="{{ cobranza.cxaccesorio.id }}" id="id_accesorio">
                 <input type="text" value="{{ cheque.id }}" id="id_cheque">
                 <input type="text" value="{{ cheque.nvalor|floatformat:"2u"  }}" id="valor_cheque">
@@ -106,11 +106,12 @@
                         <div class="row form-group">
                             <div class="col col-md-5">
                                 <label for="id_nvalornotadebito" class=" form-control-label">
-                                    {{ form.nvalornotadebito.label }}</label>
+                                    Valor de la nota débito</label>
                             </div>
                             <div class="col-md-7">
-                                {{ form.nvalornotadebito }}
-                            </div>
+                                <input type="number" name="nvalornotadebito" 
+                                value="0.0" step="any" class="form-control" 
+                                required id="id_nvalornotadebito">                            </div>
                         </div>  
                 <!-- </div> -->
             </div>    

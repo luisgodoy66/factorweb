@@ -60,13 +60,12 @@ class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
     context_object_name='consulta'
     login_url = 'bases:login'
     form_class=CuentasBancariasForm
-    # success_url=reverse_lazy("clientes:listacuentasbancariascliente")
     success_message="Línea creada satisfactoriamente"
 
-    def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        qs=Datos_generales.objects.filter(leliminado = False, empresa = id_empresa.empresa)
-        return qs
+    # def get_queryset(self) :
+    #     id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+    #     qs=Datos_generales.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+    #     return qs
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -75,17 +74,17 @@ class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        cliente_ruc = self.kwargs.get('cliente_ruc')
+        cliente_id = self.kwargs.get('cliente_id')
         # Call the base implementation first to get a context
         context = super(CuentasBancariasNew, self).get_context_data(**kwargs)
         context["nueva"]=True
-        context["cliente_id"] = cliente_ruc
+        context["cliente_id"] = cliente_id
         return context
 
     def get_success_url(self):
-        cliente_ruc = self.kwargs.get('cliente_ruc')
+        cliente_id = self.kwargs.get('cliente_id')
         return reverse_lazy("clientes:listacuentasbancariascliente"
-            , kwargs={'cliente_ruc': cliente_ruc})
+            , kwargs={'cliente_id': cliente_id})
 
 class CuentasBancariasDeudoresView(LoginRequiredMixin, generic.ListView):
     model = Cuentas_bancarias
@@ -95,12 +94,11 @@ class CuentasBancariasDeudoresView(LoginRequiredMixin, generic.ListView):
 
     # solo cuentas de deudores
     def get_queryset(self):
-        participantes = Datos_participantes.objects.values_list('cxparticipante')
-        dedudores = Datos_compradores.objects.values_list('cxcomprador')
+        participantes = Datos_participantes.objects.values_list('id')
+        deudores = Datos_compradores.objects.values_list('cxcomprador__id')
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-
         return Cuentas_bancarias.objects\
-            .filter(cxparticipante__in = participantes.intersection(dedudores)
+            .filter(cxparticipante__in = participantes.intersection(deudores)
                     , empresa = id_empresa.empresa)
 
 class CuentasBancariasDeudorNew(LoginRequiredMixin, generic.CreateView):
@@ -669,17 +667,17 @@ def DatosClienteJuridico(request, cliente_id=None):
 
 @login_required(login_url='/login/')
 @permission_required('clientes.view_datos_generales', login_url='bases:sin_permisos')
-def CuentasBancariasCliente(request, cliente_ruc):
+def CuentasBancariasCliente(request, cliente_id):
     template_name = "clientes/listacuentasbancariascliente.html"
-    cliente = Datos_generales.objects.filter(cxcliente=cliente_ruc).first()
+    cliente = Datos_generales.objects.filter(cxcliente=cliente_id).first()
     contexto={'cliente':cliente
             }
     return render(request, template_name, contexto)
 
-def DetalleCuentasBancarias(request, cliente_ruc = None):
+def DetalleCuentasBancarias(request, cliente_id = None):
     # cliente = Datos_generales.objects.filter(cxcliente=cliente_id).first()
     cuentas = Cuentas_bancarias.objects\
-        .filter(cxparticipante__cxparticipante=cliente_ruc)\
+        .filter(cxparticipante__id=cliente_id)\
             .filter( leliminado = False)
     tempBlogs = []
 
@@ -737,7 +735,7 @@ def EliminarCuentaBancaria(request, pk):
             cuenta.save()
 
             # eliminar la relacion cuentas de transferencias
-            cliente = cuenta.cxparticipante.cxparticipante
+            cliente = cuenta.cxparticipante.id
             ctacte = Cuenta_transferencia.objects.filter(cxcliente=cliente).first()
 
             if ctacte.cxcuenta.id == pk:

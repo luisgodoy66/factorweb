@@ -65,7 +65,7 @@ urlpatterns = [
         name='consulta_asignaciones'),
     path('listaasignacionespendientesdesembolsar/',AsignacionesPendientesDesembolsarView.as_view(), \
         name='listaasignacionespendientesdesembolsar'),
-    path('desembolsarasignaciones/<int:pk>/<cliente_ruc>',DesembolsarAsignacion, \
+    path('desembolsarasignaciones/<int:pk>/<cliente_id>',DesembolsarAsignacion, \
         name='desembolsarasignacion'),
     path('aceptarasignacion/<int:asignacion_id>',AceptarAsignacion, \
         name='aceptarasignacion'),

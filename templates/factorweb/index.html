@@ -198,6 +198,33 @@
                             <li><i class="menu-icon fa fa-times"></i><a href="{% url 'cobranzas:listamotivosprotesto' %}">Motivos de protestos</a></li>
                         </ul>
                     </li>
+
+                    <h3 class="menu-title">Contabilidad</h3><!-- /.menu-title -->
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-list-ul"></i>Cuentas</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'empresa:listaclasesparticipantes' %}">Plan de cuentas</a></li>
+                            <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'pais:listabancos' %}">Asignar cuentas</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-pencil"></i>Asientos</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-pencil"></i><a href="{% url 'pais:listabancos' %}">Registro de asientos</a></li>
+                            <li><i class="menu-icon fa ti-book"></i><a href="{% url 'pais:listaferiados' %}">Generaciòn</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-book"></i>Reportes</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa ti-book"></i><a href="{% url 'pais:listaferiados' %}">Balance general</a></li>
+                            <li><i class="menu-icon fa ti-book"></i><a href="{% url 'empresa:listalocalidades' %}">Libro mayor</a></li>
+                            <li><i class="menu-icon fa ti-book"></i><a href="{% url 'operaciones:listamaestromovimientos' %}">Estado P&G</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div><!-- /.navbar-collapse -->
         </nav>

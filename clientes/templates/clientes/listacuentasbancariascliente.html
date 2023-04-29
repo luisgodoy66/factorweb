@@ -25,9 +25,9 @@
             <strong>Cuentas bancarias</strong> de {{cliente}}
         </div>
         <div class="card-body card-block">
-            <div class="row form-group"hidden>
-                    <input type="text" id="id_cxparticipante" 
-                    name="cxparticipante" value="{{ cliente.cxcliente.cxparticipante }}" 
+            <div class="row form-group">
+                    <input type="text" id="id_cxparticipante" hidden
+                    name="cxparticipante" value="{{ cliente.cxcliente.id }}" 
                     class="form-control" >
             </div>
             <!-- parte inferior -->
@@ -46,7 +46,7 @@
                         data-page-list="[10, 50, all]"
                         data-show-footer="true"
                         data-side-pagination="server"
-                        data-url="{% url 'clientes:detallecuentasbancariascliente' cliente.cxcliente.cxparticipante %}"
+                        data-url="{% url 'clientes:detallecuentasbancariascliente' cliente.cxcliente.id %}"
                         >
                     </table>
 
@@ -64,7 +64,7 @@
                     </a>
                     <button class="btn btn-success btn-sm"  role="button"
                         onclick="return AbrirModal(
-                            '{% url 'clientes:cuentabancaria_nueva' cliente.cxcliente.cxparticipante %}')"
+                            '{% url 'clientes:cuentabancaria_nueva' cliente.cxcliente.id %}')"
                         >  
                         <i class="fa fa-plus-circle"></i> Agregar cuenta
                     </button>

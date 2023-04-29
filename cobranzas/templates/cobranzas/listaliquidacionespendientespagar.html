@@ -67,7 +67,7 @@
                             <td>{{ item.ddesembolso|date:"Y/m/d" }}</td>
                             <td>{{ item.nneto }}</td>
                             <td>
-                                <a href="{% url 'cobranzas:desembolsarliquidacion' item.id item.cxcliente.cxcliente.cxparticipante %}" 
+                                <a href="{% url 'cobranzas:desembolsarliquidacion' item.id item.cxcliente.id %}" 
                                 class="btn btn-primary btn-sm" role="button" title="Pagar">
                                 <i class="fa fa-money"></i></a>
                                 <button onclick="ReversarLiquidacion( {{item.id}})" 

@@ -14,7 +14,8 @@ from .models import Documentos_cabecera, Documentos_detalle, Liquidacion_cabecer
 from operaciones.models import Documentos, ChequesAccesorios, Datos_operativos\
     , Desembolsos, Motivos_protesto_maestro, Cargos_detalle, Notas_debito_cabecera\
     , Notas_debito_detalle, Cheques_canjeados, Cheques_quitados
-from clientes.models import Cuentas_bancarias, Datos_generales, Cuenta_transferencia
+from clientes.models import Cuentas_bancarias, Datos_generales\
+    , Cuenta_transferencia, Datos_compradores
 from empresa.models import Tasas_factoring, Cuentas_bancarias as CuentasEmpresa\
     , Datos_participantes, Tipos_factoring
 from cuentasconjuntas import models as CuentasConjuntasModels
@@ -97,6 +98,9 @@ class ChequesADepositarView(LoginRequiredMixin, generic.ListView):
 
 class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
     model = Documentos_cabecera
+    # en esta vista el id del cliente es el correspondiente a la tabla clientes
+    # el id del comprador es el que corresponde a la tabla comprador
+
     template_name = "cobranzas/datoscobranzas_form.html"
     context_object_name='cobranza'
     login_url = 'bases:login'
@@ -109,29 +113,32 @@ class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
         docs = self.kwargs.get('ids_documentos')
         total_cartera=self.kwargs.get('total_cartera')
         forma_cobro=self.kwargs.get('forma_cobro')
-        cliente_ruc = self.kwargs.get('cliente_ruc')
+        cliente_id = self.kwargs.get('cliente_ruc')
         un_solo_deudor = self.kwargs.get('un_comprador')
         deudor_id = self.kwargs.get('deudor_id')
         tipo_factoring = self.kwargs.get('tipo_factoring')
         por_vencer = self.kwargs.get('por_vencer')
 
-        cliente = Datos_generales.objects.filter(cxcliente = cliente_ruc).first()
+        cliente = Datos_generales.objects\
+            .filter(id = cliente_id).first()
 
         cuentas = Cuentas_bancarias\
-            .objects.filter(cxparticipante = cliente_ruc \
+            .objects.filter(cxparticipante = cliente.cxcliente.id \
                 , leliminado = False, lpropia = True).all()
                 # , cxtipocuenta = 'C').all()
-        
         cuentas_deudor = None
 
         if un_solo_deudor=="Si":
+            comprador = Datos_compradores.objects\
+                .filter(id = deudor_id).first()
+
             cuentas_deudor = Cuentas_bancarias\
-                .objects.filter(cxparticipante = deudor_id \
+                .objects.filter(cxparticipante = comprador.cxcomprador.id \
                     , leliminado = False, lpropia = True).all()
                     # , cxtipocuenta = 'C').all()   # podría hacer transferencias desde cuenta de ahorros
 
         cuentas_conjuntas = CuentasConjuntasModels.Cuentas_bancarias\
-            .objects.filter(cxcliente = cliente_ruc \
+            .objects.filter(cxcliente = cliente_id \
                 , leliminado = False, lactiva = True).all()
 
         context = super(CobranzasDocumentosView, self).get_context_data(**kwargs)
@@ -142,7 +149,7 @@ class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
         context["cuentas_bancarias_cliente"] = cuentas
         context["cuentas_bancarias_deudor"] = cuentas_deudor
         context["un_solo_comprador"] = un_solo_deudor
-        context["cliente_id"] = cliente_ruc
+        context["cliente_id"] = cliente_id
         context["cliente"] = cliente
         context["tipo_factoring"] = tipo_factoring
         context["deudor_id"] = deudor_id
@@ -314,7 +321,7 @@ class ProtestoCobranzaNew(LoginRequiredMixin, generic.CreateView):
         context = super(ProtestoCobranzaNew, self).get_context_data(**kwargs)
         context["cheque"]=cheque
         context["cobranza"] = cobranza
-        context["id_cliente"] = cobranza.cxcliente.cxcliente.cxparticipante
+        context["id_cliente"] = cobranza.cxcliente.id
         context["forma_cobro"] = cobranza.cxformapago
         context["codigo_cobranza"] = cobranza.cxcobranza
         context["tipo_operacion"]='Cobranza'
@@ -336,7 +343,9 @@ class ProtestosPendientesView(LoginRequiredMixin, generic.ListView):
 class RecuperacionProtestoView(LoginRequiredMixin, generic.FormView):
     model = Recuperaciones_cabecera
     # 31-ene-23 l.g.    usar la misma forma de cobranzas
-    # template_name = "cobranzas/datosrecuperacion_form.html"
+    # en esta vista el id del cliente es el correspondiente a la tabla participante
+    # el id del comprador es el que corresponde a la tabla participante
+
     template_name = "cobranzas/datoscobranzas_form.html"
     context_object_name='cobranza'
     login_url = 'bases:login'
@@ -349,7 +358,7 @@ class RecuperacionProtestoView(LoginRequiredMixin, generic.FormView):
         docs = self.kwargs.get('ids_protestos')
         total_cartera=self.kwargs.get('total_cartera')
         forma_cobro=self.kwargs.get('forma_cobro')
-        cliente_ruc = self.kwargs.get('cliente_ruc')
+        cliente_id = self.kwargs.get('cliente_ruc')
         un_solo_deudor = self.kwargs.get('un_comprador')
         deudor_id = self.kwargs.get('deudor_id')
         tipo_factoring = self.kwargs.get('tipo_factoring')
@@ -357,9 +366,10 @@ class RecuperacionProtestoView(LoginRequiredMixin, generic.FormView):
         modalidad_factoring='CR'
 
         cliente = Datos_participantes.objects\
-            .filter(cxparticipante = cliente_ruc).first()
+            .filter(pk = cliente_id).first()
+
         cuentas = Cuentas_bancarias\
-            .objects.filter(cxparticipante = cliente_ruc \
+            .objects.filter(cxparticipante = cliente_id \
                 , leliminado = False, lpropia = True).all()
                 # , cxtipocuenta = 'C').all()
         cuentas_deudor = None
@@ -371,7 +381,7 @@ class RecuperacionProtestoView(LoginRequiredMixin, generic.FormView):
                     # , cxtipocuenta = 'C').all()   # podría hacer transferencias desde cuenta de ahorros
 
         cuentas_conjuntas = CuentasConjuntasModels.Cuentas_bancarias\
-            .objects.filter(cxcliente = cliente_ruc \
+            .objects.filter(cxcliente = cliente.datos_generales.id \
                 , leliminado = False, lactiva = True).all()
 
 
@@ -382,10 +392,9 @@ class RecuperacionProtestoView(LoginRequiredMixin, generic.FormView):
         context["forma_cobro"] = forma_cobro
         context["form_cheque"] = ChequesForm
         context["cuentas_bancarias_cliente"] = cuentas
-        context["cliente_id"] = cliente_ruc
+        context["cliente_id"] = cliente_id
         context["cliente"] = cliente
         context["tipo_factoring"] = tipo_factoring
-        # context["modalidad_factoring"]=modalidad_factoring
         context["cuentas_bancarias_deudor"] = cuentas_deudor
         context["un_solo_comprador"] = un_solo_deudor
         context["deudor_id"] = deudor_id
@@ -527,11 +536,11 @@ def GeneraListaCarterPorVencerJSONSalida(doc):
     output = {}
 
     output['id'] = doc.id
-    output["IdCliente"] = doc.cxcliente.cxparticipante
-    output["Cliente"] = doc.cxcliente.ctnombre
-    output["IdComprador"] = doc.cxcomprador.cxparticipante
-    output["Comprador"] = doc.cxcomprador.ctnombre
-    output["IdTipoFactoring"] = doc.cxtipofactoring.cxtipofactoring
+    output["IdCliente"] = doc.cxcliente.id
+    output["Cliente"] = doc.cxcliente.cxcliente.ctnombre
+    output["IdComprador"] = doc.cxcomprador.id
+    output["Comprador"] = doc.cxcomprador.cxcomprador.ctnombre
+    output["IdTipoFactoring"] = doc.cxtipofactoring.id
     output["TipoFactoring"] = doc.cxtipofactoring.ctabreviacion
     output["Asignacion"] = doc.cxasignacion.cxasignacion
     output["Documento"] = doc.ctdocumento
@@ -549,11 +558,11 @@ def GeneraListaAccesoriosQuitadosJSONSalida(acc):
     output = {}
     # para diferenciar de facturas puras usar un indice negativo
     output['id'] = -acc.id
-    output["IdCliente"] = acc.documento.cxcliente.cxparticipante
-    output["Cliente"] = acc.documento.cxcliente.ctnombre
-    output["IdComprador"] = acc.documento.cxcomprador.cxparticipante
-    output["Comprador"] = acc.documento.cxcomprador.ctnombre
-    output["IdTipoFactoring"] = acc.documento.cxtipofactoring.cxtipofactoring
+    output["IdCliente"] = acc.documento.cxcliente.id
+    output["Cliente"] = acc.documento.cxcliente.cxcliente.ctnombre
+    output["IdComprador"] = acc.documento.cxcomprador.id
+    output["Comprador"] = acc.documento.cxcomprador.cxcomprador.ctnombre
+    output["IdTipoFactoring"] = acc.documento.cxtipofactoring.id
     output["TipoFactoring"] = acc.documento.cxtipofactoring.ctabreviacion
     output["Asignacion"] = acc.documento.cxasignacion.cxasignacion
     output["Documento"] = acc.documento.ctdocumento
@@ -608,8 +617,8 @@ def GeneraListaDocumentosSeleccionadosOutput(doc):
     # presenten en el HTML
     output = {}
     output['id'] = doc.id
-    output["IdComprador"] = doc.cxcomprador.cxparticipante
-    output["Comprador"] = doc.cxcomprador.ctnombre
+    output["IdComprador"] = doc.cxcomprador.id
+    output["Comprador"] = doc.cxcomprador.cxcomprador.ctnombre
     output["Asignacion"] = doc.cxasignacion.cxasignacion
     output["Documento"] = doc.ctdocumento
     output["PorcentajeAnticipo"] = doc.nporcentajeanticipo
@@ -633,8 +642,8 @@ def GeneraListaAccesoriosQuitadosSeleccionadosOutput(acc):
     print(acc)
     output = {}
     output['id'] = acc.documento.id
-    output["IdComprador"] = acc.documento.cxcomprador.cxparticipante
-    output["Comprador"] = acc.documento.cxcomprador.ctnombre
+    output["IdComprador"] = acc.documento.cxcomprador.id
+    output["Comprador"] = acc.documento.cxcomprador.cxcomprador.ctnombre
     output["Asignacion"] = acc.documento.cxasignacion.cxasignacion
     output["Documento"] = acc.documento.ctdocumento
     output["Emision"] = acc.documento.demision.strftime("%Y-%m-%d")
@@ -745,10 +754,10 @@ def GeneraListaChequesADepositarJSONSalida(doc):
     output = {}
 
     output['id'] = doc.id
-    output["IdCliente"] = doc.documento.cxcliente.cxparticipante
-    output["Cliente"] = doc.documento.cxcliente.ctnombre
-    output["IdComprador"] = doc.documento.cxcomprador.cxparticipante
-    output["Comprador"] = doc.documento.cxcomprador.ctnombre
+    output["IdCliente"] = doc.documento.cxcliente.id
+    output["Cliente"] = doc.documento.cxcliente.cxcliente.ctnombre
+    output["IdComprador"] = doc.documento.cxcomprador.id
+    output["Comprador"] = doc.documento.cxcomprador.cxcomprador.ctnombre
     output["IdTipoFactoring"] = doc.documento.cxtipofactoring.cxtipofactoring
     output["TipoFactoring"] = doc.documento.cxtipofactoring.ctabreviacion
     output["Asignacion"] = doc.documento.cxasignacion.cxasignacion
@@ -770,7 +779,7 @@ def DepositoCheques(request, ids_cheques, total_cartera, cuenta_destino
     if request.method =='GET':
 
         result = (ChequesAccesorios.objects.filter(id__in = ids_cheques.split(','))
-            .values( 'documento__cxcliente__ctnombre')
+            .values( 'documento__cxcliente__cxcliente__ctnombre')
             .annotate(pcount=Count('documento'))
             .annotate(total = Sum('ntotal'))
             .order_by()
@@ -1067,7 +1076,7 @@ def DetalleDocumentosCobradosSalida(doc):
 
     output = {}
     output['id'] = doc.id
-    output["Comprador"] = doc.cxdocumento.cxcomprador.ctnombre
+    output["Comprador"] = doc.cxdocumento.cxcomprador.cxcomprador.ctnombre
     output["Asignacion"] = doc.cxdocumento.cxasignacion.cxasignacion
     output["Documento"] = doc.cxdocumento.ctdocumento
     output["Vencimiento"] = doc.vencimiento().strftime("%Y-%m-%d")
@@ -1084,7 +1093,7 @@ def DetalleDocumentosRecuperadosSalida(doc):
 
     output = {}
     output['id'] = doc.id
-    output["Comprador"] = doc.documentoprotestado.documento.cxcomprador.ctnombre
+    output["Comprador"] = doc.documentoprotestado.documento.cxcomprador.cxcomprador.ctnombre
     output["Asignacion"] = doc.documentoprotestado.documento.cxasignacion.cxasignacion
     output["Documento"] = doc.documentoprotestado.documento.ctdocumento
     output["Vencimiento"] = doc.vencimiento().strftime("%Y-%m-%d")
@@ -1285,7 +1294,7 @@ def Liquidacion(request, tipo_operacion):
     pjcobranzas = objeto["cobranzas"]
     pjotroscargos = objeto["otros_cargos"]
 
-    resultado=enviarPost("CALL uspLiquidarCobranzas( '{0}','{1}', {2},'{3}'\
+    resultado=enviarPost("CALL uspLiquidarCobranzas( {0},'{1}', {2},{3}\
         ,'{4}'\
         ,{5},{6},{7},{8},{9},{10}\
         ,{11},{12},{13},{14},{15},{16},'{17}'\
@@ -1312,6 +1321,8 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
     
     liquidacion = Liquidacion_cabecera.objects.filter(pk=pk).first()
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
     if request.method=="GET":
 
         e={'cxtipooperacion':'C'
@@ -1371,6 +1382,7 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
                 , ctbeneficiario = beneficiario
                 , cxcuentadestino = cuenta_destino
                 , cxusuariocrea = request.user
+                , empresa = id_empresa.empresa,
                 )
             
             desembolso.save()
@@ -1404,7 +1416,7 @@ def AceptarProtesto(request):
         id_accesorio='Null'
 
     # Los 2 ultimos parametros son el id de cheque accesorio y el mensaje de error
-    resultado=enviarPost("CALL uspRegistroProtesto( {0},'{1}',{2},'{3}','{4}'\
+    resultado=enviarPost("CALL uspRegistroProtesto( {0},'{1}',{2},{3},{4}\
         ,'{5}','{6}',{7},{8},{9},{10}\
         ,'{11}',{12},'{13}','',0)"
         .format(id_cobranza, codigo_cobranza, id_cheque, id_cliente, tipo_factoring
@@ -1437,40 +1449,40 @@ def GeneraListaProtestosPendientesJSON(request):
     return JsonResponse( data)
 
 def GeneraListaProtestosPendientesJSONSalida(doc):
-    output = {}
-    if doc.cxtipooperacion=='C':
-        cobranza = Documentos_cabecera.objects.filter(cxcheque = doc.cheque)\
-        .first()
-    else:
-        cobranza = Recuperaciones_cabecera.objects.filter(cxcheque = doc.cheque)\
-            .first()
-
-    output['id'] = doc.id
     # los datos mostrados deben ser del cliente, no del emisor del cheque.
-    output["IdCliente"] = cobranza.cxcliente.cxcliente.cxparticipante
-    output["Cliente"] = cobranza.cxcliente.cxcliente.__str__()
+    output = {}
 
     if doc.cxtipooperacion=='C':
+        cobranza = Documentos_cabecera.objects\
+            .filter(cxcheque = doc.cheque).first()
         output["Cobranza"] = cobranza.cxcobranza
     else:
+        cobranza = Recuperaciones_cabecera.objects\
+            .filter(cxcheque = doc.cheque).first()
         output["Cobranza"] = cobranza.cxrecuperacion
 
-    output["IdTipoFactoring"] = cobranza.cxtipofactoring.cxtipofactoring
+    output['id'] = doc.id
+    output["IdCliente"] = cobranza.cxcliente.id
+    output["Cliente"] = cobranza.cxcliente.cxcliente.__str__()
+    output["IdTipoFactoring"] = cobranza.cxtipofactoring.id
     output["Deposito"] = cobranza.ddeposito.strftime("%Y-%m-%d")
     output["Girador"] = doc.cheque.ctgirador
     output["Cheque"] = doc.cheque.__str__()
+    output["IdCobranza"] = cobranza.id
+    output["TipoOperacion"] = doc.cxtipooperacion
+    output["Protesto"] = doc.dprotesto
+    output["Saldo"] = doc.nsaldocartera
+    output["Motivo"] = doc.motivoprotesto.ctmotivoprotesto
     
+
     if doc.notadedebito:
         output["NotaDebito"] = doc.notadedebito.nvalor
     else:
         output["NotaDebito"] = None
 
-    output["Protesto"] = doc.dprotesto
-    output["Saldo"] = doc.nsaldocartera
-    output["Motivo"] = doc.motivoprotesto.ctmotivoprotesto
     # determinar si cheque fue pagado por comprador 
     if doc.cheque.cxtipoparticipante =='D':
-        output["IdComprador"] = doc.cheque.cxparticipante.cxparticipante
+        output["IdComprador"] = doc.cheque.cxparticipante.id
     else:
         output["IdComprador"] = ''
         
@@ -1478,8 +1490,6 @@ def GeneraListaProtestosPendientesJSONSalida(doc):
         output["CuentaDeposito"] = 'Cuenta cliente'
     else:
         output["CuentaDeposito"] = cobranza.cxcuentadeposito.__str__()
-    output["IdCobranza"] = cobranza.id
-    output["TipoOperacion"] = doc.cxtipooperacion
 
     return output
 
@@ -1515,8 +1525,8 @@ def DocumentoProtestoJSONSalida(doc):
     # presenten en el HTML
     output = {}
     output['id'] = doc.id
-    output["IdComprador"] = doc.documento.cxcomprador.cxparticipante
-    output["Comprador"] = doc.documento.cxcomprador.ctnombre
+    output["IdComprador"] = doc.documento.cxcomprador.id
+    output["Comprador"] = doc.documento.cxcomprador.cxcomprador.ctnombre
     output["Asignacion"] = doc.documento.cxasignacion.cxasignacion
     output["Documento"] = doc.documento.ctdocumento
     output["Emision"] = doc.documento.demision.strftime("%Y-%m-%d")
@@ -1628,23 +1638,28 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
     listacobranzas =[]
     vuelto_cobranza=0
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     if request.method =="GET":
 
         if tipo_operacion=='R':
-            lista_cobranzas = Recuperaciones_cabecera.objects.filter(id__in = ids_cobranzas.split(','))
+            lista_cobranzas = Recuperaciones_cabecera.objects\
+                .filter(id__in = ids_cobranzas.split(','))
         else:
-            lista_cobranzas = Documentos_cabecera.objects.filter(id__in = ids_cobranzas.split(','))
+            lista_cobranzas = Documentos_cabecera.objects\
+                .filter(id__in = ids_cobranzas.split(','))
 
         for c in range(len(lista_cobranzas)):
 
             cobranza = lista_cobranzas[c]
 
             if tipo_operacion =='R':
-                detalle_cobranza = Recuperaciones_detalle.objects.filter(recuperacion = cobranza)
+                detalle_cobranza = Recuperaciones_detalle.objects\
+                    .filter(recuperacion = cobranza)
             else:
-                detalle_cobranza = Documentos_detalle.objects.filter(cxcobranza = cobranza)
+                detalle_cobranza = Documentos_detalle.objects\
+                    .filter(cxcobranza = cobranza)
 
-            
             cuenta_transferencia = Cuenta_transferencia\
                     .objects.cuenta_default(cobranza.cxcliente).first()
             
@@ -1658,7 +1673,8 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
             for i in range(len(detalle_cobranza)):
 
                 # inicializar
-                descuento_cartera=0; descuento_cartera_vencido=0; valor_gao=0; valor_gaoa=0
+                descuento_cartera=0; descuento_cartera_vencido=0; valor_gao=0
+                valor_gaoa=0
                 cargo_retenciones=0; cargo_bajas=0
                 dias_vencidos=0; dias_negociados =0
                 tasa_dc=0; tasa_gao=0;tasa_gaoa=0
@@ -1675,7 +1691,8 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                     base_bajas=documento_cobrado.nvalorbaja + documento_cobrado.nvalorbajacobranza
                 else:
                     codigo_operacion = cobranza.cxcobranza
-                    accesorios = cobranza.cxformapago == "DEP" 
+                    # puede estar cobrando un cheque quitado lo que lo convierte en accesorio
+                    accesorios = cobranza.cxformapago == "DEP" or documento_cobrado.accesorioquitado
                     base_bajas=documento_cobrado.nvalorbaja
                     base_retenciones = documento_cobrado.nretenciones
 
@@ -1685,7 +1702,11 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                         documento = documento_cobrado.documentoprotestado.accesorio
                         vuelto = documento_cobrado.nvalorrecuperacion * (100 - documento.nporcentajeanticipo) /100
                     else:
-                        documento = cobranza.cxaccesorio
+                        if cobranza.cxformapago == "DEP":
+                            documento = cobranza.cxaccesorio
+                        else:
+                            documento = accesorios
+
                         vuelto = documento_cobrado.nvalorcobranza * (100 - documento.nporcentajeanticipo) /100
 
                     id_documento = documento.documento.id
@@ -1707,7 +1728,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                     asignacion = documento.cxasignacion.cxasignacion
                     id_asignacion = documento.cxasignacion.id
                     numero_documento=documento.ctdocumento
-
+                print(documento)
                 # considerar los días condonados
                 fechacobrocalculo = cobranza.dcobranza - timedelta(days=documento_cobrado.ndiasacondonar)
 
@@ -1717,7 +1738,8 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                     dias_vencidos = dias_vencidos.days
 
                 # generar DC
-                dc = Tasas_factoring.objects.filter(cxtasa='DCAR').first()
+                dc = Tasas_factoring.objects\
+                    .filter(cxtasa='DCAR', empresa = id_empresa.empresa).first()
                 
                 if not tipofactoring.lgeneradcenaceptacion:
 
@@ -1763,7 +1785,8 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                 cargo_bajas = base_bajas * documento.nporcentajeanticipo / 100
 
                 # genera GAO
-                gao = Tasas_factoring.objects.filter(cxtasa="GAO").first()
+                gao = Tasas_factoring.objects\
+                    .filter(cxtasa="GAO", empresa = id_empresa.empresa).first()
 
                 if not tipofactoring.lgeneragaoenaceptacion:
 
@@ -1788,7 +1811,11 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
 
 
                 # generar GAOA
-                gaoa = Tasas_factoring.objects.filter(cxtasa="GAOA").first()
+                gaoa = Tasas_factoring.objects\
+                    .filter(cxtasa="GAOA", empresa = id_empresa.empresa).first()
+
+                if not gaoa:
+                    return HttpResponse("No se ha encontrado tasa de GAOA")
 
                 # aplicar los días de gracia
                 if tipofactoring.lcargagaoa and dias_vencidos > tipofactoring.ndiasgracia:
@@ -1880,7 +1907,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
 
     contexto={
         "nombredecliente" : cobranza.cxcliente.cxcliente.ctnombre,
-        "tipo_factoring" : tipofactoring.cxtipofactoring,
+        "tipo_factoring" : tipofactoring.id,
         "total_vuelto": round(total_vuelto,2),
         "total_sobrepagos": total_sobrepagos,
         "total_descuentocartera": round(total_dc + total_dcv,2),
@@ -1904,7 +1931,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
         "data": json.dumps(listacargos),
         "form": LiquidarForm,
         "base_iva":base_iva,
-        "cliente": cobranza.cxcliente.cxcliente.cxparticipante,
+        "cliente": cobranza.cxcliente.id,
         "cobranzas":json.dumps(listacobranzas),
         "tipo_operacion":tipo_operacion,
         "otros_cargos":json.dumps(listaotroscargos),
@@ -2402,14 +2429,18 @@ def ReversaProtesto(request, id_cobranza,tipo_operacion,id_protesto, cobranza
 
     return HttpResponse(resultado)
 
-def CanjeDeCheque(request, cheque_id, cliente_ruc, deudor_id):
+def CanjeDeCheque(request, cheque_id, cliente_id, deudor_id):
     template_path = 'cobranzas/datoscanjecheque_modal.html'
+
+    cliente = Datos_generales.objects.filter(pk = cliente_id).first()
+    comprador = Datos_compradores.objects.filter(pk = deudor_id).first()
+
     cuentas = Cuentas_bancarias\
-        .objects.filter(cxparticipante = cliente_ruc \
+        .objects.filter(cxparticipante = cliente.cxcliente.id \
             , leliminado = False, lpropia = True\
             , cxtipocuenta = 'C').all()
     cuentas_deudor = Cuentas_bancarias\
-        .objects.filter(cxparticipante = deudor_id \
+        .objects.filter(cxparticipante = comprador.cxcomprador.id \
             , leliminado = False, lpropia = True\
             , cxtipocuenta = 'C').all()
 
@@ -2418,9 +2449,11 @@ def CanjeDeCheque(request, cheque_id, cliente_ruc, deudor_id):
         'form_cheque': AccesoriosForm,
         "cuentas_bancarias_cliente" : cuentas,
         "cuentas_bancarias_deudor" : cuentas_deudor,
-        'cliente_ruc':cliente_ruc,
+        'cliente_id':cliente_id,
         'deudor_id':deudor_id,
         }
+    
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     
     if request.method =='POST':
 
@@ -2464,13 +2497,13 @@ def CanjeDeCheque(request, cheque_id, cliente_ruc, deudor_id):
                 cxestado = cheque.cxestado,
                 ncanjeadopor = cheque.id,
                 cxusuariocrea = request.user,            
+                empresa = id_empresa.empresa,
             )
             if nuevo_cheque:
                 nuevo_cheque.save()
 
             # registrar canje con el motivo
             motivo  = request.POST.get('motivo')
-            cliente = Datos_generales.objects.filter(cxcliente = cliente_ruc).first()
 
             canje = Cheques_canjeados(
                 cxcliente = cliente,
@@ -2478,6 +2511,7 @@ def CanjeDeCheque(request, cheque_id, cliente_ruc, deudor_id):
                 accesorionuevo = nuevo_cheque,
                 ctmotivocanje = motivo,
                 cxusuariocrea = request.user,            
+                empresa = id_empresa.empresa,
             )
             if canje:
                 canje.save()
@@ -2494,6 +2528,8 @@ def QuitarAccesorio(request, cheque_id, cliente_ruc):
         'cliente_ruc':cliente_ruc,
         }
     
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
     if request.method =='POST':
         with transaction.atomic():
 
@@ -2508,6 +2544,7 @@ def QuitarAccesorio(request, cheque_id, cliente_ruc):
                 nsaldo = cheque.ntotal,
                 ctmotivoquitado = motivo,
                 cxusuariocrea = request.user,
+                empresa = id_empresa.empresa,
             )
             if quitado:
                 quitado.save()
@@ -2531,8 +2568,11 @@ def AmpliacionDePlazo(request, ids, tipo_factoring, tipo_asignacion, id_cliente)
     # buscar en la configuracion del tipo de factoring las condiciones para menajer 
     # las ampliaciones de plazo
 
-        # buscar el tipo de factoring 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    # buscar el tipo de factoring
     tipo_factoring = Tipos_factoring.objects.get(cxtipofactoring=tipo_factoring)
+
     if not tipo_factoring:
         return HttpResponse("Tipo de factoring no existe:" + tipo_factoring)
     if tipo_factoring.lcargadcenampliacionplazo:
@@ -2541,14 +2581,20 @@ def AmpliacionDePlazo(request, ids, tipo_factoring, tipo_asignacion, id_cliente)
         acumula_gao="Si"
 
     # datos de tasa gaoa/dc
-    gaoa = Tasas_factoring.objects.filter(cxtasa="GAOA").first()
+    gaoa = Tasas_factoring.objects\
+        .filter(cxtasa="GAOA", empresa = id_empresa.empresa).first()
+    
     if not gaoa:
         return HttpResponse("no encontró tasa de gaoa")
+    
     if gaoa.lcargaiva: iva_gaoa = 'Si'
 
-    dc = Tasas_factoring.objects.filter(cxtasa="DCAR").first()
+    dc = Tasas_factoring.objects\
+        .filter(cxtasa="DCAR", empresa = id_empresa.empresa).first()
+    
     if not dc:
         return HttpResponse("no encontró tasa de descuento de cartera")
+    
     if dc.lcargaiva: iva_dc='Si'
 
     dic_gaoa  = {'carga_iva': iva_gaoa
@@ -2561,7 +2607,7 @@ def AmpliacionDePlazo(request, ids, tipo_factoring, tipo_asignacion, id_cliente)
         , 'generar':carga_dc
         , 'iniciales': dc.ctinicialesentablas}
 
-
+    print(dic_gaoa)
     context={
         'ids':ids,
         'tipo_asignacion':tipo_asignacion,
@@ -2583,6 +2629,8 @@ def DetalleCargosAmpliacionPlazo(request, ids, tipo_asignacion, fecha_corte
     arr_acc = []    # estos dos arreglos son
     arr_fac = []    # usados para separar facturas de accesorio quitados
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     # obtener las tasas de los datos operativos del ciente
     datos_operativos = Datos_operativos.objects\
                 .filter(cxcliente = id_cliente).first()
@@ -2592,12 +2640,14 @@ def DetalleCargosAmpliacionPlazo(request, ids, tipo_asignacion, fecha_corte
     tasa_gaoa = datos_operativos.ntasagaoa
 
     # datos de tasa gao/dc
-    gaoa = Tasas_factoring.objects.filter(cxtasa="GAOA").first()
+    gaoa = Tasas_factoring.objects\
+        .filter(cxtasa="GAOA", empresa = id_empresa.empresa).first()
     if not gaoa:
         return HttpResponse("no encontró registro de tasa de gao en tabla de tasas de factoring")
 
     if carga_dc=='Si':
-        dc = Tasas_factoring.objects.filter(cxtasa="DCAR").first()
+        dc = Tasas_factoring.objects\
+            .filter(cxtasa="DCAR", empresa = id_empresa.empresa).first()
         if not dc:
             return HttpResponse("no encontró registro de tasa de descuento de catera en tabla de tasas de factoring")
 
@@ -2697,7 +2747,7 @@ def GeneraDetalleCargosAmpliacionPlazo(request, ids, tipo_asignacion):
         documentos = Documentos.objects.filter(id__in=arr_fac)
     else:
         documentos = ChequesAccesorios.objects\
-            .filter(id__in=ids.split(','),leliminado = False)
+            .filter(id__in=ids.split(','), leliminado = False)
 
     tempBlogs = []
     for i in range(len(documentos)):
@@ -2749,7 +2799,7 @@ def GeneraDetalleCargosAmpliacionPlazoOutput(doc, tipo_asignacion):
     return output
 
 def SumaCargos(request,ids, tipo_asignacion, gaoa_carga_iva, dc_carga_iva
-               , carga_gaoa, carga_dc, porcentaje_iva=12):
+               , porcentaje_iva=12):
     # lee los datos de la tabla solicutid documentos
     arr_acc = []    # estos dos arreglos son
     arr_fac = []    # usados para separar facturas de accesorio quitados
@@ -2775,27 +2825,25 @@ def SumaCargos(request,ids, tipo_asignacion, gaoa_carga_iva, dc_carga_iva
             .filter(id__in=ids.split(','),leliminado = False)
 
     # gaoa
-    if carga_gaoa=="Si":
-        total_gaoa = documentos.aggregate(suma_gaoa = Sum('ngaoaap'))
-        
-        g = total_gaoa["suma_gaoa"]
-        
-        if arr_acc:
-            if not g: g = 0
+    total_gaoa = documentos.aggregate(suma_gaoa = Sum('ngaoaap'))
+    
+    g = total_gaoa["suma_gaoa"]
+    
+    if arr_acc:
+        if not g: g = 0
 
-            total_gaoa = quitados.aggregate(suma_gaoa = Sum('ngaoaap'))
-            g += total_gaoa["suma_gaoa"]
+        total_gaoa = quitados.aggregate(suma_gaoa = Sum('ngaoaap'))
+        g += total_gaoa["suma_gaoa"]
 
     # dc
-    if carga_dc=="Si":
-        total_dc = documentos.aggregate(suma_dc = Sum('ndescuentocarteraap'))
-        d = total_dc["suma_dc"]
+    total_dc = documentos.aggregate(suma_dc = Sum('ndescuentocarteraap'))
+    d = total_dc["suma_dc"]
 
-        if arr_acc:
-            if not d: d = 0
+    if arr_acc:
+        if not d: d = 0
 
-            total_dc = quitados.aggregate(suma_dc = Sum('ndescuentocarteraap'))
-            d += total_dc["suma_dc"]
+        total_dc = quitados.aggregate(suma_dc = Sum('ndescuentocarteraap'))
+        d += total_dc["suma_dc"]
 
     # iva
     base = 0
@@ -2812,16 +2860,23 @@ def SumaCargos(request,ids, tipo_asignacion, gaoa_carga_iva, dc_carga_iva
         , 'dc':str(d)
         , 'iva': str(iva)
         , 'total':str(total)}
-
+    
     return HttpResponse(json.dumps(data), content_type = "application/json")
 
-def Prorroga(request, id, tipo_asignacion, vencimiento, documento):
+def Prorroga(request, id, tipo_asignacion, vencimiento, numero_factura):
     template_path = 'cobranzas/datosdiasprorroga_modal.html'
+
+    if tipo_asignacion =='F':
+        documento = Documentos.objects.filter(pk=id).first()
+    else:
+        documento = ChequesAccesorios.objects.filter(pk=id).first()
+
     context={
         'id':id,
         'tipo_asignacion':tipo_asignacion,
         'vencimiento': vencimiento,
-        'documento' : documento, 
+        'numero_factura' : numero_factura, 
+        'cantidad_prorrogas' : documento.ncontadorprorrogas,
         'dias':0,
         }
     
@@ -2830,11 +2885,6 @@ def Prorroga(request, id, tipo_asignacion, vencimiento, documento):
         dias = request.POST.get("dias_id")
         dias = Decimal(dias)
         
-        if tipo_asignacion =='F':
-            documento = Documentos.objects.filter(pk=id).first()
-        else:
-            documento = ChequesAccesorios.objects.filter(pk=id).first()
-
         if documento:
             documento.ndiasprorroga += dias
             documento.ncontadorprorrogas += 1

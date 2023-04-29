@@ -47,9 +47,7 @@ class CobranzasDocumentosForm(forms.ModelForm):
                 'class':'form-control'
             })
         self.fields['nsobrepago'].widget.attrs['readonly']=True
-        # self.fields['dcobranza'].widget.attrs['readonly']=True
         self.fields['dcobranza'].widget.attrs['value']=date.today
-        # self.fields['ddeposito'].widget.attrs['readonly']=True
         self.fields['ddeposito'].widget.attrs['value']=date.today
 
     def clean_ddeposito(self):
@@ -65,6 +63,7 @@ class CobranzasDocumentosForm(forms.ModelForm):
 
         # Remember to always return the cleaned data.
         return data
+    
 class ChequesForm(forms.ModelForm):
     class Meta:
         model = Cheques
@@ -142,17 +141,16 @@ class MotivoProtestoForm(forms.ModelForm):
 
 class ProtestoForm(forms.ModelForm):
 
-    nvalornotadebito = forms.DecimalField( initial=0.00)
-    
+    # el valor de la nd por protesto no se guarda en el registro del protesto
+    # estará en el registro de la tabla de notas de debito asociada al protesto
     class Meta:
         model = Cheques_protestados
 
-        fields=['dprotesto', 'motivoprotesto','nvalornotadebito']
+        fields=['dprotesto', 'motivoprotesto']
 
         labels={'dprotesto':'Fecha de protesto'
-        , 'motivoprotesto':'Motivo'
-        ,'nvalornotadebito':'Nota de débito bancaria'
-        }
+            , 'motivoprotesto':'Motivo'
+            }
         widgets = {
             'dprotesto': forms.DateInput(
                 format=('%Y-%m-%d'),

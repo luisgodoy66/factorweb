@@ -56,11 +56,11 @@ urlpatterns = [
     path('cobranzasregistradasjson/<desde>/<hasta>',GeneraListaCobranzasRegistradasJSON
         , name="cobranzasregistradas_json"),
     path('reversarcobranza/<int:pid_cobranza>/<tipo_operacion>',ReversaCobranza),
-    path('canjearchequeaccesorio/<int:cheque_id>/<cliente_ruc>/<deudor_id>'
+    path('canjearchequeaccesorio/<int:cheque_id>/<cliente_id>/<deudor_id>'
          , CanjeDeCheque, name='canjearchequeaccesorio'),
     path('quitaraccesorio/<int:cheque_id>/<cliente_ruc>'
          , QuitarAccesorio, name='quitarchequeaccesorio'),
-    path('prorroga/<int:id>/<tipo_asignacion>/<vencimiento>/<documento>', Prorroga, name='prorroga' ),
+    path('prorroga/<int:id>/<tipo_asignacion>/<vencimiento>/<numero_factura>', Prorroga, name='prorroga' ),
     
     # liquidaciones
     path('confirmarcobranza/<int:cobranza_id>/<tipo_operacion>',ConfirmarCobranza),
@@ -144,7 +144,7 @@ urlpatterns = [
          ,DetalleCargosAmpliacionPlazo),
     path('refrescadetallecargosampliacionplazo/<ids>/<tipo_asignacion>'
          ,GeneraDetalleCargosAmpliacionPlazo),
-    path('sumacargos/<ids>/<tipo_asignacion>/<gaoa_carga_iva>/<dc_carga_iva>/<carga_gaoa>/<carga_dc>/<int:porcentaje_iva>',\
+    path('sumacargos/<ids>/<tipo_asignacion>/<gaoa_carga_iva>/<dc_carga_iva>/<int:porcentaje_iva>',\
         SumaCargos),
 
 ]

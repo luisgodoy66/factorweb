@@ -270,10 +270,9 @@ def DatosFacturasPuras(request, cliente_id=None
                 asignacion.save()
 
             # grabar comprador , si es nuevo
-            comprador = Datos_compradores.objects\
-                .filter(cxcomprador = id_comprador).first()
             datosparticipante = Datos_participantes.objects\
-                .filter(cxparticipante = id_comprador).first()
+                .filter(cxparticipante = id_comprador, empresa = id_empresa.empresa).first()
+            comprador = Datos_compradores.objects.filter(cxcomprador = datosparticipante.id).first()
 
             if not datosparticipante:
 
@@ -588,8 +587,9 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
             asignacion.save()
 
         # grabar comprador , si es nuevo
-        comprador = Datos_compradores.objects.filter(cxcomprador = id_comprador).first()
-        datosparticipante = Datos_participantes.objects.filter(cxparticipante = id_comprador).first()
+        datosparticipante = Datos_participantes.objects\
+            .filter(cxparticipante = id_comprador, empresa = id_empresa.empresa).first()
+        comprador = Datos_compradores.objects.filter(cxcomprador = datosparticipante.id).first()
 
         if not datosparticipante:
 
@@ -711,8 +711,8 @@ def DatosAccesorioEditar(request, accesorio_id = None, tipo_factoring_id = None)
 
             asg_id = accesorio.documento.cxasignacion.id
             tipo_factoring_id = accesorio.documento.cxasignacion\
-                .cxtipofactoring.cxtipofactoring
-
+                .cxtipofactoring.id
+            
             tipoFactoring = Tipos_factoring.objects\
                 .filter(pk=tipo_factoring_id).first()
 

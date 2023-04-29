@@ -54,7 +54,7 @@
                             <tr></tr>
                             {% for item in detalle %}
                             <tr>
-                                <td>{{ item.cxcomprador__ctnombre }}</td>
+                                <td>{{ item.cxcomprador__cxcomprador__ctnombre }}</td>
                                 <td>{{ item.cxasignacion__cxasignacion }}</td>
                                 <td>{{ item.ctdocumento }}</td>
                                 <td>{{ item.dvencimiento |date:"Y-m-d"}}</td>

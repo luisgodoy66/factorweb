@@ -31,7 +31,7 @@
                     <tbody>
                         {% for item in cheques %}
                         <tr>
-                            <td>{{ item.documento__cxcliente__ctnombre }}</td>
+                            <td>{{ item.documento__cxcliente__cxcliente__ctnombre }}</td>
                             <td>{{ item.pcount }}</td>
                             <td>{{ item.total }}</td>
                         </tr>
@@ -44,32 +44,32 @@
 
                 <div class="row form-group mt-3">
                     {% if cuenta_destino == 'CE' %}
-                    <div class="col-md-2"><label for="id_cxcuentadeposito" 
-                        class=" form-control-label">
-                        {{form.cxcuentadeposito.label}}</label>
-                    </div>
-                    <div class="col-md-4">
-                        {{form.cxcuentadeposito}}
-                    </div>
-                    {% else %}
-                    <div class="col-md-2"><label for="id_cxcuentadeposito" 
-                        class=" form-control-label">
-                        Cuenta compartida</label>
-                    </div>
-                    <div class="col-md-4">
-                        <div id="div_cuentas_conjuntas" >
-                            <select data-placeholder="Seleccione una cuenta..." 
-                            class="form-control" tabindex="1" 
-                            id="cuenta_conjunta" name="cuenta_conjunta"
-                            >
-                            <option value=""></option>
-                            {% for cuenta in cuentas_conjuntas %}
-                            <option value="{{ cuenta.id}}" >{{ cuenta}} </option>
-                            {% endfor %}
-                        </select>
-
+                        <div class="col-md-2"><label for="id_cxcuentadeposito" 
+                            class=" form-control-label">
+                            {{form.cxcuentadeposito.label}}</label>
                         </div>
-                    </div>
+                        <div class="col-md-4">
+                            {{form.cxcuentadeposito}}
+                        </div>
+                    {% else %}
+                        <div class="col-md-2"><label for="id_cxcuentadeposito" 
+                            class=" form-control-label">
+                            Cuenta compartida</label>
+                        </div>
+                        <div class="col-md-4">
+                            <div id="div_cuentas_conjuntas" >
+                                <select data-placeholder="Seleccione una cuenta..." 
+                                class="form-control" tabindex="1" required 
+                                id="cuenta_conjunta" name="cuenta_conjunta"
+                                >
+                                <option value=""></option>
+                                {% for cuenta in cuentas_conjuntas %}
+                                <option value="{{ cuenta.id}}" >{{ cuenta}} </option>
+                                {% endfor %}
+                            </select>
+
+                            </div>
+                        </div>
                     {% endif %}
 
                     <div class="col-md-2"><label for="id_ddeposito" 

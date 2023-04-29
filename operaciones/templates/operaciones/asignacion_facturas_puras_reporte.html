@@ -47,7 +47,7 @@
                     <tbody>
                         <tr>
                             <td><h4>Cliente:</h4></td>
-                            <td>{{ asignacion.cxcliente.ctnombre }}</td>
+                            <td>{{ asignacion.cxcliente }}</td>
                             <td></td>
                             <td></td>
                             <td><h4>Fecha de negociacion:</h4></td>
@@ -55,7 +55,7 @@
                         </tr>
                         <tr>
                             <td><h4>Id:</h4></td>
-                            <td>{{asignacion.cxcliente.cxparticipante}}</td>
+                            <td>{{asignacion.cxcliente.cxcliente.cxparticipante}}</td>
                             <td></td>
                             <td></td>
                             <td><h4>Fecha de desembolso:</h4></td>
@@ -95,7 +95,7 @@
                             {% for item in documentos %}
                             <tr>
                                 <td>{{ item.id }}</td>
-                                <td>{{ item.cxcomprador.ctnombre }}</td>
+                                <td>{{ item.cxcomprador }}</td>
                                 <td>{{ item.ctdocumento }}</td>
                                 <td class="fecha">{{ item.demision|date:"y-m-d"  }}</td>
                                 <td class="fecha">{{ item.dvencimiento|date:"Y-m-d"  }}</td>

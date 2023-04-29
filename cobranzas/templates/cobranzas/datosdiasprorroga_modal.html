@@ -2,7 +2,7 @@
     <div class="modal-content">
 
         <form  method="POST" rol="form"  class="form-horizontal" name="form"
-                action="{% url 'cobranzas:prorroga' id tipo_asignacion vencimiento documento %}"
+                action="{% url 'cobranzas:prorroga' id tipo_asignacion vencimiento numero_factura %}"
             >
             <!-- <div class="col-md-12"> -->
             <div class="card">
@@ -16,6 +16,14 @@
 
                 <!-- body -->
                 <div class="card-body card-block">
+                    <!-- cantidad -->
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="dias" class=" form-control-label">
+                            Prorrogas realizadas</label></div>
+                        <div class="col-md-6">
+                            {{cantidad_prorrogas | default:"0"}}
+                        </div>
+                    </div>
                     <!-- dias -->
                     <div class="row form-group">
                         <div class="col-md-6"><label for="dias" class=" form-control-label">

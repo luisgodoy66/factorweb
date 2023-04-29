@@ -8,7 +8,7 @@ from bases.models import ClaseModelo
 from empresa.models import Clases_cliente, Datos_participantes \
     , Tipos_factoring, Cuentas_bancarias
 from clientes.models import Datos_generales as Datos_generales_cliente\
-    , Cuenta_transferencia
+    , Cuenta_transferencia, Datos_compradores
 from pais.models import Bancos
 
 from datetime import datetime, timedelta, date
@@ -53,7 +53,7 @@ class Asignacion(ClaseModelo):
         ('L', 'Liquidada'),
         ('P', 'Pagada'),
     )
-    cxcliente=models.ForeignKey(Datos_participantes
+    cxcliente=models.ForeignKey(Datos_generales_cliente
         , on_delete=models.CASCADE
         , related_name="cliente_asignacion"
     )
@@ -131,7 +131,7 @@ class Documentos_Manager(models.Manager):
                 , porvencer_mas_90 = Sum('nsaldo', filter=Q(dvencimiento__gt = xver90) ) 
                 )
     
-    def antigüedad_por_cliente(self):
+    def antigüedad_por_cliente(self, id_empresa):
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
         vcdo30 = datetime.today()+timedelta(days=-30)
@@ -142,8 +142,9 @@ class Documentos_Manager(models.Manager):
         return self.filter( leliminado = False, nsaldo__gt = 0
             , cxasignacion__cxtipo = "F"
             , cxasignacion__cxestado = "P"
-            , cxasignacion__leliminado = False)\
-            .values('cxcliente__ctnombre')\
+            , cxasignacion__leliminado = False
+            , empresa = id_empresa)\
+            .values('cxcliente__cxcliente__ctnombre')\
             .annotate(
                 vencido_mas_90 = Sum('nsaldo', filter=Q(dvencimiento__lt = vcdo90) ) 
                 , vencido_90 = Sum('nsaldo', filter=Q(dvencimiento__lt = vcdo60
@@ -173,13 +174,13 @@ class Documentos_Manager(models.Manager):
         return self.filter(leliminado = False, nsaldo__gt = 0
                 , cxasignacion__in = Asignacion.objects
                     .filter(cxtipo = "F", cxestado = "P", leliminado = False))\
-                    .values("cxcomprador__ctnombre","cxcliente__ctnombre"
+                    .values("cxcomprador__cxcomprador__ctnombre","cxcliente__cxcliente__ctnombre"
                             , "cxasignacion__cxasignacion"
                             , "ctdocumento"
                             , "dvencimiento", "cxasignacion__ddesembolso", "nsaldo")
     
 class Documentos(ClaseModelo):
-    cxcliente=models.ForeignKey(Datos_participantes
+    cxcliente=models.ForeignKey(Datos_generales_cliente
         , on_delete=models.CASCADE
         , related_name="cliente_documento"
     )
@@ -191,7 +192,7 @@ class Documentos(ClaseModelo):
         , related_name="tipo_factoring"
     )
     nreferencia = models.BigIntegerField(null=True)  
-    cxcomprador=models.ForeignKey(Datos_participantes
+    cxcomprador=models.ForeignKey(Datos_compradores
         , on_delete=models.CASCADE
         , related_name="comprador"
     )
@@ -261,7 +262,8 @@ class ChequesAccesorios_Manager(models.Manager):
         fecha = parse_date(fecha_corte)
         return self.filter(dvencimiento__lte = fecha - F('ndiasprorroga')
                 , cxestado = 'A'
-                , leliminado = False, lcanjeado = False, laccesorioquitado = False
+                , leliminado = False, lcanjeado = False
+                , laccesorioquitado = False
                 , documento__cxasignacion__cxestado = "P"
                 , documento__cxasignacion__leliminado = False
                 , empresa = id_empresa
@@ -269,8 +271,9 @@ class ChequesAccesorios_Manager(models.Manager):
 
     def facturas_pendientes(self, fecha_corte, id_empresa):
         fecha = parse_date(fecha_corte)
-        return self.filter(dvencimiento__lte = fecha - F('ndiasprorroga')
-                , laccesorioquitado = True, chequequitado__cxestado = 'A'
+        return self.filter(
+                dvencimiento__lte = fecha - F('ndiasprorroga'),
+                laccesorioquitado = True, chequequitado__cxestado = 'A'
                 , leliminado = False, lcanjeado = False
                 , documento__cxasignacion__cxestado = "P"
                 , documento__cxasignacion__leliminado = False
@@ -308,7 +311,7 @@ class ChequesAccesorios_Manager(models.Manager):
                 , porvencer_mas_90 = Sum('ntotal', filter=Q(dvencimiento__gt = xver90) ) 
                 )
 
-    def antigüedad_por_cliente(self):
+    def antigüedad_por_cliente(self, id_empresa):
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
         vcdo30 = datetime.today()+timedelta(days=-30)
@@ -319,8 +322,9 @@ class ChequesAccesorios_Manager(models.Manager):
         return self.filter(cxestado = 'A'
                 , leliminado = False, lcanjeado  = False, laccesorioquitado = False
                 , documento__cxasignacion__cxestado = "P"
-                , documento__cxasignacion__leliminado = False)\
-            .values('documento__cxcliente__ctnombre')\
+                , documento__cxasignacion__leliminado = False
+                , empresa = id_empresa)\
+            .values('documento__cxcliente__cxcliente__ctnombre')\
             .annotate(
                 vencido_mas_90 = Sum('ntotal', filter=Q(dvencimiento__lt = vcdo90) ) 
                 , vencido_90 = Sum('ntotal', filter=Q(dvencimiento__lt = vcdo60
@@ -345,8 +349,8 @@ class ChequesAccesorios_Manager(models.Manager):
                 , leliminado = False, lcanjeado = False
                 , documento__cxasignacion__cxestado = "P"
                 , documento__cxasignacion__leliminado = False)\
-                .values("documento__cxcomprador__ctnombre"
-                        , "documento__cxcliente__ctnombre"
+                .values("documento__cxcomprador__cxcomprador__ctnombre"
+                        , "documento__cxcliente__cxcliente__ctnombre"
                         , "documento__cxasignacion__cxasignacion"
                         , "documento__ctdocumento"
                         , "dvencimiento", "documento__cxasignacion__ddesembolso"
@@ -384,7 +388,7 @@ class Cheques_quitados_Manager(models.Manager):
                 , porvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__gt = xver90) ) 
                 )
 
-    def antigüedad_por_cliente(self):
+    def antigüedad_por_cliente(self, id_empresa):
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
         vcdo30 = datetime.today()+timedelta(days=-30)
@@ -395,8 +399,9 @@ class Cheques_quitados_Manager(models.Manager):
         return self.filter(cxestado = 'A'
                 , leliminado = False
                 , accesorio_quitado__documento__cxasignacion__cxestado = "P"
-                , accesorio_quitado__documento__cxasignacion__leliminado = False)\
-            .values('accesorio_quitado__documento__cxcliente__ctnombre')\
+                , accesorio_quitado__documento__cxasignacion__leliminado = False
+                , empresa = id_empresa)\
+            .values('accesorio_quitado__documento__cxcliente__cxcliente__ctnombre')\
             .annotate(
                 vencido_mas_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt = vcdo90) ) 
                 , vencido_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt = vcdo60

@@ -339,7 +339,7 @@ class Documentos_protestados_Manager(models.Manager):
 
         return protestos
     
-    def antigüedad_por_cliente_facturas(self):
+    def antigüedad_por_cliente_facturas(self, id_empresa):
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
         vcdo30 = datetime.today()+timedelta(days=-30)
@@ -347,8 +347,11 @@ class Documentos_protestados_Manager(models.Manager):
         xver60 = datetime.today()+timedelta(days=60)
         xver90 = datetime.today()+timedelta(days=90)
 
-        return self.filter( leliminado = False, nsaldo__gt = 0, accesorio__isnull = True)\
-            .values('documento__cxcliente__ctnombre')\
+        return self.filter( leliminado = False
+                           , nsaldo__gt = 0
+                           , accesorio__isnull = True
+                           , empresa = id_empresa)\
+            .values('documento__cxcliente__cxcliente__ctnombre')\
             .annotate(
                 vencido_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo90) ) 
                 , vencido_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo60
@@ -368,7 +371,7 @@ class Documentos_protestados_Manager(models.Manager):
                 )\
             .order_by()
     
-    def antigüedad_por_cliente_accesorios(self):
+    def antigüedad_por_cliente_accesorios(self, id_empresa):
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
         vcdo30 = datetime.today()+timedelta(days=-30)
@@ -376,8 +379,11 @@ class Documentos_protestados_Manager(models.Manager):
         xver60 = datetime.today()+timedelta(days=60)
         xver90 = datetime.today()+timedelta(days=90)
 
-        return self.filter( leliminado = False, nsaldo__gt = 0, accesorio__isnull = False)\
-            .values('documento__cxcliente__ctnombre')\
+        return self.filter( leliminado = False
+                           , nsaldo__gt = 0
+                           , accesorio__isnull = False
+                           , empresa = id_empresa)\
+            .values('documento__cxcliente__cxcliente__ctnombre')\
             .annotate(
                 vencido_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo90) ) 
                 , vencido_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo60
