@@ -119,7 +119,11 @@ window.operateEvents = {
     QuitarAccesorio( row.id, row.IdCliente)
   },
   'click .prorroga': function (e, value, row, index) {
-    Prorroga( row.id, 'A', row.Vencimiento, row.Documento)
+    if(row.Anticipa100){
+      alert("No puede ejecutar la prorroga de un documento al que se ha anticipado el 100 %. Debe realizar una ampliación de plazo")
+    }else{
+      Prorroga( row.id, 'A', row.Vencimiento, row.Documento)
+    }
   },
 };
 

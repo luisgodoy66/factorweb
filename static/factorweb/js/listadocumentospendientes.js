@@ -134,7 +134,11 @@ function CobroDeDocumentos(forma){
 
 window.operateEvents = {
   'click .prorroga': function (e, value, row, index) {
-    Prorroga(row.id, 'F', row.Vencimiento, row.Documento)
+    if(row.Anticipa100){
+      alert("No puede ejecutar la prorroga de un documento al que se ha anticipado el 100 %. Debe realizar una ampliación de plazo")
+    }else{
+      Prorroga(row.id, row.Tipo_asignacion, row.Vencimiento, row.Documento)
+    }
   },
 };
 

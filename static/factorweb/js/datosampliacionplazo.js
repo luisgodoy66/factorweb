@@ -17,11 +17,6 @@ window.onload=function(){
  
    // inicializar el encabezado
     ActualizarHeader();
-    // // configuar cambios en los campos de fecha y valores y select
-    // jQuery('#id_ndescuentodecartera', '#id_ngao', '#id_nanticipo')
-    //     .change(function(){
-    //       Calcula_Neto();
-    //       });
           
     jQuery('#fechacorte')
         .change(function(){
@@ -41,7 +36,7 @@ window.onload=function(){
 
   window.operateEvents = {
   'click .editar': function (e, value, row, index) {
-    CambiarTasasDocumento(row.id,capturaValor("fechacorte"),function(){
+    CambiarTasasDocumento(row.id,capturaValor("fechacorte"), row.Tipo_documento,function(){
     })
   },
 };
@@ -124,7 +119,7 @@ function initTable(iniciales_GAOA, iniciales_DC) {
     })
 }
 
-function CambiarTasasDocumento(doc_id, fecha_ampliacion, callback){
+function CambiarTasasDocumento(doc_id, fecha_ampliacion, tipo_asignacion, callback){
   AbrirModal("/cobranzas/editartasasdocumento/"+ doc_id+"/"+fecha_ampliacion+"/"
     +tipo_asignacion)
   
@@ -157,8 +152,7 @@ function AceptarAmpliacionPlazo(){
         else{
           window.location.href = "/cobranzas/listadocumentosvencidos";
         }
-        alert('grabada')
-        MensajeOK("Generada la nota de débito " + data)
+        alert("Generada la nota de débito " + data)
         // // en una nueva ventana abrir el reporte de asignación
         // url = window.location.origin
         // url = url + "/operaciones/reporteasignaciondesdesolicitud/"+asignacion_id;

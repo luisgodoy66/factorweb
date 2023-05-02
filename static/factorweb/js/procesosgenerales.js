@@ -20,14 +20,20 @@ function EliminarDocumentoDeSolicitudAsignacion(asignacion_id, documento_id, tip
 
 function ImprimirCobranza(cobranza_id, tipo_operacion){
     // en una nueva ventana abrir el reporte de cobranza
+    // eliminar espacios al final de string ?
+    tipo = tipo_operacion.substr(0,2).trim()
+    
     url = window.location.origin
-    if (tipo_operacion[0]=="C"){
+    if (tipo=="CC"){
+      url = url + "/cobranzas/reportecobranzacargos/"+cobranza_id;
+     }
+    if (tipo=="C"){
       url = url + "/cobranzas/reportecobranzacartera/"+cobranza_id;
      }
-     if (tipo_operacion[0]=="R"){
+     if (tipo=="R"){
       url = url + "/cobranzas/reporterecuperacion/"+cobranza_id;
      }
-     if (tipo_operacion[0]=="L"){
+     if (tipo=="L"){
       url = url + "/cobranzas/reporteliquidacion/"+cobranza_id;
      }
   window.open( url);
@@ -136,7 +142,6 @@ function AmpliacionDePlazo(tipo_asignacion){
     }}
     // solo los tipos de factoring que anticipan el 100%
     if ( !row.Anticipa100){
-      alert(row.Anticipa100)
       error = true
     }
   });

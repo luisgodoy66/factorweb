@@ -584,7 +584,8 @@ def GeneraListaCarterPorVencerJSONSalida(doc):
     else:
         output["UltimaCobranza"] =''
     output["Anticipa100"] = doc.cxtipofactoring.lanticipatotalnegociado
-
+    output["Tipo_asignacion"] = 'F'
+    
     return output
 
 def GeneraListaAccesoriosQuitadosJSONSalida(acc):
@@ -607,6 +608,7 @@ def GeneraListaAccesoriosQuitadosJSONSalida(acc):
         output["UltimaCobranza"] =''
 
     output["Anticipa100"] = acc.documento.cxtipofactoring.lanticipatotalnegociado
+    output["Tipo_asignacion"] = 'A'
 
     return output
 
@@ -790,7 +792,7 @@ def GeneraListaChequesADepositarJSONSalida(doc):
     output["Cliente"] = doc.documento.cxcliente.cxcliente.ctnombre
     output["IdComprador"] = doc.documento.cxcomprador.id
     output["Comprador"] = doc.documento.cxcomprador.cxcomprador.ctnombre
-    output["IdTipoFactoring"] = doc.documento.cxtipofactoring.cxtipofactoring
+    output["IdTipoFactoring"] = doc.documento.cxtipofactoring.id
     output["TipoFactoring"] = doc.documento.cxtipofactoring.ctabreviacion
     output["Asignacion"] = doc.documento.cxasignacion.cxasignacion
     output["Documento"] = doc.documento.ctdocumento
@@ -896,15 +898,6 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'R protestada'",''))
         cargos = Cargos_cabecera.objects\
-            .filter(empresa = id_empresa.empresa)\
-                .values('cxcliente__cxcliente__ctnombre','ddeposito'
-                ,'cxtipofactoring__ctabreviacion','cxcobranza'
-                ,'cxformapago'
-                ,'nvalor', 'dcobranza'
-                , 'cxcheque', 'cxestado','dregistro'
-                , 'id', 'cxcuentatransferencia','nsobrepago')\
-                    .annotate(tipo=RawSQL("select 'CC'",''))
-        liquidaciones = Liquidacion_cabecera.objects\
             .filter(empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','cxcobranza'
@@ -1042,9 +1035,9 @@ def GeneraListaCobranzasJSONSalida(transaccion):
     elif transaccion['tipo'] =='R':
         output["Movimiento"] = 'Recuperación'
     elif transaccion['tipo'] =='C protestada':
-        output["Movimiento"] = 'Cobranza protestada'
+        output["Movimiento"] = 'Protestado de cobranza'
     elif transaccion['tipo'] =='R protestada':
-        output["Movimiento"] = 'Recuperación protestada'
+        output["Movimiento"] = 'Protesto de recuperación'
     elif transaccion['tipo'] =='CC':
         output["Movimiento"] = 'Cobranza de cargos'
     elif transaccion['tipo'] =='L':
@@ -2538,6 +2531,9 @@ def CanjeDeCheque(request, cheque_id, cliente_id, deudor_id):
                 nplazo = cheque.nplazo,
                 cxestado = cheque.cxestado,
                 ncanjeadopor = cheque.id,
+                ndiasprorroga = cheque.ndiasprorroga,
+                ncontadorprorrogas = cheque.ncontadorprorrogas,
+                dultimageneraciondecargos = cheque.dultimageneraciondecargos,
                 cxusuariocrea = request.user,            
                 empresa = id_empresa.empresa,
             )
@@ -2613,8 +2609,7 @@ def AmpliacionDePlazo(request, ids, tipo_factoring, tipo_asignacion, id_cliente)
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     # buscar el tipo de factoring
-    tipo_factoring = Tipos_factoring.objects.get(cxtipofactoring=tipo_factoring
-                                                 , empresa = id_empresa.empresa)
+    tipo_factoring = Tipos_factoring.objects.get(id=tipo_factoring)
 
     if not tipo_factoring:
         return HttpResponse("Tipo de factoring no existe:" + tipo_factoring)
@@ -2828,7 +2823,8 @@ def GeneraDetalleCargosAmpliacionPlazoOutput(doc, tipo_asignacion):
 
     # el id debe ser del documento o el accesorio, para poder editar las tasas
     output['id'] = doc.id
-    
+    output["Tipo_documento"] = tipo_asignacion
+  
     # los siguientes 3 campos pertenecen al documento y no se encuentran en los cheques
     if tipo_asignacion==FACTURAS_PURAS:
         output["Asignacion"] = doc.cxasignacion.cxasignacion
@@ -3036,7 +3032,6 @@ def AceptarAmpliacionDePlazo(request):
     fecha_emision=objeto["emision_nd"]
     fecha_ampliacion=objeto["fecha_corte"]
     id_factoring=objeto["tipo_factoring"]
-    tipo_asignacion=objeto["tipo_asignacion"]
     pngao=objeto["ngao"]
     pndescuentocartera=objeto["ndescuentocartera"]
     pniva=objeto["niva"]
@@ -3046,10 +3041,10 @@ def AceptarAmpliacionDePlazo(request):
     nusuario = request.user.id
 
     print(objeto)
-    resultado=enviarPost("CALL uspAmpliacionDePlazo( {0},{1}, '{2}','{3}'\
-        ,'{4}',{5},{6}, {7}\
-        ,{8},{9},{10},'{11}','',0)"
-        .format(id_cliente, id_factoring, tipo_asignacion, fecha_emision
+    resultado=enviarPost("CALL uspAmpliacionDePlazo( {0},{1}, '{2}'\
+        ,'{3}',{4},{5}, {6}\
+        ,{7},{8},{9},'{10}','',0)"
+        .format(id_cliente, id_factoring, fecha_emision
                 , fecha_ampliacion, valor, pngao, pndescuentocartera
                 , porcentaje_iva, pniva, nusuario, documentos))
 
