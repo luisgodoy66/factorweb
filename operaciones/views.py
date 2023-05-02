@@ -667,7 +667,8 @@ def CalcularCargosPorDocumento(doc, gao, dc, fecha_desembolso
     
     # gao
     if gao.lsobreanticipo:
-        doc.ngao = (doc.ntotal * doc.nporcentajeanticipo * doc.ntasacomision / 10000)
+        doc.ngao = (doc.ntotal * doc.nporcentajeanticipo 
+                    * doc.ntasacomision / 10000)
     else:
         doc.ngao = (doc.ntotal * doc.ntasacomision / 100)
 

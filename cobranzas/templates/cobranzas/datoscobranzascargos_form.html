@@ -7,7 +7,11 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Operaciones</a></li>
                     <li><a href="#">cargos pendientes</a></li>
-                    <li><a href="{% url 'cobranzas:listaliquidacionesennegativopendientes' %}">por operaciones</a></li>
+                    {% if tipo_nd == 'AP' %}
+                        <li><a href="{% url 'cobranzas:listaampliacionespendientespagar' %}">ampliaciones plazo</a></li>
+                    {% else %}
+                        <li><a href="{% url 'cobranzas:listaliquidacionesennegativopendientes' %}">por operaciones</a></li>
+                    {% endif %}
                     <li class="active">cobro de cargos</li>
                 </ol>
             </div>
@@ -22,20 +26,18 @@
     <div class="card">
             {% csrf_token %}
         <div class="card-header">
-            <strong>Cobro de cargos</strong> de {{ cliente }}
+            <strong>Cobro de cargos</strong> de {{ cliente }} 
         </div>
+
         <div hidden>
-            <input type="text" id="documentos" name="documentos" 
-                value="{{ documentos }}" class="form-control">
-            <input type="text" id="total_cargos" name="total_cargos" 
-                value="{{ total_cargos }}" class="form-control">
-            <input type="text" id="id_cliente" name="id_cliente" 
-                value="{{ cliente_id }}"  class="form-control">
-            <input type="text" id="forma_cobro" value="{{ forma_cobro }}"
-                class="form-control">
-            <input type="text" id="tipo_factoring" value="{{ tipo_factoring }}"
-                class="form-control">
+            <input id="documentos" name="documentos" value="{{ documentos }}" >
+            <input id="total_cargos" name="total_cargos" value="{{ total_cargos }}" >
+            <input id="id_cliente" name="id_cliente" value="{{ cliente_id }}"  >
+            <input id="forma_cobro" value="{{ forma_cobro }}" >
+            <input id="tipo_factoring" value="{{ tipo_factoring }}">
+            <input id="tipo_nd" value="{{ tipo_nd }}">
         </div>
+
         <div class="card-body card-block">
             <!-- lista de clientes -->
             <div class="row form-group">
@@ -162,8 +164,13 @@
         </div>    
           
         <div class="card-footer">
-            <a href="{% url 'cobranzas:listaliquidacionesennegativopendientes' %}" 
-            class="btn btn-danger btn-sm">
+            <a 
+                {% if tipo_nd == 'AP' %}
+                    href="{% url 'cobranzas:listaampliacionespendientespagar' %}" 
+                {% else %}
+                    href="{% url 'cobranzas:listaliquidacionesennegativopendientes' %}" 
+                {% endif %}
+                class="btn btn-danger btn-sm">
                 <i class="fa fa-ban"></i> Cancelar
             </a>
             <button class="btn btn-primary btn-sm"  type="button" onclick="AceptarCobranza()">  

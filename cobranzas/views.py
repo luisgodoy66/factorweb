@@ -13,7 +13,7 @@ from .models import Documentos_cabecera, Documentos_detalle, Liquidacion_cabecer
     , Documentos_protestados, Recuperaciones_detalle, Cargos_cabecera
 from operaciones.models import Documentos, ChequesAccesorios, Datos_operativos\
     , Desembolsos, Motivos_protesto_maestro, Cargos_detalle, Notas_debito_cabecera\
-    , Notas_debito_detalle, Cheques_canjeados, Cheques_quitados
+    , Notas_debito_detalle, Cheques_canjeados, Cheques_quitados, Ampliaciones_plazo_cabecera
 from clientes.models import Cuentas_bancarias, Datos_generales\
     , Cuenta_transferencia, Datos_compradores
 from empresa.models import Tasas_factoring, Cuentas_bancarias as CuentasEmpresa\
@@ -450,6 +450,14 @@ class LiquidacionesEnNegativoPendientesView(LoginRequiredMixin, generic.ListView
                 , empresa = id_empresa.empresa
                 , nsaldo__gt = 0)
 
+    def get_context_data(self, **kwargs):
+
+        # Call the base implementation first to get a context
+        context = super(LiquidacionesEnNegativoPendientesView, self).get_context_data(**kwargs)
+        context["tipo_nd"] = 'ND'
+
+        return context
+
 class CobranzasCargosView(LoginRequiredMixin, generic.FormView):
     model = Cargos_cabecera
     template_name = "cobranzas/datoscobranzascargos_form.html"
@@ -464,12 +472,15 @@ class CobranzasCargosView(LoginRequiredMixin, generic.FormView):
         docs = self.kwargs.get('ids_documentos')
         total_cartera=self.kwargs.get('total_cargos')
         forma_cobro=self.kwargs.get('forma_cobro')
-        cliente_ruc = self.kwargs.get('cliente_ruc')
+        cliente_id = self.kwargs.get('cliente_id')
         tipo_factoring = self.kwargs.get('tipo_factoring')
-        cliente = Datos_generales.objects.filter(cxcliente = cliente_ruc).first()
+        tipo_nd = self.kwargs.get('tipo_nd')
+
+        print(tipo_nd)
+        cliente = Datos_generales.objects.filter(id = cliente_id).first()
 
         cuentas = Cuentas_bancarias\
-            .objects.filter(cxparticipante = cliente_ruc \
+            .objects.filter(cxparticipante = cliente.cxcliente \
                 , leliminado = False, lpropia = True).all()
                 # , cxtipocuenta = 'C').all()
         
@@ -480,9 +491,31 @@ class CobranzasCargosView(LoginRequiredMixin, generic.FormView):
         context["forma_cobro"] = forma_cobro
         context["form_cheque"] = ChequesForm
         context["cuentas_bancarias_cliente"] = cuentas
-        context["cliente_id"] = cliente_ruc
+        context["cliente_id"] = cliente_id
         context["cliente"] = cliente
         context["tipo_factoring"] = tipo_factoring
+        context["tipo_nd"] = tipo_nd
+
+        return context
+
+class AmpliacionesDePlazoPendientesView(LoginRequiredMixin, generic.ListView):
+    model = Notas_debito_cabecera
+    template_name = "cobranzas/listaampliacionesdeplazopendientes.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+
+    def get_queryset(self):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        return Notas_debito_cabecera.objects\
+        .filter(cxtipooperacion = 'A', leliminado = False
+                , empresa = id_empresa.empresa
+                , nsaldo__gt = 0)
+    
+    def get_context_data(self, **kwargs):
+
+        # Call the base implementation first to get a context
+        context = super(AmpliacionesDePlazoPendientesView, self).get_context_data(**kwargs)
+        context["tipo_nd"] = 'AP'
 
         return context
 
@@ -639,7 +672,6 @@ def GeneraListaAccesoriosQuitadosSeleccionadosOutput(acc):
 
     # los datos aquí van a obtenerse con el getData de la tb, aunque no se 
     # presenten en el HTML
-    print(acc)
     output = {}
     output['id'] = acc.documento.id
     output["IdComprador"] = acc.documento.cxcomprador.id
@@ -1728,7 +1760,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                     asignacion = documento.cxasignacion.cxasignacion
                     id_asignacion = documento.cxasignacion.id
                     numero_documento=documento.ctdocumento
-                print(documento)
+
                 # considerar los días condonados
                 fechacobrocalculo = cobranza.dcobranza - timedelta(days=documento_cobrado.ndiasacondonar)
 
@@ -2099,12 +2131,15 @@ def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
 
 def GeneraListaLiquidacionesEnNegativoPendientesJSON(request):
     # Es invocado desde la url de una tabla bt
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     movimiento = Notas_debito_cabecera.objects\
-        .filter(cxtipooperacion__in = 'LCRB', leliminado = False, nsaldo__gt = 0).all()
+        .filter(cxtipooperacion__in = 'LCRB', leliminado = False
+                , nsaldo__gt = 0, empresa = id_empresa.empresa).all()
 
     docjson = []
     for i in range(len(movimiento)):
-        docjson.append(GeneraListaLiquidacionesEnNegativoPendientesJSONSalida(movimiento[i])) 
+        docjson.append(GeneraListaNotasDeDebitoPendientesJSONSalida(movimiento[i])) 
 
     # docjson = tempBlogs
 
@@ -2115,10 +2150,10 @@ def GeneraListaLiquidacionesEnNegativoPendientesJSON(request):
         }
     return JsonResponse( data)
     
-def GeneraListaLiquidacionesEnNegativoPendientesJSONSalida(transaccion):
+def GeneraListaNotasDeDebitoPendientesJSONSalida(transaccion):
     output = {}
     output["id"] = transaccion.id
-    output["IdCliente"] = transaccion.cxcliente.cxcliente.cxparticipante
+    output["IdCliente"] = transaccion.cxcliente.id
     output["Cliente"] = transaccion.cxcliente.cxcliente.ctnombre
     output["ND"] = transaccion.cxnotadebito
     output["Fecha"] = transaccion.dnotadebito.strftime("%Y-%m-%d")
@@ -2127,7 +2162,7 @@ def GeneraListaLiquidacionesEnNegativoPendientesJSONSalida(transaccion):
 
     # Las ND que vienen de cuentas conjuntas (B) no tienen tipo de factoring
     if transaccion.cxtipooperacion!='B':
-        output["IdTipoFactoring"] = transaccion.cxtipofactoring.cxtipofactoring
+        output["IdTipoFactoring"] = transaccion.cxtipofactoring.id
         output["TipoFactoring"] = transaccion.cxtipofactoring.ctabreviacion
     else:
         output["IdTipoFactoring"] = 'NULL'
@@ -2142,6 +2177,9 @@ def GeneraListaLiquidacionesEnNegativoPendientesJSONSalida(transaccion):
     if transaccion.cxtipooperacion=='R':
         op = Recuperaciones_cabecera.objects.filter(pk = transaccion.operacion).first()
         opx = op.cxrecuperacion
+    if transaccion.cxtipooperacion=='A':
+        op = Ampliaciones_plazo_cabecera.objects.filter(pk = transaccion.operacion).first()
+        opx = op.dampliacionhasta
     
     output["Operacion"] = opx
 
@@ -2190,6 +2228,10 @@ def DetalleNotasDebitoPendientesJSONSalida(doc):
     if doc.cxtipooperacion=='R':
         op = Recuperaciones_cabecera.objects.filter(pk = doc.operacion).first()
         opx = op.cxrecuperacion
+    if doc.cxtipooperacion=='A':
+        op = Ampliaciones_plazo_cabecera.objects.filter(pk = doc.operacion).first()
+        opx = op.dampliacionhasta
+    
     output["Operacion"] = opx
 
     return output
@@ -2241,13 +2283,13 @@ def AceptarCobranzaNotasDebito(request):
     if not cuenta_bancaria:
         cuenta_bancaria='Null'
     
-    # para los debitos de cuentas conjuntas que se registran sin cobranza
-    # no hay tipo de factoring, se carga con NULL 
-    if tipo_factoring != 'NULL':
-        tipo_factoring="'" + tipo_factoring + "'"
+    # # para los debitos de cuentas conjuntas que se registran sin cobranza
+    # # no hay tipo de factoring, se carga con NULL 
+    # if tipo_factoring != 'NULL':
+    #     tipo_factoring="'" + tipo_factoring + "'"
 
     # Los 2 ultimos parametros son el id de cheque accesorio y el mensaje de error
-    resultado=enviarPost("CALL uspAceptarCobranzaCargos( '{0}',{1},'{2}','{3}',{4}\
+    resultado=enviarPost("CALL uspAceptarCobranzaCargos({0},{1},'{2}','{3}',{4}\
         ,{5},{6}\
         ,'{7}','{8}',{9},{10}\
         ,'{11}', {12},Null,0)"
@@ -2571,7 +2613,8 @@ def AmpliacionDePlazo(request, ids, tipo_factoring, tipo_asignacion, id_cliente)
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     # buscar el tipo de factoring
-    tipo_factoring = Tipos_factoring.objects.get(cxtipofactoring=tipo_factoring)
+    tipo_factoring = Tipos_factoring.objects.get(cxtipofactoring=tipo_factoring
+                                                 , empresa = id_empresa.empresa)
 
     if not tipo_factoring:
         return HttpResponse("Tipo de factoring no existe:" + tipo_factoring)
@@ -2607,7 +2650,7 @@ def AmpliacionDePlazo(request, ids, tipo_factoring, tipo_asignacion, id_cliente)
         , 'generar':carga_dc
         , 'iniciales': dc.ctinicialesentablas}
 
-    print(dic_gaoa)
+    cliente = Datos_generales.objects.filter(pk = id_cliente).first()
     context={
         'ids':ids,
         'tipo_asignacion':tipo_asignacion,
@@ -2615,6 +2658,8 @@ def AmpliacionDePlazo(request, ids, tipo_factoring, tipo_asignacion, id_cliente)
         'dc' : dic_dc,
         'porcentaje_iva':12,
         'id_cliente': id_cliente, 
+        'cliente': cliente.cxcliente.ctnombre,
+        'tipo_factoring': tipo_factoring.id
         }
     return render(request, template_path, context)
 
@@ -2683,8 +2728,9 @@ def DetalleCargosAmpliacionPlazo(request, ids, tipo_asignacion, fecha_corte
     
     return HttpResponse("OK")
 
-def CalcularCargosPorDocumento(doc, gaoa, dc, fecha_hasta, tasa_gaoa, acumula_gao):
-    # los dos ultimos parametros se omiten cuando se trata de edicion de tasas
+def CalcularCargosPorDocumento(doc, gaoa, dc, fecha_hasta, tasa_gaoa, acumula_gao
+                               , tasa_dc = None):
+    # el último parametro va cuando se trata de edicion de tasas
 
     if doc.dultimageneraciondecargos:
         plazo =fecha_hasta- doc.dultimageneraciondecargos 
@@ -2704,17 +2750,25 @@ def CalcularCargosPorDocumento(doc, gaoa, dc, fecha_hasta, tasa_gaoa, acumula_ga
 
     # gaoa
     if gaoa.lsobreanticipo:
-        doc.ngaoaap = (doc.ntotal * doc.nporcentajeanticipo * doc.ntasacomisionap / 10000)
+        doc.ngaoaap = (doc.ntotal * doc.nporcentajeanticipo 
+                       * doc.ntasacomisionap / 10000)
     else:
         doc.ngaoaap = (doc.ntotal * doc.ntasacomisionap / 100)
 
-    if not gaoa.lflat:
+    if gaoa.lflat :
+        # determinar cuantas veces aplicar la tasa según los días de aplicacion
+        x = math.ceil(plazo/gaoa.ndiasperiocidad)
+        doc.ngaoaap = doc.ngaoaap * x
+    else:
         doc.ngaoaap = (doc.ngaoaap * plazo / gaoa.ndiasperiocidad)
 
     # dc
     if dc:
-        doc.ntasadescuentoap = doc.ntasadescuento
-
+        if tasa_dc == None:
+            doc.ntasadescuentoap = doc.ntasadescuento
+        else:
+            doc.ntasadescuentoap = tasa_dc
+            
         if dc.lsobreanticipo:
             doc.ndescuentocarteraap = (doc.ntotal * doc.nporcentajeanticipo * doc.ntasadescuentoap / 10000)
         else:
@@ -2728,7 +2782,7 @@ def CalcularCargosPorDocumento(doc, gaoa, dc, fecha_hasta, tasa_gaoa, acumula_ga
 
     doc.save()
 
-def GeneraDetalleCargosAmpliacionPlazo(request, ids, tipo_asignacion):
+def GeneraDetalleCargosAmpliacionPlazoJSON(request, ids, tipo_asignacion):
     # Es invocado desde la url
     # crear detalle de salida para el contexto
     # no calcula, ni graba cargos, recupera los documentos
@@ -2778,11 +2832,17 @@ def GeneraDetalleCargosAmpliacionPlazoOutput(doc, tipo_asignacion):
     # los siguientes 3 campos pertenecen al documento y no se encuentran en los cheques
     if tipo_asignacion==FACTURAS_PURAS:
         output["Asignacion"] = doc.cxasignacion.cxasignacion
+        output["id_asignacion"] = doc.cxasignacion.id
         output["Documento"] = doc.ctdocumento
+        output["id_documento"] = doc.id
+        output["id_documento_accesorio"] = doc.id
         output["Saldo"] = doc.nsaldo
     else:
         output["Asignacion"] = doc.documento.cxasignacion.cxasignacion
+        output["id_asignacion"] = doc.documento.cxasignacion.id
         output["Documento"] = doc.documento.ctdocumento
+        output["id_documento"] = doc.documento.id
+        output["id_documento_accesorio"] = doc.id
         output["Saldo"] = doc.ntotal
     
     if doc.dultimageneraciondecargos:
@@ -2898,3 +2958,120 @@ def Prorroga(request, id, tipo_asignacion, vencimiento, numero_factura):
             return redirect("cobranzas:listachequesadepositar",)
 
     return render(request, template_path, context)
+
+from operaciones.forms import TasasAPAccesoriosForm, TasasAPDocumentoForm
+
+def EditarTasasDocumentoAmpliacionDePlazo(request, documento_id, fecha_ampliacion
+                                          , tipo_asignacion):
+    template_name = "cobranzas/datoscambiotasasampliaciondeplazo_modal.html"
+    contexto={}
+    numero_documento=""
+    formulario = {}
+    # si son facturas puras los documentos son las facturas
+    # si son accesorios los documentos son los cheques
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    if tipo_asignacion ==FACTURAS_PURAS:
+        documento = Documentos.objects.filter(pk=documento_id).first()
+        es_facturas_puras = True
+        e = {'ntasacomisionap': documento.ntasacomisionap
+             , 'ntasadescuentoap': documento.ntasadescuentoap}
+        formulario = TasasAPDocumentoForm(e)
+    else:
+        documento = ChequesAccesorios.objects.filter(pk=documento_id).first()
+        es_facturas_puras = False
+        e = {'ntasacomisionap': documento.ntasacomisionap
+             , 'ntasadescuentoap': documento.ntasadescuentoap}
+        formulario = TasasAPAccesoriosForm(e)
+
+    if request.method=='GET':
+        if documento:
+            if es_facturas_puras:
+                numero_documento=documento.ctdocumento
+            else:
+                numero_documento=documento.documento.ctdocumento
+
+    contexto={ 'documento_id':documento_id
+        , 'documento':numero_documento
+        , 'fecha_ampliacion': fecha_ampliacion
+        , 'tipo_asignacion': tipo_asignacion 
+        , 'tasa_gaoa': documento.ntasacomisionap
+        , 'tasa_dc': documento.ntasadescuentoap
+        , 'form' :formulario
+        }
+
+    if request.method=='POST':
+        ntasacomision = request.POST.get("ntasacomisionap")
+        ntasadescuentocartera = request.POST.get("ntasadescuentoap")
+
+        ntasacomision = Decimal(ntasacomision)
+        ntasadescuentocartera = Decimal(ntasadescuentocartera)
+        
+        # calcular y grabar los valores para cada tasa y grabarlos en el registro del documento
+        # datos de tasa gao/dc
+        gaoa = Tasas_factoring.objects\
+            .filter(cxtasa="GAOA", empresa = id_empresa.empresa).first()
+        
+        dc = Tasas_factoring.objects\
+            .filter(cxtasa="DCAR", empresa = id_empresa.empresa).first()
+        
+        fecha_ampliacion = parse_date(fecha_ampliacion)
+            
+        # cuando edita no necesita enviar clase de cliente ni codigo de condicion operativa
+        # si necesita el tipo de asignacion para saber donde grbar las tasas
+
+        CalcularCargosPorDocumento(documento, gaoa ,dc, fecha_ampliacion
+                                    , ntasacomision, 'No', ntasadescuentocartera)
+        return HttpResponse(1)
+
+    return render(request, template_name, contexto)
+
+def AceptarAmpliacionDePlazo(request):
+    # ejecuta un store procedure 
+
+    objeto=json.loads(request.body.decode("utf-8"))
+
+    id_cliente=objeto["id_cliente"]
+    fecha_emision=objeto["emision_nd"]
+    fecha_ampliacion=objeto["fecha_corte"]
+    id_factoring=objeto["tipo_factoring"]
+    tipo_asignacion=objeto["tipo_asignacion"]
+    pngao=objeto["ngao"]
+    pndescuentocartera=objeto["ndescuentocartera"]
+    pniva=objeto["niva"]
+    valor=objeto["valor_ampliacion"]
+    porcentaje_iva=objeto["porcentaje_iva"]
+    documentos=objeto["arr_documentos_ampliados"]
+    nusuario = request.user.id
+
+    print(objeto)
+    resultado=enviarPost("CALL uspAmpliacionDePlazo( {0},{1}, '{2}','{3}'\
+        ,'{4}',{5},{6}, {7}\
+        ,{8},{9},{10},'{11}','',0)"
+        .format(id_cliente, id_factoring, tipo_asignacion, fecha_emision
+                , fecha_ampliacion, valor, pngao, pndescuentocartera
+                , porcentaje_iva, pniva, nusuario, documentos))
+
+    return HttpResponse(resultado)
+
+def GeneraListaAmpliacionesPendientesJSON(request):
+    # Es invocado desde la url de una tabla bt
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    movimiento = Notas_debito_cabecera.objects\
+        .filter(cxtipooperacion = 'A', leliminado = False
+                , nsaldo__gt = 0, empresa = id_empresa.empresa).all()
+
+    docjson = []
+    for i in range(len(movimiento)):
+        docjson.append(GeneraListaNotasDeDebitoPendientesJSONSalida(movimiento[i])) 
+
+    # docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": movimiento.count(),
+        "totalNotFiltered": movimiento.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)

@@ -40,15 +40,15 @@ window.onload=function(){
   };
 
   window.operateEvents = {
-  'click .like': function (e, value, row, index) {
-    CambiarTasasDocumento(row.id,capturaValor("id_ddesembolso"),function(){
+  'click .editar': function (e, value, row, index) {
+    CambiarTasasDocumento(row.id,capturaValor("fechacorte"),function(){
     })
   },
 };
 
 function operateFormatter(value, row, index) {
   return [
-    '<a class="like" href="javascript:void(0)" title="Configurar tasas">',
+    '<a class="editar" href="javascript:void(0)" title="Configurar tasas">',
     '<i class="fa fa-cog"></i>',
     '</a>  '
   ].join('')
@@ -124,34 +124,45 @@ function initTable(iniciales_GAOA, iniciales_DC) {
     })
 }
 
-function CambiarTasasDocumento(doc_id, fecha_desembolso, callback){
-  AbrirModal("/operaciones/editartasasdocumento/"+ doc_id+"/"+fecha_desembolso+"/"
-    +asignacion_id)
+function CambiarTasasDocumento(doc_id, fecha_ampliacion, callback){
+  AbrirModal("/cobranzas/editartasasdocumento/"+ doc_id+"/"+fecha_ampliacion+"/"
+    +tipo_asignacion)
   
 }
 
 function AceptarAmpliacionPlazo(){
+  var JSONdocumentos= JSON.stringify($table.bootstrapTable('getData'));
+
   MensajeConfirmacion("Aceptar ampliación de plazo para el " 
-    + capturaValor("id_ddesembolso") +"?",function(){
-    
+    + capturaValor("fechacorte") +"?",function(){
     var objeto={
-        "id_asignacion":asignacion_id,
-        "dnegociacion":capturaValor("id_dnegociacion"),
-        "ddesembolso": capturaValor("id_ddesembolso"), 
-        "nanticipo":capturaValor("id_nanticipo"),
-        "ngao":capturaValor("id_ngao"), 
+        "id_cliente":id_cliente,
+        "tipo_factoring":capturaValor("tipo_factoring"),
+        "tipo_asignacion":tipo_asignacion,
+        "emision_nd":capturaValor("emision_nd"),
+        "fecha_corte": capturaValor("fechacorte"), 
+        "ngao":capturaValor("id_ngaoa"), 
         "ndescuentocartera": capturaValor("id_ndescuentodecartera"),
         "niva": capturaValor("id_niva"),
-        "sinstruccionpago": capturaValor("id_ctinstrucciondepago"),
+        "valor_ampliacion": capturaValor("total"),
+        "porcentaje_iva":porcentaje_iva,
+        "arr_documentos_ampliados": JSONdocumentos,
       }
-    fetchPostear("/operaciones/aceptardocumentos/", objeto, function(){
-        // regresar a la lista de solicitudes
-        window.location.href = "/solicitudes/listasolicitudes";
-        
-        // en una nueva ventana abrir el reporte de asignación
-        url = window.location.origin
-        url = url + "/operaciones/reporteasignaciondesdesolicitud/"+asignacion_id;
-        window.open( url);
+
+      fetchPostear("/cobranzas/aceptarampliaciondeplazo/", objeto, function(data){
+        // regresar a la lista dependiendo dónde estaba
+        if(tipo_asignacion=='A'){
+          window.location.href = "/cobranzas/listachequesadepositar";
+        }
+        else{
+          window.location.href = "/cobranzas/listadocumentosvencidos";
+        }
+        alert('grabada')
+        MensajeOK("Generada la nota de débito " + data)
+        // // en una nueva ventana abrir el reporte de asignación
+        // url = window.location.origin
+        // url = url + "/operaciones/reporteasignaciondesdesolicitud/"+asignacion_id;
+        // window.open( url);
       })
   })
     

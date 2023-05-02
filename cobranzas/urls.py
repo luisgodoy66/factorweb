@@ -17,8 +17,10 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , DetalleNotasDebitoPendientesJSON, DatosCobroNotaDebito, AceptarCobranzaNotasDebito\
     , GeneraListaLiquidacionesRegistradasJSON, GeneraListaCobranzasCargosRegistradasJSON\
     , ReversaProtesto, CanjeDeCheque, QuitarAccesorio, AmpliacionDePlazo\
-    , DetalleCargosAmpliacionPlazo, GeneraDetalleCargosAmpliacionPlazo, SumaCargos\
-    , Prorroga
+    , DetalleCargosAmpliacionPlazo, GeneraDetalleCargosAmpliacionPlazoJSON\
+    , SumaCargos, Prorroga, EditarTasasDocumentoAmpliacionDePlazo\
+    , AceptarAmpliacionDePlazo, AmpliacionesDePlazoPendientesView\
+    , GeneraListaAmpliacionesPendientesJSON
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos, ImpresionProtestosPendientes
@@ -123,7 +125,7 @@ urlpatterns = [
     path('listaliquidacionesennegativopendientesjson/'
          ,GeneraListaLiquidacionesEnNegativoPendientesJSON\
         , name="listaliquidacionesennegativopendientes_json"),
-    path('cobrodecargos/<ids_documentos>/<total_cargos>/<forma_cobro>/<cliente_ruc>/<tipo_factoring>', 
+    path('cobrodecargos/<ids_documentos>/<total_cargos>/<forma_cobro>/<cliente_id>/<tipo_factoring>/<tipo_nd>', 
         CobranzasCargosView.as_view(), name='cobro_cargos'),
     path('detallenotasdebitojson/<ids_documentos>'
          , DetalleNotasDebitoPendientesJSON
@@ -143,8 +145,16 @@ urlpatterns = [
     path('detallecargosampliaciondeplazo/<ids>/<tipo_asignacion>/<fecha_corte>/<carga_dc>/<acumula_gao>/<id_cliente>'
          ,DetalleCargosAmpliacionPlazo),
     path('refrescadetallecargosampliacionplazo/<ids>/<tipo_asignacion>'
-         ,GeneraDetalleCargosAmpliacionPlazo),
+         ,GeneraDetalleCargosAmpliacionPlazoJSON),
     path('sumacargos/<ids>/<tipo_asignacion>/<gaoa_carga_iva>/<dc_carga_iva>/<int:porcentaje_iva>',\
         SumaCargos),
+    path('editartasasdocumento/<int:documento_id>/<fecha_ampliacion>/<tipo_asignacion>'\
+        , EditarTasasDocumentoAmpliacionDePlazo, name="editartasasdocumento"),
+    path('aceptarampliaciondeplazo/',AceptarAmpliacionDePlazo),
+    path('listaampliacionesdeplazopendientespagar/',AmpliacionesDePlazoPendientesView.as_view()
+        , name="listaampliacionespendientespagar"),
+    path('listaampliacionespendientesjson/'
+         ,GeneraListaAmpliacionesPendientesJSON\
+        , name="listaampliacionespendientes_json"),
 
 ]

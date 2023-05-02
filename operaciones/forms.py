@@ -4,7 +4,7 @@ from pyexpat import model
 from django import forms
 from .models import Condiciones_operativas_detalle, Datos_operativos, \
     Asignacion, Movimientos_maestro, Condiciones_operativas_cabecera, Anexos\
-        , Desembolsos
+        , Desembolsos, Documentos, ChequesAccesorios
 from datetime import date
 from solicitudes import models as ModelosSolicitudes
 
@@ -255,3 +255,40 @@ class AnexosForm(forms.ModelForm):
                 'class':'form-control'
             })
 
+class TasasAPAccesoriosForm(forms.ModelForm):
+    # demision = forms.DateInput()
+    
+    class Meta:
+        model=ChequesAccesorios
+        
+        fields=['ntasacomisionap', 'ntasadescuentoap'
+        ]
+        labels={ 'ntasacomisionap':"GAOA adicional"
+            , 'ntasadescuentoap': "Tasa de descuento"
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+
+class TasasAPDocumentoForm(forms.ModelForm):
+    # demision = forms.DateInput()
+    
+    class Meta:
+        model=Documentos
+        
+        fields=['ntasacomisionap', 'ntasadescuentoap'
+        ]
+        labels={ 'ntasacomisionap':"GAOA adicional"
+            , 'ntasadescuentoap': "Tasa de descuento"
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })

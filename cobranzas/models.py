@@ -11,6 +11,7 @@ from empresa.models import Datos_participantes , Tipos_factoring, Cuentas_bancar
 from clientes import models as Cliente_models
 from operaciones.models import Documentos, ChequesAccesorios\
     , Cargos_detalle as Operaciones_cargos, Motivos_protesto_maestro
+from cuentasconjuntas import models as CuentasConjuntasModels
 
 class Cheques(ClaseModelo):
     TIPOS_DE_PARTICIPANTES = (
@@ -33,8 +34,6 @@ class Cheques(ClaseModelo):
 
     def __str__(self):
         return '{} CH/{}'.format(self.cxcuentabancaria, self.ctcheque)
-
-from cuentasconjuntas import models as CuentasConjuntasModels
 
 class Documentos_cabecera(ClaseModelo):
     FORMAS_DE_PAGO = (

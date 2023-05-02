@@ -110,8 +110,10 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
                             <i class="menu-icon fa fa-exclamation"></i>Cargos pendientes</a>
                         <ul class="sub-menu children dropdown-menu">
-                            <li><i class="menu-icon fa fa-exclamation"></i><a href="{% url 'cobranzas:listaliquidacionesennegativopendientes' %}">Por operaciones</a></li>
-                            <li><i class="menu-icon fa fa-exclamation"></i><a href="#">Ampliaciones plazo</a></li>
+                            <li><i class="menu-icon fa fa-exclamation"></i>
+                                <a href="{% url 'cobranzas:listaliquidacionesennegativopendientes' %}">Por operaciones</a></li>
+                            <li><i class="menu-icon fa fa-exclamation"></i>
+                                <a href="{% url 'cobranzas:listaampliacionespendientespagar' %}">Ampliaciones plazo</a></li>
                         </ul>
                     </li>
 

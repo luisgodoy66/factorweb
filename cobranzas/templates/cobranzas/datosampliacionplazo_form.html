@@ -26,35 +26,19 @@
             {% csrf_token %}
         <div class="card-header">
             <strong>Ampliación de plazo</strong> 
-            de  {{ asignacion.cxcliente }} 
+            de  {{ cliente }} 
         </div>
         <div class="col-6 col-md-6" hidden>
-            <input type="text" id="iva_gaoa" name="iva_gaoa" 
-                value="{{ gaoa.carga_iva }}" class="form-control">
-
-            <input type="text" id="acumula_gao" name="acumula_gao" 
-                value="{{ gaoa.acumula_gao }}" class="form-control">
-
-            <input type="text" id="iniciales_gaoa" name="iniciales_gaoa" 
-                value="{{ gaoa.iniciales }}" class="form-control">
-
-            <input type="text" id="iva_dc" name="iva_dc" 
-                value="{{ dc.carga_iva }}" class="form-control">
-
-            <input type="text" id="carga_dc" name="carga_dc" 
-                value="{{ dc.generar }}" class="form-control">
-
-            <input type="text" id="iniciales_dc" name="iniciales_dc" 
-                value="{{ dc.iniciales }}" class="form-control">
-
-            <input type="text" id="tipo_asignacion" name="tipo_asignacion" 
-                value="{{ tipo_asignacion }}" class="form-control">
-
-            <input type="text" id="ids" name="ids" 
-                value="{{ ids }}" class="form-control">
-                
-            <input type="text" id="id_cliente" name="id_cliente" 
-                value="{{ id_cliente }}" class="form-control">
+            <input id="acumula_gao" name="acumula_gao" value="{{ gaoa.acumula_gao }}" >
+            <input id="carga_dc" name="carga_dc" value="{{ dc.generar }}" >
+            <input id="tipo_asignacion" name="tipo_asignacion" value="{{ tipo_asignacion }}" >
+            <input id="iva_gaoa" name="iva_gaoa" value="{{ gaoa.carga_iva }}" >
+            <input id="iva_dc" name="iva_dc" value="{{ dc.carga_iva }}" >
+            <input id="ids" name="ids" value="{{ ids }}" >              
+            <input id="id_cliente" name="id_cliente" value="{{ id_cliente }}" >
+            <input id="tipo_factoring" name="tipo_factoring" value="{{ tipo_factoring }}" >
+            <input id="iniciales_dc" name="iniciales_dc" value="{{ dc.iniciales }}" >
+            <input id="iniciales_gaoa" name="iniciales_gaoa" value="{{ gaoa.iniciales }}" >
         </div>
             <div class="card-body card-block">
                 <!-- columna izquierda -->

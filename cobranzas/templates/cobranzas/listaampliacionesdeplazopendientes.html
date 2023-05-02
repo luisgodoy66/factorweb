@@ -7,7 +7,7 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">operaciones</a></li>
                     <li><a href="#">cargos pendientes</a></li>
-                    <li class="active">por operaciones</li>
+                    <li class="active">ampliaciones de plazo</li>
                 </ol>
             </div>
         </div>
@@ -34,14 +34,14 @@
             <div hidden>
                 <input id="tipo_nd" value="{{ tipo_nd }}">
             </div>
-            
+
             {% if not consulta %}
             <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
                 <span class="badge badge-pill badge-danger">Sin registros</span>
                 {% if error %}
                     {{ error }}
                 {% else %}
-                 No hay notas de débito por liquidaciones negativas pendientes hasta la fecha.
+                 No hay notas de débito por ampliaciones de plazo pendientes hasta la fecha.
                {% endif %}
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -69,7 +69,7 @@
             </div>        
             <div >
                 <table id="table"  class="table table-striped table-bordered"
-                    data-url="{% url 'cobranzas:listaliquidacionesennegativopendientes_json' %}"
+                    data-url="{% url 'cobranzas:listaampliacionespendientes_json' %}"
                     data-filter-control="false"
                     data-show-search-clear-button="true"
                     data-show-refresh="true"
@@ -92,7 +92,7 @@
                         <th data-field="Cliente" data-sortable="true" >Cliente</th>
                         <th data-field="ND" data-sortable="true" >Número</th>
                         <th data-field="Fecha" data-sortable="true" >Fecha</th>
-                        <th data-field="Operacion" data-sortable="true" >Operacion</th>
+                        <th data-field="Operacion" data-sortable="true" >Ampliación</th>
                         <th data-field="TipoFactoring" data-sortable="true" >Tipo de factoring</th>
                         <th data-field="Valor" data-sortable="true" >Valor</th>
                         <th data-field="Saldo" data-sortable="true" >Saldo</th>

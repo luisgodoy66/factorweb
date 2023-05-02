@@ -685,8 +685,7 @@ class Ampliaciones_plazo_cabecera(ClaseModelo):
     ndescuentodecartera = models.DecimalField(max_digits=10,
         decimal_places= 2, default= 0)
     niva = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
-    notadedebito = models.OneToOneField(Notas_debito_cabecera
-        , on_delete=models.CASCADE)
+    nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 class Ampliaciones_plazo_detalle(ClaseModelo):
     TIPOS_ASIGNACION = (

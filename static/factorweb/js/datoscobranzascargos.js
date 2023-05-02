@@ -3,9 +3,6 @@ var $table = jQuery('#table')
 window.onload=function(){
     // inicializar el encabezado
     ActualizarHeader();
-    
-    // objeto_fechas("#id_dcobranza")
-    // objeto_fechas("#id_ddeposito")
 
     inicializaValor("id_nvalor",capturaValor("total_cargos"))
 
@@ -17,7 +14,6 @@ window.onload=function(){
 
     // inicializar tabla
     initTable();
-
 
 };
 
@@ -128,8 +124,13 @@ function AceptarCobranza(){
     }
 
     fetchPostear("/cobranzas/aceptarcobranzanotasdebito/", objeto, function(data){
-        // regresar a la lista de NOTAS DE DEBITO
-        window.location.href = "/cobranzas/listaliquidacionesennegativopendientes";
+        // regresar a la lista de NOTAS DE DEBITO o AMPLIACIONES
+        if (capturaValor("tipo_nd") == 'ND'){
+          window.location.href = "/cobranzas/listaliquidacionesennegativopendientes";
+        }
+        else{
+          window.location.href = "/cobranzas/listaliquidacionesennegativopendientes";
+        }
         // en una nueva ventana abrir el reporte de cobranza
         // hay que saber el id de la cobranza
          url = window.location.origin

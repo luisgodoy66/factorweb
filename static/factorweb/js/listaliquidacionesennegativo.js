@@ -4,6 +4,7 @@ var $cobroconcheque = jQuery("#cobroconcheque")
 var $cobroconefectivo = jQuery("#cobroconefectivo")
 var $cobroconmovimiento = jQuery("#cobroconmovimiento")
 var $cobrocontransferencia = jQuery("#cobrocontransferencia")
+const tipo_nd = capturaValor("tipo_nd")
 
 window.onload=function(){
     // inicializar el encabezado
@@ -108,7 +109,7 @@ function CobroDeCargos(forma){
       }, 0)
 
     url = '/cobranzas/cobrodecargos/'+ids+'/'+total_cargos+'/'+forma+'/'
-      +id_cliente+'/'+tipo_factoring;
+      +id_cliente+'/'+tipo_factoring+'/'+tipo_nd;
     
     location.href=url
   }
