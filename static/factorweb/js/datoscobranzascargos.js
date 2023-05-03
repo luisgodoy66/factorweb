@@ -129,7 +129,7 @@ function AceptarCobranza(){
           window.location.href = "/cobranzas/listaliquidacionesennegativopendientes";
         }
         else{
-          window.location.href = "/cobranzas/listaliquidacionesennegativopendientes";
+          window.location.href = "/cobranzas/listaampliacionesdeplazopendientespagar";
         }
         // en una nueva ventana abrir el reporte de cobranza
         // hay que saber el id de la cobranza

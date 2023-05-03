@@ -476,7 +476,6 @@ class CobranzasCargosView(LoginRequiredMixin, generic.FormView):
         tipo_factoring = self.kwargs.get('tipo_factoring')
         tipo_nd = self.kwargs.get('tipo_nd')
 
-        print(tipo_nd)
         cliente = Datos_generales.objects.filter(id = cliente_id).first()
 
         cuentas = Cuentas_bancarias\
@@ -870,6 +869,7 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 ,'cxcheque', 'cxestado', 'dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'C'",''))
+        
         recuperaciones = Recuperaciones_cabecera.objects\
             .filter(empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
@@ -879,6 +879,7 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 , 'cxcheque', 'cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'R'",''))
+        
         protestos_cobranzas = Documentos_cabecera.objects\
             .filter(cxestado='P', empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
@@ -888,6 +889,7 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 ,'cxcheque', 'cxcheque__cheque_protestado__cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'C protestada'",''))
+        
         protestos_recuperaciones = Recuperaciones_cabecera.objects\
             .filter(cxestado='P', empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
@@ -897,6 +899,7 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 ,'cxcheque', 'cxcheque__cheque_protestado__cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'R protestada'",''))
+        
         cargos = Cargos_cabecera.objects\
             .filter(empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
@@ -906,6 +909,7 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                 , 'cxcheque', 'cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'CC'",''))
+        
         liquidaciones = Liquidacion_cabecera.objects\
             .filter(empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddesembolso'
@@ -2051,15 +2055,16 @@ def ReversaCobranza(request, pid_cobranza, tipo_operacion):
     # ejecuta un store procedure 
     #  EL TIPO DE OPERACION debe determinar el SP a ejecutar: o cobranzas o recuperaciones
     nusuario = request.user.id
-    
-    if tipo_operacion[0]=='C':
+    if tipo_operacion=='CC':
+        resultado=enviarPost("CALL uspReversarCobranzaCargos( {0},{1},'')"
+        .format(pid_cobranza, nusuario))
+    elif tipo_operacion[0]=='C':
         resultado=enviarPost("CALL uspReversarCobranzaCartera( {0},{1},'')"
         .format(pid_cobranza, nusuario))
     elif tipo_operacion[0]=='R':
         resultado=enviarPost("CALL uspReversarRecuperacion( {0},{1},'')"
         .format(pid_cobranza, nusuario))
     
-
     return HttpResponse(resultado)
 
 def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
@@ -2076,6 +2081,7 @@ def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
                 ,'cxcheque', 'cxestado', 'dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
                     .annotate(tipo=RawSQL("select 'C'",''))
+        
         recuperaciones = Recuperaciones_cabecera.objects\
             .filter(empresa = id_empresa.empresa)\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
@@ -2359,7 +2365,7 @@ def GeneraListaCobranzasCargosRegistradasJSON(request, desde = None, hasta= None
                 ,'nvalor', 'dcobranza'
                 ,'cxcheque', 'cxestado', 'dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
-                    .annotate(tipo=RawSQL("select 'C'",''))
+                    .annotate(tipo=RawSQL("select 'CC'",''))
     else:
 
         movimiento = Cargos_cabecera.objects\
@@ -2370,7 +2376,7 @@ def GeneraListaCobranzasCargosRegistradasJSON(request, desde = None, hasta= None
                 ,'cxformapago','nvalor', 'dcobranza'
                 , 'cxcheque', 'cxestado','dregistro'
                 , 'id', 'cxcuentatransferencia','nsobrepago')\
-                    .annotate(tipo=RawSQL("select 'C'",''))
+                    .annotate(tipo=RawSQL("select 'CC'",''))
                 
 
     tempBlogs = []
@@ -3040,7 +3046,6 @@ def AceptarAmpliacionDePlazo(request):
     documentos=objeto["arr_documentos_ampliados"]
     nusuario = request.user.id
 
-    print(objeto)
     resultado=enviarPost("CALL uspAmpliacionDePlazo( {0},{1}, '{2}'\
         ,'{3}',{4},{5}, {6}\
         ,{7},{8},{9},'{10}','',0)"

@@ -79,7 +79,7 @@ return [
 
 window.operateEventsCobCar = {
   'click .revertir': function (e, value, row, index) {
-    ReversarCobranzaCargos(row.id, row.Operacion, row.TipoOperacion)
+    ReversarCobranza(row.id, row.TipoOperacion, row.Cliente)
   },
   'click .imprimir': function (e, value, row, index) {
     ImprimirCobranzaCargos( row.id, )

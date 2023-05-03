@@ -39,7 +39,7 @@ window.operateEvents = {
       
 function operateFormatter(value, row, index) {
     return [
-        '<a class="revertir" href="javascript:void(0)" title="Reverso de confirmación">',
+        '<a class="revertir" href="javascript:void(0)" title="Reverso de asignación">',
         '<i class="fa fa-rotate-left"></i>',
         '</a>  ',
         '<a class="imprimir" href="javascript:void(0)" title="Imprimir asignación">',
