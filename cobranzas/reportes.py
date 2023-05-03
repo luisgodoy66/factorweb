@@ -325,7 +325,6 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
     totales = {
         "cobrado":tot_cobro["nvalorrecuperacion__sum"]
         , "bajas":tot_bajas["nvalorbaja__sum"]
-                +tot_bajascobranza["nvalorbajacobranza__sum"]
         , "aplicado":tot_cobro["nvalorrecuperacion__sum"]
                 +tot_bajas["nvalorbaja__sum"]
                 +tot_bajascobranza["nvalorbajacobranza__sum"]
@@ -372,7 +371,7 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
         jsdet["saldo_al_dia_protesto"] = item.nsaldoaldia
         jsdet["saldo_al_dia_baja_cobranza"] = item.nsaldoaldiabajacobranza
         jsdet["valor_recuperado"] = item.nvalorrecuperacion
-        jsdet["valor_baja"]=item.nvalorbaja + item.nvalorbajacobranza
+        jsdet["valor_baja"]=item.nvalorbaja 
         jsdet["total_aplicado"]=item.aplicado()
         jsdet["saldo_actual_protesto"] = item.documentoprotestado.nsaldo
 

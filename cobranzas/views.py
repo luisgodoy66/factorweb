@@ -2434,7 +2434,8 @@ def ObtenerOtrosCargosDeCobranza(tipo_operacion, cobranza, codigo_operacion\
 
     # la nd se registra sobre la recuperacion o cobranza protestada
     nd = Notas_debito_cabecera.objects\
-        .filter(cxtipooperacion = tipo_operacion, operacion = cobranza)
+        .filter(cxtipooperacion = tipo_operacion
+                , operacion = cobranza, leliminado = False)
 
     for ndx in nd:
 
@@ -2463,8 +2464,9 @@ def ReversaProtesto(request, id_cobranza,tipo_operacion,id_protesto, cobranza
                     , cliente_id, factoring_id):
     # # ejecuta un store procedure 
     nusuario = request.user.id
-    resultado=enviarPost("CALL uspReversaProtesto( '{0}',{1},{2},'{3}','{4}'\
-        ,'{5}',{6},'')"
+
+    resultado=enviarPost("CALL uspReversaProtesto( '{0}',{1},{2},'{3}',{4}\
+        ,{5},{6},'')"
     .format(tipo_operacion,id_cobranza,id_protesto, cobranza,cliente_id
         ,factoring_id, nusuario))
 

@@ -84,9 +84,9 @@
                             <th>Saldo a la fecha</th>
                             <th>Vencimiento</th>
                             <th>Días vencidos</th>
-                            <th>Baja de cobranza</th>
                             <th>Valor recuperado</th>
-                            <th>Bajas</th>
+                            <th>Baja registrada</th>
+                            <th>Baja de protesto</th>
                             <th>Total aplicado</th>
                             <th>Saldo actual</th>
                         </thead>
@@ -120,9 +120,9 @@
                                 <td class="numero">{{ item.saldo_al_dia_protesto }}</td>
                                 <td class="centrado">{{ item.vencimiento|date:"Y-m-d" }}</td>
                                 <td class="numero">{{ item.dias_vencidos }}</td>
-                                <td class="numero">{{ item.saldo_al_dia_baja_cobranza }}</td>
                                 <td class="numero">{{ item.valor_recuperado }}</td>
                                 <td class="numero">{{ item.valor_baja }}</td>
+                                <td class="numero">{{ item.saldo_al_dia_baja_cobranza }}</td>
                                 <td class="numero">{{ item.total_aplicado }}</td>
                                 <td class="numero">{{ item.saldo_actual_protesto }}</td>
                             </tr>
@@ -136,9 +136,9 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td></td>
                                 <td class="numero"><h4>{{ totales.cobrado }}</h4></td>
                                 <td class="numero"><h4>{{ totales.bajas }}</h4></td>
+                                <td></td>
                                 <td class="numero"><h4>{{ totales.aplicado }}</h4></td>
                             </tr>
                         </tbody>
