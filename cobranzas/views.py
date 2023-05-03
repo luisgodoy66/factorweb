@@ -1039,7 +1039,7 @@ def GeneraListaCobranzasJSONSalida(transaccion):
     elif transaccion['tipo'] =='R':
         output["Movimiento"] = 'Recuperación'
     elif transaccion['tipo'] =='C protestada':
-        output["Movimiento"] = 'Protestado de cobranza'
+        output["Movimiento"] = 'Protesto de cobranza'
     elif transaccion['tipo'] =='R protestada':
         output["Movimiento"] = 'Protesto de recuperación'
     elif transaccion['tipo'] =='CC':
