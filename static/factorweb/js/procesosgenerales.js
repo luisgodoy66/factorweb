@@ -38,7 +38,7 @@ function ImprimirCobranza(cobranza_id, tipo_operacion){
      }
   window.open( url);
   
-  }
+}
 
 function ReversarCobranza(operacion_id, tipo_operacion, nombre_cliente = null){
     // este proceso a diferencia de aceptar no se ejecuta desde un
@@ -61,6 +61,7 @@ function ReversarCobranza(operacion_id, tipo_operacion, nombre_cliente = null){
     }
       
 }
+
 function ImprimirAsignacion(id, ){
   // en una nueva ventana abrir el reporte de asignación
   url = window.location.origin
@@ -108,11 +109,12 @@ function ReversarliquidacionCobranza(liquidacion_id,){
   })
     
 }
+
 function ImprimirCobranzaCargos(cobranza_id){
   // en una nueva ventana abrir el reporte de cobranza
   url = window.location.origin
   url = url + "/cobranzas/reportecobranzacargos/"+cobranza_id;
-window.open( url);
+  window.open( url);
 
 }
 
@@ -166,4 +168,12 @@ function Prorroga(id, tipo_asignacion, vencimiento, documento){
   }
   AbrirModal("/cobranzas/prorroga/"+ id + '/' + tipo_asignacion
     +'/'+vencimiento+'/'+documento)
+}
+
+function ImprimirAmpliacionPlazo(ampliacion_id){
+  // en una nueva ventana abrir el reporte de cobranza
+  url = window.location.origin
+  url = url + "/cobranzas/reporteampliacion/"+ampliacion_id;
+  window.open( url);
+
 }

@@ -16,7 +16,7 @@ from .forms import DatosOperativosForm, AsignacionesForm, MaestroMovimientosForm
 from .models import Cargos_detalle, Condiciones_operativas_detalle, Datos_operativos \
     , Asignacion,  Movimientos_maestro, Condiciones_operativas_cabecera, Anexos\
     , Desembolsos, Documentos, ChequesAccesorios, Notas_debito_cabecera\
-    , Cheques_quitados
+    , Cheques_quitados, Ampliaciones_plazo_cabecera, Cheques_canjeados
 from empresa.models import  Clases_cliente, Datos_participantes, \
     Tasas_factoring, Tipos_factoring, Cuentas_bancarias
 from cobranzas.models import Documentos_protestados, Liquidacion_cabecera\
@@ -1328,10 +1328,9 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
 
 def AntigüedadCarteraClienteJSON(request, cliente_id):
     
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-
-    documentos = None
     cheques = None
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     facturas = Documentos.objects.antigüedad_por_cliente(id_empresa.empresa)\
         .filter(cxcliente = cliente_id)
@@ -1350,9 +1349,6 @@ def AntigüedadCarteraClienteJSON(request, cliente_id):
                         , ftotal = Sum('total')
                         )
 
-    accesorios = ChequesAccesorios.objects.antigüedad_por_cliente(id_empresa.empresa)\
-        .filter(documento__cxcliente = cliente_id)
-
     prot_fac = Documentos_protestados.objects.antigüedad_por_cliente_facturas(id_empresa.empresa)\
         .filter(documento__cxcliente= cliente_id)
     prot_acces = Documentos_protestados.objects.antigüedad_por_cliente_accesorios(id_empresa.empresa)\
@@ -1370,8 +1366,9 @@ def AntigüedadCarteraClienteJSON(request, cliente_id):
                         , ptotal = Sum('total')
                         )
 
-    if facturas: 
-        documentos = facturas[0]
+    accesorios = ChequesAccesorios.objects.antigüedad_por_cliente(id_empresa.empresa)\
+        .filter(documento__cxcliente = cliente_id)
+
     if accesorios:
         cheques = accesorios[0]
 
@@ -1506,6 +1503,9 @@ def GeneraListaCargosPendientesClienteJSONSalida(transaccion):
     if transaccion.cxtipooperacion=='R':
         op = Recuperaciones_cabecera.objects.filter(pk = transaccion.operacion).first()
         opx = op.cxrecuperacion
+    if transaccion.cxtipooperacion=='A':
+        op = Ampliaciones_plazo_cabecera.objects.filter(pk = transaccion.operacion).first()
+        opx = op.dampliacionhasta
     
     output["Operacion"] = opx
 
@@ -1542,12 +1542,72 @@ def GeneraListaProtestosPendientesClienteJSON(request, cliente_id):
 def GeneraListaProtestosPendientesClienteJSONSalida(doc):
     output = {}
     output["Girador"] = doc.cheque.ctgirador
-    output["Cheque"] = doc.cheque.__str__()
-    
+    output["Cheque"] = doc.cheque.__str__()    
     output["Protesto"] = doc.dprotesto
     output["Saldo"] = doc.nsaldocartera
     output["Motivo"] = doc.motivoprotesto.ctmotivoprotesto
     # determinar si cheque fue pagado por comprador 
+
+    return output
+
+def GeneraListaCanjesClienteJSON(request, cliente_id):
+    # Es invocado desde la url de una tabla bt
+
+    documentos = Cheques_canjeados.objects\
+        .filter(leliminado=False
+                , cxcliente = cliente_id).all()
+
+    tempBlogs = []
+    for i in range(len(documentos)):
+        tempBlogs.append(GeneraListaCanjesClienteJSONSalida(documentos[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaCanjesClienteJSONSalida(doc):
+    output = {}
+    output["Fecha"] = doc.dregistro
+    output["Asignacion"] = doc.accesoriooriginal.documento.cxasignacion.cxasignacion
+    output["Original"] = doc.accesoriooriginal.__str__()    
+    output["Nuevo"] = doc.accesorionuevo.__str__()
+    output["Motivo"] = doc.ctmotivocanje
+
+    return output
+
+def GeneraListaChequesQuitadosClienteJSON(request, cliente_id):
+    # Es invocado desde la url de una tabla bt
+
+    documentos = Cheques_quitados.objects\
+        .filter(leliminado=False
+                , cxcliente = cliente_id).all()
+
+    tempBlogs = []
+    for i in range(len(documentos)):
+        tempBlogs.append(GeneraListaChequesQuitadosClienteJSONSalida(documentos[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaChequesQuitadosClienteJSONSalida(doc):
+    output = {}
+    output["Fecha"] = doc.dregistro
+    accesorio = ChequesAccesorios.objects.filter(chequequitado=doc.id).first()
+    output["Asignacion"] = accesorio.documento.cxasignacion.cxasignacion
+    output["Cheque"] = accesorio.__str__()
+    output["Motivo"] = doc.ctmotivoquitado
+    output["Saldo"] = doc.nsaldo
 
     return output
 

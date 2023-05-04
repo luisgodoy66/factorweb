@@ -184,8 +184,11 @@ class Protestos_Manager(models.Manager):
         return self.filter(leliminado=False, nsaldocartera__gt = 0)\
             .aggregate(Total = Sum('nsaldocartera'))
 
-    def protestos_pendientes(self):
-        cp = self.filter(nsaldocartera__gt=0, leliminado = False, cxtipooperacion='C')\
+    def protestos_pendientes(self, id_empresa):
+        cp = self.filter(nsaldocartera__gt=0
+                         , leliminado = False
+                         , empresa = id_empresa
+                         , cxtipooperacion='C')\
             .values('id','cheque__cheque_cobranza'
                     ,'cheque__cheque_cobranza__cxcliente__cxcliente__ctnombre'
                     ,'cheque__cheque_cobranza__cxcobranza'
@@ -195,7 +198,10 @@ class Protestos_Manager(models.Manager):
                     ,'motivoprotesto__ctmotivoprotesto'
                     ,'nvalor','nsaldocartera','nvalorcartera'
                     )
-        rp = self.filter(nsaldocartera__gt=0, leliminado = False, cxtipooperacion='R')\
+        rp = self.filter(nsaldocartera__gt=0
+                         , leliminado = False
+                         , empresa = id_empresa
+                         , cxtipooperacion='R')\
             .values('id','cheque__cheque_recuperacion'
                     ,'cheque__cheque_recuperacion__cxcliente__cxcliente__ctnombre'
                     ,'cheque__cheque_recuperacion__cxrecuperacion'

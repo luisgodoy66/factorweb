@@ -12,7 +12,8 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     GeneraListaAsignacionesRegistradasJSON, GeneraResumenAntigüedadCarteraJSON,\
     EstadosOperativosView, EstadoOperativoCliente, AntigüedadCarteraClienteJSON,\
     GeneraListaCarteraClienteJSON, GeneraListaChequesADepositarClienteJSON,\
-    GeneraListaCargosPendientesClienteJSON, GeneraListaProtestosPendientesClienteJSON
+    GeneraListaCargosPendientesClienteJSON, GeneraListaChequesQuitadosClienteJSON,\
+    GeneraListaProtestosPendientesClienteJSON, GeneraListaCanjesClienteJSON
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
@@ -37,6 +38,10 @@ urlpatterns = [
          GeneraListaCargosPendientesClienteJSON, name="listacargospendientescliente_json"),
     path('protestospendientesjson/<cliente_id>',GeneraListaProtestosPendientesClienteJSON, 
         name="protestospendientescliente_json"),
+    path('canjesclientejson/<cliente_id>',GeneraListaCanjesClienteJSON, 
+        name="listacanjescliente_json"),
+    path('chequesquitadosclientejson/<cliente_id>',GeneraListaChequesQuitadosClienteJSON, 
+        name="listachequesquitadoscliente_json"),
 # movimientos
     path('listamaestromovimientos/',MaestroMovimientosView.as_view(), \
         name='listamaestromovimientos'),

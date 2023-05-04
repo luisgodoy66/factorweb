@@ -152,11 +152,10 @@ function AceptarAmpliacionPlazo(){
         else{
           window.location.href = "/cobranzas/listadocumentosvencidos";
         }
-        alert("Generada la nota de débito " + data)
-        // // en una nueva ventana abrir el reporte de asignación
-        // url = window.location.origin
-        // url = url + "/operaciones/reporteasignaciondesdesolicitud/"+asignacion_id;
-        // window.open( url);
+        // en una nueva ventana abrir el reporte de ampliacion
+        url = window.location.origin
+        url = url + "/cobranzas/reporteampliacion/"+data;
+        window.open( url);
       })
   })
     

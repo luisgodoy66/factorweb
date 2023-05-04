@@ -20,10 +20,12 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , DetalleCargosAmpliacionPlazo, GeneraDetalleCargosAmpliacionPlazoJSON\
     , SumaCargos, Prorroga, EditarTasasDocumentoAmpliacionDePlazo\
     , AceptarAmpliacionDePlazo, AmpliacionesDePlazoPendientesView\
-    , GeneraListaAmpliacionesPendientesJSON
+    , GeneraListaAmpliacionesPendientesJSON, GeneraListaAmpliacionesJSON\
+    , AmpliacionesConsulta
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
-    , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos, ImpresionProtestosPendientes
+    , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos\
+    , ImpresionProtestosPendientes, ImpresionAmpliacionDePlazo
 
 urlpatterns = [
     # cobranzas
@@ -153,8 +155,12 @@ urlpatterns = [
     path('aceptarampliaciondeplazo/',AceptarAmpliacionDePlazo),
     path('listaampliacionesdeplazopendientespagar/',AmpliacionesDePlazoPendientesView.as_view()
         , name="listaampliacionespendientespagar"),
-    path('listaampliacionespendientesjson/'
-         ,GeneraListaAmpliacionesPendientesJSON\
+    path('listaampliacionespendientesjson/',GeneraListaAmpliacionesPendientesJSON\
         , name="listaampliacionespendientes_json"),
-
+    path('reporteampliacion/<int:ampliacion_id>',ImpresionAmpliacionDePlazo
+        , name='reporte_ampliacion'),
+    path('consultaampliaciones/',AmpliacionesConsulta.as_view() \
+        , name='consulta_ampliaciones'),
+    path('ampliacionesplazojson/<desde>/<hasta>',GeneraListaAmpliacionesJSON
+        , name="ampliacionesplazo_json"),
 ]

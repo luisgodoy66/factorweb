@@ -20,8 +20,6 @@ from .forms import CuentasBancariasForm, DebitosForm, TransferenciasForm\
     , DebitosNuevosForm
 from bases.views import enviarPost, numero_a_letras
 
-from datetime import date
-
 import json
 
 class CuentasView(LoginRequiredMixin, generic.ListView):
@@ -61,10 +59,6 @@ class CuentasBancariasEdit(LoginRequiredMixin, generic.UpdateView):
     form_class = CuentasBancariasForm
     success_url= reverse_lazy("cuentasconjuntas:listacuentasconjuntas")
     login_url = 'bases:login'
-
-    def form_valid(self, form):
-        form.instance.cxusuariocrea = self.request.user
-        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         pk = self.kwargs.get('pk')
@@ -244,14 +238,14 @@ def DebitoBancarioSinCobranza(request):
 
         cuenta = Cuentas_bancarias.objects.filter(pk = id_cuentaorigen).first()
 
-        cliente_id = cuenta.cxcliente.cxcliente.cxparticipante
+        cliente_id = cuenta.cxcliente.id
         valor_cargo = request.POST.get("nvalor")
         motivo_cargo = request.POST.get("ctmotivo")
         fecha_cargo = request.POST.get("dmovimiento")
         nusuario = request.user.id
         
         resultado=enviarPost("CALL uspAceptaCargoCuentaConjuntaSinCobranza( {0}\
-            ,'{1}',{2},{3},'{4}','{5}','',0)"
+            ,{1},{2},{3},'{4}','{5}','',0)"
             .format( nusuario
                 , cliente_id, id_cuentaorigen, valor_cargo, motivo_cargo, fecha_cargo))
 

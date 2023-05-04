@@ -166,6 +166,66 @@
     <div class="col-xl-6">
         <div class="card">
             <div class="card-header">
+                <strong>Canjes</strong>
+            </div>
+            <small>
+                <div>
+                    <table id="tbcanjes"  class="table table-striped table-bordered"
+                    data-url="{% url 'operaciones:listacanjescliente_json' cliente_id %}"
+                        data-id-field="id"
+                        >
+                        <thead>
+                            <tr>
+                            <th data-field="Fecha" data-filter-control="input"
+                            data-sortable="true" >Fecha</th>
+                            <th data-field="Asignacion" data-filter-control="input"
+                            data-sortable="true" >Asignación</th>
+                            <th data-field="Original" data-filter-control="input"
+                            data-sortable="true" >Original</th>
+                            <th data-field="Nuevo" data-filter-control="input"
+                            data-sortable="true" >Nuevo</th>
+                            <th data-field="Motivo" 
+                            data-sortable="true" >Motivo</th>
+                            </tr>
+                        </thead>
+                    </table>             
+                </div>
+            </small>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="card">
+            <div class="card-header">
+                <strong>Accesorios quitados</strong>
+            </div>
+            <small>
+                <div>
+                    <table id="tbquitados"  class="table table-striped table-bordered"
+                    data-url="{% url 'operaciones:listachequesquitadoscliente_json' cliente_id %}"
+                        data-id-field="id"
+                        >
+                        <thead>
+                            <tr>
+                            <th data-field="Fecha" data-filter-control="input"
+                            data-sortable="true" >Fecha</th>
+                            <th data-field="Asignacion" data-filter-control="input"
+                            data-sortable="true" >Asignación</th>
+                            <th data-field="Cheque" data-filter-control="input"
+                            data-sortable="true" >Cheque</th>
+                            <th data-field="Saldo" data-filter-control="input"
+                            data-sortable="true" >Saldo</th>
+                            <th data-field="Motivo" 
+                            data-sortable="true" >Motivo</th>
+                            </tr>
+                        </thead>
+                    </table>             
+                </div>
+            </small>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="card">
+            <div class="card-header">
                 <strong>Cargos pendientes</strong>
             </div>
             <small>

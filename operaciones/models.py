@@ -686,7 +686,12 @@ class Ampliaciones_plazo_cabecera(ClaseModelo):
         decimal_places= 2, default= 0)
     niva = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    notadebito = models.OneToOneField(Notas_debito_cabecera
+        ,related_name="ampliacion_notadedebito", on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.notadebito.cxnotadebito
+    
 class Ampliaciones_plazo_detalle(ClaseModelo):
     TIPOS_ASIGNACION = (
         ('F', 'Factura pura'),
@@ -696,3 +701,7 @@ class Ampliaciones_plazo_detalle(ClaseModelo):
     cxtipoasignacion = models.CharField( max_length=1, choices=TIPOS_ASIGNACION)
     documentoaccesorio = models.BigIntegerField()
     dampliaciondesde = models.DateField()
+    nvalorcartera= models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    def plazo(self):
+        return (self.ampliacion.dampliacionhasta - self.dampliaciondesde)/timedelta(days=1)

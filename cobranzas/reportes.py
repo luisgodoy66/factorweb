@@ -13,8 +13,8 @@ from .models import  Documentos_cabecera, Documentos_detalle, Liquidacion_cabece
         , Cheques, Cheques_protestados, Cargos_cabecera, Cargos_detalle\
         , DebitosCuentasConjuntas
 
-from operaciones.models import Notas_debito_cabecera
-
+from operaciones.models import Notas_debito_cabecera, Notas_debito_detalle
+from bases.models import Usuario_empresa
 from empresa.models import Tasas_factoring
 
 from xhtml2pdf import pisa
@@ -156,21 +156,28 @@ def ImpresionCobranzaCartera(request, cobranza_id):
 def ImpresionLiquidacion(request, liquidacion_id):
     template_name = 'cobranzas/liquidacion_reporte.html'
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     liquidacion = Liquidacion_cabecera.objects.filter(pk = liquidacion_id).first()
 
     detalle_cargos = Liquidacion_detalle.objects.filter(liquidacion = liquidacion)\
         .order_by('cargo__cxmovimiento')
 
     # datos de tasa gao/dc
-    gao = Tasas_factoring.objects.filter(cxtasa="GAO").first()
+    gao = Tasas_factoring.objects.filter(cxtasa="GAO"
+                                         , empresa = id_empresa.empresa).first()
     if not gao:
         return HttpResponse("no encontró tasa de gao")
 
-    dc = Tasas_factoring.objects.filter(cxtasa="DCAR").first()
+    dc = Tasas_factoring.objects.filter(cxtasa="DCAR"
+                                        , empresa = id_empresa.empresa).first()
     if not dc:
         return HttpResponse("no encontró tasa de descuento de catera")
 
-    gaoa = Tasas_factoring.objects.filter(cxtasa="GAOA").first()
+    gaoa = Tasas_factoring.objects.filter(cxtasa="GAOA"
+                                          , empresa = id_empresa.empresa).first()
+    if not gaoa:
+        return HttpResponse("no encontró tasa de GAO adicional")
 
     # crear un objeto json agrupando los cargos por código y que haya un elemento
     # json que contenga el detalle de cada cobranza.
@@ -232,7 +239,7 @@ def ImpresionLiquidacion(request, liquidacion_id):
         jsdet["tasa_calculo"]=item.cargo.ntasacalculo
         jsdet["dias_calculo"] = item.cargo.ndiascalculo
         jsdet["valor"] = item.cargo.nvalor
-        print(jsdet)
+
         listadetalle.append(jsdet)
 
         totalcargo += item.cargo.nvalor
@@ -511,8 +518,10 @@ def ImpresionCobranzaCargos(request, cobranza_id):
     return response
 
 def ImpresionProtestosPendientes(request):
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
      
-    protestos = Cheques_protestados.objects.protestos_pendientes()
+    protestos = Cheques_protestados.objects.protestos_pendientes(id_empresa.empresa)
 
     template_path = 'cobranzas/protestos_reporte.html'
 
@@ -526,6 +535,139 @@ def ImpresionProtestosPendientes(request):
     # find the template and render it.
     template = get_template(template_path)
     html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+from operaciones.models import Ampliaciones_plazo_cabecera, Ampliaciones_plazo_detalle \
+, Documentos, ChequesAccesorios
+
+def ImpresionAmpliacionDePlazo(request, ampliacion_id):
+    template_name = 'cobranzas/ampliacion_de_plazo_reporte.html'
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+     
+    ampliacion = Notas_debito_cabecera.objects.filter(pk = ampliacion_id).first()
+
+    ap = Ampliaciones_plazo_cabecera.objects.filter(pk = ampliacion.operacion).first()
+
+    detalle_ampliacion = Ampliaciones_plazo_detalle.objects\
+        .filter(ampliacion = ampliacion.operacion)
+
+    detalle_cargos = Notas_debito_detalle.objects.filter(notadebito = ampliacion)\
+        .order_by('cargo__cxmovimiento')
+
+    listadocumentos = []
+    documento=""
+    hay_accesorios = False
+
+    for i in range(len(detalle_ampliacion)):
+        item = detalle_ampliacion[i]
+
+        jsdet={}
+
+        if item.cxtipoasignacion == 'F':
+             doc = Documentos.objects.filter(pk = item.documentoaccesorio).first()
+             documento = doc.__str__()
+             asgn = doc.cxasignacion
+             jsdet["Accesorio"] = None
+        else:
+             doc = ChequesAccesorios.objects.filter(pk = item.documentoaccesorio).first()
+             documento = doc.documento.__str__()
+             asgn = doc.documento.cxasignacion
+             jsdet["Accesorio"] = doc.__str__()
+             hay_accesorios=True
+
+        jsdet["Asignacion"] = asgn
+        jsdet["Documento"] = documento
+        jsdet["AmpliarDesde"] = item.dampliaciondesde
+        jsdet["Plazo"] = item.plazo
+        jsdet["Cartera"] = item.nvalorcartera
+
+        listadocumentos.append(jsdet)
+
+    # datos de tasa gao/dc
+    dc = Tasas_factoring.objects.filter(cxtasa="DCAR"
+                                        , empresa = id_empresa.empresa).first()
+    if not dc:
+        return HttpResponse("no encontró tasa de descuento de catera")
+
+    gaoa = Tasas_factoring.objects.filter(cxtasa="GAOA"
+                                          , empresa = id_empresa.empresa).first()
+    if not gaoa:
+        return HttpResponse("no encontró tasa de GAO adicional")
+
+    # crear un objeto json agrupando los cargos por código y que haya un elemento
+    # json que contenga el detalle de cada cobranza.
+    idcargo=""
+    totalcargo = 0
+    listadetalle = []
+    listacargos=[]
+
+    for i in range(len(detalle_cargos)):
+        item = detalle_cargos[i]
+
+        if idcargo != item.cargo.cxmovimiento.ctmovimiento and idcargo !="":
+            
+            jscab={}
+            jscab["nombre"] = idcargo
+            jscab["valor"] = totalcargo
+            jscab["detalle"] = listadetalle
+
+            listacargos.append(jscab)
+
+            totalcargo=0
+            jsdet={}
+            listadetalle = []
+
+        idcargo = item.cargo.cxmovimiento.ctmovimiento
+
+        jsdet={}
+
+        # el IVA no tiene documento, porque es general a la Liquidacion
+        if item.cargo.cxasignacion != None:
+            jsdet["asignacion"] = item.cargo.cxasignacion
+            jsdet["documento"] = item.cargo.cxdocumento.ctdocumento
+            jsdet["desembolso"] = item.cargo.cxasignacion.ddesembolso
+
+        jsdet["valor_base"] = item.cargo.ctvalorbase
+        jsdet["tasa_calculo"]=item.cargo.ntasacalculo
+        jsdet["dias_calculo"] = item.cargo.ndiascalculo
+        jsdet["valor"] = item.cargo.nvalor
+
+        listadetalle.append(jsdet)
+
+        totalcargo += item.cargo.nvalor
+    
+    # el ultimo
+    jscab={}
+    jscab["nombre"] = idcargo
+    jscab["valor"] = totalcargo
+    jscab["detalle"] = listadetalle
+
+    listacargos.append(jscab)
+
+    contexto = {
+        "ampliacion" : ampliacion,
+        "detalle" : listacargos,
+        "nombre_dc": dc.ctdescripcionenreporte,
+        "nombre_gaoa": gaoa.ctdescripcionenreporte,
+        "ap" : ap,
+        "detalle_ampliacion"  : listadocumentos,
+        "hay_accesorios" : hay_accesorios,
+    }
+    print(contexto)
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="ampliacion "' + str(ampliacion.cxnotadebito) + ".pdf"
+    # find the template and render it.
+    template = get_template(template_name)
+    html = template.render(contexto)
 
     # create a pdf
     pisa_status = pisa.CreatePDF(

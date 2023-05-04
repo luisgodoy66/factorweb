@@ -158,18 +158,11 @@ class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
         context["por_vencer"]=por_vencer
         return context
 
-class CobranzasConsulta(LoginRequiredMixin, generic.ListView):
+class CobranzasConsulta(LoginRequiredMixin, generic.TemplateView):
     model = Documentos_cabecera
     template_name = "cobranzas/consultageneralcobranzas.html"
     context_object_name='consulta'
     login_url = 'bases:login'
-
-    def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        qs=Documentos_cabecera.objects.filter(leliminado = False
-                                              , empresa = id_empresa.empresa
-                                              )
-        return qs
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -516,6 +509,23 @@ class AmpliacionesDePlazoPendientesView(LoginRequiredMixin, generic.ListView):
         context = super(AmpliacionesDePlazoPendientesView, self).get_context_data(**kwargs)
         context["tipo_nd"] = 'AP'
 
+        return context
+
+class AmpliacionesConsulta(LoginRequiredMixin, generic.TemplateView):
+    model = Documentos_cabecera
+    template_name = "cobranzas/consultaampliaciones.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        # obtener primer día del mes actual
+        desde = date.today() + timedelta(days=-date.today().day +1)
+        hasta = date.today()
+
+        context = super(AmpliacionesConsulta, self).get_context_data(**kwargs)
+        context["desde"] = desde
+        context["hasta"] =hasta
         return context
 
 def CobranzaPorCondonar(request,pk, tipo_operacion):
@@ -3077,3 +3087,69 @@ def GeneraListaAmpliacionesPendientesJSON(request):
         "rows": docjson 
         }
     return JsonResponse( data)
+
+def GeneraListaAmpliacionesJSON(request, desde = None, hasta= None):
+    # Es invocado desde la url de una tabla bt
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    if desde == 'None':
+        movimiento = Ampliaciones_plazo_cabecera.objects\
+            .filter(empresa = id_empresa.empresa)\
+                .values('cxcliente__cxcliente__ctnombre', 'notadebito__id'
+                        ,'notadebito__cxnotadebito'
+                        ,'dregistro'
+                        ,'notadebito__dnotadebito'
+                        , 'notadebito__cxestado'
+                        ,'notadebito__cxtipofactoring__ctabreviacion'
+                        ,'ncomision','ndescuentodecartera', 'niva'
+                        ,'nvalor', 'dampliacionhasta'
+                        ,'notadebito__nsaldo')
+        
+    else:
+
+        movimiento = Ampliaciones_plazo_cabecera.objects\
+            .filter(notadebito__dnotadebito__gte = desde
+                    , empresa = id_empresa.empresa
+                    , notadebito__dnotadebito__lte = hasta)\
+                .values('cxcliente__cxcliente__ctnombre', 'notadebito__id'
+                        ,'notadebito__cxnotadebito'
+                        ,'dregistro'
+                        ,'notadebito__dnotadebito'
+                        , 'notadebito__cxestado'
+                        ,'notadebito__cxtipofactoring__ctabreviacion'
+                        ,'ncomision','ndescuentodecartera', 'niva'
+                        ,'nvalor', 'dampliacionhasta'
+                        ,'notadebito__nsaldo')
+                
+    tempBlogs = []
+    for i in range(len(movimiento)):
+        tempBlogs.append(GeneraListaAmpliaciocnesJSONSalida(movimiento[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": movimiento.count(),
+        "totalNotFiltered": movimiento.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaAmpliaciocnesJSONSalida(transaccion):
+    output = {}
+    output['id'] = transaccion['notadebito__id']
+    output["Cliente"] = transaccion['cxcliente__cxcliente__ctnombre']
+    output["Operacion"] = transaccion['notadebito__cxnotadebito']
+    output["Fecha"] = transaccion['notadebito__dnotadebito'].strftime("%Y-%m-%d")
+    output["FechaHasta"] = transaccion['dampliacionhasta'].strftime("%Y-%m-%d")
+    output["Estado"] = transaccion['notadebito__cxestado']
+    output["TipoFactoring"] = transaccion['notadebito__cxtipofactoring__ctabreviacion']
+    output["Registro"] = transaccion["dregistro"]
+    output["Comision"] = transaccion["ncomision"]
+    output["DescuentoCartera"] = transaccion["ndescuentodecartera"]
+    output["IVA"] = transaccion["niva"]
+    output["Total"] = transaccion["nvalor"]
+    output["Saldo"] = transaccion["notadebito__nsaldo"]
+
+
+    return output
+
