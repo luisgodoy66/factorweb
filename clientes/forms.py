@@ -1,8 +1,12 @@
 # from dataclasses import fields
 from django import forms
-from .models import  Cuentas_bancarias, Datos_generales\
-    , Linea_Factoring, Personas_juridicas \
-    , Personas_naturales, Cupos_compradores, Datos_compradores
+
+from .models import  Cuentas_bancarias, Datos_generales, Linea_Factoring\
+    , Personas_juridicas , Personas_naturales, Cupos_compradores\
+    , Datos_compradores, Clases_cliente
+from empresa.models import Localidades, Datos_participantes
+from pais.models import Bancos
+
 from datetime import date
 
 class ClienteForm(forms.ModelForm):
@@ -15,6 +19,7 @@ class ClienteForm(forms.ModelForm):
             , 'cxlocalidad':'Sucursal de atención'
         }
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
@@ -22,6 +27,10 @@ class ClienteForm(forms.ModelForm):
                 'class':'form-control'
             })
 
+        if empresa:
+            self.fields['cxlocalidad'].queryset = Localidades.objects\
+                .filter(empresa=empresa, lactiva = True, leliminado = False)
+            
 class CompradorForm(forms.ModelForm):
     
     class Meta:
@@ -30,6 +39,7 @@ class CompradorForm(forms.ModelForm):
         labels={'cxclase':'Clase', 'cxestado':'Estado'}
 
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
@@ -37,8 +47,11 @@ class CompradorForm(forms.ModelForm):
                 'class':'form-control'
             })
 
+        if empresa:
+            self.fields['cxclase'].queryset = Clases_cliente.objects\
+                .filter(empresa=empresa, leliminado = False)
+
 class PersonaNaturalForm(forms.ModelForm):
-    # dnacimiento = forms.DateInput()
     
     class Meta:
         model=Personas_naturales
@@ -183,12 +196,19 @@ class CuposCompradoresForm(forms.ModelForm):
             , 'lactivo': 'Activo', 'lsenotifica':'Se notifica de operación al deudor', }        
 
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
+
+        if empresa:
+            self.fields['cxcliente'].queryset = Datos_generales.objects\
+                .filter(empresa=empresa, leliminado = False)
+            self.fields['cxcomprador'].queryset = Datos_compradores.objects\
+                .filter(empresa=empresa, leliminado = False)
 
 class CuentasBancariasForm(forms.ModelForm):
     class Meta:
@@ -207,9 +227,19 @@ class CuentasBancariasForm(forms.ModelForm):
         widgets={'ctnombrepropietario': forms.Textarea(attrs={'rows': '2'}), }
 
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
+
+        if empresa:
+            self.fields['cxbanco'].queryset = Bancos.objects\
+                .filter(empresa=empresa, leliminado = False)
+            deudores = Datos_compradores.objects\
+                .filter(empresa = empresa).values_list('cxcomprador__id')
+            self.fields['cxparticipante'].queryset = Datos_participantes.objects\
+                .filter(empresa=empresa, leliminado = False, id__in = deudores)
+

@@ -1,6 +1,8 @@
 from datetime import date
 from django import forms
 from .models import Asignacion, Documentos, ChequesAccesorios, Clientes
+from empresa.models import Tipos_factoring
+from pais.models import Bancos
 
 class AsignacionesForm(forms.ModelForm):
 
@@ -12,7 +14,9 @@ class AsignacionesForm(forms.ModelForm):
         labels={'cxcliente':'Cliente', 'cxtipofactoring':'Tipo de factoring'
             ,'nvalor':'Total negociado', 'ncantidaddocumentos':'Cantidad de documentos', 
         }
-    def __init__(self, *args, **kwargs):
+
+    def __init__(self, *args, **kwargs,):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
@@ -21,6 +25,12 @@ class AsignacionesForm(forms.ModelForm):
             })
         self.fields['ncantidaddocumentos'].widget.attrs['readonly']=True
         self.fields['nvalor'].widget.attrs['readonly']=True
+
+        if empresa:
+            self.fields['cxcliente'].queryset = Clientes.objects\
+                .filter(empresa=empresa, leliminado = False)
+            self.fields['cxtipofactoring'].queryset = Tipos_factoring.objects\
+                .filter(empresa=empresa, leliminado = False)
 
 class DocumentosForm(forms.ModelForm):
     demision = forms.DateInput()
@@ -65,9 +75,7 @@ class DocumentosForm(forms.ModelForm):
                 'class':'form-control'
             })
         self.fields['demision'].widget.attrs['value']=date.today
-        # self.fields['demision'].widget.attrs['readonly']=True
         self.fields['dvencimiento'].widget.attrs['value']=date.today
-        # self.fields['dvencimiento'].widget.attrs['readonly']=True
         self.fields['ntotal'].widget.attrs['readonly']=True
 
 class ChequesForm(forms.ModelForm):
@@ -95,6 +103,7 @@ class ChequesForm(forms.ModelForm):
                     ),
         }
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
@@ -102,8 +111,11 @@ class ChequesForm(forms.ModelForm):
                 'class':'form-control'
             })
         self.fields['dvencimiento'].widget.attrs['value']=date.today
-        # self.fields['dvencimiento'].widget.attrs['readonly']=True
 
+        if empresa:
+            self.fields['cxbanco'].queryset = Bancos.objects\
+                .filter(empresa=empresa, leliminado = False)
+            
 class ClientesForm(forms.ModelForm):
     class Meta:
         model = Clientes
@@ -120,6 +132,7 @@ class ClientesForm(forms.ModelForm):
 
         widgets={'ctdireccion': forms.Textarea(attrs={'rows': '3'})
                 }
+        
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         

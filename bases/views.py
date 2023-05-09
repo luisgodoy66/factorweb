@@ -10,6 +10,7 @@ from solicitudes.models import Asignacion
 from operaciones.models import Documentos
 from cobranzas.models import Cheques_protestados
 from datetime import date, timedelta
+from .models import Usuario_empresa
 
 class Home(LoginRequiredMixin, generic.TemplateView):
     # model = Asignacion
@@ -147,11 +148,12 @@ def dashboard(request):
     hasta = date.today() + timedelta(days=1)
     cartera = 0
     protestos = 0
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    docs = Documentos.objects.TotalCartera()
+    docs = Documentos.objects.TotalCartera(id_empresa.empresa)
     if docs['Total']:
         cartera = docs['Total']
-    prot = Cheques_protestados.objects.TotalProtestos()
+    prot = Cheques_protestados.objects.TotalProtestos(id_empresa.empresa)
     if prot['Total']:
         protestos = prot['Total']
 

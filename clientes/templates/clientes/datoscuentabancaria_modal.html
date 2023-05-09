@@ -4,9 +4,9 @@
         <form  method="post" id="frmSolicitud" enctype="multipart/form-data" 
             class="form-horizontal" name="form"
             {% if not nueva %}
-            action="{% url 'clientes:cuentabancaria_editar' cuentabancaria_id %}"
+                action="{% url 'clientes:cuentabancaria_editar' cuentabancaria_id %}"
             {% else %}
-            action="{% url 'clientes:cuentabancaria_nueva' cliente_id %}"
+                action="{% url 'clientes:cuentabancaria_nueva' cliente_id %}"
             {% endif %}
             >
             <!-- columna izquierda -->
@@ -18,8 +18,7 @@
                 <div class="card-body">
                     <!-- datos de factura texto y fecha -->
                     <div class="col-12 col-md-9"hidden>
-                        <input type="text" id="id_cxparticipante" name="cxparticipante" 
-                        value="{{ cliente_id }}" class="form-control" >
+                        <input id="id_cxparticipante" name="cxparticipante" value="{{ cliente_id }}" >
                     </div>
                     <div class="col-md-6">
                         <div class="row form-group">
@@ -50,18 +49,36 @@
                             <div class="col col-md-4"><label for="id_cxtipocliente" 
                                 class=" form-control-label">
                                 {{ form.lpropia.label}}</label></div>
-                            <div class="col-8 col-md-8">
+                            <!-- <div class="col-8 col-md-8">
                                 {{ form.lpropia}}
+                            </div> -->
+                            <div class="col-md-8 ">
+                                <label class="switch switch-3d switch-success mr-3">
+                                    <input type="checkbox" class="switch-input" 
+                                    {% if  cuentabancaria.lpropia %} checked {% endif %} 
+                                    id = "id_lpropia" name = "lpropia"> 
+                                    <span class="switch-label"></span> 
+                                    <span class="switch-handle"></span>
+                                </label>
                             </div>
-                        </div>  
+                                </div>  
                         <div class="row form-group">
                             <div class="col col-md-4"><label for="id_cxtipocliente" 
                                 class=" form-control-label">
                                 {{ form.lactiva.label}}</label></div>
-                            <div class="col-8 col-md-8">
+                            <!-- <div class="col-8 col-md-8">
                                 {{ form.lactiva}}
+                            </div> -->
+                            <div class="col-md-8 ">
+                                <label class="switch switch-3d switch-success mr-3">
+                                    <input type="checkbox" class="switch-input" 
+                                    {% if  cuentabancaria.lactiva %} checked {% endif %} 
+                                    id = "id_lactiva" name = "lactiva"> 
+                                    <span class="switch-label"></span> 
+                                    <span class="switch-handle"></span>
+                                </label>
                             </div>
-                        </div>  
+                                </div>  
                     </div>
                     <!-- datos de factura valores -->
                     <div class="col-md-6">

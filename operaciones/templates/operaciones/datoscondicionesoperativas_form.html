@@ -30,12 +30,12 @@
                     <div class="row form-group">
                         <div class="col-md-2"><label for="id_ctcondicion" class=" form-control-label">
                             {{ form_cabecera.ctcondicion.label}}</label></div>
-                        <div class="col-md-4">
+                        <div class="col-md-5">
                             {{ form_cabecera.ctcondicion}}
                         </div>
                         <div class="col-md-2"><label for="id_cxtipofactoring" class=" form-control-label"> 
                             {{ form_cabecera.cxtipofactoring.label}}</label></div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             {{ form_cabecera.cxtipofactoring}}
                         </div>
                     </div>  
@@ -47,7 +47,7 @@
                         <div class="col col-md-2"><label for="id_laplicaafacturaspuras" class=" form-control-label">
                             {{ form_cabecera.laplicaafacturaspuras.label}}</label>
                         </div>
-                        <div class="col col-md-4">
+                        <div class="col col-md-1">
                             <label class="switch switch-3d switch-success mr-3">
                                 <input type="checkbox" class="switch-input" 
                                 {% if  condicion.laplicaafacturaspuras %} checked {% endif %} 
@@ -57,9 +57,9 @@
                             </label>
                         </div>
 
-                        <div class="col col-md-2"><label for="id_laplicaaaccesorios" class=" form-control-label">
+                        <div class="col col-md-3"><label for="id_laplicaaaccesorios" class=" form-control-label">
                             {{ form_cabecera.laplicaaaccesorios.label}}</label></div>
-                        <div class="col col-md-4">
+                        <div class="col col-md-1">
                             <label class="switch switch-3d switch-success mr-3">
                                 <input type="checkbox" class="switch-input" 
                                 {% if  condicion.laplicaaaccesorios %} checked {% endif %} 
@@ -68,7 +68,14 @@
                                 <span class="switch-handle"></span>
                             </label>
                         </div>
-
+                        <div class="col-md-5">
+                            {% if condicion %}
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fa fa-dot-circle-o"></i> Actualizar descripción, aplicación y tipo de factoring
+                                </button>
+                            {% endif %}
+                        </div>
+        
                     </div>  
                 </div>
             </div>
@@ -133,17 +140,13 @@
                             {{ form_detalle.ntasadescuento}}
                         </div>
                     </div>  
-                    <div class="row form-group float-right">
-                        <button type="submit" class="btn btn-success btn-sm float-right">
-                        <i class="fa fa-plus-circle"></i> Agregar
-                        </button>
-                    </div>  
                 </div>
             </div>
             
             <!-- parte inferior -->
-            <div class="row">
-                <div class="col col-xs-12">
+            <div class="row form-group">
+
+                <div class="col-md-12">
                         
                     <table id="table"                      
                         data-show-columns-toggle-all="true"
@@ -169,6 +172,9 @@
             <a href="{% url 'operaciones:listacondicionesoperativas' %}" class="btn btn-danger btn-sm">
                 <i class="fa fa-ban"></i> Salir
             </a>
+            <button type="submit" class="btn btn-success btn-sm ">
+            <i class="fa fa-plus-circle"></i> Agregar línea
+            </button>
 
         </div>
           

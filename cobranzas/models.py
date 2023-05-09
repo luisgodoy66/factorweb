@@ -180,8 +180,10 @@ class Liquidacion_detalle(ClaseModelo):
 from operaciones.models import  Notas_debito_cabecera
 
 class Protestos_Manager(models.Manager):
-    def TotalProtestos(self):
-        return self.filter(leliminado=False, nsaldocartera__gt = 0)\
+    def TotalProtestos(self, id_empresa):
+        return self.filter(leliminado=False
+                           , empresa = id_empresa
+                           , nsaldocartera__gt = 0)\
             .aggregate(Total = Sum('nsaldocartera'))
 
     def protestos_pendientes(self, id_empresa):

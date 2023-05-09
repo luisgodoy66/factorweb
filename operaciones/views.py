@@ -195,6 +195,8 @@ def DesembolsarAsignacion(request, pk, cliente_id):
     contexto = {}
     formulario={}
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     cliente = ModeloCliente.Datos_generales.objects\
         .filter(cxcliente=cliente_id).first()
 
@@ -211,7 +213,7 @@ def DesembolsarAsignacion(request, pk, cliente_id):
             , 'cxoperacion':asignacion.id
             , 'nvalor': asignacion.neto()
             }
-        formulario = DesembolsarForm(e)
+        formulario = DesembolsarForm(e, empresa = id_empresa.empresa)
 
         contexto={'liquidacion':asignacion.dnegociacion
             , 'instruccion_de_pago':asignacion.ctinstrucciondepago
@@ -225,8 +227,6 @@ def DesembolsarAsignacion(request, pk, cliente_id):
         }
 
     if request.method=="POST":
-
-        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
         with transaction.atomic():
             # 1. Actualizar el estado de la ASIGNACION
@@ -303,6 +303,8 @@ def DatosOperativos(request, cliente_id=None):
     formulario={}
     datoscliente={}
     
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     cliente = ModeloCliente.Datos_generales.objects\
         .filter(cxcliente=cliente_id).first()
 
@@ -327,17 +329,15 @@ def DatosOperativos(request, cliente_id=None):
                 'ctbeneficiariocobranzas':datoscliente.ctbeneficiariocobranzas,
                 'cxestado':datoscliente.cxestado
             }
-            formulario=DatosOperativosForm(e)
+            formulario=DatosOperativosForm(e, empresa = id_empresa.empresa)
         else:
-            formulario=DatosOperativosForm()
+            formulario=DatosOperativosForm(empresa = id_empresa.empresa)
 
     contexto={'nombrecliente':cliente
             , 'form_cliente':formulario
             }
 
     if request.method=='POST':
-
-        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
         dalta = request.POST.get("dalta")
         cxclase = request.POST.get("cxclase")
@@ -418,7 +418,7 @@ def AceptarAsignacion(request, asignacion_id=None):
         .filter(pk=asignacion_id).first()
 
     cuenta_transferencia = ModeloCliente.Cuenta_transferencia\
-            .objects.cuenta_default(asignacion.cxcliente.cxcliente).first()
+            .objects.cuenta_default(asignacion.cxcliente.id).first()
             
     # buscar el tipo de factoring 
     tipo_factoring = Tipos_factoring.objects.get(pk=asignacion.cxtipofactoring_id)
@@ -473,13 +473,21 @@ def AceptarAsignacion(request, asignacion_id=None):
         , 'generar':carga_dc
         , 'iniciales': dc.ctinicialesentablas}
 
+    # determinar si el solicitante ya es cliente
+    cliente = Datos_participantes.objects\
+        .filter(cxparticipante=asignacion.cxcliente.cxcliente
+                , empresa = id_empresa.empresa).first()
+    if not cliente:
+        return HttpResponse("solicitante no encontrado en lista de clientes")
+
     # buscar en datos operativos el beneficiario del cheque
     datos_operativos = Datos_operativos.objects\
-                .filter(cxcliente = asignacion.cxcliente.cxcliente
-                        , empresa = id_empresa.empresa).first()
-    
+                .filter(cxcliente = cliente.datos_generales.id).first()
+
     if datos_operativos:
         beneficiario=datos_operativos.ctbeneficiarioasignacion
+    else:
+        return HttpResponse("No se ha encontrado datos operativos del cliente.")
 
     contexto={'form_asignacion':formulario,
         'asignacion': asignacion,
@@ -509,8 +517,7 @@ def DetalleCargosAsignacion(request, asignacion_id = None
 
     # buscar el tipo de factoring 
     tipo_factoring = Tipos_factoring.objects\
-        .filter(pk=asignacion.cxtipofactoring_id
-                , empresa = id_empresa.empresa).first()
+        .filter(pk=asignacion.cxtipofactoring_id).first()
     if not tipo_factoring:
         return HttpResponse("Tipo de factoring "+ asignacion.cxtipofactoring + " no existe")
 
@@ -519,10 +526,12 @@ def DetalleCargosAsignacion(request, asignacion_id = None
                 , empresa = id_empresa.empresa).first()
     if not cliente:
         return HttpResponse("solicitante no encontrado en lista de clientes")
-    
+
     # buscar los datos operativos 
+    # datos_operativos = Datos_operativos.objects\
+    #     .filter(cxcliente=cliente.id).first()
     datos_operativos = Datos_operativos.objects\
-        .filter(cxcliente=cliente.id).first()
+                .filter(cxcliente = cliente.datos_generales.id).first()
     if not datos_operativos:
         return HttpResponse("No se ha encontrado datos operativos del cliente.")
 
@@ -929,6 +938,8 @@ def CondicionesOperativas(request,condicion_id=None):
     formulario={}
     condicion={}
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     if request.method=='GET':
         condicion = Condiciones_operativas_cabecera.objects.filter(pk=condicion_id).first()
 
@@ -940,19 +951,17 @@ def CondicionesOperativas(request,condicion_id=None):
                 'laplicaafacturaspuras': condicion.laplicaafacturaspuras ,
                 'laplicaaaccesorios': condicion.laplicaaaccesorios ,
             }
-            formulario = CondicionesOperativasForm(e)
+            formulario = CondicionesOperativasForm(e, empresa = id_empresa.empresa)
         else:
-            formulario = CondicionesOperativasForm()
+            formulario = CondicionesOperativasForm(empresa = id_empresa.empresa)
             condicion=None
             
     contexto={'form_cabecera':formulario,
-    'form_detalle': DetalleCondicionesOperativasForm,
+    'form_detalle': DetalleCondicionesOperativasForm(empresa=id_empresa.empresa),
     'condicion':condicion
     }
     
     if request.method=='POST':
-
-        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
         ctcondicion = request.POST.get("ctcondicion")
         cxtipofactoring = request.POST.get("cxtipofactoring")

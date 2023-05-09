@@ -45,13 +45,17 @@ class AsignacionFacturasPurasView(LoginRequiredMixin, generic.UpdateView):
     login_url = 'bases:login'
     form_class = AsignacionesForm
     success_url=reverse_lazy("solicitudes:listasolicitudes")
+    
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
 
-    def get_context_data(self,*args, **kwargs): 
-        context = super(AsignacionFacturasPurasView, self).get_context_data(*args,**kwargs) 
-        context['clientes'] = Clientes.objects.all() 
-
-        return context
-
+    def get_form_kwargs(self):
+        kwargs = super(AsignacionFacturasPurasView, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+       
 class AsignacionConAccesoriosView(LoginRequiredMixin, generic.UpdateView):
     model = Asignacion
     template_name = "solicitudes/datosasignacionconaccesorios_form.html"
@@ -63,6 +67,12 @@ class AsignacionConAccesoriosView(LoginRequiredMixin, generic.UpdateView):
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super(AsignacionConAccesoriosView, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
 
 class ClienteCrearView(LoginRequiredMixin, generic.CreateView):
     model = Clientes
@@ -82,9 +92,10 @@ class ClienteCrearView(LoginRequiredMixin, generic.CreateView):
 @login_required(login_url='/login/')
 @permission_required('solicitudes.update_asignaciones', login_url='bases:sin_permisos')
 def DatosAsignacionFacturasPurasNueva(request):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     template_name="solicitudes/datosasignacionfacturaspuras_form.html"
-    contexto={'form': AsignacionesForm,
+    contexto={'form': AsignacionesForm(empresa = id_empresa.empresa),
             'clientes' : Clientes.objects.all() ,
             "asignacion": Asignacion
        }
@@ -93,10 +104,11 @@ def DatosAsignacionFacturasPurasNueva(request):
 @login_required(login_url='/login/')
 @permission_required('solicitudes.update_asignaciones', login_url='bases:sin_permisos')
 def DatosAsignacionConAccesoriosNueva(request):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     template_name="solicitudes/datosasignacionconaccesorios_form.html"
-    contexto={'form': AsignacionesForm,
-            'clientes' : Clientes.objects.all() ,
+    contexto={'form': AsignacionesForm(empresa = id_empresa.empresa),
+            'clientes' : Clientes.objects.all(),
             "asignacion": Asignacion
        }
     return render(request, template_name, contexto)
@@ -271,9 +283,8 @@ def DatosFacturasPuras(request, cliente_id=None
 
             # grabar comprador , si es nuevo
             datosparticipante = Datos_participantes.objects\
-                .filter(cxparticipante = id_comprador, empresa = id_empresa.empresa).first()
-            comprador = Datos_compradores.objects.filter(cxcomprador = datosparticipante.id).first()
-
+                .filter(cxparticipante = id_comprador
+                        , empresa = id_empresa.empresa).first()
             if not datosparticipante:
 
                 cxtipoid = request.POST.get("cxtipoid")
@@ -288,6 +299,9 @@ def DatosFacturasPuras(request, cliente_id=None
                 if datosparticipante:
                     datosparticipante.save()
 
+            comprador = Datos_compradores.objects\
+                .filter(cxcomprador = datosparticipante.id).first()
+
             if not comprador:
                 datoscomprador=Datos_compradores(
                     cxcomprador = datosparticipante,
@@ -297,7 +311,8 @@ def DatosFacturasPuras(request, cliente_id=None
                 if datoscomprador:
                     datoscomprador.save()
 
-        return redirect("solicitudes:asignacionfacturaspuras_editar", pk= asignacion_id)
+        return redirect("solicitudes:asignacionfacturaspuras_editar"
+                        , pk= asignacion_id, )
 
     return render(request, template_name, contexto)
 
@@ -470,6 +485,8 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
     formulario = {}
     asignacion = {}
     
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
     if request.method=='GET':
 
         asignacion = Asignacion.objects.filter(pk=asignacion_id).first()
@@ -491,7 +508,7 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
     # por lo que no se validan los campos pero sirve para la lista 
     contexto={'form_asignacion':formulario,
         'form_documento':DocumentosForm,
-        'form_cheque': ChequesForm,
+        # 'form_cheque': ChequesForm(),
         'asignacion' : asignacion,
         'asignacion_id': asignacion_id,
         'cliente': cliente_id,
@@ -500,8 +517,6 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
 
     if request.method=='POST':
 
-        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-        
         idcliente = request.POST.get("id_cliente")
         tipo_factoring = request.POST.get("id_tipofactoring")
         tipoasignacion = "A"
@@ -511,150 +526,156 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
         tipoFactoring = Tipos_factoring.objects\
             .filter(pk=tipo_factoring).first()
 
-        if not asignacion_id:
+        # inicio de transaccion
+        with transaction.atomic():
+            # crear la asignacion
+            if not asignacion_id:
 
-            asignacion = Asignacion(
-                cxcliente = cliente,
-                cxtipofactoring = tipoFactoring,
-                cxtipo = tipoasignacion,
+                asignacion = Asignacion(
+                    cxcliente = cliente,
+                    cxtipofactoring = tipoFactoring,
+                    cxtipo = tipoasignacion,
+                    cxusuariocrea = request.user,
+                    empresa = id_empresa.empresa,
+                )
+                if asignacion:
+                    asignacion.save()
+                    asignacion_id = asignacion.id
+
+                # nueva = True
+            else:
+                asignacion = Asignacion.objects.filter(pk= asignacion_id).first()
+                if asignacion:
+
+                    asignacion.cxcliente = cliente
+                    asignacion.cxtipofactoring = tipoFactoring
+                    asignacion.cxtipo = tipoasignacion
+                    asignacion.cxusuariomodifica = request.user.id
+                    asignacion.save()
+
+                # nueva = False
+
+            if not asignacion_id:
+                return redirect("solicitudes:listasolicitudes")
+
+            id_comprador=request.POST.get("cxcomprador")
+            nombre_comprador=request.POST.get("ctcomprador")
+            documento=request.POST.get("ctdocumento")
+            emision =request.POST.get("demision")
+            # la factura no tiene fecha de vencimiento ya que eso está 
+            # en los cheques. Este campo no debe ser utilizado
+            vencimiento =request.POST.get("demision")
+            valor_antes_de_iva =request.POST.get("nvalorantesiva")
+            iva =request.POST.get("niva")
+            retencion_iva =request.POST.get("nretencioniva")
+            retencion_renta =request.POST.get("nretencionrenta")
+            total = request.POST.get("ntotal")
+            valornonegociado = request.POST.get("nvalornonegociado")
+            serie1=request.POST.get("ctserie1")
+            serie2=request.POST.get("ctserie2")
+
+            det = Documentos(
+                cxasignacion=asignacion,
+                cxcomprador = id_comprador,
+                ctcomprador = nombre_comprador,
+                ctdocumento = documento,
+                demision  = emision,
+                dvencimiento  = vencimiento,
+                nvalorantesiva = valor_antes_de_iva,
+                niva = iva,
+                nretencioniva = retencion_iva,
+                nretencionrenta = retencion_renta,
+                ntotal = total,
+                nvalornonegociado = valornonegociado,
+                ctserie1 = serie1,
+                ctserie2 = serie2,
                 cxusuariocrea = request.user,
                 empresa = id_empresa.empresa,
             )
-            if asignacion:
+
+            if det:
+                det.save()
+
+                total_factura = Documentos.objects.filter(cxasignacion=asignacion_id)\
+                    .filter(leliminado=False).aggregate(Sum('ntotal'))
+                numero_documentos = Documentos.objects.filter(cxasignacion=asignacion_id)\
+                    .filter(leliminado=False).aggregate(Count('ctdocumento'))
+                asignacion.nvalor = total_factura["ntotal__sum"]
+                asignacion.ncantidaddocumentos = numero_documentos["ctdocumento__count"]
                 asignacion.save()
-                asignacion_id = asignacion.id
 
-            # nueva = True
-        else:
-            asignacion = Asignacion.objects.filter(pk= asignacion_id).first()
-            if asignacion:
-
-                asignacion.cxcliente = cliente
-                asignacion.cxtipofactoring = tipoFactoring
-                asignacion.cxtipo = tipoasignacion
-                asignacion.cxusuariomodifica = request.user.id
-                asignacion.save()
-
-            # nueva = False
-
-        if not asignacion_id:
-            return redirect("solicitudes:listasolicitudes")
-
-        id_comprador=request.POST.get("cxcomprador")
-        nombre_comprador=request.POST.get("ctcomprador")
-        documento=request.POST.get("ctdocumento")
-        emision =request.POST.get("demision")
-        # la factura no tiene fecha de vencimiento ya que eso está 
-        # en los cheques. Este campo no debe ser utilizado
-        vencimiento =request.POST.get("demision")
-        valor_antes_de_iva =request.POST.get("nvalorantesiva")
-        iva =request.POST.get("niva")
-        retencion_iva =request.POST.get("nretencioniva")
-        retencion_renta =request.POST.get("nretencionrenta")
-        total = request.POST.get("ntotal")
-        valornonegociado = request.POST.get("nvalornonegociado")
-        serie1=request.POST.get("ctserie1")
-        serie2=request.POST.get("ctserie2")
-
-        det = Documentos(
-            cxasignacion=asignacion,
-            cxcomprador = id_comprador,
-            ctcomprador = nombre_comprador,
-            ctdocumento = documento,
-            demision  = emision,
-            dvencimiento  = vencimiento,
-            nvalorantesiva = valor_antes_de_iva,
-            niva = iva,
-            nretencioniva = retencion_iva,
-            nretencionrenta = retencion_renta,
-            ntotal = total,
-            nvalornonegociado = valornonegociado,
-            ctserie1 = serie1,
-            ctserie2 = serie2,
-            cxusuariocrea = request.user,
-            empresa = id_empresa.empresa,
-        )
-
-        if det:
-            det.save()
-
-            total_factura = Documentos.objects.filter(cxasignacion=asignacion_id)\
-                .filter(leliminado=False).aggregate(Sum('ntotal'))
-            numero_documentos = Documentos.objects.filter(cxasignacion=asignacion_id)\
-                .filter(leliminado=False).aggregate(Count('ctdocumento'))
-            asignacion.nvalor = total_factura["ntotal__sum"]
-            asignacion.ncantidaddocumentos = numero_documentos["ctdocumento__count"]
-            asignacion.save()
-
-        # grabar comprador , si es nuevo
-        datosparticipante = Datos_participantes.objects\
-            .filter(cxparticipante = id_comprador, empresa = id_empresa.empresa).first()
-        comprador = Datos_compradores.objects.filter(cxcomprador = datosparticipante.id).first()
-
-        if not datosparticipante:
-
-            cxtipoid = request.POST.get("cxtipoid")
-
-            datosparticipante=Datos_participantes(
-                cxtipoid=cxtipoid,
-                cxparticipante=id_comprador,
-                ctnombre=nombre_comprador,
-                cxusuariocrea = request.user,
-                empresa = id_empresa.empresa,
-            )
-            if datosparticipante:
-                datosparticipante.save()
-
-        if not comprador:
-            datoscomprador=Datos_compradores(
-                cxcomprador = datosparticipante,
-                cxusuariocrea = request.user,
-                empresa = id_empresa.empresa,
-            )
-            if datoscomprador:
-                datoscomprador.save()
-
-        # grabar detalle de cheques
-
-        # recuperar el string de lista de cheques pasado en la data y
-        # convertir a lista
-        lista = request.POST.get("Cheques")
-        output = eval(lista)
-
-        for elem in output:      
-            #accedemos a cada elemento de la lista (en este caso cada elemento es un dictionario)
-            bco = Bancos.objects.filter(id = elem.get("banco")).first()
-
-            vencimiento = elem.get("vencimiento")
+            # grabar comprador , si es nuevo
+            datosparticipante = Datos_participantes.objects\
+                .filter(cxparticipante = id_comprador
+                        , empresa = id_empresa.empresa).first()
             
-            # segun tipo de factoring no acepte vencimientos en feriados
-            # cambiar la fecha de vencimiento
-            if not tipoFactoring.lpermitediasferiados:
+            if not datosparticipante:
 
-                fecha = parse_date(vencimiento)
+                cxtipoid = request.POST.get("cxtipoid")
+
+                datosparticipante=Datos_participantes(
+                    cxtipoid=cxtipoid,
+                    cxparticipante=id_comprador,
+                    ctnombre=nombre_comprador,
+                    cxusuariocrea = request.user,
+                    empresa = id_empresa.empresa,
+                )
+                if datosparticipante:
+                    datosparticipante.save()
+
+            comprador = Datos_compradores.objects\
+                .filter(cxcomprador = datosparticipante.id).first()
+
+            if not comprador:
+                datoscomprador=Datos_compradores(
+                    cxcomprador = datosparticipante,
+                    cxusuariocrea = request.user,
+                    empresa = id_empresa.empresa,
+                )
+                if datoscomprador:
+                    datoscomprador.save()
+
+            # grabar detalle de cheques
+
+            # recuperar el string de lista de cheques pasado en la data y
+            # convertir a lista
+            lista = request.POST.get("Cheques")
+            output = eval(lista)
+
+            for elem in output:      
+                #accedemos a cada elemento de la lista (en este caso cada elemento es un dictionario)
+                bco = Bancos.objects.filter(id = elem.get("banco")).first()
+
+                vencimiento = elem.get("vencimiento")
                 
-                while Feriados.objects.filter(dferiado = vencimiento)\
-                    .filter(llaborable = False).first() \
-                        or fecha.weekday()== 6 or fecha.weekday() == 5:
-                        
-                    fecha = parse_date(vencimiento)
-                    fecha = fecha + datetime.timedelta(days=1)
-                    vencimiento = date.isoformat(fecha)
+                # segun tipo de factoring no acepte vencimientos en feriados
+                # cambiar la fecha de vencimiento
+                if not tipoFactoring.lpermitediasferiados:
 
-            cheque = ChequesAccesorios(
-                documento = det,
-                cxbanco=bco,
-                ctcuenta = elem.get("cuenta"),
-                ctcheque = elem.get("cheque"),
-                ctgirador = elem.get("girador"),
-                dvencimiento = vencimiento,
-                ntotal = elem.get("valor"),
-                cxusuariocrea = request.user,
-                cxpropietariocuenta = elem.get("propietariocuenta"),
-                empresa = id_empresa.empresa,
-            )
-            if cheque:
-                cheque.save()
+                    fecha = parse_date(vencimiento)
+                    
+                    while Feriados.objects.filter(dferiado = vencimiento)\
+                        .filter(llaborable = False).first() \
+                            or fecha.weekday()== 6 or fecha.weekday() == 5:
+                            
+                        fecha = parse_date(vencimiento)
+                        fecha = fecha + datetime.timedelta(days=1)
+                        vencimiento = date.isoformat(fecha)
+
+                cheque = ChequesAccesorios(
+                    documento = det,
+                    cxbanco=bco,
+                    ctcuenta = elem.get("cuenta"),
+                    ctcheque = elem.get("cheque"),
+                    ctgirador = elem.get("girador"),
+                    dvencimiento = vencimiento,
+                    ntotal = elem.get("valor"),
+                    cxusuariocrea = request.user,
+                    cxpropietariocuenta = elem.get("propietariocuenta"),
+                    empresa = id_empresa.empresa,
+                )
+                if cheque:
+                    cheque.save()
 
         # la ejecucion de esta vista POST se hace por jquery.ajax 
         # y ese proceso traslada a la forma de edición de la 
@@ -665,11 +686,13 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
 
 def DatosAccesorioEditar(request, accesorio_id = None, tipo_factoring_id = None):
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
     template_name = "solicitudes/datoschequeaccesorio_modal.html"
-    form_cheque = ChequesForm
+    form_cheque = ChequesForm(empresa=id_empresa.empresa)
     valor_cheque = None
     acepta_vencimiento_en_feriado = False
-
+    
     if request.method=='GET':
         if accesorio_id:
             accesorio = ChequesAccesorios.objects.get(id=accesorio_id)
@@ -681,7 +704,7 @@ def DatosAccesorioEditar(request, accesorio_id = None, tipo_factoring_id = None)
                 , 'ntotal':accesorio.ntotal
                 , 'dvencimiento':accesorio.dvencimiento
                 , 'cxpropietariocuenta': accesorio.cxpropietariocuenta}
-            form_cheque = ChequesForm(e)
+            form_cheque = ChequesForm(e, empresa=id_empresa.empresa)
             valor_cheque=accesorio.ntotal
 
         if tipo_factoring_id:

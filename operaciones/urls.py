@@ -76,28 +76,31 @@ urlpatterns = [
         name='aceptarasignacion'),
     path('sumacargos/<int:asignacion_id>/<gao_carga_iva>/<dc_carga_iva>/<carga_gao>/<carga_dc>/<int:porcentaje_iva>',\
         SumaCargos),
-    path('detallecargosasignacion/<int:asignacion_id>/<fecha_desembolso>/',\
+    path('detallecargosasignacion/<int:asignacion_id>/<fecha_desembolso>/',
         DetalleCargosAsignacion, name='detallecargosasignacion'),
     path('detallecargosasignacion/<int:asignacion_id>/<fecha_desembolso>/<int:condicion_id>',\
         DetalleCargosAsignacion, name='detallecargosasignacion'),
-    path('refrescadetallesolicitud/<int:asignacion_id>',\
+    path('refrescadetallesolicitud/<int:asignacion_id>',
         GeneraDetalleParaTabla1,),
     path('aceptardocumentos/',AceptarDocumentos),
     path('editartasasdocumento/<int:documento_id>/<fecha_desembolso>/<int:asignacion_id>'\
         , EditarTasasDocumentoSolicitud, name="editartasasdocumento"),
-    path("reporteasignacion/<int:asignacion_id>",ImpresionAsignacion, \
+    path("reporteasignacion/<int:asignacion_id>",ImpresionAsignacion, 
         name='reporteasignacion'),
-    path("reporteasignaciondesdesolicitud/<int:asignacion_id>",\
+    path("reporteasignaciondesdesolicitud/<int:asignacion_id>",
         ImpresionAsignacionDesdeSolicitud ),
     path("generaranexos/<int:asignacion_id>", GenerarAnexos, name="generaranexos"),
     path('listaanexos/',AnexosView.as_view(), name='listaanexos'),
     path('nuevoanexo/',AnexosNew.as_view(), name='anexo_nuevo'),
     path('editaranexo/<int:pk>',AnexosEdit.as_view(), name='anexo_editar'),
     path('reversaraceptacionasignacion/<int:pid_asignacion>',ReversaAceptacionAsignacion),
-    path('asignacionesjson/<desde>/<hasta>',GeneraListaAsignacionesJSON, name="asignaciones_json"),
+    path('asignacionesjson/<desde>/<hasta>',GeneraListaAsignacionesJSON
+         , name="asignaciones_json"),
     path('asignacionesregistradasjson/<desde>/<hasta>',GeneraListaAsignacionesRegistradasJSON
         , name="asignacionesregistradas_json"),
     path('antigüedadcartera', GeneraResumenAntigüedadCarteraJSON),
-    path('impresioncartera', ImpresionAntiguedadCartera, name='antigüedad_por_cliente'),
-    path('impresioncarterapendiente', ImpresionFacturasPendientes, name='detalle_facturas_pendientes'),
+    path('impresioncartera', ImpresionAntiguedadCartera
+         , name='antigüedad_por_cliente'),
+    path('impresioncarterapendiente', ImpresionFacturasPendientes
+         , name='detalle_facturas_pendientes'),
     ]

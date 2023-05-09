@@ -164,16 +164,19 @@ class Documentos_Manager(models.Manager):
                 )\
             .order_by()
 
-    def TotalCartera(self):
+    def TotalCartera(self, id_empresa):
         return self.filter(leliminado = False, nsaldo__gt = 0
+                           , empresa = id_empresa
                            , cxasignacion__cxestado = "P"
                            , cxasignacion__leliminado = False)\
             .aggregate(Total = Sum('nsaldo'))
 
-    def cartera_pendiente(self,):
+    def cartera_pendiente(self, id_empresa):
         return self.filter(leliminado = False, nsaldo__gt = 0
-                , cxasignacion__in = Asignacion.objects
-                    .filter(cxtipo = "F", cxestado = "P", leliminado = False))\
+                           , cxasignacion__in = Asignacion.objects
+                    .filter(cxtipo = "F", cxestado = "P"
+                            , empresa = id_empresa
+                            , leliminado = False))\
                     .values("cxcomprador__cxcomprador__ctnombre","cxcliente__cxcliente__ctnombre"
                             , "cxasignacion__cxasignacion"
                             , "ctdocumento"
@@ -344,9 +347,10 @@ class ChequesAccesorios_Manager(models.Manager):
                 )\
             .order_by()
 
-    def cartera_pendiente(self,):
+    def cartera_pendiente(self, id_empresa):
         return self.filter(laccesorioquitado = True, chequequitado__cxestado = 'A'
                 , leliminado = False, lcanjeado = False
+                , empresa = id_empresa
                 , documento__cxasignacion__cxestado = "P"
                 , documento__cxasignacion__leliminado = False)\
                 .values("documento__cxcomprador__cxcomprador__ctnombre"

@@ -14,6 +14,11 @@ class BancosView(LoginRequiredMixin, generic.ListView):
     context_object_name='consulta'
     login_url = 'bases:login'
 
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Bancos.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
+
 class BancosNew(LoginRequiredMixin, generic.CreateView):
     model = Bancos
     template_name="pais/datosbanco_form.html"

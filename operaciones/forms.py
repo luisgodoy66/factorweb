@@ -2,11 +2,14 @@ from cProfile import label
 from dataclasses import fields
 from pyexpat import model
 from django import forms
+
 from .models import Condiciones_operativas_detalle, Datos_operativos, \
     Asignacion, Movimientos_maestro, Condiciones_operativas_cabecera, Anexos\
         , Desembolsos, Documentos, ChequesAccesorios
-from datetime import date
 from solicitudes import models as ModelosSolicitudes
+from empresa.models import Clases_cliente, Tipos_factoring, Cuentas_bancarias
+
+from datetime import date
 
 class DatosOperativosForm(forms.ModelForm):
     dalta = forms.DateInput
@@ -44,13 +47,17 @@ class DatosOperativosForm(forms.ModelForm):
 
 
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        # self.fields['dalta'].widget.attrs['readonly']=True
+
+        if empresa:
+            self.fields['cxclase'].queryset = Clases_cliente.objects\
+                .filter(empresa=empresa, leliminado = False)
 
 class AsignacionesForm(forms.ModelForm):
     class Meta:
@@ -114,6 +121,7 @@ class DesembolsarForm(forms.ModelForm):
         # widgets={'ctinstrucciondepago': forms.Textarea(attrs={'rows': '2'}), }
 
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
@@ -121,6 +129,10 @@ class DesembolsarForm(forms.ModelForm):
                 'class':'form-control'
             })
         self.fields['nvalor'].widget.attrs['readonly']=True
+
+        if empresa:
+            self.fields['cxcuentapago'].queryset = Cuentas_bancarias.objects\
+                .filter(empresa=empresa, leliminado = False, lactiva = True)
 
 class MaestroMovimientosForm(forms.ModelForm):
     class Meta:
@@ -151,12 +163,17 @@ class CondicionesOperativasForm(forms.ModelForm):
             , 'laplicaaaccesorios':'Aplica a facturas con accesorios'}
 
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
+
+        if empresa:
+            self.fields['cxtipofactoring'].queryset = Tipos_factoring.objects\
+                .filter(empresa=empresa, leliminado = False)
 
 class DetalleCondicionesOperativasForm(forms.ModelForm):
     class Meta:
@@ -175,12 +192,19 @@ class DetalleCondicionesOperativasForm(forms.ModelForm):
         }
         
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
+
+        if empresa:
+            self.fields['cxclasecliente'].queryset = Clases_cliente.objects\
+                .filter(empresa=empresa, leliminado = False)
+            self.fields['cxclasecomprador'].queryset = Clases_cliente.objects\
+                .filter(empresa=empresa, leliminado = False)
 
 class TasasDocumentosForm(forms.ModelForm):
     # demision = forms.DateInput()

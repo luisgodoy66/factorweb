@@ -16,7 +16,7 @@ urlpatterns=[
         , name='asignacionfacturaspuras_nueva'),
     path('nuevasolicitudconaccesorios/',DatosAsignacionConAccesoriosNueva
         , name='asignacionconaccesorios_nueva'),
-    path('editarsolicitud/<int:pk>/',AsignacionFacturasPurasView.as_view()
+    path('editarsolicitud/<int:pk>',AsignacionFacturasPurasView.as_view()
         , name='asignacionfacturaspuras_editar'),
     path('editarsolicitudconaccesorios/<int:pk>',AsignacionConAccesoriosView.as_view(), \
         name='asignacionconaccesorios_editar'),

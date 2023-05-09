@@ -142,6 +142,12 @@ class CuentaBancariaNew(LoginRequiredMixin, generic.CreateView):
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
+    def get_form_kwargs(self):
+        kwargs = super(CuentaBancariaNew, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+       
 class CuentaBancariaEdit(LoginRequiredMixin, generic.UpdateView):
     model = Cuentas_bancarias
     template_name="empresa/datoscuentabancaria_form.html"

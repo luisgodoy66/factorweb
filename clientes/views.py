@@ -8,7 +8,6 @@ from django.db import transaction
 
 from .models import Cuenta_transferencia, Datos_generales, Personas_juridicas, Personas_naturales, Linea_Factoring \
     , Datos_compradores, Cupos_compradores, Cuentas_bancarias
-
 from solicitudes.models import Clientes as Solicitante
 from bases.models import Usuario_empresa
 from empresa.models import Datos_participantes, Localidades
@@ -51,21 +50,16 @@ class CuentasBancariasView(LoginRequiredMixin, generic.ListView):
     
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        qs=Datos_generales.objects.filter(leliminado = False, empresa = id_empresa.empresa)
-        return qs
+        return Datos_generales.objects.filter(leliminado = False
+                                              , empresa = id_empresa.empresa)
 
 class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
     model = Cuentas_bancarias
     template_name = "clientes/datoscuentabancaria_modal.html"
-    context_object_name='consulta'
+    context_object_name='cuentabancaria'
     login_url = 'bases:login'
     form_class=CuentasBancariasForm
     success_message="Línea creada satisfactoriamente"
-
-    # def get_queryset(self) :
-    #     id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-    #     qs=Datos_generales.objects.filter(leliminado = False, empresa = id_empresa.empresa)
-    #     return qs
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -86,6 +80,15 @@ class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
         return reverse_lazy("clientes:listacuentasbancariascliente"
             , kwargs={'cliente_id': cliente_id})
 
+    def get_form_kwargs(self):
+        kwargs = super(CuentasBancariasNew, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        # si cambio sin condicion los kwargs en el modal, al momento del submit no 
+        # regresa a la ventana anterior
+        if not 'data' in kwargs:
+            kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+       
 class CuentasBancariasDeudoresView(LoginRequiredMixin, generic.ListView):
     model = Cuentas_bancarias
     template_name = "clientes/listacuentasbancariasdeudores.html"
@@ -94,9 +97,12 @@ class CuentasBancariasDeudoresView(LoginRequiredMixin, generic.ListView):
 
     # solo cuentas de deudores
     def get_queryset(self):
-        participantes = Datos_participantes.objects.values_list('id')
-        deudores = Datos_compradores.objects.values_list('cxcomprador__id')
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+
+        participantes = Datos_participantes.objects\
+            .filter(empresa = id_empresa.empresa).values_list('id')
+        deudores = Datos_compradores.objects\
+            .filter(empresa = id_empresa.empresa).values_list('cxcomprador__id')
         return Cuentas_bancarias.objects\
             .filter(cxparticipante__in = participantes.intersection(deudores)
                     , empresa = id_empresa.empresa)
@@ -104,7 +110,7 @@ class CuentasBancariasDeudoresView(LoginRequiredMixin, generic.ListView):
 class CuentasBancariasDeudorNew(LoginRequiredMixin, generic.CreateView):
     model = Cuentas_bancarias
     template_name = "clientes/datoscuentabancariadeudor.html"
-    context_object_name='consulta'
+    context_object_name='cuentabancaria'
     login_url = 'bases:login'
     form_class=CuentasBancariasForm
     success_url=reverse_lazy("clientes:listacuentasbancarias_deudores")
@@ -116,6 +122,12 @@ class CuentasBancariasDeudorNew(LoginRequiredMixin, generic.CreateView):
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
+    def get_form_kwargs(self):
+        kwargs = super(CuentasBancariasDeudorNew, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+       
 class CuentasBancariasDeudorEdit(LoginRequiredMixin, generic.UpdateView):
     model = Cuentas_bancarias
     template_name = "clientes/datoscuentabancariadeudor.html"
@@ -129,6 +141,12 @@ class CuentasBancariasDeudorEdit(LoginRequiredMixin, generic.UpdateView):
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
 
+    def get_form_kwargs(self):
+        kwargs = super(CuentasBancariasDeudorEdit, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+       
 class LineaNew(LoginRequiredMixin, generic.CreateView):
     model=Linea_Factoring
     template_name="clientes/datoslinea_modal.html"
@@ -213,6 +231,12 @@ class CuposCompradoresNew(LoginRequiredMixin, generic.CreateView):
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
+    def get_form_kwargs(self):
+        kwargs = super(CuposCompradoresNew, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+       
 class CuposCompradoresEdit(LoginRequiredMixin, generic.UpdateView):
     model=Cupos_compradores
     template_name="clientes/datoscupo_modal.html"
@@ -225,6 +249,12 @@ class CuposCompradoresEdit(LoginRequiredMixin, generic.UpdateView):
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
 
+    def get_form_kwargs(self):
+        kwargs = super(CuposCompradoresEdit, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+
 class ClientesSolicitudesView(LoginRequiredMixin, generic.ListView):
     model = Solicitante
     template_name = "clientes/listaclientessolicitudes.html"
@@ -232,9 +262,12 @@ class ClientesSolicitudesView(LoginRequiredMixin, generic.ListView):
     login_url = 'bases:login'
 
     def get_queryset(self):
-        solicitantes = Solicitante.objects.values_list('cxcliente')
-        clientes = Datos_generales.objects.values_list('cxcliente__cxparticipante')
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+
+        solicitantes = Solicitante.objects\
+            .filter(empresa = id_empresa.empresa).values_list('cxcliente')
+        clientes = Datos_generales.objects\
+            .filter(empresa = id_empresa.empresa).values_list('cxcliente__cxparticipante')
 
         return Solicitante.objects\
             .filter(cxcliente__in = solicitantes.difference(clientes)
@@ -259,6 +292,12 @@ class CompradorEdit(LoginRequiredMixin, generic.UpdateView):
         context["pk"] = id
         return context
 
+    def get_form_kwargs(self):
+        kwargs = super(CompradorEdit, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+       
 @login_required(login_url='/login/')
 @permission_required('clientes.view_datos_generales', login_url='bases:sin_permisos')
 def DatosClientes(request, cliente_id=None, solicitante_id=None):
@@ -306,10 +345,10 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
                     'cxcliente':datosparticipante.cxparticipante,
                     'cxlocalidad':datoscliente.cxlocalidad,
                 }
-                form_cliente=ClienteForm(e)
+                form_cliente=ClienteForm(e, empresa = id_empresa.empresa)
         else:
             formulario=ParticipanteForm()
-            form_cliente=ClienteForm()
+            form_cliente=ClienteForm(empresa = id_empresa.empresa)
 
             # si viene desde la opción de arrastre desde solicitud
             if solicitante_id:
@@ -734,14 +773,16 @@ def EliminarCuentaBancaria(request, pk):
             cuenta.cxusuarioelimina = request.user.id
             cuenta.save()
 
-            # eliminar la relacion cuentas de transferencias
-            cliente = cuenta.cxparticipante.id
+            # eliminar la relacion cuentas de transferencias ...
+            cliente = cuenta.cxparticipante.datos_generales.id
             ctacte = Cuenta_transferencia.objects.filter(cxcliente=cliente).first()
 
-            if ctacte.cxcuenta.id == pk:
-                ctacte.leliminado = True
-                ctacte.cxusuarioelimina = request.user.id
-                ctacte.save()
+            # ... si es que existe una cuenta favorita
+            if ctacte:
+                if ctacte.cxcuenta.id == pk:
+                    ctacte.leliminado = True
+                    ctacte.cxusuarioelimina = request.user.id
+                    ctacte.save()
 
     return HttpResponse("OK")
 
@@ -807,19 +848,8 @@ def DatosCompradores(request, comprador_id=None):
             idcomprador=datosparticipante.cxparticipante
             formulario=ParticipanteForm(e)
 
-            # datoscomprador = Datos_compradores.objects\
-            #     .filter(cxcomprador=idcomprador).first()
-            
-            # if datoscomprador:
-            #     e={
-            #         'cxcomprador':datosparticipante.cxparticipante
-            #     }
-            #     form_comprador=CompradorForm(e)
         else:
             formulario=ParticipanteForm()
-            # form_comprador=CompradorForm()
-
-            # datoscliente=Datos_generales.objects.filter(pk=0)
             
     contexto={'datosparticipante':datosparticipante
             , 'form_participante':formulario

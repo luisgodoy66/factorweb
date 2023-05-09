@@ -61,6 +61,8 @@ def ImpresionAsignacion(request, asignacion_id):
     asignacion = Asignacion.objects.filter(id = asignacion_id).first()
     documentos = {}
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     if asignacion.cxtipo==FACTURAS_PURAS:
         template_path = 'operaciones/asignacion_facturas_puras_reporte.html'
         documentos = Documentos.objects.filter(cxasignacion = asignacion)\
@@ -102,6 +104,7 @@ def ImpresionAsignacion(request, asignacion_id):
         'dc' : dic_dc,
         'subtotal': subtotal,
         'neto': neto,
+        'empresa': id_empresa.empresa
     }
 
     # Create a Django response object, and specify content_type as pdf
@@ -233,9 +236,10 @@ def ImpresionAntiguedadCartera(request, ):
     return response
 
 def ImpresionFacturasPendientes(request):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
      
-    facturas = Documentos.objects.cartera_pendiente()
-    cheques_quitados = ChequesAccesorios.objects.cartera_pendiente()
+    facturas = Documentos.objects.cartera_pendiente(id_empresa.empresa)
+    cheques_quitados = ChequesAccesorios.objects.cartera_pendiente(id_empresa.empresa)
 
     cartera = facturas.union(cheques_quitados)
     

@@ -25,10 +25,8 @@
             <strong>Cuentas bancarias</strong> de {{cliente}}
         </div>
         <div class="card-body card-block">
-            <div class="row form-group">
-                    <input type="text" id="id_cxparticipante" hidden
-                    name="cxparticipante" value="{{ cliente.cxcliente.id }}" 
-                    class="form-control" >
+            <div class="row form-group"hidden>
+                <input id="id_cxparticipante" name="cxparticipante" value="{{ cliente.cxcliente.id }}" >
             </div>
             <!-- parte inferior -->
                 <small>

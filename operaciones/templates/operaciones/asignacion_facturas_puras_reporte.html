@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Asignacion</title>
+    <title>Asignación</title>
 
     <style type="text/css">
         @page {
@@ -32,11 +32,11 @@
                 <table >
                     <tbody>
                         <tr>
-                            <td width="80%"><h2>Liquidación de asignación </h2></td>
+                            <td colspan="2"><h2>{{ empresa }}</h2></td>
                             <td></td>
+                            <td colspan="2"><h1>Liquidación de asignación </h1></td>
                             <td></td>
-                            <td></td>
-                            <td>{% now "Y/m/d" %}</td>
+                            <td>Impresión: {% now "Y-m-d" %}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -96,8 +96,8 @@
                             <tr>
                                 <td>{{ item.id }}</td>
                                 <td>{{ item.cxcomprador }}</td>
-                                <td>{{ item.ctdocumento }}</td>
-                                <td class="fecha">{{ item.demision|date:"y-m-d"  }}</td>
+                                <td width="10%">{{ item.documento.ctdocumento }}</td>
+                                <td>{{ item.documento.demision|date:"Y-m-d"  }}</td>
                                 <td class="fecha">{{ item.dvencimiento|date:"Y-m-d"  }}</td>
                                 <td class="numero">{{ item.ntotal }}</td>
                                 <td class="numero">{{ item.nplazo }}</td>

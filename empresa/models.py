@@ -51,7 +51,7 @@ class Datos_participantes(ClaseModelo):
         ('O', 'OTRO')
     )
     cxtipoid =models.CharField(max_length=1, null=False, choices=TIPOS_DE_ID)
-    cxparticipante = models.CharField(max_length=13, unique=True)
+    cxparticipante = models.CharField(max_length=13)
     ctnombre =models.CharField(max_length=100)
     cxzona =models.CharField(max_length=5, null=True)
     # cxlocalidad =models.CharField(max_length=4, null=True)

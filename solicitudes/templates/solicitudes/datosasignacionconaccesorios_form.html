@@ -26,42 +26,14 @@
             {% if asignacion.id %} de  {{ asignacion.cxcliente }}  
             {% else %}  nueva {% endif %} 
         </div>
-        <div class="col-6 col-md-6"hidden>
-            <input type="text" 
-                id="asignacion_id" 
-                name="asignacion_id" 
-                value="{{ asignacion.id }}"
-                class="form-control">
-            <input type="text" 
-                id="id_cliente" 
-                name="id_cliente" 
-                value="{{ asignacion.cxcliente_id }}"
-                class="form-control">
-            <input type="text" 
-                id="id_tipofactoring" 
-                name="id_tipofactoring" 
-                value="{{ asignacion.cxtipofactoring_id }}"
-                class="form-control">
+        <div class="col-6 col-md-6" hidden>
+            <input id="asignacion_id" name="asignacion_id" value="{{ asignacion.id }}">
+            <input id="id_cliente" name="id_cliente" value="{{ asignacion.cxcliente_id }}">
+            <input id="id_tipofactoring" name="id_tipofactoring" value="{{ asignacion.cxtipofactoring_id }}">
         </div>
         <div class="card-body card-block">
                 <!-- lista de clientes -->
             <div class="row form-group">
-                <!-- <div class="col-md-2"><label for="cxcliente" 
-                    class=" form-control-label">
-                    {{ form.cxcliente.label}}</label>
-                </div>
-                <div class="col-md-4">            
-                    <select data-placeholder="Seleccione un cliente..." 
-                        class="standardSelect" tabindex="1" 
-                        id="cliente_id" name="cliente_id"
-                        {% if asignacion.id %} disabled {% endif %}
-                        >
-                        <option value=""></option>
-                        {% for cli in clientes %}
-                        <option value="{{ cli.id}}" >{{ cli.ctnombre}} </option>
-                        {% endfor %}
-                    </select>
-                </div> -->
                 <!-- cliente -->
                 <div class="col-md-2">
                     <label for="id_cxtipocliente" 

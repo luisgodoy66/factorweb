@@ -1,7 +1,9 @@
 from dataclasses import fields
 from django import forms
+
 from .models import Clases_cliente, Datos_participantes, \
     Tipos_factoring, Tasas_factoring, Cuentas_bancarias, Localidades
+from pais.models import Bancos
 
 class ParticipanteForm(forms.ModelForm):
     class Meta:
@@ -150,11 +152,16 @@ class CuentaBancariaForm(forms.ModelForm):
             , 'lactiva':'Activa',
         }
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
+
+        if empresa:
+            self.fields['cxbanco'].queryset = Bancos.objects\
+                .filter(empresa=empresa, leliminado = False,)
 
 class LocalidadForm(forms.ModelForm):
     class Meta:

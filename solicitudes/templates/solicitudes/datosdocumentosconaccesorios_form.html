@@ -7,7 +7,15 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Operaciones</a></li>
                     <li><a href="#">Negociación</a></li>
-                    <li class="active">Solicitudes pendientes</li>
+                    <li><a href="{% url 'solicitudes:listasolicitudes' %}">solicitudes</a></li>
+                    <li><a 
+                        {% if asignacion_id %}
+                            href="{% url 'solicitudes:asignacionconaccesorios_editar' asignacion_id %}" 
+                        {% else %}
+                            href="{% url 'solicitudes:asignacionconaccesorios_nueva' %}" 
+                        {% endif %}
+                        >facturas con accesorio</a></li>
+                    <li class="active">Agregar factura</li>
                 </ol>
             </div>
         </div>
