@@ -52,6 +52,12 @@ class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
         context["nueva"]=True
         return context
 
+    def get_form_kwargs(self):
+        kwargs = super(CuentasBancariasNew, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+
 class CuentasBancariasEdit(LoginRequiredMixin, generic.UpdateView):
     model = Cuentas_bancarias
     template_name = "cuentasconjuntas/datoscuentabancaria_modal.html"
@@ -68,6 +74,12 @@ class CuentasBancariasEdit(LoginRequiredMixin, generic.UpdateView):
         context["id"]=pk
         return context
 
+    def get_form_kwargs(self):
+        kwargs = super(CuentasBancariasEdit, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+
 class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
     model = Documentos_cabecera
     template_name = "cuentasconjuntas/listacobranzasporconfirmar.html"
@@ -76,6 +88,7 @@ class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        
         cobranzas = Documentos_cabecera.objects.filter(cxestado='A'\
             , leliminado = False\
             , empresa = id_empresa.empresa
@@ -97,7 +110,7 @@ class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
                 ,'cxrecuperacion','cxformacobro','nvalor', 'id', 'cxcuentaconjunta_id'
                 , 'cxcuentaconjunta__cxbanco__ctbanco').annotate(tipo=RawSQL("select 'R'",'')
                 )
-
+        print('return cobranzasporconfirmarview')
         return cobranzas.union(recuperaciones)
 
 class CargosPendientesView(LoginRequiredMixin, generic.ListView):
@@ -177,11 +190,13 @@ class DebitoBancarioEdit(LoginRequiredMixin, generic.UpdateView):
 def ConfirmarCobranza(request, cobranza_id, tipo_operacion, cuenta_conjunta):
     template_name = "cuentasconjuntas/datosconfirmacioncobranza_form.html"
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     cc = Cuentas_bancarias.objects.filter(pk = cuenta_conjunta).first()
 
     contexto={"id_operacion": cobranza_id
         , "form_cargos" : DebitosForm
-        , "form_transferencias" : TransferenciasForm
+        , "form_transferencias" : TransferenciasForm(empresa = id_empresa.empresa)
         , "tipo_operacion": tipo_operacion
         , 'cuenta_conjunta': cc
         , 'id_cuenta_conjunta': cuenta_conjunta

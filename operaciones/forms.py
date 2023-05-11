@@ -156,10 +156,10 @@ class MaestroMovimientosForm(forms.ModelForm):
 class CondicionesOperativasForm(forms.ModelForm):
     class Meta:
         model = Condiciones_operativas_cabecera
-        fields=['ctcondicion', 'cxtipofactoring', 'lactiva'
+        fields=['ctcondicion', 'cxtipofactoring'
             , 'laplicaafacturaspuras', 'laplicaaaccesorios']
         labels={'ctcondicion':'Descripción', 'cxtipofactoring':'Tipo de factoring'
-            , 'lactiva':'Activa', 'laplicaafacturaspuras':'Aplica a facturas puras'
+            , 'laplicaafacturaspuras':'Aplica a facturas puras'
             , 'laplicaaaccesorios':'Aplica a facturas con accesorios'}
 
     def __init__(self, *args, **kwargs):

@@ -931,11 +931,35 @@ def AceptarDocumentos(request):
 
     return HttpResponse(resultado)
 
+class CondicionesOperativasUpdate(LoginRequiredMixin, generic.UpdateView):
+    model = Condiciones_operativas_cabecera
+    template_name = 'operaciones/datoscondicionesoperativas_form.html'
+    form_class = CondicionesOperativasForm
+    success_url = reverse_lazy('operaciones:listacondicionesoperativas')
+    context_object_name='condicion'
+
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super(CondicionesOperativasUpdate, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+
+def DatosCondicionOperativaNueva(request):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    template_name="operaciones/datoscondicionesoperativas_form.html"
+    contexto={'form': CondicionesOperativasForm(empresa = id_empresa.empresa),
+       }
+    return render(request, template_name, contexto)
+
 @login_required(login_url='/login/')
 @permission_required('operaciones.view_asignaciones', login_url='bases:sin_permisos')
-def CondicionesOperativas(request,condicion_id=None):
-    template_name='operaciones/datoscondicionesoperativas_form.html'
-    formulario={}
+def DatosCondicionesOperativas(request,condicion_id=None
+                               , tipo_factoring_id = None):
+    template_name='operaciones/datoscondicionesoperativas_modal.html'
     condicion={}
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
@@ -943,37 +967,21 @@ def CondicionesOperativas(request,condicion_id=None):
     if request.method=='GET':
         condicion = Condiciones_operativas_cabecera.objects.filter(pk=condicion_id).first()
 
-        if condicion:
-            e ={
-                'ctcondicion': condicion.ctcondicion ,
-                'cxtipofactoring': condicion.cxtipofactoring ,
-                'lactiva': condicion.lactiva,
-                'laplicaafacturaspuras': condicion.laplicaafacturaspuras ,
-                'laplicaaaccesorios': condicion.laplicaaaccesorios ,
-            }
-            formulario = CondicionesOperativasForm(e, empresa = id_empresa.empresa)
-        else:
-            formulario = CondicionesOperativasForm(empresa = id_empresa.empresa)
-            condicion=None
-            
-    contexto={'form_cabecera':formulario,
-    'form_detalle': DetalleCondicionesOperativasForm(empresa=id_empresa.empresa),
-    'condicion':condicion
+    contexto={'form_detalle': DetalleCondicionesOperativasForm(empresa=id_empresa.empresa),
+              'condicion_id':condicion_id,
+              'tipo_factoring': tipo_factoring_id,
     }
-    
     if request.method=='POST':
 
-        ctcondicion = request.POST.get("ctcondicion")
-        cxtipofactoring = request.POST.get("cxtipofactoring")
-        laplicaafacturaspuras = request.POST.get("laplicaafacturaspuras")
-        laplicaaaccesorios = request.POST.get("laplicaaaccesorios")
-        
+        ctcondicion = request.POST.get("nombre_condicion")
+        laplicaafacturaspuras = request.POST.get("para_facturas_puras")
+        laplicaaaccesorios = request.POST.get("para_accesorios")
         aplica_facturaspuras_on=False;aplica_accesorios_on=False
       
-        if laplicaafacturaspuras: aplica_facturaspuras_on = True
-        if laplicaaaccesorios: aplica_accesorios_on = True
+        if laplicaafacturaspuras == 'true': aplica_facturaspuras_on = True
+        if laplicaaaccesorios == 'true': aplica_accesorios_on = True
 
-        tipo_factoring = Tipos_factoring.objects.filter(pk=cxtipofactoring).first()
+        tipo_factoring = Tipos_factoring.objects.filter(pk=tipo_factoring_id).first()
 
         if not condicion_id:
             condicion = Condiciones_operativas_cabecera(
@@ -1027,7 +1035,7 @@ def CondicionesOperativas(request,condicion_id=None):
         if det:
             det.save()
 
-        return redirect("operaciones:condicionesoperativas_editar", condicion_id = condicion_id)
+        return redirect("operaciones:condicionesoperativas_editar", pk = condicion_id)
 
 
     return render(request, template_name, contexto)

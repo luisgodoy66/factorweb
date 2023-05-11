@@ -110,7 +110,7 @@ function RecuperacionDeProtesto(forma){
 });
   if (id_comprador==''){
     un_solo_comprador = "No"
-    id_comprador='None'
+    id_comprador='0'
   }
   // cargar forma de cobro de documentos seleccionados
   if (error ){

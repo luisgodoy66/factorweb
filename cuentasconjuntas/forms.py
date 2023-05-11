@@ -1,5 +1,9 @@
 from django import forms
+
 from .models import Cuentas_bancarias, Transferencias
+from pais.models import Bancos
+from clientes.models import Datos_generales
+from empresa import models as Modelos_empresa
 from cobranzas.models import DebitosCuentasConjuntas
 
 from datetime import date
@@ -16,12 +20,19 @@ class CuentasBancariasForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
+
+        if empresa:
+            self.fields['cxbanco'].queryset = Bancos.objects\
+                .filter(empresa=empresa, leliminado = False)
+            self.fields['cxcliente'].queryset = Datos_generales.objects\
+                .filter(empresa=empresa, leliminado = False)
 
 class TransferenciasForm(forms.ModelForm):
     class Meta:
@@ -42,14 +53,18 @@ class TransferenciasForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        # self.fields['dmovimiento'].widget.attrs['readonly']=True
         self.fields['dmovimiento'].widget.attrs['value']=date.today
+        
+        if empresa:
+            self.fields['cuentadestino'].queryset = Modelos_empresa.Cuentas_bancarias\
+                .objects.filter(empresa=empresa, leliminado = False)
 
 class DebitosForm(forms.ModelForm):
     input_formats=["%Y/%m/%d"],

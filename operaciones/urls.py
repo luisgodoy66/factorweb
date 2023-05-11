@@ -4,7 +4,7 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     DatosOperativos, AsignacionesConsulta, \
     AceptarAsignacion, DetalleCargosAsignacion, MaestroMovimientosView, \
     SumaCargos, AceptarDocumentos,MaestroMovimientosView, MaestroMovimientoNew, \
-    MaestroMovimientoEdit, CondicionesOperativasView, CondicionesOperativas,\
+    MaestroMovimientoEdit, CondicionesOperativasView, DatosCondicionesOperativas,\
     DetalleCondicionOperativa, EliminarDetalleCondicionOperativa, AnexosView, \
     EditarTasasDocumentoSolicitud, GeneraDetalleParaTabla1, AnexosEdit,\
     AsignacionesPendientesDesembolsarView, DesembolsarAsignacion, GenerarAnexos, \
@@ -13,7 +13,8 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     EstadosOperativosView, EstadoOperativoCliente, AntigüedadCarteraClienteJSON,\
     GeneraListaCarteraClienteJSON, GeneraListaChequesADepositarClienteJSON,\
     GeneraListaCargosPendientesClienteJSON, GeneraListaChequesQuitadosClienteJSON,\
-    GeneraListaProtestosPendientesClienteJSON, GeneraListaCanjesClienteJSON
+    GeneraListaProtestosPendientesClienteJSON, GeneraListaCanjesClienteJSON,\
+    CondicionesOperativasUpdate, DatosCondicionOperativaNueva
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
@@ -52,17 +53,18 @@ urlpatterns = [
 # condiciones operativas
     path('listacondicionesoperativas/',CondicionesOperativasView.as_view(), \
         name='listacondicionesoperativas'),
-    path('condicionesoperativas/',CondicionesOperativas, \
+    path('editarcondicionesoperativas/<int:pk>', CondicionesOperativasUpdate.as_view(),\
+         name='condicionesoperativas_editar'),
+    path('nuevacondicionesoperativas/',DatosCondicionOperativaNueva, \
         name='condicionesoperativas_nueva'),
-    path('editarcondicionesoperativas/<int:condicion_id>',\
-        CondicionesOperativas, \
-        name='condicionesoperativas_editar'),
+    path('editarcondicionoperativa/<int:condicion_id>/<tipo_factoring_id>',\
+        DatosCondicionesOperativas, name='condicionoperativa_editar'),
+    path('nuevacondicionoperativa/<tipo_factoring_id>',
+        DatosCondicionesOperativas, name='condicionoperativa_nueva'),
     path('detallecondicionoperativa/<int:condicion_id>',\
-        DetalleCondicionOperativa, \
-        name='detallecondicionoperativa'),
+        DetalleCondicionOperativa, name='detallecondicionoperativa'),
     path('eliminardetallecondicionoperativa/<int:detalle_id>',\
-        EliminarDetalleCondicionOperativa, \
-        name='eliminardetallecondicionoperativa'),
+        EliminarDetalleCondicionOperativa, name='eliminardetallecondicionoperativa'),
 # asignaciones
     path('listaasignaciones/',AsignacionesView.as_view(), \
         name='listaasignaciones'),

@@ -144,8 +144,8 @@ def DatosFacturasPuras(request, cliente_id=None
             form_documento = DocumentosForm(e)
 
         if tipo_factoring_id:
-            tipoFactoring = Tipos_factoring.objects\
-            .filter(pk=tipo_factoring_id).first()
+            tipoFactoring = Tipos_factoring.objects.filter(pk=tipo_factoring_id).first()
+            
             acepta_vencimiento_en_feriado = tipoFactoring.lpermitediasferiados
 
     contexto={'form_documento':form_documento,

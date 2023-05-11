@@ -62,7 +62,7 @@ urlpatterns = [
     path('reversarcobranza/<int:pid_cobranza>/<tipo_operacion>',ReversaCobranza),
     path('canjearchequeaccesorio/<int:cheque_id>/<cliente_id>/<deudor_id>'
          , CanjeDeCheque, name='canjearchequeaccesorio'),
-    path('quitaraccesorio/<int:cheque_id>/<cliente_ruc>'
+    path('quitaraccesorio/<int:cheque_id>/<cliente_id>'
          , QuitarAccesorio, name='quitarchequeaccesorio'),
     path('prorroga/<int:id>/<tipo_asignacion>/<vencimiento>/<numero_factura>', Prorroga, name='prorroga' ),
     

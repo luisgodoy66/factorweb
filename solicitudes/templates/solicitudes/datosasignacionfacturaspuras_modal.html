@@ -1,7 +1,8 @@
 <div class="modal-dialog modal-lg">
     <div class="modal-content">
 
-        <form  method="POST" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal" name="form"
+        <form  method="POST" id="frmSolicitud" enctype="multipart/form-data" 
+            class="form-horizontal" name="form"
             {% if not asignacion_id %}
                 action="{% url 'solicitudes:facturaspuras_nueva' cliente tipo_factoring %}"
             {% else %}

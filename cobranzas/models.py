@@ -105,10 +105,16 @@ class Documentos_detalle(ClaseModelo):
         # ai es accesorio, busco el cheque accesorio grabado en la cabecera
         if self.cxdocumento.cxasignacion.cxtipo=='F':
             vencimiento = self.cxdocumento.dvencimiento
+            if self.cxcobranza.cxtipofactoring.lanticipatotalnegociado:
+                vencimiento = vencimiento + timedelta(self.cxdocumento.ndiasprorroga)
         elif self.cxcobranza.cxformapago =='DEP':
             vencimiento = self.cxcobranza.cxaccesorio.dvencimiento
+            if self.cxcobranza.cxtipofactoring.lanticipatotalnegociado:
+                vencimiento = vencimiento + timedelta(self.cxcobranza.cxaccesorio.ndiasprorroga)
         else:
             vencimiento = self.accesorioquitado.dvencimiento
+            if self.cxcobranza.cxtipofactoring.lanticipatotalnegociado:
+                vencimiento = vencimiento + timedelta(self.accesorioquitado.ndiasprorroga)
 
         return (self.cxcobranza.dcobranza - vencimiento)/timedelta(days=1)
 
@@ -117,10 +123,16 @@ class Documentos_detalle(ClaseModelo):
         # ai es accesorio, busco el cheque accesorio grabado en la cabecera
         if self.cxdocumento.cxasignacion.cxtipo=='F':
             vencimiento = self.cxdocumento.dvencimiento
+            if self.cxcobranza.cxtipofactoring.lanticipatotalnegociado:
+                vencimiento = vencimiento + timedelta(self.cxdocumento.ndiasprorroga)
         elif self.cxcobranza.cxformapago =='DEP':
             vencimiento = self.cxcobranza.cxaccesorio.dvencimiento
+            if self.cxcobranza.cxtipofactoring.lanticipatotalnegociado:
+                vencimiento = vencimiento + timedelta(self.cxcobranza.cxaccesorio.ndiasprorroga)
         else:
             vencimiento = self.accesorioquitado.dvencimiento
+            if self.cxcobranza.cxtipofactoring.lanticipatotalnegociado:
+                vencimiento = vencimiento + timedelta(self.accesorioquitado.ndiasprorroga)
 
         return vencimiento
 

@@ -42,7 +42,7 @@
             <strong>Recuperación de protestos</strong> de {{ cliente }}
             {% endif %}
         </div>
-        <div hidden>
+        <div >
             <input type="text" id="documentos" name="documentos" value="{{ documentos }}">
             <input type="text" id="total_cartera" name="total_cartera" value="{{ total_cartera }}">
             <input type="text" id="id_cliente" name="id_cliente" value="{{ cliente_id }}">
@@ -162,13 +162,6 @@
                 <div class="col-md-2">
                     {{ form_cheque.ctcheque}}
                 </div>
-                <!-- <div class="col-md-1"><label for="id_demision" 
-                    class=" form-control-label">
-                    {{ form_cheque.demision.label}}</label>
-                </div>
-                <div class="col-md-1">
-                    {{ form_cheque.demision}}
-                </div> -->
                 {% endif %}
             </div>
             {% endif %} 

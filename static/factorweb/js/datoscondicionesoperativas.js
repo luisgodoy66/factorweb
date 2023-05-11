@@ -27,7 +27,7 @@ function operateFormatter(value, row, index) {
     
 function initTable() {
     $table.bootstrapTable('destroy').bootstrapTable({
-      height: 550,
+      height: 400,
       locale: "es-EC",
       columns: [
         [{  title: 'Ref.', field: 'id', rowspan: 2
@@ -69,3 +69,16 @@ function initTable() {
       })
   })
   }
+
+  function NuevaCondicionOperativa(){
+    condicion_nombre=capturaValor("id_ctcondicion");
+    tipo_factoring=capturaValor("id_cxtipofactoring");
+  
+    if (condicion_nombre == "" || tipo_factoring==""){
+      alert("debe especificar nombre y tipo de factoring")
+    }
+    else{
+      return AbrirModal('/operaciones/nuevacondicionoperativa/'+tipo_factoring);
+    }
+  }
+  

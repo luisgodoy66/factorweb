@@ -1,8 +1,10 @@
 from pyexpat import model
 from django import forms
+
 from .models import Cheques, Documentos_cabecera, Liquidacion_cabecera\
     , Cheques_protestados, Recuperaciones_cabecera, Cargos_cabecera
 from operaciones.models import Motivos_protesto_maestro, ChequesAccesorios
+from empresa.models import Cuentas_bancarias
 
 from datetime import date
 
@@ -40,6 +42,7 @@ class CobranzasDocumentosForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
@@ -49,6 +52,10 @@ class CobranzasDocumentosForm(forms.ModelForm):
         self.fields['nsobrepago'].widget.attrs['readonly']=True
         self.fields['dcobranza'].widget.attrs['value']=date.today
         self.fields['ddeposito'].widget.attrs['value']=date.today
+
+        if empresa:
+            self.fields['cxcuentadeposito'].queryset = Cuentas_bancarias.objects\
+                .filter(empresa=empresa, lactiva = True, leliminado = False)
 
     def clean_ddeposito(self):
         data = self.cleaned_data['ddeposito']
@@ -162,6 +169,7 @@ class ProtestoForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
@@ -170,6 +178,10 @@ class ProtestoForm(forms.ModelForm):
             })
         # self.fields['dprotesto'].widget.attrs['readonly']=True
         self.fields['dprotesto'].widget.attrs['value']=date.today
+
+        if empresa:
+            self.fields['motivoprotesto'].queryset = Motivos_protesto_maestro.objects\
+                .filter(empresa=empresa, leliminado = False)
 
 class RecuperacionesProtestosForm(forms.ModelForm):
 
@@ -204,6 +216,7 @@ class RecuperacionesProtestosForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
@@ -211,10 +224,12 @@ class RecuperacionesProtestosForm(forms.ModelForm):
                 'class':'form-control'
             })
         self.fields['nsobrepago'].widget.attrs['readonly']=True
-        # self.fields['dcobranza'].widget.attrs['readonly']=True
         self.fields['dcobranza'].widget.attrs['value']=date.today
-        # self.fields['ddeposito'].widget.attrs['readonly']=True
         self.fields['ddeposito'].widget.attrs['value']=date.today
+
+        if empresa:
+            self.fields['cxcuentadeposito'].queryset = Cuentas_bancarias.objects\
+                .filter(empresa=empresa, lactiva = True, leliminado = False)
 
 class CobranzasCargosForm(forms.ModelForm):
 
@@ -249,6 +264,7 @@ class CobranzasCargosForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
@@ -256,10 +272,12 @@ class CobranzasCargosForm(forms.ModelForm):
                 'class':'form-control'
             })
         self.fields['nsobrepago'].widget.attrs['readonly']=True
-        # self.fields['dcobranza'].widget.attrs['readonly']=True
         self.fields['dcobranza'].widget.attrs['value']=date.today
-        # self.fields['ddeposito'].widget.attrs['readonly']=True
         self.fields['ddeposito'].widget.attrs['value']=date.today
+
+        if empresa:
+            self.fields['cxcuentadeposito'].queryset = Cuentas_bancarias.objects\
+                .filter(empresa=empresa, lactiva = True, leliminado = False)
 
 class AccesoriosForm(forms.ModelForm):
     class Meta:

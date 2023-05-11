@@ -15,7 +15,8 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
-<form  method="post" id="frmCondicion" enctype="multipart/form-data" class="form-horizontal">
+<form  method="post" id="frmCondicion" enctype="multipart/form-data" 
+    class="form-horizontal">
     <!-- <div class="col-lg-6"> -->
     <div class="card">
             {% csrf_token %}
@@ -29,14 +30,14 @@
                 <div class="col-12">
                     <div class="row form-group">
                         <div class="col-md-2"><label for="id_ctcondicion" class=" form-control-label">
-                            {{ form_cabecera.ctcondicion.label}}</label></div>
+                            {{ form.ctcondicion.label}}</label></div>
                         <div class="col-md-5">
-                            {{ form_cabecera.ctcondicion}}
+                            {{ form.ctcondicion}}
                         </div>
                         <div class="col-md-2"><label for="id_cxtipofactoring" class=" form-control-label"> 
-                            {{ form_cabecera.cxtipofactoring.label}}</label></div>
+                            {{ form.cxtipofactoring.label}}</label></div>
                         <div class="col-md-3">
-                            {{ form_cabecera.cxtipofactoring}}
+                            {{ form.cxtipofactoring}}
                         </div>
                     </div>  
                 </div>
@@ -45,7 +46,7 @@
                 <div class="col-12">
                     <div class="row form-group">
                         <div class="col col-md-2"><label for="id_laplicaafacturaspuras" class=" form-control-label">
-                            {{ form_cabecera.laplicaafacturaspuras.label}}</label>
+                            {{ form.laplicaafacturaspuras.label}}</label>
                         </div>
                         <div class="col col-md-1">
                             <label class="switch switch-3d switch-success mr-3">
@@ -58,7 +59,7 @@
                         </div>
 
                         <div class="col col-md-3"><label for="id_laplicaaaccesorios" class=" form-control-label">
-                            {{ form_cabecera.laplicaaaccesorios.label}}</label></div>
+                            {{ form.laplicaaaccesorios.label}}</label></div>
                         <div class="col col-md-1">
                             <label class="switch switch-3d switch-success mr-3">
                                 <input type="checkbox" class="switch-input" 
@@ -76,69 +77,6 @@
                             {% endif %}
                         </div>
         
-                    </div>  
-                </div>
-            </div>
-            <div class="dropdown-divider"></div>
-            <!-- file intermedia -->
-            <div class="row">
-                <div class="col-3">
-                    <div class="row form-group">
-                        <div class="col-md-6"><label for="id_cxclasecliente" class=" form-control-label">  
-                            {{ form_detalle.cxclasecliente.label}}</label></div>
-                        <div class="col-md-6">
-                            {{ form_detalle.cxclasecliente}}
-                        </div>
-                    </div>  
-                    <div class="row form-group">
-                        <div class="col-md-6"><label for="id_cxclasecomprador" class=" form-control-label">  
-                            {{ form_detalle.cxclasecomprador.label}}</label></div>
-                        <div class="col-md-6">
-                            {{ form_detalle.cxclasecomprador}}
-                        </div>
-                    </div>  
-                </div>
-
-                <div class="col-3">
-                    <div class="row form-group">
-                        <div class="col-md-2"><label for="id_nplazodesde" class=" form-control-label">  
-                            {{ form_detalle.nplazodesde.label}}</label></div>
-                        <div class="col-md-4">
-                            {{ form_detalle.nplazodesde}}
-                        </div>
-                        <div class="col-md-2"><label for="id_nplazohasta" class=" form-control-label">  
-                            {{ form_detalle.nplazohasta.label}}</label></div>
-                        <div class="col-md-4">
-                            {{ form_detalle.nplazohasta}}
-                        </div>
-                    </div>  
-                </div>
-
-                <div class="col-3">
-                    <div class="row form-group">
-                        <div class="col-md-6"><label for="id_nporcentajeanticipo" class=" form-control-label">  
-                            {{ form_detalle.nporcentajeanticipo.label}}</label></div>
-                        <div class="col-md-6">
-                            {{ form_detalle.nporcentajeanticipo}}
-                        </div>
-                    </div>  
-                    <div class="row form-group">
-                        <div class="col-md-6"><label for="id_ntasagao" class=" form-control-label">  
-                            {{ form_detalle.ntasagao.label}}</label></div>
-                        <div class="col-md-6">
-                            {{ form_detalle.ntasagao}}
-                        </div>
-                    </div>  
-
-                </div>
-
-                <div class="col-3">
-                    <div class="row form-group">
-                        <div class="col-md-6"><label for="id_ntasadescuento" class=" form-control-label">  
-                            {{ form_detalle.ntasadescuento.label}}</label></div>
-                        <div class="col-md-6">
-                            {{ form_detalle.ntasadescuento}}
-                        </div>
                     </div>  
                 </div>
             </div>
@@ -172,8 +110,14 @@
             <a href="{% url 'operaciones:listacondicionesoperativas' %}" class="btn btn-danger btn-sm">
                 <i class="fa fa-ban"></i> Salir
             </a>
-            <button type="submit" class="btn btn-success btn-sm ">
-            <i class="fa fa-plus-circle"></i> Agregar línea
+            <button class="btn btn-success btn-sm"  role="button"
+                {% if condicion.id %}
+                    onclick="return AbrirModal('{% url 'operaciones:condicionoperativa_editar' condicion.id condicion.cxtipofactoring_id %}')"
+                {% else %}
+                    onclick="return NuevaCondicionOperativa()"
+                {% endif %} 
+                >  
+                <i class="fa fa-plus-circle"></i> Agregar condición
             </button>
 
         </div>
@@ -183,5 +127,5 @@
 </form>
 {% endblock %}
 {% block js_page %}
-<script type="text/javascript" src="{% static 'factorweb/js/condicionesoperativas.js' %}"></script>
+<script type="text/javascript" src="{% static 'factorweb/js/datoscondicionesoperativas.js' %}"></script>
 {% endblock %}

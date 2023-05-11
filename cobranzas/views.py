@@ -119,23 +119,34 @@ class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
         tipo_factoring = self.kwargs.get('tipo_factoring')
         por_vencer = self.kwargs.get('por_vencer')
 
-        cliente = Datos_generales.objects\
-            .filter(id = cliente_id).first()
+        cliente = Datos_generales.objects.filter(id = cliente_id).first()
 
-        cuentas = Cuentas_bancarias\
-            .objects.filter(cxparticipante = cliente.cxcliente.id \
-                , leliminado = False, lpropia = True).all()
-                # , cxtipocuenta = 'C').all()
+        if forma_cobro=="CHE":
+            cuentas = Cuentas_bancarias\
+                .objects.filter(cxparticipante = cliente.cxcliente.id \
+                    , leliminado = False, lpropia = True
+                    , cxtipocuenta = 'C').all()
+        else:
+            # podría hacer transferencias desde cuenta de ahorros
+            cuentas = Cuentas_bancarias\
+                .objects.filter(cxparticipante = cliente.cxcliente.id \
+                    , leliminado = False, lpropia = True).all()
+
         cuentas_deudor = None
 
         if un_solo_deudor=="Si":
-            comprador = Datos_compradores.objects\
-                .filter(id = deudor_id).first()
+            comprador = Datos_compradores.objects.filter(id = deudor_id).first()
 
-            cuentas_deudor = Cuentas_bancarias\
-                .objects.filter(cxparticipante = comprador.cxcomprador.id \
-                    , leliminado = False, lpropia = True).all()
-                    # , cxtipocuenta = 'C').all()   # podría hacer transferencias desde cuenta de ahorros
+            if forma_cobro=="CHE":
+                cuentas_deudor = Cuentas_bancarias\
+                    .objects.filter(cxparticipante = comprador.cxcomprador.id \
+                        # , leliminado = False, lpropia = True
+                        , leliminado = False
+                        , cxtipocuenta = 'C').all()
+            else:
+                cuentas_deudor = Cuentas_bancarias\
+                    .objects.filter(cxparticipante = comprador.cxcomprador.id \
+                        , leliminado = False).all()
 
         cuentas_conjuntas = CuentasConjuntasModels.Cuentas_bancarias\
             .objects.filter(cxcliente = cliente_id \
@@ -157,6 +168,12 @@ class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
         context["tipo"]="Cobranza"
         context["por_vencer"]=por_vencer
         return context
+
+    def get_form_kwargs(self):
+        kwargs = super(CobranzasDocumentosView, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
 
 class CobranzasConsulta(LoginRequiredMixin, generic.TemplateView):
     model = Documentos_cabecera
@@ -322,6 +339,12 @@ class ProtestoCobranzaNew(LoginRequiredMixin, generic.CreateView):
 
         return context
 
+    def get_form_kwargs(self):
+        kwargs = super(ProtestoCobranzaNew, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+
 class ProtestosPendientesView(LoginRequiredMixin, generic.ListView):
     model = Cheques_protestados
     template_name = "cobranzas/listaprotestospendientes.html"
@@ -395,6 +418,12 @@ class RecuperacionProtestoView(LoginRequiredMixin, generic.FormView):
         context["tipo"]="Recuperación"
 
         return context
+
+    def get_form_kwargs(self):
+        kwargs = super(RecuperacionProtestoView, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
 
 class ProtestoRecuperacionNew(LoginRequiredMixin, generic.CreateView):
     model=Cheques_protestados
@@ -471,10 +500,16 @@ class CobranzasCargosView(LoginRequiredMixin, generic.FormView):
 
         cliente = Datos_generales.objects.filter(id = cliente_id).first()
 
-        cuentas = Cuentas_bancarias\
-            .objects.filter(cxparticipante = cliente.cxcliente \
-                , leliminado = False, lpropia = True).all()
-                # , cxtipocuenta = 'C').all()
+        if forma_cobro=="CHE":
+            cuentas = Cuentas_bancarias\
+                .objects.filter(cxparticipante = cliente.cxcliente.id \
+                    , leliminado = False, lpropia = True
+                    , cxtipocuenta = 'C').all()
+        else:
+            # podría hacer transferencias desde cuenta de ahorros
+            cuentas = Cuentas_bancarias\
+                .objects.filter(cxparticipante = cliente.cxcliente.id \
+                    , leliminado = False, lpropia = True).all()
         
         # Call the base implementation first to get a context
         context = super(CobranzasCargosView, self).get_context_data(**kwargs)
@@ -489,6 +524,12 @@ class CobranzasCargosView(LoginRequiredMixin, generic.FormView):
         context["tipo_nd"] = tipo_nd
 
         return context
+
+    def get_form_kwargs(self):
+        kwargs = super(CobranzasCargosView, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
 
 class AmpliacionesDePlazoPendientesView(LoginRequiredMixin, generic.ListView):
     model = Notas_debito_cabecera
@@ -576,7 +617,7 @@ def GeneraListaCarteraPorVencerJSON(request, fecha_corte = None):
 
 def GeneraListaCarterPorVencerJSONSalida(doc):
     output = {}
-
+    print('porvencer')
     output['id'] = doc.id
     output["IdCliente"] = doc.cxcliente.id
     output["Cliente"] = doc.cxcliente.cxcliente.ctnombre
@@ -587,6 +628,8 @@ def GeneraListaCarterPorVencerJSONSalida(doc):
     output["Asignacion"] = doc.cxasignacion.cxasignacion
     output["Documento"] = doc.ctdocumento
     output["Vencimiento"] = doc.vencimiento().strftime("%Y-%m-%d")
+    if doc.ncontadorprorrogas > 0 :
+        output["Vencimiento"] += ' *'
     output["Saldo"] = doc.nsaldo
     if doc.dultimacobranza:
         output["UltimaCobranza"] = doc.dultimacobranza.strftime("%Y-%m-%d")
@@ -610,6 +653,8 @@ def GeneraListaAccesoriosQuitadosJSONSalida(acc):
     output["Asignacion"] = acc.documento.cxasignacion.cxasignacion
     output["Documento"] = acc.documento.ctdocumento
     output["Vencimiento"] = acc.vencimiento().strftime("%Y-%m-%d")
+    if acc.ncontadorprorrogas > 0 :
+        output["Vencimiento"] += ' *'
     output["Saldo"] = acc.chequequitado.nsaldo
     if acc.chequequitado.dultimacobranza:
         output["UltimaCobranza"] = acc.chequequitado.dultimacobranza.strftime("%Y-%m-%d")
@@ -667,7 +712,11 @@ def GeneraListaDocumentosSeleccionadosOutput(doc):
     output["Documento"] = doc.ctdocumento
     output["PorcentajeAnticipo"] = doc.nporcentajeanticipo
     output["Emision"] = doc.demision.strftime("%Y-%m-%d")
-    output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
+    # cuando es 100% los cálculos son sobre la nueva fecha ampliada
+    if doc.nporcentajeanticipo ==100:
+        output["Vencimiento"] = doc.vencimiento().strftime("%Y-%m-%d")
+    else:
+        output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
     output["SaldoActual"] = doc.nsaldo
     output["Cobro"] = doc.nsaldo
     output["Retenido"] = "0.0"
@@ -691,7 +740,10 @@ def GeneraListaAccesoriosQuitadosSeleccionadosOutput(acc):
     output["Documento"] = acc.documento.ctdocumento
     output["Emision"] = acc.documento.demision.strftime("%Y-%m-%d")
     output["PorcentajeAnticipo"] = acc.nporcentajeanticipo
-    output["Vencimiento"] = acc.dvencimiento.strftime("%Y-%m-%d")
+    if acc.nporcentajeanticipo ==100:
+        output["Vencimiento"] = acc.vencimiento().strftime("%Y-%m-%d")
+    else:
+        output["Vencimiento"] = acc.dvencimiento.strftime("%Y-%m-%d")
     output["SaldoActual"] = acc.chequequitado.nsaldo
     output["Cobro"] = acc.chequequitado.nsaldo
     output["Retenido"] = "0.0"
@@ -806,6 +858,8 @@ def GeneraListaChequesADepositarJSONSalida(doc):
     output["Asignacion"] = doc.documento.cxasignacion.cxasignacion
     output["Documento"] = doc.documento.ctdocumento
     output["Vencimiento"] = doc.vencimiento().strftime("%Y-%m-%d")
+    if doc.ncontadorprorrogas > 0 :
+        output["Vencimiento"] += ' *'
     output["Valor"] = doc.ntotal
     output["Datos"] = doc.cxbanco.ctbanco +' CTA.'+ doc.ctcuenta + ' CH/' + doc.ctcheque
     output["Anticipa100"] = doc.documento.cxtipofactoring.lanticipatotalnegociado
@@ -818,6 +872,8 @@ def DepositoCheques(request, ids_cheques, total_cartera, cuenta_destino
     contexto={}
     result={}
     cuentas_conjuntas=None
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     if request.method =='GET':
 
@@ -835,7 +891,7 @@ def DepositoCheques(request, ids_cheques, total_cartera, cuenta_destino
 
     contexto = {"cheques" : result
         , "total_cartera" : total_cartera
-        , "form": CobranzasDocumentosForm
+        , "form": CobranzasDocumentosForm(empresa=id_empresa.empresa)
         , "cuenta_destino" : cuenta_destino
         , "cuentas_conjuntas": cuentas_conjuntas
         }
@@ -1368,7 +1424,7 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
             , 'cxoperacion':liquidacion.id
             , 'nvalor': liquidacion.nneto
             }
-        formulario = DesembolsarForm(e)
+        formulario = DesembolsarForm(e, empresa = id_empresa.empresa)
 
         contexto={'liquidacion':liquidacion.dliquidacion
             , 'instruccion_de_pago':liquidacion.ctinstrucciondepago
@@ -2576,24 +2632,25 @@ def CanjeDeCheque(request, cheque_id, cliente_id, deudor_id):
 
     return render(request, template_path, context)
 
-def QuitarAccesorio(request, cheque_id, cliente_ruc):
+def QuitarAccesorio(request, cheque_id, cliente_id):
     template_path = 'cobranzas/datosquitaraccesorio_modal.html'
 
     context={
         'cheque':cheque_id,
-        'cliente_ruc':cliente_ruc,
+        'cliente_ruc':cliente_id,
         }
     
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     
     if request.method =='POST':
+
         with transaction.atomic():
 
             cheque = ChequesAccesorios.objects.filter(id = cheque_id).first()
 
             # registrar quitada con el motivo
             motivo  = request.POST.get('motivo')
-            cliente = Datos_generales.objects.filter(cxcliente = cliente_ruc).first()
+            cliente = Datos_generales.objects.filter(id = cliente_id).first()
             
             quitado = Cheques_quitados(
                 cxcliente = cliente,
