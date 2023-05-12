@@ -609,8 +609,7 @@ class Desembolsos(ClaseModelo):
     )
     cxtipooperacion = models.CharField(max_length=1, choices= TIPOS_DE_OPERACION)
     cxoperacion = models.BigIntegerField()
-    cxcliente = models.ForeignKey(Datos_generales_cliente, on_delete=models.RESTRICT
-        , null = True)
+    cxcliente = models.ForeignKey(Datos_generales_cliente, on_delete=models.RESTRICT)
     nvalor =  models.DecimalField(max_digits=10, decimal_places=2)
     cxformapago = models.CharField(max_length=3, choices=FORMAS_DE_PAGO)
     cxcuentapago = models.ForeignKey(Cuentas_bancarias, on_delete=models.RESTRICT

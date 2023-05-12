@@ -14,7 +14,8 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     GeneraListaCarteraClienteJSON, GeneraListaChequesADepositarClienteJSON,\
     GeneraListaCargosPendientesClienteJSON, GeneraListaChequesQuitadosClienteJSON,\
     GeneraListaProtestosPendientesClienteJSON, GeneraListaCanjesClienteJSON,\
-    CondicionesOperativasUpdate, DatosCondicionOperativaNueva
+    CondicionesOperativasUpdate, DatosCondicionOperativaNueva, DesembolsosConsulta,\
+    GeneraListaDesembolsosJSON
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
@@ -70,10 +71,6 @@ urlpatterns = [
         name='listaasignaciones'),
     path('consultaasignaciones/',AsignacionesConsulta.as_view(), \
         name='consulta_asignaciones'),
-    path('listaasignacionespendientesdesembolsar/',AsignacionesPendientesDesembolsarView.as_view(), \
-        name='listaasignacionespendientesdesembolsar'),
-    path('desembolsarasignaciones/<int:pk>/<cliente_id>',DesembolsarAsignacion, \
-        name='desembolsarasignacion'),
     path('aceptarasignacion/<int:asignacion_id>',AceptarAsignacion, \
         name='aceptarasignacion'),
     path('sumacargos/<int:asignacion_id>/<gao_carga_iva>/<dc_carga_iva>/<carga_gao>/<carga_dc>/<int:porcentaje_iva>',\
@@ -105,4 +102,14 @@ urlpatterns = [
          , name='antigüedad_por_cliente'),
     path('impresioncarterapendiente', ImpresionFacturasPendientes
          , name='detalle_facturas_pendientes'),
+# desembolsos
+    path('listaasignacionespendientesdesembolsar/',AsignacionesPendientesDesembolsarView.as_view(), \
+        name='listaasignacionespendientesdesembolsar'),
+    path('desembolsarasignaciones/<int:pk>/<cliente_id>',DesembolsarAsignacion, \
+        name='desembolsarasignacion'),
+    path('consultadesembolsos/',DesembolsosConsulta.as_view() \
+        , name='consulta_desembolsos'),
+    path('desembolsosjson/<desde>/<hasta>',GeneraListaDesembolsosJSON
+        , name="desembolsos_json"),
+        
     ]

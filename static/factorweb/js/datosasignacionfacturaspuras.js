@@ -7,16 +7,6 @@ window.onload=function(){
     // inicializar el encabezado
     ActualizarHeader();
 
-    // // inicializar valores
-    // inicializaValor("cliente_id",cliente_id)
-    
-    // // configuar select
-    // jQuery(".standardSelect").chosen({
-    //     disable_search_threshold: 10,
-    //     no_results_text: "Cliente no encontrado!",
-    //     width: "100%"
-    // });
-
     // inicializar tabla
     initTable();
     // // cerrar side bar

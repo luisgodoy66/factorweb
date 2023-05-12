@@ -18,19 +18,25 @@ window.operateEvents = {
   'click .like': function (e, value, row, index) {
     MarcarCuentaTransferencia(row.id,cliente_id)
   },
+    'click .editar': function (e, value, row, index) {
+      EditarCuentaBancaria( row.id, cliente_id)
+  },
     'click .remove': function (e, value, row, index) {
       EliminarCuentaBancaria( row.id)
-    }
+  }
 };
 
 function operateFormatter(value, row, index) {
 return [
+  '<a class="editar" href="javascript:void(0)" title="Editar cuenta">',
+  '<i class="fa fa-edit"></i>',
+  '</a>  ',
   '<a class="like" href="javascript:void(0)" title="Default transferencias">',
   '<i class="fa fa-heart"></i>',
   '</a>  ',
   '<a class="remove" href="javascript:void(0)" title="Eliminar">',
     '<i class="fa fa-trash"></i>',
-    '</a>'
+  '</a>'
 ].join('')
 }
 function initTable() {
@@ -102,6 +108,10 @@ function EliminarCuentaBancaria( documento_id){
       location.reload();
     })
 })
+}
+
+function EditarCuentaBancaria( doc_id, cliente_id){
+  AbrirModal('/clientes/editcuentabancaria/'+cliente_id+'/'+doc_id )
 }
 
 function MarcarCuentaTransferencia( documento_id, cliente_id){

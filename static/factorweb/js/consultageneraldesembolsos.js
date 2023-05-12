@@ -19,7 +19,7 @@ window.onload=function(){
 
         $table.bootstrapTable('refreshOptions', {
             showRefresh: true,
-            url: "/cobranzas/ampliacionesplazojson/"+desde+"/" + hasta
+            url: "/operaciones/desembolsosjson/"+desde+"/" + hasta
         })
     })
 
@@ -31,20 +31,14 @@ window.onload=function(){
 
 window.operateEvents = {
     'click .revertir': function (e, value, row, index) {
-      ReversarAmpliacionPlazo(row.id, row.TipoOperacion, row.Cliente)
-      },
-      'click .imprimir': function (e, value, row, index) {
-        ImprimirAmpliacionPlazo( row.id)
+      ReversarCobranza(row.id, row.TipoOperacion, row.Cliente)
       },
     };
       
 function operateFormatter(value, row, index) {
     return [
-        '<a class="revertir" href="javascript:void(0)" title="Reverso de ampliación">',
+        '<a class="revertir" href="javascript:void(0)" title="Reverso de cobranza">',
         '<i class="fa fa-rotate-left"></i>',
-        '</a>  ',
-        '<a class="imprimir" href="javascript:void(0)" title="Imprimir ampliación">',
-        '<i class="fa fa-print"></i>',
         '</a>  ',
       ].join('')
 }

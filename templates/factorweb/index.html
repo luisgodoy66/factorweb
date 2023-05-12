@@ -86,7 +86,7 @@
                     </li>
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
-                            <i class="menu-icon fa fa-calendar"></i>Cobranzas</a>
+                            <i class="menu-icon fa fa-money"></i>Cobranzas</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="fa fa-calendar"></i>
                                 <a href="{% url 'cobranzas:listachequesadepositar' %}">Depósito de cheques</a></li>
@@ -94,9 +94,9 @@
                                 <a href="{% url 'cobranzas:listadocumentosvencidos' %}">Cartera vencida</a></li>
                             <li><i class="fa fa-calendar"></i>
                                 <a href="{% url 'cobranzas:listadocumentosporvencer' %}">Cartera por vencer</a></li>
-                            <li><i class="menu-icon fa fa-money"></i>
+                            <li><i class="menu-icon fa fa-thumbs-up"></i>
                                 <a href="{% url 'cobranzas:listacobranzasporconfirmar' %}">Confirma o protesta</a></li>
-                            <li><i class="menu-icon fa fa-money"></i>
+                            <li><i class="menu-icon fa fa-clock-o"></i>
                                 <a href="{% url 'cobranzas:listaprotestospendientes' %}">Protestos pendientes</a></li>
                             <li><i class="menu-icon fa fa-money"></i>
                                 <a href="{% url 'cobranzas:listacobranzaspendientesliquidar' %}">Por liquidar</a></li>
@@ -108,16 +108,16 @@
                     </li>
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
-                            <i class="menu-icon fa fa-money"></i>Pagos a clientes</a>
+                            <i class="menu-icon fa fa-user"></i>Pagos a clientes</a>
                         <ul class="sub-menu children dropdown-menu">
-                            <li><i class="fa fa-money"></i><a href="{% url 'operaciones:listaasignacionespendientesdesembolsar' %} "> Negociaciones</a></li>
+                            <li><i class="fa fa-file-text"></i><a href="{% url 'operaciones:listaasignacionespendientesdesembolsar' %} "> Negociaciones</a></li>
                             <li><i class="menu-icon fa fa-money"></i><a href="{% url 'cobranzas:listaliquidacionespendientespagar' %}">Cobranzas</a></li>
-                            <li><i class="menu-icon fa fa-print"></i><a href="#">Consulta general</a></li>
+                            <li><i class="menu-icon fa fa-print"></i><a href="{% url 'operaciones:consulta_desembolsos' %}">Consulta general</a></li>
                         </ul>
                     </li>
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
-                            <i class="menu-icon fa fa-exclamation"></i>Ampliaciones plazo</a>
+                            <i class="menu-icon fa fa-calendar"></i>Ampliaciones plazo</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-exclamation"></i>
                                 <a href="{% url 'cobranzas:listaampliacionespendientespagar' %}">Cargos pendientes</a></li>
@@ -130,7 +130,7 @@
 
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
-                            <i class="menu-icon fa fa-user"></i>Clientes</a>
+                            <i class="menu-icon fa fa-users"></i>Clientes</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-inbox"></i><a href="{% url 'clientes:listaclientessolicitudes' %}">Desde solicitudes</a></li>
                             <li><i class="menu-icon fa fa-info-circle"></i><a href="{% url 'clientes:listaclientes' %}">Ficha general</a></li>

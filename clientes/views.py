@@ -89,6 +89,44 @@ class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
             kwargs['empresa'] = id_empresa.empresa
         return kwargs
        
+class CuentasBancariasEdit(LoginRequiredMixin, generic.UpdateView):
+    model = Cuentas_bancarias
+    template_name = "clientes/datoscuentabancaria_modal.html"
+    context_object_name='cuentabancaria'
+    login_url = 'bases:login'
+    form_class=CuentasBancariasForm
+    success_message="Línea creada satisfactoriamente"
+
+    def form_valid(self, form):
+        form.instance.cxusuariocrea = self.request.user
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        cliente_id = self.kwargs.get('cliente_id')
+        cuenta_id = self.kwargs.get('pk')
+        # Call the base implementation first to get a context
+        context = super(CuentasBancariasEdit, self).get_context_data(**kwargs)
+        context["nueva"]=False
+        context["cliente_id"] = cliente_id
+        context["cuentabancaria_id"] = cuenta_id
+        return context
+
+    def get_success_url(self):
+        cliente_id = self.kwargs.get('cliente_id')
+        return reverse_lazy("clientes:listacuentasbancariascliente"
+            , kwargs={'cliente_id': cliente_id})
+
+    def get_form_kwargs(self):
+        kwargs = super(CuentasBancariasEdit, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        # si cambio sin condicion los kwargs en el modal, al momento del submit no 
+        # regresa a la ventana anterior
+        if not 'data' in kwargs:
+            kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+       
 class CuentasBancariasDeudoresView(LoginRequiredMixin, generic.ListView):
     model = Cuentas_bancarias
     template_name = "clientes/listacuentasbancariasdeudores.html"

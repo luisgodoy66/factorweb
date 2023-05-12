@@ -4,7 +4,7 @@
         <form  method="post" id="frmSolicitud" enctype="multipart/form-data" 
             class="form-horizontal" name="form"
             {% if not nueva %}
-                action="{% url 'clientes:cuentabancaria_editar' cuentabancaria_id %}"
+                action="{% url 'clientes:cuentabancaria_editar' cliente_id cuentabancaria_id %}"
             {% else %}
                 action="{% url 'clientes:cuentabancaria_nueva' cliente_id %}"
             {% endif %}

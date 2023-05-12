@@ -188,6 +188,23 @@ class EstadosOperativosView(LoginRequiredMixin, generic.ListView):
                                                         , empresa = id_empresa.empresa)
         return qs
 
+class DesembolsosConsulta(LoginRequiredMixin, generic.TemplateView):
+    model = Desembolsos
+    template_name = "operaciones/consultageneraldesembolsos.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        # obtener primer día del mes actual
+        desde = date.today() + timedelta(days=-date.today().day +1)
+        hasta = date.today()
+
+        context = super(DesembolsosConsulta, self).get_context_data(**kwargs)
+        context["desde"] = desde
+        context["hasta"] = hasta
+        return context
+ 
 @login_required(login_url='/login/')
 @permission_required('operativos.update_asignacion', login_url='bases:sin_permisos')
 def DesembolsarAsignacion(request, pk, cliente_id):
@@ -198,7 +215,7 @@ def DesembolsarAsignacion(request, pk, cliente_id):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     cliente = ModeloCliente.Datos_generales.objects\
-        .filter(cxcliente=cliente_id).first()
+        .filter(id=cliente_id).first()
 
     datosoperativos = Datos_operativos.objects.filter(cxcliente = cliente_id).first()
     
@@ -307,7 +324,7 @@ def DatosOperativos(request, cliente_id=None):
 
     cliente = ModeloCliente.Datos_generales.objects\
         .filter(cxcliente=cliente_id).first()
-
+    
     datoscliente = Datos_operativos.objects\
         .filter(cxcliente=cliente).first()
     
@@ -799,7 +816,6 @@ def SumaCargos(request,asignacion_id, gao_carga_iva, dc_carga_iva, carga_gao, ca
                     , documento__in=ModelosSolicitud.Documentos.objects
                         .filter(cxasignacion=asignacion_id, leliminado = False))
         
-    print(documentos)
     # total negociado
     negociado = documentos.aggregate(Sum('ntotal'))
     n = negociado["ntotal__sum"]
@@ -1104,7 +1120,7 @@ def GenerarAnexos(request,asignacion_id):
     
     cliente = Datos_participantes.objects\
         .filter(id=asignacion.cxcliente.id).first()
-    print(cliente)
+
     anexos = Anexos.objects.filter(lactivo = True).all()
 
     if cliente.datos_generales.cxtipocliente =="J":
@@ -1628,3 +1644,66 @@ def GeneraListaChequesQuitadosClienteJSONSalida(doc):
 
     return output
 
+def GeneraListaDesembolsosJSON(request, desde = None, hasta= None):
+    # Es invocado desde la url de una tabla bt
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    if desde == 'None':
+        movimiento = Desembolsos.objects\
+            .filter(empresa = id_empresa.empresa)\
+            .order_by('dregistro')
+        
+    else:
+
+        movimiento = Desembolsos.objects\
+            .filter(dregistro__gte = desde
+                    , empresa = id_empresa.empresa
+                    , dregistro__lte = hasta)\
+            .order_by('dregistro')
+                
+    tempBlogs = []
+    for i in range(len(movimiento)):
+        tempBlogs.append(GeneraListaDesembolsosJSONSalida(movimiento[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": movimiento.count(),
+        "totalNotFiltered": movimiento.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaDesembolsosJSONSalida(transaccion):
+    output = {}
+    output['id'] = transaccion.id
+    output["Cliente"] = transaccion.cxcliente.cxcliente.ctnombre
+    output["Registro"] = transaccion.dregistro.strftime("%Y-%m-%d")
+    # output["Estado"] = transaccion['cxestado']
+    output["Valor"] =  transaccion.nvalor
+    output["FormaPago"] = transaccion.cxformapago
+    output["OrigenPago"] = transaccion.cxcuentapago.__str__()
+
+    if transaccion.cxformapago =="CHE":
+        output["Detalle"] = transaccion.ctbeneficiario
+    elif transaccion.cxformapago =="TRA":
+        # cuenta = Cuentas_bancarias.objects\
+        #     .filter(pk = transaccion.cxcuentadestino).first()
+        output["Detalle"] = transaccion.cxcuentadestino.__str__()
+
+    if transaccion.cxtipooperacion =='C':
+        output["Movimiento"] = 'Liquidación de cobranza'
+        operacion = Liquidacion_cabecera.objects\
+            .filter(pk = transaccion.cxoperacion).first()
+        if operacion:
+            output["Operacion"] = operacion.__str__()
+            output["TipoFactoring"] = operacion.cxtipofactoring.__str__()
+    elif transaccion.cxtipooperacion =='A':
+        output["Movimiento"] = 'Liquidacion de asignación'
+        operacion = Asignacion.objects\
+            .filter(pk = transaccion.cxoperacion).first()
+        if operacion:
+            output["Operacion"] = operacion.__str__()
+            output["TipoFactoring"] = operacion.cxtipofactoring.__str__()
+
+    return output
