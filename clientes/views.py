@@ -9,6 +9,7 @@ from django.db import transaction
 from .models import Cuenta_transferencia, Datos_generales, Personas_juridicas, Personas_naturales, Linea_Factoring \
     , Datos_compradores, Cupos_compradores, Cuentas_bancarias
 from solicitudes.models import Clientes as Solicitante
+from solicitudes.models import Asignacion as Asignacion
 from bases.models import Usuario_empresa
 from empresa.models import Datos_participantes, Localidades
 
@@ -31,6 +32,13 @@ class ClientesView(LoginRequiredMixin, generic.ListView):
         qs=Datos_generales.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
     
+    def get_context_data(self, **kwargs):
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context = super(ClientesView, self).get_context_data(**kwargs)
+        context["solicitudes_pendientes"]=sp
+
+        return context
+    
 class LineasView(LoginRequiredMixin, generic.ListView):
     model = Datos_generales
     template_name = "clientes/listalineasfactoring.html"
@@ -42,6 +50,13 @@ class LineasView(LoginRequiredMixin, generic.ListView):
         qs=Datos_generales.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
+    def get_context_data(self, **kwargs):
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context = super(LineasView, self).get_context_data(**kwargs)
+        context["solicitudes_pendientes"]=sp
+
+        return context
+
 class CuentasBancariasView(LoginRequiredMixin, generic.ListView):
     model = Datos_generales
     template_name = "clientes/listacuentasbancarias.html"
@@ -52,6 +67,13 @@ class CuentasBancariasView(LoginRequiredMixin, generic.ListView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         return Datos_generales.objects.filter(leliminado = False
                                               , empresa = id_empresa.empresa)
+
+    def get_context_data(self, **kwargs):
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context = super(CuentasBancariasView, self).get_context_data(**kwargs)
+        context["solicitudes_pendientes"]=sp
+
+        return context
 
 class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
     model = Cuentas_bancarias
@@ -70,6 +92,7 @@ class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
     def get_context_data(self, **kwargs):
         cliente_id = self.kwargs.get('cliente_id')
         # Call the base implementation first to get a context
+        
         context = super(CuentasBancariasNew, self).get_context_data(**kwargs)
         context["nueva"]=True
         context["cliente_id"] = cliente_id
@@ -145,6 +168,13 @@ class CuentasBancariasDeudoresView(LoginRequiredMixin, generic.ListView):
             .filter(cxparticipante__in = participantes.intersection(deudores)
                     , empresa = id_empresa.empresa)
 
+    def get_context_data(self, **kwargs):
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context = super(CuentasBancariasDeudoresView, self).get_context_data(**kwargs)
+        context["solicitudes_pendientes"]=sp
+
+        return context
+
 class CuentasBancariasDeudorNew(LoginRequiredMixin, generic.CreateView):
     model = Cuentas_bancarias
     template_name = "clientes/datoscuentabancariadeudor.html"
@@ -166,6 +196,13 @@ class CuentasBancariasDeudorNew(LoginRequiredMixin, generic.CreateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
        
+    def get_context_data(self, **kwargs):
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context = super(CuentasBancariasDeudorNew, self).get_context_data(**kwargs)
+        context["solicitudes_pendientes"]=sp
+
+        return context
+
 class CuentasBancariasDeudorEdit(LoginRequiredMixin, generic.UpdateView):
     model = Cuentas_bancarias
     template_name = "clientes/datoscuentabancariadeudor.html"
@@ -202,7 +239,6 @@ class LineaNew(LoginRequiredMixin, generic.CreateView):
     def get_context_data(self, **kwargs):
         cliente_id = self.kwargs.get('cliente_id')
         nombre_cliente = self.kwargs.get('cliente')
-
         context = super(LineaNew, self).get_context_data(**kwargs)
         context["nueva"]=True
         context["nombre_cliente"] = nombre_cliente
@@ -244,6 +280,13 @@ class CompradoresView(LoginRequiredMixin, generic.ListView):
         qs=Datos_compradores.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
     
+    def get_context_data(self, **kwargs):
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context = super(CompradoresView, self).get_context_data(**kwargs)
+        context["solicitudes_pendientes"]=sp
+
+        return context
+
 class CuposCompradoresView(LoginRequiredMixin, generic.ListView):
     model = Cupos_compradores
     template_name = "clientes/listacuposcompradores.html"
@@ -254,6 +297,13 @@ class CuposCompradoresView(LoginRequiredMixin, generic.ListView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         qs=Cupos_compradores.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
+
+    def get_context_data(self, **kwargs):
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context = super(CuposCompradoresView, self).get_context_data(**kwargs)
+        context["solicitudes_pendientes"]=sp
+
+        return context
 
 class CuposCompradoresNew(LoginRequiredMixin, generic.CreateView):
     model=Cupos_compradores
@@ -310,6 +360,13 @@ class ClientesSolicitudesView(LoginRequiredMixin, generic.ListView):
         return Solicitante.objects\
             .filter(cxcliente__in = solicitantes.difference(clientes)
                     , empresa = id_empresa.empresa)
+
+    def get_context_data(self, **kwargs):
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context = super(ClientesSolicitudesView, self).get_context_data(**kwargs)
+        context["solicitudes_pendientes"]=sp
+
+        return context
 
 class CompradorEdit(LoginRequiredMixin, generic.UpdateView):
     model=Datos_compradores
@@ -407,9 +464,12 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
                     }
                     formulario=ParticipanteForm(e)
 
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    
     contexto={'datosparticipante':datosparticipante
             , 'form_participante':formulario
             , 'form_cliente':form_cliente
+            , 'solicitudes_pendientes':sp
             }
 
     if request.method=='POST':
@@ -536,9 +596,12 @@ def DatosClienteNatural(request, cliente_id=None):
             formulario=PersonaNaturalForm(e)
         else:
             formulario=PersonaNaturalForm()
+    
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
 
     contexto={'nombrecliente':cliente
             , 'form_cliente':formulario
+            , 'solicitudes_pendientes':sp
             }
 
     if request.method=='POST':
@@ -635,8 +698,11 @@ def DatosClienteJuridico(request, cliente_id=None):
         else:
             formulario=PersonaJuridicaForm()
 
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+
     contexto={'nombrecliente':cliente
             , 'form':formulario
+            , 'solicitudes_pendientes':sp
             }
 
     if request.method=='POST':
@@ -747,8 +813,11 @@ def DatosClienteJuridico(request, cliente_id=None):
 def CuentasBancariasCliente(request, cliente_id):
     template_name = "clientes/listacuentasbancariascliente.html"
     cliente = Datos_generales.objects.filter(cxcliente=cliente_id).first()
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
     contexto={'cliente':cliente
+              , 'solicitudes_pendientes':sp
             }
+    
     return render(request, template_name, contexto)
 
 def DetalleCuentasBancarias(request, cliente_id = None):
@@ -860,8 +929,6 @@ def DatosCompradores(request, comprador_id=None):
     idcomprador={}
     datosparticipante={}
     formulario={}
-    # form_comprador={}
-    # datoscomprador={}
     
     if request.method=='GET':
         datosparticipante = Datos_participantes.objects\
@@ -888,10 +955,12 @@ def DatosCompradores(request, comprador_id=None):
 
         else:
             formulario=ParticipanteForm()
+    
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
             
     contexto={'datosparticipante':datosparticipante
             , 'form_participante':formulario
-            # , 'form_comprador':form_comprador
+            , 'solicitudes_pendientes':sp
             }
 
     if request.method=='POST':

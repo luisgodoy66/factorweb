@@ -660,8 +660,9 @@ def ImpresionAmpliacionDePlazo(request, ampliacion_id):
         "ap" : ap,
         "detalle_ampliacion"  : listadocumentos,
         "hay_accesorios" : hay_accesorios,
+        'empresa': id_empresa.empresa
     }
-    print(contexto)
+    # return render(request, template_name, contexto)
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="ampliacion "' + str(ampliacion.cxnotadebito) + ".pdf"

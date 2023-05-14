@@ -6,6 +6,7 @@ from django.urls import reverse_lazy
 from .models import Tipos_factoring, Tasas_factoring, Clases_cliente\
     , Cuentas_bancarias, Localidades
 from bases.models import Usuario_empresa
+from solicitudes.models import Asignacion
 
 from .forms import CuentaBancariaForm, TipoFactoringForm, TasaFactoringForm\
     , ClasesParticipantesForm, LocalidadForm
@@ -24,6 +25,12 @@ class TiposFactoringView(LoginRequiredMixin, generic.ListView):
                                      .order_by("cttipofactoring")
         return qs
     
+    def get_context_data(self, **kwargs):
+        context = super(TiposFactoringView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
 class TipoFactoringNew(LoginRequiredMixin, generic.CreateView):
     model = Tipos_factoring
     template_name="empresa/datostipofactoring_form.html"
@@ -37,6 +44,12 @@ class TipoFactoringNew(LoginRequiredMixin, generic.CreateView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super(TipoFactoringNew, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class TipoFactoringEdit(LoginRequiredMixin, generic.UpdateView):
     model = Tipos_factoring
@@ -49,6 +62,12 @@ class TipoFactoringEdit(LoginRequiredMixin, generic.UpdateView):
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super(TipoFactoringEdit, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class TasasFactoringView(LoginRequiredMixin, generic.ListView):
     model = Tasas_factoring
@@ -62,6 +81,12 @@ class TasasFactoringView(LoginRequiredMixin, generic.ListView):
                                      , empresa = id_empresa.empresa)\
                                      .order_by("cttasa")
         return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super(TasasFactoringView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class TasaFactoringNew(LoginRequiredMixin, generic.CreateView):
     model = Tasas_factoring
@@ -76,6 +101,12 @@ class TasaFactoringNew(LoginRequiredMixin, generic.CreateView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super(TasaFactoringNew, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class TasaFactoringEdit(LoginRequiredMixin, generic.UpdateView):
     model = Tasas_factoring
@@ -88,6 +119,12 @@ class TasaFactoringEdit(LoginRequiredMixin, generic.UpdateView):
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super(TasaFactoringEdit, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class ClasesParticipanteView(LoginRequiredMixin, generic.ListView):
     model = Clases_cliente
@@ -101,6 +138,12 @@ class ClasesParticipanteView(LoginRequiredMixin, generic.ListView):
                                      , empresa = id_empresa.empresa)\
                                      .order_by("cxclase")
         return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super(ClasesParticipanteView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class ClasesParticipanteNew(LoginRequiredMixin, generic.CreateView):
     model = Clases_cliente
@@ -115,6 +158,12 @@ class ClasesParticipanteNew(LoginRequiredMixin, generic.CreateView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super(ClasesParticipanteNew, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class CuentasBancariasView(LoginRequiredMixin, generic.ListView):
     model = Cuentas_bancarias
@@ -127,6 +176,12 @@ class CuentasBancariasView(LoginRequiredMixin, generic.ListView):
         qs=Cuentas_bancarias.objects.filter(leliminado = False
                                      , empresa = id_empresa.empresa)
         return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super(CuentasBancariasView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class CuentaBancariaNew(LoginRequiredMixin, generic.CreateView):
     model = Cuentas_bancarias
@@ -147,6 +202,12 @@ class CuentaBancariaNew(LoginRequiredMixin, generic.CreateView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
+    
+    def get_context_data(self, **kwargs):
+        context = super(CuentaBancariaNew, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
        
 class CuentaBancariaEdit(LoginRequiredMixin, generic.UpdateView):
     model = Cuentas_bancarias
@@ -159,6 +220,12 @@ class CuentaBancariaEdit(LoginRequiredMixin, generic.UpdateView):
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super(CuentaBancariaEdit, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class LocalidadesView(LoginRequiredMixin, generic.ListView):
     model = Localidades
@@ -172,6 +239,12 @@ class LocalidadesView(LoginRequiredMixin, generic.ListView):
                                      , empresa = id_empresa.empresa)\
                                      .order_by("ctlocalidad")
         return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super(LocalidadesView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class LocalidadesNew(LoginRequiredMixin, generic.CreateView):
     model = Localidades
@@ -186,6 +259,12 @@ class LocalidadesNew(LoginRequiredMixin, generic.CreateView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super(LocalidadesNew, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class LocalidadesEdit(LoginRequiredMixin, generic.UpdateView):
     model = Localidades
@@ -199,4 +278,9 @@ class LocalidadesEdit(LoginRequiredMixin, generic.UpdateView):
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super(LocalidadesEdit, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 

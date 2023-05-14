@@ -13,8 +13,8 @@ from cobranzas.models import Documentos_cabecera, Recuperaciones_cabecera\
     , DebitosCuentasConjuntas
 from operaciones.models import Notas_debito_cabecera, Notas_debito_detalle\
     , Cargos_detalle
-from empresa.models import Datos_participantes
 from bases.models import Usuario_empresa
+from solicitudes.models import Asignacion
 
 from .forms import CuentasBancariasForm, DebitosForm, TransferenciasForm\
     , DebitosNuevosForm
@@ -32,6 +32,12 @@ class CuentasView(LoginRequiredMixin, generic.ListView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         qs=Cuentas_bancarias.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super(CuentasView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
     model = Cuentas_bancarias
@@ -50,6 +56,8 @@ class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
     def get_context_data(self, **kwargs):
         context = super(CuentasBancariasNew, self).get_context_data(**kwargs)
         context["nueva"]=True
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
         return context
 
     def get_form_kwargs(self):
@@ -72,6 +80,8 @@ class CuentasBancariasEdit(LoginRequiredMixin, generic.UpdateView):
         context = super(CuentasBancariasEdit, self).get_context_data(**kwargs)
         context["nueva"]=False
         context["id"]=pk
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
         return context
 
     def get_form_kwargs(self):
@@ -110,8 +120,13 @@ class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
                 ,'cxrecuperacion','cxformacobro','nvalor', 'id', 'cxcuentaconjunta_id'
                 , 'cxcuentaconjunta__cxbanco__ctbanco').annotate(tipo=RawSQL("select 'R'",'')
                 )
-        print('return cobranzasporconfirmarview')
         return cobranzas.union(recuperaciones)
+
+    def get_context_data(self, **kwargs):
+        context = super(CobranzasPorConfirmarView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class CargosPendientesView(LoginRequiredMixin, generic.ListView):
     model = DebitosCuentasConjuntas
@@ -125,6 +140,12 @@ class CargosPendientesView(LoginRequiredMixin, generic.ListView):
             .filter(leliminado = False
                     , empresa = id_empresa.empresa
                     , notadedebito__nsaldo__gt = 0)
+
+    def get_context_data(self, **kwargs):
+        context = super(CargosPendientesView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class DebitoBancarioEdit(LoginRequiredMixin, generic.UpdateView):
     model = DebitosCuentasConjuntas
@@ -144,6 +165,8 @@ class DebitoBancarioEdit(LoginRequiredMixin, generic.UpdateView):
         context["notadedebito"]=nd.notadedebito
         context["cuentaconjunta"]=nd.cuentabancaria
         context["cliente"]=nd.notadedebito.cxcliente
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
         return context
 
     def form_valid(self, form):
@@ -194,12 +217,15 @@ def ConfirmarCobranza(request, cobranza_id, tipo_operacion, cuenta_conjunta):
 
     cc = Cuentas_bancarias.objects.filter(pk = cuenta_conjunta).first()
 
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    
     contexto={"id_operacion": cobranza_id
         , "form_cargos" : DebitosForm
         , "form_transferencias" : TransferenciasForm(empresa = id_empresa.empresa)
         , "tipo_operacion": tipo_operacion
         , 'cuenta_conjunta': cc
         , 'id_cuenta_conjunta': cuenta_conjunta
+        , 'solicitudes_pendientes':sp
         }
     
     return render(request, template_name, contexto)
@@ -244,7 +270,10 @@ def AceptarConfirmacion(request):
 
 def DebitoBancarioSinCobranza(request):
     template_name = "cuentasconjuntas/datosdebitobancario_form.html"
-    contexto={ "form" : DebitosNuevosForm     }
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+
+    contexto={ "form" : DebitosNuevosForm
+              , "solicitudes_pendientes" : sp    }
 
     if request.method =='POST':
         resultado = 'OK'

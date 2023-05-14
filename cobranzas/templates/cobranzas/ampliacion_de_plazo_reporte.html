@@ -35,17 +35,32 @@
         font-size: 11px; 
         font-weight: 400; 
         color: #eb1111; 
-        }        
+        }     
+        .footer{
+            position: absolute;
+            bottom: 0;
+            /* text-align: center; */
+            width: 100%;
+        }   
     </style>
-    <!-- <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.1/dist/bootstrap-table.min.css">    -->
 </head>
 <body>
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <h1>Ampliación de plazo </h1>
+                <table >
+                    <tbody>
+                        <tr>
+                            <td colspan="2"><h2>{{ empresa }}</h2></td>
+                            <td></td>
+                            <td colspan="2"><h1>Ampliación de plazo </h1></td>
+                            <td></td>
+                            <td>Impresión: {% now "Y-m-d" %}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-
+            <br>
             <div class="list-group">
                 <table >
                     <tbody>
@@ -204,9 +219,13 @@
                         </tr>
                     </tbody>
                 </table>
-                </div>
-    
+            </div>
         </div>
+            {% if empresa.lgratis %}
+            <footer class="footer">
+                <p>SAAS Margarita desarrollado por Código Bambú</p>
+            </footer>
+            {% endif %}
     </div>
 </body>
 </html>

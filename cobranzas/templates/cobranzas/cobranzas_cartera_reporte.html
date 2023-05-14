@@ -35,9 +35,19 @@
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <h2>Reporte de cobranza </h2>
+                <table >
+                    <tbody>
+                        <tr>
+                            <td colspan="2"><h2>{{ empresa }}</h2></td>
+                            <td></td>
+                            <td colspan="2"><h1>Reporte de cobranza </h1></td>
+                            <td></td>
+                            <td>Impresión: {% now "Y-m-d" %}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-
+            <br>
             <div class="list-group">
                 <table >
                     <tbody>
@@ -153,7 +163,12 @@
 
 
         </div>
-    </div>
+        {% if empresa.lgratis %}
+        <footer class="footer">
+            <p>SAAS Margarita desarrollado por Código Bambú</p>
+        </footer>
+        {% endif %}
+</div>
 
 </body>
 </html>

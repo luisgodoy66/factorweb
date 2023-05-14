@@ -20,6 +20,7 @@ from empresa.models import Tasas_factoring, Cuentas_bancarias as CuentasEmpresa\
     , Datos_participantes, Tipos_factoring
 from cuentasconjuntas import models as CuentasConjuntasModels
 from bases.models import Usuario_empresa
+from solicitudes.models import Asignacion
 
 from .forms import CobranzasDocumentosForm, ChequesForm, LiquidarForm\
     , MotivoProtestoForm, ProtestoForm, RecuperacionesProtestosForm\
@@ -54,6 +55,8 @@ class DocumentosVencidosView(LoginRequiredMixin, generic.ListView):
         fecha_corte = date.today() 
         context['fecha_corte'] =  fecha_corte
         context['por_vencer'] = 'No'
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
 
         return context
 
@@ -73,6 +76,8 @@ class DocumentosPorVencerView(LoginRequiredMixin, generic.ListView):
         fecha_corte = date.today() + timedelta(days=7)
         context['fecha_corte'] =  fecha_corte
         context['por_vencer'] = 'Si'
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
 
         return context
 
@@ -93,6 +98,8 @@ class ChequesADepositarView(LoginRequiredMixin, generic.ListView):
         context = super(ChequesADepositarView, self).get_context_data(*args,**kwargs) 
         fecha_corte = date.today() 
         context['fecha_corte'] =  fecha_corte#.strftime("%Y-%m-%d")
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
 
         return context
 
@@ -167,6 +174,10 @@ class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
         context["cuentas_conjuntas"] = cuentas_conjuntas
         context["tipo"]="Cobranza"
         context["por_vencer"]=por_vencer
+
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+
         return context
 
     def get_form_kwargs(self):
@@ -190,6 +201,8 @@ class CobranzasConsulta(LoginRequiredMixin, generic.TemplateView):
         context = super(CobranzasConsulta, self).get_context_data(**kwargs)
         context["desde"] = desde
         context["hasta"] =hasta
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
         return context
  
 class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
@@ -227,6 +240,12 @@ class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
 
         return cobranzas.union(recuperaciones)
 
+    def get_context_data(self, **kwargs):
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context = super(CobranzasPorConfirmarView, self).get_context_data(**kwargs)
+        context['solicitudes_pendientes'] = sp
+        return context
+ 
 class CobranzasPendientesLiquidarView(LoginRequiredMixin, generic.ListView):
     model = Documentos_cabecera
     template_name = "cobranzas/listacobranzaspendientesliquidar.html"
@@ -254,6 +273,12 @@ class CobranzasPendientesLiquidarView(LoginRequiredMixin, generic.ListView):
 
         return cobranzas.union(recuperaciones)
 
+    def get_context_data(self, **kwargs):
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context = super(CobranzasPendientesLiquidarView, self).get_context_data(**kwargs)
+        context['solicitudes_pendientes'] = sp
+        return context
+ 
 class LiquidacionesPendientesPagarView(LoginRequiredMixin, generic.ListView):
     model = Liquidacion_cabecera
     template_name = "cobranzas/listaliquidacionespendientespagar.html"
@@ -266,6 +291,12 @@ class LiquidacionesPendientesPagarView(LoginRequiredMixin, generic.ListView):
             , empresa = id_empresa.empresa
             , leliminado = False, ddesembolso__lte = date.today())
 
+    def get_context_data(self, **kwargs):
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context = super(LiquidacionesPendientesPagarView, self).get_context_data(**kwargs)
+        context['solicitudes_pendientes'] = sp
+        return context
+ 
 class MotivosProtestoView(LoginRequiredMixin, generic.ListView):
     model = Motivos_protesto_maestro
     template_name = "cobranzas/listamotivosprotesto.html"
@@ -278,6 +309,12 @@ class MotivosProtestoView(LoginRequiredMixin, generic.ListView):
                                               , empresa = id_empresa.empresa
                                               )
         return qs
+
+    def get_context_data(self, **kwargs):
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context = super(MotivosProtestoView, self).get_context_data(**kwargs)
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class MotivoProtestoNew(LoginRequiredMixin, generic.CreateView):
     model = Motivos_protesto_maestro
@@ -293,6 +330,12 @@ class MotivoProtestoNew(LoginRequiredMixin, generic.CreateView):
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context = super(MotivoProtestoNew, self).get_context_data(**kwargs)
+        context['solicitudes_pendientes'] = sp
+        return context
+
 class MotivoProtestoEdit(LoginRequiredMixin, generic.UpdateView):
     model = Motivos_protesto_maestro
     template_name = "cobranzas/datosmotivoprotesto_form.html"
@@ -304,6 +347,12 @@ class MotivoProtestoEdit(LoginRequiredMixin, generic.UpdateView):
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(MotivoProtestoEdit, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class ProtestoCobranzaNew(LoginRequiredMixin, generic.CreateView):
     model=Cheques_protestados
@@ -336,6 +385,8 @@ class ProtestoCobranzaNew(LoginRequiredMixin, generic.CreateView):
         context["codigo_cobranza"] = cobranza.cxcobranza
         context["tipo_operacion"]='Cobranza'
         context["lista_deposito"]=lista_deposito
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
 
         return context
 
@@ -355,6 +406,12 @@ class ProtestosPendientesView(LoginRequiredMixin, generic.ListView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         qs=Cheques_protestados.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
+
+    def get_context_data(self, **kwargs):
+        context = super(ProtestosPendientesView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class RecuperacionProtestoView(LoginRequiredMixin, generic.FormView):
     model = Recuperaciones_cabecera
@@ -416,6 +473,8 @@ class RecuperacionProtestoView(LoginRequiredMixin, generic.FormView):
         context["deudor_id"] = deudor_id
         context["cuentas_conjuntas"] = cuentas_conjuntas
         context["tipo"]="Recuperación"
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
 
         return context
 
@@ -456,6 +515,8 @@ class ProtestoRecuperacionNew(LoginRequiredMixin, generic.CreateView):
         context["codigo_cobranza"] = cobranza.cxrecuperacion
         context["tipo_operacion"]='Recuperacion'
         context["lista_deposito"]=lista_deposito
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
 
         return context
 
@@ -474,9 +535,10 @@ class LiquidacionesEnNegativoPendientesView(LoginRequiredMixin, generic.ListView
 
     def get_context_data(self, **kwargs):
 
-        # Call the base implementation first to get a context
         context = super(LiquidacionesEnNegativoPendientesView, self).get_context_data(**kwargs)
         context["tipo_nd"] = 'ND'
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
 
         return context
 
@@ -522,6 +584,8 @@ class CobranzasCargosView(LoginRequiredMixin, generic.FormView):
         context["cliente"] = cliente
         context["tipo_factoring"] = tipo_factoring
         context["tipo_nd"] = tipo_nd
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
 
         return context
 
@@ -549,6 +613,8 @@ class AmpliacionesDePlazoPendientesView(LoginRequiredMixin, generic.ListView):
         # Call the base implementation first to get a context
         context = super(AmpliacionesDePlazoPendientesView, self).get_context_data(**kwargs)
         context["tipo_nd"] = 'AP'
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
 
         return context
 
@@ -567,6 +633,8 @@ class AmpliacionesConsulta(LoginRequiredMixin, generic.TemplateView):
         context = super(AmpliacionesConsulta, self).get_context_data(**kwargs)
         context["desde"] = desde
         context["hasta"] =hasta
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
         return context
 
 def CobranzaPorCondonar(request,pk, tipo_operacion):
@@ -577,9 +645,11 @@ def CobranzaPorCondonar(request,pk, tipo_operacion):
         
     else:
         operacion = Recuperaciones_cabecera.objects.filter(pk=pk).first()
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
         
     contexto={"operacion": operacion
         , "tipo_operacion": tipo_operacion
+        ,'solicitudes_pendientes': sp
         }
     
     return render(request, template_name, contexto)
@@ -609,9 +679,12 @@ def GeneraListaCarteraPorVencerJSON(request, fecha_corte = None):
     docjson = tempBlogs
 
     # crear el contexto
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    
     data = {"total": documentos.count(),
         "totalNotFiltered": documentos.count(),
-        "rows": docjson 
+        "rows": docjson ,
+        "solictudes_pendientes":sp,
         }
     return JsonResponse( data)
 
@@ -888,12 +961,14 @@ def DepositoCheques(request, ids_cheques, total_cartera, cuenta_destino
                 .objects.filter(cxcliente = id_cliente , leliminado = False
                                 , lactiva = True)\
                 .all()
-
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    
     contexto = {"cheques" : result
         , "total_cartera" : total_cartera
         , "form": CobranzasDocumentosForm(empresa=id_empresa.empresa)
         , "cuenta_destino" : cuenta_destino
         , "cuentas_conjuntas": cuentas_conjuntas
+        , "solicitudes_pendientes":sp
         }
 
     if request.method == 'POST':
@@ -1202,11 +1277,14 @@ def DetalleDocumentosRecuperadosSalida(doc):
 
 def DatosDiasACondonar(request, id, dias, cobranza_id, tipo_operacion):
     template_name = "cobranzas/datosdiasacondonar_modal.html"
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    
     contexto={
         "id": id,
         "dias":dias,
         "cobranza": cobranza_id,
-        "tipo_operacion": tipo_operacion
+        "tipo_operacion": tipo_operacion,
+        "solicitudes_pendientes":sp
     }
     if request.method =="POST":
 
@@ -1426,6 +1504,8 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
             }
         formulario = DesembolsarForm(e, empresa = id_empresa.empresa)
 
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+
         contexto={'liquidacion':liquidacion.dliquidacion
             , 'instruccion_de_pago':liquidacion.ctinstrucciondepago
             , "cuenta_transferencia":cuenta_transferencia
@@ -1435,6 +1515,7 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
             , 'cliente':cliente
             , 'tipo_operacion':'C'
             , 'operacion':liquidacion.cxliquidacion
+            , 'solicitudes_pendientes':sp
         }
 
     if request.method=="POST":
@@ -1999,6 +2080,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
 
         neto = total_vuelto + total_sobrepagos - total_cargos
 
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
 
     contexto={
         "nombredecliente" : cobranza.cxcliente.cxcliente.ctnombre,
@@ -2030,6 +2112,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
         "cobranzas":json.dumps(listacobranzas),
         "tipo_operacion":tipo_operacion,
         "otros_cargos":json.dumps(listaotroscargos),
+        "solicitudes_pendientes":sp
     }
 
     return render(request, template_name, contexto)
@@ -2721,6 +2804,9 @@ def AmpliacionDePlazo(request, ids, tipo_factoring, tipo_asignacion, id_cliente)
         , 'iniciales': dc.ctinicialesentablas}
 
     cliente = Datos_generales.objects.filter(pk = id_cliente).first()
+    
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+
     context={
         'ids':ids,
         'tipo_asignacion':tipo_asignacion,
@@ -2729,7 +2815,8 @@ def AmpliacionDePlazo(request, ids, tipo_factoring, tipo_asignacion, id_cliente)
         'porcentaje_iva':12,
         'id_cliente': id_cliente, 
         'cliente': cliente.cxcliente.ctnombre,
-        'tipo_factoring': tipo_factoring.id
+        'tipo_factoring': tipo_factoring.id,
+        'solicitudes_pendientes':sp, 
         }
     return render(request, template_path, context)
 

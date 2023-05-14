@@ -38,6 +38,12 @@ class SolicitudesView(LoginRequiredMixin, generic.ListView):
                                      .order_by("dregistro")
         return qs
 
+    def get_context_data(self, **kwargs):
+        context = super(SolicitudesView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
 class AsignacionFacturasPurasView(LoginRequiredMixin, generic.UpdateView):
     model = Asignacion
     template_name = "solicitudes/datosasignacionfacturaspuras_form.html"
@@ -55,6 +61,12 @@ class AsignacionFacturasPurasView(LoginRequiredMixin, generic.UpdateView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super(AsignacionFacturasPurasView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
        
 class AsignacionConAccesoriosView(LoginRequiredMixin, generic.UpdateView):
     model = Asignacion
@@ -74,6 +86,12 @@ class AsignacionConAccesoriosView(LoginRequiredMixin, generic.UpdateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        context = super(AsignacionConAccesoriosView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
 class ClienteCrearView(LoginRequiredMixin, generic.CreateView):
     model = Clientes
     template_name="solicitudes/datosclientes_form.html"
@@ -89,15 +107,25 @@ class ClienteCrearView(LoginRequiredMixin, generic.CreateView):
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super(ClienteCrearView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
 @login_required(login_url='/login/')
 @permission_required('solicitudes.update_asignaciones', login_url='bases:sin_permisos')
 def DatosAsignacionFacturasPurasNueva(request):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     template_name="solicitudes/datosasignacionfacturaspuras_form.html"
+    
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+
     contexto={'form': AsignacionesForm(empresa = id_empresa.empresa),
             'clientes' : Clientes.objects.all() ,
-            "asignacion": Asignacion
+            "asignacion": Asignacion,
+            'solicitudes_pendientes':sp
        }
     return render(request, template_name, contexto)
 
@@ -107,9 +135,13 @@ def DatosAsignacionConAccesoriosNueva(request):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     template_name="solicitudes/datosasignacionconaccesorios_form.html"
+    
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+
     contexto={'form': AsignacionesForm(empresa = id_empresa.empresa),
             'clientes' : Clientes.objects.all(),
-            "asignacion": Asignacion
+            "asignacion": Asignacion,
+            'solicitudes_pendientes':sp
        }
     return render(request, template_name, contexto)
 
@@ -506,6 +538,9 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
             
     # aunque se envía el form de cheques, el mismo no se utliza con submit
     # por lo que no se validan los campos pero sirve para la lista 
+    
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+
     contexto={'form_asignacion':formulario,
         'form_documento':DocumentosForm,
         # 'form_cheque': ChequesForm(),
@@ -513,6 +548,7 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
         'asignacion_id': asignacion_id,
         'cliente': cliente_id,
         'tipo_factoring': tipo_factoring_id,
+        'solicitudes_pendientes':sp
        }
 
     if request.method=='POST':

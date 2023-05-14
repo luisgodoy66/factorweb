@@ -44,6 +44,12 @@ class DatosOperativosView(LoginRequiredMixin, generic.ListView):
         qs=ModeloCliente.Datos_generales.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
+    def get_context_data(self, **kwargs):
+        context = super(DatosOperativosView, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
 class AsignacionesView(LoginRequiredMixin, generic.ListView):
     model = Asignacion
     template_name = "operaciones/listaasignaciones.html"
@@ -54,6 +60,12 @@ class AsignacionesView(LoginRequiredMixin, generic.ListView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         qs=Asignacion.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
+
+    def get_context_data(self, **kwargs):
+        context = super(AsignacionesView, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class AsignacionesConsulta(LoginRequiredMixin, generic.ListView):
     model = Asignacion
@@ -74,6 +86,8 @@ class AsignacionesConsulta(LoginRequiredMixin, generic.ListView):
         context = super(AsignacionesConsulta, self).get_context_data(**kwargs)
         context["desde"] = desde
         context["hasta"] =hasta
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
         return context
 
 class AsignacionesPendientesDesembolsarView(LoginRequiredMixin, generic.ListView):
@@ -87,6 +101,12 @@ class AsignacionesPendientesDesembolsarView(LoginRequiredMixin, generic.ListView
         return Asignacion.objects.filter(cxestado='L', empresa = id_empresa.empresa\
             ,leliminado = False, ddesembolso__lte = date.today())
 
+    def get_context_data(self, **kwargs):
+        context = super(AsignacionesPendientesDesembolsarView, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
 class MaestroMovimientosView(LoginRequiredMixin, generic.ListView):
     model = Movimientos_maestro
     template_name = "operaciones/listamaestromovimientos.html"
@@ -97,6 +117,12 @@ class MaestroMovimientosView(LoginRequiredMixin, generic.ListView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         qs=Movimientos_maestro.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
+
+    def get_context_data(self, **kwargs):
+        context = super(MaestroMovimientosView, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class MaestroMovimientoNew(LoginRequiredMixin, generic.CreateView):
     # permission_required="clientes.add_Linea_factoring"
@@ -113,6 +139,12 @@ class MaestroMovimientoNew(LoginRequiredMixin, generic.CreateView):
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super(MaestroMovimientoNew, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
 class MaestroMovimientoEdit(LoginRequiredMixin, generic.UpdateView):
     model = Movimientos_maestro
     template_name="operaciones/datosmovimiento_form.html"
@@ -125,6 +157,12 @@ class MaestroMovimientoEdit(LoginRequiredMixin, generic.UpdateView):
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super(MaestroMovimientoEdit, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
 class CondicionesOperativasView(LoginRequiredMixin, generic.ListView):
     model = Condiciones_operativas_cabecera
     template_name= "operaciones/listacondicionesoperativas.html"
@@ -136,6 +174,12 @@ class CondicionesOperativasView(LoginRequiredMixin, generic.ListView):
         qs=Condiciones_operativas_cabecera.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
+    def get_context_data(self, **kwargs):
+        context = super(CondicionesOperativasView, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
 class AnexosView(LoginRequiredMixin, generic.ListView):
     model = Anexos
     template_name = "operaciones/listaanexos.html"
@@ -146,6 +190,12 @@ class AnexosView(LoginRequiredMixin, generic.ListView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         qs=Anexos.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
+
+    def get_context_data(self, **kwargs):
+        context = super(AnexosView, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class AnexosNew(LoginRequiredMixin, generic.CreateView):
     model = Anexos
@@ -160,6 +210,12 @@ class AnexosNew(LoginRequiredMixin, generic.CreateView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(AnexosNew, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class AnexosEdit(LoginRequiredMixin, generic.UpdateView):
     # permission_required="clientes.add_Linea_factoring"
@@ -176,6 +232,12 @@ class AnexosEdit(LoginRequiredMixin, generic.UpdateView):
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super(AnexosEdit, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
 class EstadosOperativosView(LoginRequiredMixin, generic.ListView):
     model = ModeloCliente.Datos_generales
     template_name = "operaciones/listaestadosoperativos.html"
@@ -187,6 +249,12 @@ class EstadosOperativosView(LoginRequiredMixin, generic.ListView):
         qs=ModeloCliente.Datos_generales.objects.filter(leliminado = False
                                                         , empresa = id_empresa.empresa)
         return qs
+
+    def get_context_data(self, **kwargs):
+        context = super(EstadosOperativosView, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 
 class DesembolsosConsulta(LoginRequiredMixin, generic.TemplateView):
     model = Desembolsos
@@ -203,6 +271,8 @@ class DesembolsosConsulta(LoginRequiredMixin, generic.TemplateView):
         context = super(DesembolsosConsulta, self).get_context_data(**kwargs)
         context["desde"] = desde
         context["hasta"] = hasta
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
         return context
  
 @login_required(login_url='/login/')
@@ -232,6 +302,8 @@ def DesembolsarAsignacion(request, pk, cliente_id):
             }
         formulario = DesembolsarForm(e, empresa = id_empresa.empresa)
 
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+
         contexto={'liquidacion':asignacion.dnegociacion
             , 'instruccion_de_pago':asignacion.ctinstrucciondepago
             , "cuenta_transferencia":cuenta_transferencia
@@ -241,6 +313,7 @@ def DesembolsarAsignacion(request, pk, cliente_id):
             , 'cliente':cliente
             , 'tipo_operacion':'A'
             , 'operacion':asignacion.cxasignacion
+            , 'solicitudes_pendientes':sp
         }
 
     if request.method=="POST":
@@ -349,9 +422,12 @@ def DatosOperativos(request, cliente_id=None):
             formulario=DatosOperativosForm(e, empresa = id_empresa.empresa)
         else:
             formulario=DatosOperativosForm(empresa = id_empresa.empresa)
-
+    
+    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    
     contexto={'nombrecliente':cliente
             , 'form_cliente':formulario
+            , 'solicitudes_pendientes':sp
             }
 
     if request.method=='POST':
@@ -506,6 +582,8 @@ def AceptarAsignacion(request, asignacion_id=None):
     else:
         return HttpResponse("No se ha encontrado datos operativos del cliente.")
 
+    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+
     contexto={'form_asignacion':formulario,
         'asignacion': asignacion,
         'gao': dic_gao,
@@ -516,6 +594,7 @@ def AceptarAsignacion(request, asignacion_id=None):
         'tipo_asignacion':asignacion.cxtipo,
         "cuenta_transferencia":cuenta_transferencia,
         "beneficiario": beneficiario,
+        'solicitudes_pendientes':sp
     }
 
     return render(request, template_name, contexto)
@@ -964,10 +1043,20 @@ class CondicionesOperativasUpdate(LoginRequiredMixin, generic.UpdateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        context = super(CondicionesOperativasUpdate, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
 def DatosCondicionOperativaNueva(request):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     template_name="operaciones/datoscondicionesoperativas_form.html"
+        
+    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+
     contexto={'form': CondicionesOperativasForm(empresa = id_empresa.empresa),
+              'solicitudes_pendientes':sp
        }
     return render(request, template_name, contexto)
 
@@ -982,10 +1071,13 @@ def DatosCondicionesOperativas(request,condicion_id=None
 
     if request.method=='GET':
         condicion = Condiciones_operativas_cabecera.objects.filter(pk=condicion_id).first()
+        
+    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
 
     contexto={'form_detalle': DetalleCondicionesOperativasForm(empresa=id_empresa.empresa),
               'condicion_id':condicion_id,
               'tipo_factoring': tipo_factoring_id,
+              'solicitudes_pendientes':sp,
     }
     if request.method=='POST':
 
@@ -1325,7 +1417,8 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
         estado_cliente = operativos.cxestado
         clase_cliente = operativos.cxclase
         if operativos.dultimanegociacion:
-            dias_ultima_operacion = (date.today() - operativos.dultimanegociacion)/timedelta(days=1)
+            dias_ultima_operacion = (date.today() 
+                                     - operativos.dultimanegociacion)/timedelta(days=1)
 
     if estado_cliente=='A':
         estado_cliente = 'Activo'
@@ -1346,6 +1439,8 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
         estado_cliente = 'Bloqueado'
         color_estado = 4
 
+    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+
     context={
         'cliente_id':cliente_id,
         'valor_linea':valor_linea,
@@ -1356,6 +1451,7 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
         'estado': estado_cliente,
         'clase':clase_cliente,
         'color_estado':color_estado,
+        'solicitudes_pendientes':sp
         }
     return render(request, template_path, context)
 
@@ -1654,11 +1750,15 @@ def GeneraListaDesembolsosJSON(request, desde = None, hasta= None):
             .order_by('dregistro')
         
     else:
+        # la fecha de registro es datetime por lo que la comparación "hasta" es mejor
+        # que sea con el día siguiente
+        hasta = parse_date(hasta)
+        hasta = hasta + timedelta(days=1)
 
         movimiento = Desembolsos.objects\
             .filter(dregistro__gte = desde
                     , empresa = id_empresa.empresa
-                    , dregistro__lte = hasta)\
+                    , dregistro__lt = hasta)\
             .order_by('dregistro')
                 
     tempBlogs = []

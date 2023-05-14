@@ -4,8 +4,6 @@ var $tb_liqcob = jQuery('#tb_liqcob')
 var $tb_cobcar = jQuery('#tb_cobcar')
 
 window.onload=function(){
-  // inicializar el encabezado
-  ActualizarHeader();
 
   // configuracin de las tablas
   $table.bootstrapTable({locale:"es-EC"});
