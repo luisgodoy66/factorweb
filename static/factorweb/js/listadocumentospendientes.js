@@ -9,8 +9,6 @@ const filtro = capturaValor("filtro")
 var $ampliar_plazo = jQuery("#ampliarplazo")
 
 window.onload=function(){
-    // inicializar el encabezado
-    ActualizarHeader();
 
     // si la lista es de cartera vencida no debe mostrar filtro
     if (filtro=='Si'){

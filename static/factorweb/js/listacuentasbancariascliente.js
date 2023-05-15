@@ -3,8 +3,6 @@ var selections = []
 var cliente_id = capturaValor("id_cxparticipante")
 
 window.onload=function(){
-    // inicializar el encabezado
-    ActualizarHeader();
 
     // inicializar tabla
     initTable();

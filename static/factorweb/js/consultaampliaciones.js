@@ -3,9 +3,6 @@ var $btnFiltrar = jQuery('#btnFiltrar')
 
 window.onload=function(){
     
-    // objeto_fechas("#fechadesde")
-    // objeto_fechas("#fechahasta")
-
     inicializaValor("fechadesde", capturaValor("id_desde"))
     inicializaValor("fechahasta", capturaValor("id_hasta"))
 

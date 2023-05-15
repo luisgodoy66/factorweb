@@ -4,8 +4,6 @@ var hay_transferencia = true
 var hay_cargo = true
 
 window.onload=function(){
-    // inicializar el encabezado
-    ActualizarHeader();
     
     // objeto_fechas("#id_dmovimiento")
     // objeto_fechas("#id_dtransferencia")

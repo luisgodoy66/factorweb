@@ -1,8 +1,6 @@
 var $table = jQuery('#table')
 
 window.onload=function(){
-    // inicializar el encabezado
-    ActualizarHeader();
 
     $table.bootstrapTable({"locale" : 'es-EC' });
 }

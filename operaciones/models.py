@@ -1,7 +1,7 @@
 from random import choices
 from django.db import models
 from django.forms import BooleanField
-from django.db.models import Sum, Q, F
+from django.db.models import Sum, Q, F, ExpressionWrapper, DateField
 from django.utils.dateparse import parse_date
 
 from bases.models import ClaseModelo
@@ -181,9 +181,12 @@ class Documentos_Manager(models.Manager):
                             ,"cxcliente__cxcliente__ctnombre"
                             , "cxasignacion__cxasignacion"
                             , "ctdocumento"
-                            , "dvencimiento", "cxasignacion__ddesembolso"
+                            , "dvencimiento", "ndiasprorroga"
+                            , "cxasignacion__ddesembolso"
                             , "nsaldo")\
-                    .annotate(dias_vencidos = (date.today() - F('dvencimiento')),
+                    .annotate(vencimiento = ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
+                                                              , output_field=DateField()),
+                              dias_vencidos = (date.today() - F('dvencimiento')),
                               dias_negociados = F('dvencimiento')-F('cxasignacion__ddesembolso'))
     
 class Documentos(ClaseModelo):
@@ -361,9 +364,12 @@ class ChequesAccesorios_Manager(models.Manager):
                         , "documento__cxcliente__cxcliente__ctnombre"
                         , "documento__cxasignacion__cxasignacion"
                         , "documento__ctdocumento"
-                        , "dvencimiento", "documento__cxasignacion__ddesembolso"
+                        , "dvencimiento", "ndiasprorroga"
+                        , "documento__cxasignacion__ddesembolso"
                         , "chequequitado__nsaldo")\
-                .annotate(dias_vencidos = (date.today() - F('dvencimiento')),
+                .annotate(vencimiento =ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
+                                                         , output_field = DateField() ),
+                          dias_vencidos = (date.today() - F('dvencimiento')),
                           dias_negociados = F('dvencimiento')-F('documento__cxasignacion__ddesembolso'),
                           )
 

@@ -6,8 +6,6 @@ var $cobroconmovimiento = jQuery("#cobroconmovimiento")
 var $cobrocontransferencia = jQuery("#cobrocontransferencia")
 
 window.onload=function(){
-    // inicializar el encabezado
-    ActualizarHeader();
 
     // si la lista es de cartera vencida no debe mostrar filtro
     $table.bootstrapTable({locale:"es-EC"});

@@ -251,7 +251,6 @@ def ImpresionFacturasPendientes(request):
         "detalle" : cartera,
         'empresa': id_empresa.empresa,
     }
-#     return render(request, template_path, context)
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'

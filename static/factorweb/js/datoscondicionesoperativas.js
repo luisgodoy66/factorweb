@@ -2,9 +2,6 @@ var $table = jQuery('#table')
 var selections = []
 
 window.onload=function(){
-    // inicializar el encabezado
-    ActualizarHeader();
-    
     // inicializar tabla
     initTable();
     // // cerrar side bar

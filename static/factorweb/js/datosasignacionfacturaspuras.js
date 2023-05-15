@@ -4,8 +4,6 @@ var cliente_id = capturaValor("id_cliente")
 var asignacion_id = capturaValor("asignacion_id")
 
 window.onload=function(){
-    // inicializar el encabezado
-    ActualizarHeader();
 
     // inicializar tabla
     initTable();

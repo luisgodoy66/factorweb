@@ -1,6 +1,4 @@
 window.onload=function(){
-    // inicializar el encabezado
-    ActualizarHeader();
 
     // configuar cambios en los campos de valores
     jQuery('#id_nvalorantesiva, #id_niva, #id_nretencioniva, #id_nretencionrenta,  #id_nvalornonegociado')

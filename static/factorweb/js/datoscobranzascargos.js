@@ -1,9 +1,6 @@
 var $table = jQuery('#table')
 
 window.onload=function(){
-    // inicializar el encabezado
-    ActualizarHeader();
-
     inicializaValor("id_nvalor",capturaValor("total_cargos"))
 
     jQuery('#id_nvalor').change(function(){

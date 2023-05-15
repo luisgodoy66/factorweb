@@ -1,8 +1,4 @@
 // funciones operativas
-function ActualizarHeader(){
-  inicializaValor("solicitudes_pendientes",87)
-}
-
 function EliminarDocumentoDeSolicitudAsignacion(asignacion_id, documento_id, tipo_asignacion, documento){
     MensajeConfirmacion("Eliminar documento " + documento
         + " con referencia " + documento_id +"?",function(){

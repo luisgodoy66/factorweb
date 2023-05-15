@@ -14,9 +14,6 @@ window.onload=function(){
   //  // cerrar side bar
   //   CerrarSideBar();
  
-   // inicializar el encabezado
-    ActualizarHeader();
-
     // configuar cambios en los campos de fecha y valores y select
     jQuery('#condicion_id')
         .change(function(){

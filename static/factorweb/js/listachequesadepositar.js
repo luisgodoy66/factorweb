@@ -6,8 +6,6 @@ var $deposito_cliente = jQuery("#deposito_cc")
 var $ampliar_plazo = jQuery("#ampliarplazo")
 
 window.onload=function(){
-    // inicializar el encabezado
-    ActualizarHeader();
     $table.bootstrapTable({locale:"es-EC"});
     
     // boton de refrescar filtro

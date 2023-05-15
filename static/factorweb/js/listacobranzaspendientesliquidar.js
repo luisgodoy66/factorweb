@@ -3,8 +3,6 @@ var selections = []
 var $btnliquidar = jQuery("#btnliquidar")
 
 window.onload=function(){
-  // inicializar el encabezado
-  ActualizarHeader();
   $table.bootstrapTable({locale:"es-EC"});
   
   // evento de marcar y desmarcar documentos

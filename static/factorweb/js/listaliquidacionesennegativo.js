@@ -7,8 +7,6 @@ var $cobrocontransferencia = jQuery("#cobrocontransferencia")
 const tipo_nd = capturaValor("tipo_nd")
 
 window.onload=function(){
-    // inicializar el encabezado
-    ActualizarHeader();
     $table.bootstrapTable({locale:"es-EC"});
     
     // evento de marcar y desmarcar documentos

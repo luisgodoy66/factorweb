@@ -1,11 +1,6 @@
 var $table = jQuery('#table')
 
 window.onload=function(){
-    // inicializar el encabezado
-    ActualizarHeader();
-    
-    // objeto_fechas("#id_dcobranza")
-    // objeto_fechas("#id_ddeposito")
 
     inicializaValor("id_nvalor",capturaValor("total_cartera"))
 

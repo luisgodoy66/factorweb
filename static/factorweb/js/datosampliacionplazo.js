@@ -15,9 +15,7 @@ window.onload=function(){
   //  // cerrar side bar
   //   CerrarSideBar();
  
-   // inicializar el encabezado
-    ActualizarHeader();
-          
+        
     jQuery('#fechacorte')
         .change(function(){
           RecalcularCargos(ids,capturaValor("fechacorte"));
