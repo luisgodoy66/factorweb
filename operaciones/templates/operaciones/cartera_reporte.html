@@ -32,11 +32,11 @@
                 <table >
                     <tbody>
                         <tr>
-                            <td width="80%"><h2>Antigüedad de la cartera por cliente </h2></td>
+                            <td colspan="2"><h2>{{ empresa }}</h2></td>
                             <td></td>
+                            <td colspan="2"><h1>Antigüedad de la cartera por cliente </h1></td>
                             <td></td>
-                            <td></td>
-                            <td>{% now "Y-m-d" %}</td>
+                            <td>Impresión: {% now "Y-m-d" %}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -77,15 +77,15 @@
                             <tr></tr>
                             <tr>
                                 <td></td>
-                                <td class="numero">{{ totalvm90 |default:0.00}} </td>
-                                <td class="numero">{{ totalv90  |default:0.00}} </td>
-                                <td class="numero">{{ totalv60  |default:0.00}} </td>
-                                <td class="numero">{{ totalv30  |default:0.00}} </td>
-                                <td class="numero">{{ totalx30  |default:0.00}} </td>
-                                <td class="numero">{{ totalx60  |default:0.00}} </td>
-                                <td class="numero">{{ totalx90  |default:0.00}} </td>
-                                <td class="numero">{{ totalxm90 |default:0.00}} </td>
-                                <td class="numero">{{ total |default:0.00}} </td>
+                                <td class="numero"><h4>{{ totalvm90 |default:0.00}}</h4> </td>
+                                <td class="numero"><h4>{{ totalv90  |default:0.00}} </h4></td>
+                                <td class="numero"><h4>{{ totalv60  |default:0.00}}</h4> </td>
+                                <td class="numero"><h4>{{ totalv30  |default:0.00}} </h4></td>
+                                <td class="numero"><h4>{{ totalx30  |default:0.00}} </h4></td>
+                                <td class="numero"><h4>{{ totalx60  |default:0.00}} </h4></td>
+                                <td class="numero"><h4>{{ totalx90  |default:0.00}}</h4> </td>
+                                <td class="numero"><h4>{{ totalxm90 |default:0.00}}</h4> </td>
+                                <td class="numero"><h4>{{ total |default:0.00}}</h4> </td>
                             </tr>
                         </tbody>
                     </table>
@@ -93,6 +93,11 @@
                 </div>
             </div>
         </div>
+        {% if empresa.lgratis %}
+        <footer class="footer">
+            <p>SAAS Margarita desarrollado por Código Bambú</p>
+        </footer>
+        {% endif %}
     </div>
 
 </body>

@@ -218,7 +218,9 @@ def ImpresionAntiguedadCartera(request, ):
         "totalxm90"  : fxm90+axm90+pxm90+qxm90,
         "total" : fvm90+fv90+fv60+fv30+avm90+av90+av60+av30+pvm90+pv90+pv60+pv30
                 +fxm90+fx90+fx60+fx30+axm90+ax90+ax60+ax30+pxm90+px90+px60+px30
-                +qvm90+qv90+qv60+qv30+qx30+qx60+ax90+qxm90    }
+                +qvm90+qv90+qv60+qv30+qx30+qx60+ax90+qxm90,
+        'empresa': id_empresa.empresa,
+                }
 
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')
@@ -246,7 +248,8 @@ def ImpresionFacturasPendientes(request):
     template_path = 'operaciones/detalle_facturaspendientes_reporte.html'
 
     context={
-          "detalle" : cartera
+        "detalle" : cartera,
+        'empresa': id_empresa.empresa,
     }
 #     return render(request, template_path, context)
     # Create a Django response object, and specify content_type as pdf

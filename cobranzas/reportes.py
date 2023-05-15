@@ -59,6 +59,9 @@ def ImpresionCobranzaCartera(request, cobranza_id):
     fecha_protesto=''
     motivo_protesto=''
     nd_protesto = 0
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     # tomar el codigo de asignacion grabado en la solicitud
     cobranza = Documentos_cabecera.objects.filter(id= cobranza_id).first()
     
@@ -135,6 +138,7 @@ def ImpresionCobranzaCartera(request, cobranza_id):
         "fecha_protesto": fecha_protesto,
         "motivo_protesto": motivo_protesto,
         "nd_protesto":nd_protesto,
+        'empresa': id_empresa.empresa
     }
 
     # Create a Django response object, and specify content_type as pdf
@@ -257,7 +261,8 @@ def ImpresionLiquidacion(request, liquidacion_id):
         "detalle" : listacargos,
         "nombre_dc": dc.ctdescripcionenreporte,
         "nombre_gao": gao.ctdescripcionenreporte,
-        "nombre_gaoa": gaoa.ctdescripcionenreporte
+        "nombre_gaoa": gaoa.ctdescripcionenreporte,
+        'empresa': id_empresa.empresa,
     }
 
     # Create a Django response object, and specify content_type as pdf
@@ -284,6 +289,8 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
     fecha_protesto=''
     motivo_protesto=''
     nd_protesto = 0
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     # tomar el codigo de asignacion grabado en la solicitud
     recuperacion = Recuperaciones_cabecera.objects.filter(id= cobranza_id).first()
@@ -427,6 +434,7 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
         "fecha_protesto": fecha_protesto,
         "motivo_protesto": motivo_protesto,
         "nd_protesto":nd_protesto,
+        'empresa': id_empresa.empresa
     }
 
     # Create a Django response object, and specify content_type as pdf
@@ -525,8 +533,16 @@ def ImpresionProtestosPendientes(request):
 
     template_path = 'cobranzas/protestos_reporte.html'
 
+    # totalizar el campo nsaldocartera de la tabla cheques_protestados
+    tot_cobro = Cheques_protestados.objects\
+        .filter(empresa = id_empresa.empresa, leliminado = False, nsaldocartera__gt=0)\
+            .aggregate(total_cartera = Sum('nvalorcartera')
+                       , total_saldo = Sum('nsaldocartera'))
+
     context={
-          "protestos" : protestos
+        "protestos" : protestos,
+        "totales": tot_cobro,
+        'empresa': id_empresa.empresa,
     }
 
     # Create a Django response object, and specify content_type as pdf

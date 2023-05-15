@@ -177,10 +177,14 @@ class Documentos_Manager(models.Manager):
                     .filter(cxtipo = "F", cxestado = "P"
                             , empresa = id_empresa
                             , leliminado = False))\
-                    .values("cxcomprador__cxcomprador__ctnombre","cxcliente__cxcliente__ctnombre"
+                    .values("cxcomprador__cxcomprador__ctnombre"
+                            ,"cxcliente__cxcliente__ctnombre"
                             , "cxasignacion__cxasignacion"
                             , "ctdocumento"
-                            , "dvencimiento", "cxasignacion__ddesembolso", "nsaldo")
+                            , "dvencimiento", "cxasignacion__ddesembolso"
+                            , "nsaldo")\
+                    .annotate(dias_vencidos = (date.today() - F('dvencimiento')),
+                              dias_negociados = F('dvencimiento')-F('cxasignacion__ddesembolso'))
     
 class Documentos(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
@@ -358,7 +362,10 @@ class ChequesAccesorios_Manager(models.Manager):
                         , "documento__cxasignacion__cxasignacion"
                         , "documento__ctdocumento"
                         , "dvencimiento", "documento__cxasignacion__ddesembolso"
-                        , "chequequitado__nsaldo")
+                        , "chequequitado__nsaldo")\
+                .annotate(dias_vencidos = (date.today() - F('dvencimiento')),
+                          dias_negociados = F('dvencimiento')-F('documento__cxasignacion__ddesembolso'),
+                          )
 
 class Cheques_quitados_Manager(models.Manager):
     def antigüedad_cartera(self, id_empresa):
