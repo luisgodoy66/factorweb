@@ -5,13 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Facturas pendientes</title>
+    <title>Cheques pendientes</title>
 
     <style type="text/css">
         @page {
             size: A4;
             margin: 1cm;
-            size:  portrait;
+            size: landscape;
         }
         .table thead th {
                 vertical-align:  top ;
@@ -40,7 +40,7 @@
                         <tr>
                             <td colspan="2"><h2>{{ empresa }}</h2></td>
                             <td></td>
-                            <td colspan="2"><h1>Listado de facturas pendientes </h1></td>
+                            <td colspan="2"><h1>Listado de cheques pendientes </h1></td>
                             <td></td>
                             <td>Impresión: {% now "Y-m-d" %}</td>
                         </tr>
@@ -55,6 +55,7 @@
                             <th>Cliente/Deudor</th>        
                             <th>Asignación</th>        
                             <th>Documento</th>
+                            <th>Cheque</th>
                             <th>Vencimiento</th>
                             <th>Días negociados</th>
                             <th>Días vencidos</th>
@@ -62,26 +63,27 @@
                         </thead>
                         <tbody>
                             <tr></tr>
-                            {% regroup detalle by cxcliente__cxcliente__ctnombre as cartera_list %}
+                            {% regroup detalle by documento__cxcliente__cxcliente__ctnombre as cartera_list %}
                             {% for cliente in cartera_list %}
                             <tr>
                                 <td><h3>{{ cliente.grouper }}</h3>
                                 </td>
                             </tr>
-                                {% with total=1000 %}
+                                {% with total=0 %}
                                 {% for item in cliente.list %}
-                                    {% with total=total|add:item.nsaldo %}
+                                    {% with total=total|add:item.ntotal %}
                             <tr>
-                                <td>{{ item.cxcomprador__cxcomprador__ctnombre }}</td>
-                                <td>{{ item.cxasignacion__cxasignacion }}</td>
-                                <td>{{ item.ctdocumento }}</td>
-                                <td>{{ item.vencimiento |date:"Y-m-d"}}</td>
+                                <td>{{ item.documento__cxcomprador__cxcomprador__ctnombre }}</td>
+                                <td>{{ item.documento__cxasignacion__cxasignacion }}</td>
+                                <td>{{ item.documento__ctdocumento }}</td>
+                                <td width="20%">{{ item.descripcion }}</td>
+                                <td class="centrado">{{ item.vencimiento |date:"Y-m-d"}}</td>
                                 <td>{{ item.dias_negociados }}</td>
                                 <td> {% if item.ndiasprorroga > 0 %}<h4>{% endif %}
                                     {{ item.dias_vencidos }}
                                     {% if item.ndiasprorroga > 0 %}</h4>{% endif %}
                                 </td>
-                                <td class="numero">{{ item.nsaldo }}</td>
+                                <td class="numero">{{ item.ntotal }}</td>
                             </tr>
                                     {% endwith %}
                                 {% endfor %}
@@ -89,6 +91,7 @@
                             {% endfor %}
                             <tr></tr>
                             <tr>
+                                <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>

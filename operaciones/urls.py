@@ -19,7 +19,7 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
-    ImpresionAntiguedadCartera, ImpresionFacturasPendientes
+    ImpresionAntiguedadCartera, ImpresionFacturasPendientes, ImpresionAccesoriosPendientes
 
 urlpatterns = [
 # datos operativos
@@ -102,6 +102,8 @@ urlpatterns = [
          , name='antigüedad_por_cliente'),
     path('impresioncarterapendiente', ImpresionFacturasPendientes
          , name='detalle_facturas_pendientes'),
+    path('impresionchequespendientes', ImpresionAccesoriosPendientes
+         , name='detalle_cheques_pendientes'),
 # desembolsos
     path('listaasignacionespendientesdesembolsar/',AsignacionesPendientesDesembolsarView.as_view(), \
         name='listaasignacionespendientesdesembolsar'),

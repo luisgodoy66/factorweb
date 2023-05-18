@@ -239,17 +239,53 @@ def ImpresionAntiguedadCartera(request, ):
 
 def ImpresionFacturasPendientes(request):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-     
-    facturas = Documentos.objects.cartera_pendiente(id_empresa.empresa)
-    cheques_quitados = ChequesAccesorios.objects.cartera_pendiente(id_empresa.empresa)
+    totalfacturas=0
+    totalquitados=0
 
-    cartera = facturas.union(cheques_quitados)
-    
     template_path = 'operaciones/detalle_facturaspendientes_reporte.html'
+
+    facturas = Documentos.objects.cartera_pendiente(id_empresa.empresa)
+    totalfacturas = facturas.aggregate(total = Sum('nsaldo'))
+    if not totalfacturas['total']: totalfacturas['total']=0
+
+    cheques_quitados = ChequesAccesorios.objects.cartera_pendiente(id_empresa.empresa)
+    totalquitados = cheques_quitados.aggregate(total = Sum('chequequitado__nsaldo'))
+    if not totalquitados['total']: totalquitados['total']=0
+    
+    cartera = facturas.union(cheques_quitados).order_by('cxcliente__cxcliente__ctnombre')
+    
+    context={
+        "detalle" : cartera,
+        'empresa': id_empresa.empresa,
+        'total' : totalfacturas['total'] + totalquitados['total'],
+    }
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+def ImpresionAccesoriosPendientes(request):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+     
+    cartera = ChequesAccesorios.objects.cheques_pendientes(id_empresa.empresa)
+    total = cartera.aggregate(total = Sum('ntotal'))
+
+    template_path = 'operaciones/detalle_accesoriospendientes_reporte.html'
 
     context={
         "detalle" : cartera,
         'empresa': id_empresa.empresa,
+        'total': total['total']
     }
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')

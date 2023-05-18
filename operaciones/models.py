@@ -1,7 +1,8 @@
 from random import choices
 from django.db import models
 from django.forms import BooleanField
-from django.db.models import Sum, Q, F, ExpressionWrapper, DateField
+from django.db.models import Sum, Q, F, ExpressionWrapper, DateField, CharField, Value
+from django.db.models.functions import Concat
 from django.utils.dateparse import parse_date
 
 from bases.models import ClaseModelo
@@ -187,7 +188,9 @@ class Documentos_Manager(models.Manager):
                     .annotate(vencimiento = ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
                                                               , output_field=DateField()),
                               dias_vencidos = (date.today() - F('dvencimiento')),
-                              dias_negociados = F('dvencimiento')-F('cxasignacion__ddesembolso'))
+                              dias_negociados = F('dvencimiento')-F('cxasignacion__ddesembolso'),
+                              )\
+                    .order_by('cxcliente__cxcliente__ctnombre')
     
 class Documentos(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
@@ -369,9 +372,35 @@ class ChequesAccesorios_Manager(models.Manager):
                         , "chequequitado__nsaldo")\
                 .annotate(vencimiento =ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
                                                          , output_field = DateField() ),
-                          dias_vencidos = (date.today() - F('dvencimiento')),
+                          dias_vencidos = date.today() - F('dvencimiento'),
                           dias_negociados = F('dvencimiento')-F('documento__cxasignacion__ddesembolso'),
-                          )
+                          )\
+                .order_by('documento__cxcliente__cxcliente__ctnombre')
+
+    def cheques_pendientes(self, id_empresa):
+        return self.filter(laccesorioquitado = False, cxestado='A'
+                , leliminado = False, lcanjeado = False
+                , empresa = id_empresa
+                , documento__cxasignacion__cxestado = "P"
+                , documento__cxasignacion__leliminado = False)\
+                .values("documento__cxcomprador__cxcomprador__ctnombre"
+                        , "documento__cxcliente__cxcliente__ctnombre"
+                        , "documento__cxasignacion__cxasignacion"
+                        , "documento__ctdocumento"
+                        , "dvencimiento", "ndiasprorroga"
+                        , "documento__cxasignacion__ddesembolso"
+                        , "ntotal")\
+                .annotate(vencimiento =ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
+                                                         , output_field = DateField() ),
+                          dias_vencidos = date.today() - F('dvencimiento'),
+                          dias_negociados = F('dvencimiento')-F('documento__cxasignacion__ddesembolso'),
+                          descripcion =  Concat('cxbanco__ctbanco'
+                                                , Value(' CTA.') 
+                                                , 'ctcuenta'
+                                                , Value(' CH/')
+                                                , ('ctcheque'), output_field=CharField())
+                          )\
+                .order_by('documento__cxcliente__cxcliente__ctnombre')
 
 class Cheques_quitados_Manager(models.Manager):
     def antigüedad_cartera(self, id_empresa):
