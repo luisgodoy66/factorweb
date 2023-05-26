@@ -1,0 +1,52 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" rol="form" id="frmLinea" class="form-horizontal" enctype="multipart/form-data"
+            {% if nueva %}
+                action="{% url 'contabilidad:cuentatipofactoring_nueva' tipofactoring tipofactoring_id %}"
+            {% else %}
+                action="{% url 'contabilidad:cuentatipofactoring_editar' tipofactoring tipofactoring_id pk %}"
+            {% endif %}
+            >
+            <!-- <div class="col"> -->
+            <div class="card">
+
+                {% csrf_token %}
+                <div class="card-header">
+                    <strong>Cuenta contable </strong> 
+                    para {{ tipofactoring }}
+                </div>
+                
+                <div class="card-body card-block">
+                    <div class="row form-group">
+                        <div class="col-12 col-md-9">
+                            <input id="id_tipofactoring" name="tipofactoring" 
+                            value="{{ tipofactoring_id }}" hidden>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-2"><label for="id_nvalor" 
+                            class=" form-control-label">
+                            {{ form.cuenta.label }}</label></div>
+                        <div class="col-md-10">
+                            {{ form.cuenta}}
+                            <!-- <small class="form-text text-muted">Máximo 30 caracteres</small> -->
+                        </div>
+                    </div>
+                </div>    
+                
+                <div class="card-footer">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="return CerrarModal()">
+                        <i class="fa fa-ban"></i> Cerrar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+                </div>
+            </div>
+            <!-- </div> -->
+        </form>
+
+    </div>
+</div>
+

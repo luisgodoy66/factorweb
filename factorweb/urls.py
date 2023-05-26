@@ -25,6 +25,7 @@ urlpatterns = [
     path('solicitudes/',include(('solicitudes.urls','solicitudes'),namespace='solicitudes')),
     path('cobranzas/',include(('cobranzas.urls','cobranzas'),namespace='cobranzas')),
     path('cuentasconjuntas/',include(('cuentasconjuntas.urls','cuentasconjuntas'),namespace='cuentasconjuntas')),
+    path('contabilidad/',include(('contabilidad.urls','contabilidad'),namespace='contabilidad')),
     
     path('admin/', admin.site.urls),
 ]

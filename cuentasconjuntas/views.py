@@ -74,6 +74,10 @@ class CuentasBancariasEdit(LoginRequiredMixin, generic.UpdateView):
     success_url= reverse_lazy("cuentasconjuntas:listacuentasconjuntas")
     login_url = 'bases:login'
 
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+
     def get_context_data(self, **kwargs):
         pk = self.kwargs.get('pk')
 
