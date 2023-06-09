@@ -3,7 +3,9 @@ from .views import CuentasView, CuentasEspecialesEdit, BuscarCuentasEspeciales\
     , CuentasEspecialesNew, CuentasBancosView, CuentaBancoNew, CuentaBancoEdit\
     , CuentasTiposFactoringView, CuentaTipoFactoringNew, CuentaTipoFactoringEdit\
     , CuentasTasasFactoringView, CuentasTasaTiposFactoringView\
-     , CuentaTasaTipoFactoringNew, CuentaTasaTipoFactoringEdit
+     , CuentaTasaTipoFactoringNew, CuentaTasaTipoFactoringEdit,PendientesGenerarFacturaView\
+     , GenerarFactura, ObtenerSecuenciaFactura, DesembolsosPendientesView
+from .reportes import ImpresionDiarioContable
 
 urlpatterns = [
     path('listacuentascontables/',CuentasView.as_view()
@@ -34,4 +36,11 @@ urlpatterns = [
          ,CuentaTasaTipoFactoringNew.as_view(), name="cuentatasatipofactoring_nueva"),
     path('cuentatasatipofactoringeditar/<tipofactoring>/<tipofactoring_id>/<tasafactoring>/<tasafactoring_id>/<int:pk>'
          ,CuentaTasaTipoFactoringEdit.as_view(), name="cuentatasatipofactoring_editar"),
+    path('listapendientesgenerarfactura',PendientesGenerarFacturaView.as_view()
+         , name="listapendientesgenerarfactura"),
+    path('generarfactura/<int:pk>/<tipo>/<operacion>',GenerarFactura, name="generar_factura"),
+    path('obtenersecuenciafactura/<int:punto_emision>',ObtenerSecuenciaFactura,),
+    path('imprimirdiariocontable/<int:diario_id>',ImpresionDiarioContable,),
+    path('listadesembolsospendientes',DesembolsosPendientesView.as_view()
+         , name="listadesembolsospendientes"),
 ]

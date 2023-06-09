@@ -109,18 +109,7 @@ class Tasas_factoring(ClaseModelo):
         self.cxtasa=self.cxtasa.upper()
         self.cttasa=self.cttasa.upper()
         return super(Tasas_factoring, self).save()
-
-# class Tipos_documentos(ClaseModelo):
-#     cxtipodocumento = models.CharField(max_length=1)
-#     cttipodocumento = models.CharField(max_length=15)
-#     ctabreviacion = models.CharField(max_length=5, blank=True)
-#     lprincipal = models.BooleanField(default=True)
-#     laccesorio = models.BooleanField(default=False)
-#     lefectocobro = models.BooleanField(default=True)
-
-#     def __str__(self):
-#         return self.cttipodocumento
-    
+   
 class Tipos_factoring(ClaseModelo):
     cxtipofactoring = models.CharField(max_length=3 , )
     cttipofactoring = models.CharField(max_length= 40) 
@@ -146,9 +135,23 @@ class Tipos_factoring(ClaseModelo):
 
     def __str__(self):
         return self.ctabreviacion
+    
     def save(self):
         self.ctinicialesliquidacioncobranza=self.ctinicialesliquidacioncobranza.upper()
-        # self.ctinicialesasignacion=self.ctinicialesasignacion.upper()
+        self.ctinicialesasignacion=self.ctinicialesasignacion.upper()
         self.cxtipofactoring=self.cxtipofactoring.upper()
         self.cttipofactoring=self.cttipofactoring.upper()
         return super(Tipos_factoring, self).save()
+
+class Puntos_emision(ClaseModelo):
+    cxestablecimiento = models.CharField(max_length=3)
+    cxpuntoemision = models.CharField(max_length=3)
+    ctdescripcion = models.CharField(max_length=30)
+    ctdireccion = models.TextField()
+    lgeneracionxmldocumentoelectronico = models.BooleanField(default=True)
+    nultimasecuencia = models.IntegerField(default=0)
+    lactiva = models.BooleanField(default=True)
+
+    def __str__(self):
+        return "{}-{}".format(self.cxestablecimiento, self.cxpuntoemision)
+

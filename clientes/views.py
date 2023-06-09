@@ -33,7 +33,9 @@ class ClientesView(LoginRequiredMixin, generic.ListView):
         return qs
     
     def get_context_data(self, **kwargs):
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False, empresa = id_empresa.empresa).count()
         context = super(ClientesView, self).get_context_data(**kwargs)
         context["solicitudes_pendientes"]=sp
 

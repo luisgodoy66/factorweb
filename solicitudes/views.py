@@ -18,7 +18,7 @@ from .forms import AsignacionesForm, ChequesForm, DocumentosForm\
 from empresa.models import Tipos_factoring
 from .models import Asignacion, ChequesAccesorios, Documentos, Clientes
 from clientes.models import Datos_compradores
-from operaciones.models import Datos_participantes
+from empresa.models import Datos_participantes
 from pais.models import Bancos, Feriados
 from bases.models import Usuario_empresa
 

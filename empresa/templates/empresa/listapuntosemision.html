@@ -4,9 +4,9 @@
         <div class="page-header float-right">
             <div class="page-title">
                 <ol class="breadcrumb text-right">
-                    <li><a href="#">operaciones</a></li>
-                    <li><a href="#">cuentas compartidas</a></li>
-                    <li class="active">cuentas</li>
+                    <li><a href="#">contabilidad</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li class="active">puntos de emisión</li>
                 </ol>
             </div>
         </div>
@@ -16,16 +16,12 @@
     <div class="card bg-flat-color-0">
         <div class="card-body">
             <div class="dropdown float-right">
-                <button class="btn bg-transparent dropdown-toggle theme-toggle " 
-                    type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
                     <i class="fa fa-bars"></i>
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                     <div class="dropdown-menu-content">
-                        <a class="dropdown-item" 
-                        onclick="return AbrirModal('{% url 'cuentasconjuntas:cuentabancaria_nueva' %}')"
-                            >Nuevo
-                        </a>
+                        <a class="dropdown-item" href="{% url 'empresa:puntoemision_nuevo' %}">Nuevo</a>
                         <a class="dropdown-item" href="#">Imprimir</a>
                     </div>
                 </div>
@@ -40,7 +36,7 @@
                 {% if error %}
                     {{ error }}
                 {% else %}
-                 No hay cuentas registrados.
+                 No hay puntos de emisión registrados.
                {% endif %}
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -53,25 +49,23 @@
                 <table class="table table-striped table-bordered" id="bootstrap-data-table-export">
                     <thead>
                         <th>Id</th>
-                        <th>Cliente</th>
-                        <th>Cuenta</th>
-                        <th>Activa</th>
+                        <th>Nombre</th>
+                        <th>Serie</th>
+                        <th>Dirección</th>
+                        <th>Genera XML para facturación electrónica</th>
                         <th class="all">Acciones</th>
                     </thead>
                     <tbody>
                         {% for item in consulta %}
                         <tr>
                             <td>{{ item.id }}</td>
-                            <td>{{ item.cxcliente.cxcliente.ctnombre }}</td>
+                            <td>{{ item.ctdescripcion }}</td>
                             <td>{{ item }}</td>
-                            <td>{{ item.lactiva }}</td>
+                            <td>{{ item.ctdireccion }}</td>
+                            <td>{{ item.lgeneracionxmldocumentoelectronico }}</td>
                             <td>
-                                <button class="btn btn-warning btn-sm"  title="Editar"
-                                        onclick="return AbrirModal(
-                                            '{% url 'cuentasconjuntas:cuentabancaria_editar' item.id %}')"
-                                        role="button">
-                                    <i class="fa fa-edit"></i>
-                                </button>
+                                <a href="{% url 'empresa:puntoemision_editar' item.id %}"  title="Editar"
+                                    class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>
                                 <a href="#" class="btn btn-danger btn-sm" role="button"><i class="fa fa-exclamation"></i></a>
                             </td>
                         </tr>

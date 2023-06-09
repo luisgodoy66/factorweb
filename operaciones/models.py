@@ -6,8 +6,7 @@ from django.db.models.functions import Concat
 from django.utils.dateparse import parse_date
 
 from bases.models import ClaseModelo
-from empresa.models import Clases_cliente, Datos_participantes \
-    , Tipos_factoring, Cuentas_bancarias
+from empresa.models import Clases_cliente, Tipos_factoring, Cuentas_bancarias
 from clientes.models import Datos_generales as Datos_generales_cliente\
     , Cuenta_transferencia, Datos_compradores
 from pais.models import Bancos
@@ -85,7 +84,9 @@ class Asignacion(ClaseModelo):
         decimal_places= 2, default= 0)
     lcartacesiongenerada = models.BooleanField(default=False, null=True) 
     nmayorplazonegociacion = models.SmallIntegerField(default=0, )
-
+    lfacturagenerada = models.BooleanField(default=False)
+    nporcentajeiva = models.DecimalField(max_digits=5, decimal_places=2, default=12)
+    
     def __str__(self):
         return self.cxasignacion
 
@@ -665,7 +666,6 @@ class Desembolsos(ClaseModelo):
     lcontabilizado = models.BooleanField(default= False)
     dcontabilizado = models.DateField(null= True)
     cxasientodiario = models.CharField(max_length=8, blank=True,null=True)
-    nporcentajeiva = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
         return self.cxformapago
@@ -733,6 +733,8 @@ class Ampliaciones_plazo_cabecera(ClaseModelo):
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     notadebito = models.OneToOneField(Notas_debito_cabecera
         ,related_name="ampliacion_notadedebito", on_delete=models.CASCADE)
+    lfacturagenerada = models.BooleanField(default=False)
+    nporcentajeiva = models.DecimalField(max_digits=5, decimal_places=2, default=12)
 
     def __str__(self):
         return self.notadebito.cxnotadebito

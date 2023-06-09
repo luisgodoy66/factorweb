@@ -2,7 +2,7 @@ from dataclasses import fields
 from django import forms
 
 from .models import Clases_cliente, Datos_participantes, \
-    Tipos_factoring, Tasas_factoring, Cuentas_bancarias, Localidades
+    Tipos_factoring, Tasas_factoring, Cuentas_bancarias, Localidades, Puntos_emision
 from pais.models import Bancos
 
 class ParticipanteForm(forms.ModelForm):
@@ -176,3 +176,26 @@ class LocalidadForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
+
+class PuntoEmisionForm(forms.ModelForm):
+    class Meta:
+        model = Puntos_emision
+        fields=[
+            'cxestablecimiento', 'cxpuntoemision', 'ctdescripcion', 'ctdireccion'
+            , 'lgeneracionxmldocumentoelectronico', 'lactiva', 'nultimasecuencia'
+        ]
+        labels={
+            'cxestablecimiento':'Establecimiento', 'cxpuntoemision':'Punto de emisión'
+            , 'ctdescripcion':'Descripción', 'ctdireccion':'Dirección'
+            , 'lgeneracionxmldocumentoelectronico':'Generar xml', 'lactiva':'Activa'
+            , 'nultimasecuencia': 'Última secuencia generada'}
+        
+        widgets={'ctdireccion': forms.Textarea(attrs={'rows': '3'}),}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+            

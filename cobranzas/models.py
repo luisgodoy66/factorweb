@@ -169,6 +169,7 @@ class Liquidacion_cabecera(ClaseModelo):
     ddesembolso= models.DateTimeField()
     ldesembolsada = models.BooleanField(default=False)
     cxestado = models.CharField(max_length=1, default='A')
+    lfacturagenerada = models.BooleanField(default=False)
 
     def __str__(self):
         return self.cxliquidacion

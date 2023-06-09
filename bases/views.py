@@ -41,15 +41,6 @@ class HomeSinPrivilegios(LoginRequiredMixin, generic.TemplateView):
     login_url = "bases:login"
     template_name="bases/sin_privilegios.html"
 
-# def SolicitudesPendientes(request):
-#     template_name='bases/home.html'
-
-#     sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
-#     datos = {
-#         'asignaciones_pendientes':sp
-#     }
-#     return render(request, template_name, datos)
-
 def enviarPost(consulta):
     # se ejecuta en vistas que llaman a stored procedures con parametros OUT.
     # El fetchone regresará una arreglo de los parámetros de salida del tipo:

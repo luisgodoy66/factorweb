@@ -46,7 +46,8 @@ class DatosOperativosView(LoginRequiredMixin, generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super(DatosOperativosView, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P'
+                                                        ,leliminado=False).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -63,7 +64,8 @@ class AsignacionesView(LoginRequiredMixin, generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super(AsignacionesView, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects\
+            .filter(cxestado='P', leliminado=False).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -86,7 +88,8 @@ class AsignacionesConsulta(LoginRequiredMixin, generic.ListView):
         context = super(AsignacionesConsulta, self).get_context_data(**kwargs)
         context["desde"] = desde
         context["hasta"] =hasta
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects\
+            .filter(cxestado='P', leliminado=False).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -98,12 +101,15 @@ class AsignacionesPendientesDesembolsarView(LoginRequiredMixin, generic.ListView
 
     def get_queryset(self):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        return Asignacion.objects.filter(cxestado='L', empresa = id_empresa.empresa\
-            ,leliminado = False, ddesembolso__lte = date.today())
+        return Asignacion.objects.filter(cxestado='L'
+                                         , empresa = id_empresa.empresa
+                                         , leliminado = False
+                                         , ddesembolso__lte = date.today())
 
     def get_context_data(self, **kwargs):
         context = super(AsignacionesPendientesDesembolsarView, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects\
+            .filter(cxestado='P', leliminado=False).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -141,7 +147,8 @@ class MaestroMovimientoNew(LoginRequiredMixin, generic.CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(MaestroMovimientoNew, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects\
+            .filter(cxestado='P', leliminado=False).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -159,7 +166,8 @@ class MaestroMovimientoEdit(LoginRequiredMixin, generic.UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(MaestroMovimientoEdit, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects\
+            .filter(cxestado='P', leliminado=False).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -171,12 +179,14 @@ class CondicionesOperativasView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        qs=Condiciones_operativas_cabecera.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        qs=Condiciones_operativas_cabecera.objects\
+            .filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self, **kwargs):
         context = super(CondicionesOperativasView, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects\
+            .filter(cxestado='P', leliminado=False).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -271,7 +281,8 @@ class DesembolsosConsulta(LoginRequiredMixin, generic.TemplateView):
         context = super(DesembolsosConsulta, self).get_context_data(**kwargs)
         context["desde"] = desde
         context["hasta"] = hasta
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects\
+            .filter(cxestado='P', leliminado=False).count()
         context['solicitudes_pendientes'] = sp
         return context
  
@@ -1018,11 +1029,14 @@ def AceptarDocumentos(request):
     pniva=objeto["niva"]
     psinstruccionpago=objeto["sinstruccionpago"]
     nusuario = request.user.id
+    porcentaje_iva = objeto["porcentaje_iva"]
 
     resultado=enviarPost("CALL uspAceptarAsignacion( {0},'{1}', '{2}',{3},{4}\
-        ,{5},{6},'{7}',{8},'{9}','')"
+        ,{5},{6},'{7}',{8},'{9}'\
+        ,{10},'')"
         .format(pid_asignacion,pdnegociacion,pddesembolso,pnanticipo,pngao\
-            ,pndescuentocartera,pniva,psinstruccionpago,nusuario, pslocalidad))
+            ,pndescuentocartera,pniva,psinstruccionpago,nusuario, pslocalidad
+            , porcentaje_iva))
 
     return HttpResponse(resultado)
 

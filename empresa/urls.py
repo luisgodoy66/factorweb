@@ -3,7 +3,8 @@ from .views import TiposFactoringView, TipoFactoringNew , TipoFactoringEdit\
     , TasasFactoringView, TasaFactoringNew, TasaFactoringEdit\
     , ClasesParticipanteView, ClasesParticipanteNew\
     , CuentasBancariasView, CuentaBancariaNew, CuentaBancariaEdit\
-    , LocalidadesView, LocalidadesNew, LocalidadesEdit
+    , LocalidadesView, LocalidadesNew, LocalidadesEdit, PuntosEmisionView\
+    , PuntoEmisionNew, PuntoEmisionEdit, DatosEmpresaEdit
 
 urlpatterns = [
     path('listatiposfactoring/',TiposFactoringView.as_view()
@@ -31,4 +32,9 @@ urlpatterns = [
     path('listalocalidades/',LocalidadesView.as_view(),name='listalocalidades'),
     path('localidadnueva/',LocalidadesNew.as_view(),name='localidad_nueva'),
     path('localidadedit/<int:pk>',LocalidadesEdit.as_view(),name='localidad_editar'),
- ]
+    path('listapuntosemision',PuntosEmisionView.as_view(),name='listapuntosemision'),
+    path('puntoemisionnuevo/',PuntoEmisionNew.as_view(), name='puntoemision_nuevo'),
+    path('puntoemisioneditar/<int:pk>',PuntoEmisionEdit.as_view()
+    , name='puntoemision_editar'),
+    path('datosempresa/<int:pk>',DatosEmpresaEdit.as_view(), name='datosempresa'),
+]

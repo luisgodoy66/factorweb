@@ -1,0 +1,109 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">configuración</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li class="active">datos de la empresa</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmConfirmacion" enctype="multipart/form-data" class="form-horizontal">
+    <div class="card bg-flat-color-0">
+        {% csrf_token %}
+        <div class="card-header">
+            <strong>Datos de la empresa</strong> 
+        </div>
+        <div class="card-body">
+            <!-- cargos -->
+            <div class="col-lg-12">
+                    <div class="row form-group">
+                        <div class="col-md-3"><label for="id_ctruccompania" 
+                            class=" form-control-label">
+                            {{ form.ctruccompania.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.ctruccompania}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_ctnombre" class=" form-control-label">
+                            {{ form.ctnombre.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.ctnombre}}
+                        </div>
+                            
+                    </div>
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_ctgerente" class=" form-control-label">
+                            {{ form.ctgerente.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.ctgerente}}
+                        </div>
+                            
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_ctdireccion" class=" form-control-label">
+                            {{ form.ctdireccion.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.ctdireccion}}
+                        </div>                        
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_ctcontribuyenteespecial" class=" form-control-label">
+                            {{ form.ctcontribuyenteespecial.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.ctcontribuyenteespecial}}
+                        </div>                        
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_lregimenrimpe" class=" form-control-label">
+                            {{ form.lregimenrimpe.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.lregimenrimpe}}
+                        </div>                        
+                    </div>
+
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <a href="{% url 'bases:dashboard' %}" 
+                class="btn btn-danger btn-sm">
+                <i class="fa fa-ban"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa fa-dot-circle-o"></i> Grabar
+            </button>
+
+        </div>
+
+
+    </div>
+ 
+</form>
+{% endblock %}

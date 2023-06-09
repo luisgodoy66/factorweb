@@ -1,0 +1,121 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">contabilidad</a></li>
+                    <li><a href="#">procesos</a></li>
+                    <li><a href="{% url 'contabilidad:listapendientesgenerarfactura' %}">generar factura</a></li>
+                    <li class="active">{{operacion}}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmGenera" enctype="multipart/form-data" class="form-horizontal">
+    <!-- <div class="col-lg-6"> -->
+        <div class="card">
+            {% csrf_token %}
+            <div class="card-header">
+                <strong>generar factura</strong> 
+            </div>
+            <div hidden>
+               {{form.cliente}}
+               {{form.nporcentajeiva}}
+            </div>
+            <div class="card-body card-block">
+                <!-- columna izquierda -->
+                <div class="col-lg-6">
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            <label for="id_puntoemision" class=" form-control-label">
+                               {{form.puntoemision.label}}</label></div>
+                        <div class="col-md-6">{{form.puntoemision}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            <label for="id_cxnumerofactura" class=" form-control-label">
+                               {{form.cxnumerofactura.label}}</label></div>
+                        <div class="col-md-6">{{form.cxnumerofactura}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            <label for="id_demision" class=" form-control-label">
+                               {{form.demision.label}}</label></div>
+                        <div class="col-md-6">{{form.demision}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            <label for="id_ctconcepto" class=" form-control-label">
+                               Concepto</label></div>
+                        <div class="col-md-6">
+                            <textarea type="text" class="form-control" 
+                            required id="concepto" rows="3" name="concepto">{{concepto}}
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            <label for="id_nvalor" class=" form-control-label">
+                               {{form.nbaseiva.label}}</label></div>
+                        <div class="col-md-6">{{form.nbaseiva}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            <label for="id_nvalor" class=" form-control-label">
+                               {{form.nbasenoiva.label}}</label></div>
+                        <div class="col-md-6">{{form.nbasenoiva}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            <label for="id_nvalor" class=" form-control-label">
+                               {{form.niva.label}}</label></div>
+                        <div class="col-md-6">{{form.niva}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            <label for="id_nvalor" class=" form-control-label">
+                               {{form.nvalor.label}}</label></div>
+                        <div class="col-md-6">{{form.nvalor}}</div>
+                    </div>
+
+
+                </div>
+                <div class="col-lg-6">
+                    <div class="alert alert-info" role="alert">
+                        Al grabar la generación de factura, el sistema creará un archivo XML con los datos de la factura
+                        para su firma y autorización y lo guardará en la carpeta Descargas con el nombre 
+                        correspondiente al número de autorización.
+                    </div>
+
+                </div>
+            </div>    
+            
+            <div class="card-footer">
+                <a href="{% url 'contabilidad:listapendientesgenerarfactura' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Grabar
+                </button>
+            </div>
+        </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<script type="text/javascript" 
+    src="{% static 'factorweb/js/datosgenerafactura.js' %}">
+</script>
+{% endblock %}

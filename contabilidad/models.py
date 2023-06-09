@@ -2,7 +2,9 @@ from django.db import models
 
 # Create your models here.
 from bases.models import ClaseModelo
-from empresa.models import Cuentas_bancarias, Tipos_factoring, Tasas_factoring
+from empresa.models import Cuentas_bancarias, Tipos_factoring, Tasas_factoring\
+    , Puntos_emision
+from clientes.models import Datos_generales
 
 class Plan_cuentas(ClaseModelo):
     cxcuenta =  models.CharField( max_length=15)
@@ -46,12 +48,11 @@ class Diario_cabecera(ClaseModelo):
         return self.ctconcepto
 
 class Transaccion(ClaseModelo):
+    diario = models.ForeignKey(Diario_cabecera, on_delete=models.CASCADE)
     cxcuenta = models.ForeignKey(Plan_cuentas, on_delete=models.CASCADE)
     cxtipo = models.CharField( max_length=1) 
     nvalor = models.DecimalField(max_digits= 10, decimal_places= 2)
     cxreferencia= models.CharField(max_length=30)
-    dcontabilizado = models.DateField()
-    cxtransaccion = models.CharField(max_length= 10)
     # norden = models.SmallIntegerField
 
 class Cuentas_bancos(ClaseModelo):
@@ -59,10 +60,16 @@ class Cuentas_bancos(ClaseModelo):
                               , related_name="cuenta_banco")
     cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT)
 
+    def __str__(self):
+        return self.cuenta
+
 class Cuentas_tiposfactoring(ClaseModelo):
     tipofactoring = models.OneToOneField(Tipos_factoring, on_delete=models.RESTRICT
                                          , related_name="cuenta_tipofactoring")
     cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT)
+
+    def __str__(self):
+        return self.cuenta
 
 class Cuentas_tasasfactoring(ClaseModelo):
     tasafactoring = models.ForeignKey(Tasas_factoring, on_delete=models.RESTRICT
@@ -70,3 +77,49 @@ class Cuentas_tasasfactoring(ClaseModelo):
     tipofactoring = models.ForeignKey(Tipos_factoring, on_delete=models.RESTRICT
                                       , related_name="cuenta_tasatipofactoring")
     cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT)
+
+    def __str__(self):
+        return self.cuenta
+
+class Factura_venta(ClaseModelo):
+    TIPOS_DE_OPERACION = (
+        ('LA', 'Liquidación de asignación'),
+        ('LC', 'Liquidación de cobranza'),
+        ('AP', 'Ampliación de plazo'),
+    )
+    cliente = models.ForeignKey(Datos_generales, on_delete=models.RESTRICT)
+    puntoemision = models.ForeignKey(Puntos_emision, on_delete=models.RESTRICT)
+    cxnumerofactura = models.CharField(max_length=9)
+    demision = models.DateField()
+    cxestado = models.CharField(max_length=1, default='A')
+    cxtipodocumento = models.CharField(max_length=2)
+    nbasenoiva = models.DecimalField(max_digits=10, decimal_places=2)
+    nbaseiva = models.DecimalField(max_digits=10, decimal_places=2)
+    niva = models.DecimalField(max_digits=10, decimal_places=2)
+    nvalor = models.DecimalField(max_digits=10, decimal_places=2)
+    nsaldo = models.DecimalField(max_digits=10, decimal_places=2)
+    ldocumentoelectronicogenerado = models.BooleanField(default=False)
+    nporcentajeiva = models.DecimalField(max_digits=5, decimal_places=2, default=12)
+    cxtipooperacion = models.CharField(max_length=2, choices= TIPOS_DE_OPERACION
+        ,null=True)
+    operacion = models.BigIntegerField(null=True)
+    cxasiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
+                                     , null=True)
+
+    def __str__(self):
+        return "{}-{}-{}".format(self.puntoemision.cxestablecimiento
+                                 , self.puntoemision.cxpuntoemision, self.cxnumerofactura)
+
+class Items_facturaventa(ClaseModelo):
+    factura = models.ForeignKey(Factura_venta, on_delete=models.RESTRICT)
+    item = models.ForeignKey(Tasas_factoring, on_delete=models.RESTRICT)
+    nvalor = models.DecimalField(max_digits=10, decimal_places=2)
+    lcargaiva = models.BooleanField()
+
+class Impuestos_facturaventa(ClaseModelo):
+    factura = models.ForeignKey(Factura_venta, on_delete=models.RESTRICT)
+    cximpuesto = models.CharField(max_length=3)
+    cxporcentaje = models.CharField(max_length=5)
+    nbase = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+

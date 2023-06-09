@@ -1,7 +1,7 @@
 from django import forms
 from .models import Cuentas_especiales, Plan_cuentas, Cuentas_bancos\
-    , Cuentas_tiposfactoring, Cuentas_tasasfactoring
-from empresa.models import Cuentas_bancarias, Tipos_factoring, Tasas_factoring
+    , Cuentas_tiposfactoring, Cuentas_tasasfactoring, Factura_venta
+from empresa.models import Cuentas_bancarias, Tipos_factoring, Puntos_emision
 
 class CuentasEspecialesForm(forms.ModelForm):
     class Meta:
@@ -13,7 +13,7 @@ class CuentasEspecialesForm(forms.ModelForm):
         ]
         labels={'cuentaporcobrar' :'Cuenta por cobrar'
                 ,'pagoconcajachica':'Pago con caja chica'
-                , 'sobrepago':'sbrepago'
+                , 'sobrepago':'Sobrepago'
                 , 'cuentaconjunta':'Cuenta compartida'
                 , 'protesto':'Protesto'
                 , 'cuentaivaganado':'IVA ganado'
@@ -131,3 +131,44 @@ class CuentasTasaTiposFactoringForm(forms.ModelForm):
                 .order_by('cxcuenta')
             self.fields['tipofactoring'].queryset = Tipos_factoring.objects\
                 .filter(empresa=empresa, leliminado = False, )
+
+class FacturaVentaForm(forms.ModelForm):
+    class Meta:
+        model=Factura_venta
+        fields = ['puntoemision', 'cxnumerofactura', 'demision', 'nbasenoiva'
+                  , 'cxestado', 'nvalor', 'nbaseiva', 'niva'
+                  , 'cliente', 'nporcentajeiva']
+        labels = {'puntoemision':'Punto de emisión'
+                  , 'cxnumerofactura': 'Secuencia de factura'
+                  , 'demision':'Fecha de emisión'
+                  , 'nbasenoiva':'Base sin IVA'
+                  , 'nbaseiva':'Base con IVA'
+                  , 'nvalor':'Total'
+                  , 'niva': 'IVA'}
+        widgets={'demision': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+        self.fields['demision'].widget.attrs['readonly']=True
+        self.fields['nvalor'].widget.attrs['readonly']=True
+        self.fields['niva'].widget.attrs['readonly']=True
+        self.fields['nbaseiva'].widget.attrs['readonly']=True
+        self.fields['nbasenoiva'].widget.attrs['readonly']=True
+
+        if empresa:
+            self.fields['puntoemision'].queryset = Puntos_emision.objects\
+                .filter(empresa=empresa, leliminado = False)
+                  

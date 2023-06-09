@@ -4,13 +4,14 @@ from django.views import generic
 from django.urls import reverse_lazy
 
 from .models import Tipos_factoring, Tasas_factoring, Clases_cliente\
-    , Cuentas_bancarias, Localidades
+    , Cuentas_bancarias, Localidades, Puntos_emision
 from bases.models import Usuario_empresa
 from solicitudes.models import Asignacion
+from bases.models import Empresas
 
 from .forms import CuentaBancariaForm, TipoFactoringForm, TasaFactoringForm\
-    , ClasesParticipantesForm, LocalidadForm
-
+    , ClasesParticipantesForm, LocalidadForm, PuntoEmisionForm
+from bases.forms import EmpresaForm
 
 class TiposFactoringView(LoginRequiredMixin, generic.ListView):
     model = Tipos_factoring
@@ -284,3 +285,85 @@ class LocalidadesEdit(LoginRequiredMixin, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
+class PuntosEmisionView(LoginRequiredMixin, generic.ListView):
+    model = Puntos_emision
+    template_name="empresa/listapuntosemision.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Puntos_emision.objects.filter(leliminado = False
+                                     , empresa = id_empresa.empresa)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(PuntosEmisionView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P'
+                                       ,leliminado=False
+                                       , empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class PuntoEmisionNew(LoginRequiredMixin, generic.CreateView):
+    model = Puntos_emision
+    template_name="empresa/datospuntoemision_form.html"
+    form_class=PuntoEmisionForm
+    context_object_name='puntoemision'
+    success_url= reverse_lazy("empresa:listapuntosemision")
+    login_url = 'bases:login'
+
+    def form_valid(self, form):
+        form.instance.cxusuariocrea = self.request.user
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(PuntoEmisionNew, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P',leliminado=False
+                                       , empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class PuntoEmisionEdit(LoginRequiredMixin, generic.UpdateView):
+    model = Puntos_emision
+    template_name="empresa/datospuntoemision_form.html"
+    form_class=PuntoEmisionForm
+    context_object_name='puntoemision'
+    success_url= reverse_lazy("empresa:listapuntosemision")
+    login_url = 'bases:login'
+
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(PuntoEmisionEdit, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P',leliminado=False
+                                       , empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class DatosEmpresaEdit(LoginRequiredMixin, generic.UpdateView):
+    model = Empresas
+    template_name="empresa/datosempresa_form.html"
+    form_class=EmpresaForm
+    context_object_name='empresa'
+    success_url= reverse_lazy("bases:dashboard")
+    login_url = 'bases:login'
+
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super(DatosEmpresaEdit, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context

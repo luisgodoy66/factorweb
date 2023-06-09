@@ -3,12 +3,19 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class Empresas(models.Model):
+    ctruccompania = models.CharField(max_length=13, default='')
     ctnombre = models.CharField(max_length=60)
     lgratis = models.BooleanField(default=True)
     nmaximooperaciones = models.SmallIntegerField(default=10)
     lbloqueada = models.BooleanField(default=False)
     dcreacion = models.DateTimeField(auto_now_add=True)
-
+    ctgerente = models.CharField(max_length=25, default='')
+    ctdireccion = models.CharField(max_length=60, default='')
+    ctcontribuyenteespecial = models.CharField(max_length= 4, default='0000')
+    lregimenrimpe = models.BooleanField(default=False)
+    dmodificacion = models.DateTimeField(auto_now=True)
+    cxusuariomodifica = models.IntegerField(blank=True, null=True)
+    ambientesri = models.CharField(max_length=1, default='1')
     def __str__(self):
         return self.ctnombre
     

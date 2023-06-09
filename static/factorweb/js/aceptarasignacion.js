@@ -191,6 +191,7 @@ function AceptarAsignacion(){
         "ndescuentocartera": capturaValor("id_ndescuentodecartera"),
         "niva": capturaValor("id_niva"),
         "sinstruccionpago": capturaValor("id_ctinstrucciondepago"),
+        "porcentaje_iva": porcentaje_iva
       }
     fetchPostear("/operaciones/aceptardocumentos/", objeto, function(){
         // regresar a la lista de solicitudes
