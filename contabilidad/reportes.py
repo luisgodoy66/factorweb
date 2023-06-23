@@ -8,11 +8,9 @@ from django.shortcuts import render
 from django.db.models import Sum, Count
 from django.contrib.staticfiles import finders
 
-from .models import  Diario_cabecera, Transaccion
+from .models import  Diario_cabecera, Transaccion, Plan_cuentas
 
-from operaciones.models import Notas_debito_cabecera, Notas_debito_detalle
 from bases.models import Usuario_empresa
-from empresa.models import Tasas_factoring
 
 from xhtml2pdf import pisa
 
@@ -148,3 +146,32 @@ def ImpresionComprobanteEgreso(request, diario_id):
        return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
+
+def ImpresionPlanDeCuentas(request):
+    template_path = 'contabilidad/plandecuentas_reporte.html'
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    detalle = Plan_cuentas.objects.filter(empresa = id_empresa.empresa)\
+        .order_by('cxcuenta')
+
+    context = {
+        "detalle" : detalle,
+        'empresa': id_empresa.empresa
+    }
+
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="plan de cuentas.pdf"'
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+      

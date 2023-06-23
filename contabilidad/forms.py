@@ -266,3 +266,21 @@ class ComprobanteEgresoForm(forms.ModelForm):
             self.fields['cxcuentadestino'].queryset = Cuenta_transferencia.objects\
                 .filter(empresa=empresa, leliminado = False)
                   
+class PlanCuentasForm(forms.ModelForm):
+    class Meta:
+        model = Plan_cuentas
+        fields = ['cxcuenta', 'ctcuenta', 'nnivel', 'ldetalle']
+        labels={
+            "cxcuenta": "Cuenta", 
+            "ctcuenta":'Nombre de cuenta',
+            "nnivel": "Nivel de la cuenta",
+            "ldetalle":'Es cuenta de detalle'}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+        

@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Plan de cuentas</title>
+
+    <style type="text/css">
+        @page {
+            size: A4;
+            margin: 1cm;
+            size:  portrait;
+        }
+        .table thead th {
+                vertical-align:  top ;
+                border-bottom: 1px solid #000;
+        }
+        .table td.numero{
+            text-align: right;
+        }
+        .table td.centrado{
+            text-align: center;
+        }
+        .alerta { 
+        font-family: sans-serif; 
+        font-size: 11px; 
+        font-weight: 400; 
+        color: #eb1111; 
+        }        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <table >
+                    <tbody>
+                        <tr>
+                            <td colspan="2"><h2>{{ empresa }}</h2></td>
+                            <td></td>
+                            <td colspan="2"><h1>Plan de cuentas</h1></td>
+                            <td></td>
+                            <td>Impresión: {% now "Y-m-d" %}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col">
+                    <table class="table table-striped table-hover nowrap" style="width:100%">
+                        <thead>
+                            <th>Cuenta</th>        
+                            <th>Descripción</th>
+                            <th>Nivel</th>
+                            <th>Es detalle</th>                            
+                        </thead>
+                        <tbody>
+                            <tr></tr>
+                            {% for item in detalle %}
+                            <tr>
+                                <td>{{ item.cxcuenta }}</td>
+                                <td width="60%">{{ item.ctcuenta }}</td>
+                                <td>{{ item.nnivel }}</td>
+                                <td>{{ item.ldetalle }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+        {% if empresa.lgratis %}
+        <footer class="footer">
+            <p>SAAS Margarita desarrollado por Código Bambú</p>
+        </footer>
+        {% endif %}
+</div>
+
+</body>
+</html>

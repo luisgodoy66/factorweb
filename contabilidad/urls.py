@@ -9,13 +9,22 @@ from .views import CuentasView, CuentasEspecialesEdit, BuscarCuentasEspeciales\
      , GenerarEgresoDiario, CuentasDiferidosView, CuentasProvisionesView\
      , CuentasTasaDiferidoView, CuentaDiferidoTasaTipoFactoringNew\
      , CuentasTasaProvisionView, CuentaDiferidoTasaTipoFactoringEdit\
-     , CuentaProvisionTasaTipoFactoringNew, CuentaProvisionTasaTipoFactoringEdit
+     , CuentaProvisionTasaTipoFactoringNew, CuentaProvisionTasaTipoFactoringEdit\
+     , CuentasNew, CuentasEdit
+
 from .sri import GeneraXMLFactura
-from .reportes import ImpresionDiarioContable, ImpresionComprobanteEgreso
+from .reportes import ImpresionDiarioContable, ImpresionComprobanteEgreso\
+     , ImpresionPlanDeCuentas
 
 urlpatterns = [
     path('listacuentascontables/',CuentasView.as_view()
          , name="listacuentascontables"),
+    path('cuentacontablenueva/',CuentasNew.as_view()
+         , name="cuentacontable_nueva"),
+    path('cuentacontableneditar/<int:pk>',CuentasEdit.as_view()
+         , name="cuentacontable_editar"),
+    path('imprimirplandecuentas/>',ImpresionPlanDeCuentas
+         , name="imprimirplandecuentas"),
     path('buscarcuentasespeciales/',BuscarCuentasEspeciales
          , name="buscarcuentasespeciales"),
     path('asignarcuentascontables/',CuentasEspecialesNew.as_view()

@@ -23,7 +23,7 @@ from bases.views import enviarPost
 from .forms import CuentasEspecialesForm, CuentasBancosForm, FacturaVentaForm\
     , CuentasTiposFactoringForm, CuentasTasaTiposFactoringForm\
     , ComprobanteEgresoForm, CuentasDiferidoTasaTiposFactoringForm\
-    , CuentasProvisionTasaTiposFactoringForm
+    , CuentasProvisionTasaTiposFactoringForm, PlanCuentasForm
 
 import xml.etree.cElementTree as etree
 
@@ -43,6 +43,46 @@ class CuentasView(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super(CuentasView, self).get_context_data(**kwargs)
         sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class CuentasNew(LoginRequiredMixin, generic.CreateView):
+    model = Plan_cuentas
+    template_name = "contabilidad/datoscuenta_form.html"
+    context_object_name='cuentas'
+    form_class = PlanCuentasForm
+    success_url= reverse_lazy("contabilidad:listacuentascontables")
+    login_url = 'bases:login'
+
+    def form_valid(self, form):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
+        form.instance.cxusuariocrea = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(CuentasNew, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P',leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class CuentasEdit(LoginRequiredMixin, generic.UpdateView):
+    model = Plan_cuentas
+    template_name = "contabilidad/datoscuenta_form.html"
+    context_object_name='cuentas'
+    form_class = PlanCuentasForm
+    success_url= reverse_lazy("contabilidad:listacuentascontables")
+    login_url = 'bases:login'
+
+    def form_valid(self, form):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(CuentasEdit, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P',leliminado=False).count()
         context['solicitudes_pendientes'] = sp
         return context
 
