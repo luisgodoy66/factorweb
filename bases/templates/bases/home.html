@@ -22,14 +22,15 @@
 
                         {% if solicitudes_pendientes > 0 %}
                         <div class="dropdown for-notification">
-                            <button class="btn btn-secondary dropdown-toggle" 
-                            type="button" id="notification" data-toggle="dropdown" 
+                            <a href="{% url 'solicitudes:listasolicitudes' %}" 
+                            class="btn btn-secondary dropdown-toggle" 
+                            type="button" id="notification" 
                             aria-haspopup="true" aria-expanded="false">
                                 <i class="fa fa-bell"></i>
                                 <span class="count bg-danger" id="solicitudes_pendientes">
                                     {{solicitudes_pendientes}}
                                 </span>
-                            </button>
+                            </a>
                             <!-- <div class="dropdown-menu" aria-labelledby="notification">
                                 <p class="red">You have 3 Notification</p>
                                 <a class="dropdown-item media bg-flat-color-1" href="#">

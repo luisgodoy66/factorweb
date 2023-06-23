@@ -7,7 +7,7 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">contabilidad</a></li>
                     <li><a href="#">procesos</a></li>
-                    <li><a href="{% url 'contabilidad:listapendientesgenerarfactura' %}">generar factura</a></li>
+                    <li><a href="{% url 'contabilidad:listadesembolsospendientes' %}">generar egresos</a></li>
                     <li class="active">{{operacion}}</li>
                 </ol>
             </div>
@@ -21,107 +21,99 @@
         <div class="card">
             {% csrf_token %}
             <div class="card-header">
-                <strong>generar factura</strong> 
+                <strong>generar comprobante de egreso</strong> 
             </div>
             <div hidden>
-               {{form.cliente}}
-               {{form.nporcentajeiva}}
-               <input id="tipo_operacion" value="{{cxtipooperacion}}">
-               <input id="id_operacion" value="{{id_operacion}}">
-               <input id="valor_gao" value='{{valor_gao|floatformat:"2u"}}'  >
-               <input id="valor_dc" value='{{valor_dc |floatformat:"2u"}}'>
-               <input id="valor_dcv" value='{{valor_dcv |floatformat:"2u"}}'>
-               <input id="valor_gaoa" value='{{valor_gaoa |floatformat:"2u"}}'>
+                <input id="forma_pago" value="{{forma_pago}}">
+                <input id="id_desembolso" value="{{id_desembolso}}">
+                <input id="id_factura" value="{{id_factura}}">
             </div>
             <div class="card-body card-block">
                 <!-- columna izquierda -->
                 <div class="col-lg-6">
                     <div class="row form-group">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="id_puntoemision" class=" form-control-label">
-                               {{form.puntoemision.label}}</label></div>
-                        <div class="col-md-6">{{form.puntoemision}}</div>
+                               {{form.cxbeneficiario.label}}</label></div>
+                        <div class="col-md-8">{{form.cxbeneficiario}}</div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="id_cxnumerofactura" class=" form-control-label">
-                               {{form.cxnumerofactura.label}}</label></div>
-                        <div class="col-md-6">{{form.cxnumerofactura}}</div>
+                               {{form.ctrecibidopor.label}}</label></div>
+                        <div class="col-md-8">{{form.ctrecibidopor}}</div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="id_demision" class=" form-control-label">
                                {{form.demision.label}}</label></div>
-                        <div class="col-md-6">{{form.demision}}</div>
+                        <div class="col-md-8">{{form.demision}}</div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="id_ctconcepto" class=" form-control-label">
                                Concepto de diario</label></div>
-                        <div class="col-md-6">
+                        <div class="col-md-8">
                             <textarea type="text" class="form-control" 
-                            required id="concepto" rows="3" 
-                            name="concepto">{{concepto}}</textarea>
+                            required id="concepto" rows="3" name="concepto">{{concepto}}
+                            </textarea>
                         </div>
                     </div>
 
+                    {% if forma_pago != 'EFE' %}
                     <div class="row form-group">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="id_nvalor" class=" form-control-label">
-                               {{form.nbaseiva.label}}</label></div>
-                        <div class="col-md-6">{{form.nbaseiva}}</div>
+                               {{form.cxcuentapago.label}}</label></div>
+                        <div class="col-md-8">{{form.cxcuentapago}}</div>
                     </div>
-
+                    {% endif %}
+                    {% if forma_pago == 'CHE' %}
                     <div class="row form-group">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="id_nvalor" class=" form-control-label">
-                               {{form.nbasenoiva.label}}</label></div>
-                        <div class="col-md-6">{{form.nbasenoiva}}</div>
+                               {{form.ctcheque.label}}</label></div>
+                        <div class="col-md-8">{{form.ctcheque}}</div>
                     </div>
-
+                    {% endif %}
+                    {% if forma_pago == 'TRA' %}
                     <div class="row form-group">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="id_nvalor" class=" form-control-label">
-                               {{form.niva.label}}</label></div>
-                        <div class="col-md-6">{{form.niva}}</div>
+                               {{form.cxcuentadestino.label}}</label></div>
+                        <div class="col-md-8">{{form.cxcuentadestino}}</div>
                     </div>
-
+                    {% endif %}
                     <div class="row form-group">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="id_nvalor" class=" form-control-label">
                                {{form.nvalor.label}}</label></div>
-                        <div class="col-md-6">{{form.nvalor}}</div>
+                        <div class="col-md-8">{{form.nvalor}}</div>
                     </div>
 
-
-                </div>
-                <div class="col-lg-6">
-                    <div class="alert alert-info" role="alert">
-                        Al grabar la generación de factura, el sistema creará un archivo XML con los datos de la factura
-                        para su firma y autorización y lo guardará en la carpeta Descargas con el nombre 
-                        correspondiente al número de autorización.
-                    </div>
 
                 </div>
             </div>    
             
             <div class="card-footer">
-                <a href="{% url 'contabilidad:listapendientesgenerarfactura' %}" class="btn btn-danger btn-sm">
+                <a href="{% url 'contabilidad:listadesembolsospendientes' %}" 
+                class="btn btn-danger btn-sm">
                     <i class="fa fa-ban"></i> Cancelar
                 </a>
-                <button type="button" onclick="GenerarFactura()" class="btn btn-primary btn-sm ">
+                <button type="button" onclick="GenerarEgreso()" 
+                class="btn btn-primary btn-sm ">
                     <i class="fa fa-dot-circle-o"></i> Aceptar
                 </button>
-                </div>
+            </div>
         </div>
     <!-- </div> -->
 </form>
 {% endblock %}
 {% block js_page %}
 <script type="text/javascript" 
-    src="{% static 'factorweb/js/datosgenerafactura.js' %}">
+    src="{% static 'factorweb/js/datosgeneraegreso.js' %}">
 </script>
 {% endblock %}

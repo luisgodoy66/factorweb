@@ -6,7 +6,7 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">contabilidad</a></li>
                     <li><a href="#">cuentas</a></li>
-                    <li class="active">por tipo de factoring</li>
+                    <li class="active">provisiones por tasa</li>
                 </ol>
             </div>
         </div>
@@ -36,7 +36,7 @@
                 {% if error %}
                     {{ error }}
                 {% else %}
-                 No hay tipos de factoring registrados.
+                 No hay tasas de factoring registrados.
                {% endif %}
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -49,9 +49,7 @@
                 <table class="table table-striped table-bordered" id="bootstrap-data-table-export">
                     <thead>
                         <th>Id</th>
-                        <th>Tipo de factoring</th>
-                        <th>Cuenta de operaciones</th>
-                        <th>Cuenta de facturación</th>
+                        <th>Tasa de factoring</th>
                         <th class="all">Acciones</th>
                     </thead>
                     <tbody>
@@ -59,20 +57,9 @@
                         <tr>
                             <td>{{ item.id }}</td>
                             <td>{{ item }}</td>
-                            <td>{{ item.cuenta_tipofactoring.cuenta }}</td>
-                            <td>{{ item.cuenta_tipofactoring.cuentaporcobrar }}</td>
                             <td>
-                                <button class="btn btn-warning btn-sm"  title="Editar"
-                                    {% if item.cuenta_tipofactoring.cuenta %}
-                                        onclick="return AbrirModal(
-                                            '{% url 'contabilidad:cuentatipofactoring_editar' item item.id item.cuenta_tipofactoring.id %}')"
-                                    {% else %}
-                                        onclick="return AbrirModal(
-                                            '{% url 'contabilidad:cuentatipofactoring_nueva' item item.id %}')"
-                                    {% endif %}
-                                    role="button">
-                                    <i class="fa fa-edit"></i>
-                                </button>
+                                <a href="{% url 'contabilidad:listacuentastasaprovision' item.id item %}"  title="Editar"
+                                    class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>
                                 <a href="#" class="btn btn-danger btn-sm" role="button"><i class="fa fa-exclamation"></i></a>
                             </td>
                         </tr>

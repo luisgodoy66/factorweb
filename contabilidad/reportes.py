@@ -97,3 +97,54 @@ def ImpresionDiarioContable(request, diario_id):
        return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
+def ImpresionComprobanteEgreso(request, diario_id):
+    detalle = {}
+    template_path = 'contabilidad/comprobante_egreso_reporte.html'
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    # tomar el codigo de asignacion grabado en la solicitud
+    diario = Diario_cabecera.objects.filter(id= diario_id).first()
+    
+    if not diario:
+        return HttpResponse("no encontró diario contable")
+
+    
+    # cuando la forma de pago es DEP es deposito de accesorios y de ahí debe
+    # tomar la fecha de vencimiento
+    detalle = Transaccion.objects\
+        .filter(diario = diario_id, leliminado = False)
+
+    # totales
+    tot_cobro_d = detalle.filter(cxtipo='D').aggregate(tot_debe=Sum('nvalor'))
+    tot_cobro_h = detalle.filter(cxtipo='H').aggregate(tot_haber=Sum('nvalor'))
+
+    totales = {
+        "debe":tot_cobro_d["tot_debe"],
+        "haber":tot_cobro_h["tot_haber"]
+    }
+
+
+    context = {
+        "diario" : diario,
+        "detalle" : detalle,
+        "totales": totales,
+        'empresa': id_empresa.empresa
+    }
+
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="diario "' \
+        + str(diario.cxtransaccion) + ".pdf"
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+

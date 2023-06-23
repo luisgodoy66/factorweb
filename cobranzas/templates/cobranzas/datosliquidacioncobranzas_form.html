@@ -29,12 +29,13 @@
             <input id="sobrepago_id" value='{{ total_sobrepagos|floatformat:"2u" }}'>
             <input id="gao_id" value='{{ total_gao|floatformat:"2u" }}' >
             <input id="gaoa_id" value='{{ total_gaoa|floatformat:"2u" }}'>
-            <input id="dc_id" value='{{ total_descuentocartera|floatformat:"2u" }}'>
+            <input id="dc_id" value='{{ total_dc|floatformat:"2u" }}'>
             <input id="retenciones_id" value='{{ total_cargoretenciones|floatformat:"2u" }}'>
             <input id="bajas_id" value='{{ total_cargobajas|floatformat:"2u" }}'>
             <input id="otros_id" value='{{ total_otros_cargos|floatformat:"2u" }}'>
             <input id="data_cobranzas" value="{{ cobranzas }}">
             <input id="tipo_operacion" value="{{ tipo_operacion }}">
+            <input id="dcv_id" value='{{ total_dcv|floatformat:"2u" }}'>
         </div>
         <div class="card">
                 {% csrf_token %}

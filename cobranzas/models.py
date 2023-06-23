@@ -170,6 +170,8 @@ class Liquidacion_cabecera(ClaseModelo):
     ldesembolsada = models.BooleanField(default=False)
     cxestado = models.CharField(max_length=1, default='A')
     lfacturagenerada = models.BooleanField(default=False)
+    nporcentajeiva = models.DecimalField(max_digits=5, decimal_places=2, default=12)
+    ndescuentodecarteravencido = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
         return self.cxliquidacion

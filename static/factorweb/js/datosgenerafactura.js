@@ -15,7 +15,6 @@ window.onload=function(){
             data: formData
         })
         .done(function(r,textStatus,xhr){
-            alert('done')
             if(xhr.status=200){
                 MensajeOK('Archivo grabado en carpeta Descargas');
                 location.href = "/contabilidad/listapendientesgenerarfactura";
@@ -50,4 +49,38 @@ function SecuenciaPorPuntoEmision( punto_emision){
             console.log(error);
         }
         });
+}
+
+function GenerarFactura(){
+  MensajeConfirmacion("Aceptar generación de factura " 
+    + capturaValor("id_cxnumerofactura") +"?",function(){
+    
+    var objeto={
+        "tipo_operacion": capturaValor("tipo_operacion"),
+        "id_operacion": capturaValor("id_operacion"),
+        "id_puntoemision": capturaValor("id_puntoemision"),
+        "id_cliente": capturaValor("id_cliente"),
+        "base_iva" : capturaValor("id_nbaseiva"), 
+        "base_noiva" : capturaValor("id_nbasenoiva"), 
+        "concepto" : capturaValor("concepto"), 
+        "emision" : capturaValor("id_demision"),
+        "porcentaje_iva" : capturaValor("id_nporcentajeiva"),
+        "ngao" : capturaValor("valor_gao"),
+        "ndescuentocartera" : capturaValor("valor_dc"),
+        "ngaoa" : capturaValor("valor_gaoa"),
+        "niva" : capturaValor("id_niva"),
+        "ndescuentocarteravencido" : capturaValor("valor_dcv"),
+        }
+
+    fetchPostear("/contabilidad/generarfacturadiario/", objeto, function(data){
+        // regresar a la lista de generar factura
+        window.location.href = "/contabilidad/listapendientesgenerarfactura";
+        
+        // en una nueva ventana abrir el reporte de asiento
+        url = window.location.origin
+        url = url + "/contabilidad/generarxmlfactura/"+data+"/"+capturaValor("concepto");
+        window.open( url);
+      })
+  })
+    
 }

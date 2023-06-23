@@ -132,7 +132,8 @@ class Tipos_factoring(ClaseModelo):
     lfactoringproveedores = models.BooleanField(default= False)
     ctinicialesasignacion = models.CharField(max_length=3, blank=True, null=True)
     lcargadcenampliacionplazo = models.BooleanField(default= False)
-
+    lgenerafacturaenaceptacion = models.BooleanField(default=True)
+    
     def __str__(self):
         return self.ctabreviacion
     

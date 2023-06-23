@@ -3,9 +3,9 @@
 
         <form  method="POST" rol="form" id="frmLinea" class="form-horizontal" enctype="multipart/form-data"
             {% if nueva %}
-                action="{% url 'contabilidad:cuentatipofactoring_nueva' tipofactoring tipofactoring_id %}"
+                action="{% url 'contabilidad:cuentaprovisiontasatipofactoring_nueva' tipofactoring tipofactoring_id tasafactoring tasafactoring_id %}"
             {% else %}
-                action="{% url 'contabilidad:cuentatipofactoring_editar' tipofactoring tipofactoring_id pk %}"
+                action="{% url 'contabilidad:cuentaprovisiontasatipofactoring_editar' tipofactoring tipofactoring_id tasafactoring tasafactoring_id pk %}"
             {% endif %}
             >
             <!-- <div class="col"> -->
@@ -14,10 +14,16 @@
                 {% csrf_token %}
                 <div class="card-header">
                     <strong>Cuenta contable </strong> 
-                    para {{ tipofactoring }}
+                    para {{ tipofactoring }} {{nueva}}
                 </div>
                 
                 <div class="card-body card-block">
+                    <div class="row form-group">
+                        <div class="col-12 col-md-9">
+                            <input id="id_tasafactoring" name="tasafactoring" 
+                            value="{{ tasafactoring_id }}" hidden>
+                        </div>
+                    </div>
                     <div class="row form-group">
                         <div class="col-12 col-md-9">
                             <input id="id_tipofactoring" name="tipofactoring" 
@@ -27,18 +33,9 @@
                     <div class="row form-group">
                         <div class="col-md-2"><label for="id_nvalor" 
                             class=" form-control-label">
-                            {{ form.cuenta.label }}</label></div>
+                            {{ form.cuentaprovision.label }}</label></div>
                         <div class="col-md-10">
-                            {{ form.cuenta}}
-                            <!-- <small class="form-text text-muted">Máximo 30 caracteres</small> -->
-                        </div>
-                    </div>
-                    <div class="row form-group">
-                        <div class="col-md-2"><label for="id_nvalor" 
-                            class=" form-control-label">
-                            {{ form.cuentaporcobrar.label }}</label></div>
-                        <div class="col-md-10">
-                            {{ form.cuentaporcobrar}}
+                            {{ form.cuentaprovision}}
                             <!-- <small class="form-text text-muted">Máximo 30 caracteres</small> -->
                         </div>
                     </div>

@@ -47,6 +47,7 @@ function LiquidarCobranza(){
           "gao":capturaValor("gao_id"),
           "gaoa":capturaValor("gaoa_id"),
           "descuentodecartera":capturaValor("dc_id"),
+          "descuentodecarteravencido":capturaValor("dcv_id"),
           "retenciones":capturaValor("retenciones_id"),
           "bajas":capturaValor("bajas_id"),
           "otros":capturaValor("otros_id"),

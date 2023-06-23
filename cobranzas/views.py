@@ -1466,17 +1466,20 @@ def Liquidacion(request, tipo_operacion):
     pnneto = objeto["neto"]
     pjcobranzas = objeto["cobranzas"]
     pjotroscargos = objeto["otros_cargos"]
+    pndescuentodecarteravencido =objeto["descuentodecarteravencido"]
 
     resultado=enviarPost("CALL uspLiquidarCobranzas( {0},'{1}', {2},{3}\
         ,'{4}'\
         ,{5},{6},{7},{8},{9},{10}\
         ,{11},{12},{13},{14},{15},{16},'{17}'\
-        ,{18},'{19}','{20}','{21}','{22}','',0)"
+        ,{18},'{19}','{20}','{21}','{22}'\
+        ,{23},'',0)"
         .format(psidcliente ,pdliquidacion ,pnvalorliquidacion ,pstipofactoring
          ,pddesembolso\
          ,pnvuelto ,pnsobrepago ,pngao ,pngaoa,pndescuentodecartera ,pnretenciones\
          ,pnbajas ,pnotros ,pnneto,pnbaseiva ,pnporcentajeiva ,pniva ,psinstruccionpago
-         ,nusuario ,padocumentos, pjcobranzas, tipo_operacion, pjotroscargos))
+         ,nusuario ,padocumentos, pjcobranzas, tipo_operacion, pjotroscargos
+         , pndescuentodecarteravencido))
     return HttpResponse(resultado)
 
 @login_required(login_url='/login/')

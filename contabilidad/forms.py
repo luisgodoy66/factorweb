@@ -1,26 +1,28 @@
 from django import forms
 from .models import Cuentas_especiales, Plan_cuentas, Cuentas_bancos\
-    , Cuentas_tiposfactoring, Cuentas_tasasfactoring, Factura_venta
+    , Cuentas_tiposfactoring, Cuentas_tasasfactoring, Factura_venta\
+        , Comprobante_egreso, Cuentas_diferidos, Cuentas_provisiones
 from empresa.models import Cuentas_bancarias, Tipos_factoring, Puntos_emision
+from clientes.models import Cuenta_transferencia
 
 class CuentasEspecialesForm(forms.ModelForm):
     class Meta:
         model=Cuentas_especiales
-        fields=[ 'cuentaporcobrar','pagoconcajachica', 'sobrepago', 'cuentaconjunta'
+        fields=[ 'pagoconcajachica', 'sobrepago', 'cuentaconjunta'
             , 'protesto', 'cuentaivaganado', 'cuentagananciaejercicio'
             , 'cuentaperdidaejercicio', 'cuentagananciaejercicioanterior'
-            , 'cuentaperdidaejercicioanterior'
+            , 'cuentaperdidaejercicioanterior', 'ivadiferido'
         ]
-        labels={'cuentaporcobrar' :'Cuenta por cobrar'
-                ,'pagoconcajachica':'Pago con caja chica'
+        labels={ 'pagoconcajachica':'Pago con caja chica'
                 , 'sobrepago':'Sobrepago'
-                , 'cuentaconjunta':'Cuenta compartida'
+                , 'cuentaconjunta':'Cuenta bancaria compartida'
                 , 'protesto':'Protesto'
                 , 'cuentaivaganado':'IVA ganado'
                 , 'cuentagananciaejercicio':'Ganancia del ejercicio actual'
                 , 'cuentaperdidaejercicio':'Pérdida del ejercicio actual'
                 , 'cuentagananciaejercicioanterior':'Ganancia del ejercicio anterior'
                 , 'cuentaperdidaejercicioanterior':'Pérdida del ejercicio anterior'
+                , 'ivadiferido': 'IVA diferido'
         }
 
     def __init__(self, *args, **kwargs):
@@ -33,9 +35,6 @@ class CuentasEspecialesForm(forms.ModelForm):
             })
 
         if empresa:
-            self.fields['cuentaporcobrar'].queryset = Plan_cuentas.objects\
-                .filter(empresa=empresa, leliminado = False, ldetalle=True)\
-                .order_by('cxcuenta')
             self.fields['pagoconcajachica'].queryset = Plan_cuentas.objects\
                 .filter(empresa=empresa, leliminado = False, ldetalle=True)\
                 .order_by('cxcuenta')
@@ -49,6 +48,9 @@ class CuentasEspecialesForm(forms.ModelForm):
                 .filter(empresa=empresa, leliminado = False, ldetalle=True)\
                 .order_by('cxcuenta')
             self.fields['cuentaivaganado'].queryset = Plan_cuentas.objects\
+                .filter(empresa=empresa, leliminado = False, ldetalle=True)\
+                .order_by('cxcuenta')
+            self.fields['ivadiferido'].queryset = Plan_cuentas.objects\
                 .filter(empresa=empresa, leliminado = False, ldetalle=True)\
                 .order_by('cxcuenta')
             self.fields['cuentagananciaejercicio'].queryset = Plan_cuentas.objects\
@@ -89,8 +91,37 @@ class CuentasBancosForm(forms.ModelForm):
 class CuentasTiposFactoringForm(forms.ModelForm):
     class Meta:
         model=Cuentas_tiposfactoring
-        fields = ['tipofactoring', 'cuenta']
-        labels = {'tipofactoring':'Tipo de factoring', 'cuenta':'Cuenta contable'}
+        fields = ['tipofactoring', 'cuenta', 'cuentaporcobrar']
+        labels = {'tipofactoring':'Tipo de factoring'
+                  , 'cuenta':'Cuenta en operaciones'
+                  , 'cuentaporcobrar':'Cuenta en factura'}
+
+    def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+
+        if empresa:
+            self.fields['cuenta'].queryset = Plan_cuentas.objects\
+                .filter(empresa=empresa, leliminado = False, ldetalle=True)\
+                .order_by('cxcuenta')
+            self.fields['cuentaporcobrar'].queryset = Plan_cuentas.objects\
+                .filter(empresa=empresa, leliminado = False, ldetalle=True)\
+                .order_by('cxcuenta')
+            self.fields['tipofactoring'].queryset = Tipos_factoring.objects\
+                .filter(empresa=empresa, leliminado = False, )
+
+class CuentasTasaTiposFactoringForm(forms.ModelForm):
+    class Meta:
+        model=Cuentas_tasasfactoring
+        fields = ['tipofactoring', 'tasafactoring', 'cuenta']
+        labels = {'tipofactoring':'Tipo de factoring'
+                  , 'tasafactoring': 'Tasa'
+                  , 'cuenta':'Cuenta contable'}
 
     def __init__(self, *args, **kwargs):
         empresa = kwargs.pop('empresa', None)
@@ -108,9 +139,33 @@ class CuentasTiposFactoringForm(forms.ModelForm):
             self.fields['tipofactoring'].queryset = Tipos_factoring.objects\
                 .filter(empresa=empresa, leliminado = False, )
 
-class CuentasTasaTiposFactoringForm(forms.ModelForm):
+class CuentasDiferidoTasaTiposFactoringForm(forms.ModelForm):
     class Meta:
-        model=Cuentas_tasasfactoring
+        model=Cuentas_diferidos
+        fields = ['tipofactoring', 'tasafactoring', 'cuenta']
+        labels = {'tipofactoring':'Tipo de factoring'
+                  , 'tasafactoring': 'Tasa'
+                  , 'cuenta':'Cuenta contable'}
+
+    def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+
+        if empresa:
+            self.fields['cuenta'].queryset = Plan_cuentas.objects\
+                .filter(empresa=empresa, leliminado = False, ldetalle=True)\
+                .order_by('cxcuenta')
+            self.fields['tipofactoring'].queryset = Tipos_factoring.objects\
+                .filter(empresa=empresa, leliminado = False, )
+
+class CuentasProvisionTasaTiposFactoringForm(forms.ModelForm):
+    class Meta:
+        model=Cuentas_provisiones
         fields = ['tipofactoring', 'tasafactoring', 'cuenta']
         labels = {'tipofactoring':'Tipo de factoring'
                   , 'tasafactoring': 'Tasa'
@@ -170,5 +225,44 @@ class FacturaVentaForm(forms.ModelForm):
 
         if empresa:
             self.fields['puntoemision'].queryset = Puntos_emision.objects\
+                .filter(empresa=empresa, leliminado = False)
+                  
+class ComprobanteEgresoForm(forms.ModelForm):
+    class Meta:
+        model=Comprobante_egreso
+        fields = ['cxbeneficiario', 'ctrecibidopor', 'cxcuentapago', 'nvalor'
+                  , 'ctcheque', 'cxcuentadestino', 'demision', 'cxformapago']
+        labels = { 'demision':'Fecha de emisión'
+                  , 'cxbeneficiario': 'Id. beneficiario'
+                  , 'ctrecibidopor':'Recibido por'
+                  , 'cxcuentapago':'Cuenta de pago'
+                  , 'ctcheque':'Número de cheque'
+                  , 'cxcuentadestino':'Cuenta destino'
+                  , 'nvalor':'Valor'
+                  }
+        widgets={'demision': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+        self.fields['demision'].widget.attrs['readonly']=True
+        self.fields['nvalor'].widget.attrs['readonly']=True
+
+        if empresa:
+            self.fields['cxcuentapago'].queryset = Cuentas_bancarias.objects\
+                .filter(empresa=empresa, leliminado = False, lactiva = True)
+            self.fields['cxcuentadestino'].queryset = Cuenta_transferencia.objects\
                 .filter(empresa=empresa, leliminado = False)
                   

@@ -1,8 +1,60 @@
 import xml.etree.cElementTree as etree
 import time
+import os
+
+from django.shortcuts import redirect
 from decimal import Decimal
 
-from .models import Impuestos_facturaventa, Items_facturaventa
+from .models import Impuestos_facturaventa, Items_facturaventa, Factura_venta
+
+def GeneraXMLFactura(request, id_factura, concepto):
+    # clave de acceso
+    factura = Factura_venta.objects.get(pk = id_factura)
+    claveacceso = time.strftime('%d%m%Y',time.strptime(str(factura.demision), '%Y-%m-%d')) \
+        + '01' +factura.empresa.ctruccompania + '2' \
+        + factura.puntoemision.cxestablecimiento \
+        + factura.puntoemision.cxpuntoemision\
+        + factura.cxnumerofactura.zfill(9) \
+        + factura.cxnumerofactura.zfill(8) + '1'
+    dv = calculate_check_digit(claveacceso)        
+
+    claveacceso += str(dv)
+
+    # crear el XML y bajarlo a la carpeta descargas
+    documento = etree.Element('factura')
+    documento.set('id','comprobante')
+    documento.set('version','1.1.0')
+
+    # generar infoTributaria
+    infoTributaria = _get_tax_element(factura, claveacceso, '1')
+    documento.append(infoTributaria)
+    
+    # generar infoFactura
+    infoFactura = _get_invoice_element(factura)
+    documento.append(infoFactura)
+    
+    #generar detalles
+    detalles = _get_detail_element(factura)        
+    documento.append(detalles)
+
+    # informacion adicional
+    infoAdicional = etree.Element('infoAdicional')
+    campoAdicional = etree.SubElement(infoAdicional,'campoAdicional')
+    campoAdicional.text=concepto
+    campoAdicional.set('nombre','Concepto')
+    
+    documento.append(infoAdicional)
+
+    tree = etree.ElementTree(documento)
+
+    # Set the path for the Downloads folder
+    folder = os.path.join(os.path.expanduser("~"), "Downloads")
+
+    # Set the full path for the file
+    file_path = os.path.join(folder, claveacceso+".XML")
+
+    tree.write(file_path)
+    return redirect("contabilidad:imprimirdiariocontable",diario_id = factura.asiento.id)
 
 def _get_tax_element( invoice, access_key, ambiente):
     """
@@ -51,7 +103,7 @@ def _get_invoice_element( invoice):
     cliente = invoice.cliente.cxcliente
     tsi = Decimal(invoice.nbaseiva) + Decimal(invoice.nbasenoiva)
     infoFactura = etree.Element('infoFactura')
-    etree.SubElement(infoFactura, 'fechaEmision').text = time.strftime('%d/%m/%Y',time.strptime(invoice.demision, '%Y-%m-%d'))
+    etree.SubElement(infoFactura, 'fechaEmision').text = time.strftime('%d/%m/%Y',time.strptime(str(invoice.demision), '%Y-%m-%d'))
     etree.SubElement(infoFactura, 'dirEstablecimiento').text = invoice.puntoemision.ctdireccion
     etree.SubElement(infoFactura, 'contribuyenteEspecial').text = company.ctcontribuyenteespecial
     etree.SubElement(infoFactura, 'obligadoContabilidad').text = 'SI'
@@ -76,13 +128,13 @@ def _get_invoice_element( invoice):
     infoFactura.append(totalConImpuestos)
     
     etree.SubElement(infoFactura, 'propina').text = '0.00'
-    etree.SubElement(infoFactura, 'importeTotal').text = invoice.nvalor
+    etree.SubElement(infoFactura, 'importeTotal').text = str(invoice.nvalor)
     etree.SubElement(infoFactura, 'moneda').text = 'DOLAR'
         
     pagos = etree.Element('pagos')
     pago = etree.Element('pago')
     etree.SubElement(pago,'formaPago').text = "15"
-    etree.SubElement(pago,'total').text = invoice.nvalor
+    etree.SubElement(pago,'total').text = str(invoice.nvalor)
     pagos.append(pago)
     infoFactura.append(pagos)
     return infoFactura
@@ -131,8 +183,8 @@ def _get_detail_element( invoice):
 
     for line in items:
         detalle = etree.Element('detalle')
-        etree.SubElement(detalle, 'codigoPrincipal').text = line.item.cxtasa
-        etree.SubElement(detalle, 'descripcion').text = line.item.cttasa
+        etree.SubElement(detalle, 'codigoPrincipal').text = line.item.cxmovimiento
+        etree.SubElement(detalle, 'descripcion').text = line.item.ctmovimiento
         etree.SubElement(detalle, 'cantidad').text = '%.6f' % (1)
         etree.SubElement(detalle, 'precioUnitario').text = '%.6f' % (line.nvalor)
         etree.SubElement(detalle, 'descuento').text = '%.2f' % (0)
@@ -142,7 +194,7 @@ def _get_detail_element( invoice):
         impuesto = etree.Element('impuesto')
         etree.SubElement(impuesto, 'codigo').text = codigoImpuesto['IVA']
         if line.lcargaiva:
-            etree.SubElement(impuesto, 'codigoPorcentaje').text = tarifaImpuesto[invoice.nporcentajeiva]
+            etree.SubElement(impuesto, 'codigoPorcentaje').text = tarifaImpuesto[str(invoice.nporcentajeiva)]
             etree.SubElement(impuesto, 'tarifa').text = '%.2f' % (Decimal(invoice.nporcentajeiva))
             etree.SubElement(impuesto, 'baseImponible').text = '%.2f' % (line.nvalor)
             etree.SubElement(impuesto, 'valor').text = '%.2f' % (line.nvalor * Decimal(invoice.nporcentajeiva) / 100)

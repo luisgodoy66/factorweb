@@ -6,7 +6,8 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">contabilidad</a></li>
                     <li><a href="#">cuentas</a></li>
-                    <li class="active">por tipo de factoring</li>
+                    <li><a href="{% url 'contabilidad:listacuentasprovisiones' %}">provisiones por tasa</a></li>
+                    <li class="active">{{nombre_tasa}}</li>
                 </ol>
             </div>
         </div>
@@ -50,25 +51,23 @@
                     <thead>
                         <th>Id</th>
                         <th>Tipo de factoring</th>
-                        <th>Cuenta de operaciones</th>
-                        <th>Cuenta de facturación</th>
+                        <th>Cuenta contable</th>
                         <th class="all">Acciones</th>
                     </thead>
                     <tbody>
                         {% for item in consulta %}
                         <tr>
                             <td>{{ item.id }}</td>
-                            <td>{{ item }}</td>
-                            <td>{{ item.cuenta_tipofactoring.cuenta }}</td>
-                            <td>{{ item.cuenta_tipofactoring.cuentaporcobrar }}</td>
+                            <td>{{ item.cttipofactoring }}</td>
+                            <td>{{ item.cuentaprovision_tasatipofactoring__cuentaprovision__ctcuenta }}</td>
                             <td>
                                 <button class="btn btn-warning btn-sm"  title="Editar"
-                                    {% if item.cuenta_tipofactoring.cuenta %}
+                                    {% if item.cuentaprovision_tasatipofactoring__cuentaprovision__ctcuenta != None %}
                                         onclick="return AbrirModal(
-                                            '{% url 'contabilidad:cuentatipofactoring_editar' item item.id item.cuenta_tipofactoring.id %}')"
+                                            '{% url 'contabilidad:cuentaprovisiontasatipofactoring_editar' item.cttipofactoring item.id nombre_tasa id_tasa item.cuentaprovision_tasatipofactoring %}')"
                                     {% else %}
                                         onclick="return AbrirModal(
-                                            '{% url 'contabilidad:cuentatipofactoring_nueva' item item.id %}')"
+                                            '{% url 'contabilidad:cuentaprovisiontasatipofactoring_nueva' item.cttipofactoring item.id nombre_tasa id_tasa %}')"
                                     {% endif %}
                                     role="button">
                                     <i class="fa fa-edit"></i>

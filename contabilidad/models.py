@@ -2,9 +2,9 @@ from django.db import models
 
 # Create your models here.
 from bases.models import ClaseModelo
-from empresa.models import Cuentas_bancarias, Tipos_factoring, Tasas_factoring\
-    , Puntos_emision
+from empresa.models import Cuentas_bancarias, Tipos_factoring,  Puntos_emision
 from clientes.models import Datos_generales
+from operaciones.models import Documentos, ChequesAccesorios
 
 class Plan_cuentas(ClaseModelo):
     cxcuenta =  models.CharField( max_length=15)
@@ -16,18 +16,22 @@ class Plan_cuentas(ClaseModelo):
         return '{} {}'.format(self.cxcuenta,self.ctcuenta)
     
 class Cuentas_especiales(ClaseModelo):
-    cuentaporcobrar = models.ForeignKey(Plan_cuentas,on_delete=models.RESTRICT
-                                        , related_name='cuenta_cxc')
     pagoconcajachica =models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
                                         , related_name='cuenta_cajachica')
     sobrepago = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
+                                  , null = True
                                   , related_name='cuenta_sobrepago')
     cuentaconjunta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
-                                         , related_name='cuenta_cuentacompartida')
+                                       , null = True
+                                       , related_name='cuenta_cuentacompartida')
     protesto = models.ForeignKey(Plan_cuentas,on_delete=models.RESTRICT
+                                 , null = True
                                  , related_name='cuenta_protesto')
     cuentaivaganado =models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
                                          , related_name='cuenta_ivaganado')
+    ivadiferido =models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
+                                   , null = True
+                                   , related_name='cuenta_ivadiferido')
     cuentagananciaejercicio = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
                                                   , related_name='cuenta_ganancia')
     cuentaperdidaejercicio = models.ForeignKey(Plan_cuentas,on_delete=models.RESTRICT
@@ -67,12 +71,16 @@ class Cuentas_tiposfactoring(ClaseModelo):
     tipofactoring = models.OneToOneField(Tipos_factoring, on_delete=models.RESTRICT
                                          , related_name="cuenta_tipofactoring")
     cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT)
+    cuentaporcobrar = models.ForeignKey(Plan_cuentas,on_delete=models.RESTRICT
+                                        , related_name='cuenta_cxc')
 
     def __str__(self):
         return self.cuenta
 
+from operaciones.models import Movimientos_maestro
+
 class Cuentas_tasasfactoring(ClaseModelo):
-    tasafactoring = models.ForeignKey(Tasas_factoring, on_delete=models.RESTRICT
+    tasafactoring = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT
                                       , related_name="cuenta_tasafactoring")
     tipofactoring = models.ForeignKey(Tipos_factoring, on_delete=models.RESTRICT
                                       , related_name="cuenta_tasatipofactoring")
@@ -80,6 +88,27 @@ class Cuentas_tasasfactoring(ClaseModelo):
 
     def __str__(self):
         return self.cuenta
+
+class Cuentas_diferidos(ClaseModelo):
+    tasafactoring = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT
+                                      , related_name="cuentadiferido_tasafactoring")
+    tipofactoring = models.ForeignKey(Tipos_factoring, on_delete=models.RESTRICT
+                                      , related_name="cuentadiferido_tasatipofactoring")
+    cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
+                                       , related_name="cuenta_diferido")
+    def __str__(self):
+        return self.cuentadiferido
+
+class Cuentas_provisiones(ClaseModelo):
+    tasafactoring = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT
+                                      , related_name="cuentaprovision_tasafactoring")
+    tipofactoring = models.ForeignKey(Tipos_factoring, on_delete=models.RESTRICT
+                                      , related_name="cuentaprovision_tasatipofactoring")
+    cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
+                                        , related_name="cuenta_provision")
+
+    def __str__(self):
+        return self.cuentaprovision
 
 class Factura_venta(ClaseModelo):
     TIPOS_DE_OPERACION = (
@@ -103,7 +132,8 @@ class Factura_venta(ClaseModelo):
     cxtipooperacion = models.CharField(max_length=2, choices= TIPOS_DE_OPERACION
         ,null=True)
     operacion = models.BigIntegerField(null=True)
-    cxasiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
+    asiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
+                                     , related_name="asiento_factura"
                                      , null=True)
 
     def __str__(self):
@@ -112,14 +142,51 @@ class Factura_venta(ClaseModelo):
 
 class Items_facturaventa(ClaseModelo):
     factura = models.ForeignKey(Factura_venta, on_delete=models.RESTRICT)
-    item = models.ForeignKey(Tasas_factoring, on_delete=models.RESTRICT)
+    item = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT)
     nvalor = models.DecimalField(max_digits=10, decimal_places=2)
     lcargaiva = models.BooleanField()
 
+    def __str__(self):
+        return self.item
+    
 class Impuestos_facturaventa(ClaseModelo):
     factura = models.ForeignKey(Factura_venta, on_delete=models.RESTRICT)
     cximpuesto = models.CharField(max_length=3)
     cxporcentaje = models.CharField(max_length=5)
     nbase = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+from clientes.models import  Cuenta_transferencia
 
+class Comprobante_egreso(ClaseModelo):
+    FORMAS_DE_PAGO = (
+        ('EFE', 'Efectivo'),
+        ('CHE', 'Cheque'),
+        ('TRA', 'Transferencia'),
+    )
+    demision = models.DateField()
+    cxestado = models.CharField(max_length=1, default='A')
+    cxformapago = models.CharField(max_length=3, choices=FORMAS_DE_PAGO)
+    cxbeneficiario = models.CharField(max_length=13, blank=True)
+    ctrecibidopor = models.CharField(max_length=60)
+    cxcuentapago = models.ForeignKey(Cuentas_bancarias, on_delete=models.RESTRICT
+                                     , null=True)
+    ctcheque = models.CharField(max_length=8, null=True)
+    cxcuentadestino = models.ForeignKey(Cuenta_transferencia
+        , on_delete=models.RESTRICT, null = True)
+    cxasiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
+                                     , related_name="asiento_egreso"
+                                     , null=True)
+    nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+class Provisiones(ClaseModelo):
+    cargo = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT)
+    documento = models.ForeignKey(Documentos, on_delete=models.CASCADE)
+    accesorio = models.ForeignKey(ChequesAccesorios, on_delete=models.CASCADE, null=True)
+    nvalor = models.DecimalField(max_digits=10, decimal_places=2)
+    lcontabilizado = models.BooleanField(default=False)
+    asiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
+                                     , related_name="asiento_provision"
+                                     , null=True)
+    año = models.CharField(max_length=4)
+    mes = models.CharField(max_length=2)
+    

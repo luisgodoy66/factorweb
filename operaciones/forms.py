@@ -137,10 +137,10 @@ class DesembolsarForm(forms.ModelForm):
 class MaestroMovimientosForm(forms.ModelForm):
     class Meta:
         model=Movimientos_maestro
-        fields=['cxmovimiento', 'ctmovimiento', 'cxsigno', 'lcargo'
+        fields=['cxmovimiento', 'ctmovimiento', 'cxsigno', 'litemfactura'
             , 'lcolateral', 'cxmovimientopadre']
         labels={'cxmovimiento':'Código', 'ctmovimiento':'Descripción'
-            , 'cxsigno': 'Signo', 'lcargo': 'Es cargo'
+            , 'cxsigno': 'Signo', 'litemfactura': 'Es item de factura'
             , 'lcolateral': 'Afecta a cartera'
             , 'cxmovimientopadre':'Movimiento padre'}
             # , 'lcargadescuentocartera':'Carga descuento de cartera'

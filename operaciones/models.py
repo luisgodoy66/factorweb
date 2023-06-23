@@ -544,7 +544,7 @@ class Movimientos_maestro(ClaseModelo):
     cxsigno= models.CharField(max_length=1, choices=TIPOS_DE_SIGNOS) 
     # omitir prioridad y agregar si el movimiento es un cargo
     # nprioridad = models.SmallIntegerField()
-    lcargo = models.BooleanField(default=False)
+    litemfactura = models.BooleanField(default=False)
     lcolateral = models.BooleanField()
     cxmovimientopadre = models.CharField(max_length=4) 
     
@@ -638,7 +638,9 @@ class Anexos(ClaseModelo):
     ctrutaanexo = models.TextField()
     def __str__(self):
         return self.ctnombre
-        
+
+from contabilidad.models import Diario_cabecera
+
 class Desembolsos(ClaseModelo):
     TIPOS_DE_OPERACION = (
         ('A', 'Asignaciones'),
@@ -664,8 +666,9 @@ class Desembolsos(ClaseModelo):
     lgeneradoarchivobanco = models.BooleanField(default=False)
     cxplantillacontabilidad = models.CharField(max_length=10, blank=True, null=True)
     lcontabilizado = models.BooleanField(default= False)
-    dcontabilizado = models.DateField(null= True)
-    cxasientodiario = models.CharField(max_length=8, blank=True,null=True)
+    cxasiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
+                                     , related_name="asiento_desembolso"
+                                     , null=True)
 
     def __str__(self):
         return self.cxformapago

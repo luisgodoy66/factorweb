@@ -57,13 +57,14 @@
                         {% for item in consulta %}
                         <tr>
                             <td>{{ item.id }}</td>
+                            <td>{{ item.cxcliente__cxcliente__ctnombre }}</td>
                             <td>{{ item.operacion }}</td>
                             <td>{{ item.nvalor }}</td>
+                            <td>{{ item.cxformapago }}</td>
+                            <td>{{ item.cxcuentapago__cxbanco__ctbanco }}</td>
                             <td>
-                                <button class="btn btn-warning btn-sm"  title="Editar"
-                                    role="button">
-                                    <i class="fa fa-edit"></i>
-                                </button>
+                                <a href="{% url 'contabilidad:generar_egreso' item.id item.cxformapago item.operacion %}"  title="Generar"
+                                    class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>
                                 <a href="#" class="btn btn-danger btn-sm" role="button"><i class="fa fa-exclamation"></i></a>
                             </td>
                         </tr>

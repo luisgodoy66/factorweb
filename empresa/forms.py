@@ -67,7 +67,7 @@ class TipoFactoringForm(forms.ModelForm):
             , 'lmanejacondicionesoperativas', 'lcargagaoa', 'lgeneradcenaceptacion', 'lgeneragaoenaceptacion'
             , 'lesnegociada', 'lcobramorabc', 'ctinicialesliquidacioncobranza'
             , 'lacumulagaoaatasagao', 'lfactoringproveedores', 'ctinicialesasignacion'
-            , 'lcargadcenampliacionplazo'
+            , 'lcargadcenampliacionplazo','lgenerafacturaenaceptacion'
         ]
         labels={
             'cxtipofactoring':'Código', 'cttipofactoring':'Descripción'
@@ -87,6 +87,7 @@ class TipoFactoringForm(forms.ModelForm):
             , 'lfactoringproveedores':'Factoring proveedores'
             , 'ctinicialesasignacion':'Iniciales de asignaciones aceptadas'
             , 'lcargadcenampliacionplazo':'Carga descuento en ampliaciones de plazo'
+            , 'lgenerafacturaenaceptacion': 'Requiere generar factura en negociación'
         }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
