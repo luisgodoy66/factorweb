@@ -1,0 +1,101 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">contabilidad</a></li>
+                    <li><a href="#">asientos</a></li>
+                    <li class="active">registro de asientos</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div class="card-body">
+            <div class="dropdown float-right">
+                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <div class="dropdown-menu-content">
+                        <a class="dropdown-item" href="{% url 'contabilidad:asientodiario_nuevo' %}">Nuevo diario</a>
+                        <a class="dropdown-item" href="#">Imprimir</a>
+                    </div>
+                </div>
+            </div>
+            <h4 class="mb-0">
+                <span class="count">{{ consulta.count }}</span>
+            </h4>
+
+            {% if not consulta %}
+            <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                <span class="badge badge-pill badge-danger">Sin registros</span>
+                {% if error %}
+                    {{ error }}
+                {% else %}
+                 No hay solicitudes de asignación pendientes
+               {% endif %}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            {% endif %}
+
+            <!-- <div class="content"> -->
+
+                <table class="table table-striped table-bordered" id="bootstrap-data-table-export">
+                    <thead>
+                        <th>Id</th>
+                        <th>Asiento</th>
+                        <th>Registro</th>
+                        <th>Contabilizado</th>
+                        <th>Concepto</th>
+                        <th>Valor</th>
+                        <th class="all">Acciones</th>
+                    </thead>
+                    <tbody>
+                        {% for item in consulta %}
+                        <tr>
+                            <td>{{ item.id }}</td>
+                            <td>{{ item.cxtransaccion }}</td>
+                            <td>{{ item.dregistro|date:"Y-m-d H:m:s" }}</td>
+                            <td>{{ item.dcontabilizado|date:"Y-m-d" }}</td>
+                            <td>{{ item.ctconcepto }}</td>
+                            <td>{{ item.nvalor}}</td>
+                            <td>
+                                <a href="{% url 'solicitudes:asignacionfacturaspuras_editar' item.id %}" 
+                                    class="btn btn-warning btn-sm" role="button" title="Editar"><i class="fa fa-edit"></i>
+                                </a>
+                                <a 
+                                {% if item.asiento_egreso %}
+                                    href="{% url 'contabilidad:imprimircomprobanteegreso' item.id %}" target="{{item.cxtransaccion}}"
+                                {% else %}
+                                    href="{% url 'contabilidad:imprimirdiariocontable' item.id %}" target="{{item.cxtransaccion}}"
+                                {% endif %}
+                                    class="btn btn-primary btn-sm" role="button" title="Imprimir"><i class="fa fa-print"></i>
+                                </a>
+                                <a href="#" onclick='EliminarAsignacion("{{item.id}}")' title="Eliminar"
+                                    class="btn btn-danger btn-sm" role="button"><i class="fa fa-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            <!-- </div> -->
+
+        </div>
+
+    </div>
+ 
+
+{% endblock %}
+
+{% block js_page %}
+<script type="text/javascript" 
+    src="{% static 'factorweb/js/listasolicitudes.js' %}">
+</script>
+{% endblock %}

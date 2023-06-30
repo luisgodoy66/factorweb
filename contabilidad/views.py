@@ -5,11 +5,13 @@ from django.urls import reverse_lazy
 from django.db.models import Q, FilteredRelation, F
 from django.db.models.expressions import RawSQL 
 from django.http import JsonResponse
+from django.db import transaction
 import json
 
 from .models import Plan_cuentas, Cuentas_especiales, Cuentas_bancos\
     , Cuentas_tiposfactoring, Cuentas_tasasfactoring, Factura_venta\
-    , Cuentas_diferidos, Cuentas_provisiones
+    , Cuentas_diferidos, Cuentas_provisiones, Diario_cabecera, Transaccion\
+    , Comprobante_egreso
 from bases.models import Usuario_empresa
 from solicitudes.models import Asignacion
 from empresa.models import Cuentas_bancarias, Tipos_factoring, Puntos_emision\
@@ -23,9 +25,11 @@ from bases.views import enviarPost
 from .forms import CuentasEspecialesForm, CuentasBancosForm, FacturaVentaForm\
     , CuentasTiposFactoringForm, CuentasTasaTiposFactoringForm\
     , ComprobanteEgresoForm, CuentasDiferidoTasaTiposFactoringForm\
-    , CuentasProvisionTasaTiposFactoringForm, PlanCuentasForm
+    , CuentasProvisionTasaTiposFactoringForm, PlanCuentasForm, DiarioCabeceraForm\
+    , TransaccionForm
 
 import xml.etree.cElementTree as etree
+from datetime import date, timedelta, datetime
 
 class CuentasView(LoginRequiredMixin, generic.ListView):
     model = Plan_cuentas
@@ -820,6 +824,71 @@ class DesembolsosPendientesView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
+class AsientosView(LoginRequiredMixin, generic.ListView):
+    model = Diario_cabecera
+    template_name = "contabilidad/listaasientoscontables.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        desde = date.today() + timedelta(-1)
+        hasta = date.today() + timedelta(1)
+        qs=Diario_cabecera.objects\
+            .filter(leliminado = False
+                    , dregistro__gte = desde, dregistro__lte = hasta
+                    , empresa = id_empresa.empresa)\
+            .order_by('dcontabilizado')
+        return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super(AsientosView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class DiariosConsulta(LoginRequiredMixin, generic.TemplateView):
+    # model = Diario_cabecera
+    template_name = "contabilidad/consultageneralasientos.html"
+    # context_object_name='consulta'
+    login_url = 'bases:login'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        # obtener primer día del mes actual
+        desde = date.today() + timedelta(days=-date.today().day +1)
+        hasta = date.today()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+
+        context = super(DiariosConsulta, self).get_context_data(**kwargs)
+        context["desde"] = desde
+        context["hasta"] = hasta
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+ 
+class LibroMayorConsulta(LoginRequiredMixin, generic.TemplateView):
+    # model = Asignacion
+    template_name = "contabilidad/consultalibromayor.html"
+    # context_object_name='consulta'
+    # login_url = 'bases:login'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        desde = date.today() + timedelta(days=-date.today().day +1)
+        hasta = date.today()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+
+        context = super(LibroMayorConsulta, self).get_context_data(**kwargs)
+        context["desde"] = desde
+        context["hasta"] =hasta
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        context['cuentas'] = Plan_cuentas.objects\
+            .filter(empresa= id_empresa.empresa, nnivel__gte= 4, leliminado= False)\
+            .order_by('cxcuenta')
+        return context
+
 def BuscarCuentasEspeciales(request):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     pk = Cuentas_especiales.objects.filter(empresa = id_empresa.empresa).first()
@@ -998,7 +1067,7 @@ def GenerarComprobanteEgreso(request, pk, forma_pago, operacion):
     if request.method=='GET':
 
         e = {
-            'demision': desembolso.dregistro,
+            'demision': documento_origen.ddesembolso,
             'cxbeneficiario':desembolso.cxbeneficiario,
             'ctrecibidopor':desembolso.ctbeneficiario,
             'cxcuentapago':desembolso.cxcuentapago,
@@ -1073,10 +1142,6 @@ def GenerarEgresoDiario(request):
     pid_factura = objeto["pid_factura"]
     nusuario = request.user.id
 
-    if not pid_factura == 'NONE':
-        pid_factura = 'NULL'
-
-    print(pid_cuentapago)
     resultado=enviarPost("CALL uspGenerarEgresoContabilidad( '{0}',{1},'{2}','{3}'\
                          ,{4},'{5}',{6},'{7}','{8}'\
                          ,{9},{10},{11},'',0)"
@@ -1084,3 +1149,307 @@ def GenerarEgresoDiario(request):
                 , pid_cuentapago, pscheque, pid_cuentadestino, psconcepto, pdemision\
             ,pnvalor, pid_factura, nusuario))
     return HttpResponse(resultado)
+
+def DatosDiarioContable(request, diario_id=None):
+    template_name="solicitudes/datosasiento_form.html"
+    formulario = {}
+    diario = {}
+    
+    if request.method=='GET':
+
+        diario = Diario_cabecera.objects.filter(pk=diario_id).first()
+
+        if diario:
+            e={
+                'cxtransaccion': diario.cxtransaccion,
+                'ctconcepto': diario.ctconcepto,
+                'nvalor': diario.nvalor,
+                'dcontabilizado':diario.dcontabilizado
+            }
+            formulario = DiarioCabeceraForm(e)
+        else:
+            formulario=DiarioCabeceraForm()
+            diario=None
+            
+    sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
+
+    contexto={'form_diario':formulario,
+        'diario' : diario,
+        'diario_id': diario_id,
+        'solicitudes_pendientes':sp
+       }
+
+
+    return render(request, template_name, contexto)
+
+def AsientoDiarioNuevo(request, diario_id = None):
+
+    template_name="contabilidad/datosasiento_form.html"
+    
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
+    sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
+
+    contexto={'form_diario': DiarioCabeceraForm(),
+            'solicitudes_pendientes':sp
+       }
+    
+    if request.method=='POST':
+
+        fecha = request.POST.get("dcontabilizado")
+        concepto = request.POST.get("ctconcepto")
+        valor =  request.POST.get("total_debe")
+        print(request.POST)
+        # inicio de transaccion
+        with transaction.atomic():
+
+            if not diario_id:
+                # buscar el secuancial que toca
+                sec = Contador.objects.filter(cxtransaccion = 'AD'
+                                              , empresa = id_empresa.empresa)\
+                                              .first()
+                if sec:
+                    contador = sec.nultimonumero + 1
+                else:
+                    contador = 1
+                # agregar ceros a la izquierda de variable numerica en python?
+
+                transaccion = 'AD-' + str(contador).zfill(7)
+
+                diario = Diario_cabecera(
+                    cxtransaccion = transaccion,
+                    dcontabilizado = fecha,
+                    ctconcepto = concepto,
+                    nvalor = valor,
+                    cxusuariocrea = request.user,
+                    empresa = id_empresa.empresa,
+                )
+                if diario:
+                    diario.save()
+                    diario_id = diario.id
+
+                # nueva = True
+            else:
+                diario = Diario_cabecera.objects.filter(pk= diario_id).first()
+                if diario:
+
+                    diario.dcontabilizado = fecha
+                    diario.ctconcepto = concepto
+                    diario.nvalor = valor
+                    diario.cxusuariomodifica = request.user.id
+                    diario.save()
+
+                # nueva = False
+
+            if not diario_id:
+                return redirect("contabilidad:listaasientocontables")
+
+            # grabar detalle 
+
+            # recuperar el string de lista  pasado en la data y
+            # convertir a lista
+            lista = request.POST.get("Diario")
+            output = eval(lista)
+
+            for elem in output:      
+                #accedemos a cada elemento de la lista (en este caso cada elemento es un dictionario)
+                cuenta = Plan_cuentas.objects.filter(id = elem.get("cuenta")).first()
+
+                detalle = Transaccion(
+                    diario = diario,
+                    cxcuenta=cuenta,
+                    cxtipo = elem.get("tipo"),
+                    ctreferencia = elem.get("referencia"),
+                    nvalor = elem.get("debe") + elem.get("haber"),
+                    cxusuariocrea = request.user,
+                    empresa = id_empresa.empresa,
+                )
+                if detalle:
+                    detalle.save()
+
+        # la ejecucion de esta vista POST se hace por jquery.ajax 
+        # y ese proceso traslada a la forma de edición de la 
+        # asignación que se está creando o modificando
+        return HttpResponse( diario_id)
+    
+    return render(request, template_name, contexto)
+
+def DatosDiarioEditar(request, detalle_id = None):
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
+    template_name = "contabilidad/datoslineaasiento_modal.html"
+
+    form_linea = TransaccionForm(empresa=id_empresa.empresa)
+    
+    if request.method=='GET':
+        if detalle_id:
+            detalle = Transaccion.objects.get(id=detalle_id)
+            e = {'cxcuenta':detalle.cxcuenta
+                , 'cxtipo':detalle.cxtipo
+                , 'ctreferencia':detalle.ctreferencia
+                , 'nvalor':detalle.nvalor}
+            
+            form_linea = TransaccionForm(e, empresa=id_empresa.empresa)
+
+    contexto={'form_linea': form_linea,
+              'detalle': detalle_id,
+              'valor': 0,
+    }
+
+    return render(request, template_name, contexto)
+
+def GeneraListaDiariosJSON(request, desde = None, hasta= None):
+    # Es invocado desde la url de una tabla bt
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    if desde == 'None':
+        diario = Diario_cabecera.objects\
+            .filter(empresa = id_empresa.empresa).order_by('dcontabilizado')
+    else:
+        diario = Diario_cabecera.objects\
+            .filter(dcontabilizado__gte = desde, dcontabilizado__lte = hasta
+                    , empresa = id_empresa.empresa)\
+            .order_by('dcontabilizado')
+        
+    tempBlogs = []
+    for i in range(len(diario)):
+        tempBlogs.append(GeneraListaDiariosJSONSalida(diario[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": diario.count(),
+        "totalNotFiltered": diario.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaDiariosJSONSalida(diario):
+    output = {}
+
+    output["id"] = diario.id
+    output["Diario"] = diario.cxtransaccion
+    output["Fecha"] = diario.dcontabilizado.strftime("%Y-%m-%d")
+    output["Concepto"] = diario.ctconcepto
+    output["Valor"] = diario.nvalor
+
+    factura = Factura_venta.objects.filter(asiento = diario.id).first()
+    if factura:
+        output["Factura"] = factura.__str__()
+        output["RecibidoPor"] = None
+        output["Tipo"] = 'D'
+    else:
+        output["Factura"] = None
+
+        ce = Comprobante_egreso.objects.filter(asiento = diario.id).first()
+        if ce : 
+            output["RecibidoPor"] =  ce.ctrecibidopor
+            output["Tipo"] = 'E'
+        else:
+            output["RecibidoPor"] = None
+            output["Tipo"] = 'D'
+
+    output["Estado"] = diario.cxestado
+    output["Registro"] = diario.dregistro
+
+    return output
+from django.db import connection
+
+def my_view(request):
+    with connection.cursor() as cursor:
+        cursor.callproc('funcuno', [arg1, arg2])
+        result = cursor.fetchone()[0]
+    return render(request, 'my_template.html', {'result': result})
+
+def GeneraLibroMayorJSON(request, desde = None, hasta= None, cuentas = None):
+    # Es invocado desde la url de una tabla bt
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    arr_cuentas = []
+    id_cuenta=""
+
+    ids = cuentas.split(',')
+    for id in ids:
+        arr_cuentas.append(id)
+
+    if desde == 'None':
+        detalle_asiento = Transaccion.objects\
+            .filter(cxcuenta__id__in =cuentas
+                    ,empresa = id_empresa.empresa)\
+            .order_by('cxcuenta','diario__dcontabilizado')
+    else:
+        detalle_asiento = Transaccion.objects\
+            .filter(diario__dcontabilizado__gte = desde
+                    , diario__dcontabilizado__lte = hasta
+                    , cxcuenta__id__in = arr_cuentas
+                    , empresa = id_empresa.empresa)\
+            .order_by('cxcuenta','diario__dcontabilizado')
+            
+    tempBlogs = []
+    nsaldo={}
+
+    for i in range(len(detalle_asiento)):
+        # por cada cuenta mostrar saldo aterior
+        if detalle_asiento[i].cxcuenta!=id_cuenta:
+            if id_cuenta!="":
+                tempBlogs.append({}) 
+            id_cuenta = detalle_asiento[i].cxcuenta
+            # convertir string en tipo fecha?
+            fecha_desde = datetime.strptime(desde,"%Y-%m-%d")
+            result = enviarPost("CALL uspSaldoCuenta({0},'{1}','',0)".format(detalle_asiento[i].cxcuenta.id
+                                                                        ,fecha_desde - timedelta(days=1)))
+            if result[0] !='':
+                return result[0]
+            
+            output = {}
+            nsaldo["valor"] = result[1]
+            output["Fecha"] = detalle_asiento[i].cxcuenta.__str__()
+            output["Referencia"] = "SALDO ANTERIOR"
+            output["Saldo"] = nsaldo["valor"]
+            tempBlogs.append(output) 
+
+        tempBlogs.append(GeneraLibroMayorJSONSalida(detalle_asiento[i], nsaldo)) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": detalle_asiento.count(),
+        "totalNotFiltered": detalle_asiento.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraLibroMayorJSONSalida(detalle, saldo):
+    output = {}
+    nsaldo = saldo["valor"]
+
+    output["id"] = detalle.id
+    output["Cuenta"] =  detalle.cxcuenta.__str__()
+    output["Fecha"] = detalle.diario.dcontabilizado
+    output["Asiento"] = detalle.diario.cxtransaccion
+    output["Concepto"] = detalle.diario.ctconcepto
+    output["Referencia"] = detalle.ctreferencia
+    if detalle.cxtipo=='D':
+        output["Debe"] = detalle.nvalor
+    else:
+        output["Haber"] = detalle.nvalor
+
+    factura = Factura_venta.objects.filter(asiento = detalle.diario.id).first()
+    if factura:
+        output["Tipo"] = 'D'
+    else:
+        ce = Comprobante_egreso.objects.filter(asiento = detalle.diario.id).first()
+        if ce : 
+            output["Tipo"] = 'E'
+        else:
+            output["Tipo"] = 'D'
+    output["Diario"] = detalle.diario.id
+    
+    nsaldo += detalle.nvalor
+
+    output["Saldo"] = nsaldo
+    saldo["valor"] = nsaldo
+
+    return output
+

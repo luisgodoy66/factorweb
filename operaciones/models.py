@@ -1,7 +1,8 @@
 from random import choices
 from django.db import models
 from django.forms import BooleanField
-from django.db.models import Sum, Q, F, ExpressionWrapper, DateField, CharField, Value
+from django.db.models import Sum, Q, F, ExpressionWrapper, DateField, CharField\
+    , Value
 from django.db.models.functions import Concat
 from django.utils.dateparse import parse_date
 

@@ -3,14 +3,15 @@ from .views import CuentasView, CuentasEspecialesEdit, BuscarCuentasEspeciales\
     , CuentasEspecialesNew, CuentasBancosView, CuentaBancoNew, CuentaBancoEdit\
     , CuentasTiposFactoringView, CuentaTipoFactoringNew, CuentaTipoFactoringEdit\
     , CuentasTasasFactoringView, CuentasTasaTiposFactoringView\
-     , CuentaTasaTipoFactoringNew, CuentaTasaTipoFactoringEdit,PendientesGenerarFacturaView\
-     , GenerarFactura, ObtenerSecuenciaFactura, DesembolsosPendientesView\
-     , GenerarFacturaDiario, GenerarComprobanteEgreso\
-     , GenerarEgresoDiario, CuentasDiferidosView, CuentasProvisionesView\
-     , CuentasTasaDiferidoView, CuentaDiferidoTasaTipoFactoringNew\
-     , CuentasTasaProvisionView, CuentaDiferidoTasaTipoFactoringEdit\
-     , CuentaProvisionTasaTipoFactoringNew, CuentaProvisionTasaTipoFactoringEdit\
-     , CuentasNew, CuentasEdit
+    , CuentaTasaTipoFactoringNew, CuentaTasaTipoFactoringEdit,PendientesGenerarFacturaView\
+    , GenerarFactura, ObtenerSecuenciaFactura, DesembolsosPendientesView\
+    , GenerarFacturaDiario, GenerarComprobanteEgreso, GenerarEgresoDiario\
+    , CuentasDiferidosView, CuentasProvisionesView, CuentasTasaDiferidoView\
+    , CuentaDiferidoTasaTipoFactoringNew, CuentasTasaProvisionView\
+    , CuentaDiferidoTasaTipoFactoringEdit, CuentaProvisionTasaTipoFactoringNew\
+    , CuentaProvisionTasaTipoFactoringEdit, CuentasNew, CuentasEdit, AsientosView\
+    , AsientoDiarioNuevo, DatosDiarioEditar, GeneraListaDiariosJSON, DiariosConsulta\
+    , LibroMayorConsulta, GeneraLibroMayorJSON
 
 from .sri import GeneraXMLFactura
 from .reportes import ImpresionDiarioContable, ImpresionComprobanteEgreso\
@@ -91,4 +92,17 @@ urlpatterns = [
     path('imprimircomprobanteegreso/<int:diario_id>',ImpresionComprobanteEgreso
          , name="imprimircomprobanteegreso"),
     path('generaregresodiario/',GenerarEgresoDiario, ),
+    path('listaasientocontables/',AsientosView.as_view(), name="listaasientoscontables"),
+    path('asientodiarionuevo/',AsientoDiarioNuevo, name="asientodiario_nuevo"),
+    path('editarlineadeasiento/', DatosDiarioEditar, name='editarlineadeasiento'),
+    path('editarlineadeasiento/<int:detalle_id>', DatosDiarioEditar
+         , name='editarlineadeasiento'),
+    path('consultageneraldiarios/', DiariosConsulta.as_view()
+         , name='consulta_diarios'),
+    path('asientosdiariojson/<desde>/<hasta>',GeneraListaDiariosJSON
+         , name="asientosdiario_json"),
+    path('consultalibromayor/',LibroMayorConsulta.as_view()
+         , name="consultalibromayor"),
+    path('libromayorjson/<desde>/<hasta>/<cuentas>',GeneraLibroMayorJSON
+         , name="libromayor_json"),
 ]

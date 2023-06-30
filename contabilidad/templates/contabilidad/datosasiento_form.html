@@ -1,0 +1,116 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">contabilidad</a></li>
+                    <li><a href="#">asientos</a></li>
+                    <li><a href="{% url 'contabilidad:listaasientoscontables' %}">registro de asientos</a></li>
+                    <li class="active">nuevo</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmAsiento" enctype="multipart/form-data" 
+        class="form-horizontal">
+<div class="col-md-12">
+    <div class="card">
+        {% csrf_token %}
+        <div class="card-header">
+            <strong>Detalle de asiento</strong> 
+        </div>
+        <div class="col-6 col-md-6" hidden>
+            <input id="asignacion_id" value="{{ asignacion_id }}">
+        </div>
+        
+        <div class="card-body">
+
+            <div class="col-md-3">
+                <div class="row form-group">
+                    <div class="col-md-4"><label for="id_cxbanco" class=" form-control-label">
+                        {{ form_diario.dcontabilizado.label}}</label></div>
+                    <div class="col-md-8">
+                        {{ form_diario.dcontabilizado}}
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-12">
+                    <button type="button" class="btn btn-success btn-sm float-right" 
+                        onclick="AbrirModal('/contabilidad/editarlineadeasiento/')">  
+                        <i class="fa fa-dot-circle-o"></i> Agregar detalle
+                    </button>
+                    </div>
+                </div>  
+            </div>
+            <div class="col-md-6">
+                <div class="row form-group">
+                    <div class="col-md-2"><label for="id_cxbanco" class=" form-control-label">
+                        {{ form_diario.ctconcepto.label}}</label></div>
+                    <div class="col-md-10">
+                        {{ form_diario.ctconcepto}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+
+                <div class="row form-group">
+                    <div class="col-md-2"><label for="id_cxbanco" class=" form-control-label">
+                        Debe</label></div>
+                    <div class="col-md-10">
+                        <input id="total_debe" name="total_debe" value="0.00" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-2"><label for="id_cxbanco" class=" form-control-label">
+                        Haber</label></div>
+                    <div class="col-md-10">
+                        <input id="total_haber" name="total_haber" value="0.00" class="form-control" disabled>
+                    </div>
+                </div>
+            </div>
+
+            <small>
+
+            <div class="container mt-3">
+                <div id="divTabla">
+                    <table class="table table-striped table-bordered" id="tabla_diario" data-propiedadId="Id">
+                        <thead>
+                            <tr>
+                                <td data-cabecera="cxcuenta">Cuenta</td>
+                                <td data-cabecera="referencia">Referencia</td>
+                                <td data-cabecera="debe">Debe</td>
+                                <td data-cabecera="haber">Haber</td>
+                                <td data-cabecera="haber" hidden>Id.Cuenta</td>
+                                <td data-cabecera="haber" hidden>Tipo</td>
+                                <td data-cabecera="Acciones"class="all">Acciones</td>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            </small>
+    </div>
+        <div class="card-footer">
+            <a class="btn btn-danger btn-sm "
+                href="{% url 'contabilidad:listaasientoscontables' %}" 
+            ><i class="fa fa-ban"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa fa-dot-circle-o"></i> Grabar
+            </button>
+            
+        </div>
+    </div>
+</div>
+
+</form>
+{% endblock %}
+{% block js_page %}
+<script type="text/javascript" src="{% static 'factorweb/js/datosasiento.js' %}"></script>
+{% endblock %}
+

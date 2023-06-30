@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.expressions import RawSQL 
 
 # Create your models here.
 from bases.models import ClaseModelo
@@ -14,7 +15,11 @@ class Plan_cuentas(ClaseModelo):
 
     def __str__(self):
         return '{} {}'.format(self.cxcuenta,self.ctcuenta)
-    
+
+    def save(self):
+        self.ctcuenta = self.ctcuenta.upper()
+        super(Plan_cuentas, self).save()
+  
 class Cuentas_especiales(ClaseModelo):
     pagoconcajachica =models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
                                         , related_name='cuenta_cajachica')
@@ -43,20 +48,29 @@ class Cuentas_especiales(ClaseModelo):
 
 class Diario_cabecera(ClaseModelo):
     cxtransaccion = models.CharField(max_length= 10) 
+    dcontabilizado = models.DateField()
     ctconcepto = models.TextField()
     nvalor = models.DecimalField(max_digits= 10,decimal_places= 2)
+    cxestado = models.CharField(max_length=1, default='A')
     # cxlocalidad character(2) COLLATE pg_catalog."default",
-    dcontabilizado = models.DateField()
 
     def __str__(self):
         return self.ctconcepto
 
+    def save(self):
+        self.ctconcepto = self.ctconcepto.upper()
+        super(Diario_cabecera, self).save()
+
 class Transaccion(ClaseModelo):
+    TIPOS=(
+        ('D', 'Debe'),
+        ('H', 'Haber')
+    )
     diario = models.ForeignKey(Diario_cabecera, on_delete=models.CASCADE)
     cxcuenta = models.ForeignKey(Plan_cuentas, on_delete=models.CASCADE)
-    cxtipo = models.CharField( max_length=1) 
+    cxtipo = models.CharField( max_length=1, choices=TIPOS) 
+    ctreferencia= models.CharField(max_length=30)
     nvalor = models.DecimalField(max_digits= 10, decimal_places= 2)
-    cxreferencia= models.CharField(max_length=30)
     # norden = models.SmallIntegerField
 
 class Cuentas_bancos(ClaseModelo):
@@ -173,7 +187,7 @@ class Comprobante_egreso(ClaseModelo):
     ctcheque = models.CharField(max_length=8, null=True)
     cxcuentadestino = models.ForeignKey(Cuenta_transferencia
         , on_delete=models.RESTRICT, null = True)
-    cxasiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
+    asiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
                                      , related_name="asiento_egreso"
                                      , null=True)
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -190,3 +204,47 @@ class Provisiones(ClaseModelo):
     año = models.CharField(max_length=4)
     mes = models.CharField(max_length=2)
     
+class Control_meses(ClaseModelo):
+    año = models.CharField(max_length=4)
+    mes = models.CharField(max_length=2)
+    lbloqueado = models.BooleanField(default=False)
+
+class Saldos(ClaseModelo):
+    cuenta = models.ForeignKey(Plan_cuentas, on_delete = models.RESTRICT)
+    año = models.CharField(max_length=4)
+    ndebe01 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    ndebe02 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    ndebe03 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    ndebe04 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    ndebe05 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    ndebe06 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    ndebe07 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    ndebe08 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    ndebe09 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    ndebe10 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    ndebe11 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    ndebe12 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    nhaber01 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    nhaber02 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    nhaber03 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    nhaber04 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    nhaber05 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    nhaber06 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    nhaber07 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    nhaber08 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    nhaber09 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    nhaber10 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    nhaber11 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    nhaber12 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    ndebe00 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    nhaber00 = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    ndebe = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+    nhaber = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
+     
+class Cuentas_nivel1(ClaseModelo):
+    cxcuenta = models.CharField(max_length=1)
+    descripcion = models.CharField(max_length=20)
+    lactivo = models.BooleanField()
+    lingreso = models.BooleanField()
+    legreso = models.BooleanField()
+    lorden = models.BooleanField()

@@ -1,7 +1,11 @@
 from django import forms
+
+from datetime import date
+
 from .models import Cuentas_especiales, Plan_cuentas, Cuentas_bancos\
     , Cuentas_tiposfactoring, Cuentas_tasasfactoring, Factura_venta\
-        , Comprobante_egreso, Cuentas_diferidos, Cuentas_provisiones
+        , Comprobante_egreso, Cuentas_diferidos, Cuentas_provisiones\
+        , Diario_cabecera, Transaccion
 from empresa.models import Cuentas_bancarias, Tipos_factoring, Puntos_emision
 from clientes.models import Cuenta_transferencia
 
@@ -217,7 +221,7 @@ class FacturaVentaForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        self.fields['demision'].widget.attrs['readonly']=True
+        # self.fields['demision'].widget.attrs['readonly']=True
         self.fields['nvalor'].widget.attrs['readonly']=True
         self.fields['niva'].widget.attrs['readonly']=True
         self.fields['nbaseiva'].widget.attrs['readonly']=True
@@ -257,7 +261,7 @@ class ComprobanteEgresoForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        self.fields['demision'].widget.attrs['readonly']=True
+        # self.fields['demision'].widget.attrs['readonly']=True
         self.fields['nvalor'].widget.attrs['readonly']=True
 
         if empresa:
@@ -283,4 +287,51 @@ class PlanCuentasForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
+        
+class DiarioCabeceraForm(forms.ModelForm):
+    class Meta:
+        model = Diario_cabecera
+        fields = ['ctconcepto', 'dcontabilizado', 'nvalor']
+        labels = {'ctconcepto':'Concepto', 'dcontabilizado':'Fecha', 'nvalor':'Valor'}
+        widgets= {'ctconcepto': forms.Textarea(attrs={'rows': '3'}),
+            'dcontabilizado': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+        self.fields['dcontabilizado'].widget.attrs['value']=date.today
+
+class TransaccionForm(forms.ModelForm):
+    class Meta:
+        model = Transaccion
+        fields = ['cxcuenta', 'cxtipo', 'ctreferencia', 'nvalor']
+        labels = {'cxcuenta' : 'Cuenta'
+                  , 'cxtipo':'Debe/Haber'
+                  , 'ctreferencia': 'Referencia'
+                  , 'nvalor':'Valor'}
+
+    def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+
+        if empresa:
+            self.fields['cxcuenta'].queryset = Plan_cuentas.objects\
+                .filter(empresa=empresa, leliminado = False, ldetalle=True)\
+                .order_by('cxcuenta')
         

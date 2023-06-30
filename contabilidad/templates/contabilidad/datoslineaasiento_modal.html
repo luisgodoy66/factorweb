@@ -1,0 +1,89 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" rol="form"  class="form-horizontal" name="form"
+            {% if detalle %}
+                action="{% url 'contabilidad:editarlineadeasiento' detalle  %}"
+            {% else %}
+                action="{% url 'contabilidad:editarlineadeasiento'  %}"
+            {% endif %}
+            >
+            <!-- <div class="col-md-12"> -->
+            <div hidden>
+                <input type="text" id = "id_valor" value = "{{ valor }}">
+            </div>
+            <div class="card">
+
+                {% csrf_token %}
+                <div class="card-header">
+                    <strong>Datos de línea de asiento</strong> 
+                </div>
+                
+                <div class="card-body card-block">
+                <!-- <div class="col-lg-6"> -->
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_cxbanco" class=" form-control-label">
+                            {{ form_linea.cxcuenta.label}}</label></div>
+                        <div class="col-md-8">
+                            {{ form_linea.cxcuenta}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_cxbanco" class=" form-control-label">
+                            {{ form_linea.cxtipo.label}}</label></div>
+                        <div class="col-md-8">
+                            {{ form_linea.cxtipo}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_ctcuenta" class=" form-control-label">
+                            {{ form_linea.ctreferencia.label}}</label></div>
+                        <div class="col-md-8">
+                            {{ form_linea.ctreferencia}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="cheque_nvalor" class=" form-control-label">
+                            {{ form_linea.nvalor.label}}</label>
+                        </div>
+                        <div class="col-md-8">
+                            {{ form_linea.nvalor}}
+                        </div>
+                    </div>
+                </div>    
+                {{ errors}}
+                <div class="card-footer">
+                    <button type="buttom" class="btn btn-danger btn-sm" 
+                        onclick="return CerrarModal()">
+                        <i class="fa fa-ban"></i> Cerrar
+                    </button>
+                    {% if cheque %}
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fa fa-dot-circle-o"></i> Grabar
+                        </button>
+                    {% else %}
+                        <button type="button" class="btn btn-primary btn-sm"
+                            onclick="AgregarFila()" >
+                            <i class="fa fa-dot-circle-o"></i> Grabar
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- </div> -->
+        </form>
+
+    </div>
+
+    <!-- {% block js_page %}
+    <script>
+        // este modal viene desde nuevo registro o edicion de cheque. Si es nuevo
+        // (no hay cheque), inicializar los valores del comprador y total
+        if ( capturaValor("id_cheque") == 'None')
+        {
+            inicializaValor("id_ctgirador",capturaValor("id_ctcomprador"))
+            inicializaValor("cheque_nvalor",capturaValor("id_ntotal"))
+        }
+        
+    </script>
+    {% endblock %} -->
+</div>    
