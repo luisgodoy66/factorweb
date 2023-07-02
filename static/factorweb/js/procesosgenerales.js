@@ -275,3 +275,27 @@ function antigüedadcartera(url){
 
   })
 }    
+
+function ReversarAsientoDiario(asiento_id, asiento){
+  MensajeConfirmacion("Reversar diario " +  asiento +"?",function(){
+    fetchProcesar("/contabilidad/reversarasiento/"+asiento_id, function(){
+        location.reload();
+    })
+})
+}
+
+function ModificarCobranza(cobranza_id, tipo_operacion, contabilizada){
+  if (contabilizada){
+    MensajeError("Cobranza ya está contabilizada. No se puede modificar.")
+  }
+  else{
+    if (tipo_operacion == 'C' || tipo_operacion =='R'){
+      AbrirModal("/cobranzas/modificarcobranza/"+ cobranza_id + '/' + tipo_operacion)
+    }
+    else{
+      MensajeError("Solo puede modificar cobranzas y recuperaciones no protestadas.")
+    }
+
+  }
+
+}

@@ -27,7 +27,7 @@ window.onload=function(){
 };
 window.operateEvents = {
     'click .revertir': function (e, value, row, index) {
-        ReversarAsientoDiario(row.id, )
+        ReversarAsientoDiario(row.id, row.Diario)
       },
       'click .imprimir': function (e, value, row, index) {
         ImprimirAsientoDiario( row.id, row.Tipo)

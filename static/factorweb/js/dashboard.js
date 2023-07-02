@@ -22,6 +22,9 @@ window.operateEvents = {
   'click .imprimir': function (e, value, row, index) {
     ImprimirCobranza( row.id, row.TipoOperacion)
   },
+  'click .editar': function (e, value, row, index) {
+    ModificarCobranza( row.id, row.TipoOperacion, row.Contabilizada)
+  },
 };
 
 function operateFormatter(value, row, index) {

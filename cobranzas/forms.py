@@ -5,6 +5,7 @@ from .models import Cheques, Documentos_cabecera, Liquidacion_cabecera\
     , Cheques_protestados, Recuperaciones_cabecera, Cargos_cabecera
 from operaciones.models import Motivos_protesto_maestro, ChequesAccesorios
 from empresa.models import Cuentas_bancarias
+from cuentasconjuntas.models import Cuentas_bancarias as Cuentas_compartidas
 
 from datetime import date
 
@@ -22,7 +23,7 @@ class CobranzasDocumentosForm(forms.ModelForm):
             , 'cxcuentadeposito':'Cuenta de la empresa'
             , 'ddeposito': 'Fecha de depósito'
             , 'cxcuentatransferencia': 'Cuenta de origen de transferencia'
-            , 'cxcuentaconjunta': 'Cuenta conjunta'
+            , 'cxcuentaconjunta': 'Cuenta compartida'
         }
         widgets = {
             'dcobranza': forms.DateInput(
@@ -56,6 +57,9 @@ class CobranzasDocumentosForm(forms.ModelForm):
         if empresa:
             self.fields['cxcuentadeposito'].queryset = Cuentas_bancarias.objects\
                 .filter(empresa=empresa, lactiva = True, leliminado = False)
+            self.fields['cxcuentaconjunta'].queryset = Cuentas_compartidas.objects\
+                .filter(empresa=empresa, lactiva = True
+                        , leliminado = False)
 
     def clean_ddeposito(self):
         data = self.cleaned_data['ddeposito']
@@ -189,7 +193,7 @@ class RecuperacionesProtestosForm(forms.ModelForm):
         model=Recuperaciones_cabecera
         fields=['cxcliente', 'cxtipofactoring','cxformacobro', 'nvalor'
             , 'dcobranza', 'nsobrepago', 'cxcuentadeposito', 'ddeposito'
-            , 'cxcuentatransferencia'
+            , 'cxcuentatransferencia', 'cxcuentaconjunta'
         ]
         labels={'cxcliente':'Cliente', 'cxtipofactoring':'Tipo de factoring'
             , 'cxformacobro':'Forma de cobro','nvalor':'Valor recibido'
@@ -197,6 +201,7 @@ class RecuperacionesProtestosForm(forms.ModelForm):
             , 'cxcuentadeposito':'Cuenta de la empresa'
             , 'ddeposito': 'Fecha de depósito'
             , 'cxcuentatransferencia': 'Cuenta de origen de transferencia'
+            , 'cxcuentaconjunta': 'Cuenta compartida'
         }
         widgets = {
             'ddeposito': forms.DateInput(
@@ -230,6 +235,9 @@ class RecuperacionesProtestosForm(forms.ModelForm):
         if empresa:
             self.fields['cxcuentadeposito'].queryset = Cuentas_bancarias.objects\
                 .filter(empresa=empresa, lactiva = True, leliminado = False)
+            self.fields['cxcuentaconjunta'].queryset = Cuentas_compartidas.objects\
+                .filter(empresa=empresa, lactiva = True
+                        , leliminado = False)
 
 class CobranzasCargosForm(forms.ModelForm):
 

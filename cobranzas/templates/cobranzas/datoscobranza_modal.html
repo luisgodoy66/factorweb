@@ -1,0 +1,129 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" rol="form"  class="form-horizontal" name="form"
+                action="{% url 'cobranzas:modificar_cobranza' id tipo_operacion %}"
+            >
+            <!-- <div class="col-md-12"> -->
+                <div class="card">
+
+                    {% csrf_token %}
+                    <div class="card-header">
+                        <strong>Datos de la cobranza </strong> 
+                    </div>
+                    
+                    <input type="text" id = "id_id"  hidden  value = "{{ id}}" >
+                    <input type="text" id = "id_deposito_cc"  hidden  value = "{{ deposito_en_cuentacompartida}}" >
+
+                    {% if estado == 'L' %}
+                    <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                        <span class="badge badge-pill badge-danger">Operación liquidada</span>
+                        {% if error %}
+                            {{ error }}
+                        {% else %}
+                         La Operación está liquidada y no puede modificarse las fechas.
+                       {% endif %}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                    </div>
+                    {% endif %}
+        
+                    <div class="card-body card-block">
+                    <!-- <div class="col-lg-6"> -->
+                        {% if estado != 'L' %}
+                        <div class="row form-group">
+                            <div class="col-md-3"><label for="id_dcobranza" class=" form-control-label">
+                                {{ form.dcobranza.label }}</label></div>
+                            <div class="col-md-9">
+                                {{ form.dcobranza }}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-3"><label for="id_ddeposito" class=" form-control-label">
+                                {{ form.ddeposito.label }}</label></div>
+                            <div class="col-md-9">
+                                {{ form.ddeposito }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if deposito_en_cuentacompartida %}
+                        <div class="row form-group">
+                            <div class="col-md-3"><label for="id_dcobranza" class=" form-control-label">
+                                {{ form.cxcuentaconjunta.label }}</label></div>
+                            <div class="col-md-9">
+                                {{ form.cxcuentaconjunta }}
+                            </div>                            
+                        </div>
+                        {% else %}
+                        <div class="row form-group">
+                            <div class="col-md-3"><label for="id_dcobranza" class=" form-control-label">
+                                {{ form.cxcuentadeposito.label }}</label></div>
+                            <div class="col-md-9">
+                                {{ form.cxcuentadeposito }}
+                            </div>                            
+                        </div>
+                        {% endif %}
+                    </div>    
+                    <div class="card-footer">
+                        <button type="buttom" class="btn btn-danger btn-sm" 
+                            onclick="return CerrarModal()">
+                            <i class="fa fa-dot-circle-o"></i> Cerrar
+                        </button>
+                        <button id="btnCobrar" class="btn btn-primary btn-sm">
+                            <i class="fa fa-dot-circle-o"></i> Grabar
+                        </button>
+                        <!-- <button id="button" class="btn btn-secondary">updateCell</button> -->
+                    </div>
+                </div>
+            <!-- </div> -->
+        </form>
+
+    </div>
+
+    <script>
+        var $table = jQuery('#table')
+
+        // antes de cerrar modal...
+        jQuery("form").submit(function(e){
+
+            // actualizar la tabla con los valores del modal
+            e.preventDefault();
+            var url = jQuery("[name=form]").attr("action");
+            var token = jQuery("[name=csrfmiddlewaretoken]").val();
+            var formData = jQuery("form").serializeArray();
+
+            jQuery.ajax({
+                url:url,
+                method:"POST",
+                headers: {'X-CSRFToken': token },
+                data: formData
+            })
+            .done(function(r,textStatus,xhr){
+                if(xhr.status=200){
+                    // para que esto funcione la tabla debe tener el siguiente dato
+                    // data-unique-id="id"
+                    i = capturaValor('id_id');
+                    cobro = jQuery("#id_dcobranza").val();
+                    deposito = jQuery("#id_ddeposito").val();
+                    $table.bootstrapTable('updateByUniqueId', {
+                        id: i,
+                        row: {
+                            Fecha: cobro,
+                            Deposito: deposito,
+                        }
+                    });
+                    CerrarModal();
+                }
+                else{
+                    alert(textStatus);
+                }
+            }).fail(function (error) {
+                MensajeError(error.responseText);
+            });
+            
+
+        });
+
+    </script>
+</div>

@@ -21,7 +21,7 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , SumaCargos, Prorroga, EditarTasasDocumentoAmpliacionDePlazo\
     , AceptarAmpliacionDePlazo, AmpliacionesDePlazoPendientesView\
     , GeneraListaAmpliacionesPendientesJSON, GeneraListaAmpliacionesJSON\
-    , AmpliacionesConsulta
+    , AmpliacionesConsulta, ModificarCobranza
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos\
@@ -65,6 +65,8 @@ urlpatterns = [
     path('quitaraccesorio/<int:cheque_id>/<cliente_id>'
          , QuitarAccesorio, name='quitarchequeaccesorio'),
     path('prorroga/<int:id>/<tipo_asignacion>/<vencimiento>/<numero_factura>', Prorroga, name='prorroga' ),
+    path('modificarcobranza/<int:id>/<tipo_operacion>', ModificarCobranza
+         , name= 'modificar_cobranza'),
     
     # liquidaciones
     path('confirmarcobranza/<int:cobranza_id>/<tipo_operacion>',ConfirmarCobranza),

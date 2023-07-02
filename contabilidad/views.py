@@ -6,6 +6,8 @@ from django.db.models import Q, FilteredRelation, F
 from django.db.models.expressions import RawSQL 
 from django.http import JsonResponse
 from django.db import transaction
+from django.views import generic
+
 import json
 
 from .models import Plan_cuentas, Cuentas_especiales, Cuentas_bancos\
@@ -835,8 +837,7 @@ class AsientosView(LoginRequiredMixin, generic.ListView):
         desde = date.today() + timedelta(-1)
         hasta = date.today() + timedelta(1)
         qs=Diario_cabecera.objects\
-            .filter(leliminado = False
-                    , dregistro__gte = desde, dregistro__lte = hasta
+            .filter( dregistro__gte = desde, dregistro__lte = hasta
                     , empresa = id_empresa.empresa)\
             .order_by('dcontabilizado')
         return qs
@@ -889,6 +890,26 @@ class LibroMayorConsulta(LoginRequiredMixin, generic.TemplateView):
             .order_by('cxcuenta')
         return context
 
+class ListaCobranzasAGenerar(LoginRequiredMixin, generic.TemplateView):
+    # model = Diario_cabecera
+    template_name = "contabilidad/consultacobranzaspendientes.html"
+    # context_object_name='consulta'
+    login_url = 'bases:login'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        # obtener primer día del mes actual
+        desde = date.today() + timedelta(days=-date.today().day +1)
+        hasta = date.today()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+
+        context = super(DiariosConsulta, self).get_context_data(**kwargs)
+        context["desde"] = desde
+        context["hasta"] = hasta
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+ 
 def BuscarCuentasEspeciales(request):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     pk = Cuentas_especiales.objects.filter(empresa = id_empresa.empresa).first()
@@ -1355,13 +1376,6 @@ def GeneraListaDiariosJSONSalida(diario):
     output["Registro"] = diario.dregistro
 
     return output
-from django.db import connection
-
-def my_view(request):
-    with connection.cursor() as cursor:
-        cursor.callproc('funcuno', [arg1, arg2])
-        result = cursor.fetchone()[0]
-    return render(request, 'my_template.html', {'result': result})
 
 def GeneraLibroMayorJSON(request, desde = None, hasta= None, cuentas = None):
     # Es invocado desde la url de una tabla bt
@@ -1375,13 +1389,14 @@ def GeneraLibroMayorJSON(request, desde = None, hasta= None, cuentas = None):
 
     if desde == 'None':
         detalle_asiento = Transaccion.objects\
-            .filter(cxcuenta__id__in =cuentas
+            .filter(cxcuenta__id__in =cuentas, leliminado = False
                     ,empresa = id_empresa.empresa)\
             .order_by('cxcuenta','diario__dcontabilizado')
     else:
         detalle_asiento = Transaccion.objects\
             .filter(diario__dcontabilizado__gte = desde
                     , diario__dcontabilizado__lte = hasta
+                    , leliminado = False
                     , cxcuenta__id__in = arr_cuentas
                     , empresa = id_empresa.empresa)\
             .order_by('cxcuenta','diario__dcontabilizado')
@@ -1446,10 +1461,35 @@ def GeneraLibroMayorJSONSalida(detalle, saldo):
             output["Tipo"] = 'D'
     output["Diario"] = detalle.diario.id
     
-    nsaldo += detalle.nvalor
+    # sumar o restar dependiendo del tipo de cuenta
+    if detalle.cxcuenta.activo_egreso():
+        if detalle.cxtipo=='D':
+            nsaldo += detalle.nvalor
+        else:
+            nsaldo -= detalle.nvalor
+    else:
+        if detalle.cxtipo=='H':
+            nsaldo += detalle.nvalor
+        else:
+            nsaldo -= detalle.nvalor
 
     output["Saldo"] = nsaldo
     saldo["valor"] = nsaldo
 
     return output
 
+def ReversarAsiento(request, pk):
+    # marcar el detalle de transaccion como la cabecera de aasiento
+    asiento = Diario_cabecera.objects.filter(pk = pk).first()
+
+    asiento.leliminado = True
+    asiento.cxusuarioelimina = request.user.id
+    asiento.cxestado="E"
+    asiento.save()
+
+    for d in Transaccion.objects.filter(diario = pk):
+        d.leliminado= True
+        d.cxusuarioelimina = request.user.id
+        d.save()
+    
+    return HttpResponse("OK")

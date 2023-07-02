@@ -11,7 +11,7 @@ from .views import CuentasView, CuentasEspecialesEdit, BuscarCuentasEspeciales\
     , CuentaDiferidoTasaTipoFactoringEdit, CuentaProvisionTasaTipoFactoringNew\
     , CuentaProvisionTasaTipoFactoringEdit, CuentasNew, CuentasEdit, AsientosView\
     , AsientoDiarioNuevo, DatosDiarioEditar, GeneraListaDiariosJSON, DiariosConsulta\
-    , LibroMayorConsulta, GeneraLibroMayorJSON
+    , LibroMayorConsulta, GeneraLibroMayorJSON, ReversarAsiento, ListaCobranzasAGenerar
 
 from .sri import GeneraXMLFactura
 from .reportes import ImpresionDiarioContable, ImpresionComprobanteEgreso\
@@ -105,4 +105,8 @@ urlpatterns = [
          , name="consultalibromayor"),
     path('libromayorjson/<desde>/<hasta>/<cuentas>',GeneraLibroMayorJSON
          , name="libromayor_json"),
+     path('reversarasiento/<pk>', ReversarAsiento, name='reversarasiento'),
+     path('listacobranzaspendientescontabilizar',ListaCobranzasAGenerar.as_view()
+         , name="listacobranzaspendientescontabilizar"),
+    
 ]

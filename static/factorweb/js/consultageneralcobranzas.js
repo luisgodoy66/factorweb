@@ -27,16 +27,22 @@ window.onload=function(){
 }
 
 window.operateEvents = {
-    'click .revertir': function (e, value, row, index) {
-      ReversarCobranza(row.id, row.TipoOperacion, row.Cliente)
-      },
-      'click .imprimir': function (e, value, row, index) {
-        ImprimirCobranza( row.id, row.TipoOperacion)
-      },
-    };
-      
+  'click .revertir': function (e, value, row, index) {
+    ReversarCobranza(row.id, row.TipoOperacion, row.Cliente)
+    },
+    'click .imprimir': function (e, value, row, index) {
+      ImprimirCobranza( row.id, row.TipoOperacion)
+    },
+    'click .editar': function (e, value, row, index) {
+      ModificarCobranza( row.id, row.TipoOperacion, row.Contabilizada)
+    },
+  };
+    
 function operateFormatter(value, row, index) {
     return [
+        '<a class="editar" href="javascript:void(0)" title="modificar cobranza">',
+        '<i class="fa fa-edit"></i>',
+        '</a>  ',
         '<a class="revertir" href="javascript:void(0)" title="Reverso de cobranza">',
         '<i class="fa fa-rotate-left"></i>',
         '</a>  ',

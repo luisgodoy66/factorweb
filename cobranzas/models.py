@@ -28,7 +28,7 @@ class Cheques(ClaseModelo):
     ctcheque = models.CharField(max_length=8) 
     ctplaza = models.CharField(max_length=30, null=True)  
     ctgirador = models.CharField(max_length=60, blank=True) 
-    cxestado = models.CharField(max_length=1, default=" ") 
+    cxestado = models.CharField(max_length=1, default="A") 
     nvalor = models.DecimalField(max_digits= 10,decimal_places= 2) 
     # demision  = models.DateTimeField() 
 
@@ -71,6 +71,7 @@ class Documentos_cabecera(ClaseModelo):
         , on_delete=models.RESTRICT, null = True, related_name="cuenta_deposito")
     cxaccesorio = models.ForeignKey(ChequesAccesorios
         , on_delete = models.RESTRICT, null=True)
+    lcontabilizada = models.BooleanField(default=False, null=True)
 
     def __str__(self):
         return self.cxcobranza
@@ -159,6 +160,7 @@ class Liquidacion_cabecera(ClaseModelo):
     ngao = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     ngaoa = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     ndescuentodecartera = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    ndescuentodecarteravencido = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     nretenciones = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     nbajas = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     notros = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -171,7 +173,6 @@ class Liquidacion_cabecera(ClaseModelo):
     cxestado = models.CharField(max_length=1, default='A')
     lfacturagenerada = models.BooleanField(default=False)
     nporcentajeiva = models.DecimalField(max_digits=5, decimal_places=2, default=12)
-    ndescuentodecarteravencido = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
         return self.cxliquidacion
@@ -473,6 +474,7 @@ class Recuperaciones_cabecera(ClaseModelo):
     ldepositoencuentaconjunta = models.BooleanField(default=False)
     cxcuentaconjunta = models.ForeignKey(CuentasConjuntasModels.Cuentas_bancarias
         , on_delete=models.RESTRICT, null = True, related_name="cuentaconjunta_deposito")
+    lcontabilizada = models.BooleanField(default=False, null=True)
 
     def __str__(self):
         return self.cxrecuperacion
@@ -554,6 +556,7 @@ class Cargos_cabecera(ClaseModelo):
         , null = True, related_name="banco_deposito_cargos")
     # ctreferenciadeposito = models.CharField(max_length=15)
     ddeposito = models.DateTimeField(null=True) 
+    lcontabilizada = models.BooleanField(default=False, null=True)
 
     def __str__(self):
         return self.cxcobranza

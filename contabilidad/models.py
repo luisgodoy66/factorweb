@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models.expressions import RawSQL 
 
 # Create your models here.
 from bases.models import ClaseModelo
@@ -20,6 +19,14 @@ class Plan_cuentas(ClaseModelo):
         self.ctcuenta = self.ctcuenta.upper()
         super(Plan_cuentas, self).save()
   
+    def activo_egreso(self):
+        result = False
+        nivel1 = self.cxcuenta[0]
+        tipo = Cuentas_nivel1.objects.filter(cxcuenta = nivel1).first()
+        if tipo:
+            result = tipo.lactivo  or tipo.legreso
+        return result
+    
 class Cuentas_especiales(ClaseModelo):
     pagoconcajachica =models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
                                         , related_name='cuenta_cajachica')
