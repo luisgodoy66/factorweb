@@ -1,0 +1,65 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">contabilidad</a></li>
+                    <li><a href="#">reportes</a></li>
+                    <li class="active">estado p&g</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div class="card-body">
+            <div class="row form-group " id="filtro_por_vencer" >
+                <div class="col-md-2">
+                    <label for="fechacorte">Perìodo:</label>
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" name="añocorte"  
+                    id="añocorte" placeholder="Ingrese año" 
+                    aria-label="Ingrese fecha de corte" value="{{ año }}">
+                </div>
+                <!-- lista de meses ? -->
+                <div class="col-md-2">
+                    <select name="mes" id="cmb_mes" class="form-control">
+                        <option value="01">Enero</option>
+                        <option value="02">Febrero</option>
+                        <option value="03">Marzo</option>
+                        <option value="04">Abril</option>
+                        <option value="05">Mayo</option>
+                        <option value="06">Junio</option>
+                        <option value="07">Julio</option>
+                        <option value="08">Agosto</option>
+                        <option value="09">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button class="btn btn-success btn-sm"  role="button" 
+                        id="btnConsultar">  
+                        <i class="fa fa-print"></i> Consultar
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+ 
+
+{% endblock %}
+
+{% block js_page %}
+<script type="text/javascript" src="{% static 'factorweb/js/consultaperdidasyganancias.js' %}">
+</script>
+
+{% endblock %}

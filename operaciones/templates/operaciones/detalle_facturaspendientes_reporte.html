@@ -65,24 +65,23 @@
                             {% regroup detalle by cxcliente__cxcliente__ctnombre as cartera_list %}
                             {% for cliente in cartera_list %}
                             <tr>
-                                <td><h3>{{ cliente.grouper }}</h3>
-                                </td>
+                                <td><h3>{{ cliente.grouper }}</h3></td>
                             </tr>
                                 {% with total=1000 %}
                                 {% for item in cliente.list %}
                                     {% with total=total|add:item.nsaldo %}
-                            <tr>
-                                <td>{{ item.cxcomprador__cxcomprador__ctnombre }}</td>
-                                <td>{{ item.cxasignacion__cxasignacion }}</td>
-                                <td>{{ item.ctdocumento }}</td>
-                                <td>{{ item.vencimiento |date:"Y-m-d"}}</td>
-                                <td>{{ item.dias_negociados }}</td>
-                                <td> {% if item.ndiasprorroga > 0 %}<h4>{% endif %}
-                                    {{ item.dias_vencidos }}
-                                    {% if item.ndiasprorroga > 0 %}</h4>{% endif %}
-                                </td>
-                                <td class="numero">{{ item.nsaldo }}</td>
-                            </tr>
+                                <tr>
+                                    <td>{{ item.cxcomprador__cxcomprador__ctnombre }}</td>
+                                    <td>{{ item.cxasignacion__cxasignacion }}</td>
+                                    <td>{{ item.ctdocumento }}</td>
+                                    <td>{{ item.vencimiento |date:"Y-m-d"}}</td>
+                                    <td>{{ item.dias_negociados }}</td>
+                                    <td> {% if item.ndiasprorroga > 0 %}<h4>{% endif %}
+                                        {{ item.dias_vencidos }}
+                                        {% if item.ndiasprorroga > 0 %}</h4>{% endif %}
+                                    </td>
+                                    <td class="numero">{{ item.nsaldo }}</td>
+                                </tr>
                                     {% endwith %}
                                 {% endfor %}
                                 {% endwith %}

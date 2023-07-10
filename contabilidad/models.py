@@ -249,7 +249,7 @@ class Saldos(ClaseModelo):
     nhaber = models.DecimalField(max_digits= 10, decimal_places= 2, default=0)
      
 class Cuentas_nivel1(ClaseModelo):
-    cxcuenta = models.CharField(max_length=1)
+    cxcuenta = models.CharField(max_length=15)
     descripcion = models.CharField(max_length=20)
     lactivo = models.BooleanField()
     lingreso = models.BooleanField()

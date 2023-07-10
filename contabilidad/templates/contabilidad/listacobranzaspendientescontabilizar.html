@@ -15,18 +15,23 @@
 {% endblock breadcrumbs %}
 {% block content %}
     <div class="card bg-flat-color-0">
-        <!-- <div hidden>
-            <input type="text" value="{{ por_vencer}}" id="filtro">
-        </div> -->
         <div class="card-body">
             <div class="row form-group ">
                 <div class="col-md-3">
-                    <label for="fechacorte">Fecha de corte :</label>
+                    <label for="fechacorte">Desde :</label>
                 </div>
                 <div class="col-md-2">
-                    <input type="date" class="form-control" name="fechacorte"  
-                    id="fechacorte" placeholder="Ingrese fecha de corte" 
-                    aria-label="Ingrese fecha de corte" value="{{ fecha_corte|date:'Y-m-d'}}">
+                    <input type="date" class="form-control" name="desde"  
+                    id="desde" placeholder="Ingrese fecha de corte" 
+                    aria-label="Ingrese fecha de corte" value="{{ desde|date:'Y-m-d'}}">
+                </div>
+                <div class="col-md-3">
+                    <label for="fechacorte">Hasta :</label>
+                </div>
+                <div class="col-md-2">
+                    <input type="date" class="form-control" name="hasta"  
+                    id="hasta" placeholder="Ingrese fecha de corte" 
+                    aria-label="Ingrese fecha de corte" value="{{ hasta|date:'Y-m-d'}}">
                 </div>
                 <div class="col-md-2">
                     <button class="btn btn-success btn-sm"  role="button" id="btnFiltrar">  
@@ -46,27 +51,12 @@
                     </div>
                 </div>
             </div> -->
-            {% if not consulta %}
-            <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
-                <span class="badge badge-pill badge-danger">Sin registros</span>
-                {% if error %}
-                    {{ error }}
-                {% else %}
-                 No hay documentos por vencer hasta la fecha de corte.
-               {% endif %}
-                <button type="button" class="close" data-dismiss="alert" 
-                    aria-label="Close" id ="btnFiltrar" name="btnFiltrar">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-            </div>
-            {% endif %}
 
-            <!-- <div class="content"> -->
             <div>
                 <!-- <h5 class="heading-title mb-1 text-secondary">Formas de cobro</h5> -->
         
                 <div id="toolbar" >
-                    <button id="cobroconefectivo" class="btn btn-danger" disabled>
+                    <button id="generar" class="btn btn-danger" disabled>
                         <i class="fa fa-money"></i> Generar asientos
                     </button>
     
@@ -76,7 +66,7 @@
                 <small>
 
                 <table id="table"  class="table table-striped table-bordered"
-                    data-url="{% url 'contabilidad:cobranzaspendientes_json' fecha_corte %}"
+                    data-url="{% url 'contabilidad:cobranzaspendientes_json' desde hasta %}"
                     data-filter-control="true"
                     data-show-search-clear-button="true"
                     data-show-refresh="true"
@@ -103,8 +93,7 @@
                         data-sortable="true" >Tipo de factoring</th>
                         <th data-field="Deposito" data-filter-control="input"
                         data-sortable="true" >Depósito en</th>
-                        <th data-field="Sobrepago" data-filter-control="input"
-                        data-sortable="true" >Sobrepago</th>
+                        <th data-field="Sobrepago" data-sortable="true" >Sobrepago</th>
                         <th data-field="Valor" data-sortable="true" >Valor</th>
                         </tr>
                     </thead>

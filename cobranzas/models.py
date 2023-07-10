@@ -35,6 +35,8 @@ class Cheques(ClaseModelo):
     def __str__(self):
         return '{} CH/{}'.format(self.cxcuentabancaria, self.ctcheque)
 
+from contabilidad.models import Diario_cabecera
+
 class Documentos_cabecera(ClaseModelo):
     FORMAS_DE_PAGO = (
         ('EFE', 'Efectivo'),
@@ -72,6 +74,9 @@ class Documentos_cabecera(ClaseModelo):
     cxaccesorio = models.ForeignKey(ChequesAccesorios
         , on_delete = models.RESTRICT, null=True)
     lcontabilizada = models.BooleanField(default=False, null=True)
+    asiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
+                                     , related_name="asiento_cobranza"
+                                     , null=True)
 
     def __str__(self):
         return self.cxcobranza

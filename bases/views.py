@@ -41,7 +41,24 @@ class HomeSinPrivilegios(LoginRequiredMixin, generic.TemplateView):
     login_url = "bases:login"
     template_name="bases/sin_privilegios.html"
 
-def enviarPost(consulta):
+def enviarPost(procedimiento):
+    # se ejecuta en vistas que llaman a stored procedures con parametros OUT.
+    # El fetchone regresará una arreglo de los parámetros de salida del tipo:
+    # ('OK',123456) según la cantidad y tipo de parámetros OUT, donde siempre
+    # el primer elemento es el resultado del parametro StrError , que si no 
+    # hay errores devolverá la expresión 'OK'.
+    try:
+                
+        with connection.cursor()   as cursor:
+            cursor.execute(procedimiento)
+            resultado=cursor.fetchone()
+    except Exception as error:
+            resultado="Error:"+str(error)
+    finally:
+        cursor.close()
+    return resultado
+
+def enviarConsulta(consulta):
     # se ejecuta en vistas que llaman a stored procedures con parametros OUT.
     # El fetchone regresará una arreglo de los parámetros de salida del tipo:
     # ('OK',123456) según la cantidad y tipo de parámetros OUT, donde siempre
@@ -51,7 +68,7 @@ def enviarPost(consulta):
                 
         with connection.cursor()   as cursor:
             cursor.execute(consulta)
-            resultado=cursor.fetchone()
+            resultado=cursor.fetchall()
     except Exception as error:
             resultado="Error:"+str(error)
     finally:

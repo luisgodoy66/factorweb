@@ -11,11 +11,13 @@ from .views import CuentasView, CuentasEspecialesEdit, BuscarCuentasEspeciales\
     , CuentaDiferidoTasaTipoFactoringEdit, CuentaProvisionTasaTipoFactoringNew\
     , CuentaProvisionTasaTipoFactoringEdit, CuentasNew, CuentasEdit, AsientosView\
     , AsientoDiarioNuevo, DatosDiarioEditar, GeneraListaDiariosJSON, DiariosConsulta\
-    , LibroMayorConsulta, GeneraLibroMayorJSON, ReversarAsiento, ListaCobranzasAGenerar
+    , LibroMayorConsulta, GeneraLibroMayorJSON, ReversarAsiento\
+    , ListaCobranzasAGenerar, GeneraListaCobranzasJSON, GenerarAsientosCobranzas\
+    , BalanceGeneralConsulta, PerdiasyGananciasConsulta
 
 from .sri import GeneraXMLFactura
 from .reportes import ImpresionDiarioContable, ImpresionComprobanteEgreso\
-     , ImpresionPlanDeCuentas
+     , ImpresionPlanDeCuentas, ImpresionBalanceGeneral, ImpresionPerdidasyGanancias
 
 urlpatterns = [
     path('listacuentascontables/',CuentasView.as_view()
@@ -105,8 +107,18 @@ urlpatterns = [
          , name="consultalibromayor"),
     path('libromayorjson/<desde>/<hasta>/<cuentas>',GeneraLibroMayorJSON
          , name="libromayor_json"),
-     path('reversarasiento/<pk>', ReversarAsiento, name='reversarasiento'),
-     path('listacobranzaspendientescontabilizar',ListaCobranzasAGenerar.as_view()
-         , name="listacobranzaspendientescontabilizar"),
-    
+    path('reversarasiento/<pk>', ReversarAsiento, name='reversarasiento'),
+    path('listacobranzaspendientescontabilizar',ListaCobranzasAGenerar.as_view()
+         , name="listacobranzaspendientescontabilizar"),    
+    path('cobranzaspendientesjson/<desde>/<hasta>',GeneraListaCobranzasJSON
+         , name="cobranzaspendientes_json"),
+    path('generarasientoscobranzas/<ids>', GenerarAsientosCobranzas),
+    path('consultabalancegeneral/',BalanceGeneralConsulta.as_view()
+         , name="consultabalancegeneral"),
+    path('reportebalancegeneral/<año>/<mes>',ImpresionBalanceGeneral
+         , name="reportebalancegeneral"),
+    path('consultaperdidasyganancias/',PerdiasyGananciasConsulta.as_view()
+         , name="consultaperdidasyganancias"),
+    path('reporteperdidasyganancias/<año>/<mes>',ImpresionPerdidasyGanancias
+         , name="reporteperdidasyganancias"),
 ]

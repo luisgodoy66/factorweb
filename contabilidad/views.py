@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 from django.urls import reverse_lazy
-from django.db.models import Q, FilteredRelation, F
+from django.db.models import Q, FilteredRelation, Max
+from django.db.models.functions import Concat
 from django.db.models.expressions import RawSQL 
 from django.http import JsonResponse
 from django.db import transaction
@@ -13,16 +14,16 @@ import json
 from .models import Plan_cuentas, Cuentas_especiales, Cuentas_bancos\
     , Cuentas_tiposfactoring, Cuentas_tasasfactoring, Factura_venta\
     , Cuentas_diferidos, Cuentas_provisiones, Diario_cabecera, Transaccion\
-    , Comprobante_egreso
+    , Comprobante_egreso, Control_meses
 from bases.models import Usuario_empresa
 from solicitudes.models import Asignacion
 from empresa.models import Cuentas_bancarias, Tipos_factoring, Puntos_emision\
     , Contador, Tasas_factoring
-from operaciones.models import Asignacion as Operacion, Movimientos_maestro
-from cobranzas.models import Liquidacion_cabecera
-from operaciones.models import Ampliaciones_plazo_cabecera, Desembolsos
+from operaciones.models import Asignacion as Operacion, Movimientos_maestro\
+    , Ampliaciones_plazo_cabecera, Desembolsos
+from cobranzas.models import Liquidacion_cabecera, Documentos_cabecera as Cobranzas
 
-from bases.views import enviarPost
+from bases.views import enviarPost, enviarConsulta
 
 from .forms import CuentasEspecialesForm, CuentasBancosForm, FacturaVentaForm\
     , CuentasTiposFactoringForm, CuentasTasaTiposFactoringForm\
@@ -892,7 +893,7 @@ class LibroMayorConsulta(LoginRequiredMixin, generic.TemplateView):
 
 class ListaCobranzasAGenerar(LoginRequiredMixin, generic.TemplateView):
     # model = Diario_cabecera
-    template_name = "contabilidad/consultacobranzaspendientes.html"
+    template_name = "contabilidad/listacobranzaspendientescontabilizar.html"
     # context_object_name='consulta'
     login_url = 'bases:login'
 
@@ -903,13 +904,74 @@ class ListaCobranzasAGenerar(LoginRequiredMixin, generic.TemplateView):
         hasta = date.today()
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
 
-        context = super(DiariosConsulta, self).get_context_data(**kwargs)
+        context = super(ListaCobranzasAGenerar, self).get_context_data(**kwargs)
         context["desde"] = desde
         context["hasta"] = hasta
         sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
         context['solicitudes_pendientes'] = sp
         return context
  
+class BalanceGeneralConsulta(LoginRequiredMixin, generic.TemplateView):
+    # model = Asignacion
+    template_name = "contabilidad/consultabalancegeneral.html"
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
+
+        mescerrado = Control_meses.objects.filter(lbloqueado = True, empresa = id_empresa.empresa)\
+            .values('empresa')\
+            .annotate(ultimomes = Max(Concat('año','mes'))).first()
+        
+        if mescerrado:
+            añomes = mescerrado['ultimomes']
+            año = añomes[0:4]
+            mes = int(añomes[4:6])
+            if mes < 12:
+                mes +=1
+        else:
+            año = datetime.now().year
+            mes = datetime.now().month
+
+
+        context = super(BalanceGeneralConsulta, self).get_context_data(**kwargs)
+        context['solicitudes_pendientes'] = sp
+        context['año'] = año
+        context['mes'] = mes
+
+        return context
+
+class PerdiasyGananciasConsulta(LoginRequiredMixin, generic.TemplateView):
+    # model = Asignacion
+    template_name = "contabilidad/consultaperdidasyganancias.html"
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
+
+        mescerrado = Control_meses.objects.filter(lbloqueado = True, empresa = id_empresa.empresa)\
+            .values('empresa')\
+            .annotate(ultimomes = Max(Concat('año','mes'))).first()
+        
+        if mescerrado:
+            añomes = mescerrado['ultimomes']
+            año = añomes[0:4]
+            mes = int(añomes[4:6])
+            if mes < 12:
+                mes +=1
+        else:
+            año = datetime.now().year
+            mes = datetime.now().month
+
+        context = super(PerdiasyGananciasConsulta, self).get_context_data(**kwargs)
+        context['solicitudes_pendientes'] = sp
+        context['año'] = año
+        context['mes'] = mes
+
+        return context
+
 def BuscarCuentasEspeciales(request):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     pk = Cuentas_especiales.objects.filter(empresa = id_empresa.empresa).first()
@@ -1220,7 +1282,7 @@ def AsientoDiarioNuevo(request, diario_id = None):
         fecha = request.POST.get("dcontabilizado")
         concepto = request.POST.get("ctconcepto")
         valor =  request.POST.get("total_debe")
-        print(request.POST)
+
         # inicio de transaccion
         with transaction.atomic():
 
@@ -1249,6 +1311,10 @@ def AsientoDiarioNuevo(request, diario_id = None):
                     diario.save()
                     diario_id = diario.id
 
+                # actualizar la secuencia de diarios
+                sec.nultimonumero +=1
+                sec.save()
+
                 # nueva = True
             else:
                 diario = Diario_cabecera.objects.filter(pk= diario_id).first()
@@ -1276,21 +1342,27 @@ def AsientoDiarioNuevo(request, diario_id = None):
                 #accedemos a cada elemento de la lista (en este caso cada elemento es un dictionario)
                 cuenta = Plan_cuentas.objects.filter(id = elem.get("cuenta")).first()
 
+                if elem.get("tipo") =='D':
+                    nvalor = elem.get("debe")
+                else:
+                    nvalor = elem.get("haber")
+
                 detalle = Transaccion(
                     diario = diario,
                     cxcuenta=cuenta,
                     cxtipo = elem.get("tipo"),
+                    nvalor = nvalor,
                     ctreferencia = elem.get("referencia"),
-                    nvalor = elem.get("debe") + elem.get("haber"),
                     cxusuariocrea = request.user,
                     empresa = id_empresa.empresa,
                 )
                 if detalle:
                     detalle.save()
+            
+
 
         # la ejecucion de esta vista POST se hace por jquery.ajax 
-        # y ese proceso traslada a la forma de edición de la 
-        # asignación que se está creando o modificando
+        # y ese proceso imprime el asiento y devuelve a la lista de asientos
         return HttpResponse( diario_id)
     
     return render(request, template_name, contexto)
@@ -1419,7 +1491,7 @@ def GeneraLibroMayorJSON(request, desde = None, hasta= None, cuentas = None):
             
             output = {}
             nsaldo["valor"] = result[1]
-            output["Fecha"] = detalle_asiento[i].cxcuenta.__str__()
+            output["Concepto"] = '*** '+detalle_asiento[i].cxcuenta.__str__()+' ***'
             output["Referencia"] = "SALDO ANTERIOR"
             output["Saldo"] = nsaldo["valor"]
             tempBlogs.append(output) 
@@ -1493,3 +1565,57 @@ def ReversarAsiento(request, pk):
         d.save()
     
     return HttpResponse("OK")
+
+def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
+    # Es invocado desde la url de una tabla bt
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    if desde == 'None':
+        cobranzas = Cobranzas.objects\
+            .filter(lcontabilizada = False, leliminado = False
+                    ,empresa = id_empresa.empresa).order_by('dcobranza')
+    else:
+        cobranzas = Cobranzas.objects\
+            .filter(lcontabilizada = False, leliminado = False
+                    , dcobranza__gte = desde, dcobranza__lte = hasta
+                    , empresa = id_empresa.empresa)\
+            .order_by('dcobranza')
+        
+    tempBlogs = []
+    for i in range(len(cobranzas)):
+        tempBlogs.append(GeneraListaCobranzasJSONSalida(cobranzas[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": cobranzas.count(),
+        "totalNotFiltered": cobranzas.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaCobranzasJSONSalida(cobranza):
+    output = {}
+
+    output["id"] = cobranza.id
+    output["Fecha"] = cobranza.dcobranza.strftime("%Y-%m-%d")
+    output["Cliente"] = cobranza.cxcliente.cxcliente.ctnombre
+    output["Valor"] = cobranza.nvalor
+    output["TipoFactoring"] = cobranza.cxtipofactoring.ctabreviacion
+    if cobranza.ldepositoencuentaconjunta:
+        output["Deposito"] = 'Cuenta del cliente'
+    else:
+        output["Deposito"] = cobranza.cxcuentadeposito.__str__()
+    output["sobrepago"] = cobranza.nsobrepago
+
+    return output
+
+def GenerarAsientosCobranzas(request,ids):
+    resultado=enviarPost("CALL uspGenerarAsientosCobranzas( '{0}',{1},'')"
+        .format(ids, request.user.id, ))
+
+    if resultado[0] !='OK':
+        return HttpResponse(resultado)
+
+    return redirect("contabilidad:listacobranzaspendientescontabilizar")

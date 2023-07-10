@@ -108,7 +108,7 @@
                     </li>
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
-                            <i class="menu-icon fa fa-calendar"></i>Ampliaciones plazo</a>
+                            <i class="menu-icon fa fa-calendar"></i>Ampliación de plazo</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-exclamation"></i>
                                 <a href="{% url 'cobranzas:listaampliacionespendientespagar' %}">Cargos pendientes</a></li>
@@ -118,10 +118,11 @@
                     </li>
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
-                            <i class="menu-icon fa fa-user"></i>Pagos a clientes</a>
+                            <i class="menu-icon fa fa-user"></i>Procesos</a>
                         <ul class="sub-menu children dropdown-menu">
-                            <li><i class="fa fa-file-text"></i><a href="{% url 'operaciones:listaasignacionespendientesdesembolsar' %} ">Negociaciones</a></li>
-                            <li><i class="menu-icon fa fa-money"></i><a href="{% url 'cobranzas:listaliquidacionespendientespagar' %}">Cobranzas</a></li>
+                            <li><i class="menu-icon fa fa-download"></i><a href="{% url 'contabilidad:listapendientesgenerarfactura' %}">XML de factura</a></li>
+                            <li><i class="menu-icon fa fa-file-text"></i><a href="{% url 'operaciones:listaasignacionespendientesdesembolsar' %} ">Pago de negociación</a></li>
+                            <li><i class="menu-icon fa fa-money"></i><a href="{% url 'cobranzas:listaliquidacionespendientespagar' %}">Pago de cobranzas</a></li>
                             <li><i class="menu-icon fa fa-print"></i><a href="{% url 'operaciones:consulta_desembolsos' %}">Consulta de pagos</a></li>
                         </ul>
                     </li>
@@ -229,9 +230,8 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
                             <i class="menu-icon fa fa-cogs"></i>Procesos</a>
                         <ul class="sub-menu children dropdown-menu">
-                            <li><i class="menu-icon fa fa-pencil"></i><a href="{% url 'contabilidad:listapendientesgenerarfactura' %}">Generar facturas</a></li>
                             <li><i class="fa fa-file-text"></i><a href="{% url 'contabilidad:listadesembolsospendientes' %} ">Generar egresos</a></li>
-                            <li><i class="fa fa-file-text"></i><a href="{% url 'contabilidad:listadesembolsospendientes' %} ">Generar provisiones</a></li>
+                            <!-- <li><i class="fa fa-file-text"></i><a href="{% url 'contabilidad:listadesembolsospendientes' %} ">Generar provisiones</a></li> -->
                             <li><i class="fa fa-file-text"></i><a href="{% url 'contabilidad:listacobranzaspendientescontabilizar' %} ">Generar cobranzas</a></li>
                         </ul>
                     </li>
@@ -248,8 +248,8 @@
                             <i class="menu-icon fa fa-book"></i>Reportes</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa ti-book"></i><a href="{% url 'contabilidad:consultalibromayor' %}">Libro mayor</a></li>
-                            <li><i class="menu-icon fa ti-book"></i><a href="{% url 'pais:listaferiados' %}">Balance general</a></li>
-                            <li><i class="menu-icon fa ti-book"></i><a href="{% url 'operaciones:listamaestromovimientos' %}">Estado P&G</a></li>
+                            <li><i class="menu-icon fa ti-book"></i><a href="{% url 'contabilidad:consultabalancegeneral' %}">Balance general</a></li>
+                            <li><i class="menu-icon fa ti-book"></i><a href="{% url 'contabilidad:consultaperdidasyganancias' %}">Estado P&G</a></li>
                         </ul>
                     </li>
                 </ul>
