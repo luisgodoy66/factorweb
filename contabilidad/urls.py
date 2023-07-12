@@ -13,7 +13,7 @@ from .views import CuentasView, CuentasEspecialesEdit, BuscarCuentasEspeciales\
     , AsientoDiarioNuevo, DatosDiarioEditar, GeneraListaDiariosJSON, DiariosConsulta\
     , LibroMayorConsulta, GeneraLibroMayorJSON, ReversarAsiento\
     , ListaCobranzasAGenerar, GeneraListaCobranzasJSON, GenerarAsientosCobranzas\
-    , BalanceGeneralConsulta, PerdiasyGananciasConsulta
+    , BalanceGeneralConsulta, PerdiasyGananciasConsulta, CierreDeMes
 
 from .sri import GeneraXMLFactura
 from .reportes import ImpresionDiarioContable, ImpresionComprobanteEgreso\
@@ -121,4 +121,5 @@ urlpatterns = [
          , name="consultaperdidasyganancias"),
     path('reporteperdidasyganancias/<año>/<mes>',ImpresionPerdidasyGanancias
          , name="reporteperdidasyganancias"),
+    path('cierredemes/<año>/<mes>',CierreDeMes),
 ]

@@ -12,8 +12,10 @@ window.onload=function(){
     })
 
     $btnBloquear.click(function () {
+        var select = document.getElementById('cmb_mes');
+        var mes = select.options[select.selectedIndex].value;
 
-        ConsultaBG(capturaValor('añocorte'), mes)
+        BloquearMes(capturaValor('añocorte'), mes)
     })
 
 };
@@ -26,6 +28,11 @@ function ConsultaBG(año,mes){
     window.open( url);
 }
 
-function BloquearMes(){
-    MensajeConfirmacion("Continúa con el bloqueo del mes?")
+function BloquearMes(año, mes){
+    
+    MensajeConfirmacion("Continúa con el bloqueo del mes?", function(){
+        fetchProcesar("/contabilidad/cierredemes/"+año+"/"+mes, function(){
+            MensajeOK("Mes ha sido bloqueado")
+        })
+    })
 }

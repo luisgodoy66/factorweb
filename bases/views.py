@@ -59,11 +59,8 @@ def enviarPost(procedimiento):
     return resultado
 
 def enviarConsulta(consulta):
-    # se ejecuta en vistas que llaman a stored procedures con parametros OUT.
-    # El fetchone regresará una arreglo de los parámetros de salida del tipo:
-    # ('OK',123456) según la cantidad y tipo de parámetros OUT, donde siempre
-    # el primer elemento es el resultado del parametro StrError , que si no 
-    # hay errores devolverá la expresión 'OK'.
+    # se ejecuta en vistas que llaman a stored procedures .
+    # fetchall recibe todos los datos y son obtenidos como tipo json
     try:
                 
         with connection.cursor()   as cursor:

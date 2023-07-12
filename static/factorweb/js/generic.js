@@ -61,7 +61,7 @@ function MensajeOK(msg="Grabado con éxito"){
         icon: 'success',
         title: msg,
         showConfirmButton: false,
-        timer: 50000
+        timer: 5000
       })    
 }
 

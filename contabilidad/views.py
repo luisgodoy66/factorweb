@@ -920,12 +920,13 @@ class BalanceGeneralConsulta(LoginRequiredMixin, generic.TemplateView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
 
-        mescerrado = Control_meses.objects.filter(lbloqueado = True, empresa = id_empresa.empresa)\
+        mescerrado = Control_meses.objects\
+            .filter(lbloqueado = True, empresa = id_empresa.empresa)\
             .values('empresa')\
-            .annotate(ultimomes = Max(Concat('año','mes'))).first()
-        
+            .annotate(ultimomes = Max(Concat('año','mes')))
+
         if mescerrado:
-            añomes = mescerrado['ultimomes']
+            añomes = mescerrado[0]['ultimomes']
             año = añomes[0:4]
             mes = int(añomes[4:6])
             if mes < 12:
@@ -933,7 +934,6 @@ class BalanceGeneralConsulta(LoginRequiredMixin, generic.TemplateView):
         else:
             año = datetime.now().year
             mes = datetime.now().month
-
 
         context = super(BalanceGeneralConsulta, self).get_context_data(**kwargs)
         context['solicitudes_pendientes'] = sp
@@ -953,10 +953,10 @@ class PerdiasyGananciasConsulta(LoginRequiredMixin, generic.TemplateView):
 
         mescerrado = Control_meses.objects.filter(lbloqueado = True, empresa = id_empresa.empresa)\
             .values('empresa')\
-            .annotate(ultimomes = Max(Concat('año','mes'))).first()
-        
+            .annotate(ultimomes = Max(Concat('año','mes')))
+
         if mescerrado:
-            añomes = mescerrado['ultimomes']
+            añomes = mescerrado[0]['ultimomes']
             año = añomes[0:4]
             mes = int(añomes[4:6])
             if mes < 12:
@@ -1619,3 +1619,12 @@ def GenerarAsientosCobranzas(request,ids):
         return HttpResponse(resultado)
 
     return redirect("contabilidad:listacobranzaspendientescontabilizar")
+
+def CierreDeMes(request, año, mes):
+    nusuario = request.user.id
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    resultado=enviarPost("CALL uspBloqueoMesContabilidad( '{0}',{1},{2},{3},'')"
+        .format(año, mes, nusuario, id_empresa.empresa.id))
+    
+    return HttpResponse(resultado)

@@ -10,7 +10,7 @@ from django.shortcuts import render
 from django.db.models import Sum, Count
 from django.contrib.staticfiles import finders
 
-from .models import  Diario_cabecera, Transaccion, Plan_cuentas
+from .models import  Diario_cabecera, Transaccion, Plan_cuentas, Control_meses
 
 from bases.models import Usuario_empresa
 
@@ -178,12 +178,18 @@ def ImpresionPlanDeCuentas(request):
        return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
       
-def ImpresionBalanceGeneral(request, año, mes,):
+def ImpresionBalanceGeneral(request, año, mes):
     template_path = 'contabilidad/balance_general_reporte.html'
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    data = enviarConsulta("SELECT * FROM uspGeneraBGAcumulado('{0}',{1},{2})"
+    cerrado = Control_meses.objects.filter(empresa = id_empresa.empresa
+                                           , año = año, mes=mes).first()
+    if not cerrado or not cerrado.lbloqueado:
+        data = enviarConsulta("SELECT * FROM uspGeneraBGAcumulado('{0}',{1},{2})"
+                            .format(año, mes,  id_empresa.empresa.id))
+    else:
+        data = enviarConsulta("SELECT * FROM uspImprimeBGAcumulado('{0}',{1},{2})"
                             .format(año, mes,  id_empresa.empresa.id))
     if not data:
         return HttpResponse ("Ningún dato encontrado para "+año + "-" + mes)
@@ -222,7 +228,13 @@ def ImpresionPerdidasyGanancias(request, año, mes,):
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    data = enviarConsulta("SELECT * FROM uspGeneraPyGAcumulado('{0}',{1},{2})"
+    cerrado = Control_meses.objects.filter(empresa = id_empresa.empresa
+                                           , año = año, mes=mes).first()
+    if not cerrado or not cerrado.lbloqueado:
+        data = enviarConsulta("SELECT * FROM uspGeneraPyGAcumulado('{0}',{1},{2})"
+                            .format(año, mes,  id_empresa.empresa.id))
+    else:
+        data = enviarConsulta("SELECT * FROM uspImprimePyGAcumulado('{0}',{1},{2})"
                             .format(año, mes,  id_empresa.empresa.id))
     if not data:
         return HttpResponse ("Ningún dato encontrado para "+año + "-" + mes)

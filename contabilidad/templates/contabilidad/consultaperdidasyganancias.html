@@ -28,18 +28,18 @@
                 <!-- lista de meses ? -->
                 <div class="col-md-2">
                     <select name="mes" id="cmb_mes" class="form-control">
-                        <option value="01">Enero</option>
-                        <option value="02">Febrero</option>
-                        <option value="03">Marzo</option>
-                        <option value="04">Abril</option>
-                        <option value="05">Mayo</option>
-                        <option value="06">Junio</option>
-                        <option value="07">Julio</option>
-                        <option value="08">Agosto</option>
-                        <option value="09">Septiembre</option>
-                        <option value="10">Octubre</option>
-                        <option value="11">Noviembre</option>
-                        <option value="12">Diciembre</option>
+                        <option value="01" {% if mes == 1 %} selected {% endif %}>Enero</option>
+                        <option value="02" {% if mes == 2 %} selected {% endif %}>Febrero</option>
+                        <option value="03" {% if mes == 3 %} selected {% endif %}>Marzo</option>
+                        <option value="04" {% if mes == 4 %} selected {% endif %}>Abril</option>
+                        <option value="05" {% if mes == 5 %} selected {% endif %}>Mayo</option>
+                        <option value="06" {% if mes == 6 %} selected {% endif %}>Junio</option>
+                        <option value="07" {% if mes == 7 %} selected {% endif %}>Julio</option>
+                        <option value="08" {% if mes == 8 %} selected {% endif %}>Agosto</option>
+                        <option value="09" {% if mes == 9 %} selected {% endif %}>Septiembre</option>
+                        <option value="10" {% if mes == 10 %} selected {% endif %}>Octubre</option>
+                        <option value="11" {% if mes == 11 %} selected {% endif %}>Noviembre</option>
+                        <option value="12" {% if mes == 12 %} selected {% endif %}>Diciembre</option>
                     </select>
                 </div>
 
