@@ -11,11 +11,12 @@ class Empresas(models.Model):
     dcreacion = models.DateTimeField(auto_now_add=True)
     ctgerente = models.CharField(max_length=25, default='')
     ctdireccion = models.CharField(max_length=60, default='')
-    ctcontribuyenteespecial = models.CharField(max_length= 4, default='0000')
+    ctcontribuyenteespecial = models.CharField(max_length= 4, default='0000', null=True)
     lregimenrimpe = models.BooleanField(default=False)
     dmodificacion = models.DateTimeField(auto_now=True)
     cxusuariomodifica = models.IntegerField(blank=True, null=True)
     ambientesri = models.CharField(max_length=1, default='1')
+    ctciudad = models.CharField(max_length=20, default='')
     def __str__(self):
         return self.ctnombre
     

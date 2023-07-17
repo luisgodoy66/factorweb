@@ -21,7 +21,7 @@ from empresa.models import  Clases_cliente, Datos_participantes, \
     Tasas_factoring, Tipos_factoring, Cuentas_bancarias
 from cobranzas.models import Documentos_protestados, Liquidacion_cabecera\
     , Documentos_cabecera, Recuperaciones_cabecera, Cheques_protestados
-from bases.models import Usuario_empresa
+from bases.models import Usuario_empresa, Empresas
 
 from solicitudes import models as ModelosSolicitud
 from clientes import models as ModeloCliente
@@ -725,7 +725,7 @@ def CalcularCargosPorDocumento(doc, gao, dc, fecha_desembolso
                             , buscar_gao_en_condicion_operativa
                             , buscar_descuento_en_condicion_operativa
                             , porcentaje_anticipo, tasa_gao, tasa_dc
-                            , tipo_asignacion, clase_cliente
+                            , tipo_asignacion, clase_cliente = None
                             , condicion_id = None):
     # los dos ultimos parametros se omiten cuando se trata de edicion de tasas
 
@@ -1222,49 +1222,63 @@ def EliminarDetalleCondicionOperativa(request, detalle_id):
 
 def GenerarAnexos(request,asignacion_id):
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     asignacion = Asignacion.objects.filter(pk=asignacion_id).first()
     
     cliente = Datos_participantes.objects\
-        .filter(id=asignacion.cxcliente.id).first()
+        .filter(id=asignacion.cxcliente.cxcliente.id).first()
 
-    anexos = Anexos.objects.filter(lactivo = True).all()
+    anexos = Anexos.objects.filter(lactivo = True
+                                   , empresa = id_empresa.empresa).all()
 
-    if cliente.datos_generales.cxtipocliente =="J":
-        datos = ModeloCliente.Personas_juridicas.objects\
-            .filter(cxcliente = cliente).first()
-        if datos:
-            rl_id = datos.cxrepresentante1
-            rl_nombre = datos.ctrepresentante1
+    if anexos:
+        # datos del cliente
+        if cliente.datos_generales.cxtipocliente =="J":
+            datos = ModeloCliente.Personas_juridicas.objects\
+                .filter(cxcliente = cliente).first()
+            if datos:
+                rl_id = datos.cxrepresentante1
+                rl_nombre = datos.ctrepresentante1
+        else:
+            rl_id = cliente.cxparticipante
+            rl_nombre = cliente.ctnombre
+        
+        # datos del factor
+        factor = Empresas.objects.filter(pk = id_empresa.empresa.id).first()
+
+        for anexo in anexos:
+
+            ruta_anexo_generado = anexo.ctrutageneracion
+            ruta_plantilla = anexo.ctrutaanexo
+            
+            plantilla = DocxTemplate(ruta_plantilla)
+            
+            archivo = ruta_anexo_generado + anexo.ctnombre + ' DE ' \
+                + cliente.ctnombre+"-" \
+                + asignacion.cxasignacion+".docx"
+
+            fecha_negociacion = asignacion.dnegociacion
+
+            context = { 
+                'direccioncliente' : cliente.ctdireccion ,
+                'fechanegociacion': fecha_negociacion.strftime("%Y-%B-%d"),
+                'idcliente': cliente.cxparticipante,
+                'idrepresentantelegal':rl_id,
+                'maximoplazonegociacion':asignacion.nmayorplazonegociacion,
+                'nombrecliente':cliente.ctnombre,
+                'nombrerepresentantelegal':rl_nombre,
+                'totalanticipo': asignacion.nanticipo,
+                'totalanticipoenletras': numero_a_letras(asignacion.nanticipo),
+                'empresafactor':factor.ctnombre,
+                'rucfactor':factor.ctruccompania,
+                'direccionfactor':factor.ctdireccion,
+                'ciudadfactor': factor.ctciudad,
+                }
+            plantilla.render(context)
+            plantilla.save(archivo)
     else:
-        rl_id = cliente.cxparticipante
-        rl_nombre = cliente.ctnombre
-    
-    for anexo in anexos:
-
-        ruta_anexo_generado = anexo.ctrutageneracion
-        ruta_plantilla = anexo.ctrutaanexo
-        
-        plantilla = DocxTemplate(ruta_plantilla)
-        
-        archivo = ruta_anexo_generado + anexo.ctnombre + ' DE ' \
-            + cliente.ctnombre+"-" \
-            + asignacion.cxasignacion+".docx"
-
-        fecha_negociacion = asignacion.dnegociacion
-
-        context = { 
-            'direccion' : cliente.ctdireccion ,
-            'fechanegociacion': fecha_negociacion.strftime("%Y-%B-%d"),
-            'idcliente': cliente.cxparticipante,
-            'idrepresentantelegal':rl_id,
-            'maximoplazonegociacion':asignacion.nmayorplazonegociacion,
-            'nombrecliente':cliente.ctnombre,
-            'nombrerepresentantelegal':rl_nombre,
-            'totalanticipo': asignacion.nanticipo,
-            'totalanticipoenletras': numero_a_letras(asignacion.nanticipo),
-            }
-        plantilla.render(context)
-        plantilla.save(archivo)
+        return HttpResponse("No se ha definido ningún anexo ")
     
         # subprocess.run(["word.exe",archivo])
 

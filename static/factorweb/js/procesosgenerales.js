@@ -106,14 +106,6 @@ function ReversarliquidacionCobranza(liquidacion_id,){
     
 }
 
-function ImprimirCobranzaCargos(cobranza_id){
-  // en una nueva ventana abrir el reporte de cobranza
-  url = window.location.origin
-  url = url + "/cobranzas/reportecobranzacargos/"+cobranza_id;
-  window.open( url);
-
-}
-
 function AmpliacionDePlazo(tipo_asignacion){
   // la ampliacion sólo aplica a documentos que se han anticipado el 100%
   var seleccion=  $table.bootstrapTable('getSelections')

@@ -61,7 +61,14 @@
                         {{form.ladministrasocios.label}}
                     </div>
                     <div class="col-md-7">
-                        {{form.ladministrasocios}}
+                        <!-- {{form.ladministrasocios}} -->
+                        <label class="switch switch-3d switch-success mr-3">
+                            <input type="checkbox" class="switch-input" 
+                            {% if  datoscliente.ladministrasocios %} checked {% endif %} 
+                            id = "id_ladministrasocios" name = "ladministrasocios"> 
+                            <span class="switch-label"></span> 
+                            <span class="switch-handle"></span>
+                        </label>
                     </div>
                 </div>
 
@@ -70,8 +77,15 @@
                         {{form.ladministraindividual.label}}
                     </div>
                     <div class="col-md-7">
-                        {{form.ladministraindividual}}
-                    </div>
+                        <!-- {{form.ladministraindividual}} -->
+                        <label class="switch switch-3d switch-success mr-3">
+                            <input type="checkbox" class="switch-input" 
+                            {% if  datoscliente.ladministraindividual %} checked {% endif %} 
+                            id = "id_ladministraindividual" name = "ladministraindividual"> 
+                            <span class="switch-label"></span> 
+                            <span class="switch-handle"></span>
+                        </label>
+                </div>
                 </div>
 
                 <div class="row form-group">

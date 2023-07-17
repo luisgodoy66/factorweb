@@ -100,7 +100,9 @@ urlpatterns = [
     path('antigüedadcartera', GeneraResumenAntigüedadCarteraJSON),
     path('impresioncartera', ImpresionAntiguedadCartera
          , name='antigüedad_por_cliente'),
-    path('impresioncarterapendiente', ImpresionFacturasPendientes
+    path('impresioncarterapendiente/<clientes>', ImpresionFacturasPendientes
+         , name='detalle_facturas_pendientes'),
+    path('impresioncarterapendiente/', ImpresionFacturasPendientes
          , name='detalle_facturas_pendientes'),
     path('impresionchequespendientes', ImpresionAccesoriosPendientes
          , name='detalle_cheques_pendientes'),

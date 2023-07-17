@@ -1,4 +1,4 @@
-{% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -55,7 +55,7 @@
                             <td><h4>Diario:</h4></td>
                             <td colspan="3">{{ diario.cxtransaccion }}</td>
                             <td><h4>Fecha :</h4></td>
-                            <td>{{ diario.dcontabilizado|date:"Y/m/d" }}</td>
+                            <td>{{ diario.dcontabilizado|date:"Y-m-d" }}</td>
                         </tr>
                         <tr>
                             <td><h4>Concepto:</h4></td>
@@ -84,12 +84,12 @@
                                 <td width="60%">{{ item.cxcuenta }}</td>
                                 <td>{{ item.ctreferencia }}</td>
                                 {% if item.cxtipo == 'D' %}
-                                <td class="numero">{{ item.nvalor }}</td>
+                                <td class="numero">{{ item.nvalor|intcomma }}</td>
                                 {% else %}
                                 <td class="numero"></td>
                                 {% endif %}
                                 {% if item.cxtipo == 'H' %}
-                                <td class="numero">{{ item.nvalor }}</td>
+                                <td class="numero">{{ item.nvalor|intcomma }}</td>
                                 {% else %}
                                 <td class="numero"></td>
                                 {% endif %}
@@ -100,8 +100,8 @@
                             <tr>
                                 <td></td>
                                 <td></td>
-                                <td class="numero"><h4>{{ totales.debe }}</h4></td>
-                                <td class="numero"><h4>{{ totales.haber }}</h4></td>
+                                <td class="numero"><h4>{{ totales.debe|intcomma }}</h4></td>
+                                <td class="numero"><h4>{{ totales.haber|intcomma }}</h4></td>
                             </tr>
                         </tbody>
                     </table>

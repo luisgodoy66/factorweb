@@ -703,8 +703,9 @@ def DatosClienteJuridico(request, cliente_id=None):
     sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
 
     contexto={'nombrecliente':cliente
-            , 'form':formulario
-            , 'solicitudes_pendientes':sp
+              , 'datoscliente':datoscliente
+              , 'form':formulario
+              , 'solicitudes_pendientes':sp
             }
 
     if request.method=='POST':

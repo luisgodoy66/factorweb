@@ -222,6 +222,12 @@ class CuentaBancariaEdit(LoginRequiredMixin, generic.UpdateView):
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
     
+    def get_form_kwargs(self):
+        kwargs = super(CuentaBancariaEdit, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+    
     def get_context_data(self, **kwargs):
         context = super(CuentaBancariaEdit, self).get_context_data(**kwargs)
         sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()

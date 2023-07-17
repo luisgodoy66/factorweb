@@ -3,6 +3,12 @@ var $btnFiltrar = jQuery('#btnFiltrar')
 
 window.onload=function(){
     
+    jQuery(".standardSelect").chosen({
+        disable_search_threshold: 10,
+        no_results_text: "Oops, cuenta no encontrada!",
+        width: "100%"
+    });
+
     inicializaValor("fechadesde", capturaValor("id_desde"))
     inicializaValor("fechahasta", capturaValor("id_hasta"))
 
@@ -14,9 +20,14 @@ window.onload=function(){
         desde = capturaValor("fechadesde");
         hasta = capturaValor("fechahasta");
 
+        var x = [];
+        var options = document.getElementById("id_clientes").selectedOptions;
+        for (var i = 0; i < options.length; i++) {
+          x.push(options[i].value);
+        }
         $table.bootstrapTable('refreshOptions', {
             showRefresh: true,
-            url: "/cobranzas/cobranzasjson/"+desde+"/" + hasta
+            url: "/cobranzas/cobranzasjson/"+desde+"/" + hasta+"/"+x
         })
     })
 
@@ -52,3 +63,28 @@ function operateFormatter(value, row, index) {
       ].join('')
 }
   
+function imprimeCobranzas(){
+  desde = capturaValor("fechadesde");
+  hasta = capturaValor("fechahasta");
+  var x = [];
+  var options = document.getElementById("id_clientes").selectedOptions;
+  for (var i = 0; i < options.length; i++) {
+    x.push(options[i].value);
+  }
+  // en una nueva ventana abrir el reporte de asignación
+  url = window.location.origin
+  url = url + "/cobranzas/detallecobranzas/"+desde+"/"+hasta+"/"+x;
+  window.open( url);
+}
+
+function imprimeFacturasPendientes(){
+  var x = [];
+  var options = document.getElementById("id_clientes").selectedOptions;
+  for (var i = 0; i < options.length; i++) {
+    x.push(options[i].value);
+  }
+  // en una nueva ventana abrir el reporte de asignación
+  url = window.location.origin
+  url = url + "/operaciones/impresioncarterapendiente/"+x;
+  window.open( url);
+}

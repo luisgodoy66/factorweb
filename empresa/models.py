@@ -72,6 +72,11 @@ class Datos_participantes(ClaseModelo):
     def __str__(self):
         return self.ctnombre
 
+    def save(self):
+        self.ctnombre=self.ctnombre.upper()
+        # self.ctobjetosocial=self.ctobjetosocial.upper()
+        return super(Datos_participantes, self).save()
+
 class Funcionarios(ClaseModelo):
     cxfuncionario = models.CharField(max_length=5)
     ctfuncionario = models.CharField(max_length=100)

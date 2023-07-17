@@ -1617,8 +1617,7 @@ def GenerarAsientosCobranzas(request,ids):
 
     if resultado[0] !='OK':
         return HttpResponse(resultado)
-
-    return redirect("contabilidad:listacobranzaspendientescontabilizar")
+    return HttpResponse('OK')
 
 def CierreDeMes(request, año, mes):
     nusuario = request.user.id

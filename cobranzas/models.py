@@ -145,6 +145,13 @@ class Documentos_detalle(ClaseModelo):
     def aplicado(self):
         return self.nvalorcobranza + self.nvalorbaja + self.nretenciones
 
+    def retencionesybajas(self):
+        return self.nvalorbaja + self.nretenciones
+
+    def demoradepago(self):
+        return (self.cxcobranza.dcobranza - self.vencimiento())/timedelta(days=1)
+    
+
 class Liquidacion_cabecera(ClaseModelo):
     TIPOS_DE_OPERACION = (
         ('R', 'Recuperación'),

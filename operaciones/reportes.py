@@ -76,12 +76,14 @@ def ImpresionAsignacion(request, asignacion_id):
                 .filter( leliminado = False)
 
     # datos de tasa gao/dc
-    gao = Tasas_factoring.objects.filter(cxtasa="GAO").first()
+    gao = Tasas_factoring.objects\
+        .filter(cxtasa="GAO", empresa = id_empresa.empresa).first()
     if not gao:
         return HttpResponse("no encontró tasa de gao en el sistema."
                 +" Registre el cargo con código GAO")
 
-    dc = Tasas_factoring.objects.filter(cxtasa="DCAR").first()
+    dc = Tasas_factoring.objects\
+        .filter(cxtasa="DCAR", empresa = id_empresa.empresa).first()
     if not dc:
         return HttpResponse("no encontró tasa de descuento de "
                 +"catera en el sistema.Registre el cargo con código DCAR")
@@ -95,6 +97,7 @@ def ImpresionAsignacion(request, asignacion_id):
         , 'iniciales': dc.ctinicialesentablas}
     
     subtotal = asignacion.nanticipo - asignacion.ngao - asignacion.ndescuentodecartera
+    cargos = asignacion.ngao + asignacion.ndescuentodecartera
     neto = subtotal - asignacion.niva
 
     context = {
@@ -103,6 +106,7 @@ def ImpresionAsignacion(request, asignacion_id):
         'gao': dic_gao,
         'dc' : dic_dc,
         'subtotal': subtotal,
+        'cargos': cargos,
         'neto': neto,
         'empresa': id_empresa.empresa
     }
@@ -237,18 +241,72 @@ def ImpresionAntiguedadCartera(request, ):
        return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
-def ImpresionFacturasPendientes(request):
+from django.db.models import Sum, Q, F, ExpressionWrapper, DateField
+from datetime import datetime, timedelta, date
+
+def ImpresionFacturasPendientes(request, clientes = None):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     totalfacturas=0
     totalquitados=0
+    arr_clientes = []
+    
+    if clientes != None:
+        ids = clientes.split(',')
+        for id in ids:
+            arr_clientes.append(id)
 
     template_path = 'operaciones/detalle_facturaspendientes_reporte.html'
 
-    facturas = Documentos.objects.cartera_pendiente(id_empresa.empresa)
+    if clientes==None:
+        facturas = Documentos.objects.cartera_pendiente(id_empresa.empresa)
+        cheques_quitados = ChequesAccesorios.objects.cartera_pendiente(id_empresa.empresa)
+    else:
+        facturas = Documentos.objects\
+                .filter(leliminado = False, nsaldo__gt = 0
+                        , cxcliente__in = arr_clientes
+                        , cxasignacion__in = Asignacion.objects
+                .filter(cxtipo = "F", cxestado = "P"
+                        , empresa = id_empresa.empresa
+                        , leliminado = False))\
+                .values("cxcomprador__cxcomprador__ctnombre"
+                        ,"cxcliente__cxcliente__ctnombre"
+                        , "cxasignacion__cxasignacion"
+                        , "ctdocumento"
+                        , "dvencimiento", "ndiasprorroga"
+                        , "cxasignacion__ddesembolso"
+                        , "nsaldo")\
+                .annotate(vencimiento = ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
+                                                        , output_field=DateField()),
+                        dias_vencidos = (date.today() - F('dvencimiento')),
+                        dias_negociados = (F('dvencimiento')-F('cxasignacion__ddesembolso')),
+                        )\
+                .order_by('cxcliente__cxcliente__ctnombre')
+          
+        cheques_quitados = ChequesAccesorios.objects\
+                .filter(laccesorioquitado = True, chequequitado__cxestado = 'A'
+                , leliminado = False, lcanjeado = False
+                , documento__cxcliente__in = arr_clientes
+                , empresa = id_empresa.empresa
+                , documento__cxasignacion__cxestado = "P"
+                , documento__cxasignacion__leliminado = False)\
+                .values("documento__cxcomprador__cxcomprador__ctnombre"
+                        , "documento__cxcliente__cxcliente__ctnombre"
+                        , "documento__cxasignacion__cxasignacion"
+                        , "documento__ctdocumento"
+                        , "dvencimiento", "ndiasprorroga"
+                        , "documento__cxasignacion__ddesembolso"
+                        , "chequequitado__nsaldo")\
+                .annotate(vencimiento =ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
+                                                         , output_field = DateField() ),
+                          dias_vencidos = date.today() - F('dvencimiento'),
+                          dias_negociados = F('dvencimiento')-F('documento__cxasignacion__ddesembolso'),
+                          )\
+                .order_by('documento__cxcliente__cxcliente__ctnombre')
+
+    
     totalfacturas = facturas.aggregate(total = Sum('nsaldo'))
     if not totalfacturas['total']: totalfacturas['total']=0
 
-    cheques_quitados = ChequesAccesorios.objects.cartera_pendiente(id_empresa.empresa)
     totalquitados = cheques_quitados.aggregate(total = Sum('chequequitado__nsaldo'))
     if not totalquitados['total']: totalquitados['total']=0
     

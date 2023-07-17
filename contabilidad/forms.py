@@ -229,7 +229,7 @@ class FacturaVentaForm(forms.ModelForm):
 
         if empresa:
             self.fields['puntoemision'].queryset = Puntos_emision.objects\
-                .filter(empresa=empresa, leliminado = False)
+                .filter(empresa=empresa, leliminado = False, lactiva = True)
                   
 class ComprobanteEgresoForm(forms.ModelForm):
     class Meta:
@@ -271,6 +271,7 @@ class ComprobanteEgresoForm(forms.ModelForm):
                 .filter(empresa=empresa, leliminado = False)
                   
 class PlanCuentasForm(forms.ModelForm):
+    nnivel = forms.IntegerField(max_value=5, min_value=1)
     class Meta:
         model = Plan_cuentas
         fields = ['cxcuenta', 'ctcuenta', 'nnivel', 'ldetalle']
@@ -279,6 +280,7 @@ class PlanCuentasForm(forms.ModelForm):
             "ctcuenta":'Nombre de cuenta',
             "nnivel": "Nivel de la cuenta",
             "ldetalle":'Es cuenta de detalle'}
+        widgets={'ctcuenta': forms.Textarea(attrs={'rows': '2'}), }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

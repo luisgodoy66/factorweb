@@ -51,7 +51,6 @@
 
                 <table class="table table-striped table-bordered" id="bootstrap-data-table-export">
                     <thead>
-                        <th>Id</th>
                         <th>Nombre de cliente</th>
                         <th>Registro</th>
                         <th>Tipo de factoring</th>
@@ -63,7 +62,6 @@
                     <tbody>
                         {% for item in consulta %}
                         <tr>
-                            <td>{{ item.id }}</td>
                             <td>{{ item.cxcliente }}</td>
                             <td>{{ item.dregistro|date:"Y-m-d H:i:s" }}</td>
                             <td>{{ item.cxtipofactoring }}</td>
@@ -85,7 +83,7 @@
                                 </a>
                                 <a href="{% url 'operaciones:aceptarasignacion' item.id %}" title="Aceptar"
                                     class="btn btn-success btn-sm" role="button"><i class="fa fa-check"></i></a>
-                                <a href="#" onclick='EliminarAsignacion("{{item.id}}")' title="Eliminar"
+                                <a href="#" onclick='EliminarAsignacion({{item.id}},{{item.cxcliente}})' title="Eliminar"
                                     class="btn btn-danger btn-sm" role="button"><i class="fa fa-trash"></i></a>
                             </td>
                         </tr>

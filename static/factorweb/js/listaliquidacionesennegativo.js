@@ -54,13 +54,15 @@ window.onload=function(){
 };
 window.operateEvents = {
     'click .imprimir': function (e, value, row, index) {
-      ImprimirCobranza( row.id, row.TipoOperacion)
+      if (row.Tipo=='A'){
+          ImprimirAmpliacionPlazo(row.id)    
+      }
     },
   };
   
   function operateFormatter(value, row, index) {
   return [
-    '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
+    '<a class="imprimir" href="javascript:void(0)" title="Imprimir cargos">',
     '<i class="fa fa-print"></i>',
     '</a>  ',
   ].join('')

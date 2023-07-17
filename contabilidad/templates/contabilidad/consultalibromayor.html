@@ -21,9 +21,9 @@
         </div>
         <div class="card-body">
             <div class="row form-group ">
-                <div class="col-md-1">
+                <!-- <div class="col-md-1">
                     <label for="fechacorte">Período:</label>
-                </div>
+                </div> -->
                 <div class="col-md-1">Desde:</div>
                 <div class="col-md-2">
                     <input type="date" class="form-control" name="fechadesde" 
@@ -34,9 +34,9 @@
                     <input type="date" class="form-control" name="fechahasta" 
                     id="fechahasta" placeholder="Hasta" >
                 </div>
-            </div>
-            <div class="row form-group">
-                <div class="col-md-10">
+            <!-- </div>
+            <div class="row form-group"> -->
+                <div class="col-md-4">
                     <select data-placeholder="Ingrese las cuentas a consultar" 
                         id="id_cuentas"
                         multiple class="standardSelect" tabindex="5">
@@ -50,23 +50,25 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-1">
                     <button class="btn btn-success btn-sm"  role="button" id="btnFiltrar">  
                         <i class="fa fa-filter"></i> Filtrar
                     </button>
                 </div>
+                <div class="col-md-1">
 
-            </div>
-            <div class="dropdown float-right">
-                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
-                    <i class="fa fa-bars"></i>
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                    <div class="dropdown-menu-content">
-                        <a class="dropdown-item" href="#">Imprimir</a>
+                    <div class="dropdown float-right">
+                        <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                            <div class="dropdown-menu-content">
+                                <a class="dropdown-item" href="#">Imprimir</a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                 </div>
+           </div>
 
             <small>
 
@@ -80,8 +82,7 @@
                     data-show-export="true"
                     data-detail-formatter="detailFormatter"
                     data-show-pagination-switch="true"
-                    data-pagination="true"
-                    data-page-list="[10, 25, 50, 100, all]"
+                    data-page-list="[25, 50, 100, all]"
                     data-toolbar="#toolbar"
                     data-id-field="id"
                     data-search="true"
@@ -108,6 +109,7 @@
     </div>
  
      <!-- 
+                    data-pagination="true"
     data-detail-view="true"
     data-click-to-select="true"
     data-minimum-count-columns="2"

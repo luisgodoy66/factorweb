@@ -53,6 +53,7 @@
                         <th>Serie</th>
                         <th>Dirección</th>
                         <th>Genera XML para facturación electrónica</th>
+                        <th>Activa</th>
                         <th class="all">Acciones</th>
                     </thead>
                     <tbody>
@@ -62,7 +63,8 @@
                             <td>{{ item.ctdescripcion }}</td>
                             <td>{{ item }}</td>
                             <td>{{ item.ctdireccion }}</td>
-                            <td>{{ item.lgeneracionxmldocumentoelectronico }}</td>
+                            <td>{{ item.lgeneracionxmldocumentoelectronico|yesno:"Si,No" }}</td>
+                            <td>{{ item.lactiva|yesno:"Si,No" }}</td>
                             <td>
                                 <a href="{% url 'empresa:puntoemision_editar' item.id %}"  title="Editar"
                                     class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>

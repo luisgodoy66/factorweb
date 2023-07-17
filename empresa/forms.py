@@ -189,7 +189,7 @@ class PuntoEmisionForm(forms.ModelForm):
             'cxestablecimiento':'Establecimiento', 'cxpuntoemision':'Punto de emisión'
             , 'ctdescripcion':'Descripción', 'ctdireccion':'Dirección'
             , 'lgeneracionxmldocumentoelectronico':'Generar xml', 'lactiva':'Activa'
-            , 'nultimasecuencia': 'Última secuencia generada'}
+            , 'nultimasecuencia': 'Última secuencia de factura generada'}
         
         widgets={'ctdireccion': forms.Textarea(attrs={'rows': '3'}),}
 

@@ -94,10 +94,10 @@ def ImpresionCobranzaCartera(request, cobranza_id):
         forma_cobro = 'Se depositó accesorio ' + cobranza.cxcheque.__str__()
     
     if cobranza.cxformapago != "MOV":
-        datos_deposito = cobranza.ddeposito.strftime("%Y/%m/%d")
+        datos_deposito = cobranza.ddeposito.strftime("%Y-%m-%d")
 
         if cobranza.ldepositoencuentaconjunta:
-                datos_deposito += ' en cuenta compartida'
+                datos_deposito += ' en cuenta compartida ' + cobranza.cxcuentaconjunta.__str__()
         else:
                 datos_deposito += ' en ' + cobranza.cxcuentadeposito.__str__()
 
@@ -327,7 +327,7 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
         datos_deposito = recuperacion.ddeposito.strftime("%Y/%m/%d")
 
         if recuperacion.ldepositoencuentaconjunta:
-                datos_deposito += ' en cuenta del cliente'
+                datos_deposito += ' en cuenta compartida ' + recuperacion.cxcuentaconjunta.__str__()
         else:
                 datos_deposito += ' en ' + recuperacion.cxcuentadeposito.__str__()
 
@@ -459,6 +459,9 @@ def ImpresionCobranzaCargos(request, cobranza_id):
     forma_cobro = ''
     datos_deposito='N/A'
     codigo_forma = ''
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     cobranza = Cargos_cabecera.objects.filter(id= cobranza_id).first()
     
     if not cobranza:
@@ -473,10 +476,7 @@ def ImpresionCobranzaCargos(request, cobranza_id):
     if cobranza.cxformapago=="MOV":
         forma_cobro = 'Movimiento contable'
     else:
-        # if cobranza.lpagadoporelcliente:
-                forma_cobro = 'Cliente '
-        # else:
-                # forma_cobro = 'Deudor '
+        forma_cobro = 'Cliente '
 
     if cobranza.cxformapago=="EFE":
         forma_cobro += "paga en efectivo"
@@ -508,6 +508,7 @@ def ImpresionCobranzaCargos(request, cobranza_id):
         "datos_deposito" : datos_deposito,
         "forma_cobro": codigo_forma,
         "totales": totales,
+        'empresa': id_empresa.empresa
     }
 
     # Create a Django response object, and specify content_type as pdf
@@ -694,3 +695,54 @@ def ImpresionAmpliacionDePlazo(request, ampliacion_id):
        return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
+def ImpresionDetalleCobranzas(request, desde, hasta, clientes = None):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    arr_clientes = []
+    
+    if clientes != None:
+        ids = clientes.split(',')
+        for id in ids:
+            arr_clientes.append(id)
+     
+    template_path = 'cobranzas/detalle_cobranzas_reporte.html'
+
+    if clientes == None:            
+        detalle = Documentos_detalle.objects\
+            .filter(cxcobranza__dcobranza__gte = desde,
+                    cxcobranza__dcobranza__lte = hasta,
+                    empresa = id_empresa.empresa,
+                    leliminado = False)
+    else:            
+        detalle = Documentos_detalle.objects\
+            .filter(cxcobranza__dcobranza__gte = desde,
+                    cxcobranza__cxcliente__in = arr_clientes,
+                    cxcobranza__dcobranza__lte = hasta,
+                    empresa = id_empresa.empresa,
+                    leliminado = False)
+    
+    totales = detalle.aggregate(cobrado = Sum('nvalorcobranza'),
+                                 baja = Sum('nvalorbaja'),
+                                 retenciones = Sum('nretenciones'))
+    if not totales['cobrado']: totales['cobrado']=0
+    if not totales['baja']: totales['baja']=0
+    if not totales['retenciones']: totales['retenciones']=0
+    context={
+         'detalle':detalle,
+         'total_cobrado' :totales['cobrado'],
+         'total_retencionesybaja':totales['baja']+totales['retenciones'],
+         'total_general':totales['cobrado']+totales['baja']+totales['retenciones']
+    }
+        # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response

@@ -11,7 +11,6 @@ from empresa.models import Clases_cliente, Tipos_factoring, Cuentas_bancarias
 from clientes.models import Datos_generales as Datos_generales_cliente\
     , Cuenta_transferencia, Datos_compradores
 from pais.models import Bancos
-
 from datetime import datetime, timedelta, date
 
 class Datos_operativos(ClaseModelo):
@@ -235,8 +234,6 @@ class Documentos(ClaseModelo):
     dultimacobranza = models.DateTimeField(null=True) 
     ndiasprorroga= models.SmallIntegerField(default=0, null=True)
     lnotificaciongenerada=models.BooleanField(default=False)
-    # cxmodalidadcobranza = models.CharField(max_length=3) ,
-    # npreciocompra = models.DecimalField(max_digits=10,6),
     cxpignorado = models.CharField(max_length=3, null=True) 
     cxusuarioprorroga = models.CharField(max_length=10, null=True) 
     dultimageneraciondecargos= models.DateField(null=True) 
@@ -270,7 +267,10 @@ class Documentos(ClaseModelo):
 
     def vencimiento(self):
         return self.dvencimiento + timedelta(days=self.ndiasprorroga)
-        
+
+    def total_cargos(self):
+        return self.ngao + self.ndescuentocartera
+    
 class ChequesAccesorios_Manager(models.Manager):
 
     def cheques_a_depositar(self, fecha_corte, id_empresa):
@@ -535,6 +535,9 @@ class ChequesAccesorios(ClaseModelo):
     def vencimiento(self):
         return self.dvencimiento + timedelta(days=self.ndiasprorroga)
 
+    def total_cargos(self):
+        return self.ngao + self.ndescuentocartera
+    
 class Movimientos_maestro(ClaseModelo):
     TIPOS_DE_SIGNOS = (
         ('+', 'Suma'),
@@ -543,8 +546,6 @@ class Movimientos_maestro(ClaseModelo):
     cxmovimiento = models.CharField(max_length=4) 
     ctmovimiento= models.CharField(max_length=60) 
     cxsigno= models.CharField(max_length=1, choices=TIPOS_DE_SIGNOS) 
-    # omitir prioridad y agregar si el movimiento es un cargo
-    # nprioridad = models.SmallIntegerField()
     litemfactura = models.BooleanField(default=False)
     lcolateral = models.BooleanField()
     cxmovimientopadre = models.CharField(max_length=4) 
@@ -682,6 +683,8 @@ class Motivos_protesto_maestro(ClaseModelo):
     def __str__(self):
         return self.ctabreviacion
 
+# from cobranzas.models import Liquidacion_cabecera, Documentos_cabecera, Recuperaciones_cabecera
+
 class Notas_debito_cabecera(ClaseModelo):
     TIPOS_DE_OPERACION = (
         ('L', 'Liquidación'),
@@ -708,6 +711,25 @@ class Notas_debito_cabecera(ClaseModelo):
 
     def __str__(self):
         return self.cxnotadebito
+    
+    def origen(self):
+        if (self.cxtipooperacion == "A"):
+            ap = Ampliaciones_plazo_cabecera.objects.filter(pk=self.operacion).first()
+            return ap.__str__()
+        else:
+        # if (self.cxtipooperacion == "L"):
+        #     ap = Liquidacion_cabecera.objects.filter(pk=self.operacion).first()
+        #     return ap.__str__()
+        # if (self.cxtipooperacion == "C"):
+        #     ap = Documentos_cabecera.objects.filter(pk=self.operacion).first()
+        #     return ap.__str__()
+        # if (self.cxtipooperacion == "R"):
+        #     ap = Recuperaciones_cabecera.objects.filter(pk=self.operacion).first()
+        #     return ap.__str__()
+            if (self.cxtipooperacion == "B"):
+                return 'Cargo efectuado por el banco'
+            else:
+                return self.operacion
 
 class Notas_debito_detalle(ClaseModelo):
     notadebito = models.ForeignKey(Notas_debito_cabecera, on_delete=models.CASCADE)

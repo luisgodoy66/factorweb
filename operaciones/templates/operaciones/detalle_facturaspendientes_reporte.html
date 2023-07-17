@@ -1,4 +1,4 @@
-{% load static %}
+{% load filtros %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,7 +8,7 @@
     <title>Facturas pendientes</title>
 
     <style type="text/css">
-        @page {
+        @page { 
             size: A4;
             margin: 1cm;
             size:  portrait;
@@ -22,6 +22,9 @@
         }
         .table td.centrado{
             text-align: center;
+        }
+        .table td.subrayado{
+            border-bottom: 1px solid black;
         }
         .alerta { 
         font-family: sans-serif; 
@@ -65,11 +68,11 @@
                             {% regroup detalle by cxcliente__cxcliente__ctnombre as cartera_list %}
                             {% for cliente in cartera_list %}
                             <tr>
-                                <td><h3>{{ cliente.grouper }}</h3></td>
+                                <td class="subrayado" colspan="6"><h3>{{ cliente.grouper }}</h3></td>
+                                <td class="subrayado numero"><h3> {{cliente.list|running_saldo }}</h3></td>
                             </tr>
-                                {% with total=1000 %}
                                 {% for item in cliente.list %}
-                                    {% with total=total|add:item.nsaldo %}
+                                <tr></tr>
                                 <tr>
                                     <td>{{ item.cxcomprador__cxcomprador__ctnombre }}</td>
                                     <td>{{ item.cxasignacion__cxasignacion }}</td>
@@ -82,19 +85,12 @@
                                     </td>
                                     <td class="numero">{{ item.nsaldo }}</td>
                                 </tr>
-                                    {% endwith %}
                                 {% endfor %}
-                                {% endwith %}
+                                <tr></tr>
                             {% endfor %}
                             <tr></tr>
                             <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td class="numero"><h4>{{ total }}</h4></td>
+                                <td colspan="7" class="numero"><h4>{{ total }}</h4></td>
                             </tr>
                         </tbody>
                     </table>
@@ -104,12 +100,5 @@
 
         </div>
     </div>
-    <!-- {% with total=0 %}
-    {% for number in numbers %}
-        {% with total=total|add:number %}
-        {% endwith %}
-    {% endfor %}
-    Total: {{ total }}
-{% endwith %} -->
 </body>
 </html>

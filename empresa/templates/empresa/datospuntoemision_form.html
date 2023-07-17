@@ -4,9 +4,9 @@
         <div class="page-header float-right">
             <div class="page-title">
                 <ol class="breadcrumb text-right">
-                    <li><a href="#">Extras</a></li>
-                    <li><a href="#">Tablas</a></li>
-                    <li><a href="{% url 'empresa:listapuntosemision' %}">localidades</a></li>
+                    <li><a href="#">configuración</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li><a href="{% url 'empresa:listapuntosemision' %}">puntos de emisión</a></li>
                     <li class="active">editar</li>
                 </ol>
             </div>
@@ -73,7 +73,14 @@
                             {{ form.lgeneracionxmldocumentoelectronico.label}}
                         </label></div>
                         <div class="col col-md-6">
-                            {{ form.lgeneracionxmldocumentoelectronico}}
+                            <!-- {{ form.lgeneracionxmldocumentoelectronico}} -->
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  puntoemision.lgeneracionxmldocumentoelectronico %} checked {% endif %} 
+                                id = "id_lgeneracionxmldocumentoelectronico" name = "lgeneracionxmldocumentoelectronico"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
                         </div>
                     </div>  
 
@@ -82,7 +89,14 @@
                             {{ form.lactiva.label}}
                         </label></div>
                         <div class="col col-md-6">
-                            {{ form.lactiva}}
+                            <!-- {{ form.lactiva}} -->
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  puntoemision.lactiva %} checked {% endif %} 
+                                id = "id_lactiva" name = "lactiva"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
                         </div>
                     </div>  
 

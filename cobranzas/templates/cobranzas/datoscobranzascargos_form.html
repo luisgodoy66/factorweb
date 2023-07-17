@@ -6,10 +6,11 @@
             <div class="page-title">
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Operaciones</a></li>
-                    <li><a href="#">cobranzas</a></li>
                     {% if tipo_nd == 'AP' %}
+                    <li><a href="#">ampliación de plazo</a></li>
                         <li><a href="{% url 'cobranzas:listaampliacionespendientespagar' %}">cargos pendientes</a></li>
                     {% else %}
+                    <li><a href="#">cobranzas</a></li>
                         <li><a href="{% url 'cobranzas:listaliquidacionesennegativopendientes' %}">cargos pendientes</a></li>
                     {% endif %}
                     <li class="active">cobro de cargos</li>

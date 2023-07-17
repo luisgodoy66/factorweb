@@ -1,4 +1,4 @@
-{% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -80,7 +80,7 @@
                             <td><h4>Ampliación:</h4></td>
                             <td colspan="3">{{ ampliacion.cxnotadebito }}</td>
                             <td><h4>Total:</h4></td>
-                            <td>{{ ap.nvalor}}</td>
+                            <td>{{ ap.nvalor|intcomma }}</td>
                         </tr>
                         <tr>
                             <td><h4>Ampliar hasta:</h4></td>
@@ -116,11 +116,11 @@
                             <td > {{doc.Asignacion}} </td>
                             <td > {{doc.Documento}} </td>
                             {% if hay_accesorios %}
-                            <td > {{doc.Accesorio}} </td>
+                            <td width="30%"> {{doc.Accesorio}} </td>
                             {% endif %}
                             <td class="centrado"> {{doc.AmpliarDesde|date:"Y-m-d" }} </td>
                             <td class="numero"> {{doc.Plazo}} </td>
-                            <td class="numero"> {{doc.Cartera}} </td>
+                            <td class="numero"> {{doc.Cartera|intcomma}} </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -150,7 +150,7 @@
                             <tr></tr>
                             <tr>
                             <td colspan="7"><h3> {{ cargo.nombre }}</h3></td>
-                            <td class="numero"><h3> {{ cargo.valor }}</h3></td>
+                            <td class="numero"><h3> {{ cargo.valor|intcomma }}</h3></td>
                             </tr>
                             {% for item in cargo.detalle %}
                             <tr>
@@ -164,7 +164,7 @@
                                 <td class="numero">{{ item.valor_base|floatformat:2 }}</td>
                                 <td class="numero">{{ item.tasa_calculo }}</td>
                                 <td class="numero">{{ item.dias_calculo }}</td>
-                                <td class="numero">{{ item.valor }}</td>
+                                <td class="numero">{{ item.valor|intcomma }}</td>
                                 <td></td>
                             </tr>
                             {% endfor %}
@@ -194,10 +194,10 @@
                         <tr></tr>
                         <tr>
                             <td><h3>Totales:</h3></td>
-                            <td class="numero"> {{ap.ndescuentodecartera}} </td>
-                            <td class="numero"> {{ap.ncomision}} </td>
-                            <td class="numero"> {{ap.niva}} </td>
-                            <td class="numero"> {{ap.nvalor}} </td>
+                            <td class="numero"> {{ap.ndescuentodecartera|intcomma }} </td>
+                            <td class="numero"> {{ap.ncomision|intcomma }} </td>
+                            <td class="numero"> {{ap.niva|intcomma }} </td>
+                            <td class="numero"> {{ap.nvalor|intcomma}} </td>
                         </tr>
                     </tbody>
                 </table>

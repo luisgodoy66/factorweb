@@ -37,20 +37,24 @@ window.onload=function(){
 
     // acciones ejecutada sobre registros seleccionados
     $generar.click(function () {
-      GenerarAsientos();
+      GenerarAsientosCobranzas();
       $generar.prop('disabled', true)
     })
 };
     
-function GenerarAsientos(){
+function GenerarAsientosCobranzas(){
   // validar que los elementos seleccionados sean del mismo cliente
   // y del mismo tipo de factoring
 
   var ids = getIdSelections()
 
-    url = '/contabilidad/generarasientoscobranzas/'+ids;
+  fetchProcesar('/contabilidad/generarasientoscobranzas/'+ids,function(){
+    MensajeOK("Asientos generados. Revíselos en Contabilidad/Asientos/Registros de asientos")
+      url = '/contabilidad/listacobranzaspendientescontabilizar/';
+      location.href=url
     
-    location.href=url
+  })
+    
   return false
 }
 

@@ -4,9 +4,9 @@
         <div class="page-header float-right">
             <div class="page-title">
                 <ol class="breadcrumb text-right">
-                    <li><a href="#">Extras</a></li>
-                    <li><a href="#">Tablas</a></li>
-                    <li><a href="{% url 'empresa:listaclasesparticipantes' %}">localidades</a></li>
+                    <li><a href="#">configuración</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li><a href="{% url 'empresa:listalocalidades' %}">localidades</a></li>
                     <li class="active">editar</li>
                 </ol>
             </div>
@@ -37,9 +37,6 @@
                             {{ form.lactiva.label}}
                         </label></div>
                         <div class="col col-md-6">
-                            <!-- {{ form.lactiva}}
-                        </div>
-                        <div class="col"> -->
                             <label class="switch switch-3d switch-success mr-3">
                                 <input type="checkbox" class="switch-input" 
                                 {% if  localidad.lactiva %} checked {% endif %} 

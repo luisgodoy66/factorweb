@@ -5,11 +5,11 @@ class EmpresaForm(forms.ModelForm):
     class Meta:
         model = Empresas
         fields = ('ctruccompania', 'ctnombre', 'ctgerente', 'ctdireccion'
-                  , 'ctcontribuyenteespecial', 'lregimenrimpe')
+                  , 'ctcontribuyenteespecial', 'lregimenrimpe', 'ctciudad')
         labels = {'ctruccompania':'RUC', 'ctnombre':'Nombre'
                   , 'ctgerente':'Gerente', 'ctdireccion':'Dirección'
                   , 'ctcontribuyenteespecial':'Número de contribuyente especial'
-                  , 'lregimenrimpe': 'Régimen RIMPE'}
+                  , 'lregimenrimpe': 'Régimen RIMPE', 'ctciudad':'Ciudad de domicilio'}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

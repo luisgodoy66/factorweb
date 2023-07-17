@@ -19,8 +19,8 @@ window.onload=function(){
 
         desde = capturaValor("fechadesde");
         hasta = capturaValor("fechahasta");
-        cuentas = capturaValor("id_cuentas")
-        // capturar los valores de un select multiple ?
+
+        // capturar los valores de un select multiple 
         var x = [];
         var options = document.getElementById("id_cuentas").selectedOptions;
         for (var i = 0; i < options.length; i++) {

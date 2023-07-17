@@ -25,7 +25,8 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos\
-    , ImpresionProtestosPendientes, ImpresionAmpliacionDePlazo
+    , ImpresionProtestosPendientes, ImpresionAmpliacionDePlazo\
+    , ImpresionDetalleCobranzas
 
 urlpatterns = [
     # cobranzas
@@ -55,7 +56,9 @@ urlpatterns = [
         , name='reporte_cobranza_cartera'),
     path('consultacobranzas/',CobranzasConsulta.as_view() \
         , name='consulta_cobranzas'),
-    path('cobranzasjson/<desde>/<hasta>',GeneraListaCobranzasJSON
+    path('cobranzasjson/<desde>/<hasta>/<clientes>',GeneraListaCobranzasJSON
+        , name="cobranzas_json"),
+    path('cobranzasjson/<desde>/<hasta>/',GeneraListaCobranzasJSON
         , name="cobranzas_json"),
     path('cobranzasregistradasjson/<desde>/<hasta>',GeneraListaCobranzasRegistradasJSON
         , name="cobranzasregistradas_json"),
@@ -67,6 +70,10 @@ urlpatterns = [
     path('prorroga/<int:id>/<tipo_asignacion>/<vencimiento>/<numero_factura>', Prorroga, name='prorroga' ),
     path('modificarcobranza/<int:id>/<tipo_operacion>', ModificarCobranza
          , name= 'modificar_cobranza'),
+    path('detallecobranzas/<desde>/<hasta>/<clientes>', ImpresionDetalleCobranzas
+        , name='detalle_cobranzas_reporte'),
+    path('detallecobranzas/<desde>/<hasta>/', ImpresionDetalleCobranzas
+        , name='detalle_cobranzas_reporte'),
     
     # liquidaciones
     path('confirmarcobranza/<int:cobranza_id>/<tipo_operacion>',ConfirmarCobranza),

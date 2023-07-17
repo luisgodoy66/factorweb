@@ -20,43 +20,59 @@
             <input type="text" value = {{hasta | date:"Y-m-d"}} id="id_hasta">
         </div>
         <div class="card-body">
-            <div class="row form-group ">
-                <div class="col-md-1">
-                    <label for="fechacorte">Período de movimiento:</label>
-                </div>
-                <div class="col-md-1">Desde:</div>
-                <div class="col-md-2">
-                    <input type="date" class="form-control" name="fechadesde"  
-                    id="fechadesde" placeholder="Desde" 
-                    aria-label="Ingrese fecha inicio" >
-                </div>
-                <div class="col-md-1">Hasta:</div>
-                <div class="col-md-2">
-                    <input type="date" class="form-control" name="fechahasta"  
-                    id="fechahasta" placeholder="Hasta" 
-                    aria-label="Ingrese fecha fin" >
-                </div>
-                <div class="col-md-4">
-                    <button class="btn btn-success btn-sm"  role="button" id="btnFiltrar">  
-                        <i class="fa fa-filter"></i> Filtrar
-                    </button>
-                </div>
-            </div>
-            <div class="dropdown float-right">
-                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
-                    <i class="fa fa-bars"></i>
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                    <div class="dropdown-menu-content">
-                        <a class="dropdown-item" href="#">Imprimir</a>
+            <!-- <div class="col-md-10"> -->
+                <div class="row form-group ">
+                    <div class="col-md-1">Desde:</div>
+                    <div class="col-md-2">
+                        <input type="date" class="form-control" name="fechadesde"  
+                        id="fechadesde" placeholder="Desde" 
+                        aria-label="Ingrese fecha inicio" >
+                    </div>
+                    <div class="col-md-1">Hasta:</div>
+                    <div class="col-md-2">
+                        <input type="date" class="form-control" name="fechahasta"  
+                        id="fechahasta" placeholder="Hasta" 
+                        aria-label="Ingrese fecha fin" >
+                    </div>
+
+                <!-- </div> -->
+            <!-- </div> -->
+
+                <!-- <div class="row form-group"> -->
+                    <div class="col-md-4">
+                        <select data-placeholder="Seleccione clientes. Deje en blanco para todos los clientes" 
+                            id="id_clientes" multiple class="standardSelect" tabindex="5">
+                            <option value=""></option>
+                            {% for item in clientes %}
+                                <option value="{{item.id}}">{{ item }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-success btn-sm"  role="button" id="btnFiltrar">  
+                            <i class="fa fa-filter"></i> Filtrar
+                        </button>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="dropdown float-right">
+                            <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                <div class="dropdown-menu-content">
+                                    <a class="dropdown-item" href="#" onclick="imprimeCobranzas()">Detalle de cobranzas</a>
+                                    <a class="dropdown-item" href="#" onclick="imprimeFacturasPendientes()">Detalle de facturas pendientes</a>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-            </div>
 
             <small>
 
                 <table id="table"  class="table table-striped table-bordered"
-                    data-url="{% url 'cobranzas:cobranzas_json' desde hasta %}"
+                    data-url="{% url 'cobranzas:cobranzas_json' desde hasta None %}"
                     data-filter-control="true"
                     data-show-search-clear-button="true"
                     data-show-refresh="true"
@@ -110,4 +126,5 @@
 
 {% block js_page %}
 <script type="text/javascript" src="{% static 'factorweb/js/consultageneralcobranzas.js' %}"></script>
+<script src="{% static 'factorweb/vendors/chosen/chosen.jquery.min.js' %}"></script>
 {% endblock %}

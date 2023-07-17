@@ -58,6 +58,17 @@
                     <div class="row form-group">
         
                         <div class="col-md-3">
+                            <label for="id_ctciudad" class=" form-control-label">
+                            {{ form.ctciudad.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.ctciudad}}
+                        </div>                        
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
                             <label for="id_ctdireccion" class=" form-control-label">
                             {{ form.ctdireccion.label}}</label>
                         </div>
@@ -84,7 +95,14 @@
                             {{ form.lregimenrimpe.label}}</label>
                         </div>
                         <div class="col-md-9">
-                            {{ form.lregimenrimpe}}
+                            <!-- {{ form.lregimenrimpe}} -->
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  empresa.lregimenrimpe %} checked {% endif %} 
+                                id = "id_lregimenrimpe" name = "lregimenrimpe"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
                         </div>                        
                     </div>
 

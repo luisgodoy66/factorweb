@@ -1,4 +1,4 @@
-{% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -40,7 +40,7 @@
                         <tr>
                             <td colspan="2"><h2>{{ empresa }}</h2></td>
                             <td></td>
-                            <td colspan="2"><h1>Reporte de cobranza </h1></td>
+                            <td colspan="2"><h1>Informe de cobranza </h1></td>
                             <td></td>
                             <td>Impresión: {% now "Y-m-d" %}</td>
                         </tr>
@@ -55,7 +55,7 @@
                             <td><h4>Cliente:</h4></td>
                             <td colspan="3">{{ cobranza.cxcliente.cxcliente.ctnombre }}</td>
                             <td><h4>Fecha de cobranza:</h4></td>
-                            <td>{{ cobranza.dcobranza|date:"Y/m/d" }}</td>
+                            <td>{{ cobranza.dcobranza|date:"Y-m-d" }}</td>
                         </tr>
                         <tr>
                             <td><h4>Id:</h4></td>
@@ -65,15 +65,15 @@
                         </tr>
                         <tr>
                             <td><h4>Cobranza:</h4></td>
-                            <td colspan="3">{{ cobranza.cxcobranza }}</td>
+                            <td colspan="3" >{{ cobranza.cxcobranza }}</td>
                             <td><h4>Total:</h4></td>
-                            <td>{{ cobranza.nvalor}}</td>
+                            <td class="numero">{{ cobranza.nvalor|intcomma}}</td>
                         </tr>
                         <tr>
                             <td><h4>Forma de cobro:</h4></td>
                             <td colspan="3">{{ datos_forma_cobro }}</td>
                             <td><h4>Sobrepago:</h4></td>
-                            <td colspan="1">{{ cobranza.nsobrepago}}</td>                           
+                            <td colspan="1" class="numero">{{ cobranza.nsobrepago|intcomma}}</td>                           
                         </tr>
                     </tbody>
                 </table>
@@ -97,12 +97,17 @@
                         </thead>
                         <tbody>
                             <tr></tr>
-                            {% for item in detalle %}
+                            {% regroup detalle|dictsort:"cxdocumento.cxcomprador" by cxdocumento.cxcomprador as documentos_list %}
+                            {% for comprador in documentos_list %}
+                            <tr>
+                                <td colspan=9><strong>{{ comprador.grouper }}</strong></td>
+                            </tr>
+                            {% for item in comprador.list %}
                             <tr>
                                 <td>{{ item.cxdocumento.cxasignacion }}</td>
                                 <td>{{ item.cxdocumento }}</td>
                                 <td class="numero">{{ item.nsaldoaldia }}</td>
-                                <td class="centrado">{{ item.vencimiento|date:"Y/m/d" }}</td>
+                                <td class="centrado">{{ item.vencimiento|date:"Y-m-d" }}</td>
                                 <td class="numero">{{ item.dias_vencidos}}</td>
                                 <td class="numero">{{ item.nvalorcobranza }}</td>
                                 <td class="numero">{{ item.nretenciones }}</td>
@@ -110,6 +115,8 @@
                                 <td class="numero">{{ item.aplicado }}</td>
                                 <td class="numero">{{ item.cxdocumento.nsaldo }}</td>
                             </tr>
+                            {% endfor %}
+                            <tr></tr>
                             {% endfor %}
                             <!-- totales -->
                             <tr></tr>
@@ -119,10 +126,10 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td class="numero"><h4>{{ totales.cobrado }}</h4></td>
-                                <td class="numero"><h4>{{ totales.retenido }}</h4></td>
-                                <td class="numero"><h4>{{ totales.bajas }}</h4></td>
-                                <td class="numero"><h4>{{ totales.aplicado }}</h4></td>
+                                <td class="numero"><h4>{{ totales.cobrado|intcomma }}</h4></td>
+                                <td class="numero"><h4>{{ totales.retenido|intcomma }}</h4></td>
+                                <td class="numero"><h4>{{ totales.bajas|intcomma }}</h4></td>
+                                <td class="numero"><h4>{{ totales.aplicado|intcomma }}</h4></td>
                             </tr>
                         </tbody>
                     </table>
@@ -137,7 +144,7 @@
                         <td colspan="5">{{ datos_deposito }}</td>
                         {% if cobranza.cxestado == 'P' %}
                             <td class="alerta"><h4>Protestado el:</h4></td>
-                            <td class="alerta" colspan="2">{{ fecha_protesto|date:"Y/m/d" }}</td>
+                            <td class="alerta" colspan="2">{{ fecha_protesto|date:"Y-m-d" }}</td>
                         {% endif %}
                         {% if cobranza.cxestado == 'E' %}
                             <td class="alerta"><h4>Reversada</h4></td>
