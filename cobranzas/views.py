@@ -25,8 +25,9 @@ from solicitudes.models import Asignacion
 from .forms import CobranzasDocumentosForm, ChequesForm, LiquidarForm\
     , MotivoProtestoForm, ProtestoForm, RecuperacionesProtestosForm\
     , CobranzasCargosForm, AccesoriosForm
-
 from operaciones.forms import DesembolsarForm
+
+from bases.views import SinPrivilegios
 
 from datetime import date, timedelta
 from decimal import Decimal
@@ -39,11 +40,12 @@ from bases.views import enviarPost, numero_a_letras
 FACTURAS_PURAS = 'F'
 FACTURAS_CON_ACCESORIOS = 'A'
 
-class DocumentosVencidosView(LoginRequiredMixin, generic.ListView):
+class DocumentosVencidosView(SinPrivilegios, generic.ListView):
     model = Documentos
     template_name = "cobranzas/listadocumentospendientes.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="operaciones.view_documentos"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -60,11 +62,12 @@ class DocumentosVencidosView(LoginRequiredMixin, generic.ListView):
 
         return context
 
-class DocumentosPorVencerView(LoginRequiredMixin, generic.ListView):
+class DocumentosPorVencerView(SinPrivilegios, generic.ListView):
     model = Documentos
     template_name = "cobranzas/listadocumentospendientes.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="operaciones.view_documentos"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -81,13 +84,14 @@ class DocumentosPorVencerView(LoginRequiredMixin, generic.ListView):
 
         return context
 
-class ChequesADepositarView(LoginRequiredMixin, generic.ListView):
+class ChequesADepositarView(SinPrivilegios, generic.ListView):
     # la lista se obtiene desde url en la tabla bt, 
     # el model indicado es solo para fluir con el django. No se usa.
     model = ChequesAccesorios
     template_name = "cobranzas/listachequesadepositar.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="operaciones.view_chequesaccesorios"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -103,7 +107,7 @@ class ChequesADepositarView(LoginRequiredMixin, generic.ListView):
 
         return context
 
-class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
+class CobranzasDocumentosView(SinPrivilegios, generic.FormView):
     model = Documentos_cabecera
     # en esta vista el id del cliente es el correspondiente a la tabla clientes
     # el id del comprador es el que corresponde a la tabla comprador
@@ -112,6 +116,7 @@ class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
     context_object_name='cobranza'
     login_url = 'bases:login'
     form_class = CobranzasDocumentosForm
+    permission_required="cobranzas.view_documentos"
 
     # recibe como parametros los id's de los documentos a cobrar
     # los pasa al html para que se pasen al js que carga el detalle
@@ -186,11 +191,11 @@ class CobranzasDocumentosView(LoginRequiredMixin, generic.FormView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
-class CobranzasConsulta(LoginRequiredMixin, generic.TemplateView):
-    model = Documentos_cabecera
+class CobranzasConsulta(SinPrivilegios, generic.TemplateView):
     template_name = "cobranzas/consultageneralcobranzas.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="cobranzas.view_documentos_cabecera"
 
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -209,13 +214,14 @@ class CobranzasConsulta(LoginRequiredMixin, generic.TemplateView):
         context['solicitudes_pendientes'] = sp
         return context
  
-class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
+class CobranzasPorConfirmarView(SinPrivilegios, generic.ListView):
     # la lista se obtiene desde url en la tabla bt, 
     # el model indicado es solo para fluir con el django. No se usa.
     model = Documentos_cabecera
     template_name = "cobranzas/listacobranzasporconfirmar.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="cobranzas.view_documentos_cabecera"
 
     def get_queryset(self):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -250,11 +256,12 @@ class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
  
-class CobranzasPendientesLiquidarView(LoginRequiredMixin, generic.ListView):
+class CobranzasPendientesLiquidarView(SinPrivilegios, generic.ListView):
     model = Documentos_cabecera
     template_name = "cobranzas/listacobranzaspendientesliquidar.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="cobranzas.view_documentos_cabecera"
 
     def get_queryset(self):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -283,11 +290,12 @@ class CobranzasPendientesLiquidarView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
  
-class LiquidacionesPendientesPagarView(LoginRequiredMixin, generic.ListView):
+class LiquidacionesPendientesPagarView(SinPrivilegios, generic.ListView):
     model = Liquidacion_cabecera
     template_name = "cobranzas/listaliquidacionespendientespagar.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="cobranzas.view_liquidacion_cabecera"
 
     def get_queryset(self):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -301,11 +309,12 @@ class LiquidacionesPendientesPagarView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
  
-class MotivosProtestoView(LoginRequiredMixin, generic.ListView):
+class MotivosProtestoView(SinPrivilegios, generic.ListView):
     model = Motivos_protesto_maestro
     template_name = "cobranzas/listamotivosprotesto.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="operaciones.view_motivos_protesto_maestro"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -320,13 +329,14 @@ class MotivosProtestoView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class MotivoProtestoNew(LoginRequiredMixin, generic.CreateView):
+class MotivoProtestoNew(SinPrivilegios, generic.CreateView):
     model = Motivos_protesto_maestro
     template_name = "cobranzas/datosmotivoprotesto_form.html"
     form_class = MotivoProtestoForm
     context_object_name='motivo'
     success_url= reverse_lazy("cobranzas:listamotivosprotesto")
     login_url = 'bases:login'
+    permission_required="operaciones.add_motivos_protesto_maestro"
 
     def form_valid(self, form):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -340,13 +350,14 @@ class MotivoProtestoNew(LoginRequiredMixin, generic.CreateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class MotivoProtestoEdit(LoginRequiredMixin, generic.UpdateView):
+class MotivoProtestoEdit(SinPrivilegios, generic.UpdateView):
     model = Motivos_protesto_maestro
     template_name = "cobranzas/datosmotivoprotesto_form.html"
     context_object_name='motivo'
     login_url = 'bases:login'
     form_class = MotivoProtestoForm
     success_url= reverse_lazy("cobranzas:listamotivosprotesto")
+    permission_required="operaciones.change_motivos_protesto_maestro"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -358,13 +369,14 @@ class MotivoProtestoEdit(LoginRequiredMixin, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class ProtestoCobranzaNew(LoginRequiredMixin, generic.CreateView):
+class ProtestoCobranzaNew(SinPrivilegios, generic.CreateView):
     model=Cheques_protestados
     template_name="cobranzas/datosprotesto_form.html"
     context_object_name = "consulta"
     form_class=ProtestoForm
     success_url=reverse_lazy("cobranzas:listacobranzasporconfirmar")
     success_message="Protesto creada satisfactoriamente"
+    permission_required="cobranzas.add_cheques_protestados"
 
     def form_valid(self, form):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -400,11 +412,12 @@ class ProtestoCobranzaNew(LoginRequiredMixin, generic.CreateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
-class ProtestosPendientesView(LoginRequiredMixin, generic.ListView):
+class ProtestosPendientesView(SinPrivilegios, generic.ListView):
     model = Cheques_protestados
     template_name = "cobranzas/listaprotestospendientes.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="cobranzas.view_cheques_protestados"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -417,7 +430,7 @@ class ProtestosPendientesView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class RecuperacionProtestoView(LoginRequiredMixin, generic.FormView):
+class RecuperacionProtestoView(SinPrivilegios, generic.FormView):
     model = Recuperaciones_cabecera
     # 31-ene-23 l.g.    usar la misma forma de cobranzas
     # en esta vista el id del cliente es el correspondiente a la tabla participante
@@ -427,6 +440,7 @@ class RecuperacionProtestoView(LoginRequiredMixin, generic.FormView):
     context_object_name='cobranza'
     login_url = 'bases:login'
     form_class = RecuperacionesProtestosForm
+    permission_required="cobranzas.view_recuperaciones_cabecera"
 
     # recibe como parametros los id's de los protestos a cobrar
     # los pasa al html para que se pasen al js que carga el detalle
@@ -488,13 +502,14 @@ class RecuperacionProtestoView(LoginRequiredMixin, generic.FormView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
-class ProtestoRecuperacionNew(LoginRequiredMixin, generic.CreateView):
+class ProtestoRecuperacionNew(SinPrivilegios, generic.CreateView):
     model=Cheques_protestados
     template_name="cobranzas/datosprotesto_form.html"
     context_object_name = "consulta"
     form_class=ProtestoForm
     success_url=reverse_lazy("cobranzas:listacobranzasporconfirmar")
     success_message="Protesto creada satisfactoriamente"
+    permission_required="cobranzas.add_cheques_protestados"
 
     def form_valid(self, form):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -524,11 +539,12 @@ class ProtestoRecuperacionNew(LoginRequiredMixin, generic.CreateView):
 
         return context
 
-class LiquidacionesEnNegativoPendientesView(LoginRequiredMixin, generic.ListView):
+class LiquidacionesEnNegativoPendientesView(SinPrivilegios, generic.ListView):
     model = Notas_debito_cabecera
     template_name = "cobranzas/listaliquidacionesennegativo.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="operaciones.view_notas_debito_cabecera"
 
     def get_queryset(self):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -546,12 +562,13 @@ class LiquidacionesEnNegativoPendientesView(LoginRequiredMixin, generic.ListView
 
         return context
 
-class CobranzasCargosView(LoginRequiredMixin, generic.FormView):
+class CobranzasCargosView(SinPrivilegios, generic.FormView):
     model = Cargos_cabecera
     template_name = "cobranzas/datoscobranzascargos_form.html"
     context_object_name='cobranza'
     login_url = 'bases:login'
     form_class = CobranzasCargosForm
+    permission_required="coranzas.view_cargos_cabecera"
 
     # recibe como parametros los id's de los documentos a cobrar
     # los pasa al html para que se pasen al js que carga el detalle
@@ -599,11 +616,12 @@ class CobranzasCargosView(LoginRequiredMixin, generic.FormView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
-class AmpliacionesDePlazoPendientesView(LoginRequiredMixin, generic.ListView):
+class AmpliacionesDePlazoPendientesView(SinPrivilegios, generic.ListView):
     model = Notas_debito_cabecera
     template_name = "cobranzas/listaampliacionesdeplazopendientes.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="operaciones.view_ampliaciones_plazo_cabecera"
 
     def get_queryset(self):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -622,11 +640,11 @@ class AmpliacionesDePlazoPendientesView(LoginRequiredMixin, generic.ListView):
 
         return context
 
-class AmpliacionesConsulta(LoginRequiredMixin, generic.TemplateView):
-    model = Documentos_cabecera
+class AmpliacionesConsulta(SinPrivilegios, generic.TemplateView):
     template_name = "cobranzas/consultaampliaciones.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="operaciones.view_ampliaciones_plazo_cabecera"
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -641,15 +659,18 @@ class AmpliacionesConsulta(LoginRequiredMixin, generic.TemplateView):
         context['solicitudes_pendientes'] = sp
         return context
 
+@login_required(login_url='/login/')
+@permission_required('cobranzas.view_documentos_cabecera', login_url='bases:sin_permisos')
 def CobranzaPorCondonar(request,pk, tipo_operacion):
     template_name = "cobranzas/detallecobroporcondonar.html"
     
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+
     if tipo_operacion=='C':
         operacion = Documentos_cabecera.objects.filter(pk=pk).first()
         
     else:
         operacion = Recuperaciones_cabecera.objects.filter(pk=pk).first()
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
         
     contexto={"operacion": operacion
         , "tipo_operacion": tipo_operacion
@@ -847,6 +868,8 @@ def DatosCobro(request, id, asgn, doc, sdo, cobro, retenido, baja):
     }
     return render(request, template_name, contexto)
 
+@login_required(login_url='/login/')
+@permission_required('cobranzas.change_documentos_cabecera', login_url='bases:sin_permisos')
 def AceptarCobranza(request):
     # ejecuta un store procedure 
     # Devuelve el control a un proceso js
@@ -948,6 +971,8 @@ def GeneraListaChequesADepositarJSONSalida(doc):
 
     return output
 
+@login_required(login_url='/login/')
+@permission_required('cobranzas.add_cheques', login_url='bases:sin_permisos')
 def DepositoCheques(request, ids_cheques, total_cartera, cuenta_destino
                     , id_cliente=None):
     template_name = "cobranzas/depositocheques_form.html"
@@ -1238,7 +1263,9 @@ def GeneraListaCobranzasJSONSalida(transaccion):
     return output
 
 @login_required(login_url='/login/')
-@permission_required('cobranzas.update_documentos_cabecera', login_url='bases:sin_permisos')
+@permission_required('cobranzas.change_documentos_cabecera', login_url='bases:sin_permisos')
+# este privilegio esta enfocado en la tabla de cobranzas y no esta haciendo 
+# distincion de la tabla de recuperaciones
 def ConfirmarCobranza(request, cobranza_id, tipo_operacion):
 
     if tipo_operacion=='C':
@@ -1318,6 +1345,10 @@ def DetalleDocumentosRecuperadosSalida(doc):
 
     return output
 
+@login_required(login_url='/login/')
+@permission_required('cobranzas.change_documentos_detalle', login_url='bases:sin_permisos')
+# este privilegio esta enfocado en la tabla de cobranzas y no esta haciendo 
+# distincion de la tabla de recuperaciones
 def DatosDiasACondonar(request, id, dias, cobranza_id, tipo_operacion):
     template_name = "cobranzas/datosdiasacondonar_modal.html"
     sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
@@ -1351,7 +1382,9 @@ def DatosDiasACondonar(request, id, dias, cobranza_id, tipo_operacion):
     return render(request, template_name, contexto)
 
 @login_required(login_url='/login/')
-@permission_required('cobranzas.update_documentos_cabecera', login_url='bases:sin_permisos')
+@permission_required('cobranzas.change_documentos_cabecera', login_url='bases:sin_permisos')
+# este privilegio esta enfocado en la tabla de cobranzas y no esta haciendo 
+# distincion de la tabla de recuperaciones
 def ReversaConfirmacionCobranza(request, cobranza_id, tipo_operacion):
     # la eliminacion es lógica
     # debe devolver: OK si esta bien
@@ -1372,6 +1405,7 @@ def ReversaConfirmacionCobranza(request, cobranza_id, tipo_operacion):
     if request.method=="GET":
         cobr.cxestado = "A"
         cobr.save()
+
         # SI es cobranza en cuenta conjunta debe borrarse el movimiento de la operacion
         # para borrar necesito la id de cuenta conjunta y codigo de cobranza
         if cobr.ldepositoencuentaconjunta:
@@ -1383,8 +1417,6 @@ def ReversaConfirmacionCobranza(request, cobranza_id, tipo_operacion):
                 movimiento_cc.leliminado = True
                 movimiento_cc.cxusuarioelimina = request.user.id
                 movimiento_cc.save()
-
-
 
     return HttpResponse("OK")
 
@@ -1481,6 +1513,8 @@ def GeneraCargoJSONSalida(cobranza, id_cobranza, fecha_cobranza, id_asignacion
 
     return output
 
+@login_required(login_url='/login/')
+@permission_required('cobranzas.add_liquidacion_cabecera', login_url='bases:sin_permisos')
 def Liquidacion(request, tipo_operacion):
     # ejecuta un store procedure 
     pslocalidad = ''
@@ -1526,7 +1560,7 @@ def Liquidacion(request, tipo_operacion):
     return HttpResponse(resultado)
 
 @login_required(login_url='/login/')
-@permission_required('operativos.update_asignacion', login_url='bases:sin_permisos')
+@permission_required('operativos.add_desembolsos', login_url='bases:sin_permisos')
 def DesembolsarCobranzas(request, pk, cliente_ruc):
     template_name = "operaciones/datosdesembolsoaclientes_form.html"
     contexto = {}
@@ -1613,6 +1647,8 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
 
     return render(request, template_name, contexto)
 
+@login_required(login_url='/login/')
+@permission_required('cobranzas.add_cheques_protestados', login_url='bases:sin_permisos')
 def AceptarProtesto(request):
     # ejecuta un store procedure 
     # Devuelve el control a un proceso js
@@ -1782,6 +1818,8 @@ def DatosRecuperacion(request, id, asgn, doc, sdo, cobro, baja):
     }
     return render(request, template_name, contexto)
 
+@login_required(login_url='/login/')
+@permission_required('cobranzas.add_recuperaciones_cabecera', login_url='bases:sin_permisos')
 def AceptarRecuperacion(request):
     # ejecuta un store procedure 
     # Devuelve el control a un proceso js
@@ -1841,6 +1879,8 @@ def AceptarRecuperacion(request):
 
     return HttpResponse(resultado)
 
+@login_required(login_url='/login/')
+@permission_required('cobranzas.add_liquidacion_cabecera', login_url='bases:sin_permisos')
 def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
     template_name = "cobranzas/datosliquidacioncobranzas_form.html"
     total_vuelto=0
@@ -2238,6 +2278,8 @@ def GeneraOtroCargoJSONSalida(id_cargo, nombre_cargo, fecha,  valor
 
     return output
 
+@login_required(login_url='/login/')
+@permission_required('cobranzas.change_liquidacion_cabecera', login_url='bases:sin_permisos')
 def ReversaLiquidacion(request, pid_liquidacion):
     # # ejecuta un store procedure 
     nusuario = request.user.id
@@ -2246,6 +2288,10 @@ def ReversaLiquidacion(request, pid_liquidacion):
 
     return HttpResponse(resultado)
 
+@login_required(login_url='/login/')
+@permission_required('cobranzas.change_documentos_cabecera', login_url='bases:sin_permisos')
+# este privilegio esta enfocado en la tabla de cobranzas y no esta haciendo 
+# distincion de la tabla de recuperaciones ni cobro de cargos
 def ReversaCobranza(request, pid_cobranza, tipo_operacion):
     # ejecuta un store procedure 
     #  EL TIPO DE OPERACION debe determinar el SP a ejecutar: o cobranzas o recuperaciones
@@ -2444,6 +2490,8 @@ def DatosCobroNotaDebito(request, id, sdo, cobro):
     }
     return render(request, template_name, contexto)
 
+@login_required(login_url='/login/')
+@permission_required('cobranzas.add_cargos_cabecera', login_url='bases:sin_permisos')
 def AceptarCobranzaNotasDebito(request):
     # ejecuta un store procedure 
     # Devuelve el control a un proceso js
@@ -2660,6 +2708,8 @@ def ObtenerOtrosCargosDeCobranza(tipo_operacion, cobranza, codigo_operacion\
 
     return total_cargos
 
+@login_required(login_url='/login/')
+@permission_required('operaciones.add_cheques_canjeados', login_url='bases:sin_permisos')
 def ReversaProtesto(request, id_cobranza,tipo_operacion,id_protesto, cobranza
                     , cliente_id, factoring_id):
     # # ejecuta un store procedure 
@@ -2766,6 +2816,8 @@ def CanjeDeCheque(request, cheque_id, cliente_id, deudor_id):
 
     return render(request, template_path, context)
 
+@login_required(login_url='/login/')
+@permission_required('operaciones.change_chequesaccesorios', login_url='bases:sin_permisos')
 def QuitarAccesorio(request, cheque_id, cliente_id):
     template_path = 'cobranzas/datosquitaraccesorio_modal.html'
 
@@ -2805,6 +2857,8 @@ def QuitarAccesorio(request, cheque_id, cliente_id):
 
     return render(request, template_path, context)
 
+@login_required(login_url='/login/')
+@permission_required('operaciones.add_ampliaciones_plazo_cabecera', login_url='bases:sin_permisos')
 def AmpliacionDePlazo(request, ids, tipo_factoring, tipo_asignacion, id_cliente):
     template_path = 'cobranzas/datosampliacionplazo_form.html'
     carga_dc = "No"
@@ -3132,6 +3186,10 @@ def SumaCargos(request,ids, tipo_asignacion, gaoa_carga_iva, dc_carga_iva
     
     return HttpResponse(json.dumps(data), content_type = "application/json")
 
+@login_required(login_url='/login/')
+@permission_required('operaciones.change_documentos', login_url='bases:sin_permisos')
+# este privilegio esta enfocado en la tabla de documentos y no esta haciendo 
+# distincion de la tabla de accesorios
 def Prorroga(request, id, tipo_asignacion, vencimiento, numero_factura):
     template_path = 'cobranzas/datosdiasprorroga_modal.html'
 
@@ -3170,6 +3228,10 @@ def Prorroga(request, id, tipo_asignacion, vencimiento, numero_factura):
 
 from operaciones.forms import TasasAPAccesoriosForm, TasasAPDocumentoForm
 
+@login_required(login_url='/login/')
+@permission_required('operaciones.change_documentos', login_url='bases:sin_permisos')
+# este privilegio esta enfocado en la tabla de documentos y no esta haciendo 
+# distincion de la tabla de accesorios
 def EditarTasasDocumentoAmpliacionDePlazo(request, documento_id, fecha_ampliacion
                                           , tipo_asignacion):
     template_name = "cobranzas/datoscambiotasasampliaciondeplazo_modal.html"
@@ -3227,7 +3289,8 @@ def EditarTasasDocumentoAmpliacionDePlazo(request, documento_id, fecha_ampliacio
         
         fecha_ampliacion = parse_date(fecha_ampliacion)
             
-        # cuando edita no necesita enviar clase de cliente ni codigo de condicion operativa
+        # cuando edita no necesita enviar clase de cliente ni codigo de condicion 
+        # operativa
         # si necesita el tipo de asignacion para saber donde grbar las tasas
 
         CalcularCargosPorDocumento(documento, gaoa ,dc, fecha_ampliacion
@@ -3236,6 +3299,8 @@ def EditarTasasDocumentoAmpliacionDePlazo(request, documento_id, fecha_ampliacio
 
     return render(request, template_name, contexto)
 
+@login_required(login_url='/login/')
+@permission_required('operaciones.add_ampliaciones_plazo_cabecera', login_url='bases:sin_permisos')
 def AceptarAmpliacionDePlazo(request):
     # ejecuta un store procedure 
 
@@ -3347,14 +3412,16 @@ def GeneraListaAmpliacionesJSONSalida(transaccion):
 
     return output
 
+@login_required(login_url='/login/')
+@permission_required('cobranzas.change_documentos_cabecera', login_url='bases:sin_permisos')
+# este privilegio esta enfocado en la tabla de cobranzas y no esta haciendo 
+# distincion de la tabla de recuperaciones ni cobro de cargos
 def ModificarCobranza(request,id, tipo_operacion):
     template_name = "cobranzas/datoscobranza_modal.html"
     fecha_cobro={}
     fecha_deposito={}
     estado ={}
     form_cobranza={}
-    cheque ={}
-    cuenta_pago={}
     deposito_en_cuentacompartida=False
     cuenta_deposito=None
     cuenta_compartida=None

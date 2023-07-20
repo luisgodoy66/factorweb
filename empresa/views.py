@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required
 from django.views import generic
 from django.urls import reverse_lazy
 
@@ -13,11 +13,14 @@ from .forms import CuentaBancariaForm, TipoFactoringForm, TasaFactoringForm\
     , ClasesParticipantesForm, LocalidadForm, PuntoEmisionForm
 from bases.forms import EmpresaForm
 
-class TiposFactoringView(LoginRequiredMixin, generic.ListView):
+from bases.views import enviarPost, SinPrivilegios
+
+class TiposFactoringView(SinPrivilegios, generic.ListView):
     model = Tipos_factoring
     template_name = "empresa/listatiposfactoring.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="empresa.view_tipos_factoring"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -32,13 +35,14 @@ class TiposFactoringView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class TipoFactoringNew(LoginRequiredMixin, generic.CreateView):
+class TipoFactoringNew(SinPrivilegios, generic.CreateView):
     model = Tipos_factoring
     template_name="empresa/datostipofactoring_form.html"
     form_class=TipoFactoringForm
     context_object_name='tipofactoring'
     success_url= reverse_lazy("empresa:listatiposfactoring")
     login_url = 'bases:login'
+    permission_required="empresa.add_tipos_factoring"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -52,13 +56,14 @@ class TipoFactoringNew(LoginRequiredMixin, generic.CreateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class TipoFactoringEdit(LoginRequiredMixin, generic.UpdateView):
+class TipoFactoringEdit(SinPrivilegios, generic.UpdateView):
     model = Tipos_factoring
     template_name="empresa/datostipofactoring_form.html"
     form_class=TipoFactoringForm
     context_object_name='tipofactoring'
     success_url= reverse_lazy("empresa:listatiposfactoring")
     login_url = 'bases:login'
+    permission_required="empresa.change_tipos_factoring"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -70,11 +75,12 @@ class TipoFactoringEdit(LoginRequiredMixin, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class TasasFactoringView(LoginRequiredMixin, generic.ListView):
+class TasasFactoringView(SinPrivilegios, generic.ListView):
     model = Tasas_factoring
     template_name = "empresa/listatasasfactoring.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="empresa.view_tasas_factoring"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -89,13 +95,14 @@ class TasasFactoringView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class TasaFactoringNew(LoginRequiredMixin, generic.CreateView):
+class TasaFactoringNew(SinPrivilegios, generic.CreateView):
     model = Tasas_factoring
     template_name="empresa/datostasafactoring_form.html"
     form_class=TasaFactoringForm
     context_object_name='tasafactoring'
     success_url= reverse_lazy("empresa:listatasasfactoring")
     login_url = 'bases:login'
+    permission_required="empresa.add_tasas_factoring"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -109,13 +116,14 @@ class TasaFactoringNew(LoginRequiredMixin, generic.CreateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class TasaFactoringEdit(LoginRequiredMixin, generic.UpdateView):
+class TasaFactoringEdit(SinPrivilegios, generic.UpdateView):
     model = Tasas_factoring
     template_name="empresa/datostasafactoring_form.html"
     form_class=TasaFactoringForm
     context_object_name='tasafactoring'
     success_url= reverse_lazy("empresa:listatasasfactoring")
     login_url = 'bases:login'
+    permission_required="empresa.change_tasas_factoring"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -127,11 +135,12 @@ class TasaFactoringEdit(LoginRequiredMixin, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class ClasesParticipanteView(LoginRequiredMixin, generic.ListView):
+class ClasesParticipanteView(SinPrivilegios, generic.ListView):
     model = Clases_cliente
     template_name = "empresa/listaclasesparticipantes.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="empresa.view_clases_cliente"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -146,13 +155,14 @@ class ClasesParticipanteView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class ClasesParticipanteNew(LoginRequiredMixin, generic.CreateView):
+class ClasesParticipanteNew(SinPrivilegios, generic.CreateView):
     model = Clases_cliente
     template_name="empresa/datosclaseparticipante_form.html"
     form_class=ClasesParticipantesForm
     context_object_name='clase'
     success_url= reverse_lazy("empresa:listaclasesparticipantes")
     login_url = 'bases:login'
+    permission_required="empresa.add_clases_cliente"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -166,11 +176,12 @@ class ClasesParticipanteNew(LoginRequiredMixin, generic.CreateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class CuentasBancariasView(LoginRequiredMixin, generic.ListView):
+class CuentasBancariasView(SinPrivilegios, generic.ListView):
     model = Cuentas_bancarias
     template_name = "empresa/listacuentasbancarias.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="empresa.view_cuentas_bancarias"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -184,13 +195,14 @@ class CuentasBancariasView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class CuentaBancariaNew(LoginRequiredMixin, generic.CreateView):
+class CuentaBancariaNew(SinPrivilegios, generic.CreateView):
     model = Cuentas_bancarias
     template_name="empresa/datoscuentabancaria_form.html"
     form_class=CuentaBancariaForm
     context_object_name='cuentabancaria'
     success_url= reverse_lazy("empresa:listacuentasbancarias")
     login_url = 'bases:login'
+    permission_required="empresa.add_cuentas_bancarias"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -210,13 +222,14 @@ class CuentaBancariaNew(LoginRequiredMixin, generic.CreateView):
         context['solicitudes_pendientes'] = sp
         return context
        
-class CuentaBancariaEdit(LoginRequiredMixin, generic.UpdateView):
+class CuentaBancariaEdit(SinPrivilegios, generic.UpdateView):
     model = Cuentas_bancarias
     template_name="empresa/datoscuentabancaria_form.html"
     form_class=CuentaBancariaForm
     context_object_name='cuentabancaria'
     success_url= reverse_lazy("empresa:listacuentasbancarias")
     login_url = 'bases:login'
+    permission_required="empresa.change_cuentas_bancarias"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -234,11 +247,12 @@ class CuentaBancariaEdit(LoginRequiredMixin, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class LocalidadesView(LoginRequiredMixin, generic.ListView):
+class LocalidadesView(SinPrivilegios, generic.ListView):
     model = Localidades
     template_name = "empresa/listalocalidades.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="empresa.view_localidades"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -253,13 +267,14 @@ class LocalidadesView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class LocalidadesNew(LoginRequiredMixin, generic.CreateView):
+class LocalidadesNew(SinPrivilegios, generic.CreateView):
     model = Localidades
     template_name="empresa/datoslocalidad_form.html"
     form_class=LocalidadForm
     context_object_name='localidad'
     success_url= reverse_lazy("empresa:listalocalidades")
     login_url = 'bases:login'
+    permission_required="empresa.add_localidades"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -273,13 +288,14 @@ class LocalidadesNew(LoginRequiredMixin, generic.CreateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class LocalidadesEdit(LoginRequiredMixin, generic.UpdateView):
+class LocalidadesEdit(SinPrivilegios, generic.UpdateView):
     model = Localidades
     template_name="empresa/datoslocalidad_form.html"
     form_class=LocalidadForm
     context_object_name='localidad'
     success_url= reverse_lazy("empresa:listalocalidades")
     login_url = 'bases:login'
+    permission_required="empresa.change_localidades"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -291,11 +307,12 @@ class LocalidadesEdit(LoginRequiredMixin, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class PuntosEmisionView(LoginRequiredMixin, generic.ListView):
+class PuntosEmisionView(SinPrivilegios, generic.ListView):
     model = Puntos_emision
     template_name="empresa/listapuntosemision.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="empresa.view_puntos_emision"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -312,13 +329,14 @@ class PuntosEmisionView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class PuntoEmisionNew(LoginRequiredMixin, generic.CreateView):
+class PuntoEmisionNew(SinPrivilegios, generic.CreateView):
     model = Puntos_emision
     template_name="empresa/datospuntoemision_form.html"
     form_class=PuntoEmisionForm
     context_object_name='puntoemision'
     success_url= reverse_lazy("empresa:listapuntosemision")
     login_url = 'bases:login'
+    permission_required="empresa.add_puntos_emision"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -334,13 +352,14 @@ class PuntoEmisionNew(LoginRequiredMixin, generic.CreateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class PuntoEmisionEdit(LoginRequiredMixin, generic.UpdateView):
+class PuntoEmisionEdit(SinPrivilegios, generic.UpdateView):
     model = Puntos_emision
     template_name="empresa/datospuntoemision_form.html"
     form_class=PuntoEmisionForm
     context_object_name='puntoemision'
     success_url= reverse_lazy("empresa:listapuntosemision")
     login_url = 'bases:login'
+    permission_required="empresa.change_puntos_emision"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -356,13 +375,14 @@ class PuntoEmisionEdit(LoginRequiredMixin, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class DatosEmpresaEdit(LoginRequiredMixin, generic.UpdateView):
+class DatosEmpresaEdit(SinPrivilegios, generic.UpdateView):
     model = Empresas
     template_name="empresa/datosempresa_form.html"
     form_class=EmpresaForm
     context_object_name='empresa'
     success_url= reverse_lazy("bases:dashboard")
     login_url = 'bases:login'
+    permission_required="empresa.change_empresas"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id

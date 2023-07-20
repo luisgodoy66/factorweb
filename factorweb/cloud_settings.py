@@ -88,7 +88,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME':  'factorwebdb',
-        'HOST':  'database-2.c5i2bulrjalv.us-east-2.rds.amazonaws.com',
+        'HOST':  'database-1.c5i2bulrjalv.us-east-2.rds.amazonaws.com',
         'USER': 'postgres',
         'PASSWORD':os.getenv("PASSWORD_BD"),
         # 'PASSWORD':os.environ["PASSWORD_BD"],

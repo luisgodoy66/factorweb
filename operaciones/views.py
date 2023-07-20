@@ -1,6 +1,5 @@
 import json
 # from unicodedata import decimal
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 from django.urls import reverse_lazy
 from django.db import transaction
@@ -8,6 +7,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import redirect, render
 from django.db.models import Sum, Count
 from django.utils.dateparse import parse_date
+from django.core.exceptions import ObjectDoesNotExist
 
 from .forms import DatosOperativosForm, AsignacionesForm, MaestroMovimientosForm, \
     CondicionesOperativasForm, DetalleCondicionesOperativasForm, \
@@ -22,9 +22,10 @@ from empresa.models import  Clases_cliente, Datos_participantes, \
 from cobranzas.models import Documentos_protestados, Liquidacion_cabecera\
     , Documentos_cabecera, Recuperaciones_cabecera, Cheques_protestados
 from bases.models import Usuario_empresa, Empresas
-
 from solicitudes import models as ModelosSolicitud
 from clientes import models as ModeloCliente
+
+from bases.views import SinPrivilegios
 
 from datetime import date, timedelta, datetime
 from decimal import Decimal
@@ -33,11 +34,12 @@ from docxtpl import DocxTemplate, InlineImage
 FACTURAS_PURAS = 'F'
 FACTURAS_CON_ACCESORIOS = 'A'
 
-class DatosOperativosView(LoginRequiredMixin, generic.ListView):
+class DatosOperativosView(SinPrivilegios, generic.ListView):
     model = ModeloCliente.Datos_generales
     template_name = "operaciones/listadatosoperativos.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="clientes.view_datos_generales"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -51,11 +53,12 @@ class DatosOperativosView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class AsignacionesView(LoginRequiredMixin, generic.ListView):
+class AsignacionesView(SinPrivilegios, generic.ListView):
     model = Asignacion
     template_name = "operaciones/listaasignaciones.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="operaciones.view_asignacion"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -69,11 +72,12 @@ class AsignacionesView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class AsignacionesConsulta(LoginRequiredMixin, generic.ListView):
+class AsignacionesConsulta(SinPrivilegios, generic.ListView):
     model = Asignacion
     template_name = "operaciones/consultageneralasignaciones.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="operaciones.view_asignacion"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -93,11 +97,12 @@ class AsignacionesConsulta(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class AsignacionesPendientesDesembolsarView(LoginRequiredMixin, generic.ListView):
+class AsignacionesPendientesDesembolsarView(SinPrivilegios, generic.ListView):
     model = Asignacion
     template_name = "operaciones/listaasignacionespendientesdesembolsar.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="operaciones.view_asignacion"
 
     def get_queryset(self):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -113,11 +118,12 @@ class AsignacionesPendientesDesembolsarView(LoginRequiredMixin, generic.ListView
         context['solicitudes_pendientes'] = sp
         return context
 
-class MaestroMovimientosView(LoginRequiredMixin, generic.ListView):
+class MaestroMovimientosView(SinPrivilegios, generic.ListView):
     model = Movimientos_maestro
     template_name = "operaciones/listamaestromovimientos.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="operaciones.view_movimientos_maestro"
     
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -130,7 +136,7 @@ class MaestroMovimientosView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class MaestroMovimientoNew(LoginRequiredMixin, generic.CreateView):
+class MaestroMovimientoNew(SinPrivilegios, generic.CreateView):
     # permission_required="clientes.add_Linea_factoring"
     model = Movimientos_maestro
     template_name="operaciones/datosmovimiento_form.html"
@@ -138,6 +144,7 @@ class MaestroMovimientoNew(LoginRequiredMixin, generic.CreateView):
     form_class=MaestroMovimientosForm
     success_url=reverse_lazy("operaciones:listamaestromovimientos")
     success_message="Movimiento creada satisfactoriamente"
+    permission_required="operaciones.add_movimientos_maestro"
 
     def form_valid(self, form):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -152,13 +159,14 @@ class MaestroMovimientoNew(LoginRequiredMixin, generic.CreateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class MaestroMovimientoEdit(LoginRequiredMixin, generic.UpdateView):
+class MaestroMovimientoEdit(SinPrivilegios, generic.UpdateView):
     model = Movimientos_maestro
     template_name="operaciones/datosmovimiento_form.html"
     context_object_name = "movimiento"
     form_class=MaestroMovimientosForm
     success_url=reverse_lazy("operaciones:listamaestromovimientos")
     success_message="Movimiento actualizada satisfactoriamente"
+    permission_required="operaciones.change_movimientos_maestro"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -171,11 +179,12 @@ class MaestroMovimientoEdit(LoginRequiredMixin, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class CondicionesOperativasView(LoginRequiredMixin, generic.ListView):
+class CondicionesOperativasView(SinPrivilegios, generic.ListView):
     model = Condiciones_operativas_cabecera
     template_name= "operaciones/listacondicionesoperativas.html"
     context_object_name= 'consulta'
     login_url = 'bases:login'
+    permission_required="operaciones.view_condiciones_operativas_cabecera"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -190,11 +199,36 @@ class CondicionesOperativasView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class AnexosView(LoginRequiredMixin, generic.ListView):
+class CondicionesOperativasUpdate(SinPrivilegios, generic.UpdateView):
+    model = Condiciones_operativas_cabecera
+    template_name = 'operaciones/datoscondicionesoperativas_form.html'
+    form_class = CondicionesOperativasForm
+    success_url = reverse_lazy('operaciones:listacondicionesoperativas')
+    context_object_name='condicion'
+    permission_required="operaciones.change_condiciones_operativas_cabecera"
+
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super(CondicionesOperativasUpdate, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super(CondicionesOperativasUpdate, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class AnexosView(SinPrivilegios, generic.ListView):
     model = Anexos
     template_name = "operaciones/listaanexos.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="operaciones.view_anexos"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -207,13 +241,14 @@ class AnexosView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class AnexosNew(LoginRequiredMixin, generic.CreateView):
+class AnexosNew(SinPrivilegios, generic.CreateView):
     model = Anexos
     template_name="operaciones/datosanexo_form.html"
     context_object_name = "anexo"
     form_class=AnexosForm
     success_url=reverse_lazy("operaciones:listaanexos")
     success_message="Anexo creado satisfactoriamente"
+    permission_required="operaciones.add_anexos"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -227,7 +262,7 @@ class AnexosNew(LoginRequiredMixin, generic.CreateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class AnexosEdit(LoginRequiredMixin, generic.UpdateView):
+class AnexosEdit(SinPrivilegios, generic.UpdateView):
     # permission_required="clientes.add_Linea_factoring"
     model = Anexos
     template_name="operaciones/datosanexo_form.html"
@@ -235,6 +270,7 @@ class AnexosEdit(LoginRequiredMixin, generic.UpdateView):
     form_class=AnexosForm
     success_url=reverse_lazy("operaciones:listaanexos")
     success_message="Anexo creado satisfactoriamente"
+    permission_required="operaciones.change_anexos"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -248,11 +284,12 @@ class AnexosEdit(LoginRequiredMixin, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class EstadosOperativosView(LoginRequiredMixin, generic.ListView):
+class EstadosOperativosView(SinPrivilegios, generic.ListView):
     model = ModeloCliente.Datos_generales
     template_name = "operaciones/listaestadosoperativos.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="clientes.view_datos_generales"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -266,11 +303,12 @@ class EstadosOperativosView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class DesembolsosConsulta(LoginRequiredMixin, generic.TemplateView):
-    model = Desembolsos
+class DesembolsosConsulta(SinPrivilegios, generic.TemplateView):
+    # model = Desembolsos
     template_name = "operaciones/consultageneraldesembolsos.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="operaciones.view_desembolsos"
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -287,7 +325,7 @@ class DesembolsosConsulta(LoginRequiredMixin, generic.TemplateView):
         return context
  
 @login_required(login_url='/login/')
-@permission_required('operativos.update_asignacion', login_url='bases:sin_permisos')
+@permission_required('operaciones.add_desembolsos', login_url='bases:sin_permisos')
 def DesembolsarAsignacion(request, pk, cliente_id):
     template_name = "operaciones/datosdesembolsoaclientes_form.html"
     contexto = {}
@@ -397,7 +435,7 @@ def DesembolsarAsignacion(request, pk, cliente_id):
     return render(request, template_name, contexto)
 
 @login_required(login_url='/login/')
-@permission_required('operativos.view_datos_operativos', login_url='bases:sin_permisos')
+@permission_required('operaciones.change_datos_operativos', login_url='bases:sin_permisos')
 def DatosOperativos(request, cliente_id=None):
     template_name="operaciones/datosoperativos_form.html"
     contexto={}
@@ -502,7 +540,7 @@ def DatosOperativos(request, cliente_id=None):
     return render(request, template_name, contexto)
 
 @login_required(login_url='/login/')
-@permission_required('operativos.create_asignacion', login_url='bases:sin_permisos')
+@permission_required('operaciones.change_asignacion', login_url='bases:sin_permisos')
 def AceptarAsignacion(request, asignacion_id=None):
     template_name="operaciones/aceptarasignacion_form.html"
     asignacion = {}
@@ -582,6 +620,15 @@ def AceptarAsignacion(request, asignacion_id=None):
         .filter(cxparticipante=asignacion.cxcliente.cxcliente
                 , empresa = id_empresa.empresa).first()
     if not cliente:
+        return HttpResponse("solicitante no encontrado en lista de participantes")
+
+    # AUNQUE LO encuentra en participantes, podría se solo deudor
+    # y no tener registro de cliente
+
+    try:
+        x= cliente.datos_generales.id
+    except ObjectDoesNotExist:
+    # Handle the error here
         return HttpResponse("solicitante no encontrado en lista de clientes")
 
     # buscar en datos operativos el beneficiario del cheque
@@ -944,6 +991,8 @@ def SumaCargos(request,asignacion_id, gao_carga_iva, dc_carga_iva, carga_gao, ca
 
     return HttpResponse(json.dumps(data), content_type = "application/json")
 
+@login_required(login_url='/login/')
+@permission_required('operaciones.change_documentos', login_url='bases:sin_permisos')
 def EditarTasasDocumentoSolicitud(request, documento_id, fecha_desembolso, asignacion_id):
     template_name = "operaciones/cambiotasa_modal.html"
     contexto={}
@@ -1040,29 +1089,8 @@ def AceptarDocumentos(request):
 
     return HttpResponse(resultado)
 
-class CondicionesOperativasUpdate(LoginRequiredMixin, generic.UpdateView):
-    model = Condiciones_operativas_cabecera
-    template_name = 'operaciones/datoscondicionesoperativas_form.html'
-    form_class = CondicionesOperativasForm
-    success_url = reverse_lazy('operaciones:listacondicionesoperativas')
-    context_object_name='condicion'
-
-    def form_valid(self, form):
-        form.instance.cxusuariomodifica = self.request.user.id
-        return super().form_valid(form)
-
-    def get_form_kwargs(self):
-        kwargs = super(CondicionesOperativasUpdate, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        kwargs['empresa'] = id_empresa.empresa
-        return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super(CondicionesOperativasUpdate, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
-        context['solicitudes_pendientes'] = sp
-        return context
-
+@login_required(login_url='/login/')
+@permission_required('operaciones.add_condiciones_operativas_cabecera', login_url='bases:sin_permisos')
 def DatosCondicionOperativaNueva(request):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     template_name="operaciones/datoscondicionesoperativas_form.html"
@@ -1075,7 +1103,7 @@ def DatosCondicionOperativaNueva(request):
     return render(request, template_name, contexto)
 
 @login_required(login_url='/login/')
-@permission_required('operaciones.view_asignaciones', login_url='bases:sin_permisos')
+@permission_required('operaciones.change_condiciones_operativas_cabecera', login_url='bases:sin_permisos')
 def DatosCondicionesOperativas(request,condicion_id=None
                                , tipo_factoring_id = None):
     template_name='operaciones/datoscondicionesoperativas_modal.html'
@@ -1201,7 +1229,7 @@ def CondicionesOperativasADictionario(det):
     return output
 
 @login_required(login_url='/login/')
-@permission_required('operaciones.update_condiciones_operativas_detalle'
+@permission_required('operaciones.change_condiciones_operativas_detalle'
     , login_url='bases:sin_permisos')
 def EliminarDetalleCondicionOperativa(request, detalle_id):
     # la eliminacion es lógica
@@ -1284,6 +1312,8 @@ def GenerarAnexos(request,asignacion_id):
 
     return HttpResponse("Se han generado archivos en la carpeta correspondientes")
 
+@login_required(login_url='/login/')
+@permission_required('operaciones.change_asignacion', login_url='bases:sin_permisos')
 def ReversaAceptacionAsignacion(request, pid_asignacion):
     # # ejecuta un store procedure 
     resultado=enviarPost("CALL uspReversaAceptacionAsignacion( {0},'')"
@@ -1425,6 +1455,8 @@ def GeneraResumenAntigüedadCarteraJSON(request):
     
     return JsonResponse( data)
 
+@login_required(login_url='/login/')
+@permission_required('operaciones.view_datos_operativos', login_url='bases:sin_permisos')
 def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
     valor_linea=0
     porc_disponible=0
@@ -1483,6 +1515,8 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
         }
     return render(request, template_path, context)
 
+@login_required(login_url='/login/')
+@permission_required('operaciones.view_documentos', login_url='bases:sin_permisos')
 def AntigüedadCarteraClienteJSON(request, cliente_id):
     
     cheques = None

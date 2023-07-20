@@ -58,10 +58,10 @@ class PersonaNaturalForm(forms.ModelForm):
         fields=['cxcliente','dnacimiento', 'cxsexo', 'cxestadocivil'
             , 'cxconyuge', 'ctnombrenegocio', 'ctnombreconyuge'
             , 'ctprofesion']
-        lables={'cxcliente':'Cliente','dnacimiento':'Nacimiento'
+        labels={'cxcliente':'Cliente','dnacimiento':'Nacimiento'
             , 'cxsexo':'Sexo', 'cxestadocivil':'Estado civil'
-            , 'cxconyuge':'Conyuge', 'ctnombrenegocio':'Nombre de negocio'
-            , 'ctnombreconyuge':'Nombre de conyuge'
+            , 'cxconyuge':'Id. cónyuge', 'ctnombrenegocio':'Nombre de negocio'
+            , 'ctnombreconyuge':'Nombre de cónyuge'
             , 'ctprofesion':'Profesión'
         }
         widgets = {

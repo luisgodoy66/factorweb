@@ -25,6 +25,7 @@ class Clientes(ClaseModelo):
         constraints = [
             models.UniqueConstraint(fields=['cxcliente', 'empresa'], name='cliente_solicitud')
         ]
+
 class Asignacion(ClaseModelo):
     TIPOS_DE_ASIGNACION = (
         ('A', 'Con accesorios'),

@@ -1,5 +1,5 @@
 from django.shortcuts import redirect, render
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required
 from django.views import generic
 from django.http import HttpResponse, JsonResponse
 # from django.contrib.auth.decorators import login_required, permission_required
@@ -18,15 +18,17 @@ from solicitudes.models import Asignacion
 
 from .forms import CuentasBancariasForm, DebitosForm, TransferenciasForm\
     , DebitosNuevosForm
-from bases.views import enviarPost, numero_a_letras
+
+from bases.views import enviarPost, SinPrivilegios
 
 import json
 
-class CuentasView(LoginRequiredMixin, generic.ListView):
+class CuentasView(SinPrivilegios, generic.ListView):
     model = Cuentas_bancarias
     template_name = "cuentasconjuntas/listacuentasbancarias.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="cuentasconjuntas.view_cuentas_bancarias"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -39,13 +41,14 @@ class CuentasView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
+class CuentasBancariasNew(SinPrivilegios, generic.CreateView):
     model = Cuentas_bancarias
     template_name = "cuentasconjuntas/datoscuentabancaria_modal.html"
     context_object_name='cuentas'
     form_class = CuentasBancariasForm
     success_url= reverse_lazy("cuentasconjuntas:listacuentasconjuntas")
     login_url = 'bases:login'
+    permission_required="cuentasconjuntas.add_cuentas_bancarias"
 
     def form_valid(self, form):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -66,13 +69,14 @@ class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
-class CuentasBancariasEdit(LoginRequiredMixin, generic.UpdateView):
+class CuentasBancariasEdit(SinPrivilegios, generic.UpdateView):
     model = Cuentas_bancarias
     template_name = "cuentasconjuntas/datoscuentabancaria_modal.html"
     context_object_name='cuentas'
     form_class = CuentasBancariasForm
     success_url= reverse_lazy("cuentasconjuntas:listacuentasconjuntas")
     login_url = 'bases:login'
+    permission_required="cuentasconjuntas.change_cuentas_bancarias"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -94,11 +98,12 @@ class CuentasBancariasEdit(LoginRequiredMixin, generic.UpdateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
-class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
+class CobranzasPorConfirmarView(SinPrivilegios, generic.ListView):
     model = Documentos_cabecera
     template_name = "cuentasconjuntas/listacobranzasporconfirmar.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="cobranzas.change_documentos_cabecera"
 
     def get_queryset(self):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -132,11 +137,12 @@ class CobranzasPorConfirmarView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class CargosPendientesView(LoginRequiredMixin, generic.ListView):
+class CargosPendientesView(SinPrivilegios, generic.ListView):
     model = DebitosCuentasConjuntas
     template_name = "cuentasconjuntas/listacargospendientes.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="cobranzas.view_debitoscuentasconjuntas"
 
     def get_queryset(self):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -151,13 +157,14 @@ class CargosPendientesView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class DebitoBancarioEdit(LoginRequiredMixin, generic.UpdateView):
+class DebitoBancarioEdit(SinPrivilegios, generic.UpdateView):
     model = DebitosCuentasConjuntas
     template_name = "cuentasconjuntas/datosdebitobancario_form.html"
     context_object_name='consulta'
     login_url = 'bases:login'
     form_class = DebitosForm
     success_url= reverse_lazy("cuentasconjuntas:listadocargospendientes")
+    permission_required="cobranzas.change_debitoscuentasconjuntas"
 
     def get_context_data(self, **kwargs):
         pk = self.kwargs.get('pk')
@@ -234,7 +241,8 @@ def ConfirmarCobranza(request, cobranza_id, tipo_operacion, cuenta_conjunta):
     
     return render(request, template_name, contexto)
 
-
+@login_required(login_url='/login/')
+@permission_required('cobranzas.change_documentos_cabecera', login_url='bases:sin_permisos')
 def AceptarConfirmacion(request):
     # ejecuta un store procedure 
     # Devuelve el control a un proceso js
@@ -272,6 +280,8 @@ def AceptarConfirmacion(request):
 
     return HttpResponse(resultado)
 
+@login_required(login_url='/login/')
+@permission_required('operaciones.add_notas_debito_cabecera', login_url='bases:sin_permisos')
 def DebitoBancarioSinCobranza(request):
     template_name = "cuentasconjuntas/datosdebitobancario_form.html"
     sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()

@@ -151,7 +151,6 @@ class Documentos_detalle(ClaseModelo):
     def demoradepago(self):
         return (self.cxcobranza.dcobranza - self.vencimiento())/timedelta(days=1)
     
-
 class Liquidacion_cabecera(ClaseModelo):
     TIPOS_DE_OPERACION = (
         ('R', 'Recuperación'),

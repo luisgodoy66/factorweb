@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, HttpResponse
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required
 from django.views import generic
 from django.urls import reverse_lazy
 from django.db.models import Q, FilteredRelation, Max
@@ -23,7 +23,7 @@ from operaciones.models import Asignacion as Operacion, Movimientos_maestro\
     , Ampliaciones_plazo_cabecera, Desembolsos
 from cobranzas.models import Liquidacion_cabecera, Documentos_cabecera as Cobranzas
 
-from bases.views import enviarPost, enviarConsulta
+from bases.views import enviarPost, SinPrivilegios
 
 from .forms import CuentasEspecialesForm, CuentasBancosForm, FacturaVentaForm\
     , CuentasTiposFactoringForm, CuentasTasaTiposFactoringForm\
@@ -34,11 +34,12 @@ from .forms import CuentasEspecialesForm, CuentasBancosForm, FacturaVentaForm\
 import xml.etree.cElementTree as etree
 from datetime import date, timedelta, datetime
 
-class CuentasView(LoginRequiredMixin, generic.ListView):
+class CuentasView(SinPrivilegios, generic.ListView):
     model = Plan_cuentas
     template_name = "contabilidad/listacuentascontables.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="contabilidad.view_plan_cuentas"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -53,13 +54,14 @@ class CuentasView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class CuentasNew(LoginRequiredMixin, generic.CreateView):
+class CuentasNew(SinPrivilegios, generic.CreateView):
     model = Plan_cuentas
     template_name = "contabilidad/datoscuenta_form.html"
     context_object_name='cuentas'
     form_class = PlanCuentasForm
     success_url= reverse_lazy("contabilidad:listacuentascontables")
     login_url = 'bases:login'
+    permission_required="contabilidad.add_plan_cuentas"
 
     def form_valid(self, form):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -73,13 +75,14 @@ class CuentasNew(LoginRequiredMixin, generic.CreateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class CuentasEdit(LoginRequiredMixin, generic.UpdateView):
+class CuentasEdit(SinPrivilegios, generic.UpdateView):
     model = Plan_cuentas
     template_name = "contabilidad/datoscuenta_form.html"
     context_object_name='cuentas'
     form_class = PlanCuentasForm
     success_url= reverse_lazy("contabilidad:listacuentascontables")
     login_url = 'bases:login'
+    permission_required="contabilidad.change_plan_cuentas"
 
     def form_valid(self, form):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -93,13 +96,14 @@ class CuentasEdit(LoginRequiredMixin, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class CuentasEspecialesNew(LoginRequiredMixin, generic.CreateView):
+class CuentasEspecialesNew(SinPrivilegios, generic.CreateView):
     model = Cuentas_especiales
     template_name = "contabilidad/datoscuentasespeciales_form.html"
     context_object_name='cuentas'
     form_class = CuentasEspecialesForm
     success_url= reverse_lazy("contabilidad:listacuentascontables")
     login_url = 'bases:login'
+    permission_required="contabilidad.change_cuentas_especiales"
 
     def form_valid(self, form):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -119,13 +123,14 @@ class CuentasEspecialesNew(LoginRequiredMixin, generic.CreateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
-class CuentasEspecialesEdit(LoginRequiredMixin, generic.UpdateView):
+class CuentasEspecialesEdit(SinPrivilegios, generic.UpdateView):
     model = Cuentas_especiales
     template_name='contabilidad/datoscuentasespeciales_form.html'
     context_object_name='cuentas'
     form_class = CuentasEspecialesForm
     success_url= reverse_lazy("contabilidad:listacuentascontables")
     login_url = 'bases:login'
+    permission_required="contabilidad.change_cuentas_especiales"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -146,11 +151,12 @@ class CuentasEspecialesEdit(LoginRequiredMixin, generic.UpdateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
     
-class CuentasBancosView(LoginRequiredMixin, generic.ListView):
+class CuentasBancosView(SinPrivilegios, generic.ListView):
     model = Cuentas_bancarias
     template_name = "contabilidad/listacuentasbancos.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="contabilidad.view_cuentas_bancos"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -164,13 +170,14 @@ class CuentasBancosView(LoginRequiredMixin, generic.ListView):
 
         return context
 
-class CuentaBancoNew(LoginRequiredMixin, generic.CreateView):
+class CuentaBancoNew(SinPrivilegios, generic.CreateView):
     model=Cuentas_bancos
     template_name="contabilidad/datoscuentabanco_modal.html"
     context_object_name = "consulta"
     form_class=CuentasBancosForm
     success_url=reverse_lazy("contabilidad:listacuentasbancos")
     success_message="cuenta creada satisfactoriamente"
+    permission_required="contabilidad.add_cuentas_bancos"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -193,13 +200,14 @@ class CuentaBancoNew(LoginRequiredMixin, generic.CreateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
-class CuentaBancoEdit(LoginRequiredMixin, generic.UpdateView):
+class CuentaBancoEdit(SinPrivilegios, generic.UpdateView):
     model=Cuentas_bancos
     template_name="contabilidad/datoscuentabanco_modal.html"
     context_object_name = "consulta"
     form_class=CuentasBancosForm
     success_url=reverse_lazy("contabilidad:listacuentasbancos")
     success_message="cuenta modificada satisfactoriamente"
+    permission_required="contabilidad.change_cuentas_bancos"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -224,11 +232,12 @@ class CuentaBancoEdit(LoginRequiredMixin, generic.UpdateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
-class CuentasTiposFactoringView(LoginRequiredMixin, generic.ListView):
+class CuentasTiposFactoringView(SinPrivilegios, generic.ListView):
     model = Tipos_factoring
     template_name = "contabilidad/listacuentastiposfactoring.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="contabilidad.view_cuentas_tiposfactoring"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -242,13 +251,14 @@ class CuentasTiposFactoringView(LoginRequiredMixin, generic.ListView):
 
         return context
 
-class CuentaTipoFactoringNew(LoginRequiredMixin, generic.CreateView):
+class CuentaTipoFactoringNew(SinPrivilegios, generic.CreateView):
     model=Cuentas_tiposfactoring
     template_name="contabilidad/datoscuentatipofactoring_modal.html"
     context_object_name = "consulta"
     form_class=CuentasTiposFactoringForm
     success_url=reverse_lazy("contabilidad:listacuentastiposfactoring")
     success_message="cuenta creada satisfactoriamente"
+    permission_required="contabilidad.add_cuentas_tiposfactoring"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -271,13 +281,14 @@ class CuentaTipoFactoringNew(LoginRequiredMixin, generic.CreateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
-class CuentaTipoFactoringEdit(LoginRequiredMixin, generic.UpdateView):
+class CuentaTipoFactoringEdit(SinPrivilegios, generic.UpdateView):
     model=Cuentas_tiposfactoring
     template_name="contabilidad/datoscuentatipofactoring_modal.html"
     context_object_name = "consulta"
     form_class=CuentasTiposFactoringForm
     success_url=reverse_lazy("contabilidad:listacuentastiposfactoring")
     success_message="cuenta modificada satisfactoriamente"
+    permission_required="contabilidad.change_cuentas_tiposfactoring"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -302,11 +313,12 @@ class CuentaTipoFactoringEdit(LoginRequiredMixin, generic.UpdateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
-class CuentasTasasFactoringView(LoginRequiredMixin, generic.ListView):
+class CuentasTasasFactoringView(SinPrivilegios, generic.ListView):
     model = Movimientos_maestro
     template_name = "contabilidad/listacuentastasasfactoring.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="contabilidad.view_cuentas_tasasfactoring"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -323,11 +335,12 @@ class CuentasTasasFactoringView(LoginRequiredMixin, generic.ListView):
 
         return context
 
-class CuentasDiferidosView(LoginRequiredMixin, generic.ListView):
+class CuentasDiferidosView(SinPrivilegios, generic.ListView):
     model = Movimientos_maestro
     template_name = "contabilidad/listacuentastasasfactoring2.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="contabilidad.view_cuentas_diferidos"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -344,11 +357,12 @@ class CuentasDiferidosView(LoginRequiredMixin, generic.ListView):
 
         return context
 
-class CuentasProvisionesView(LoginRequiredMixin, generic.ListView):
+class CuentasProvisionesView(SinPrivilegios, generic.ListView):
     model = Movimientos_maestro
     template_name = "contabilidad/listacuentastasasfactoring3.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="contabilidad.view_cuentas_provisiones"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -365,11 +379,12 @@ class CuentasProvisionesView(LoginRequiredMixin, generic.ListView):
 
         return context
 
-class CuentasTasaTiposFactoringView(LoginRequiredMixin, generic.ListView):
+class CuentasTasaTiposFactoringView(SinPrivilegios, generic.ListView):
     model = Tipos_factoring
     template_name = "contabilidad/listacuentastasatiposfactoring.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="contabilidad.view_cuentas_tiposfactoring"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -414,11 +429,12 @@ class CuentasTasaTiposFactoringView(LoginRequiredMixin, generic.ListView):
 
         return context
     
-class CuentasTasaDiferidoView(LoginRequiredMixin, generic.ListView):
+class CuentasTasaDiferidoView(SinPrivilegios, generic.ListView):
     model = Tipos_factoring
     template_name = "contabilidad/listacuentastasadiferido.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="contabilidad.view_cuentas_diferidos"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -463,11 +479,12 @@ class CuentasTasaDiferidoView(LoginRequiredMixin, generic.ListView):
 
         return context
     
-class CuentasTasaProvisionView(LoginRequiredMixin, generic.ListView):
+class CuentasTasaProvisionView(SinPrivilegios, generic.ListView):
     model = Tipos_factoring
     template_name = "contabilidad/listacuentastasaprovision.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="contabilidad.view_cuentas_provisiones"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -512,13 +529,14 @@ class CuentasTasaProvisionView(LoginRequiredMixin, generic.ListView):
 
         return context
     
-class CuentaTasaTipoFactoringNew(LoginRequiredMixin, generic.CreateView):
+class CuentaTasaTipoFactoringNew(SinPrivilegios, generic.CreateView):
     model=Cuentas_tasasfactoring
     template_name="contabilidad/datoscuentatasatipofactoring_modal.html"
     context_object_name = "consulta"
     form_class=CuentasTasaTiposFactoringForm
     # success_url=reverse_lazy("contabilidad:listacuentastasatiposfactoring")
     success_message="cuenta creada satisfactoriamente"
+    permission_required="contabilidad.add_cuentas_tasasfactoring"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -551,13 +569,14 @@ class CuentaTasaTipoFactoringNew(LoginRequiredMixin, generic.CreateView):
         return reverse_lazy("contabilidad:listacuentastasatiposfactoring"
             , kwargs={'tasa': tasafactoring_id, 'nombre_tasa':nombre_tasafactoring})
 
-class CuentaDiferidoTasaTipoFactoringNew(LoginRequiredMixin, generic.CreateView):
+class CuentaDiferidoTasaTipoFactoringNew(SinPrivilegios, generic.CreateView):
     model=Cuentas_diferidos
     template_name="contabilidad/datoscuentadiferidotasatipofactoring_modal.html"
     context_object_name = "consulta"
     form_class=CuentasDiferidoTasaTiposFactoringForm
     # success_url=reverse_lazy("contabilidad:listacuentastasatiposfactoring")
     success_message="cuenta creada satisfactoriamente"
+    permission_required="contabilidad.add_cuentas_diferidos"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -590,13 +609,14 @@ class CuentaDiferidoTasaTipoFactoringNew(LoginRequiredMixin, generic.CreateView)
         return reverse_lazy("contabilidad:listacuentastasadiferido"
             , kwargs={'tasa': tasafactoring_id, 'nombre_tasa':nombre_tasafactoring})
 
-class CuentaProvisionTasaTipoFactoringNew(LoginRequiredMixin, generic.CreateView):
+class CuentaProvisionTasaTipoFactoringNew(SinPrivilegios, generic.CreateView):
     model=Cuentas_provisiones
     template_name="contabilidad/datoscuentaprovisiontasatipofactoring_modal.html"
     context_object_name = "consulta"
     form_class=CuentasProvisionTasaTiposFactoringForm
     # success_url=reverse_lazy("contabilidad:listacuentastasatiposfactoring")
     success_message="cuenta creada satisfactoriamente"
+    permission_required="contabilidad.add_cuentas_provisiones"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -629,13 +649,14 @@ class CuentaProvisionTasaTipoFactoringNew(LoginRequiredMixin, generic.CreateView
         return reverse_lazy("contabilidad:listacuentastasaprovision"
             , kwargs={'tasa': tasafactoring_id, 'nombre_tasa':nombre_tasafactoring})
 
-class CuentaTasaTipoFactoringEdit(LoginRequiredMixin, generic.UpdateView):
+class CuentaTasaTipoFactoringEdit(SinPrivilegios, generic.UpdateView):
     model=Cuentas_tasasfactoring
     template_name="contabilidad/datoscuentatasatipofactoring_modal.html"
     context_object_name = "consulta"
     form_class=CuentasTasaTiposFactoringForm
     success_url=reverse_lazy("contabilidad:listacuentastasatiposfactoring")
     success_message="cuenta modificada satisfactoriamente"
+    permission_required="contabilidad.change_cuentas_tasasfactoring"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -670,13 +691,13 @@ class CuentaTasaTipoFactoringEdit(LoginRequiredMixin, generic.UpdateView):
         return reverse_lazy("contabilidad:listacuentastasatiposfactoring"
             , kwargs={'tasa': tasafactoring_id, 'nombre_tasa':nombre_tasafactoring})
 
-class CuentaDiferidoTasaTipoFactoringEdit(LoginRequiredMixin, generic.UpdateView):
+class CuentaDiferidoTasaTipoFactoringEdit(SinPrivilegios, generic.UpdateView):
     model=Cuentas_diferidos
     template_name="contabilidad/datoscuentadiferidotasatipofactoring_modal.html"
     context_object_name = "consulta"
     form_class=CuentasDiferidoTasaTiposFactoringForm
-    # success_url=reverse_lazy("contabilidad:listacuentastasatiposfactoring")
     success_message="cuenta modificada satisfactoriamente"
+    permission_required="contabilidad.change_cuentas_diferidos"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -711,13 +732,13 @@ class CuentaDiferidoTasaTipoFactoringEdit(LoginRequiredMixin, generic.UpdateView
         return reverse_lazy("contabilidad:listacuentastasadiferido"
             , kwargs={'tasa': tasafactoring_id, 'nombre_tasa':nombre_tasafactoring})
 
-class CuentaProvisionTasaTipoFactoringEdit(LoginRequiredMixin, generic.UpdateView):
+class CuentaProvisionTasaTipoFactoringEdit(SinPrivilegios, generic.UpdateView):
     model=Cuentas_provisiones
     template_name="contabilidad/datoscuentaprovisiontasatipofactoring_modal.html"
     context_object_name = "consulta"
     form_class=CuentasProvisionTasaTiposFactoringForm
-    # success_url=reverse_lazy("contabilidad:listacuentastasatiposfactoring")
     success_message="cuenta creada satisfactoriamente"
+    permission_required="contabilidad.change_cuentas_provisiones"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -750,11 +771,12 @@ class CuentaProvisionTasaTipoFactoringEdit(LoginRequiredMixin, generic.UpdateVie
         return reverse_lazy("contabilidad:listacuentastasaprovision"
             , kwargs={'tasa': tasafactoring_id, 'nombre_tasa':nombre_tasafactoring})
 
-class PendientesGenerarFacturaView(LoginRequiredMixin, generic.ListView):
+class PendientesGenerarFacturaView(SinPrivilegios, generic.ListView):
     model = Plan_cuentas
     template_name = "contabilidad/listapendientesgenerarfactura.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="contabilidad.add_factura_venta"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -791,11 +813,12 @@ class PendientesGenerarFacturaView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class DesembolsosPendientesView(LoginRequiredMixin, generic.ListView):
+class DesembolsosPendientesView(SinPrivilegios, generic.ListView):
     model = Desembolsos
     template_name = "contabilidad/listadesembolsospendientes.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="contabilidad.add_comprobante_egreso"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -827,11 +850,12 @@ class DesembolsosPendientesView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class AsientosView(LoginRequiredMixin, generic.ListView):
+class AsientosView(SinPrivilegios, generic.ListView):
     model = Diario_cabecera
     template_name = "contabilidad/listaasientoscontables.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="contabilidad.view_diario_cabecera"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -849,11 +873,10 @@ class AsientosView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class DiariosConsulta(LoginRequiredMixin, generic.TemplateView):
-    # model = Diario_cabecera
+class DiariosConsulta(SinPrivilegios, generic.TemplateView):
     template_name = "contabilidad/consultageneralasientos.html"
-    # context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="contabilidad.view_diario_cabecera"
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -869,11 +892,9 @@ class DiariosConsulta(LoginRequiredMixin, generic.TemplateView):
         context['solicitudes_pendientes'] = sp
         return context
  
-class LibroMayorConsulta(LoginRequiredMixin, generic.TemplateView):
-    # model = Asignacion
+class LibroMayorConsulta(SinPrivilegios, generic.TemplateView):
     template_name = "contabilidad/consultalibromayor.html"
-    # context_object_name='consulta'
-    # login_url = 'bases:login'
+    permission_required="contabilidad.view_transaccion"
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -891,11 +912,10 @@ class LibroMayorConsulta(LoginRequiredMixin, generic.TemplateView):
             .order_by('cxcuenta')
         return context
 
-class ListaCobranzasAGenerar(LoginRequiredMixin, generic.TemplateView):
-    # model = Diario_cabecera
+class ListaCobranzasAGenerar(SinPrivilegios, generic.TemplateView):
     template_name = "contabilidad/listacobranzaspendientescontabilizar.html"
-    # context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="contabilidad.add_diario_cabecera"
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -911,9 +931,9 @@ class ListaCobranzasAGenerar(LoginRequiredMixin, generic.TemplateView):
         context['solicitudes_pendientes'] = sp
         return context
  
-class BalanceGeneralConsulta(LoginRequiredMixin, generic.TemplateView):
-    # model = Asignacion
+class BalanceGeneralConsulta(SinPrivilegios, generic.TemplateView):
     template_name = "contabilidad/consultabalancegeneral.html"
+    permission_required="contabilidad.view_saldos"
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -942,9 +962,9 @@ class BalanceGeneralConsulta(LoginRequiredMixin, generic.TemplateView):
 
         return context
 
-class PerdiasyGananciasConsulta(LoginRequiredMixin, generic.TemplateView):
-    # model = Asignacion
+class PerdiasyGananciasConsulta(SinPrivilegios, generic.TemplateView):
     template_name = "contabilidad/consultaperdidasyganancias.html"
+    permission_required="contabilidad.view_saldos_gyp"
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -972,6 +992,8 @@ class PerdiasyGananciasConsulta(LoginRequiredMixin, generic.TemplateView):
 
         return context
 
+@login_required(login_url='/login/')
+@permission_required('contabilidad.view_cuentas_especiales', login_url='bases:sin_permisos')
 def BuscarCuentasEspeciales(request):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     pk = Cuentas_especiales.objects.filter(empresa = id_empresa.empresa).first()
@@ -980,7 +1002,10 @@ def BuscarCuentasEspeciales(request):
     else:
         return redirect("contabilidad:asignarcuentascontables_nueva")
 
+@login_required(login_url='/login/')
+@permission_required('contabilidad.add_factura_venta', login_url='bases:sin_permisos')
 def GenerarFactura(request, pk, tipo, operacion):
+    template_name = 'contabilidad/datosgenerarfactura_form.html'
     formulario={}
     base_iva=0
     base_no_iva=0
@@ -995,7 +1020,6 @@ def GenerarFactura(request, pk, tipo, operacion):
     porc_iva={}
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-    template_name = 'contabilidad/datosgenerarfactura_form.html'
     sp = Asignacion.objects.filter(cxestado='P'
                                    , leliminado=False
                                    , empresa = id_empresa.empresa).count()
@@ -1103,6 +1127,8 @@ def ObtenerSecuenciaFactura(request,punto_emision):
     data = {'secuencia':secuencia, 'success':success}
     return JsonResponse(data)
 
+@login_required(login_url='/login/')
+@permission_required('contabilidad.add_comprobante_egreso', login_url='bases:sin_permisos')
 def GenerarComprobanteEgreso(request, pk, forma_pago, operacion):
     formulario={}
     desembolso ={}
@@ -1233,38 +1259,40 @@ def GenerarEgresoDiario(request):
             ,pnvalor, pid_factura, nusuario))
     return HttpResponse(resultado)
 
-def DatosDiarioContable(request, diario_id=None):
-    template_name="solicitudes/datosasiento_form.html"
-    formulario = {}
-    diario = {}
+# def DatosDiarioContable(request, diario_id=None):
+#     template_name="solicitudes/datosasiento_form.html"
+#     formulario = {}
+#     diario = {}
     
-    if request.method=='GET':
+#     if request.method=='GET':
 
-        diario = Diario_cabecera.objects.filter(pk=diario_id).first()
+#         diario = Diario_cabecera.objects.filter(pk=diario_id).first()
 
-        if diario:
-            e={
-                'cxtransaccion': diario.cxtransaccion,
-                'ctconcepto': diario.ctconcepto,
-                'nvalor': diario.nvalor,
-                'dcontabilizado':diario.dcontabilizado
-            }
-            formulario = DiarioCabeceraForm(e)
-        else:
-            formulario=DiarioCabeceraForm()
-            diario=None
+#         if diario:
+#             e={
+#                 'cxtransaccion': diario.cxtransaccion,
+#                 'ctconcepto': diario.ctconcepto,
+#                 'nvalor': diario.nvalor,
+#                 'dcontabilizado':diario.dcontabilizado
+#             }
+#             formulario = DiarioCabeceraForm(e)
+#         else:
+#             formulario=DiarioCabeceraForm()
+#             diario=None
             
-    sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
+#     sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
 
-    contexto={'form_diario':formulario,
-        'diario' : diario,
-        'diario_id': diario_id,
-        'solicitudes_pendientes':sp
-       }
+#     contexto={'form_diario':formulario,
+#         'diario' : diario,
+#         'diario_id': diario_id,
+#         'solicitudes_pendientes':sp
+#        }
 
 
-    return render(request, template_name, contexto)
+#     return render(request, template_name, contexto)
 
+@login_required(login_url='/login/')
+@permission_required('contabilidad.add_diario_cabecera', login_url='bases:sin_permisos')
 def AsientoDiarioNuevo(request, diario_id = None):
 
     template_name="contabilidad/datosasiento_form.html"
@@ -1367,6 +1395,8 @@ def AsientoDiarioNuevo(request, diario_id = None):
     
     return render(request, template_name, contexto)
 
+@login_required(login_url='/login/')
+@permission_required('contabilidad.view_plan_cuentas', login_url='bases:sin_permisos')
 def DatosDiarioEditar(request, detalle_id = None):
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
@@ -1550,6 +1580,8 @@ def GeneraLibroMayorJSONSalida(detalle, saldo):
 
     return output
 
+@login_required(login_url='/login/')
+@permission_required('contabilidad.change_diario_cabecera', login_url='bases:sin_permisos')
 def ReversarAsiento(request, pk):
     # marcar el detalle de transaccion como la cabecera de aasiento
     asiento = Diario_cabecera.objects.filter(pk = pk).first()
@@ -1611,6 +1643,8 @@ def GeneraListaCobranzasJSONSalida(cobranza):
 
     return output
 
+@login_required(login_url='/login/')
+@permission_required('contabilidad.add_diario_cabecera', login_url='bases:sin_permisos')
 def GenerarAsientosCobranzas(request,ids):
     resultado=enviarPost("CALL uspGenerarAsientosCobranzas( '{0}',{1},'')"
         .format(ids, request.user.id, ))
@@ -1619,6 +1653,8 @@ def GenerarAsientosCobranzas(request,ids):
         return HttpResponse(resultado)
     return HttpResponse('OK')
 
+@login_required(login_url='/login/')
+@permission_required('contabilidad.change_saldos', login_url='bases:sin_permisos')
 def CierreDeMes(request, año, mes):
     nusuario = request.user.id
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()

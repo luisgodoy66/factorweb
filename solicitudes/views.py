@@ -3,7 +3,6 @@ from datetime import date
 from pydoc import doc
 
 from django.shortcuts import redirect, render
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 from django.db.models import Sum, Count
 from django.contrib.auth.decorators import login_required, permission_required
@@ -22,14 +21,17 @@ from empresa.models import Datos_participantes
 from pais.models import Bancos, Feriados
 from bases.models import Usuario_empresa
 
+from bases.views import enviarPost, SinPrivilegios
+
 import datetime
 
 # Create your views here.
-class SolicitudesView(LoginRequiredMixin, generic.ListView):
+class SolicitudesView(SinPrivilegios, generic.ListView):
     model = Asignacion
     template_name = "solicitudes/listasolicitudes.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="solicitudes.view_asignacion"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -44,13 +46,14 @@ class SolicitudesView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class AsignacionFacturasPurasView(LoginRequiredMixin, generic.UpdateView):
+class AsignacionFacturasPurasView(SinPrivilegios, generic.UpdateView):
     model = Asignacion
     template_name = "solicitudes/datosasignacionfacturaspuras_form.html"
     context_object_name='asignacion'
     login_url = 'bases:login'
     form_class = AsignacionesForm
     success_url=reverse_lazy("solicitudes:listasolicitudes")
+    permission_required="solicitudes.change_asignacion"
     
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -68,13 +71,14 @@ class AsignacionFacturasPurasView(LoginRequiredMixin, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
        
-class AsignacionConAccesoriosView(LoginRequiredMixin, generic.UpdateView):
+class AsignacionConAccesoriosView(SinPrivilegios, generic.UpdateView):
     model = Asignacion
     template_name = "solicitudes/datosasignacionconaccesorios_form.html"
     context_object_name='asignacion'
     login_url = 'bases:login'
     form_class = AsignacionesForm
     success_url=reverse_lazy("solicitudes:listasolicitudes")
+    permission_required="solicitudes.change_asignacion"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -92,13 +96,14 @@ class AsignacionConAccesoriosView(LoginRequiredMixin, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class ClienteCrearView(LoginRequiredMixin, generic.CreateView):
+class ClienteCrearView(SinPrivilegios, generic.CreateView):
     model = Clientes
     template_name="solicitudes/datosclientes_form.html"
     context_object_name="cliente"
     login_url = "bases:login"
     form_class = ClientesForm
     success_url= reverse_lazy("solicitudes:listasolicitudes")
+    permission_required="solicitudes.add_clientes"
 
     def form_valid(self, form):
 
@@ -114,7 +119,7 @@ class ClienteCrearView(LoginRequiredMixin, generic.CreateView):
         return context
 
 @login_required(login_url='/login/')
-@permission_required('solicitudes.update_asignaciones', login_url='bases:sin_permisos')
+@permission_required('solicitudes.change_asignacion', login_url='bases:sin_permisos')
 def DatosAsignacionFacturasPurasNueva(request):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
@@ -130,7 +135,7 @@ def DatosAsignacionFacturasPurasNueva(request):
     return render(request, template_name, contexto)
 
 @login_required(login_url='/login/')
-@permission_required('solicitudes.update_asignaciones', login_url='bases:sin_permisos')
+@permission_required('solicitudes.change_asignacion', login_url='bases:sin_permisos')
 def DatosAsignacionConAccesoriosNueva(request):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
@@ -146,7 +151,7 @@ def DatosAsignacionConAccesoriosNueva(request):
     return render(request, template_name, contexto)
 
 @login_required(login_url='/login/')
-@permission_required('solicitudes.update_asignaciones', login_url='bases:sin_permisos')
+@permission_required('solicitudes.change_asignacion', login_url='bases:sin_permisos')
 def DatosFacturasPuras(request, cliente_id=None
     , tipo_factoring_id=None, asignacion_id=None, doc_id = None):
 
@@ -349,7 +354,7 @@ def DatosFacturasPuras(request, cliente_id=None
     return render(request, template_name, contexto)
 
 @login_required(login_url='/login/')
-@permission_required('solicitudes.update_asignaciones', login_url='bases:sin_permisos')
+@permission_required('solicitudes.change_documentos', login_url='bases:sin_permisos')
 def EliminarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
     # la eliminacion es lógica
     # el documento_id debe ser el id del accesorio cuando es asignacin con accesorios
@@ -412,7 +417,7 @@ def EliminarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
     return HttpResponse("OK")
 
 @login_required(login_url='/login/')
-@permission_required('solicitudes.update_asignaciones', login_url='bases:sin_permisos')
+@permission_required('solicitudes.change_documentos', login_url='bases:sin_permisos')
 def EliminarAsignacion(request, asignacion_id):
     # la eliminacion es lógica
     # debe devolver: 1 si esta bien, 0 si esta mal
@@ -510,7 +515,7 @@ def DetalleSolicitudConAccesoriosOuput(doc):
     return output
 
 @login_required(login_url='/login/')
-@permission_required('solicitudes.update_asignaciones', login_url='bases:sin_permisos')
+@permission_required('solicitudes.change_chequesaccesorios', login_url='bases:sin_permisos')
 def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=None
     , asignacion_id=None):
     template_name="solicitudes/datosdocumentosconaccesorios_form.html"
@@ -720,6 +725,8 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
 
     return render(request, template_name, contexto)
 
+@login_required(login_url='/login/')
+@permission_required('solicitudes.change_chequesaccesorios', login_url='bases:sin_permisos')
 def DatosAccesorioEditar(request, accesorio_id = None, tipo_factoring_id = None):
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()

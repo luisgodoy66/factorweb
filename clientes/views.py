@@ -1,6 +1,5 @@
 from django.shortcuts import redirect, render
 from django.views import generic
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse_lazy
@@ -14,18 +13,20 @@ from bases.models import Usuario_empresa
 from empresa.models import Datos_participantes, Localidades
 
 from empresa.forms import ParticipanteForm
-
 from .forms import  ClienteForm, PersonaNaturalForm, PersonaJuridicaForm\
     ,LineaFactoringForm, CuposCompradoresForm, CuentasBancariasForm\
     , CompradorForm
 
+from bases.views import SinPrivilegios
+
 from datetime import date
 
-class ClientesView(LoginRequiredMixin, generic.ListView):
+class ClientesView(SinPrivilegios, generic.ListView):
     model = Datos_generales
     template_name = "clientes/listaclientes.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="clientes.view_datos_generales"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -41,11 +42,12 @@ class ClientesView(LoginRequiredMixin, generic.ListView):
 
         return context
     
-class LineasView(LoginRequiredMixin, generic.ListView):
+class LineasView(SinPrivilegios, generic.ListView):
     model = Datos_generales
     template_name = "clientes/listalineasfactoring.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="clientes.view_linea_factoring"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -59,11 +61,12 @@ class LineasView(LoginRequiredMixin, generic.ListView):
 
         return context
 
-class CuentasBancariasView(LoginRequiredMixin, generic.ListView):
+class CuentasBancariasView(SinPrivilegios, generic.ListView):
     model = Datos_generales
     template_name = "clientes/listacuentasbancarias.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="clientes.view_cuentas_bancarias"
     
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -77,13 +80,14 @@ class CuentasBancariasView(LoginRequiredMixin, generic.ListView):
 
         return context
 
-class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
+class CuentasBancariasNew(SinPrivilegios, generic.CreateView):
     model = Cuentas_bancarias
     template_name = "clientes/datoscuentabancaria_modal.html"
     context_object_name='cuentabancaria'
     login_url = 'bases:login'
     form_class=CuentasBancariasForm
     success_message="Línea creada satisfactoriamente"
+    permission_required="clientes.add_cuentas_bancarias"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -114,13 +118,14 @@ class CuentasBancariasNew(LoginRequiredMixin, generic.CreateView):
             kwargs['empresa'] = id_empresa.empresa
         return kwargs
        
-class CuentasBancariasEdit(LoginRequiredMixin, generic.UpdateView):
+class CuentasBancariasEdit(SinPrivilegios, generic.UpdateView):
     model = Cuentas_bancarias
     template_name = "clientes/datoscuentabancaria_modal.html"
     context_object_name='cuentabancaria'
     login_url = 'bases:login'
     form_class=CuentasBancariasForm
     success_message="Línea creada satisfactoriamente"
+    permission_required="clientes.change_cuentas_bancarias"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -152,11 +157,12 @@ class CuentasBancariasEdit(LoginRequiredMixin, generic.UpdateView):
             kwargs['empresa'] = id_empresa.empresa
         return kwargs
        
-class CuentasBancariasDeudoresView(LoginRequiredMixin, generic.ListView):
+class CuentasBancariasDeudoresView(SinPrivilegios, generic.ListView):
     model = Cuentas_bancarias
     template_name = "clientes/listacuentasbancariasdeudores.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="clientes.view_cuentas_bancarias"
 
     # solo cuentas de deudores
     def get_queryset(self):
@@ -177,7 +183,7 @@ class CuentasBancariasDeudoresView(LoginRequiredMixin, generic.ListView):
 
         return context
 
-class CuentasBancariasDeudorNew(LoginRequiredMixin, generic.CreateView):
+class CuentasBancariasDeudorNew(SinPrivilegios, generic.CreateView):
     model = Cuentas_bancarias
     template_name = "clientes/datoscuentabancariadeudor.html"
     context_object_name='cuentabancaria'
@@ -185,6 +191,7 @@ class CuentasBancariasDeudorNew(LoginRequiredMixin, generic.CreateView):
     form_class=CuentasBancariasForm
     success_url=reverse_lazy("clientes:listacuentasbancarias_deudores")
     success_message="Línea creada satisfactoriamente"
+    permission_required="clientes.add_cuentas_bancarias"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -205,7 +212,7 @@ class CuentasBancariasDeudorNew(LoginRequiredMixin, generic.CreateView):
 
         return context
 
-class CuentasBancariasDeudorEdit(LoginRequiredMixin, generic.UpdateView):
+class CuentasBancariasDeudorEdit(SinPrivilegios, generic.UpdateView):
     model = Cuentas_bancarias
     template_name = "clientes/datoscuentabancariadeudor.html"
     context_object_name='consulta'
@@ -213,6 +220,7 @@ class CuentasBancariasDeudorEdit(LoginRequiredMixin, generic.UpdateView):
     form_class=CuentasBancariasForm
     success_url=reverse_lazy("clientes:listacuentasbancarias_deudores")
     success_message="Línea creada satisfactoriamente"
+    permission_required="clientes.change_cuentas_bancarias"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -224,13 +232,15 @@ class CuentasBancariasDeudorEdit(LoginRequiredMixin, generic.UpdateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
        
-class LineaNew(LoginRequiredMixin, generic.CreateView):
+class LineaNew(SinPrivilegios, generic.CreateView):
     model=Linea_Factoring
     template_name="clientes/datoslinea_modal.html"
     context_object_name = "consulta"
     form_class=LineaFactoringForm
     success_url=reverse_lazy("clientes:listalineas")
     success_message="Línea creada satisfactoriamente"
+    login_url = 'bases:login'
+    permission_required="clientes.add_linea_factoring"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -247,13 +257,15 @@ class LineaNew(LoginRequiredMixin, generic.CreateView):
         context["cliente_id"] = cliente_id
         return context
 
-class LineaEdit(LoginRequiredMixin, generic.UpdateView):
+class LineaEdit(SinPrivilegios, generic.UpdateView):
     model=Linea_Factoring
     template_name="clientes/datoslinea_modal.html"
     context_object_name = "consulta"
     form_class=LineaFactoringForm
     success_url=reverse_lazy("clientes:listalineas")
     success_message="Línea actualizada satisfactoriamente"
+    login_url = 'bases:login'
+    permission_required="clientes.change_linea_factoring"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -271,11 +283,12 @@ class LineaEdit(LoginRequiredMixin, generic.UpdateView):
         context["pk"] = id
         return context
 
-class CompradoresView(LoginRequiredMixin, generic.ListView):
+class CompradoresView(SinPrivilegios, generic.ListView):
     model = Datos_compradores
     template_name = "clientes/listacompradores.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="clientes.view_datos_compradores"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -289,11 +302,12 @@ class CompradoresView(LoginRequiredMixin, generic.ListView):
 
         return context
 
-class CuposCompradoresView(LoginRequiredMixin, generic.ListView):
+class CuposCompradoresView(SinPrivilegios, generic.ListView):
     model = Cupos_compradores
     template_name = "clientes/listacuposcompradores.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="clientes.view_cupos_compradores"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -307,14 +321,16 @@ class CuposCompradoresView(LoginRequiredMixin, generic.ListView):
 
         return context
 
-class CuposCompradoresNew(LoginRequiredMixin, generic.CreateView):
+class CuposCompradoresNew(SinPrivilegios, generic.CreateView):
     model=Cupos_compradores
     template_name="clientes/datoscupo_modal.html"
     context_object_name = "consulta"
     form_class=CuposCompradoresForm
     success_url=reverse_lazy("clientes:listacupos")
     success_message="Cupo actualizado satisfactoriamente"
-    
+    login_url = 'bases:login'
+    permission_required="clientes.add_cupos_compradores"
+
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -327,13 +343,14 @@ class CuposCompradoresNew(LoginRequiredMixin, generic.CreateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
        
-class CuposCompradoresEdit(LoginRequiredMixin, generic.UpdateView):
+class CuposCompradoresEdit(SinPrivilegios, generic.UpdateView):
     model=Cupos_compradores
     template_name="clientes/datoscupo_modal.html"
     context_object_name = "consulta"
     login_url = 'bases:login'
     form_class=CuposCompradoresForm
     success_url=reverse_lazy("clientes:listacupos")
+    permission_required="clientes.change_cupos_compradores"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -345,11 +362,12 @@ class CuposCompradoresEdit(LoginRequiredMixin, generic.UpdateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
-class ClientesSolicitudesView(LoginRequiredMixin, generic.ListView):
+class ClientesSolicitudesView(SinPrivilegios, generic.ListView):
     model = Solicitante
     template_name = "clientes/listaclientessolicitudes.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="solicitudes.view_clientes"
 
     def get_queryset(self):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -370,13 +388,15 @@ class ClientesSolicitudesView(LoginRequiredMixin, generic.ListView):
 
         return context
 
-class CompradorEdit(LoginRequiredMixin, generic.UpdateView):
+class CompradorEdit(SinPrivilegios, generic.UpdateView):
     model=Datos_compradores
     template_name="clientes/datosestadoyclasecomprador_modal.html"
     context_object_name = "consulta"
     form_class=CompradorForm
     success_url=reverse_lazy("clientes:listacompradores")
     success_message="Datos actualizados satisfactoriamente"
+    login_url = 'bases:login'
+    permission_required="clientes.change_datos_compradores"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -396,7 +416,7 @@ class CompradorEdit(LoginRequiredMixin, generic.UpdateView):
         return kwargs
        
 @login_required(login_url='/login/')
-@permission_required('clientes.view_datos_generales', login_url='bases:sin_permisos')
+@permission_required('clientes.change_datos_generales', login_url='bases:sin_permisos')
 def DatosClientes(request, cliente_id=None, solicitante_id=None):
     template_name="clientes/datoscliente_form.html"
     contexto={}
@@ -569,7 +589,7 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
     return render(request, template_name, contexto)
 
 @login_required(login_url='/login/')
-@permission_required('clientes.update_datos_generales', login_url='bases:sin_permisos')
+@permission_required('clientes.change_personas_naturales', login_url='bases:sin_permisos')
 def DatosClienteNatural(request, cliente_id=None):
     template_name="clientes/datosclientenatural_form.html"
     contexto={}
@@ -654,7 +674,7 @@ def DatosClienteNatural(request, cliente_id=None):
     return render(request, template_name, contexto)
 
 @login_required(login_url='/login/')
-@permission_required('clientes.update_datos_generales', login_url='bases:sin_permisos')
+@permission_required('clientes.change_personas_juridicas', login_url='bases:sin_permisos')
 def DatosClienteJuridico(request, cliente_id=None):
     template_name="clientes/datosclientejuridico_form.html"
     contexto={}
@@ -812,7 +832,7 @@ def DatosClienteJuridico(request, cliente_id=None):
     return render(request, template_name, contexto)
 
 @login_required(login_url='/login/')
-@permission_required('clientes.view_datos_generales', login_url='bases:sin_permisos')
+@permission_required('clientes.view_cuentas_bancarias', login_url='bases:sin_permisos')
 def CuentasBancariasCliente(request, cliente_id):
     template_name = "clientes/listacuentasbancariascliente.html"
     cliente = Datos_generales.objects.filter(cxcliente=cliente_id).first()
@@ -865,7 +885,7 @@ def DetalleCuentasBancariasJSONOutput(doc):
     return output
 
 @login_required(login_url='/login/')
-@permission_required('clientes.update_cuentas_bancarias', login_url='bases:sin_permisos')
+@permission_required('clientes.change_cuentas_bancarias', login_url='bases:sin_permisos')
 def EliminarCuentaBancaria(request, pk):
     # la eliminacion es lógica
 
@@ -897,7 +917,7 @@ def EliminarCuentaBancaria(request, pk):
     return HttpResponse("OK")
 
 @login_required(login_url='/login/')
-@permission_required('clientes.update_cuentas_bancarias', login_url='bases:sin_permisos')
+@permission_required('clientes.change_cuenta_transferencia', login_url='bases:sin_permisos')
 def ActualizarCuentaTransferencia(request, pk, cliente_ruc):
 
     cuenta = Cuentas_bancarias.objects.filter(pk=pk).first()
@@ -925,7 +945,7 @@ def ActualizarCuentaTransferencia(request, pk, cliente_ruc):
     return HttpResponse("OK")
 
 @login_required(login_url='/login/')
-@permission_required('clientes.view_datos_compradores', login_url='bases:sin_permisos')
+@permission_required('clientes.change_datos_compradores', login_url='bases:sin_permisos')
 def DatosCompradores(request, comprador_id=None):
     template_name="clientes/datoscomprador_form.html"
     contexto={}

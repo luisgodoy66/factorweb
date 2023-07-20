@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 from django.urls import reverse_lazy
 
@@ -9,11 +8,14 @@ from solicitudes.models import Asignacion
 
 from .forms import BancoForm, FeriadoForm
 
-class BancosView(LoginRequiredMixin, generic.ListView):
+from bases.views import enviarPost, SinPrivilegios
+
+class BancosView(SinPrivilegios, generic.ListView):
     model = Bancos
     template_name = "pais/listabancos.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="pais.view_bancos"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -26,13 +28,14 @@ class BancosView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class BancosNew(LoginRequiredMixin, generic.CreateView):
+class BancosNew(SinPrivilegios, generic.CreateView):
     model = Bancos
     template_name="pais/datosbanco_form.html"
     form_class=BancoForm
     context_object_name='banco'
     success_url= reverse_lazy("pais:listabancos")
     login_url = 'bases:login'
+    permission_required="pais.add_bancos"
 
     def form_valid(self, form):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -46,13 +49,14 @@ class BancosNew(LoginRequiredMixin, generic.CreateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class BancosEdit(LoginRequiredMixin, generic.UpdateView):
+class BancosEdit(SinPrivilegios, generic.UpdateView):
     model = Bancos
     template_name="pais/datosbanco_form.html"
     context_object_name = "banco"
     form_class=BancoForm
     success_url=reverse_lazy("pais:listabancos")
     success_message="Banco actualizado satisfactoriamente"
+    permission_required="pais.change_bancos"
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -64,11 +68,12 @@ class BancosEdit(LoginRequiredMixin, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class FeriadosView(LoginRequiredMixin, generic.ListView):
+class FeriadosView(SinPrivilegios, generic.ListView):
     model = Feriados
     template_name = "pais/listaferiados.html"
     context_object_name='consulta'
     login_url = 'bases:login'
+    permission_required="pais.view_feriados"
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -81,13 +86,14 @@ class FeriadosView(LoginRequiredMixin, generic.ListView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class FeriadosNew(LoginRequiredMixin, generic.CreateView):
+class FeriadosNew(SinPrivilegios, generic.CreateView):
     model = Feriados
     template_name="pais/datosferiado_form.html"
     form_class=FeriadoForm
     context_object_name='feriado'
     success_url= reverse_lazy("pais:listaferiados")
     login_url = 'bases:login'
+    permission_required="pais.add_feriados"
 
     def form_valid(self, form):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -101,13 +107,14 @@ class FeriadosNew(LoginRequiredMixin, generic.CreateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class FeriadosEdit(LoginRequiredMixin, generic.UpdateView):
+class FeriadosEdit(SinPrivilegios, generic.UpdateView):
     model = Feriados
     template_name="pais/datosferiado_form.html"
     form_class=FeriadoForm
     context_object_name='feriado'
     success_url= reverse_lazy("pais:listaferiados")
     login_url = 'bases:login'
+    permission_required="pais.change_feriados"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
