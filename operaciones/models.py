@@ -253,7 +253,8 @@ class Documentos(ClaseModelo):
     ndescuentocarteraap = models.DecimalField(max_digits=10,decimal_places= 2
                                               , default=0, null=True)
     ncontadorprorrogas = models.SmallIntegerField(default=0)
-                                            
+    lfacturagenerada = models.BooleanField(default=False)
+
     objects= Documentos_Manager()
 
     def __str__(self):

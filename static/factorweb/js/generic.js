@@ -100,9 +100,11 @@ function fetchProcesar(url,callback){
     fetch(url)
     .then(res=>res.text())
     .then(res=>{
-        if(res=='OK'){
+        // if(res=='OK'){
+        if(res.slice(0,2)=='OK'){
             // MensajeOK()
-            callback()
+            // callback()
+            callback(res.slice(2))
         }
         else
             MensajeError(res)

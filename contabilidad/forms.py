@@ -97,8 +97,8 @@ class CuentasTiposFactoringForm(forms.ModelForm):
         model=Cuentas_tiposfactoring
         fields = ['tipofactoring', 'cuenta', 'cuentaporcobrar']
         labels = {'tipofactoring':'Tipo de factoring'
-                  , 'cuenta':'Cuenta en operaciones'
-                  , 'cuentaporcobrar':'Cuenta en factura'}
+                  , 'cuenta':'Cuenta de operaciones'
+                  , 'cuentaporcobrar':'Cuenta de facturación'}
 
     def __init__(self, *args, **kwargs):
         empresa = kwargs.pop('empresa', None)
@@ -255,6 +255,7 @@ class ComprobanteEgresoForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         empresa = kwargs.pop('empresa', None)
+        id_cliente = kwargs.pop('id_cliente', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
@@ -268,7 +269,7 @@ class ComprobanteEgresoForm(forms.ModelForm):
             self.fields['cxcuentapago'].queryset = Cuentas_bancarias.objects\
                 .filter(empresa=empresa, leliminado = False, lactiva = True)
             self.fields['cxcuentadestino'].queryset = Cuenta_transferencia.objects\
-                .filter(empresa=empresa, leliminado = False)
+                .filter(empresa=empresa, leliminado = False, cxcliente = id_cliente)
                   
 class PlanCuentasForm(forms.ModelForm):
     nnivel = forms.IntegerField(max_value=5, min_value=1)

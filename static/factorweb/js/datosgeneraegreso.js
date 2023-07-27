@@ -30,17 +30,22 @@ function GenerarEgreso(){
     numero_cheque = 'null'
     cuenta_destino = 'null'
 
-  MensajeConfirmacion("Aceptar generación de egreso ?",function(){
-    
     if (capturaValor("forma_pago") == 'CHE') {
         numero_cheque = capturaValor("id_ctcheque")
     }
     if (capturaValor("forma_pago") == 'TRA') {
         cuenta_destino=capturaValor("id_cxcuentadestino")
+        if (cuenta_destino==''){
+            alert('Se especificó transferencia pero no se ha determinado cuenta de destino')
+            return false;
+        }
     }
     if (capturaValor("forma_pago") != 'EFE') {
         cuenta_pago = capturaValor("id_cxcuentapago")
     }
+    
+    MensajeConfirmacion("Aceptar generación de egreso ?",function(){
+    
     var objeto={
         "psforma_pago": capturaValor("forma_pago"),
         "pid_desembolso" :capturaValor("id_desembolso"),

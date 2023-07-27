@@ -75,12 +75,13 @@ function GenerarFactura(){
     fetchPostear("/contabilidad/generarfacturadiario/", objeto, function(data){
         // regresar a la lista de generar factura
         window.location.href = "/contabilidad/listapendientesgenerarfactura";
-        
-        // en una nueva ventana abrir el reporte de asiento
-        url = window.location.origin
-        url = url + "/contabilidad/generarxmlfactura/"+data+"/"+capturaValor("concepto");
-        window.open( url);
+        fetchProcesar("/contabilidad/generarxmlfactura/"+data,function(asiento){
+            // en una nueva ventana abrir el reporte de asiento
+            url = window.location.origin
+            url = url + "/contabilidad/imprimirdiariocontable/"+asiento;
+            window.open( url);
+
+        })
       })
-  })
-    
+  })    
 }

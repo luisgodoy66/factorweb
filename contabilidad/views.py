@@ -1135,7 +1135,9 @@ def GenerarComprobanteEgreso(request, pk, forma_pago, operacion):
     id_factura = None
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     template_name = 'contabilidad/datosgeneraegreso_form.html'
+    
     sp = Asignacion.objects.filter(cxestado='P'
                                    , leliminado=False
                                    , empresa = id_empresa.empresa).count()
@@ -1187,7 +1189,9 @@ def GenerarComprobanteEgreso(request, pk, forma_pago, operacion):
 
         concepto= 'PAGO DE LIQUIDACIÓN A ' + cliente +' POR LA OPERACIÓN ' + operacion
 
-        formulario = ComprobanteEgresoForm(e, empresa = id_empresa.empresa)
+        formulario = ComprobanteEgresoForm(e
+                                           , empresa = id_empresa.empresa
+                                           , id_cliente=documento_origen.cxcliente.id)
 
         contexto={'solicitudes_pendientes':sp
                 , 'form': formulario
@@ -1251,45 +1255,25 @@ def GenerarEgresoDiario(request):
     pid_factura = objeto["pid_factura"]
     nusuario = request.user.id
 
+    # para los casos donde no se emite factura en la negociación, esta tendrá 
+    # valor null
+    if pid_factura =='None':
+        pid_factura= 'NULL'
+        
+    print("CALL uspGenerarEgresoContabilidad( '{0}',{1},'{2}','{3}'\
+                         ,{4},'{5}',{6},'{7}','{8}'\
+                         ,{9},{10},{11},'',0)"
+        .format(psforma_pago, pid_desembolso, pscxbeneficiario, psrecibidopor\
+                , pid_cuentapago, pscheque, pid_cuentadestino, psconcepto, pdemision\
+            ,pnvalor, pid_factura, nusuario))
     resultado=enviarPost("CALL uspGenerarEgresoContabilidad( '{0}',{1},'{2}','{3}'\
                          ,{4},'{5}',{6},'{7}','{8}'\
                          ,{9},{10},{11},'',0)"
         .format(psforma_pago, pid_desembolso, pscxbeneficiario, psrecibidopor\
                 , pid_cuentapago, pscheque, pid_cuentadestino, psconcepto, pdemision\
             ,pnvalor, pid_factura, nusuario))
+    print(resultado)
     return HttpResponse(resultado)
-
-# def DatosDiarioContable(request, diario_id=None):
-#     template_name="solicitudes/datosasiento_form.html"
-#     formulario = {}
-#     diario = {}
-    
-#     if request.method=='GET':
-
-#         diario = Diario_cabecera.objects.filter(pk=diario_id).first()
-
-#         if diario:
-#             e={
-#                 'cxtransaccion': diario.cxtransaccion,
-#                 'ctconcepto': diario.ctconcepto,
-#                 'nvalor': diario.nvalor,
-#                 'dcontabilizado':diario.dcontabilizado
-#             }
-#             formulario = DiarioCabeceraForm(e)
-#         else:
-#             formulario=DiarioCabeceraForm()
-#             diario=None
-            
-#     sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
-
-#     contexto={'form_diario':formulario,
-#         'diario' : diario,
-#         'diario_id': diario_id,
-#         'solicitudes_pendientes':sp
-#        }
-
-
-#     return render(request, template_name, contexto)
 
 @login_required(login_url='/login/')
 @permission_required('contabilidad.add_diario_cabecera', login_url='bases:sin_permisos')
@@ -1662,4 +1646,71 @@ def CierreDeMes(request, año, mes):
     resultado=enviarPost("CALL uspBloqueoMesContabilidad( '{0}',{1},{2},{3},'')"
         .format(año, mes, nusuario, id_empresa.empresa.id))
     
+    return HttpResponse(resultado)
+
+@login_required(login_url='/login/')
+@permission_required('contabilidad.add_factura_venta', login_url='bases:sin_permisos')
+def generaFacturasAlVencimiento(request):
+    # la base de capital es el saldo del documento, el tiempo esde desde la fecha 
+    # de negociación.
+
+    template_name = 'contabilidad/datosgenerarfacturasalvencimiento_form.html'
+    formulario={}
+    # desembolso ={}
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    sp = Asignacion.objects.filter(cxestado='P'
+                                   , leliminado=False
+                                   , empresa = id_empresa.empresa).count()
+    if request.method=='GET':
+
+        e = {
+            'cxnumerofactura':'...',
+            # 'demision': desembolso,
+        }
+
+        concepto= 'SERVICIOS ENTREGADOS A {{cliente}} POR LA OPERACIÓN {{operacion}} DOCUMENTO {{documento}}'
+
+        formulario = FacturaVentaForm(e, empresa = id_empresa.empresa)
+
+        tipos_factoring = Tipos_factoring.objects\
+            .filter(empresa = id_empresa.empresa
+                    , leliminado = False
+                    , lgenerafacturaenaceptacion = False)
+
+        contexto={'solicitudes_pendientes':sp
+                , 'form': formulario
+                , 'concepto':concepto
+                , 'tipo_factoring': tipos_factoring
+                }    
+    
+    return render(request, template_name, contexto)
+
+def GeneraFacturasAlVencimientoDiario(request):
+    # ejecuta un store procedure 
+    pslocalidad = ''
+    nusuario = request.user.id
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    objeto=json.loads(request.body.decode("utf-8"))
+    pid_puntoemision =objeto["id_puntoemision"]
+    psconcepto = objeto["concepto"]
+    pdemision  = objeto["emision"]
+    id_factoring  = objeto["id_factoring"]
+    pdemision  = objeto["emision"]
+    pnmes  = objeto["mes"]
+    psaño  = objeto["año"]
+
+    print("CALL uspGenerarFacturasAlVencimientoSinCargoDescontado( \
+                         {0},{1},{2},'{3}'\
+                         ,'{4}', {5},{6}, {7},'','')"
+        .format(id_empresa.empresa.id, pid_puntoemision, id_factoring, psconcepto
+                , pdemision, nusuario, pnmes, psaño))
+       
+    resultado=enviarPost("CALL uspGenerarFacturasAlVencimientoSinCargoDescontado( \
+                         {0},{1},{2},'{3}'\
+                         ,'{4}', {5},{6}, {7},'','')"
+        .format(id_empresa.empresa.id, pid_puntoemision, id_factoring, psconcepto
+                , pdemision, nusuario, pnmes, psaño))
+       
     return HttpResponse(resultado)

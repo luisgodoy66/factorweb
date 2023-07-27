@@ -2,59 +2,65 @@ import xml.etree.cElementTree as etree
 import time
 import os
 
-from django.shortcuts import redirect
+from django.shortcuts import redirect, HttpResponse
 from decimal import Decimal
 
-from .models import Impuestos_facturaventa, Items_facturaventa, Factura_venta
+from .models import Impuestos_facturaventa, Items_facturaventa, Factura_venta\
+    , Diario_cabecera
 
-def GeneraXMLFactura(request, id_factura, concepto):
+def GeneraXMLFactura(request, ids_facturas):
     # clave de acceso
-    factura = Factura_venta.objects.get(pk = id_factura)
-    claveacceso = time.strftime('%d%m%Y',time.strptime(str(factura.demision), '%Y-%m-%d')) \
-        + '01' +factura.empresa.ctruccompania + '2' \
-        + factura.puntoemision.cxestablecimiento \
-        + factura.puntoemision.cxpuntoemision\
-        + factura.cxnumerofactura.zfill(9) \
-        + factura.cxnumerofactura.zfill(8) + '1'
-    dv = calculate_check_digit(claveacceso)        
+    ids = ids_facturas.split(',')
+    for id_factura in ids:
 
-    claveacceso += str(dv)
+        factura = Factura_venta.objects.get(pk = id_factura)
+        claveacceso = time.strftime('%d%m%Y',time.strptime(str(factura.demision), '%Y-%m-%d')) \
+            + '01' +factura.empresa.ctruccompania + '2' \
+            + factura.puntoemision.cxestablecimiento \
+            + factura.puntoemision.cxpuntoemision\
+            + factura.cxnumerofactura.zfill(9) \
+            + factura.cxnumerofactura.zfill(8) + '1'
+        dv = calculate_check_digit(claveacceso)        
 
-    # crear el XML y bajarlo a la carpeta descargas
-    documento = etree.Element('factura')
-    documento.set('id','comprobante')
-    documento.set('version','1.1.0')
+        claveacceso += str(dv)
 
-    # generar infoTributaria
-    infoTributaria = _get_tax_element(factura, claveacceso, '1')
-    documento.append(infoTributaria)
-    
-    # generar infoFactura
-    infoFactura = _get_invoice_element(factura)
-    documento.append(infoFactura)
-    
-    #generar detalles
-    detalles = _get_detail_element(factura)        
-    documento.append(detalles)
+        # crear el XML y bajarlo a la carpeta descargas
+        documento = etree.Element('factura')
+        documento.set('id','comprobante')
+        documento.set('version','1.1.0')
 
-    # informacion adicional
-    infoAdicional = etree.Element('infoAdicional')
-    campoAdicional = etree.SubElement(infoAdicional,'campoAdicional')
-    campoAdicional.text=concepto
-    campoAdicional.set('nombre','Concepto')
-    
-    documento.append(infoAdicional)
+        # generar infoTributaria
+        infoTributaria = _get_tax_element(factura, claveacceso, '1')
+        documento.append(infoTributaria)
+        
+        # generar infoFactura
+        infoFactura = _get_invoice_element(factura)
+        documento.append(infoFactura)
+        
+        #generar detalles
+        detalles = _get_detail_element(factura)        
+        documento.append(detalles)
 
-    tree = etree.ElementTree(documento)
+        # informacion adicional
+        concepto = Diario_cabecera.objects.filter(id = factura.asiento.id).first()
+        infoAdicional = etree.Element('infoAdicional')
+        campoAdicional = etree.SubElement(infoAdicional,'campoAdicional')
+        campoAdicional.text=concepto.ctconcepto
+        campoAdicional.set('nombre','Concepto')
+        
+        documento.append(infoAdicional)
 
-    # Set the path for the Downloads folder
-    folder = os.path.join(os.path.expanduser("~"), "Downloads")
+        tree = etree.ElementTree(documento)
 
-    # Set the full path for the file
-    file_path = os.path.join(folder, claveacceso+".XML")
+        # Set the path for the Downloads folder
+        folder = os.path.join(os.path.expanduser("~"), "Downloads")
 
-    tree.write(file_path)
-    return redirect("contabilidad:imprimirdiariocontable",diario_id = factura.asiento.id)
+        # Set the full path for the file
+        file_path = os.path.join(folder, claveacceso+".XML")
+
+        tree.write(file_path)
+    # SIGUIENDO el formato de las rtinas fetch, debo devolver 'OK' primero
+    return HttpResponse( "OK"+str(factura.asiento.id))
 
 def _get_tax_element( invoice, access_key, ambiente):
     """
@@ -72,7 +78,6 @@ def _get_tax_element( invoice, access_key, ambiente):
     etree.SubElement(infoTributaria, 'ptoEmi').text = invoice.puntoemision.cxpuntoemision
     etree.SubElement(infoTributaria, 'secuencial').text = invoice.cxnumerofactura
     etree.SubElement(infoTributaria, 'dirMatriz').text = company.ctdireccion
-    print(infoTributaria)
     return infoTributaria
 
 tipoIdentificacion = {

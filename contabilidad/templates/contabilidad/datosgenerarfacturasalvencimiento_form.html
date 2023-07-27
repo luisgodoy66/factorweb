@@ -1,0 +1,134 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">operaciones</a></li>
+                    <li><a href="#">procesos</a></li>
+                    <li class="active">facturas al vencimiento</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmGenera" enctype="multipart/form-data" class="form-horizontal">
+    <!-- <div class="col-lg-6"> -->
+        <div class="card">
+            {% csrf_token %}
+            <div class="card-header">
+                <strong>generar factura</strong> 
+            </div>
+            <div class="card-body card-block">
+                    <!-- columna izquierda -->
+                <div class="col-lg-6">
+                    <div class="row form-group " id="filtro" >
+                        <div class="col-md-5">
+                            <label for="fechacorte">Perìodo:</label>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" name="añocorte"  
+                            id="añocorte" placeholder="Ingrese año" 
+                            aria-label="Ingrese año" value="{{ año }}">
+                        </div>
+                        <!-- lista de meses ? -->
+                        <div class="col-md-3">
+                            <select name="mes" id="cmb_mes" class="form-control" >
+                                <option value="01" {% if mes == 1 %} selected {% endif %}>Enero</option>
+                                <option value="02" {% if mes == 2 %} selected {% endif %}>Febrero</option>
+                                <option value="03" {% if mes == 3 %} selected {% endif %}>Marzo</option>
+                                <option value="04" {% if mes == 4 %} selected {% endif %}>Abril</option>
+                                <option value="05" {% if mes == 5 %} selected {% endif %}>Mayo</option>
+                                <option value="06" {% if mes == 6 %} selected {% endif %}>Junio</option>
+                                <option value="07" {% if mes == 7 %} selected {% endif %}>Julio</option>
+                                <option value="08" {% if mes == 8 %} selected {% endif %}>Agosto</option>
+                                <option value="09" {% if mes == 9 %} selected {% endif %}>Septiembre</option>
+                                <option value="10" {% if mes == 10 %} selected {% endif %}>Octubre</option>
+                                <option value="11" {% if mes == 11 %} selected {% endif %}>Noviembre</option>
+                                <option value="12" {% if mes == 12 %} selected {% endif %}>Diciembre</option>
+                            </select>
+                        </div>
+        
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-5">
+                            <label for="fechacorte">Tipo de factoring:</label>
+                        </div>
+                        <div class="col-md-7">
+                            <select data-placeholder="Seleccione un tipo de factoring..." 
+                                class="form-control"  tabindex="1" 
+                                id="id_factoring" name="id_factoring"
+                                >
+                                <option value=""></option>
+                                {% for tipo in tipo_factoring %}
+                                <option value="{{ tipo.id}}" >{{ tipo}} </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+    
+                    </div>
+    
+                    <div class="row form-group">
+                        <div class="col-md-5">
+                            <label for="id_puntoemision" class=" form-control-label">
+                               {{form.puntoemision.label}}</label></div>
+                        <div class="col-md-7">{{form.puntoemision}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-5">
+                            <label for="id_cxnumerofactura" class=" form-control-label">
+                               {{form.cxnumerofactura.label}}</label></div>
+                        <div class="col-md-7">{{form.cxnumerofactura}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-5">
+                            <label for="id_demision" class=" form-control-label">
+                               {{form.demision.label}}</label></div>
+                        <div class="col-md-7">{{form.demision}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-5">
+                            <label for="id_ctconcepto" class=" form-control-label">
+                               Concepto de diario</label></div>
+                        <div class="col-md-7">
+                            <textarea type="text" class="form-control" 
+                            required id="concepto" rows="3" 
+                            name="concepto">{{concepto}}</textarea>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="col-lg-6">
+                    <div class="alert alert-info" role="alert">
+                        En el concepto puede usar las etiquetas { { cliente } } { { documento } } y { { operacion } } 
+                        para mostrar, en el lugar que ellas se encuentren, el nombre del cliente
+                        , el código de la negociación y el número de documento correspondiente.
+                    </div>
+
+                </div>
+            </div>    
+            
+            <div class="card-footer">
+                <a href="{% url 'contabilidad:listapendientesgenerarfactura' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="button" onclick="GenerarFacturas()" class="btn btn-primary btn-sm ">
+                    <i class="fa fa-dot-circle-o"></i> Aceptar
+                </button>
+                </div>
+        </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<script type="text/javascript" 
+    src="{% static 'factorweb/js/datosgenerarfacturasalvencimiento.js' %}">
+</script>
+{% endblock %}

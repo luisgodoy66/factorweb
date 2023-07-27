@@ -13,7 +13,8 @@ from .views import CuentasView, CuentasEspecialesEdit, BuscarCuentasEspeciales\
     , AsientoDiarioNuevo, DatosDiarioEditar, GeneraListaDiariosJSON, DiariosConsulta\
     , LibroMayorConsulta, GeneraLibroMayorJSON, ReversarAsiento\
     , ListaCobranzasAGenerar, GeneraListaCobranzasJSON, GenerarAsientosCobranzas\
-    , BalanceGeneralConsulta, PerdiasyGananciasConsulta, CierreDeMes
+    , BalanceGeneralConsulta, PerdiasyGananciasConsulta, CierreDeMes\
+    , generaFacturasAlVencimiento, GeneraFacturasAlVencimientoDiario
 
 from .sri import GeneraXMLFactura
 from .reportes import ImpresionDiarioContable, ImpresionComprobanteEgreso\
@@ -88,13 +89,13 @@ urlpatterns = [
     path('generarfacturadiario/',GenerarFacturaDiario, ),
     path('listadesembolsospendientes',DesembolsosPendientesView.as_view()
          , name="listadesembolsospendientes"),
-    path('generarxmlfactura/<int:id_factura>/<concepto>',GeneraXMLFactura, ),
+    path('generarxmlfactura/<ids_facturas>',GeneraXMLFactura, ),
     path('generaregreso/<int:pk>/<forma_pago>/<operacion>',GenerarComprobanteEgreso
          , name="generar_egreso"),
     path('imprimircomprobanteegreso/<int:diario_id>',ImpresionComprobanteEgreso
          , name="imprimircomprobanteegreso"),
     path('generaregresodiario/',GenerarEgresoDiario, ),
-    path('listaasientocontables/',AsientosView.as_view(), name="listaasientoscontables"),
+    path('listaasientoscontables/',AsientosView.as_view(), name="listaasientoscontables"),
     path('asientodiarionuevo/',AsientoDiarioNuevo, name="asientodiario_nuevo"),
     path('editarlineadeasiento/', DatosDiarioEditar, name='editarlineadeasiento'),
     path('editarlineadeasiento/<int:detalle_id>', DatosDiarioEditar
@@ -122,4 +123,8 @@ urlpatterns = [
     path('reporteperdidasyganancias/<año>/<mes>',ImpresionPerdidasyGanancias
          , name="reporteperdidasyganancias"),
     path('cierredemes/<año>/<mes>',CierreDeMes),
+    path('facturasalvencimiento/',generaFacturasAlVencimiento
+         , name="facturasalvencimiento"),
+    path('generarfacturasalvencimiento/',GeneraFacturasAlVencimientoDiario
+         , name="generarfacturasalvencimiento"),
 ]

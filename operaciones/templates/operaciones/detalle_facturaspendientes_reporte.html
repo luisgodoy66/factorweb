@@ -1,4 +1,5 @@
 {% load filtros %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -69,7 +70,7 @@
                             {% for cliente in cartera_list %}
                             <tr>
                                 <td class="subrayado" colspan="6"><h3>{{ cliente.grouper }}</h3></td>
-                                <td class="subrayado numero"><h3> {{cliente.list|running_saldo }}</h3></td>
+                                <td class="subrayado numero"><h3> {{cliente.list|running_saldo|intcomma }}</h3></td>
                             </tr>
                                 {% for item in cliente.list %}
                                 <tr></tr>
@@ -83,14 +84,14 @@
                                         {{ item.dias_vencidos }}
                                         {% if item.ndiasprorroga > 0 %}</h4>{% endif %}
                                     </td>
-                                    <td class="numero">{{ item.nsaldo }}</td>
+                                    <td class="numero">{{ item.nsaldo|intcomma }}</td>
                                 </tr>
                                 {% endfor %}
                                 <tr></tr>
                             {% endfor %}
                             <tr></tr>
                             <tr>
-                                <td colspan="7" class="numero"><h4>{{ total }}</h4></td>
+                                <td colspan="7" class="numero"><h4>Total: {{ total|intcomma }}</h4></td>
                             </tr>
                         </tbody>
                     </table>
