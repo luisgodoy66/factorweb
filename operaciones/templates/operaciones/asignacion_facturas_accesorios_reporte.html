@@ -92,7 +92,7 @@
                             {% if gao.imprimir %}<th>% {{gao.iniciales}}</th>{% endif %}
                             <th>{{ gao.descripcion }}</th>
                             {% if dc.imprimir %}<th>% {{dc.iniciales}}</th>{% endif %}
-                            {% if asignacion.ndescuentodecartera > 0 %}<th>{{ dc.descripcion }}</th>{% endif %}
+                            <th>{{ dc.descripcion }}</th>
                             <th>Total cargos</th>
                         </thead>
                         <tbody>
@@ -110,9 +110,7 @@
                                 {% if dc.imprimir %}
                                     <td class="subrayado"></td>
                                 {% endif %}
-                                {% if asignacion.ndescuentodecartera > 0 %}
-                                    <td class="subrayado"></td>
-                                {% endif %}
+                                <td class="subrayado"></td>
                                 <td class="subrayado"></td>
                             </tr>
                             {% for item in comprador.list %}
@@ -134,13 +132,12 @@
                                 {% if dc.imprimir %}
                                     <td class="numero">{{ item.ntasadescuento|floatformat:2 }}</td>
                                 {% endif %}
-                                {% if asignacion.ndescuentodecartera > 0 %}<td class="numero">{{ item.ndescuentocartera }}</td>{% endif %}
+                                <td class="numero">{{ item.ndescuentocartera }}</td>
                                 <td class="numero">{{ item.total_cargos}}</td>
                             </tr>
                             {% endfor %}
                             <tr></tr>
                             {% endfor %}
-                            <tr></tr>
                             <tr>
                                 <td></td>
                                 <td></td>
@@ -154,15 +151,14 @@
                                 {% if gao.imprimir %}<td></td>{% endif %}
                                 <td></td>
                                 {% if dc.imprimir %}<td></td>{% endif %}
-                                {% if asignacion.ndescuentodecartera > 0 %}<td></td>{% endif %}
+                                <td></td>
                                 <td></td>
                             </tr>
                             <tr>
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td></td>
-                                <td></td>
+                                <td colspan="2"><h4>Totales a liquidar:</h4></td>
                                 <td class="numero"><h4>{{ asignacion.nvalor|intcomma }}</h4></td>
                                 <td></td>
                                 <td></td>
@@ -170,9 +166,7 @@
                                 {% if gao.imprimir %}<td></td>{% endif %}
                                 <td class="numero"><h4>{{ asignacion.ngao|intcomma }}</h4></td>
                                 {% if dc.imprimir %}<td></td>{% endif %}
-                                {% if asignacion.ndescuentodecartera > 0 %}
-                                    <td class="numero"><h4>{{ asignacion.ndescuentodecartera|intcomma }}</h4></td>
-                                {% endif %}
+                                <td class="numero"><h4>{{ asignacion.ndescuentodecartera|intcomma }}</h4></td>
                                 <td class="numero"><h4>{{cargos|intcomma}}</h4></td>
                             </tr>
                             <tr></tr>

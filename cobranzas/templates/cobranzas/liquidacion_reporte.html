@@ -1,4 +1,4 @@
-{% load static %}
+{% load filtros %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -129,9 +129,9 @@
                     <table class="table table-striped table-hover nowrap" style="width:100%">
                         <thead>
                             <th>Asignación.</th>        
+                            <th>Documento negociado</th>
                             <th>Fecha de desembolso</th>
-                            <th>Documento</th>
-                            <th>Cobranza</th>
+                            <th>Cobranza / Operación</th>
                             <th>Base de cálculo</th>
                             <th>Tasa</th>
                             <th>Días</th>
@@ -149,11 +149,11 @@
                             {% for item in cargo.detalle %}
                             <tr>
                                 {% if item.asignacion == 'N/A' %}
-                                <td colspan="3">{{ item.documento }}</td>
+                                    <td colspan="3">{{ item.documento }}</td>
                                 {% else %}
-                                <td>{{ item.asignacion }}</td>
-                                <td>{{ item.desembolso|date:"Y-m-d" }}</td>
-                                <td>{{ item.documento }}</td>
+                                    <td>{{ item.asignacion }}</td>
+                                    <td>{{ item.documento }}</td>
+                                    <td class="centrado">{{ item.desembolso|date:"Y-m-d" }}</td>
                                 {% endif %}
                                 <td class="centrado">{{ item.cobranza }}</td>
                                 <td class="numero">{{ item.valor_base|floatformat:2 }}</td>
@@ -213,7 +213,7 @@
                             {% if liquidacion.nsobrepago %}
                             <td class="numero"> {{liquidacion.nsobrepago}} </td>
                             {% endif %}
-                            <td class="numero"> {{liquidacion.ndescuentodecartera}} </td>
+                            <td class="numero"> {{liquidacion.ndescuentodecartera|suma:liquidacion.ndescuentodecarteravencido}} </td>
                             {% if liquidacion.ngao %}
                             <td class="numero"> {{liquidacion.ngao}} </td>
                             {% endif %}

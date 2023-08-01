@@ -16,3 +16,7 @@ def running_total2(sales_list):
 @register.filter
 def running_aplicado(sales_list):
     return sum(d.aplicado() for d in sales_list)    
+
+@register.filter
+def suma(valor1, valor2):
+    return valor1 + valor2

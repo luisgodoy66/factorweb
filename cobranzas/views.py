@@ -13,7 +13,8 @@ from .models import Documentos_cabecera, Documentos_detalle, Liquidacion_cabecer
     , Documentos_protestados, Recuperaciones_detalle, Cargos_cabecera
 from operaciones.models import Documentos, ChequesAccesorios, Datos_operativos\
     , Desembolsos, Motivos_protesto_maestro, Cargos_detalle, Notas_debito_cabecera\
-    , Notas_debito_detalle, Cheques_canjeados, Cheques_quitados, Ampliaciones_plazo_cabecera
+    , Notas_debito_detalle, Cheques_canjeados, Cheques_quitados\
+    , Ampliaciones_plazo_cabecera, Asignacion as Operaciones
 from clientes.models import Cuentas_bancarias, Datos_generales\
     , Cuenta_transferencia, Datos_compradores
 from empresa.models import Tasas_factoring, Cuentas_bancarias as CuentasEmpresa\
@@ -21,6 +22,7 @@ from empresa.models import Tasas_factoring, Cuentas_bancarias as CuentasEmpresa\
 from cuentasconjuntas import models as CuentasConjuntasModels
 from bases.models import Usuario_empresa
 from solicitudes.models import Asignacion
+from contabilidad.models import Factura_venta
 
 from .forms import CobranzasDocumentosForm, ChequesForm, LiquidarForm\
     , MotivoProtestoForm, ProtestoForm, RecuperacionesProtestosForm\
@@ -549,14 +551,13 @@ class LiquidacionesEnNegativoPendientesView(SinPrivilegios, generic.ListView):
     def get_queryset(self):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         return Notas_debito_cabecera.objects\
-        .filter(cxtipooperacion__in = 'LCRB', leliminado = False
+            .filter(leliminado = False
                 , empresa = id_empresa.empresa
                 , nsaldo__gt = 0)
 
     def get_context_data(self, **kwargs):
 
         context = super(LiquidacionesEnNegativoPendientesView, self).get_context_data(**kwargs)
-        context["tipo_nd"] = 'ND'
         sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
         context['solicitudes_pendientes'] = sp
 
@@ -579,7 +580,7 @@ class CobranzasCargosView(SinPrivilegios, generic.FormView):
         forma_cobro=self.kwargs.get('forma_cobro')
         cliente_id = self.kwargs.get('cliente_id')
         tipo_factoring = self.kwargs.get('tipo_factoring')
-        tipo_nd = self.kwargs.get('tipo_nd')
+        tipo_deuda = self.kwargs.get('tipo_deuda')
 
         cliente = Datos_generales.objects.filter(id = cliente_id).first()
 
@@ -604,8 +605,9 @@ class CobranzasCargosView(SinPrivilegios, generic.FormView):
         context["cliente_id"] = cliente_id
         context["cliente"] = cliente
         context["tipo_factoring"] = tipo_factoring
-        context["tipo_nd"] = tipo_nd
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context["tipo_deuda"] = tipo_deuda
+        sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False).count()
         context['solicitudes_pendientes'] = sp
 
         return context
@@ -616,25 +618,22 @@ class CobranzasCargosView(SinPrivilegios, generic.FormView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
-class AmpliacionesDePlazoPendientesView(SinPrivilegios, generic.ListView):
-    model = Notas_debito_cabecera
-    template_name = "cobranzas/listaampliacionesdeplazopendientes.html"
+class FacturaDeVentaPendientesView(SinPrivilegios, generic.ListView):
+    model = Factura_venta
+    template_name = "cobranzas/listafacturasdeventapendientes.html"
     context_object_name='consulta'
     login_url = 'bases:login'
-    permission_required="operaciones.view_ampliaciones_plazo_cabecera"
+    permission_required="contabilidad.change_factura_venta"
 
     def get_queryset(self):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        return Notas_debito_cabecera.objects\
-        .filter(cxtipooperacion = 'A', leliminado = False
-                , empresa = id_empresa.empresa
-                , nsaldo__gt = 0)
+        return Factura_venta.objects\
+        .filter(leliminado = False, empresa = id_empresa.empresa, nsaldo__gt = 0)
     
     def get_context_data(self, **kwargs):
 
         # Call the base implementation first to get a context
-        context = super(AmpliacionesDePlazoPendientesView, self).get_context_data(**kwargs)
-        context["tipo_nd"] = 'AP'
+        context = super(FacturaDeVentaPendientesView, self).get_context_data(**kwargs)
         sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
         context['solicitudes_pendientes'] = sp
 
@@ -1904,6 +1903,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
 
     if request.method =="GET":
 
+        # obtener la lista de cobranzas, puede ser recuoeracion
         if tipo_operacion=='R':
             lista_cobranzas = Recuperaciones_cabecera.objects\
                 .filter(id__in = ids_cobranzas.split(','))
@@ -1915,6 +1915,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
 
             cobranza = lista_cobranzas[c]
 
+            # obtener el detalla de las cobranzas
             if tipo_operacion =='R':
                 detalle_cobranza = Recuperaciones_detalle.objects\
                     .filter(recuperacion = cobranza)
@@ -1925,10 +1926,12 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
             cuenta_transferencia = Cuenta_transferencia\
                     .objects.cuenta_default(cobranza.cxcliente).first()
             
+            # buscar datos operativos
             datos_operativos = Datos_operativos.objects\
                         .filter(cxcliente = cobranza.cxcliente).first()
 
             vuelto_cobranza = 0
+            
             # buscar el tipo de factoring
             tipofactoring = cobranza.cxtipofactoring
 
@@ -1996,8 +1999,33 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
 
                 # dias vencidos
                 if fechacobrocalculo > documento.dvencimiento:
-                    dias_vencidos = fechacobrocalculo - documento.dvencimiento
-                    dias_vencidos = dias_vencidos.days
+                    dias_vencidos = (fechacobrocalculo - documento.dvencimiento).days
+
+                # dias negociados
+                if not tipofactoring.lgenerafacturaenaceptacion \
+                    and fechacobrocalculo > documento.dvencimiento\
+                    and not documento.lfacturagenerada:
+                    return HttpResponse('No ha generado factura al vencimiento')
+
+                if fechacobrocalculo <= documento.dvencimiento:
+                    # dc negociado. desde desembolso hasta cobranza
+                    dias_negociados = (fechacobrocalculo - fechadesembolso).days
+                else:
+                    if tipofactoring.lgenerafacturaenaceptacion:                        
+                        # dc negociado. desde desembolso hasta vencimiento
+                        dias_negociados = (documento.dvencimiento - fechadesembolso).days
+                    else:
+                        # esto fue generado por proceso de factura al vencimiento
+                        dias_negociados = 0
+
+                # SI NO CARGO DC EN NEGOCIACION HAY DOS CASOS:
+                # QUE GENERE FACTURA EN NEGOCIACION Y QUE NO GENERE
+
+                # SI GENERA, en la liquidación se calculará en valor de dc
+                # desde la negociación
+
+                # SI NO GENERA, HAY UN PROCESO DE GENERACIÓN DE FACTURAS AL
+                # VENCIMIENTO QUE CARGARÁ EL DC HASTA ESA FECHA.
 
                 # generar DC
                 dc = Tasas_factoring.objects\
@@ -2008,22 +2036,17 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                     # la tasa esta en el documento o en el accesorio
                     tasa_dc = documento.ntasadescuento
 
-                    # dc negociado. desde desembolso hasta cobranza
-                    if fechacobrocalculo > documento.dvencimiento:
-                        dias_negociados = documento.dvencimiento - fechadesembolso
-                    else:
-                        dias_negociados = fechacobrocalculo - fechadesembolso
-                    dias_negociados = dias_negociados.days
-
                     if dc.lsobreanticipo:
                         base_dc = documento_cobrado.aplicado() * documento.nporcentajeanticipo /100
                     else:
                         base_dc = documento_cobrado.aplicado() 
-                                           
+                                        
                     descuento_cartera = ( base_dc * tasa_dc / 100)
 
                     if not dc.lflat:
-                        descuento_cartera = (descuento_cartera * dias_negociados / dc.ndiasperiocidad)
+
+                        descuento_cartera = descuento_cartera \
+                            * dias_negociados / dc.ndiasperiocidad
 
 
                 if fechacobrocalculo > documento.dvencimiento:
@@ -2053,13 +2076,6 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                 if not tipofactoring.lgeneragaoenaceptacion:
 
                     tasa_gao = documento.ntasacomision
-
-                    if fechacobrocalculo > documento.dvencimiento:
-                        dias_negociados = documento.dvencimiento - documento.cxasignacion.ddesembolso
-                    else:
-                        dias_negociados = fechacobrocalculo - documento.cxasignacion.ddesembolso
-
-                    dias_negociados = dias_negociados.days
 
                     if gao.lsobreanticipo:
                         base_gao = documento_cobrado.aplicado() * documento.nporcentajeanticipo / 100
@@ -2124,6 +2140,14 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
 
                 vuelto_cobranza += Decimal(vuelto)
 
+                # añadir los cargos por documento que se hayan generado por proceso
+                # de generar factura al vencimiento.
+                # nota: validar que sólo se cargue un valor por cargo-documento,
+                #   considerando que se liquiden cobranzas que hagan referencia a un 
+                #   mismo docuento
+
+                total_otroscargos = ObtenerOtrosCargosDeDocumento(documento.id, listaotroscargos)
+
             # fin del for detalle
             total_sobrepagos += cobranza.nsobrepago
             
@@ -2142,16 +2166,15 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
 
             # si es recuperacion obtener cargos del protesto
             if tipo_operacion  == 'R':
-
                 total_otroscargos += ObtenerCargosDeProtestos(cobranza, listaotroscargos)
 
-            # nota:obtener cualkquier cargo cargado a la cobranza
+            # obtener cualkquier cargo cargado a la cobranza
             total_otroscargos += ObtenerOtrosCargosDeCobranza(tipo_operacion
                                                             , cobranza.id
                                                             , codigo_operacion
                                                             , listaotroscargos)
-
         # fin for cobranzas
+
         # acumula base IVA de cargos
         if dc.lcargaiva: base_iva += total_dc
         if gao.lcargaiva: base_iva += total_gao
@@ -2263,7 +2286,7 @@ def ObtenerCargosDeProtestos(cobranza, listaotroscargos):
         return total_cargos
 
 def GeneraOtroCargoJSONSalida(id_cargo, nombre_cargo, fecha,  valor
-                            , id_nd, codigo_operacion):
+                            , id_nd, codigo_operacion, tipo_operacion = 'D'):
 
     output = {}
 
@@ -2271,10 +2294,9 @@ def GeneraOtroCargoJSONSalida(id_cargo, nombre_cargo, fecha,  valor
     output["id_nd"] = id_nd
     output["descripcion"] = nombre_cargo
     output["codigo_cobranza"] = codigo_operacion
-    # output["tipo_operacion"] = tipo_operacion
-    # output["id_operacion"] = id_nd
     output["fecha"] = fecha.strftime("%Y-%m-%d")
     output["valor"] = str(round(valor,2))
+    output["tipo_operacion"] = tipo_operacion
 
     return output
 
@@ -2376,17 +2398,17 @@ def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
 def GeneraListaLiquidacionesEnNegativoPendientesJSON(request):
     # Es invocado desde la url de una tabla bt
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-
+    print('gneralistaliquidaciones')
     movimiento = Notas_debito_cabecera.objects\
-        .filter(cxtipooperacion__in = 'LCRB', leliminado = False
-                , nsaldo__gt = 0, empresa = id_empresa.empresa).all()
+        .filter(leliminado = False, nsaldo__gt = 0, empresa = id_empresa.empresa)\
+        .all()
 
     docjson = []
     for i in range(len(movimiento)):
         docjson.append(GeneraListaNotasDeDebitoPendientesJSONSalida(movimiento[i])) 
 
     # docjson = tempBlogs
-
+    print(docjson)
     # crear el contexto
     data = {"total": movimiento.count(),
         "totalNotFiltered": movimiento.count(),
@@ -2500,6 +2522,7 @@ def AceptarCobranzaNotasDebito(request):
 
     objeto=json.loads(request.body.decode("utf-8"))
 
+    tipo_deuda = objeto["tipo_deuda"]
     id_cliente=objeto["id_cliente"]
     tipo_factoring=objeto["tipo_factoring"]
     forma_cobro=objeto["forma_cobro"]
@@ -2539,11 +2562,11 @@ def AceptarCobranzaNotasDebito(request):
     resultado=enviarPost("CALL uspAceptarCobranzaCargos({0},{1},'{2}','{3}',{4}\
         ,{5},{6}\
         ,'{7}','{8}',{9},{10}\
-        ,'{11}', {12},Null,0)"
+        ,'{11}', {12}, '{13}',Null,0)"
         .format(id_cliente, tipo_factoring, forma_cobro, fecha_cobro, valor_recibido
         ,sobrepago,cuenta_bancaria
         ,nc,gi, cd, fd
-        ,documentos_cobrados, nusuario))
+        ,documentos_cobrados, nusuario, tipo_deuda))
 
     return HttpResponse(resultado)
 
@@ -2705,6 +2728,33 @@ def ObtenerOtrosCargosDeCobranza(tipo_operacion, cobranza, codigo_operacion\
                     , codigo_operacion))
 
                 total_cargos += cargo.nsaldo
+
+    return total_cargos
+
+def ObtenerOtrosCargosDeDocumento(id_documento, listaotroscargos):
+    total_cargos = 0
+
+    # los cargos indicados en el detalle de la factura
+    cargos = Cargos_detalle.objects\
+        .filter(cxdocumento_id = id_documento, nsaldo__gt = 0, leliminado = False )
+
+    for cargo in cargos:
+        # buscar la factura correspondiente para indicarla en el registro 
+        factura = Factura_venta.objects\
+            .filter(operacion = cargo.cxasignacion.id).first()
+        
+        if factura:
+            listaotroscargos.append(GeneraOtroCargoJSONSalida(
+                cargo.id, cargo.cxmovimiento.ctmovimiento
+                , cargo.dultimageneracioncargos, cargo.nsaldo, factura.id
+                , factura.__str__(), 'F'))
+        else:
+            listaotroscargos.append(GeneraOtroCargoJSONSalida(
+                cargo.id, cargo.cxmovimiento.ctmovimiento
+                , cargo.dultimageneracioncargos, cargo.nsaldo, None
+                , 'desconocido', ''))
+
+        total_cargos += cargo.nsaldo
 
     return total_cargos
 
@@ -3327,17 +3377,16 @@ def AceptarAmpliacionDePlazo(request):
 
     return HttpResponse(resultado)
 
-def GeneraListaAmpliacionesPendientesJSON(request):
+def GeneraListaFacturasPendientesJSON(request):
     # Es invocado desde la url de una tabla bt
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    movimiento = Notas_debito_cabecera.objects\
-        .filter(cxtipooperacion = 'A', leliminado = False
-                , nsaldo__gt = 0, empresa = id_empresa.empresa).all()
+    movimiento = Factura_venta.objects\
+        .filter( leliminado = False, nsaldo__gt = 0, empresa = id_empresa.empresa)
 
     docjson = []
     for i in range(len(movimiento)):
-        docjson.append(GeneraListaNotasDeDebitoPendientesJSONSalida(movimiento[i])) 
+        docjson.append(GeneraListaFacturasPendientesJSONSalida(movimiento[i])) 
 
     # docjson = tempBlogs
 
@@ -3347,6 +3396,39 @@ def GeneraListaAmpliacionesPendientesJSON(request):
         "rows": docjson 
         }
     return JsonResponse( data)
+
+def GeneraListaFacturasPendientesJSONSalida(transaccion):
+    print(transaccion)
+    output = {}
+    output["id"] = transaccion.id
+    output["IdCliente"] = transaccion.cliente.id
+    output["Cliente"] = transaccion.cliente.cxcliente.ctnombre
+    output["Numero"] = transaccion.cxnumerofactura
+    output["Fecha"] = transaccion.demision.strftime("%Y-%m-%d")
+    output["Valor"] =  transaccion.nvalor
+    output["Saldo"] = transaccion.nsaldo
+
+    output["IdTipoFactoring"] = transaccion.cxtipofactoring.id
+    output["TipoFactoring"] = transaccion.cxtipofactoring.ctabreviacion
+    
+    opx = None
+    if transaccion.cxtipooperacion=='LA':
+        op = Operaciones.objects.filter(pk = transaccion.operacion).first()
+        opx = op.cxasignacion
+    if transaccion.cxtipooperacion=='LC':
+        op = Liquidacion_cabecera.objects.filter(pk = transaccion.operacion).first()
+        opx = op.cxliquidacion
+    if transaccion.cxtipooperacion=='AP':
+        op = Ampliaciones_plazo_cabecera.objects.filter(pk = transaccion.operacion).first()
+        opx = op.dampliacionhasta
+    if transaccion.cxtipooperacion=='VF':
+        op = Operaciones.objects.filter(pk = transaccion.operacion).first()
+        opx = op.cxasignacion
+    
+    output["Operacion"] = opx
+    output["Tipo"] = transaccion.cxtipooperacion
+
+    return output
 
 def GeneraListaAmpliacionesJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
@@ -3497,3 +3579,55 @@ def ModificarCobranza(request,id, tipo_operacion):
         return HttpResponse("OK")
     
     return render(request, template_name, contexto)
+
+def DetalleFacturasVentaPendientesJSON(request, ids_documentos):
+    # filtrar los documentos correspondientes a la lista pasada
+    documentos = Factura_venta.objects\
+        .filter(id__in = ids_documentos.split(','), leliminado = False)
+    
+    tempBlogs = []
+
+    # Converting `QuerySet` to a Python Dictionary
+    for i in range(len(documentos)):
+        tempBlogs.append(DetalleFacturasPendientesJSONSalida(documentos[i])) # Converting `QuerySet` to a Python Dictionary
+
+    docjson = tempBlogs
+
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+
+    return HttpResponse(JsonResponse( data))
+
+def DetalleFacturasPendientesJSONSalida(doc):
+    # con los datos numericos entre comillas si se calcula el total
+    # de la columna en la tabla. Del otro tipo, no
+
+    # los datos aquí van a obtenerse con el getData de la tb, aunque no se 
+    # presenten en el HTML
+    output = {}
+    output['id'] = doc.id
+    output["ND"] = doc.__str__()
+    output["Emision"] = doc.demision.strftime("%Y-%m-%d")
+    output["SaldoActual"] = doc.nsaldo
+    output["Cobro"] = doc.nsaldo
+    output["SaldoFinal"] = "0.0"
+    opx = None
+    if doc.cxtipooperacion=='LC':
+        op = Liquidacion_cabecera.objects.filter(pk = doc.operacion).first()
+        opx = op.cxliquidacion
+    if doc.cxtipooperacion=='LA':
+        op = Operaciones.objects.filter(pk = doc.operacion).first()
+        opx = op.cxasignacion
+    if doc.cxtipooperacion=='vf':
+        op = Operaciones.objects.filter(pk = doc.operacion).first()
+        opx = op.cxasignacion
+    if doc.cxtipooperacion=='AP':
+        op = Ampliaciones_plazo_cabecera.objects.filter(pk = doc.operacion).first()
+        opx = op.dampliacionhasta
+    
+    output["Operacion"] = opx
+
+    return output
+

@@ -19,9 +19,9 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , ReversaProtesto, CanjeDeCheque, QuitarAccesorio, AmpliacionDePlazo\
     , DetalleCargosAmpliacionPlazo, GeneraDetalleCargosAmpliacionPlazoJSON\
     , SumaCargos, Prorroga, EditarTasasDocumentoAmpliacionDePlazo\
-    , AceptarAmpliacionDePlazo, AmpliacionesDePlazoPendientesView\
-    , GeneraListaAmpliacionesPendientesJSON, GeneraListaAmpliacionesJSON\
-    , AmpliacionesConsulta, ModificarCobranza
+    , AceptarAmpliacionDePlazo,  GeneraListaAmpliacionesJSON, AmpliacionesConsulta\
+    , ModificarCobranza, FacturaDeVentaPendientesView, GeneraListaFacturasPendientesJSON\
+    , DetalleFacturasVentaPendientesJSON
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos\
@@ -136,7 +136,7 @@ urlpatterns = [
     path('listaliquidacionesennegativopendientesjson/'
          ,GeneraListaLiquidacionesEnNegativoPendientesJSON\
         , name="listaliquidacionesennegativopendientes_json"),
-    path('cobrodecargos/<ids_documentos>/<total_cargos>/<forma_cobro>/<cliente_id>/<tipo_factoring>/<tipo_nd>', 
+    path('cobrodecargos/<ids_documentos>/<total_cargos>/<forma_cobro>/<cliente_id>/<tipo_factoring>/<tipo_deuda>', 
         CobranzasCargosView.as_view(), name='cobro_cargos'),
     path('detallenotasdebitojson/<ids_documentos>'
          , DetalleNotasDebitoPendientesJSON
@@ -162,14 +162,21 @@ urlpatterns = [
     path('editartasasdocumento/<int:documento_id>/<fecha_ampliacion>/<tipo_asignacion>'\
         , EditarTasasDocumentoAmpliacionDePlazo, name="editartasasdocumento"),
     path('aceptarampliaciondeplazo/',AceptarAmpliacionDePlazo),
-    path('listaampliacionesdeplazopendientespagar/',AmpliacionesDePlazoPendientesView.as_view()
-        , name="listaampliacionespendientespagar"),
-    path('listaampliacionespendientesjson/',GeneraListaAmpliacionesPendientesJSON\
-        , name="listaampliacionespendientes_json"),
     path('reporteampliacion/<int:ampliacion_id>',ImpresionAmpliacionDePlazo
         , name='reporte_ampliacion'),
     path('consultaampliaciones/',AmpliacionesConsulta.as_view() \
         , name='consulta_ampliaciones'),
     path('ampliacionesplazojson/<desde>/<hasta>',GeneraListaAmpliacionesJSON
         , name="ampliacionesplazo_json"),
+    
+    # facturas
+    path('listafacturaspendientespagar/',FacturaDeVentaPendientesView.as_view()
+        , name="listafacturaspendientespagar"),
+    path('listafacturaspendientesjson/',GeneraListaFacturasPendientesJSON\
+        , name="listafacturaspendientes_json"),
+    path('cobrodefacturasdeventa/<ids_documentos>/<total_cargos>/<forma_cobro>/<cliente_id>/<tipo_factoring>/<tipo_deuda>', 
+        CobranzasCargosView.as_view(), name='cobro_facturasdeventa'),
+    path('detallefacturasventajson/<ids_documentos>'
+         , DetalleFacturasVentaPendientesJSON
+        , name='detallefacturasventa_json'),
 ]

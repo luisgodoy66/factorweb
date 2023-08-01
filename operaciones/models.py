@@ -583,8 +583,8 @@ class Cargos_detalle(ClaseModelo):
         , null=True) 
     cxdocumento  = models.ForeignKey(Documentos, on_delete=models.RESTRICT
         , null=True)  
-    cxmovimiento = models.ForeignKey(Movimientos_maestro
-        , on_delete=models.RESTRICT)
+    cxmovimiento = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT
+                                     ,related_name='cargo_movimiento')
     nvalor = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
     nsaldo = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
     dultimageneracioncargos = models.DateField()

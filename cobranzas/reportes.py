@@ -12,10 +12,10 @@ from .models import  Documentos_cabecera, Documentos_detalle, Liquidacion_cabece
         , Liquidacion_detalle, Recuperaciones_cabecera, Recuperaciones_detalle\
         , Cheques, Cheques_protestados, Cargos_cabecera, Cargos_detalle\
         , DebitosCuentasConjuntas
-
 from operaciones.models import Notas_debito_cabecera, Notas_debito_detalle
 from bases.models import Usuario_empresa
 from empresa.models import Tasas_factoring
+from contabilidad.models import Factura_venta
 
 from xhtml2pdf import pisa
 
@@ -209,8 +209,7 @@ def ImpresionLiquidacion(request, liquidacion_id):
         idcargo = item.cargo.cxmovimiento.ctmovimiento
 
         jsdet={}
-        # se guarda el código de la operación y no el pk
-        # la operacion puede ser cobranza o recuperacion
+
         if item.cxtipooperacion=="C":
             operacion = Documentos_cabecera.objects.filter(pk=item.operacion).first()
         elif item.cxtipooperacion =='R':
@@ -219,6 +218,10 @@ def ImpresionLiquidacion(request, liquidacion_id):
             operacion = Notas_debito_cabecera.objects.filter(pk=item.operacion).first()
         elif item.cxtipooperacion =='L':
             operacion = Liquidacion_cabecera.objects.filter(pk=item.operacion).first()
+        elif item.cxtipooperacion =='F':
+            operacion = Factura_venta.objects.filter(pk=item.operacion).first()
+        else:
+             operacion = 'Tipo no definido'
 
         # el IVA no tiene documento, porque es general a la Liquidacion
         if item.cargo.cxasignacion != None:
@@ -242,11 +245,13 @@ def ImpresionLiquidacion(request, liquidacion_id):
         jsdet["valor_base"] = item.cargo.ctvalorbase
         jsdet["tasa_calculo"]=item.cargo.ntasacalculo
         jsdet["dias_calculo"] = item.cargo.ndiascalculo
-        jsdet["valor"] = item.cargo.nvalor
+        # jsdet["valor"] = item.cargo.nvalor
+        jsdet["valor"] = item.nvalor
 
         listadetalle.append(jsdet)
 
-        totalcargo += item.cargo.nvalor
+        # totalcargo += item.cargo.nvalor
+        totalcargo += item.nvalor
     
     # el ultimo
     jscab={}

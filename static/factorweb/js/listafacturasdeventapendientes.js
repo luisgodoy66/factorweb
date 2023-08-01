@@ -8,7 +8,7 @@ var $cobrocontransferencia = jQuery("#cobrocontransferencia")
 
 window.onload=function(){
     $table.bootstrapTable({locale:"es-EC"});
-
+    
     // evento de marcar y desmarcar documentos
     $table.on('check.bs.table uncheck.bs.table ' +
       'check-all.bs.table uncheck-all.bs.table',
@@ -108,8 +108,8 @@ function CobroDeCargos(forma){
           return Math.round((sum + i + Number.EPSILON) * 100) / 100;
       }, 0)
 
-    url = '/cobranzas/cobrodecargos/'+ids+'/'+total_cargos+'/'+forma+'/'
-      +id_cliente+'/'+tipo_factoring+'/ND';
+    url = '/cobranzas/cobrodefacturasdeventa/'+ids+'/'+total_cargos+'/'+forma+'/'
+      +id_cliente+'/'+tipo_factoring+'/FV';
     
     location.href=url
   }

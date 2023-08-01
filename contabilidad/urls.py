@@ -14,7 +14,8 @@ from .views import CuentasView, CuentasEspecialesEdit, BuscarCuentasEspeciales\
     , LibroMayorConsulta, GeneraLibroMayorJSON, ReversarAsiento\
     , ListaCobranzasAGenerar, GeneraListaCobranzasJSON, GenerarAsientosCobranzas\
     , BalanceGeneralConsulta, PerdiasyGananciasConsulta, CierreDeMes\
-    , generaFacturasAlVencimiento, GeneraFacturasAlVencimientoDiario
+    , generaFacturasAlVencimiento, GeneraFacturasAlVencimientoDiario, FacturasConsulta\
+    , GeneraListaFacturasJSON
 
 from .sri import GeneraXMLFactura
 from .reportes import ImpresionDiarioContable, ImpresionComprobanteEgreso\
@@ -127,4 +128,8 @@ urlpatterns = [
          , name="facturasalvencimiento"),
     path('generarfacturasalvencimiento/',GeneraFacturasAlVencimientoDiario
          , name="generarfacturasalvencimiento"),
+    path('consultafacturas/',FacturasConsulta.as_view()
+         , name="consulta_facturas"),
+    path('facturasjson/<desde>/<hasta>',GeneraListaFacturasJSON
+        , name="facturas_json"),
 ]

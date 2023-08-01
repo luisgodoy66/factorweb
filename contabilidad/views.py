@@ -8,6 +8,7 @@ from django.db.models.expressions import RawSQL
 from django.http import JsonResponse
 from django.db import transaction
 from django.views import generic
+from django.utils.dateparse import parse_date
 
 import json
 
@@ -992,6 +993,23 @@ class PerdiasyGananciasConsulta(SinPrivilegios, generic.TemplateView):
 
         return context
 
+class FacturasConsulta(SinPrivilegios, generic.TemplateView):
+    template_name = "contabilidad/consultageneralfacturas.html"
+    permission_required="contabilidad.view_factura_venta"
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        desde = date.today() + timedelta(days=-date.today().day +1)
+        hasta = date.today()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+
+        context = super(FacturasConsulta, self).get_context_data(**kwargs)
+        context["desde"] = desde
+        context["hasta"] =hasta
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
 @login_required(login_url='/login/')
 @permission_required('contabilidad.view_cuentas_especiales', login_url='bases:sin_permisos')
 def BuscarCuentasEspeciales(request):
@@ -1701,12 +1719,6 @@ def GeneraFacturasAlVencimientoDiario(request):
     pnmes  = objeto["mes"]
     psaño  = objeto["año"]
 
-    print("CALL uspGenerarFacturasAlVencimientoSinCargoDescontado( \
-                         {0},{1},{2},'{3}'\
-                         ,'{4}', {5},{6}, {7},'','')"
-        .format(id_empresa.empresa.id, pid_puntoemision, id_factoring, psconcepto
-                , pdemision, nusuario, pnmes, psaño))
-       
     resultado=enviarPost("CALL uspGenerarFacturasAlVencimientoSinCargoDescontado( \
                          {0},{1},{2},'{3}'\
                          ,'{4}', {5},{6}, {7},'','')"
@@ -1714,3 +1726,64 @@ def GeneraFacturasAlVencimientoDiario(request):
                 , pdemision, nusuario, pnmes, psaño))
        
     return HttpResponse(resultado)
+
+def GeneraListaFacturasJSON(request, desde = None, hasta= None):
+    # Es invocado desde la url de una tabla bt
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    if desde == 'None':
+        movimiento = Factura_venta.objects\
+            .filter(empresa = id_empresa.empresa)\
+            .order_by('dregistro')
+        
+    else:
+        # la fecha de registro es datetime por lo que la comparación "hasta" es mejor
+        # que sea con el día siguiente
+        hasta = parse_date(hasta)
+        hasta = hasta + timedelta(days=1)
+
+        movimiento = Factura_venta.objects\
+            .filter(demision__gte = desde
+                    , empresa = id_empresa.empresa
+                    , demision__lt = hasta)\
+            .order_by('demision')
+                
+    tempBlogs = []
+    for i in range(len(movimiento)):
+        tempBlogs.append(GeneraListaFacturasJSONSalida(movimiento[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": movimiento.count(),
+        "totalNotFiltered": movimiento.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaFacturasJSONSalida(transaccion):
+    output = {}
+    output['id'] = transaccion.id
+    output["Cliente"] = transaccion.cliente.cxcliente.ctnombre
+    output["Registro"] = transaccion.dregistro.strftime("%Y-%m-%d")
+    output["Emision"] = transaccion.demision.strftime("%Y-%m-%d")
+    output["Valor"] =  transaccion.nvalor
+    output["Saldo"] = transaccion.nsaldo
+    output["Factura"] = transaccion.__str__()
+    output["BaseIVA"] = transaccion.nbaseiva
+    output["BaseNoIVA"] = transaccion.nbasenoiva
+    output["IVA"] = transaccion.niva
+    output["Origen"] = transaccion.cxtipooperacion
+    id_origen = transaccion.operacion
+    if transaccion.cxtipooperacion =='LC':
+        op = Liquidacion_cabecera.objects.filter(pk = id_origen).first()
+    elif transaccion.cxtipooperacion =='LA':
+        op = Operacion.objects.filter(pk = id_origen).first()
+    elif transaccion.cxtipooperacion == 'AP':
+        op = Ampliaciones_plazo_cabecera.objects.filter(pk = id_origen).first()
+    elif transaccion.cxtipooperacion == 'VF':
+        op = Operacion.objects.filter(pk = id_origen).first()
+    print(transaccion.cxtipooperacion, id_origen)
+    output["Operacion"] = op.__str__()
+    
+    return output
