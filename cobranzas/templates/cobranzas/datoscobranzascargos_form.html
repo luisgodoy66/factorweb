@@ -36,7 +36,7 @@
             <input id="id_cliente" name="id_cliente" value="{{ cliente_id }}"  >
             <input id="forma_cobro" value="{{ forma_cobro }}" >
             <input id="tipo_factoring" value="{{ tipo_factoring }}">
-            <input id="tipo_deuda" value="{{ tipo_deuda }}">
+            <!-- <input id="tipo_deuda" value="{{ tipo_deuda }}"> -->
         </div>
 
         <div class="card-body card-block">
@@ -134,11 +134,7 @@
                         data-unique-id="id"
                         data-show-footer="true"
                         data-side-pagination="server"
-                        {% if tipo_deuda == 'ND' %}
-                            data-url="{% url 'cobranzas:detallenotasdebito_json' documentos %}"
-                        {% else %}
-                            data-url="{% url 'cobranzas:detallefacturasventa_json' documentos %}"
-                        {% endif %}
+                        data-url="{% url 'cobranzas:detallenotasdebito_json' documentos %}"
                         >
                         </table>
 
@@ -170,11 +166,7 @@
           
         <div class="card-footer">
             <a 
-                {% if tipo_deuda == 'ND' %}
-                    href="{% url 'cobranzas:listaliquidacionesennegativopendientes' %}" 
-                {% else %}
-                    href="{% url 'cobranzas:listafacturaspendientespagar' %}" 
-                {% endif %}
+                href="{% url 'cobranzas:listaliquidacionesennegativopendientes' %}" 
                 class="btn btn-danger btn-sm">
                 <i class="fa fa-ban"></i> Cancelar
             </a>

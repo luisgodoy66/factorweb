@@ -1,5 +1,5 @@
 var $table = jQuery('#table')
-const tipo_deuda = capturaValor("tipo_deuda")
+// const tipo_deuda = capturaValor("tipo_deuda")
 
 window.onload=function(){
     inicializaValor("id_nvalor",capturaValor("total_cargos"))
@@ -120,17 +120,17 @@ function AceptarCobranza(){
       "arr_documentos_cobrados": JSONdocumentos,
       "arr_cheque": JSONcheque,
       "arr_deposito": JSONdeposito,
-      "tipo_deuda":tipo_deuda,
+      // "tipo_deuda":tipo_deuda,
     }
 
     fetchPostear("/cobranzas/aceptarcobranzanotasdebito/", objeto, function(data){
-        // // regresar a la lista de NOTAS DE DEBITO o AMPLIACIONES
-        if (capturaValor("tipo_deuda") == 'ND'){
+        // // // regresar a la lista de NOTAS DE DEBITO o AMPLIACIONES
+        // if (capturaValor("tipo_deuda") == 'ND'){
           window.location.href = "/cobranzas/listaliquidacionesennegativopendientes";
-        }
-        else{
-          window.location.href = "/cobranzas/listafacturaspendientespagar";
-        }
+        // }
+        // else{
+        //   window.location.href = "/cobranzas/listafacturaspendientespagar";
+        // }
 
 
         // en una nueva ventana abrir el reporte de cobranza

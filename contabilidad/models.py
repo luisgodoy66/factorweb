@@ -4,7 +4,7 @@ from django.db import models
 from bases.models import ClaseModelo
 from empresa.models import Cuentas_bancarias, Tipos_factoring,  Puntos_emision
 from clientes.models import Datos_generales
-from operaciones.models import Documentos, ChequesAccesorios, Notas_debito_cabecera
+from operaciones.models import Documentos, ChequesAccesorios
 
 class Plan_cuentas(ClaseModelo):
     cxcuenta =  models.CharField( max_length=15)
@@ -130,6 +130,8 @@ class Cuentas_provisiones(ClaseModelo):
 
     def __str__(self):
         return self.cuentaprovision
+
+from operaciones.models import  Notas_debito_cabecera
 
 class Factura_venta(ClaseModelo):
     TIPOS_DE_OPERACION = (

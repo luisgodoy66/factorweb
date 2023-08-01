@@ -618,27 +618,6 @@ class CobranzasCargosView(SinPrivilegios, generic.FormView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
-class FacturaDeVentaPendientesView(SinPrivilegios, generic.ListView):
-    model = Factura_venta
-    template_name = "cobranzas/listafacturasdeventapendientes.html"
-    context_object_name='consulta'
-    login_url = 'bases:login'
-    permission_required="contabilidad.change_factura_venta"
-
-    def get_queryset(self):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        return Factura_venta.objects\
-        .filter(leliminado = False, empresa = id_empresa.empresa, nsaldo__gt = 0)
-    
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super(FacturaDeVentaPendientesView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
-        context['solicitudes_pendientes'] = sp
-
-        return context
-
 class AmpliacionesConsulta(SinPrivilegios, generic.TemplateView):
     template_name = "cobranzas/consultaampliaciones.html"
     context_object_name='consulta'
@@ -714,7 +693,6 @@ def GeneraListaCarteraPorVencerJSON(request, fecha_corte = None):
 
 def GeneraListaCarterPorVencerJSONSalida(doc):
     output = {}
-    print('porvencer')
     output['id'] = doc.id
     output["IdCliente"] = doc.cxcliente.id
     output["Cliente"] = doc.cxcliente.cxcliente.ctnombre
@@ -2398,7 +2376,6 @@ def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
 def GeneraListaLiquidacionesEnNegativoPendientesJSON(request):
     # Es invocado desde la url de una tabla bt
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-    print('gneralistaliquidaciones')
     movimiento = Notas_debito_cabecera.objects\
         .filter(leliminado = False, nsaldo__gt = 0, empresa = id_empresa.empresa)\
         .all()
@@ -2408,7 +2385,6 @@ def GeneraListaLiquidacionesEnNegativoPendientesJSON(request):
         docjson.append(GeneraListaNotasDeDebitoPendientesJSONSalida(movimiento[i])) 
 
     # docjson = tempBlogs
-    print(docjson)
     # crear el contexto
     data = {"total": movimiento.count(),
         "totalNotFiltered": movimiento.count(),
@@ -2445,7 +2421,18 @@ def GeneraListaNotasDeDebitoPendientesJSONSalida(transaccion):
         opx = op.cxrecuperacion
     if transaccion.cxtipooperacion=='A':
         op = Ampliaciones_plazo_cabecera.objects.filter(pk = transaccion.operacion).first()
-        opx = op.dampliacionhasta
+        factura = Factura_venta.objects.filter(operacion = op.id, cxtipooperacion='AP').first()
+        if factura:
+            opx = factura.__str__()
+        else:
+            opx = "Debe generar factura"
+    if transaccion.cxtipooperacion=='F':
+        factura = Factura_venta.objects.filter(id = transaccion.operacion
+                                               , cxtipooperacion='VF').first()
+        if factura:
+            opx = factura.__str__()
+        else:
+            opx = "Debe generar factura"
     
     output["Operacion"] = opx
     output["Tipo"] = transaccion.cxtipooperacion
@@ -2497,8 +2484,20 @@ def DetalleNotasDebitoPendientesJSONSalida(doc):
         opx = op.cxrecuperacion
     if doc.cxtipooperacion=='A':
         op = Ampliaciones_plazo_cabecera.objects.filter(pk = doc.operacion).first()
-        opx = op.dampliacionhasta
+        factura = Factura_venta.objects.filter(operacion = op.id, cxtipooperacion='AP').first()
+        if factura:
+            opx = factura.__str__()
+        else:
+            opx = "Debe generar factura"
+    if doc.cxtipooperacion=='F':
+        factura = Factura_venta.objects.filter(id = doc.operacion
+                                               , cxtipooperacion='VF').first()
+        if factura:
+            opx = factura.__str__()
+        else:
+            opx = "Debe generar factura"
     
+    output["TipoOperacion"] = doc.cxtipooperacion
     output["Operacion"] = opx
 
     return output
@@ -2522,7 +2521,7 @@ def AceptarCobranzaNotasDebito(request):
 
     objeto=json.loads(request.body.decode("utf-8"))
 
-    tipo_deuda = objeto["tipo_deuda"]
+    # tipo_deuda = objeto["tipo_deuda"]
     id_cliente=objeto["id_cliente"]
     tipo_factoring=objeto["tipo_factoring"]
     forma_cobro=objeto["forma_cobro"]
@@ -2558,15 +2557,14 @@ def AceptarCobranzaNotasDebito(request):
     # if tipo_factoring != 'NULL':
     #     tipo_factoring="'" + tipo_factoring + "'"
 
-    # Los 2 ultimos parametros son el id de cheque accesorio y el mensaje de error
     resultado=enviarPost("CALL uspAceptarCobranzaCargos({0},{1},'{2}','{3}',{4}\
         ,{5},{6}\
         ,'{7}','{8}',{9},{10}\
-        ,'{11}', {12}, '{13}',Null,0)"
+        ,'{11}', {12},Null,0)"
         .format(id_cliente, tipo_factoring, forma_cobro, fecha_cobro, valor_recibido
         ,sobrepago,cuenta_bancaria
         ,nc,gi, cd, fd
-        ,documentos_cobrados, nusuario, tipo_deuda))
+        ,documentos_cobrados, nusuario))
 
     return HttpResponse(resultado)
 
@@ -2746,7 +2744,7 @@ def ObtenerOtrosCargosDeDocumento(id_documento, listaotroscargos):
         if factura:
             listaotroscargos.append(GeneraOtroCargoJSONSalida(
                 cargo.id, cargo.cxmovimiento.ctmovimiento
-                , cargo.dultimageneracioncargos, cargo.nsaldo, factura.id
+                , cargo.dultimageneracioncargos, cargo.nsaldo, factura.notadebito.id
                 , factura.__str__(), 'F'))
         else:
             listaotroscargos.append(GeneraOtroCargoJSONSalida(
@@ -3579,55 +3577,4 @@ def ModificarCobranza(request,id, tipo_operacion):
         return HttpResponse("OK")
     
     return render(request, template_name, contexto)
-
-def DetalleFacturasVentaPendientesJSON(request, ids_documentos):
-    # filtrar los documentos correspondientes a la lista pasada
-    documentos = Factura_venta.objects\
-        .filter(id__in = ids_documentos.split(','), leliminado = False)
-    
-    tempBlogs = []
-
-    # Converting `QuerySet` to a Python Dictionary
-    for i in range(len(documentos)):
-        tempBlogs.append(DetalleFacturasPendientesJSONSalida(documentos[i])) # Converting `QuerySet` to a Python Dictionary
-
-    docjson = tempBlogs
-
-    data = {"total": documentos.count(),
-        "totalNotFiltered": documentos.count(),
-        "rows": docjson 
-        }
-
-    return HttpResponse(JsonResponse( data))
-
-def DetalleFacturasPendientesJSONSalida(doc):
-    # con los datos numericos entre comillas si se calcula el total
-    # de la columna en la tabla. Del otro tipo, no
-
-    # los datos aquí van a obtenerse con el getData de la tb, aunque no se 
-    # presenten en el HTML
-    output = {}
-    output['id'] = doc.id
-    output["ND"] = doc.__str__()
-    output["Emision"] = doc.demision.strftime("%Y-%m-%d")
-    output["SaldoActual"] = doc.nsaldo
-    output["Cobro"] = doc.nsaldo
-    output["SaldoFinal"] = "0.0"
-    opx = None
-    if doc.cxtipooperacion=='LC':
-        op = Liquidacion_cabecera.objects.filter(pk = doc.operacion).first()
-        opx = op.cxliquidacion
-    if doc.cxtipooperacion=='LA':
-        op = Operaciones.objects.filter(pk = doc.operacion).first()
-        opx = op.cxasignacion
-    if doc.cxtipooperacion=='vf':
-        op = Operaciones.objects.filter(pk = doc.operacion).first()
-        opx = op.cxasignacion
-    if doc.cxtipooperacion=='AP':
-        op = Ampliaciones_plazo_cabecera.objects.filter(pk = doc.operacion).first()
-        opx = op.dampliacionhasta
-    
-    output["Operacion"] = opx
-
-    return output
 

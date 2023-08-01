@@ -641,40 +641,6 @@ class Anexos(ClaseModelo):
     ctrutaanexo = models.TextField()
     def __str__(self):
         return self.ctnombre
-
-from contabilidad.models import Diario_cabecera
-
-class Desembolsos(ClaseModelo):
-    TIPOS_DE_OPERACION = (
-        ('A', 'Asignaciones'),
-        ('C', 'Cobranzas'),
-    )
-    FORMAS_DE_PAGO = (
-        ('EFE', 'Efectivo'),
-        ('CHE', 'Cheque'),
-        ('MOV', 'Movimiento contable'),
-        ('TRA', 'Transferencia'),
-    )
-    cxtipooperacion = models.CharField(max_length=1, choices= TIPOS_DE_OPERACION)
-    cxoperacion = models.BigIntegerField()
-    cxcliente = models.ForeignKey(Datos_generales_cliente, on_delete=models.RESTRICT)
-    nvalor =  models.DecimalField(max_digits=10, decimal_places=2)
-    cxformapago = models.CharField(max_length=3, choices=FORMAS_DE_PAGO)
-    cxcuentapago = models.ForeignKey(Cuentas_bancarias, on_delete=models.RESTRICT
-        , null = True)
-    cxbeneficiario = models.CharField(max_length=13, blank=True, null=True)
-    ctbeneficiario = models.TextField(blank=True, null=True)
-    cxcuentadestino = models.ForeignKey(Cuenta_transferencia
-        , on_delete=models.RESTRICT, null = True)
-    lgeneradoarchivobanco = models.BooleanField(default=False)
-    cxplantillacontabilidad = models.CharField(max_length=10, blank=True, null=True)
-    lcontabilizado = models.BooleanField(default= False)
-    cxasiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
-                                     , related_name="asiento_desembolso"
-                                     , null=True)
-
-    def __str__(self):
-        return self.cxformapago
         
 class Motivos_protesto_maestro(ClaseModelo):
     ctmotivoprotesto = models.TextField()
@@ -692,7 +658,8 @@ class Notas_debito_cabecera(ClaseModelo):
         ('C', 'Cobranza'),
         ('R', 'Recuperación'),
         ('B', 'Bancaria'),
-        ('A', 'Ampliación de plazo'),
+        ('A', 'Ampliación de plazo'), 
+        ('F', 'Factural al vencimiento'), 
     )
     cxcliente=models.ForeignKey(Datos_generales_cliente
         , on_delete=models.RESTRICT
@@ -779,3 +746,37 @@ class Ampliaciones_plazo_detalle(ClaseModelo):
 
     def plazo(self):
         return (self.ampliacion.dampliacionhasta - self.dampliaciondesde)/timedelta(days=1)
+
+from contabilidad.models import Diario_cabecera
+
+class Desembolsos(ClaseModelo):
+    TIPOS_DE_OPERACION = (
+        ('A', 'Asignaciones'),
+        ('C', 'Cobranzas'),
+    )
+    FORMAS_DE_PAGO = (
+        ('EFE', 'Efectivo'),
+        ('CHE', 'Cheque'),
+        ('MOV', 'Movimiento contable'),
+        ('TRA', 'Transferencia'),
+    )
+    cxtipooperacion = models.CharField(max_length=1, choices= TIPOS_DE_OPERACION)
+    cxoperacion = models.BigIntegerField()
+    cxcliente = models.ForeignKey(Datos_generales_cliente, on_delete=models.RESTRICT)
+    nvalor =  models.DecimalField(max_digits=10, decimal_places=2)
+    cxformapago = models.CharField(max_length=3, choices=FORMAS_DE_PAGO)
+    cxcuentapago = models.ForeignKey(Cuentas_bancarias, on_delete=models.RESTRICT
+        , null = True)
+    cxbeneficiario = models.CharField(max_length=13, blank=True, null=True)
+    ctbeneficiario = models.TextField(blank=True, null=True)
+    cxcuentadestino = models.ForeignKey(Cuenta_transferencia
+        , on_delete=models.RESTRICT, null = True)
+    lgeneradoarchivobanco = models.BooleanField(default=False)
+    cxplantillacontabilidad = models.CharField(max_length=10, blank=True, null=True)
+    lcontabilizado = models.BooleanField(default= False)
+    cxasiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
+                                     , related_name="asiento_desembolso"
+                                     , null=True)
+
+    def __str__(self):
+        return self.cxformapago

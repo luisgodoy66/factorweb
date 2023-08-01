@@ -20,8 +20,7 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , DetalleCargosAmpliacionPlazo, GeneraDetalleCargosAmpliacionPlazoJSON\
     , SumaCargos, Prorroga, EditarTasasDocumentoAmpliacionDePlazo\
     , AceptarAmpliacionDePlazo,  GeneraListaAmpliacionesJSON, AmpliacionesConsulta\
-    , ModificarCobranza, FacturaDeVentaPendientesView, GeneraListaFacturasPendientesJSON\
-    , DetalleFacturasVentaPendientesJSON
+    , ModificarCobranza, GeneraListaFacturasPendientesJSON\
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos\
@@ -170,13 +169,8 @@ urlpatterns = [
         , name="ampliacionesplazo_json"),
     
     # facturas
-    path('listafacturaspendientespagar/',FacturaDeVentaPendientesView.as_view()
-        , name="listafacturaspendientespagar"),
     path('listafacturaspendientesjson/',GeneraListaFacturasPendientesJSON\
         , name="listafacturaspendientes_json"),
     path('cobrodefacturasdeventa/<ids_documentos>/<total_cargos>/<forma_cobro>/<cliente_id>/<tipo_factoring>/<tipo_deuda>', 
         CobranzasCargosView.as_view(), name='cobro_facturasdeventa'),
-    path('detallefacturasventajson/<ids_documentos>'
-         , DetalleFacturasVentaPendientesJSON
-        , name='detallefacturasventa_json'),
 ]
