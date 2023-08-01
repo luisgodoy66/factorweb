@@ -4,7 +4,7 @@ from django.db import models
 from bases.models import ClaseModelo
 from empresa.models import Cuentas_bancarias, Tipos_factoring,  Puntos_emision
 from clientes.models import Datos_generales
-from operaciones.models import Documentos, ChequesAccesorios
+from operaciones.models import Documentos, ChequesAccesorios, Notas_debito_cabecera
 
 class Plan_cuentas(ClaseModelo):
     cxcuenta =  models.CharField( max_length=15)
@@ -136,6 +136,7 @@ class Factura_venta(ClaseModelo):
         ('LA', 'Liquidación de asignación'),
         ('LC', 'Liquidación de cobranza'),
         ('AP', 'Ampliación de plazo'),
+        ('VF', 'Vencimiento de factura'),
     )
     cliente = models.ForeignKey(Datos_generales, on_delete=models.RESTRICT)
     puntoemision = models.ForeignKey(Puntos_emision, on_delete=models.RESTRICT)
@@ -150,12 +151,17 @@ class Factura_venta(ClaseModelo):
     nsaldo = models.DecimalField(max_digits=10, decimal_places=2)
     ldocumentoelectronicogenerado = models.BooleanField(default=False)
     nporcentajeiva = models.DecimalField(max_digits=5, decimal_places=2, default=12)
+    cxtipofactoring = models.ForeignKey(Tipos_factoring, null=True
+        , on_delete=models.CASCADE)
     cxtipooperacion = models.CharField(max_length=2, choices= TIPOS_DE_OPERACION
         ,null=True)
     operacion = models.BigIntegerField(null=True)
     asiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
                                      , related_name="asiento_factura"
                                      , null=True)
+    notadebito = models.OneToOneField(Notas_debito_cabecera, null=True
+        ,related_name="factura_notadedebito", on_delete=models.CASCADE)
+# nota: quitar el null en notadebito
 
     def __str__(self):
         return "{}-{}-{}".format(self.puntoemision.cxestablecimiento
