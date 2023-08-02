@@ -360,3 +360,53 @@ def ImpresionAccesoriosPendientes(request):
        return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
+def ImpresionResumenAsignaciones(request, desde, hasta, clientes=None):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+     
+    arr_clientes = []
+    
+    if clientes != None:
+        ids = clientes.split(',')
+        for id in ids:
+            arr_clientes.append(id)
+
+    template_path = 'operaciones/resumen_asignaciones_reporte.html'
+
+    if clientes == None:
+        cartera = Asignacion.objects\
+            .filter(ddesembolso__gte = desde,
+                    ddesembolso__lte = hasta,
+                    empresa = id_empresa.empresa,
+                    leliminado = False)\
+            .order_by('cxtipofactoring')
+    else:
+        cartera = Asignacion.objects\
+            .filter(ddesembolso__gte = desde,
+                    ddesembolso__lte = hasta,
+                    cxcliente__in = arr_clientes,
+                    empresa = id_empresa.empresa,
+                    leliminado = False)\
+            .order_by('cxtipofactoring')
+
+    total = cartera.aggregate(total = Sum('nvalor'))
+
+    context={
+        "detalle" : cartera,
+        'empresa': id_empresa.empresa,
+        'total': total['total']
+    }
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+

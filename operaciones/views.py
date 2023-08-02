@@ -24,6 +24,7 @@ from cobranzas.models import Documentos_protestados, Liquidacion_cabecera\
 from bases.models import Usuario_empresa, Empresas
 from solicitudes import models as ModelosSolicitud
 from clientes import models as ModeloCliente
+from contabilidad.models import Factura_venta
 
 from bases.views import SinPrivilegios
 
@@ -85,13 +86,15 @@ class AsignacionesConsulta(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         desde = date.today() + timedelta(days=-date.today().day +1)
         hasta = date.today()
 
         context = super(AsignacionesConsulta, self).get_context_data(**kwargs)
         context["desde"] = desde
         context["hasta"] =hasta
+        context["clientes"] = ModeloCliente.Datos_generales.objects\
+            .filter(empresa = id_empresa.empresa)
         sp = ModelosSolicitud.Asignacion.objects\
             .filter(cxestado='P', leliminado=False).count()
         context['solicitudes_pendientes'] = sp
@@ -1321,17 +1324,26 @@ def ReversaAceptacionAsignacion(request, pid_asignacion):
 
     return HttpResponse(resultado)
 
-def GeneraListaAsignacionesJSON(request, desde = None, hasta= None):
+def GeneraListaAsignacionesJSON(request, desde = None, hasta= None, clientes =None):
     # Es invocado desde la url de una tabla bt
 
+    arr_clientes = []
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
+    if clientes != None:
+        ids = clientes.split(',')
+        for id in ids:
+            arr_clientes.append(id)
 
-    if desde == 'None':
+    if clientes == None:
         asignacion = Asignacion.objects\
-            .filter(empresa = id_empresa.empresa).order_by('ddesembolso')
+            .filter(ddesembolso__gte = desde, ddesembolso__lte = hasta
+                    , empresa = id_empresa.empresa)\
+            .order_by('ddesembolso')
     else:
         asignacion = Asignacion.objects\
             .filter(ddesembolso__gte = desde, ddesembolso__lte = hasta
+                    , cxcliente__id__in = arr_clientes
                     , empresa = id_empresa.empresa)\
             .order_by('ddesembolso')
         
@@ -1602,7 +1614,7 @@ def GeneraListaCarteraClienteJSON(request, cliente_id, fecha_corte = None):
 def GeneraListaCarteraClienteJSONSalida(doc):
     output = {}
 
-    output["Comprador"] = doc.cxcomprador.ctnombre
+    output["Comprador"] = doc.cxcomprador.cxcomprador.ctnombre
     output["Asignacion"] = doc.cxasignacion.cxasignacion
     output["Documento"] = doc.ctdocumento
     # output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
@@ -1696,7 +1708,18 @@ def GeneraListaCargosPendientesClienteJSONSalida(transaccion):
         opx = op.cxrecuperacion
     if transaccion.cxtipooperacion=='A':
         op = Ampliaciones_plazo_cabecera.objects.filter(pk = transaccion.operacion).first()
-        opx = op.dampliacionhasta
+        factura = Factura_venta.objects.filter(operacion = op.id, cxtipooperacion='AP').first()
+        if factura:
+            opx = factura.__str__()
+        else:
+            opx = "Debe generar factura"
+    if transaccion.cxtipooperacion=='F':
+        factura = Factura_venta.objects.filter(id = transaccion.operacion
+                                               , cxtipooperacion='VF').first()
+        if factura:
+            opx = factura.__str__()
+        else:
+            opx = "Debe generar factura"
     
     output["Operacion"] = opx
 
@@ -1849,8 +1872,6 @@ def GeneraListaDesembolsosJSONSalida(transaccion):
     if transaccion.cxformapago =="CHE":
         output["Detalle"] = transaccion.ctbeneficiario
     elif transaccion.cxformapago =="TRA":
-        # cuenta = Cuentas_bancarias.objects\
-        #     .filter(pk = transaccion.cxcuentadestino).first()
         output["Detalle"] = transaccion.cxcuentadestino.__str__()
 
     if transaccion.cxtipooperacion =='C':
@@ -1867,5 +1888,8 @@ def GeneraListaDesembolsosJSONSalida(transaccion):
         if operacion:
             output["Operacion"] = operacion.__str__()
             output["TipoFactoring"] = operacion.cxtipofactoring.__str__()
-
+    if transaccion.cxasiento:
+        output["Asiento"] = transaccion.cxasiento.cxtransaccion
+    else:
+        output["Asiento"] = None
     return output

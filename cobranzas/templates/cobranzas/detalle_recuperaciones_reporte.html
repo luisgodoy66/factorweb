@@ -44,7 +44,7 @@
                         <tr>
                             <td colspan="2"><h2>{{ empresa }}</h2></td>
                             <td></td>
-                            <td colspan="2"><h1>Listado de cobranzas realizadas </h1></td>
+                            <td colspan="2"><h1>Listado de recuperaciones realizadas </h1></td>
                             <td></td>
                             <td>Impresión: {% now "Y-m-d" %}</td>
                         </tr>
@@ -58,20 +58,20 @@
                         <thead>
                             <th>Cliente/Cobranza</th>        
                             <th>Fecha</th>        
-                            <th>Deudor</th>        
+                            <th>Girador</th>        
                             <th>Forma</th>        
-                            <th>Asignación</th>        
-                            <th>Documento</th>
-                            <th>Vencimiento</th>
-                            <th>Demora</th>
+                            <th>Protesto</th>        
+                            <th>Motivo</th>
+                            <th>Cheque protestado</th>
+                            <th>Demora sobre documento</th>
                             <th>Valor cobrado</th>
-                            <th>Retenciones y bajas</th>
+                            <th>Bajas</th>
                             <th>Estado</th>
                             <th>Total aplicado</th>
                         </thead>
                         <tbody>
                             <tr></tr>
-                            {% regroup detalle by cxcobranza.cxcliente as cobranzas_list %}
+                            {% regroup detalle by recuperacion.cxcliente as cobranzas_list %}
                             {% for cliente in cobranzas_list %}
                             <tr>
                                 <td class="subrayado" colspan="11"><h3>{{ cliente.grouper }}</h3></td>
@@ -80,17 +80,17 @@
                                 {% for item in cliente.list %}
                                 <tr></tr>
                                 <tr>
-                                    <td>{{ item.cxcobranza }}</td>
-                                    <td>{{ item.cxcobranza.dcobranza|date:"Y-m-d" }}</td>
-                                    <td width="20%">{{ item.cxdocumento.cxcomprador }}</td>
-                                    <td>{{ item.cxcobranza.cxformapago }}</td>
-                                    <td>{{ item.cxdocumento.cxasignacion }}</td>
-                                    <td>{{ item.cxdocumento }}</td>
-                                    <td class="centrado">{{ item.vencimiento |date:"Y-m-d"}}</td>
-                                    <td class="numero">{{ item.demoradepago }}</td>
-                                    <td class="numero">{{ item.nvalorcobranza }}</td>
-                                    <td class="numero">{{ item.retencionesybajas }}</td>
-                                    <td class="numero">{{ item.cxcobranza.cxestado }}</td>
+                                    <td>{{ item.recuperacion }}</td>
+                                    <td>{{ item.recuperacion.dcobranza|date:"Y-m-d" }}</td>
+                                    <td>{{ item.chequeprotestado.cheque.ctgirador }}</td>
+                                    <td>{{ item.recuperacion.cxformacobro }}</td>
+                                    <td>{{ item.chequeprotestado.dprotesto |date:"Y-m-d"}}</td>
+                                    <td>{{ item.chequeprotestado.motivoprotesto }}</td>
+                                    <td width="20%">{{ item.chequeprotestado.cheque }}</td>
+                                    <td>{{ item.demoradepago }}</td>
+                                    <td class="numero">{{ item.nvalorrecuperacion }}</td>
+                                    <td class="numero">{{ item.bajas }}</td>
+                                    <td class="numero">{{ item.recuperacion.cxestado }}</td>
                                     <td class="numero">{{ item.aplicado|intcomma }}</td>
                                 </tr>
                                 {% endfor %}

@@ -731,11 +731,67 @@ def ImpresionDetalleCobranzas(request, desde, hasta, clientes = None):
     if not totales['cobrado']: totales['cobrado']=0
     if not totales['baja']: totales['baja']=0
     if not totales['retenciones']: totales['retenciones']=0
+    
     context={
-         'detalle':detalle,
-         'total_cobrado' :totales['cobrado'],
-         'total_retencionesybaja':totales['baja']+totales['retenciones'],
-         'total_general':totales['cobrado']+totales['baja']+totales['retenciones']
+        'detalle':detalle,
+        'total_cobrado' :totales['cobrado'],
+        'total_retencionesybaja':totales['baja']+totales['retenciones'],
+        'total_general':totales['cobrado']+totales['baja']+totales['retenciones'],
+        'empresa': id_empresa.empresa,
+    }
+        # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+def ImpresionDetalleRecuperaciones(request, desde, hasta, clientes = None):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    arr_clientes = []
+    
+    if clientes != None:
+        ids = clientes.split(',')
+        for id in ids:
+            arr_clientes.append(id)
+     
+    template_path = 'cobranzas/detalle_recuperaciones_reporte.html'
+
+    if clientes == None:            
+        detalle = Recuperaciones_detalle.objects\
+            .filter(recuperacion__dcobranza__gte = desde,
+                    recuperacion__dcobranza__lte = hasta,
+                    empresa = id_empresa.empresa,
+                    leliminado = False)
+    else:            
+        detalle = Recuperaciones_detalle.objects\
+            .filter(recuperacion__dcobranza__gte = desde,
+                    recuperacion__dcobranza__lte = hasta,
+                    recuperacion__cxcliente__in = arr_clientes,
+                    empresa = id_empresa.empresa,
+                    leliminado = False)
+    
+    totales = detalle.aggregate(cobrado = Sum('nvalorrecuperacion'),
+                                 baja = Sum('nvalorbaja'),
+                                 bajacobranza = Sum('nvalorbajacobranza'),)
+    if not totales['cobrado']: totales['cobrado']=0
+    if not totales['baja']: totales['baja']=0
+    if not totales['bajacobranza']: totales['bajacobranza']=0
+    
+    context={
+        'detalle':detalle,
+        'total_cobrado' :totales['cobrado'],
+        'total_baja':totales['baja']+totales["bajacobranza"],
+        'total_general':totales['cobrado']+totales['baja']+totales["bajacobranza"],
+        'empresa': id_empresa.empresa,
     }
         # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')

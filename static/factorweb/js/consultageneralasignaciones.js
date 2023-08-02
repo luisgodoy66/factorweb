@@ -3,6 +3,12 @@ var $btnFiltrar = jQuery('#btnFiltrar')
 
 window.onload=function(){
 
+    jQuery(".standardSelect").chosen({
+        disable_search_threshold: 10,
+        no_results_text: "Oops, cliente no encontrado!",
+        width: "100%"
+    });
+
     inicializaValor("fechadesde", capturaValor("id_desde"))
     inicializaValor("fechahasta", capturaValor("id_hasta"))
 
@@ -14,9 +20,14 @@ window.onload=function(){
         desde = capturaValor("fechadesde");
         hasta = capturaValor("fechahasta");
 
+        var x = [];
+        var options = document.getElementById("id_clientes").selectedOptions;
+        for (var i = 0; i < options.length; i++) {
+          x.push(options[i].value);
+        }
         $table.bootstrapTable('refreshOptions', {
             showRefresh: true,
-            url: "/operaciones/asignacionesjson/"+desde+"/" + hasta
+            url: "/operaciones/asignacionesjson/"+desde+"/" + hasta+"/"+x
         })
     })
 
@@ -44,4 +55,16 @@ function operateFormatter(value, row, index) {
         '</a>  ',
       ].join('')
 }
-    
+function imprimeOperacionesNegociadas(){
+  desde = capturaValor("fechadesde");
+  hasta = capturaValor("fechahasta");
+  var x = [];
+  var options = document.getElementById("id_clientes").selectedOptions;
+  for (var i = 0; i < options.length; i++) {
+    x.push(options[i].value);
+  }
+  // en una nueva ventana abrir el reporte de asignación
+  url = window.location.origin
+  url = url + "/operaciones/impresionresumenasignaciones/"+desde+"/"+hasta+"/"+x;
+  window.open( url);
+  }

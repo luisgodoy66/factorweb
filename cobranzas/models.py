@@ -143,7 +143,10 @@ class Documentos_detalle(ClaseModelo):
         return vencimiento
 
     def aplicado(self):
-        return self.nvalorcobranza + self.nvalorbaja + self.nretenciones
+        if self.cxcobranza.cxestado =='E' or self.cxcobranza.cxestado =='P':
+            return 0
+        else:
+            return self.nvalorcobranza + self.nvalorbaja + self.nretenciones
 
     def retencionesybajas(self):
         return self.nvalorbaja + self.nretenciones
@@ -536,7 +539,16 @@ class Recuperaciones_detalle(ClaseModelo):
         return vencimiento
 
     def aplicado(self):
-        return self.nvalorrecuperacion + self.nvalorbaja + self.nvalorbajacobranza
+        if self.recuperacion.cxestado =='E' or self.recuperacion.cxestado == 'P':
+            return 0
+        else:
+            return self.nvalorrecuperacion + self.nvalorbaja + self.nvalorbajacobranza
+
+    def bajas(self):
+        return self.nvalorbaja + self.nvalorbajacobranza
+
+    def demoradepago(self):
+        return (self.recuperacion.dcobranza - self.vencimiento())/timedelta(days=1)
 
 class Cargos_cabecera(ClaseModelo):
     FORMAS_DE_PAGO = (

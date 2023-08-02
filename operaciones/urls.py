@@ -19,7 +19,8 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
-    ImpresionAntiguedadCartera, ImpresionFacturasPendientes, ImpresionAccesoriosPendientes
+    ImpresionAntiguedadCartera, ImpresionFacturasPendientes,\
+    ImpresionAccesoriosPendientes, ImpresionResumenAsignaciones
 
 urlpatterns = [
 # datos operativos
@@ -93,7 +94,9 @@ urlpatterns = [
     path('nuevoanexo/',AnexosNew.as_view(), name='anexo_nuevo'),
     path('editaranexo/<int:pk>',AnexosEdit.as_view(), name='anexo_editar'),
     path('reversaraceptacionasignacion/<int:pid_asignacion>',ReversaAceptacionAsignacion),
-    path('asignacionesjson/<desde>/<hasta>',GeneraListaAsignacionesJSON
+    path('asignacionesjson/<desde>/<hasta>/<clientes>',GeneraListaAsignacionesJSON
+         , name="asignaciones_json"),
+    path('asignacionesjson/<desde>/<hasta>/',GeneraListaAsignacionesJSON
          , name="asignaciones_json"),
     path('asignacionesregistradasjson/<desde>/<hasta>',GeneraListaAsignacionesRegistradasJSON
         , name="asignacionesregistradas_json"),
@@ -106,6 +109,10 @@ urlpatterns = [
          , name='detalle_facturas_pendientes'),
     path('impresionchequespendientes', ImpresionAccesoriosPendientes
          , name='detalle_cheques_pendientes'),
+    path('impresionresumenasignaciones/<desde>/<hasta>/<clientes>'
+         , ImpresionResumenAsignaciones, name='resumen_asignaciones'),
+    path('impresionresumenasignaciones/<desde>/<hasta>/', ImpresionResumenAsignaciones
+         , name='resumen_asignaciones'),
 # desembolsos
     path('listaasignacionespendientesdesembolsar/',AsignacionesPendientesDesembolsarView.as_view(), \
         name='listaasignacionespendientesdesembolsar'),

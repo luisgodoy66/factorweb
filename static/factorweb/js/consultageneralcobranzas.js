@@ -5,7 +5,7 @@ window.onload=function(){
     
     jQuery(".standardSelect").chosen({
         disable_search_threshold: 10,
-        no_results_text: "Oops, cuenta no encontrada!",
+        no_results_text: "Oops, cliente no encontrado!",
         width: "100%"
     });
 
@@ -86,5 +86,19 @@ function imprimeFacturasPendientes(){
   // en una nueva ventana abrir el reporte de asignación
   url = window.location.origin
   url = url + "/operaciones/impresioncarterapendiente/"+x;
+  window.open( url);
+}
+
+function imprimeRecuperaciones(){
+  desde = capturaValor("fechadesde");
+  hasta = capturaValor("fechahasta");
+  var x = [];
+  var options = document.getElementById("id_clientes").selectedOptions;
+  for (var i = 0; i < options.length; i++) {
+    x.push(options[i].value);
+  }
+  // en una nueva ventana abrir el reporte de asignación
+  url = window.location.origin
+  url = url + "/cobranzas/detallerecuperaciones/"+desde+"/"+hasta+"/"+x;
   window.open( url);
 }

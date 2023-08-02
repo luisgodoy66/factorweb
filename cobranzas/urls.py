@@ -25,7 +25,7 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos\
     , ImpresionProtestosPendientes, ImpresionAmpliacionDePlazo\
-    , ImpresionDetalleCobranzas
+    , ImpresionDetalleCobranzas, ImpresionDetalleRecuperaciones
 
 urlpatterns = [
     # cobranzas
@@ -72,6 +72,10 @@ urlpatterns = [
     path('detallecobranzas/<desde>/<hasta>/<clientes>', ImpresionDetalleCobranzas
         , name='detalle_cobranzas_reporte'),
     path('detallecobranzas/<desde>/<hasta>/', ImpresionDetalleCobranzas
+        , name='detalle_cobranzas_reporte'),
+    path('detallerecuperaciones/<desde>/<hasta>/<clientes>', ImpresionDetalleRecuperaciones
+        , name='detalle_cobranzas_reporte'),
+    path('detallerecuperaciones/<desde>/<hasta>/', ImpresionDetalleRecuperaciones
         , name='detalle_cobranzas_reporte'),
     
     # liquidaciones

@@ -90,6 +90,9 @@ class Asignacion(ClaseModelo):
     def __str__(self):
         return self.cxasignacion
 
+    def cargos(self):
+        return self.ngao + self.ndescuentodecartera
+
     def neto(self):
         return self.nanticipo - self.ngao - self.ndescuentodecartera - self.niva
 

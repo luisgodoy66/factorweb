@@ -94,11 +94,15 @@ function CobroDeCargos(forma){
     else{ if (tipo_factoring != row.IdTipoFactoring){
         error = true
     }}
+    // si ap no tiene generado factura no continuar
+    if (row.Operacion=='Debe generar factura'){
+      error = true
+    }
   });
   // cargar forma de cobro de documentos seleccionados
 
   if (error ){
-    alert("Ha seleccionado varios clientes o tipos de factoring. No puede continuar")
+    alert("Ha seleccionado varios clientes o tipos de factoring o falta generar una factura. No puede continuar")
   }
   else{
     // calcular el total de saldos de documentos para llevarlo a siguiente pantalla

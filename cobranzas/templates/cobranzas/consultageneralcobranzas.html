@@ -34,11 +34,6 @@
                         id="fechahasta" placeholder="Hasta" 
                         aria-label="Ingrese fecha fin" >
                     </div>
-
-                <!-- </div> -->
-            <!-- </div> -->
-
-                <!-- <div class="row form-group"> -->
                     <div class="col-md-4">
                         <select data-placeholder="Seleccione clientes. Deje en blanco para todos los clientes" 
                             id="id_clientes" multiple class="standardSelect" tabindex="5">
@@ -60,7 +55,8 @@
                             </button>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                                 <div class="dropdown-menu-content">
-                                    <a class="dropdown-item" href="#" onclick="imprimeCobranzas()">Detalle de cobranzas</a>
+                                    <a class="dropdown-item" href="#" onclick="imprimeCobranzas()">Detalle de cobranzas de cartera</a>
+                                    <a class="dropdown-item" href="#" onclick="imprimeRecuperaciones()">Detalle de recuperaciones</a>
                                     <a class="dropdown-item" href="#" onclick="imprimeFacturasPendientes()">Detalle de facturas pendientes</a>
                                 </div>
                             </div>
