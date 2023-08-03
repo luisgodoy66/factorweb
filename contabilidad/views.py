@@ -1783,7 +1783,7 @@ def GeneraListaFacturasJSONSalida(transaccion):
         op = Ampliaciones_plazo_cabecera.objects.filter(pk = id_origen).first()
     elif transaccion.cxtipooperacion == 'VF':
         op = Operacion.objects.filter(pk = id_origen).first()
-    print(transaccion.cxtipooperacion, id_origen)
-    output["Operacion"] = op.__str__()
+    if op:
+        output["Operacion"] = op.__str__()
     
     return output

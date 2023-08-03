@@ -16,6 +16,7 @@ class CuentasEspecialesForm(forms.ModelForm):
             , 'protesto', 'cuentaivaganado', 'cuentagananciaejercicio'
             , 'cuentaperdidaejercicio', 'cuentagananciaejercicioanterior'
             , 'cuentaperdidaejercicioanterior', 'ivadiferido'
+            , 'liquidacionennegativo'
         ]
         labels={ 'pagoconcajachica':'Pago con caja chica'
                 , 'sobrepago':'Sobrepago'
@@ -27,6 +28,7 @@ class CuentasEspecialesForm(forms.ModelForm):
                 , 'cuentagananciaejercicioanterior':'Ganancia del ejercicio anterior'
                 , 'cuentaperdidaejercicioanterior':'Pérdida del ejercicio anterior'
                 , 'ivadiferido': 'IVA diferido'
+                , 'liquidacionennegativo':'Liquidación en negativo'
         }
 
     def __init__(self, *args, **kwargs):
@@ -67,6 +69,9 @@ class CuentasEspecialesForm(forms.ModelForm):
                 .filter(empresa=empresa, leliminado = False, ldetalle=True)\
                 .order_by('cxcuenta')
             self.fields['cuentaperdidaejercicioanterior'].queryset = Plan_cuentas.objects\
+                .filter(empresa=empresa, leliminado = False, ldetalle=True)\
+                .order_by('cxcuenta')
+            self.fields['liquidacionennegativo'].queryset = Plan_cuentas.objects\
                 .filter(empresa=empresa, leliminado = False, ldetalle=True)\
                 .order_by('cxcuenta')
 

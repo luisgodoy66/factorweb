@@ -5,7 +5,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.template.loader import get_template
 from django.shortcuts import render
-from django.db.models import Sum, Count
+from django.db.models import Sum, Case, When, FloatField, DecimalField, Q
 from django.contrib.staticfiles import finders
 
 from .models import  Documentos_cabecera, Documentos_detalle, Liquidacion_cabecera\
@@ -219,9 +219,10 @@ def ImpresionLiquidacion(request, liquidacion_id):
         elif item.cxtipooperacion =='L':
             operacion = Liquidacion_cabecera.objects.filter(pk=item.operacion).first()
         elif item.cxtipooperacion =='F':
-            operacion = Factura_venta.objects.filter(pk=item.operacion).first()
+            nd = Notas_debito_cabecera.objects.filter(pk=item.operacion).first()
+            operacion = Factura_venta.objects.filter(pk=nd.operacion).first()
         else:
-             operacion = 'Tipo no definido'
+             operacion = 'Tipo ' + item.cxtipooperacion + ' no definido'
 
         # el IVA no tiene documento, porque es general a la Liquidacion
         if item.cargo.cxasignacion != None:
@@ -473,7 +474,7 @@ def ImpresionCobranzaCargos(request, cobranza_id):
         return HttpResponse("no encontró cobranza ")
 
     detalle = Cargos_detalle.objects\
-        .filter(cxcobranza = cobranza_id, leliminado = False)
+        .filter(cxcobranza = cobranza_id)
 
     codigo_forma = cobranza.cxformapago
 
@@ -725,9 +726,27 @@ def ImpresionDetalleCobranzas(request, desde, hasta, clientes = None):
                     empresa = id_empresa.empresa,
                     leliminado = False)
     
-    totales = detalle.aggregate(cobrado = Sum('nvalorcobranza'),
-                                 baja = Sum('nvalorbaja'),
-                                 retenciones = Sum('nretenciones'))
+    totales = detalle\
+        .aggregate(cobrado = Sum(Case(
+                                When( ~Q(cxcobranza__cxestado__in=['E','P'])
+                                        , then='nvalorcobranza'),
+                                default=0,
+                                output_field=DecimalField(),)
+                        ),
+                    baja = Sum(Case(
+                                When( ~Q(cxcobranza__cxestado__in=['E','P'])
+                                        , then='nvalorbaja'),
+                                default=0,
+                                output_field=DecimalField(),)
+                        ),
+                    retenciones = Sum(Case(
+                                When( ~Q(cxcobranza__cxestado__in=['E','P'])
+                                        , then='nretenciones'),
+                                default=0,
+                                output_field=DecimalField(),)
+                        ),
+                    )
+
     if not totales['cobrado']: totales['cobrado']=0
     if not totales['baja']: totales['baja']=0
     if not totales['retenciones']: totales['retenciones']=0
@@ -779,9 +798,27 @@ def ImpresionDetalleRecuperaciones(request, desde, hasta, clientes = None):
                     empresa = id_empresa.empresa,
                     leliminado = False)
     
-    totales = detalle.aggregate(cobrado = Sum('nvalorrecuperacion'),
-                                 baja = Sum('nvalorbaja'),
-                                 bajacobranza = Sum('nvalorbajacobranza'),)
+    totales = detalle\
+        .aggregate(cobrado = Sum(Case(
+                                When( ~Q(recuperacion__cxestado__in=['E','P'])
+                                        , then='nvalorrecuperacion'),
+                                default=0,
+                                output_field=DecimalField(),)
+                        ),
+                    baja = Sum(Case(
+                                When( ~Q(recuperacion__cxestado__in=['E','P'])
+                                        , then='nvalorbaja'),
+                                default=0,
+                                output_field=DecimalField(),)
+                        ),
+                    bajacobranza = Sum(Case(
+                                When( ~Q(recuperacion__cxestado__in=['E','P'])
+                                        , then='nvalorbajacobranza'),
+                                default=0,
+                                output_field=DecimalField(),)
+                        ),
+                    )
+    
     if not totales['cobrado']: totales['cobrado']=0
     if not totales['baja']: totales['baja']=0
     if not totales['bajacobranza']: totales['bajacobranza']=0

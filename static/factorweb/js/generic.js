@@ -100,14 +100,20 @@ function fetchProcesar(url,callback){
     fetch(url)
     .then(res=>res.text())
     .then(res=>{
-        // if(res=='OK'){
         if(res.slice(0,2)=='OK'){
-            // MensajeOK()
-            // callback()
             callback(res.slice(2))
         }
         else
+        // podria ser que se vaya por "sin provilegios" en ese caso lo que se 
+        // tiene aquí es la página html que muestra el mensaje "sin privilegios"
+        var posicion = res.indexOf('<!doctype html>');
+
+        if (posicion != -1) {
+          alert(res);
+        }
+        else{
             MensajeError(res)
+        }
     })
 
 }
@@ -135,7 +141,6 @@ function fetchPostear(url, objeto, callback){
     .then(res=>{
         if(res.slice(0,2)=='OK'){
             MensajeOK()
-            // callback()
             callback(res.slice(2))
         }
         else{

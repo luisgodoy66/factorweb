@@ -86,7 +86,7 @@
                                     <td>{{ item.cxcobranza.cxformapago }}</td>
                                     <td>{{ item.cxdocumento.cxasignacion }}</td>
                                     <td>{{ item.cxdocumento }}</td>
-                                    <td class="centrado">{{ item.vencimiento |date:"Y-m-d"}}</td>
+                                    <td class="numero">{{ item.vencimiento |date:"Y-m-d"}}</td>
                                     <td class="numero">{{ item.demoradepago }}</td>
                                     <td class="numero">{{ item.nvalorcobranza }}</td>
                                     <td class="numero">{{ item.retencionesybajas }}</td>
@@ -100,6 +100,7 @@
                             <tr>
                                 <td colspan="9" class="numero"><h4>{{ total_cobrado|intcomma }}</h4></td>
                                 <td class="numero"><h4>{{ total_retencionesybaja|intcomma }}</h4></td>
+                                <td></td>
                                 <td class="numero"><h4>{{ total_general|intcomma }}</h4></td>
                             </tr>
                         </tbody>

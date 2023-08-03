@@ -52,6 +52,9 @@ class Cuentas_especiales(ClaseModelo):
                                                           , related_name='cuenta_gananciaanterior')
     cuentaperdidaejercicioanterior = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
                                                          , related_name='cuenta_perdidaanterior')
+    liquidacionennegativo = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
+                                       , null = True, default=2)
+# nota: quitar el default
 
 class Diario_cabecera(ClaseModelo):
     cxtransaccion = models.CharField(max_length= 10) 

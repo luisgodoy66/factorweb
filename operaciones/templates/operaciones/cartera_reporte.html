@@ -61,7 +61,7 @@
                             <tr></tr>
                             {% for item in documentos %}
                             <tr>
-                                <td>{{ item.cxcliente__cxcliente__ctnombre }}</td>
+                                <td width="20%">{{ item.cxcliente__cxcliente__ctnombre }}</td>
                                 <td class="numero">{{ item.vencido_mas_90 |default:''}}</td>
                                 <td class="numero">{{ item.vencido_90 |default:''}}</td>
                                 <td class="numero">{{ item.vencido_60 |default:'' }}</td>
