@@ -251,21 +251,27 @@ class Cheques_protestados(ClaseModelo):
         ('CHE', 'Cheque'),
         ('DEP', 'Deposito de accesorio'),
     )
-
+    TIPO_OPERACION = (
+        ("C", "Cobranza"),
+        ("R","Recuperacion"),
+    )
     cheque = models.ForeignKey(Cheques, on_delete= models.RESTRICT
         , related_name="cheque_protestado")
     cxformacobro = models.CharField(max_length=3, choices=FORMAS_DE_COBRO)
     dprotesto = models.DateField()
     motivoprotesto = models.ForeignKey(Motivos_protesto_maestro
         , on_delete=models.RESTRICT)
-    # nvalornotadebito = models.DecimalField(max_digits=10, decimal_places=2)
     nvalor =  models.DecimalField(max_digits=10, decimal_places=2)
     nvalorcartera = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     nsaldocartera =  models.DecimalField(max_digits=10, decimal_places=2)
     cxestado = models.CharField(max_length=1, default="A") 
     dultimacobranza = models.DateTimeField(null=True) 
-    cxtipooperacion = models.CharField(max_length=1)
+    cxtipooperacion = models.CharField(max_length=1, choices=TIPO_OPERACION)
     notadedebito = models.ForeignKey(Notas_debito_cabecera, on_delete=models.CASCADE, null=True)
+    lcontabilizada = models.BooleanField(default=False, null=True)
+    asiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
+                                     , related_name="asiento_protesto"
+                                     , null=True)
 
     objects = Protestos_Manager()
 

@@ -74,7 +74,6 @@ function Calcula_Neto()
 window.operateEvents = {
   'click .like': function (e, value, row, index) {
     CambiarTasasDocumento(row.id,capturaValor("id_ddesembolso"),function(){
-      // alert('refersacar')
     })
   },
   'click .remove': function (e, value, row, index) {

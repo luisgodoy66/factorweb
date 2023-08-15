@@ -664,7 +664,9 @@ from django.http import HttpResponse, JsonResponse
 
 def DetalleCargosAsignacion(request, asignacion_id = None
                         , fecha_desembolso = None, condicion_id=None):
-
+    # se ejecuta desde fetchProcesar (fetch) por lo tanto si todo terminar bien
+    # debe regresar el texto 'OK'.
+    # Si regresa otro texto debe aparecer modal con mensaje de error.
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     asignacion = ModelosSolicitud.Asignacion.objects.get(pk=asignacion_id) 

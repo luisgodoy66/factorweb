@@ -117,11 +117,12 @@ class ChequesForm(forms.ModelForm):
                 .filter(empresa=empresa, leliminado = False)
             
 class ClientesForm(forms.ModelForm):
+
     class Meta:
         model = Clientes
         fields=['cxcliente', 'ctnombre', 'ctdireccion', 'cttelefono1'
             , 'cttelefono2', 'ctemail', 'ctemail2', 'ctcelular'
-            , 'ctgirocomercial']
+            , 'ctgirocomercial', 'empresa']
         labels={
             'cxcliente':'Id. cliente', 'ctnombre':'Nombre de cliente'
             , 'ctdireccion':'Dirección', 'cttelefono1':'Teléfono'
@@ -140,3 +141,15 @@ class ClientesForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
+        
+    def validate_unique(self):
+        super().validate_unique()
+
+        if self.instance.pk is not None:
+            # Don't check for uniqueness if the instance already exists in the database
+            return
+
+        if Clientes.objects.filter(cxcliente=self.cleaned_data['cxcliente']
+                                   ,empresa=self.cleaned_data['empresa']).exists():
+            raise forms.ValidationError('La identificación del cliente ya existe.')
+

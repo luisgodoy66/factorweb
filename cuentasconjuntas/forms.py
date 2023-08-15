@@ -37,13 +37,12 @@ class CuentasBancariasForm(forms.ModelForm):
 class TransferenciasForm(forms.ModelForm):
     class Meta:
         model = Transferencias
-        fields = ['cuentadestino', 'nvalor', 'ndevolucion', 'dmovimiento']
-        labels = {'cuentadestino':'Cuenta destino'
-            , 'nvalor':'Valor transferido'
-            , 'ndevolucion':'Valor a devolver', 'dmovimiento':'Fecha'}
-        widgets={'dmovimiento': forms.Textarea(attrs={'rows': '2'})
-            , 'ctbeneficiariocobranzas': forms.Textarea(attrs={'rows': '2'}), 
-            'dalta': forms.DateInput(
+        fields = ['cuentadestino', 'nvalor', 'ndevolucion', 'dmovimiento'
+                  , 'cuentaorigen']
+        labels = {'cuentadestino':'Cuenta destino', 'nvalor':'Valor transferido'
+                  , 'ndevolucion':'Valor a devolver', 'dmovimiento':'Fecha'
+                  ,'cuentaorigen':'Cuenta origen'}
+        widgets={'dmovimiento': forms.DateInput(
                 format=('%Y-%m-%d'),
                 attrs={'class': 'form-control', 
                     'placeholder': 'Seleccione una fecha',
@@ -64,6 +63,8 @@ class TransferenciasForm(forms.ModelForm):
         
         if empresa:
             self.fields['cuentadestino'].queryset = Modelos_empresa.Cuentas_bancarias\
+                .objects.filter(empresa=empresa, leliminado = False)
+            self.fields['cuentaorigen'].queryset = Cuentas_bancarias\
                 .objects.filter(empresa=empresa, leliminado = False)
 
 class DebitosForm(forms.ModelForm):

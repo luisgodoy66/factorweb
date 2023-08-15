@@ -5,6 +5,7 @@ from bases.models import ClaseModelo
 from pais.models import Bancos
 from clientes.models import Datos_generales
 from empresa import models as Empresa_modelo
+from contabilidad.models import Diario_cabecera
 
 class Cuentas_bancarias(ClaseModelo):
     TIPOS_DE_CUENTAS = (
@@ -26,7 +27,6 @@ class Cuentas_bancarias(ClaseModelo):
     def __str__(self):
         return '{} Cta. {}'.format(self.cxbanco,self.cxcuenta)
 
-
 class Transferencias(ClaseModelo):
     cuentaorigen = models.ForeignKey(Cuentas_bancarias, on_delete=models.CASCADE)
     cuentadestino = models.ForeignKey(Empresa_modelo.Cuentas_bancarias, on_delete=models.RESTRICT
@@ -34,7 +34,11 @@ class Transferencias(ClaseModelo):
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     ndevolucion = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     dmovimiento = models.DateField()
-    cxtransferencia = models.CharField(max_length=10)
+    # cxtransferencia = models.CharField(max_length=10)
+    lcontabilizado = models.BooleanField(default= False)
+    cxasiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
+                                     , related_name="asiento_transferencia"
+                                     , null=True)
 
     def __str__(self):
         return 'Desde {} a {}'.format(self.cuentaorigen,self.cuentadestino)

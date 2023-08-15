@@ -40,7 +40,7 @@ return [
 
 window.operateEventsAsgn = {
   'click .revertir': function (e, value, row, index) {
-    ReversarAceptacionAsignacion(row.id, )
+    ReversarAceptacionAsignacion(row.id,row.Asignacion )
   },
   'click .imprimir': function (e, value, row, index) {
     ImprimirAsignacion( row.id, )

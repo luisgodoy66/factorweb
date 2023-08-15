@@ -553,6 +553,7 @@ class Movimientos_maestro(ClaseModelo):
     litemfactura = models.BooleanField(default=False)
     lcolateral = models.BooleanField()
     cxmovimientopadre = models.CharField(max_length=4) 
+    lcargo = models.BooleanField(default=False)
     
     def __str__(self):
         return self.ctmovimiento
@@ -775,7 +776,6 @@ class Desembolsos(ClaseModelo):
     cxcuentadestino = models.ForeignKey(Cuenta_transferencia
         , on_delete=models.RESTRICT, null = True)
     lgeneradoarchivobanco = models.BooleanField(default=False)
-    cxplantillacontabilidad = models.CharField(max_length=10, blank=True, null=True)
     lcontabilizado = models.BooleanField(default= False)
     cxasiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
                                      , related_name="asiento_desembolso"

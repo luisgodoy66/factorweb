@@ -2,7 +2,6 @@ var $btnFiltrar = jQuery('#btnFiltrar')
 var $table = jQuery('#table')
 var selections = []
 var $generar = jQuery("#generar")
-var $ampliar_plazo = jQuery("#ampliarplazo")
 
 window.onload=function(){
 

@@ -60,12 +60,12 @@
                             <td><h4>Cliente:</h4></td>
                             <td colspan="3">{{ cobranza.cxcliente.cxcliente.ctnombre }}</td>
                             <td><h4>Fecha de recuperación:</h4></td>
-                            <td>{{ cobranza.dcobranza|date:"Y/m/d" }}</td>
+                            <td>{{ cobranza.dcobranza|date:"Y-m-d" }}</td>
                         </tr>
                         <tr>
                             <td><h4>Id:</h4></td>
                             <td colspan="3">{{cobranza.cxcliente.cxcliente.cxparticipante}}</td>
-                            <td><h4>tipo de factoring:</h4></td>
+                            <td><h4>Tipo de factoring:</h4></td>
                             <td>{{ cobranza.cxtipofactoring }}</td>
                         </tr>
                         <tr>

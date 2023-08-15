@@ -436,6 +436,7 @@ class RecuperacionProtestoView(SinPrivilegios, generic.FormView):
     model = Recuperaciones_cabecera
     # 31-ene-23 l.g.    usar la misma forma de cobranzas
     # en esta vista el id del cliente es el correspondiente a la tabla participante
+    # CORRECCION cliente_id corresponde a la tabla de clientes
     # el id del comprador es el que corresponde a la tabla participante
 
     template_name = "cobranzas/datoscobranzas_form.html"
@@ -458,13 +459,22 @@ class RecuperacionProtestoView(SinPrivilegios, generic.FormView):
         # nota: debe tomar del tipo de factoring el con o sin recurso
         modalidad_factoring='CR'
 
-        cliente = Datos_participantes.objects\
-            .filter(pk = cliente_id).first()
+        cl = Datos_generales.objects.filter(pk = cliente_id).first()
 
-        cuentas = Cuentas_bancarias\
-            .objects.filter(cxparticipante = cliente_id \
-                , leliminado = False, lpropia = True).all()
-                # , cxtipocuenta = 'C').all()
+        cliente = Datos_participantes.objects\
+            .filter(pk = cl.cxcliente.id).first()
+
+        if forma_cobro=="CHE":
+            cuentas = Cuentas_bancarias\
+                .objects.filter(cxparticipante = cl.cxcliente \
+                    , leliminado = False, lpropia = True, lactiva = True
+                    , cxtipocuenta = 'C').all()
+        else:
+            # podría hacer transferencias desde cuenta de ahorros
+            cuentas = Cuentas_bancarias\
+                .objects.filter(cxparticipante = cl.cxcliente \
+                    , leliminado = False, lpropia = True, lactiva = True).all()
+        
         cuentas_deudor = None
 
         if un_solo_deudor=="Si":
@@ -474,7 +484,7 @@ class RecuperacionProtestoView(SinPrivilegios, generic.FormView):
                     # , cxtipocuenta = 'C').all()   # podría hacer transferencias desde cuenta de ahorros
 
         cuentas_conjuntas = CuentasConjuntasModels.Cuentas_bancarias\
-            .objects.filter(cxcliente = cliente.datos_generales.id \
+            .objects.filter(cxcliente = cl.id \
                 , leliminado = False, lactiva = True).all()
 
 
@@ -1543,8 +1553,7 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
     contexto = {}
     formulario={}
 
-    cliente = Datos_generales.objects.filter(cxcliente=cliente_ruc).first()
-
+    cliente = Datos_generales.objects.filter(pk=cliente_ruc).first()
     datosoperativos = Datos_operativos.objects.filter(cxcliente = cliente_ruc).first()
     
     cuenta_transferencia = Cuenta_transferencia.objects.cuenta_default(cliente_ruc).first()

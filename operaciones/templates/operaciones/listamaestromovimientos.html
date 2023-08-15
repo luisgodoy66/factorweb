@@ -51,8 +51,9 @@
                         <th>Código</th>
                         <th>Descripción</th>
                         <th>Signo</th>
-                        <th>Es item de factura</th>
                         <th>Afecta a cartera</th>
+                        <th>Es item de factura</th>
+                        <th>Es cargo</th>
                         <th class="all">Acciones</th>
                     </thead>
                     <tbody>
@@ -61,8 +62,9 @@
                             <td>{{ item.cxmovimiento }}</td>
                             <td>{{ item.ctmovimiento }}</td>
                             <td>{{ item.cxsigno }}</td>
-                            <td>{{ item.litemfactura }}</td>
                             <td>{{ item.lcolateral }}</td>
+                            <td>{{ item.litemfactura }}</td>
+                            <td>{{ item.lcargo }}</td>
                             <td>
                                 <a href="{% url 'operaciones:movimiento_editar' item.id %}"  title="Editar"
                                     class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>

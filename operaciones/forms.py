@@ -138,12 +138,11 @@ class MaestroMovimientosForm(forms.ModelForm):
     class Meta:
         model=Movimientos_maestro
         fields=['cxmovimiento', 'ctmovimiento', 'cxsigno', 'litemfactura'
-            , 'lcolateral', 'cxmovimientopadre']
+            , 'lcolateral', 'cxmovimientopadre', 'lcargo']
         labels={'cxmovimiento':'Código', 'ctmovimiento':'Descripción'
             , 'cxsigno': 'Signo', 'litemfactura': 'Es item de factura'
-            , 'lcolateral': 'Afecta a cartera'
+            , 'lcolateral': 'Afecta a cartera', 'lcargo':'Es cargo'
             , 'cxmovimientopadre':'Movimiento padre'}
-            # , 'lcargadescuentocartera':'Carga descuento de cartera'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

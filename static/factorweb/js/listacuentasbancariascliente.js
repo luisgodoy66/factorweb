@@ -29,7 +29,7 @@ return [
   '<a class="editar" href="javascript:void(0)" title="Editar cuenta">',
   '<i class="fa fa-edit"></i>',
   '</a>  ',
-  '<a class="like" href="javascript:void(0)" title="Default transferencias">',
+  '<a class="like" href="javascript:void(0)" title="Recibe transferencias">',
   '<i class="fa fa-heart"></i>',
   '</a>  ',
   '<a class="remove" href="javascript:void(0)" title="Eliminar">',
@@ -113,7 +113,7 @@ function EditarCuentaBancaria( doc_id, cliente_id){
 }
 
 function MarcarCuentaTransferencia( documento_id, cliente_id){
-  MensajeConfirmacion("Establecer como cuenta para transferencias " + documento_id + "?",function(){
+  MensajeConfirmacion("Establecer como cuenta para transferencias la cuenta de referencia " + documento_id + "?",function(){
 
     fetchProcesar("/clientes/actualizarcuentatransferencia/"
       + documento_id + "/" + cliente_id, function(){

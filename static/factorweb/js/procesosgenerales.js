@@ -66,11 +66,11 @@ window.open( url);
 
 }
 
-function ReversarAceptacionAsignacion(asignacion_id){
+function ReversarAceptacionAsignacion(asignacion_id, codigo_asgn = ''){
   // este proceso a diferencia de aceptar no se ejecuta desde un
   // formulario por eso no usa fetchPostear
 
-  MensajeConfirmacion("Reversar aceptación " +  asignacion_id +"?",function(){
+  MensajeConfirmacion("Reversar aceptación " +  codigo_asgn +"?",function(){
       fetchProcesar("/operaciones/reversaraceptacionasignacion/"+  asignacion_id,  function(){
           location.reload();
       })
@@ -290,4 +290,16 @@ function ModificarCobranza(cobranza_id, tipo_operacion, contabilizada){
 
   }
 
+}
+
+function EliminarDebitoCuentaCompartida(nd_id,){
+  // este proceso a diferencia de aceptar no se ejecuta desde un
+  // formulario por eso no usa fetchPostear
+
+  MensajeConfirmacion("Eliminar débito " +  nd_id +"?",function(){
+      fetchProcesar("/cuentasconjuntas/debitoeliminar/"+nd_id, function(){
+          location.reload();
+      })
+  })
+    
 }

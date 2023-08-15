@@ -103,16 +103,18 @@ function fetchProcesar(url,callback){
         if(res.slice(0,2)=='OK'){
             callback(res.slice(2))
         }
-        else
-        // podria ser que se vaya por "sin provilegios" en ese caso lo que se 
-        // tiene aquí es la página html que muestra el mensaje "sin privilegios"
-        var posicion = res.indexOf('<!doctype html>');
-
-        if (posicion != -1) {
-          alert(res);
-        }
         else{
-            MensajeError(res)
+            // podria ser que se vaya por "sin provilegios" en ese caso lo que se 
+            // tiene aquí es la página html que muestra el mensaje "sin privilegios"
+            var posicion = res.indexOf('<!doctype html>');
+
+            if (posicion != -1) {
+            alert(res);
+            }
+            else{
+                MensajeError(res)
+            }
+            
         }
     })
 

@@ -78,14 +78,23 @@
                             <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-6">
                     <div class="row form-group">
                         <div class="col col-md-6"><label for="id_cttelefono2" 
                             class=" form-control-label">{{form_cliente.cxestado.label}}</label></div>
                         <div class="col-md-6">
                             {{form_cliente.cxestado}}
                             <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="row form-group">
+                        <div class="col-md-12">
+                        <div class="alert alert-info" role="alert">
+                            Si establece valores en el porcentaje de anticipo y las tasas operativas, 
+                            estos valores tendrán precedencia sobre las tasas
+                            que retorne las condiciones operativas, si el tipo de factoring las usa.
+                        </div>
                         </div>
                     </div>
                     <h5 class="heading-title mb-1 text-secondary">Beneficiario de Liquidación de asignación</h5>

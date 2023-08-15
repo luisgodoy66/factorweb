@@ -122,7 +122,7 @@
                     </li>
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
-                            <i class="menu-icon fa fa-cogs"></i>Pagos a clientes</a>
+                            <i class="menu-icon fa fa-dollar"></i>Pagos a clientes</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-file-text"></i><a href="{% url 'operaciones:listaasignacionespendientesdesembolsar' %} ">Pago de negociación</a></li>
                             <li><i class="menu-icon fa fa-money"></i><a href="{% url 'cobranzas:listaliquidacionespendientespagar' %}">Pago de cobranzas</a></li>
@@ -136,7 +136,7 @@
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-info"></i><a href="{% url 'cuentasconjuntas:listacuentasconjuntas' %}">Cuentas</a></li>
                             <li><i class="menu-icon fa fa-wrench"></i><a href="{% url 'cuentasconjuntas:listacobranzasporconfirmar' %}">Confirmar cobranzas</a></li>
-                            <li><i class="menu-icon fa fa-forward"></i><a href="#">Transferencias</a></li>
+                            <li><i class="menu-icon fa fa-forward"></i><a href="{% url 'cuentasconjuntas:listatransferencias' %}">Transferencias</a></li>
                             <li><i class="menu-icon fa fa-forward"></i><a href="{% url 'cuentasconjuntas:listacargospendientes' %}">Débitos pendientes</a></li>
                             <li><i class="menu-icon fa fa-print"></i><a href="#">Movimientos</a></li>
                         </ul>
@@ -198,6 +198,7 @@
                             <li><i class="menu-icon fa fa-tasks"></i><a href="{% url 'operaciones:listacondicionesoperativas' %}">Condiciones</a></li>
                             <li><i class="menu-icon fa fa-money"></i><a href="{% url 'empresa:listacuentasbancarias' %}">Cuentas bancarias</a></li>
                             <li><i class="menu-icon fa fa-dot-circle-o"></i><a href="{% url 'empresa:listapuntosemision' %}">Puntos de emisión</a></li>
+                            <li><i class="menu-icon fa fa-map-marker"></i><a href="{% url 'empresa:listalocalidades' %}">Localidades</a></li>
                             <li><i class="menu-icon fa fa-paperclip"></i><a href="{% url 'operaciones:listaanexos' %}">Anexos al contrato</a></li>
                         </ul>
                     </li>
@@ -206,12 +207,11 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
                             <i class="menu-icon fa fa-cog"></i>Tablas</a>
                         <ul class="sub-menu children dropdown-menu">
-                            <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'empresa:listaclasesparticipantes' %}">Clases de clientes</a></li>
+                            <li><i class="menu-icon fa fa-star"></i><a href="{% url 'empresa:listaclasesparticipantes' %}">Clases de clientes</a></li>
                             <li><i class="menu-icon fa fa-building"></i><a href="{% url 'pais:listabancos' %}">Bancos</a></li>
                             <li><i class="menu-icon fa fa-calendar"></i><a href="{% url 'pais:listaferiados' %}">Días feriados</a></li>
-                            <li><i class="menu-icon fa fa-map-marker"></i><a href="{% url 'empresa:listalocalidades' %}">Localidades</a></li>
-                            <li><i class="menu-icon fa fa-paperclip"></i><a href="{% url 'operaciones:listamaestromovimientos' %}">Movimientos</a></li>
-                            <li><i class="menu-icon fa fa-times"></i><a href="{% url 'cobranzas:listamotivosprotesto' %}">Motivos de protestos</a></li>
+                            <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'operaciones:listamaestromovimientos' %}">Movimientos</a></li>
+                            <li><i class="menu-icon fa fa-times"></i><a href="{% url 'cobranzas:listamotivosprotesto' %}">Motivos de protesto</a></li>
                         </ul>
                     </li>
 
@@ -225,6 +225,7 @@
                             <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'contabilidad:listacuentasbancos' %}">Por bancos empresa</a></li>
                             <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'contabilidad:listacuentastiposfactoring' %}">Por tipo de factoring</a></li>
                             <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'contabilidad:listacuentastasasfactoring' %}">Por tasa de factoring</a></li>
+                            <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'contabilidad:listacuentascargosfactoring' %}">Por cargo liquidación</a></li>
                             <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'contabilidad:listacuentasdiferidos' %}">Diferidos por tasa</a></li>
                             <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'contabilidad:listacuentasprovisiones' %}">Provisiones por tasa</a></li>
                         </ul>
@@ -236,6 +237,8 @@
                             <li><i class="fa fa-file-text"></i><a href="{% url 'contabilidad:listadesembolsospendientes' %} ">Generar egresos</a></li>
                             <!-- <li><i class="fa fa-file-text"></i><a href="{% url 'contabilidad:listadesembolsospendientes' %} ">Generar provisiones</a></li> -->
                             <li><i class="fa fa-file-text"></i><a href="{% url 'contabilidad:listacobranzaspendientescontabilizar' %} ">Generar cobranzas</a></li>
+                            <li><i class="fa fa-file-text"></i><a href="{% url 'contabilidad:listaprotestospendientescontabilizar' %} ">Generar protestos</a></li>
+                            <li><i class="fa fa-file-text"></i><a href="{% url 'contabilidad:listatransferenciaspendientescontabilizar' %} ">Generar transferencias</a></li>
                         </ul>
                     </li>
                     <li class="menu-item-has-children dropdown">

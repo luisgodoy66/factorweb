@@ -62,7 +62,7 @@ class TipoFactoringForm(forms.ModelForm):
         model = Tipos_factoring
 
         fields=[
-            'cxtipofactoring', 'cttipofactoring', 'ctabreviacion','cxmoneda'
+            'cttipofactoring', 'ctabreviacion','cxmoneda'
             , 'lmanejalineafactoring', 'lanticipatotalnegociado', 'ndiasgracia', 'lpermitediasferiados'
             , 'lmanejacondicionesoperativas', 'lcargagaoa', 'lgeneradcenaceptacion', 'lgeneragaoenaceptacion'
             , 'lesnegociada', 'lcobramorabc', 'ctinicialesliquidacioncobranza'
@@ -70,7 +70,7 @@ class TipoFactoringForm(forms.ModelForm):
             , 'lcargadcenampliacionplazo','lgenerafacturaenaceptacion'
         ]
         labels={
-            'cxtipofactoring':'Código', 'cttipofactoring':'Descripción'
+            'cttipofactoring':'Descripción'
             , 'ctabreviacion':'Nombre corto','cxmoneda':'Moneda'
             , 'lmanejalineafactoring':'Maneja línea de factoring'
             , 'lanticipatotalnegociado':'Anticipa el total negociado'

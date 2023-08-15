@@ -116,7 +116,7 @@ class Tasas_factoring(ClaseModelo):
         return super(Tasas_factoring, self).save()
    
 class Tipos_factoring(ClaseModelo):
-    cxtipofactoring = models.CharField(max_length=3 , )
+    # cxtipofactoring = models.CharField(max_length=3 , )
     cttipofactoring = models.CharField(max_length= 40) 
     ctabreviacion = models.CharField(max_length= 30) 
     cxmoneda = models.CharField(max_length=3) 
@@ -145,7 +145,7 @@ class Tipos_factoring(ClaseModelo):
     def save(self):
         self.ctinicialesliquidacioncobranza=self.ctinicialesliquidacioncobranza.upper()
         self.ctinicialesasignacion=self.ctinicialesasignacion.upper()
-        self.cxtipofactoring=self.cxtipofactoring.upper()
+        # self.cxtipofactoring=self.cxtipofactoring.upper()
         self.cttipofactoring=self.cttipofactoring.upper()
         return super(Tipos_factoring, self).save()
 

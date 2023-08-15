@@ -3,18 +3,19 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.views import generic
 from django.http import HttpResponse, JsonResponse
 # from django.contrib.auth.decorators import login_required, permission_required
-# from django.db import transaction
+from django.db import transaction
 from django.urls import reverse_lazy
 # from django.db.models import Count, Sum, Q
 from django.db.models.expressions import RawSQL 
 
-from .models import Cuentas_bancarias, Movimientos
+from .models import Cuentas_bancarias, Movimientos, Transferencias
 from cobranzas.models import Documentos_cabecera, Recuperaciones_cabecera\
     , DebitosCuentasConjuntas
 from operaciones.models import Notas_debito_cabecera, Notas_debito_detalle\
     , Cargos_detalle
 from bases.models import Usuario_empresa
 from solicitudes.models import Asignacion
+from empresa import models as Empresa_modelo
 
 from .forms import CuentasBancariasForm, DebitosForm, TransferenciasForm\
     , DebitosNuevosForm
@@ -163,7 +164,7 @@ class DebitoBancarioEdit(SinPrivilegios, generic.UpdateView):
     context_object_name='consulta'
     login_url = 'bases:login'
     form_class = DebitosForm
-    success_url= reverse_lazy("cuentasconjuntas:listadocargospendientes")
+    success_url= reverse_lazy("cuentasconjuntas:listacargospendientes")
     permission_required="cobranzas.change_debitoscuentasconjuntas"
 
     def get_context_data(self, **kwargs):
@@ -220,6 +221,94 @@ class DebitoBancarioEdit(SinPrivilegios, generic.UpdateView):
         cargo.save()
 
         return super().form_valid(form)
+
+class TransferenciasView(SinPrivilegios, generic.ListView):
+    model = Transferencias
+    template_name = "cuentasconjuntas/listatransferencias.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="cuentasconjuntas.view_transferencias"
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Transferencias.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super(TransferenciasView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+# class TansferenciaNew(SinPrivilegios, generic.CreateView):
+#     model = Transferencias
+#     template_name = "cuentasconjuntas/datostransferencia_form.html"
+#     context_object_name='transferencias'
+#     form_class = TransferenciasForm
+#     success_url= reverse_lazy("cuentasconjuntas:listatransferencias")
+#     login_url = 'bases:login'
+#     permission_required="cuentasconjuntas.add_transferencias"
+
+#     def form_valid(self, form):
+#         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+#         form.instance.empresa = id_empresa.empresa
+#         form.instance.cxusuariocrea = self.request.user
+#         # NOTA: obtener el id de la transaccion
+#         print('form.intance',form.instance)
+#         cb = self.request.POST.get("cuentaorigen")
+#         cuenta = Cuentas_bancarias.objects.filter(pk = cb).first()
+#         ft = self.request.POST.get("dmovimiento")
+#         vt = self.request.POST.get("nvalor")
+#         id = form.instance
+#         mov = Movimientos(cuentabancaria=cuenta,
+#                     dmovimiento=ft,
+#                     nvalor=vt,
+#                     cxtipo='T',
+#                     cxmovimiento=id
+#                     )
+#         if mov:
+#             mov.save()
+
+#         return super().form_valid(form)
+
+#     def get_context_data(self, **kwargs):
+#         context = super(TansferenciaNew, self).get_context_data(**kwargs)
+#         sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+#         context['solicitudes_pendientes'] = sp
+#         return context
+
+#     def get_form_kwargs(self):
+#         kwargs = super(TansferenciaNew, self).get_form_kwargs()
+#         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+#         kwargs['empresa'] = id_empresa.empresa
+#         return kwargs
+
+class TansferenciaEdit(SinPrivilegios, generic.UpdateView):
+    model = Transferencias
+    template_name = "cuentasconjuntas/datostransferencia_form.html"
+    context_object_name='transferencias'
+    form_class = TransferenciasForm
+    success_url= reverse_lazy("cuentasconjuntas:listatransferencias")
+    login_url = 'bases:login'
+    permission_required="cuentasconjuntas.change_transferencias"
+
+    def form_valid(self, form):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
+        form.instance.cxusuariocrea = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(TansferenciaEdit, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super(TansferenciaEdit, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
 
 def ConfirmarCobranza(request, cobranza_id, tipo_operacion, cuenta_conjunta):
     template_name = "cuentasconjuntas/datosconfirmacioncobranza_form.html"
@@ -309,9 +398,119 @@ def DebitoBancarioSinCobranza(request):
 
 
         if resultado=='OK':
-            return redirect('cuentas_conjuntas:listadocargospendientes')
+            return redirect('cuentas_conjuntas:listacargospendientes')
 
         return HttpResponse(resultado)
 
     return render(request, template_name, contexto)
 
+@login_required(login_url='/login/')
+@permission_required('cobranzas.change_debitoscuentasconjuntas', login_url='bases:sin_permisos')
+def EliminarNotaDebito(request, pk):
+    resultado = 'OK'
+
+    ndcc = DebitosCuentasConjuntas.objects.filter(pk = pk).first()
+    if ndcc:
+        with transaction.atomic():
+            ndcc.leliminado = True
+            ndcc.cxusuarioelimina = request.user.id
+            ndcc.save()
+
+            # eliminar también la nota de débito
+            nd = Notas_debito_cabecera.objects.filter(pk = ndcc.notadedebito.id).first()
+            if nd:
+                nd.leliminado = True
+                nd.cxusuarioelimina = request.user.id
+                nd.save()
+            else:
+                resultado='Nota de débito no encontrada.'
+    else:
+        resultado="No se ha podido obtener el registro de la nota de débito"
+
+    return HttpResponse(resultado)
+
+@login_required(login_url='/login/')
+@permission_required('cuentasconjuntas.change_transferencias', login_url='bases:sin_permisos')
+def EliminarTransferencia(request, pk):
+    # la eliminacion es lógica
+    resultado = 'OK'
+    transferencia = Transferencias.objects.filter(pk=pk).first()
+
+    if not transferencia:
+        return HttpResponse("Transferencia no encontrada")
+
+    if request.method=="GET":
+
+        with transaction.atomic():
+
+            # marcar como eliminado
+            transferencia.leliminado = True
+            transferencia.cxusuarioelimina = request.user.id
+            transferencia.save()
+
+            # eliminar el movimiento de transferencias ...
+            movimiento = Movimientos.objects.filter(cxmovimiento=pk
+                                                    , cxtipo='T').first()
+
+            # ... si es que existe una cuenta favorita
+            if movimiento:
+                movimiento.leliminado = True
+                movimiento.cxusuarioelimina = request.user.id
+                movimiento.save()
+            else:
+                resultado = "Movimiento no encontrado."
+        
+        if resultado!='OK':
+            transaction.rollback()
+
+    return HttpResponse(resultado)
+
+@login_required(login_url='/login/')
+@permission_required('cuentasconjuntas.add_transferencias', login_url='bases:sin_permisos')
+def DatosTransferencia(request, pk = None):
+    template_name = "cuentasconjuntas/datostransferencia_form.html"
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    form = TransferenciasForm(empresa = id_empresa.empresa)
+    
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    
+    contexto={'form':form
+            , 'solicitudes_pendientes':sp
+            }
+    
+    if request.method=='POST':
+        co = request.POST.get("cuentaorigen")
+        cd = request.POST.get("cuentadestino")
+        cuentaorigen = Cuentas_bancarias.objects.filter(pk = co).first()
+        cuentadestino = Empresa_modelo.Cuentas_bancarias.objects.filter(pk = cd).first()
+        with transaction.atomic():
+            # if not pk:
+            trans = Transferencias(
+                cuentaorigen = cuentaorigen,
+                cuentadestino = cuentadestino,
+                nvalor = request.POST.get("nvalor"),
+                ndevolucion = request.POST.get("ndevolucion"),
+                dmovimiento = request.POST.get("dmovimiento"),
+                empresa = id_empresa.empresa,
+                cxusuariocrea = request.user
+            )
+            if trans:
+                trans.save()
+
+#           movimiento
+            mov = Movimientos(
+                cuentabancaria = trans.cuentaorigen,
+                dmovimiento = trans.dmodificacion,
+                nvalor = trans.nvalor,
+                cxtipo = 'T',
+                cxmovimiento = trans.id,
+                empresa = id_empresa.empresa,
+                cxusuariocrea = request.user
+            )
+            if mov:
+                mov.save()
+
+        return redirect("cuentasconjuntas:listatransferencias")
+
+    return render(request, template_name, contexto)
+    

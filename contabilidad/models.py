@@ -53,8 +53,9 @@ class Cuentas_especiales(ClaseModelo):
     cuentaperdidaejercicioanterior = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
                                                          , related_name='cuenta_perdidaanterior')
     liquidacionennegativo = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
-                                       , null = True, default=2)
-# nota: quitar el default
+                                       , null = True)
+    comisionchequesprotestados = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
+                                       , null = True, related_name='cuenta_notadebitobanco')
 
 class Diario_cabecera(ClaseModelo):
     cxtransaccion = models.CharField(max_length= 10) 
@@ -298,3 +299,14 @@ class Cuentas_nivel1(ClaseModelo):
     lingreso = models.BooleanField()
     legreso = models.BooleanField()
     lorden = models.BooleanField()
+
+class Cuentas_cargosfactoring(ClaseModelo):
+    cargo = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT
+                                      , related_name="cuenta_cargo")
+    tipofactoring = models.ForeignKey(Tipos_factoring, on_delete=models.RESTRICT
+                                      , related_name="cuenta_cargotipofactoring")
+    cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT)
+
+    def __str__(self):
+        return self.cuenta
+

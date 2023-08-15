@@ -15,7 +15,7 @@
 {% endblock breadcrumbs %}
 {% block content %}
 <form  method="post"  class="form-horizontal">
-    <div class="col-lg-6">
+    <div class="col-lg-7">
         <div class="card">
             <div class="card-header">
                 <strong>Datos</strong> 
@@ -25,25 +25,25 @@
             <div class="card-body card-block">
 
                     <div class="row form-group">
-                        <div class="col-12 col-md-6"><label for="id_cxtipoid" 
+                        <div class="col-md-5"><label for="id_cxtipoid" 
                             class=" form-control-label">{{ form.cxtasa.label}}</label></div>
-                        <div class="col col-md-6">
+                        <div class="col col-md-7">
                             {{ form.cxtasa}}
                             <small class="form-text text-muted">Máximo 4 caracteres</small>
                         </div>
                     </div>  
 
                     <div class="row form-group">
-                        <div class="col col-md-6"><label for="id_cxparticipante" class=" form-control-label">Descripción</label></div>
-                        <div class="col">
+                        <div class="col col-md-5"><label for="id_cxparticipante" class=" form-control-label">Descripción</label></div>
+                        <div class="col-md-7">
                             {{ form.cttasa}}
                             <small class="form-text text-muted">Máximo 60 caracteres</small>
                         </div>
                     </div>
                     <div class="row form-group">
-                        <div class="col col-md-6"><label for="id_cxlocalidad" 
+                        <div class="col col-md-5"><label for="id_cxlocalidad" 
                             class=" form-control-label">{{ form.lflat.label}}</label></div>
-                        <div class="col ">
+                        <div class="col-md-7 ">
                             <label class="switch switch-3d switch-success mr-3">
                                 <input type="checkbox" class="switch-input" 
                                 {% if  tasafactoring.lflat %} checked {% endif %} 
@@ -55,18 +55,18 @@
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-6"><label for="id_cxparticipante" 
+                        <div class="col col-md-5"><label for="id_cxparticipante" 
                             class=" form-control-label"> {{ form.ndiasperiocidad.label}}</label></div>
-                        <div class="col">
+                        <div class="col-md-7">
                             {{ form.ndiasperiocidad}}
                             <!-- <small class="form-text text-muted">Máximo 30 caracteres</small> -->
                         </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-6"><label for="id_cxlocalidad" 
+                        <div class="col col-md-5"><label for="id_cxlocalidad" 
                             class=" form-control-label">{{ form.limprimeenreporte.label}}</label></div>
-                        <div class="col">
+                        <div class="col-md-7">
                             <label class="switch switch-3d switch-success mr-3">
                                 <input type="checkbox" class="switch-input" 
                                 {% if  tasafactoring.limprimeenreporte %} checked {% endif %} 
@@ -78,7 +78,7 @@
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-6"><label for="id_cxparticipante" 
+                        <div class="col col-md-5"><label for="id_cxparticipante" 
                             class=" form-control-label"> {{ form.ctdescripcionenreporte.label}}</label></div>
                         <div class="col">
                             {{ form.ctdescripcionenreporte}}
@@ -87,7 +87,7 @@
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-6"><label for="id_cxparticipante" 
+                        <div class="col col-md-5"><label for="id_cxparticipante" 
                             class=" form-control-label"> {{ form.ctinicialesentablas.label}}</label></div>
                         <div class="col">
                             {{ form.ctinicialesentablas}}
@@ -96,7 +96,7 @@
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-6 "><label for="id_cxlocalidad" 
+                        <div class="col col-md-5 "><label for="id_cxlocalidad" 
                             class=" form-control-label">{{ form.lcargaiva.label}}</label></div>
                         <div class="col">
                             <label class="switch switch-3d switch-success mr-3">
@@ -110,7 +110,7 @@
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-6 "><label for="id_cxlocalidad" 
+                        <div class="col col-md-5 "><label for="id_cxlocalidad" 
                             class=" form-control-label">{{ form.lsobreanticipo.label}}</label></div>
                         <div class="col">
                             <label class="switch switch-3d switch-success mr-3">

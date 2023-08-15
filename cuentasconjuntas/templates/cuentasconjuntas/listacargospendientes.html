@@ -64,7 +64,7 @@
                         <tr>
                             <td>{{ item.notadedebito.cxcliente }}</td>
                             <td>{{ item.notadedebito }}</td>
-                            <td>{{ item.dmovimiento|date:"Y/m/d" }}</td>
+                            <td>{{ item.dmovimiento|date:"Y-m-d" }}</td>
                             <td>{{ item.cobranza }}</td>
                             <!-- <td>{{ item.cobranza.cxtipofactoring }}</td> -->
                             <td>{{ item.cuentabancaria }}</td>
@@ -77,6 +77,11 @@
                                     href="{% url 'cuentasconjuntas:debitobancario_editar' item.id %}" 
                                     class="btn btn-warning btn-sm" role="button" title="Editar"><i class="fa fa-edit"></i>
                                 </a>
+                                <button onclick="EliminarDebitoCuentaCompartida( {{item.id}})" 
+                                    class="btn btn-danger btn-sm"
+                                    role="button">
+                                    <i class="fa fa-rotate-left"></i>
+                                </button>
                                 {% endif %}
                             </td>
                         </tr>

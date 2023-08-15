@@ -1,4 +1,4 @@
-{% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -62,30 +62,30 @@
                             {% for item in documentos %}
                             <tr>
                                 <td width="20%">{{ item.cxcliente__cxcliente__ctnombre }}</td>
-                                <td class="numero">{{ item.vencido_mas_90 |default:''}}</td>
-                                <td class="numero">{{ item.vencido_90 |default:''}}</td>
-                                <td class="numero">{{ item.vencido_60 |default:'' }}</td>
-                                <td class="numero">{{ item.vencido_30 |default:'' }}</td>
-                                <td class="numero">{{ item.porvencer_30 |default:''}}</td>
-                                <td class="numero">{{ item.porvencer_60 |default:''}}</td>
-                                <td class="numero">{{ item.porvencer_90 |default:''}}</td>
-                                <td class="numero">{{ item.porvencer_mas_90 |default:''}}</td>
-                                <td class="numero">{{ item.total |default:''}}</td>
+                                <td class="numero">{{ item.vencido_mas_90 |default:''|intcomma}}</td>
+                                <td class="numero">{{ item.vencido_90 |default:''|intcomma}}</td>
+                                <td class="numero">{{ item.vencido_60 |default:''|intcomma}}</td>
+                                <td class="numero">{{ item.vencido_30 |default:''|intcomma}}</td>
+                                <td class="numero">{{ item.porvencer_30 |default:''|intcomma}}</td>
+                                <td class="numero">{{ item.porvencer_60 |default:''|intcomma}}</td>
+                                <td class="numero">{{ item.porvencer_90 |default:''|intcomma}}</td>
+                                <td class="numero">{{ item.porvencer_mas_90 |default:''|intcomma}}</td>
+                                <td class="numero">{{ item.total |default:''|intcomma}}</td>
                             </tr>
                             {% endfor %}
                             <!-- totales -->
                             <tr></tr>
                             <tr>
                                 <td></td>
-                                <td class="numero"><h4>{{ totalvm90 |default:0.00}}</h4> </td>
-                                <td class="numero"><h4>{{ totalv90  |default:0.00}} </h4></td>
-                                <td class="numero"><h4>{{ totalv60  |default:0.00}}</h4> </td>
-                                <td class="numero"><h4>{{ totalv30  |default:0.00}} </h4></td>
-                                <td class="numero"><h4>{{ totalx30  |default:0.00}} </h4></td>
-                                <td class="numero"><h4>{{ totalx60  |default:0.00}} </h4></td>
-                                <td class="numero"><h4>{{ totalx90  |default:0.00}}</h4> </td>
-                                <td class="numero"><h4>{{ totalxm90 |default:0.00}}</h4> </td>
-                                <td class="numero"><h4>{{ total |default:0.00}}</h4> </td>
+                                <td class="numero"><h4>{{ totalvm90 |default:0.00|intcomma}}</h4> </td>
+                                <td class="numero"><h4>{{ totalv90  |default:0.00|intcomma}} </h4></td>
+                                <td class="numero"><h4>{{ totalv60  |default:0.00|intcomma}}</h4> </td>
+                                <td class="numero"><h4>{{ totalv30  |default:0.00|intcomma}} </h4></td>
+                                <td class="numero"><h4>{{ totalx30  |default:0.00|intcomma}} </h4></td>
+                                <td class="numero"><h4>{{ totalx60  |default:0.00|intcomma}} </h4></td>
+                                <td class="numero"><h4>{{ totalx90  |default:0.00|intcomma}}</h4> </td>
+                                <td class="numero"><h4>{{ totalxm90 |default:0.00|intcomma}}</h4> </td>
+                                <td class="numero"><h4>{{ total |default:0.00|intcomma}}</h4> </td>
                             </tr>
                         </tbody>
                     </table>

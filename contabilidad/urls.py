@@ -15,7 +15,10 @@ from .views import CuentasView, CuentasEspecialesEdit, BuscarCuentasEspeciales\
     , ListaCobranzasAGenerar, GeneraListaCobranzasJSON, GenerarAsientosCobranzas\
     , BalanceGeneralConsulta, PerdiasyGananciasConsulta, CierreDeMes\
     , generaFacturasAlVencimiento, GeneraFacturasAlVencimientoDiario, FacturasConsulta\
-    , GeneraListaFacturasJSON
+    , GeneraListaFacturasJSON, GeneraListaProtestosJSON, ListaProtestosAGenerar\
+    , GenerarAsientosProtestos, CuentasCargosFactoringView, CuentaCargoTipoFactoringNew\
+    , CuentaCargoTipoFactoringEdit, CuentasCargoTiposFactoringView\
+    , GeneraListaTransferenciasJSON, ListaTransferenciasAGenerar, GenerarAsientosTransferencias
 
 from .sri import GeneraXMLFactura
 from .reportes import ImpresionDiarioContable, ImpresionComprobanteEgreso\
@@ -110,7 +113,7 @@ urlpatterns = [
     path('libromayorjson/<desde>/<hasta>/<cuentas>',GeneraLibroMayorJSON
          , name="libromayor_json"),
     path('reversarasiento/<pk>', ReversarAsiento, name='reversarasiento'),
-    path('listacobranzaspendientescontabilizar',ListaCobranzasAGenerar.as_view()
+    path('listacobranzaspendientescontabilizar/',ListaCobranzasAGenerar.as_view()
          , name="listacobranzaspendientescontabilizar"),    
     path('cobranzaspendientesjson/<desde>/<hasta>',GeneraListaCobranzasJSON
          , name="cobranzaspendientes_json"),
@@ -132,4 +135,25 @@ urlpatterns = [
          , name="consulta_facturas"),
     path('facturasjson/<desde>/<hasta>',GeneraListaFacturasJSON
         , name="facturas_json"),
+     path('listaprotestospendientescontabilizar/',ListaProtestosAGenerar.as_view()
+         , name="listaprotestospendientescontabilizar"),    
+   path('protestospendientesjson/<desde>/<hasta>',GeneraListaProtestosJSON
+         , name="protestospendientes_json"),
+    path('generarasientosprotestos/<ids>', GenerarAsientosProtestos),
+    path('listacuentascargosfactoring/',CuentasCargosFactoringView.as_view()
+         , name="listacuentascargosfactoring"),
+    path('listacuentascargotiposfactoring/<int:cargo>/<nombre_cargo>'
+         ,CuentasCargoTiposFactoringView.as_view()
+         , name="listacuentascargotiposfactoring"),
+    path('cuentacargotipofactoringnueva/<tipofactoring>/<tipofactoring_id>/<cargofactoring>/<cargofactoring_id>'
+         ,CuentaCargoTipoFactoringNew.as_view()
+         , name="cuentacargotipofactoring_nueva"),
+    path('cuentacargotipofactoringeditar/<tipofactoring>/<tipofactoring_id>/<cargofactoring>/<cargofactoring_id>/<int:pk>'
+         ,CuentaCargoTipoFactoringEdit.as_view()
+         , name="cuentacargotipofactoring_editar"),
+     path('listatransferenciaspendientescontabilizar/',ListaTransferenciasAGenerar.as_view()
+         , name="listatransferenciaspendientescontabilizar"),    
+   path('transferenciaspendientesjson/<desde>/<hasta>',GeneraListaTransferenciasJSON
+         , name="transferenciaspendientes_json"),
+    path('generarasientostransferencias/<ids>', GenerarAsientosTransferencias),
 ]

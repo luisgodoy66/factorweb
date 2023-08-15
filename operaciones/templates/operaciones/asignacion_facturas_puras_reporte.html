@@ -27,6 +27,12 @@
         .table td.subrayado{
             border-bottom: 1px solid black;
         }
+        .alerta { 
+        font-family: sans-serif; 
+        font-size: 11px; 
+        font-weight: 400; 
+        color: #eb1111; 
+        }        
     </style>
 </head>
 <body>
@@ -96,7 +102,7 @@
                         </thead>
                         <tbody>
                             <tr></tr>
-                            {% regroup documentos|dictsort:"cxcomprador" by cxcomprador as documentos_list %}
+                            {% regroup documentos|dictsort:"cxcomprador.cxcomprador.ctnombre" by cxcomprador as documentos_list %}
                             {% for comprador in documentos_list %}
                             <tr>
                                 <td class="subrayado" colspan="4"><h3>{{ comprador.grouper }}</h3></td>
@@ -222,6 +228,9 @@
                         <td>                        Elaborado por: {{ asignacion.cxusuariocrea}}</td>
                         <td>                        Revisado por:                        </td>
                         <td>                        Recibido por:                        </td>
+                        {% if asignacion.cxestado == 'E' %}
+                            <td class="alerta"><h4>Reversada</h4></td>
+                        {% endif %}
                     </tr>
                 </tbody>
             </table>

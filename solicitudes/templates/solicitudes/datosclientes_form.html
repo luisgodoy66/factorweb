@@ -27,14 +27,10 @@
             <div class="card-body card-block">
                 <!-- columna izquierda -->
                 <div class="col-lg-6">
+                    <div hidden>
+                        {{form.empresa}}
+                    </div>
                     
-                    <!-- <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cxtipocliente" class=" form-control-label">Tipo de cliente</label></div>
-                        <div class="col-12 col-md-9">
-                            {{ form_cliente.cxtipocliente}}
-                        </div>
-                    </div>   -->
-    
                     <div class="row form-group">
                         <div class="col col-md-3">
                             <label for="id_cxparticipante" class=" form-control-label">{{form.cxcliente.label}}</label></div>
@@ -115,8 +111,19 @@
                             
                 </div>
             </div>    
-            
+            <div>
+            </div>
             <div class="card-footer">
+                {% if form.errors %}
+                    <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                
                 <a href="{% url 'solicitudes:listasolicitudes' %}" class="btn btn-danger btn-sm">
                     <i class="fa fa-ban"></i> Cancelar
                 </a>
@@ -129,7 +136,10 @@
 </form>
 {% endblock %}
 {% block js_page %}
-<!-- <script type="text/javascript" 
-    src="{% static 'factorweb/js/datoscliente.js' %}">
-</script> -->
+<script>
+    // la que esta en la plantilla home copiarla a esta forma
+    var x = capturaValor("empresa_id")
+    inicializaValor("id_empresa", x)
+
+</script>
 {% endblock %}

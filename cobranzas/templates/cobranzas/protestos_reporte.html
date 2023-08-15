@@ -1,4 +1,4 @@
-{% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -67,17 +67,17 @@
                                 <td class="numero">{{ item.cheque__ctgirador }}</td>
                                 <td class="numero">{{ item.dprotesto|date:"Y-m-d"}}</td>
                                 <td class="numero">{{ item.motivoprotesto__ctmotivoprotesto}}</td>
-                                <td class="numero">{{ item.nvalor}}</td>
-                                <td class="numero">{{ item.nvalorcartera}}</td>
-                                <td class="numero">{{ item.nsaldocartera}}</td>
+                                <td class="numero">{{ item.nvalor|intcomma}}</td>
+                                <td class="numero">{{ item.nvalorcartera|intcomma}}</td>
+                                <td class="numero">{{ item.nsaldocartera|intcomma}}</td>
                             </tr>
                             {% endfor %}
                             <!-- totales -->
                             <tr></tr>
                             <tr>
                                 <td></td>
-                                <td class="numero" colspan="7"><h4>{{ totales.total_cartera |default:0.00}}</h4> </td>
-                                <td class="numero" ><h4>{{ totales.total_saldo |default:0.00}}</h4> </td>
+                                <td class="numero" colspan="7"><h4>{{ totales.total_cartera |default:0.00|intcomma}}</h4> </td>
+                                <td class="numero" ><h4>{{ totales.total_saldo |default:0.00|intcomma}}</h4> </td>
                             </tr>
                         </tbody>
                     </table>

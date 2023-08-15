@@ -190,6 +190,9 @@
                         {% if liquidacion.ngaoa %}
                         <th >{{nombre_gaoa}}</th>
                         {% endif %}
+                        {% if liquidacion.niva %}
+                        <th >IVA</th>
+                        {% endif %}
                         {% if liquidacion.nretenciones %}
                         <th >Retenciones</th>
                         {% endif %}
@@ -198,9 +201,6 @@
                         {% endif %}
                         {% if liquidacion.notros %}
                         <th >Otros</th>
-                        {% endif %}
-                        {% if liquidacion.niva %}
-                        <th >IVA</th>
                         {% endif %}
                         <th >Neto</th>
                         </tr>
@@ -220,6 +220,9 @@
                             {% if liquidacion.ngaoa %}
                             <td class="numero"> {{liquidacion.ngaoa}} </td>
                             {% endif %}
+                            {% if liquidacion.niva %}
+                            <td class="numero"> {{liquidacion.niva}} </td>
+                            {% endif %}
                             {% if liquidacion.nretenciones %}
                             <td class="numero"> {{liquidacion.nretenciones}} </td>
                             {% endif %}
@@ -228,9 +231,6 @@
                             {% endif %}
                             {% if liquidacion.notros %}
                             <td class="numero"> {{liquidacion.notros}} </td>
-                            {% endif %}
-                            {% if liquidacion.niva %}
-                            <td class="numero"> {{liquidacion.niva}} </td>
                             {% endif %}
                             <td class="numero"> {{liquidacion.nneto}} </td>
                         </tr>

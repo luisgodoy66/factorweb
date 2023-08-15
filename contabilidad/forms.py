@@ -4,8 +4,8 @@ from datetime import date
 
 from .models import Cuentas_especiales, Plan_cuentas, Cuentas_bancos\
     , Cuentas_tiposfactoring, Cuentas_tasasfactoring, Factura_venta\
-        , Comprobante_egreso, Cuentas_diferidos, Cuentas_provisiones\
-        , Diario_cabecera, Transaccion
+    , Comprobante_egreso, Cuentas_diferidos, Cuentas_provisiones\
+    , Diario_cabecera, Transaccion, Cuentas_cargosfactoring
 from empresa.models import Cuentas_bancarias, Tipos_factoring, Puntos_emision
 from clientes.models import Cuenta_transferencia
 
@@ -16,7 +16,7 @@ class CuentasEspecialesForm(forms.ModelForm):
             , 'protesto', 'cuentaivaganado', 'cuentagananciaejercicio'
             , 'cuentaperdidaejercicio', 'cuentagananciaejercicioanterior'
             , 'cuentaperdidaejercicioanterior', 'ivadiferido'
-            , 'liquidacionennegativo'
+            , 'liquidacionennegativo', 'comisionchequesprotestados'
         ]
         labels={ 'pagoconcajachica':'Pago con caja chica'
                 , 'sobrepago':'Sobrepago'
@@ -29,6 +29,7 @@ class CuentasEspecialesForm(forms.ModelForm):
                 , 'cuentaperdidaejercicioanterior':'Pérdida del ejercicio anterior'
                 , 'ivadiferido': 'IVA diferido'
                 , 'liquidacionennegativo':'Liquidación en negativo'
+                , 'comisionchequesprotestados':'Comisión por cheques protestados'
         }
 
     def __init__(self, *args, **kwargs):
@@ -72,6 +73,9 @@ class CuentasEspecialesForm(forms.ModelForm):
                 .filter(empresa=empresa, leliminado = False, ldetalle=True)\
                 .order_by('cxcuenta')
             self.fields['liquidacionennegativo'].queryset = Plan_cuentas.objects\
+                .filter(empresa=empresa, leliminado = False, ldetalle=True)\
+                .order_by('cxcuenta')
+            self.fields['comisionchequesprotestados'].queryset = Plan_cuentas.objects\
                 .filter(empresa=empresa, leliminado = False, ldetalle=True)\
                 .order_by('cxcuenta')
 
@@ -342,4 +346,28 @@ class TransaccionForm(forms.ModelForm):
             self.fields['cxcuenta'].queryset = Plan_cuentas.objects\
                 .filter(empresa=empresa, leliminado = False, ldetalle=True)\
                 .order_by('cxcuenta')
+
+class CuentasCargoTiposFactoringForm(forms.ModelForm):
+    class Meta:
+        model=Cuentas_cargosfactoring
+        fields = ['tipofactoring', 'cargo', 'cuenta']
+        labels = {'tipofactoring':'Tipo de factoring'
+                  , 'cargo': 'Cargo'
+                  , 'cuenta':'Cuenta contable'}
+
+    def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
+        super().__init__(*args, **kwargs)
         
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+
+        if empresa:
+            self.fields['cuenta'].queryset = Plan_cuentas.objects\
+                .filter(empresa=empresa, leliminado = False, ldetalle=True)\
+                .order_by('cxcuenta')
+            self.fields['tipofactoring'].queryset = Tipos_factoring.objects\
+                .filter(empresa=empresa, leliminado = False, )
+

@@ -61,7 +61,7 @@
                         {% for item in consulta %}
                         <tr>
                             <td>{{ item.cxcliente__cxcliente__ctnombre }}</td>
-                            <td>{{ item.ddeposito|date:"Y/m/d" }}</td>
+                            <td>{{ item.ddeposito|date:"Y-m-d" }}</td>
                             <td>{{ item.cxtipofactoring__ctabreviacion }}</td>
                             <td>{{ item.cxcobranza }} </td>
                             <td>{{ item.cxformapago }}</td>

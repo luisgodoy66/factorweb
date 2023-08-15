@@ -15,14 +15,16 @@ import json
 from .models import Plan_cuentas, Cuentas_especiales, Cuentas_bancos\
     , Cuentas_tiposfactoring, Cuentas_tasasfactoring, Factura_venta\
     , Cuentas_diferidos, Cuentas_provisiones, Diario_cabecera, Transaccion\
-    , Comprobante_egreso, Control_meses
+    , Comprobante_egreso, Control_meses, Cuentas_cargosfactoring
 from bases.models import Usuario_empresa
 from solicitudes.models import Asignacion
 from empresa.models import Cuentas_bancarias, Tipos_factoring, Puntos_emision\
     , Contador, Tasas_factoring
 from operaciones.models import Asignacion as Operacion, Movimientos_maestro\
     , Ampliaciones_plazo_cabecera, Desembolsos
-from cobranzas.models import Liquidacion_cabecera, Documentos_cabecera as Cobranzas
+from cobranzas.models import Liquidacion_cabecera, Documentos_cabecera as Cobranzas\
+    , Cheques_protestados, Recuperaciones_cabecera
+from cuentasconjuntas.models import Transferencias
 
 from bases.views import enviarPost, SinPrivilegios
 
@@ -30,7 +32,7 @@ from .forms import CuentasEspecialesForm, CuentasBancosForm, FacturaVentaForm\
     , CuentasTiposFactoringForm, CuentasTasaTiposFactoringForm\
     , ComprobanteEgresoForm, CuentasDiferidoTasaTiposFactoringForm\
     , CuentasProvisionTasaTiposFactoringForm, PlanCuentasForm, DiarioCabeceraForm\
-    , TransaccionForm
+    , TransaccionForm, CuentasCargoTiposFactoringForm
 
 import xml.etree.cElementTree as etree
 from datetime import date, timedelta, datetime
@@ -1010,6 +1012,199 @@ class FacturasConsulta(SinPrivilegios, generic.TemplateView):
         context['solicitudes_pendientes'] = sp
         return context
 
+class ListaProtestosAGenerar(SinPrivilegios, generic.TemplateView):
+    template_name = "contabilidad/listaprotestospendientescontabilizar.html"
+    login_url = 'bases:login'
+    permission_required="contabilidad.add_diario_cabecera"
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        # obtener primer día del mes actual
+        desde = date.today() + timedelta(days=-date.today().day +1)
+        hasta = date.today()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+
+        context = super(ListaProtestosAGenerar, self).get_context_data(**kwargs)
+        context["desde"] = desde
+        context["hasta"] = hasta
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+ 
+class CuentasCargosFactoringView(SinPrivilegios, generic.ListView):
+    model = Movimientos_maestro
+    template_name = "contabilidad/listacuentascargosfactoring.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="contabilidad.view_cuentas_cargosfactoring"
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Movimientos_maestro.objects\
+            .filter(leliminado = False
+                    , lcargo = True
+                    , empresa = id_empresa.empresa)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False).count()
+        context = super(CuentasCargosFactoringView, self).get_context_data(**kwargs)
+        context["solicitudes_pendientes"]=sp
+
+        return context
+
+class CuentasCargoTiposFactoringView(SinPrivilegios, generic.ListView):
+    model = Tipos_factoring
+    template_name = "contabilidad/listacuentascargotiposfactoring.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="contabilidad.view_cuentas_cargosfactoring"
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_cargo = self.kwargs.get('cargo')
+        # qs= Tipos_factoring.objects\
+        #     .annotate(registros = FilteredRelation('cuenta_tasatipofactoring'
+        #                                            ,condition = Q(cuenta_tasatipofactoring__tasafactoring__id=id_tasa) ))\
+        #     .values('id','cttipofactoring'
+        #             ,'cuenta_tasatipofactoring__cuenta__ctcuenta'
+        #             , 'cuenta_tasatipofactoring__tasafactoring__id'
+        #             , 'cuenta_tasatipofactoring__id')\
+        #     .filter(leliminado = False, empresa = id_empresa.empresa, registros__isnull = True)
+        # en este query la condition ingresada en el FilterdRelation no se pasa al query
+        # y no se filtra por la tasa ingresada. La filtración se está resolviendo en la
+        # forma más burda en el HTML con condiciones tags de Django.
+        qs=Tipos_factoring.objects\
+            .filter(empresa=id_empresa.empresa
+                    , cuenta_cargotipofactoring__cargo = id_cargo)\
+            .values('id', 'cttipofactoring'
+                    ,'cuenta_cargotipofactoring__cuenta__ctcuenta'
+                    ,'cuenta_cargotipofactoring'
+                    ,'cuenta_cargotipofactoring__cargo')
+        
+        qs2=Tipos_factoring.objects\
+            .annotate(registros=FilteredRelation('cuenta_cargotipofactoring'
+                                                 , condition = Q(cuenta_cargotipofactoring__cargo=id_cargo)))\
+            .values('id','cttipofactoring'
+                    , 'registros__cuenta__ctcuenta'
+                    ,'cuenta_cargotipofactoring'
+                    ,'cuenta_cargotipofactoring__cargo')\
+            .filter(empresa = id_empresa.empresa, registros__cuenta__ctcuenta__isnull=True)
+        return qs.union(qs2)
+
+    def get_context_data(self, **kwargs):
+        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_tasa = self.kwargs.get('cargo')
+        nombre_tasa = self.kwargs.get('nombre_cargo')
+        context = super(CuentasCargoTiposFactoringView, self).get_context_data(**kwargs)
+        context["solicitudes_pendientes"]=sp
+        context["id_cargo"]=id_tasa
+        context["nombre_cargo"]=nombre_tasa
+
+        return context
+    
+class CuentaCargoTipoFactoringNew(SinPrivilegios, generic.CreateView):
+    model=Cuentas_tasasfactoring
+    template_name="contabilidad/datoscuentacargotipofactoring_modal.html"
+    context_object_name = "consulta"
+    form_class=CuentasCargoTiposFactoringForm
+    # success_url=reverse_lazy("contabilidad:listacuentastasatiposfactoring")
+    success_message="cuenta creada satisfactoriamente"
+    permission_required="contabilidad.add_cuentas_cargosfactoring"
+
+    def form_valid(self, form):
+        form.instance.cxusuariocrea = self.request.user
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        tasafactoring_id = self.kwargs.get('cargofactoring_id')
+        nombre_tasafactoring = self.kwargs.get('cargofactoring')
+        tipofactoring_id = self.kwargs.get('tipofactoring_id')
+        nombre_tipofactoring = self.kwargs.get('tipofactoring')
+        context = super(CuentaCargoTipoFactoringNew, self).get_context_data(**kwargs)
+        context["nueva"]=True
+        context["cargofactoring"] = nombre_tasafactoring
+        context["cargofactoring_id"] = tasafactoring_id
+        context["tipofactoring"] = nombre_tipofactoring
+        context["tipofactoring_id"] = tipofactoring_id
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super(CuentaCargoTipoFactoringNew, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+
+    def get_success_url(self):
+        tasafactoring_id = self.kwargs.get('cargofactoring_id')
+        nombre_tasafactoring = self.kwargs.get('cargofactoring')
+        return reverse_lazy("contabilidad:listacuentascargotiposfactoring"
+            , kwargs={'cargo': tasafactoring_id, 'nombre_cargo':nombre_tasafactoring})
+
+class CuentaCargoTipoFactoringEdit(SinPrivilegios, generic.UpdateView):
+    model=Cuentas_cargosfactoring
+    template_name="contabilidad/datoscuentacargotipofactoring_modal.html"
+    context_object_name = "consulta"
+    form_class=CuentasCargoTiposFactoringForm
+    # success_url=reverse_lazy("contabilidad:listacuentastasatiposfactoring")
+    success_message="cuenta modificada satisfactoriamente"
+    permission_required="contabilidad.change_cuentas_cargosfactoring"
+
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        id = self.kwargs.get('pk')
+        tasafactoring_id = self.kwargs.get('cargofactoring_id')
+        nombre_tasafactoring = self.kwargs.get('cargofactoring')
+        tipofactoring_id = self.kwargs.get('tipofactoring_id')
+        nombre_tipofactoring = self.kwargs.get('tipofactoring')
+        context = super(CuentaCargoTipoFactoringEdit, self).get_context_data(**kwargs)
+        context["nueva"]=False
+        context["cargofactoring"] = nombre_tasafactoring
+        context["cargofactoring_id"] = tasafactoring_id
+        context["tipofactoring"] = nombre_tipofactoring
+        context["tipofactoring_id"] = tipofactoring_id
+        context["pk"] = id
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super(CuentaCargoTipoFactoringEdit, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+
+    def get_success_url(self):
+        tasafactoring_id = self.kwargs.get('cargofactoring_id')
+        nombre_tasafactoring = self.kwargs.get('cargofactoring')
+        return reverse_lazy("contabilidad:listacuentascargotiposfactoring"
+            , kwargs={'cargo': tasafactoring_id, 'nombre_cargo':nombre_tasafactoring})
+
+class ListaTransferenciasAGenerar(SinPrivilegios, generic.TemplateView):
+    template_name = "contabilidad/listatransferenciaspendientescontabilizar.html"
+    login_url = 'bases:login'
+    permission_required="contabilidad.add_diario_cabecera"
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        # obtener primer día del mes actual
+        desde = date.today() + timedelta(days=-date.today().day +1)
+        hasta = date.today()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+
+        context = super(ListaTransferenciasAGenerar, self).get_context_data(**kwargs)
+        context["desde"] = desde
+        context["hasta"] = hasta
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
 @login_required(login_url='/login/')
 @permission_required('contabilidad.view_cuentas_especiales', login_url='bases:sin_permisos')
 def BuscarCuentasEspeciales(request):
@@ -1641,7 +1836,8 @@ def GeneraListaCobranzasJSONSalida(cobranza):
         output["Deposito"] = 'Cuenta del cliente'
     else:
         output["Deposito"] = cobranza.cxcuentadeposito.__str__()
-    output["sobrepago"] = cobranza.nsobrepago
+    output["Cobranza"] = cobranza.cxcobranza
+    output["Sobrepago"] = cobranza.nsobrepago
 
     return output
 
@@ -1787,3 +1983,119 @@ def GeneraListaFacturasJSONSalida(transaccion):
         output["Operacion"] = op.__str__()
     
     return output
+
+def GeneraListaProtestosJSON(request, desde = None, hasta= None):
+    # Es invocado desde la url de una tabla bt
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    if desde == 'None':
+        cobranzas = Cheques_protestados.objects\
+            .filter(lcontabilizada = False, leliminado = False
+                    ,empresa = id_empresa.empresa).order_by('dprotesto')
+    else:
+        cobranzas = Cheques_protestados.objects\
+            .filter(lcontabilizada = False, leliminado = False
+                    , dprotesto__gte = desde, dprotesto__lte = hasta
+                    , empresa = id_empresa.empresa)\
+            .order_by('dprotesto')
+        
+    tempBlogs = []
+    for i in range(len(cobranzas)):
+        tempBlogs.append(GeneraListaProtestosJSONSalida(cobranzas[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": cobranzas.count(),
+        "totalNotFiltered": cobranzas.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaProtestosJSONSalida(doc):
+    output = {}
+
+    output["id"] = doc.id
+    output["Fecha"] = doc.dprotesto.strftime("%Y-%m-%d")
+    output["Valor"] = doc.nvalor
+    if doc.cxtipooperacion=='C':
+        cobranza = Cobranzas.objects\
+            .filter(cxcheque = doc.cheque).first()
+        output["Cobranza"] = cobranza.cxcobranza
+    else:
+        cobranza = Recuperaciones_cabecera.objects\
+            .filter(cxcheque = doc.cheque).first()
+        output["Cobranza"] = cobranza.cxrecuperacion
+
+    output["Cliente"] = cobranza.cxcliente.cxcliente.__str__()
+    output["TipoFactoring"] = cobranza.cxtipofactoring.__str__()
+    if cobranza.ldepositoencuentaconjunta:
+        output["Deposito"] = 'Cuenta del cliente'
+    else:
+        output["Deposito"] = cobranza.cxcuentadeposito.__str__()
+    output["sobrepago"] = cobranza.nsobrepago
+
+    return output
+
+@login_required(login_url='/login/')
+@permission_required('contabilidad.add_diario_cabecera', login_url='bases:sin_permisos')
+def GenerarAsientosProtestos(request,ids):
+    resultado=enviarPost("CALL uspGenerarAsientosProtestos( '{0}',{1},'')"
+        .format(ids, request.user.id, ))
+
+    if resultado[0] !='OK':
+        return HttpResponse(resultado)
+    return HttpResponse('OK')
+
+def GeneraListaTransferenciasJSON(request, desde = None, hasta= None):
+    # Es invocado desde la url de una tabla bt
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    if desde == 'None':
+        cobranzas = Transferencias.objects\
+            .filter(lcontabilizado = False, leliminado = False
+                    ,empresa = id_empresa.empresa).order_by('dprotesto')
+    else:
+        cobranzas = Transferencias.objects\
+            .filter(lcontabilizado = False, leliminado = False
+                    , dmovimiento__gte = desde, dmovimiento__lte = hasta
+                    , empresa = id_empresa.empresa)\
+            .order_by('dmovimiento')
+        
+    tempBlogs = []
+    for i in range(len(cobranzas)):
+        tempBlogs.append(GeneraListaTransferenciasJSONSalida(cobranzas[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": cobranzas.count(),
+        "totalNotFiltered": cobranzas.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaTransferenciasJSONSalida(doc):
+    output = {}
+
+    output["id"] = doc.id
+    output["Fecha"] = doc.dmovimiento.strftime("%Y-%m-%d")
+    output["Valor"] = doc.nvalor
+    output["Cliente"] = doc.cuentaorigen.cxcliente.cxcliente.__str__()
+    output["CuentaOrigen"] = doc.cuentaorigen.__str__()
+    output["CuentaDestino"] = doc.cuentadestino.__str__()
+
+    return output
+
+@login_required(login_url='/login/')
+@permission_required('contabilidad.add_diario_cabecera', login_url='bases:sin_permisos')
+def GenerarAsientosTransferencias(request,ids):
+    resultado=enviarPost("CALL uspGenerarAsientosTransferencias( '{0}',{1},'')"
+        .format(ids, request.user.id, ))
+
+    if resultado[0] !='OK':
+        return HttpResponse(resultado)
+    return HttpResponse('OK')
+

@@ -66,14 +66,17 @@ def ImpresionAsignacion(request, asignacion_id):
     if asignacion.cxtipo==FACTURAS_PURAS:
         template_path = 'operaciones/asignacion_facturas_puras_reporte.html'
         documentos = Documentos.objects.filter(cxasignacion = asignacion)\
-                .filter(leliminado = False)
+                .filter(leliminado = False)\
+                .order_by('cxcomprador__cxcomprador__ctnombre')
     else:
         template_path = 'operaciones/asignacion_facturas_accesorios_reporte.html'
         documentos = ChequesAccesorios.objects\
             .filter(leliminado = False
                     , ncanjeadopor = None
-                    , documento__in=Documentos.objects.filter(cxasignacion=asignacion_id))\
-                .filter( leliminado = False)
+                    , documento__in=Documentos.objects\
+                        .filter(cxasignacion=asignacion_id))\
+                .order_by('documento__cxcomprador__cxcomprador__ctnombre')
+                
 
     # datos de tasa gao/dc
     gao = Tasas_factoring.objects\
