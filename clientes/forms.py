@@ -189,10 +189,10 @@ class CuposCompradoresForm(forms.ModelForm):
     class Meta:
         model=Cupos_compradores
         fields=['cxcliente', 'cxcomprador','cxmoneda', 'ncupocartera'
-            , 'cxmodalidadcobranza', 'lactivo', 'lsenotifica']
+            , 'lactivo', 'lsenotifica']
         labels={'cxcliente':'Cliente', 'cxcomprador':'Deudor'
             ,'cxmoneda': 'Moneda', 'ncupocartera':'Cupo de cartera'
-            , 'cxmodalidadcobranza':'Modalidad de cobranza'
+            # , 'cxmodalidadcobranza':'Modalidad de cobranza'
             , 'lactivo': 'Activo', 'lsenotifica':'Se notifica de operación al deudor', }        
 
     def __init__(self, *args, **kwargs):

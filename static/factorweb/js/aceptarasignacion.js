@@ -12,7 +12,7 @@ var iva_dc = capturaValor("iva_dc")
 
 window.onload=function(){
   //  // cerrar side bar
-  //   CerrarSideBar();
+    CerrarSideBar();
  
     // configuar cambios en los campos de fecha y valores y select
     jQuery('#condicion_id')

@@ -129,6 +129,7 @@ class ClientesForm(forms.ModelForm):
             , 'cttelefono2':'Teléfono', 'ctemail':'Dirección email'
             , 'ctemail2':'Dirección email', 'ctcelular':'Celular'
             , 'ctgirocomercial':'Giro comercial'
+            , 'empresa':'Empresa'
         }
 
         widgets={'ctdireccion': forms.Textarea(attrs={'rows': '3'})
@@ -142,14 +143,18 @@ class ClientesForm(forms.ModelForm):
                 'class':'form-control'
             })
         
-    def validate_unique(self):
-        super().validate_unique()
+    def clean(self):
+        try:
+            sc = Clientes.objects.get(cxcliente=self.cleaned_data["cxcliente"]
+                                      , empresa= self.cleaned_data["empresa"]
+            )
 
-        if self.instance.pk is not None:
-            # Don't check for uniqueness if the instance already exists in the database
-            return
-
-        if Clientes.objects.filter(cxcliente=self.cleaned_data['cxcliente']
-                                   ,empresa=self.cleaned_data['empresa']).exists():
-            raise forms.ValidationError('La identificación del cliente ya existe.')
-
+            if not self.instance.pk:
+                print("Identificación ya existe")
+                raise forms.ValidationError("Identificación ya registrada anteriormente")
+            elif self.instance.pk!=sc.pk:
+                print("Cambio no permitido")
+                raise forms.ValidationError("Cambio No Permitido")
+        except Clientes.DoesNotExist:
+            pass
+        return self.cleaned_data

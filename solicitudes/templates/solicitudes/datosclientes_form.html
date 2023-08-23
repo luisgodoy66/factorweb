@@ -33,7 +33,7 @@
                     
                     <div class="row form-group">
                         <div class="col col-md-3">
-                            <label for="id_cxparticipante" class=" form-control-label">{{form.cxcliente.label}}</label></div>
+                            <label for="id_cxcliente" class=" form-control-label">{{form.cxcliente.label}}</label></div>
                         <div class="col-12 col-md-9">
                             {{form.cxcliente}}
                             <small class="form-text text-muted">Máximo 13 caracteres</small></div>
@@ -75,6 +75,26 @@
                             <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
                     </div>
 
+                    <div>
+                        <small class="text-danger">
+
+                        {% if form.errors %}
+                            {% for field in form %}
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        {{ error|escape }}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        
+                            {% if form.non_field_errors%}
+                                {% for error in form.non_field_errors %}
+                                    {{ error|escape }}
+                                {% endfor %}
+                            {% endif %}
+                        {% endif %}
+                        </small>
+                    </div>
                 </div>
                 <!-- columna derecha -->
                 <div class="col-lg-6">
@@ -111,19 +131,9 @@
                             
                 </div>
             </div>    
-            <div>
-            </div>
             <div class="card-footer">
-                {% if form.errors %}
-                    <ul>
-                        {% for field in form %}
-                            {% for error in field.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-                
+                <!-- mostrar los errores del formulario ? -->
+     
                 <a href="{% url 'solicitudes:listasolicitudes' %}" class="btn btn-danger btn-sm">
                     <i class="fa fa-ban"></i> Cancelar
                 </a>

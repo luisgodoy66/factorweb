@@ -579,14 +579,14 @@ def AceptarAsignacion(request, asignacion_id=None):
         if asignacion.cxtipo ==FACTURAS_PURAS:
             condicion_operativa = Condiciones_operativas_cabecera.objects \
                 .filter(cxtipofactoring= tipo_factoring
-                    ,leliminado = False
+                    ,leliminado = False, lactiva = True
                     , empresa = id_empresa.empresa
                     ,laplicaafacturaspuras=True)
         else:
             if asignacion.cxtipo==FACTURAS_CON_ACCESORIOS:
                 condicion_operativa = Condiciones_operativas_cabecera.objects \
                     .filter(cxtipofactoring= tipo_factoring
-                        ,leliminado = False
+                        ,leliminado = False, lactiva = True
                         , empresa = id_empresa.empresa
                         ,laplicaaaccesorios=True)
             else:
@@ -703,7 +703,7 @@ def DetalleCargosAsignacion(request, asignacion_id = None
     dc = Tasas_factoring.objects.filter(cxtasa="DCAR"
                                         , empresa = id_empresa.empresa).first()
     if not dc:
-        return HttpResponse("no encontró registro de tasa de descuento de catera en tabla de tasas de factoring")
+        return HttpResponse("no encontró registro de tasa de descuento de cartera en tabla de tasas de factoring")
 
     if not fecha_desembolso:
         return HttpResponse("No hay fecha de desembolso")
@@ -758,19 +758,22 @@ def DetalleCargosAsignacion(request, asignacion_id = None
                     , leliminado = False)
             
     # calcular cargos
+    resulta='OK'
     for i in range(len(documentos)):
-        CalcularCargosPorDocumento(documentos[i], gao ,dc, fecha_desembolso
-                                    , buscar_anticipo_en_condicion_operativa
-                                    , buscar_gao_en_condicion_operativa
-                                    , buscar_descuento_en_condicion_operativa 
-                                    , porcentaje_anticipo, tasa_gao, tasa_dc
-                                    , asignacion.cxtipo, clase_cliente
-                                    , condicion_id)
+        resulta = CalcularCargosPorDocumento(documentos[i], gao ,dc, fecha_desembolso
+                                , buscar_anticipo_en_condicion_operativa
+                                , buscar_gao_en_condicion_operativa
+                                , buscar_descuento_en_condicion_operativa 
+                                , porcentaje_anticipo, tasa_gao, tasa_dc
+                                , asignacion.cxtipo, clase_cliente
+                                , condicion_id)
+        if resulta.content.decode()!="OK":
+            return HttpResponse(resulta)
     # crea página con datos json de cargos de documentos
     # return HttpResponse(GeneraDetalleParaTabla(asignacion_id, asignacion.cxtipo ))
     # 09-SEP-22 L.G.    no crea datos json, solo grabó datos. otro proceso crea los 
     #                   datos json
-    return HttpResponse("OK")
+    return HttpResponse(resulta)
 
 def CalcularCargosPorDocumento(doc, gao, dc, fecha_desembolso
                             , buscar_anticipo_en_condicion_operativa
@@ -809,8 +812,11 @@ def CalcularCargosPorDocumento(doc, gao, dc, fecha_desembolso
 
         if comprador:
             clase_comprador = comprador.datos_generales_comprador.cxclase
+
+            if clase_comprador ==None:
+                return HttpResponse("No se ha definido la clase del deudor " + comprador.ctnombre)
         else:
-            return HttpResponse("comprador no encontrado")
+            return HttpResponse("Deudor no encontrado")
 
         # ubicar el plazo en las condiciones operativas    
         condicion_plazo = Condiciones_operativas_detalle.objects\
@@ -853,6 +859,8 @@ def CalcularCargosPorDocumento(doc, gao, dc, fecha_desembolso
         doc.ndescuentocartera = (doc.ndescuentocartera * plazo / dc.ndiasperiocidad)
 
     doc.save()
+
+    return HttpResponse("OK")
 
 def GeneraDetalleParaTabla(asignacion_id, tipo_asignacion):
     # es llamado en el proceso DetalleCargosAsignacion
@@ -920,11 +928,13 @@ def DetalleDocumentoADiccionario(doc, tipo_asignacion):
     # los siguientes 3 campos pertenecen al documento y no se encuentran en los cheques
     if tipo_asignacion==FACTURAS_PURAS:
         output["Comprador"] = doc.ctcomprador
+        output["ClaseComprador"] = doc.ctcomprador
         output["Documento"] = doc.ctdocumento
         output["Emision"] = doc.demision.strftime("%Y-%m-%d")
     else:
         # output['id'] = doc.documento.id
         output["Comprador"] = doc.documento.ctcomprador
+        output["ClaseComprador"] = doc.documento.ctcomprador
         output["Documento"] = doc.documento.ctdocumento
         output["Emision"] = doc.documento.demision.strftime("%Y-%m-%d")
 
@@ -1056,7 +1066,6 @@ def EditarTasasDocumentoSolicitud(request, documento_id, fecha_desembolso, asign
         fecha_desembolso = parse_date(fecha_desembolso)
             
         # cuando edita no necesita enviar clase de cliente ni codigo de condicion operativa
-        # si necesita el tipo de asignacion para saber donde grbar las tasas
 
         CalcularCargosPorDocumento(documento, gao ,dc, fecha_desembolso
                                     , False, False, False , nporcentajeanticipo
@@ -1895,3 +1904,17 @@ def GeneraListaDesembolsosJSONSalida(transaccion):
     else:
         output["Asiento"] = None
     return output
+
+
+@login_required(login_url="/login/")
+@permission_required("operaciones.change_condiciones_operativas_cabecera",login_url="/login/")
+def CondicionesOperativasInactivar(request,id):
+    condicion = Condiciones_operativas_cabecera.objects.filter(pk=id).first()
+    if request.method=="POST":
+        if condicion:
+            condicion.lactiva = not condicion.lactiva
+            condicion.save()
+            return HttpResponse("OK")
+        return HttpResponse("FAIL")
+    
+    return HttpResponse("FAIL")

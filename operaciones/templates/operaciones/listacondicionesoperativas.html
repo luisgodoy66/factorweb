@@ -1,11 +1,12 @@
 {% extends 'bases/home.html' %}
+{% load static %}
 {% block breadcrumbs %}
     <div class="col-sm-8">
         <div class="page-header float-right">
             <div class="page-title">
                 <ol class="breadcrumb text-right">
-                    <li><a href="#">Extras</a></li>
                     <li><a href="#">Configuración</a></li>
+                    <li><a href="#">empresa</a></li>
                     <li class="active">condiciones operativas</li>
                 </ol>
             </div>
@@ -21,7 +22,7 @@
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                     <div class="dropdown-menu-content">
-                        <a class="dropdown-item" href="{% url 'operaciones:condicionesoperativas_nueva' %}">Nuevo</a>
+                        <a class="dropdown-item" href="{% url 'operaciones:condicionesoperativas_nueva' %}">Nueva</a>
                         <a class="dropdown-item" href="#">Imprimir</a>
                     </div>
                 </div>
@@ -67,8 +68,17 @@
                             <td>{{ item.laplicaaaccesorios|yesno:"Si,No" }}</td>
                             <td>
                                 <a href="{% url 'operaciones:condicionesoperativas_editar' item.id %}"  title="Editar"
-                                class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>
-                                <a href="#" class="btn btn-danger btn-sm" role="button"><i class="fa fa-exclamation"></i></a>
+                                class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i>
+                                </a>
+                                <button onclick="inactivar({{item.id}})"
+                                {% if item.lactiva %}
+                                    class="btn btn-danger btn-sm"  title="Inactivar" role="button">
+                                    <i class="fa fa-thumbs-down"></i>
+                                {% else %}
+                                    class="btn btn-success btn-sm"  title="Activar" role="button">
+                                    <i class="fa fa-thumbs-up"></i>
+                                {% endif %}
+                                </button>                            
                             </td>
                         </tr>
                         {% endfor %}
@@ -82,4 +92,37 @@
  
 
 {% endblock %}
+{% block js_page %}
+<!-- <script type="text/javascript" src="{% static 'factorweb/js/listacondicionesoperativas.js' %}"></script> -->
+<!-- para tomar el token se prograna el script aqui -->
+<script>
+function inactivar(id)
+{
+  var data = {id:id};
+  data = JSON.stringify(data);
+  var token = '{{csrf_token}}';
+  
+  jQuery.ajax({
+    headers : {"X-CSRFToken": token},
+    type:"POST",
+    url:"/operaciones/estadocondicionoperativa/"+id,
+    data: data,
+    success: function(response){
+      if(response==="OK")
+      {
+        location.reload(true);
+      }
+      else{
+        MensajeError("Error Intentado Cambiar Estado a Cliente");
+      }
+    },
+    error: function(jqXHR, textStatus, errorThrow){
+      console.log(textStatus, errorThrow);
+      MensajeError(errorThrow,'red');
+      CerrarModal();
+    }
+  });
+}
 
+</script>
+{% endblock %}

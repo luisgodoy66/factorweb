@@ -183,7 +183,7 @@ class DetalleCondicionesOperativasForm(forms.ModelForm):
         ]        
         labels={'cxcondicion':'Id. condición'
             ,'cxclasecliente':'Clase de cliente'
-            ,'cxclasecomprador':'Clase de comprador'
+            ,'cxclasecomprador':'Clase de deudor'
             ,'nplazodesde':'Desde'
             ,'nplazohasta':'Hasta','nporcentajeanticipo':'% Anticipo'
             ,'ntasadescuento':'Tasa de descuento'

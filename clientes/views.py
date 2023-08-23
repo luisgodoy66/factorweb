@@ -869,15 +869,22 @@ def DetalleCuentasBancariasJSONOutput(doc):
     output["Banco"] = doc.cxbanco.ctbanco
     output["TipoCuenta"] = doc.cxtipocuenta
     output["Cuenta"] = doc.cxcuenta
-    output["Propia"] = doc.lpropia
-    output["Activa"] = doc.lactiva
+    if doc.lpropia:
+        output["Propia"] = 'Si'
+    else:
+        output["Propia"] = 'No'
+
+    if doc.lactiva:
+        output["Activa"] = 'Si'
+    else:
+        output["Activa"] = 'No'
 
     # determinar si la cuenta es la de transferencia
     x = Cuenta_transferencia.objects.filter(cxcuenta = doc).first()
     if x:
-        output["Default"] = True
+        output["Default"] = 'Si'
     else:
-        output["Default"] = False
+        output["Default"] = None
 
     output["IdPropietario"] = doc.cxidpropietario
     output["Propietario"] =  doc.ctnombrepropietario

@@ -129,7 +129,7 @@ class Cupos_compradores(ClaseModelo):
         max_digits=10, decimal_places=2, null=False, default=0
     )
     cxtipocupo=models.CharField(max_length=1, null=True    )
-    cxmodalidadcobranza=models.CharField(max_length=3, null=False)
+    # cxmodalidadcobranza=models.CharField(max_length=3, null=False)
     lactivo=models.BooleanField(default=True)
     lsenotifica=models.BooleanField(default=False)
 

@@ -195,7 +195,7 @@
                             <li><i class="menu-icon fa fa-building"></i><a href="{% url 'empresa:datosempresa' user.usuario_empresa.get.empresa.id %}">Datos de la empresa</a></li>
                             <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'empresa:listatiposfactoring' %}">Tipos de factoring</a></li>
                             <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'empresa:listatasasfactoring' %}">Tasas de factoring</a></li>
-                            <li><i class="menu-icon fa fa-tasks"></i><a href="{% url 'operaciones:listacondicionesoperativas' %}">Condiciones</a></li>
+                            <li><i class="menu-icon fa fa-tasks"></i><a href="{% url 'operaciones:listacondicionesoperativas' %}">Condiciones operati.</a></li>
                             <li><i class="menu-icon fa fa-money"></i><a href="{% url 'empresa:listacuentasbancarias' %}">Cuentas bancarias</a></li>
                             <li><i class="menu-icon fa fa-dot-circle-o"></i><a href="{% url 'empresa:listapuntosemision' %}">Puntos de emisión</a></li>
                             <li><i class="menu-icon fa fa-map-marker"></i><a href="{% url 'empresa:listalocalidades' %}">Localidades</a></li>
@@ -207,7 +207,7 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
                             <i class="menu-icon fa fa-cog"></i>Tablas</a>
                         <ul class="sub-menu children dropdown-menu">
-                            <li><i class="menu-icon fa fa-star"></i><a href="{% url 'empresa:listaclasesparticipantes' %}">Clases de clientes</a></li>
+                            <li><i class="menu-icon fa fa-star"></i><a href="{% url 'empresa:listaclasesparticipantes' %}">Clases participantes</a></li>
                             <li><i class="menu-icon fa fa-building"></i><a href="{% url 'pais:listabancos' %}">Bancos</a></li>
                             <li><i class="menu-icon fa fa-calendar"></i><a href="{% url 'pais:listaferiados' %}">Días feriados</a></li>
                             <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'operaciones:listamaestromovimientos' %}">Movimientos</a></li>
@@ -238,7 +238,7 @@
                             <!-- <li><i class="fa fa-file-text"></i><a href="{% url 'contabilidad:listadesembolsospendientes' %} ">Generar provisiones</a></li> -->
                             <li><i class="fa fa-file-text"></i><a href="{% url 'contabilidad:listacobranzaspendientescontabilizar' %} ">Generar cobranzas</a></li>
                             <li><i class="fa fa-file-text"></i><a href="{% url 'contabilidad:listaprotestospendientescontabilizar' %} ">Generar protestos</a></li>
-                            <li><i class="fa fa-file-text"></i><a href="{% url 'contabilidad:listatransferenciaspendientescontabilizar' %} ">Generar transferencias</a></li>
+                            <li><i class="fa fa-file-text"></i><a href="{% url 'contabilidad:listatransferenciaspendientescontabilizar' %} ">Transferencias</a></li>
                         </ul>
                     </li>
                     <li class="menu-item-has-children dropdown">
@@ -323,11 +323,11 @@
 
     <!-- agregado para datetime picker -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js" integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>      
-    <script>
+    <!-- <script>
         jQuery(document).ready(function(){
             jQuery.datetimepicker.setlocale('es');
         });
-    </script>
+    </script> -->
      <!-- /agregado para datetime picker -->
 
      <!-- rutinas generales -->

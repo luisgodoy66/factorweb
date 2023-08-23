@@ -15,7 +15,7 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     GeneraListaCargosPendientesClienteJSON, GeneraListaChequesQuitadosClienteJSON,\
     GeneraListaProtestosPendientesClienteJSON, GeneraListaCanjesClienteJSON,\
     CondicionesOperativasUpdate, DatosCondicionOperativaNueva, DesembolsosConsulta,\
-    GeneraListaDesembolsosJSON
+    GeneraListaDesembolsosJSON, CondicionesOperativasInactivar
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
@@ -67,6 +67,8 @@ urlpatterns = [
         DetalleCondicionOperativa, name='detallecondicionoperativa'),
     path('eliminardetallecondicionoperativa/<int:detalle_id>',\
         EliminarDetalleCondicionOperativa, name='eliminardetallecondicionoperativa'),
+    path('estadocondicionoperativa/<int:id>', CondicionesOperativasInactivar, \
+         name='condicionesoerativas_estado'),
 # asignaciones
     path('listaasignaciones/',AsignacionesView.as_view(), \
         name='listaasignaciones'),

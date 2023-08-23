@@ -21,10 +21,11 @@ class Home(LoginRequiredMixin, generic.TemplateView):
 class MixinFormInvalid:
     def form_invalid(self,form):
         response = super().form_invalid(form)
-        if self.request.is_ajax():
-            return JsonResponse(form.errors, status=400)
-        else:
-            return response
+        if response.status_code != 200:
+            if self.request.is_ajax():
+                return JsonResponse(form.errors, status=400)
+            # else:
+        return response
 
 class SinPrivilegios(LoginRequiredMixin, PermissionRequiredMixin, MixinFormInvalid):
     login_url = 'bases:login'
