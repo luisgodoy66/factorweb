@@ -303,3 +303,104 @@ function EliminarDebitoCuentaCompartida(nd_id,){
   })
     
 }
+
+function CargaXMLfactura(xmlFile){
+  const file = xmlFile.files[0];
+  const reader = new FileReader();
+  var parser = new DOMParser();
+  reader.readAsText(file);
+  reader.onload = function() {
+      const xml = reader.result;
+      // process the xml here
+      var xmlDoc = parser.parseFromString(xml,"text/xml");
+      if (xmlDoc.documentElement.localName != 'autorizacion'){
+          alert('No corresponde')
+      }
+      else{
+          let estado=xmlDoc.getElementsByTagName("estado")[0].childNodes[0].nodeValue ;
+
+          if (estado != 'AUTORIZADO'){
+              alert('Documento no tiene estado de autorizado')
+          }
+          else{
+              comprobante = xmlDoc.getElementsByTagName("comprobante")[0].childNodes[0].nodeValue
+
+              xmlFactura = parser.parseFromString(comprobante,"text/xml")
+
+              let infoTributaria=xmlFactura.getElementsByTagName("infoTributaria")[0].childNodes ;
+
+              for (let i in infoTributaria ){
+                  switch (infoTributaria[i].nodeName ){
+                      case "estab":
+                      inicializaValor("id_ctserie1",infoTributaria[i].childNodes[0].nodeValue)
+                      case "ptoEmi":
+                      inicializaValor("id_ctserie2",infoTributaria[i].childNodes[0].nodeValue)
+                      case "secuencial":
+                      inicializaValor("id_ctdocumento",infoTributaria[i].childNodes[0].nodeValue)
+                  }
+              }
+
+              let infoFactura=xmlFactura.getElementsByTagName("infoFactura")[0].childNodes ;
+              
+              for (let i in infoFactura ){
+                  switch (infoFactura[i].nodeName){
+                      case "razonSocialComprador":
+                          inicializaValor("id_ctcomprador",infoFactura[i].childNodes[0].nodeValue);
+                          break;
+                      case "identificacionComprador":
+                          inicializaValor("id_cxcomprador",infoFactura[i].childNodes[0].nodeValue);
+                          break;
+                      case "totalSinImpuestos":
+                          inicializaValor("id_nvalorantesiva",infoFactura[i].childNodes[0].nodeValue);
+                          break;
+                      case "fechaEmision":
+                          var fechaEmision = infoFactura[i].childNodes[0].nodeValue
+                          var dateParts = fechaEmision.split("/");
+                          var fecha= dateParts[2] + "-" + (dateParts[1]) + "-" + dateParts[0];
+                          inicializaValor("id_demision",fecha)
+                          break;
+                      case "tipoIdentificacionComprador":
+                          var tipo =infoFactura[i].childNodes[0].nodeValue
+                          switch (tipo) {
+                              case '04': inicializaValor("cxtipoid",'R'); break;
+                              case '05': inicializaValor("cxtipoid",'C'); break;
+                              case '06': inicializaValor("cxtipoid",'P'); break;
+                              case '08': inicializaValor("cxtipoid",'O'); break;
+                          }
+                          break;
+                  }
+                  
+              }
+              let detalles =xmlFactura.getElementsByTagName("detalles")[0].childNodes ;
+              valorIva=0;
+
+              for (let i in detalles ){
+                  detalle1=detalles[i].childNodes
+                  for (let j in detalle1){
+                      if (detalle1[j].nodeName=="impuestos"){
+                          impuesto1=detalle1[j].childNodes
+                          for (let k in impuesto1 ){
+                              nodo = impuesto1[k].childNodes
+                              iva_imp=false
+                              for (let l in nodo){
+                                  if(nodo[l].nodeName=='codigo'){
+                                      if (nodo[l].childNodes[0].nodeValue='2'){iva_imp = true}
+                                  }
+                                  if (iva_imp & nodo[l].nodeName== "valor"){
+                                      valorIva += parseFloat((parseFloat(nodo[l].childNodes[0].nodeValue)*1).toFixed(3))
+                                      }
+                              }
+                          }
+                      }
+                  }
+              }
+              inicializaValor("id_niva",valorIva)
+              total=jQuery("#id_nvalorantesiva").val()
+              total = +total+valorIva;
+              inicializaValor("id_ntotal",total.toFixed(2))
+              
+          }
+      }
+};
+
+}

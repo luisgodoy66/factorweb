@@ -90,7 +90,13 @@
                         </div>  
     
                     </div>
+                    <!-- parte derecha -->
                     <div class="col-md-6">
+                        <div class="row form-group">
+                            <input type="file" id="xmlFile" accept=".xml">
+
+                        </div>
+
                         <div class="row form-group">
                             <div class="col-md-7"><label for="id_cxtipocliente" class=" form-control-label">
                                 {{ form_documento.nvalorantesiva.label}}</label>
@@ -164,8 +170,10 @@
     </div>
     <script>
 
-        // objeto_fechas("#id_demision");
-        // objeto_fechas("#id_dvencimiento");
+        const xmlFile = document.getElementById('xmlFile');
+        xmlFile.addEventListener('change', function() {
+            CargaXMLfactura(xmlFile);
+        });
 
         // configuar cambios en ls campos de valores
         jQuery('#id_nvalorantesiva, #id_niva, #id_nretencioniva, #id_nretencionrenta, #id_nvalornonegociado')

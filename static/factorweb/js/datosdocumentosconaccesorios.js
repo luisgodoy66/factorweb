@@ -1,3 +1,4 @@
+const xmlFile = document.getElementById('xmlFile');
 window.onload=function(){
 
     // configuar cambios en los campos de valores
@@ -6,13 +7,12 @@ window.onload=function(){
             calcular_factura();
         });
 
-    // // inicializar valores
-    // objeto_fechas("#id_demision");
-    // objeto_fechas("#id_dvencimiento");
+        alert('inico')
+        xmlFile.addEventListener('change', function() {
+          CargaXMLfactura(xmlFile)
+        })
+        alert('fin')
     
-    // cerrar side bar
-    // CerrarSideBar();
-
     // validar antes de enviar
     jQuery("#frmSolicitud").submit(function(e){
 

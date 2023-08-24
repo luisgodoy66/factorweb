@@ -4,12 +4,7 @@ var cliente_id = capturaValor("id_cliente")
 var asignacion_id = capturaValor("asignacion_id")
 
 window.onload=function(){
-
-    // // inicializar tabla de documwntos
     initTable();
-    // // cerrar side bar
-    // CerrarSideBar();
-
 };
 
 window.operateEvents = {
