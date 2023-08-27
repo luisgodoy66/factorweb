@@ -37,8 +37,10 @@ class CuentasView(SinPrivilegios, generic.ListView):
         return qs
     
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(CuentasView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -58,9 +60,11 @@ class CuentasBancariasNew(SinPrivilegios, generic.CreateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(CuentasBancariasNew, self).get_context_data(**kwargs)
         context["nueva"]=True
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -84,12 +88,14 @@ class CuentasBancariasEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         pk = self.kwargs.get('pk')
 
         context = super(CuentasBancariasEdit, self).get_context_data(**kwargs)
         context["nueva"]=False
         context["id"]=pk
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -133,8 +139,10 @@ class CobranzasPorConfirmarView(SinPrivilegios, generic.ListView):
         return cobranzas.union(recuperaciones)
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(CobranzasPorConfirmarView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -153,8 +161,10 @@ class CargosPendientesView(SinPrivilegios, generic.ListView):
                     , notadedebito__nsaldo__gt = 0)
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(CargosPendientesView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -168,6 +178,7 @@ class DebitoBancarioEdit(SinPrivilegios, generic.UpdateView):
     permission_required="cobranzas.change_debitoscuentasconjuntas"
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         pk = self.kwargs.get('pk')
         # obtener el id de la nota de debito
         nd = DebitosCuentasConjuntas.objects.filter(pk=pk).first()
@@ -177,7 +188,8 @@ class DebitoBancarioEdit(SinPrivilegios, generic.UpdateView):
         context["notadedebito"]=nd.notadedebito
         context["cuentaconjunta"]=nd.cuentabancaria
         context["cliente"]=nd.notadedebito.cxcliente
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -235,8 +247,10 @@ class TransferenciasView(SinPrivilegios, generic.ListView):
         return qs
     
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(TransferenciasView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -299,8 +313,10 @@ class TansferenciaEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(TansferenciaEdit, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -317,7 +333,8 @@ def ConfirmarCobranza(request, cobranza_id, tipo_operacion, cuenta_conjunta):
 
     cc = Cuentas_bancarias.objects.filter(pk = cuenta_conjunta).first()
 
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
     
     contexto={"id_operacion": cobranza_id
         , "form_cargos" : DebitosForm
@@ -373,7 +390,9 @@ def AceptarConfirmacion(request):
 @permission_required('operaciones.add_notas_debito_cabecera', login_url='bases:sin_permisos')
 def DebitoBancarioSinCobranza(request):
     template_name = "cuentasconjuntas/datosdebitobancario_form.html"
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
 
     contexto={ "form" : DebitosNuevosForm
               , "solicitudes_pendientes" : sp    }
@@ -472,7 +491,8 @@ def DatosTransferencia(request, pk = None):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     form = TransferenciasForm(empresa = id_empresa.empresa)
     
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
     
     contexto={'form':form
             , 'solicitudes_pendientes':sp

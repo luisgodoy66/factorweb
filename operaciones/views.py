@@ -48,9 +48,10 @@ class DatosOperativosView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(DatosOperativosView, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P'
-                                                        ,leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -67,9 +68,10 @@ class AsignacionesView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(AsignacionesView, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects\
-            .filter(cxestado='P', leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -95,8 +97,8 @@ class AsignacionesConsulta(SinPrivilegios, generic.ListView):
         context["hasta"] =hasta
         context["clientes"] = ModeloCliente.Datos_generales.objects\
             .filter(empresa = id_empresa.empresa)
-        sp = ModelosSolicitud.Asignacion.objects\
-            .filter(cxestado='P', leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -115,9 +117,10 @@ class AsignacionesPendientesDesembolsarView(SinPrivilegios, generic.ListView):
                                          , ddesembolso__lte = date.today())
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(AsignacionesPendientesDesembolsarView, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects\
-            .filter(cxestado='P', leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -134,8 +137,10 @@ class MaestroMovimientosView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(MaestroMovimientosView, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -156,9 +161,10 @@ class MaestroMovimientoNew(SinPrivilegios, generic.CreateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(MaestroMovimientoNew, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects\
-            .filter(cxestado='P', leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -176,9 +182,10 @@ class MaestroMovimientoEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(MaestroMovimientoEdit, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects\
-            .filter(cxestado='P', leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -196,9 +203,10 @@ class CondicionesOperativasView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(CondicionesOperativasView, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects\
-            .filter(cxestado='P', leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -221,8 +229,10 @@ class CondicionesOperativasUpdate(SinPrivilegios, generic.UpdateView):
         return kwargs
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(CondicionesOperativasUpdate, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -239,8 +249,10 @@ class AnexosView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(AnexosView, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -254,14 +266,16 @@ class AnexosNew(SinPrivilegios, generic.CreateView):
     permission_required="operaciones.add_anexos"
 
     def form_valid(self, form):
-        form.instance.cxusuariocrea = self.request.user
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.cxusuariocrea = self.request.user
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(AnexosNew, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -276,14 +290,16 @@ class AnexosEdit(SinPrivilegios, generic.UpdateView):
     permission_required="operaciones.change_anexos"
 
     def form_valid(self, form):
-        form.instance.cxusuariocrea = self.request.user
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.cxusuariocrea = self.request.user
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(AnexosEdit, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -301,8 +317,10 @@ class EstadosOperativosView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(EstadosOperativosView, self).get_context_data(**kwargs)
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -314,16 +332,15 @@ class DesembolsosConsulta(SinPrivilegios, generic.TemplateView):
     permission_required="operaciones.view_desembolsos"
 
     def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        # obtener primer día del mes actual
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         desde = date.today() + timedelta(days=-date.today().day +1)
         hasta = date.today()
 
         context = super(DesembolsosConsulta, self).get_context_data(**kwargs)
         context["desde"] = desde
         context["hasta"] = hasta
-        sp = ModelosSolicitud.Asignacion.objects\
-            .filter(cxestado='P', leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
  
@@ -354,7 +371,8 @@ def DesembolsarAsignacion(request, pk, cliente_id):
             }
         formulario = DesembolsarForm(e, empresa = id_empresa.empresa)
 
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
 
         contexto={'liquidacion':asignacion.dnegociacion
             , 'instruccion_de_pago':asignacion.ctinstrucciondepago
@@ -475,7 +493,8 @@ def DatosOperativos(request, cliente_id=None):
         else:
             formulario=DatosOperativosForm(empresa = id_empresa.empresa)
     
-    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
     
     contexto={'nombrecliente':cliente
             , 'form_cliente':formulario
@@ -643,7 +662,8 @@ def AceptarAsignacion(request, asignacion_id=None):
     else:
         return HttpResponse("No se ha encontrado datos operativos del cliente.")
 
-    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
 
     contexto={'form_asignacion':formulario,
         'asignacion': asignacion,
@@ -1109,7 +1129,8 @@ def DatosCondicionOperativaNueva(request):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     template_name="operaciones/datoscondicionesoperativas_form.html"
         
-    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
 
     contexto={'form': CondicionesOperativasForm(empresa = id_empresa.empresa),
               'solicitudes_pendientes':sp
@@ -1128,7 +1149,8 @@ def DatosCondicionesOperativas(request,condicion_id=None
     if request.method=='GET':
         condicion = Condiciones_operativas_cabecera.objects.filter(pk=condicion_id).first()
         
-    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
 
     contexto={'form_detalle': DetalleCondicionesOperativasForm(empresa=id_empresa.empresa),
               'condicion_id':condicion_id,
@@ -1522,7 +1544,9 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
         estado_cliente = 'Bloqueado'
         color_estado = 4
 
-    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
 
     context={
         'cliente_id':cliente_id,

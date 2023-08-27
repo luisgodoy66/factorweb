@@ -1,5 +1,8 @@
 from django import forms
 from .models import Empresas
+from django.forms.widgets import PasswordInput
+from django.contrib.auth.models import User
+
 
 class EmpresaForm(forms.ModelForm):
     class Meta:
@@ -19,3 +22,30 @@ class EmpresaForm(forms.ModelForm):
                 'class':'form-control'
             })
 
+class Userform(forms.ModelForm):
+    
+    class Meta:
+        model = User
+        fields = ['email','first_name','last_name']
+        widget = {'email': forms.EmailInput, }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args,**kwargs)
+        for field in iter(self.fields):
+            self.fields[field].widget.attrs.update({
+                'class':'form-control'
+            })
+
+class UserPasswordForm(forms.ModelForm):
+    password = forms.CharField(widget=PasswordInput)
+    
+    class Meta:
+        model = User
+        fields = ['password']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args,**kwargs)
+        for field in iter(self.fields):
+            self.fields[field].widget.attrs.update({
+                'class':'form-control'
+            })

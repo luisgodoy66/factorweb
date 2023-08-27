@@ -10,21 +10,24 @@ from django.http import HttpResponse
 from django.db import transaction
 from django.utils.dateparse import parse_date
 from django.urls import reverse_lazy
+from datetime import datetime, timedelta
 
 from .forms import AsignacionesForm, ChequesForm, DocumentosForm\
     , ClientesForm
 
-from empresa.models import Tipos_factoring
+from empresa.models import Tipos_factoring, Datos_participantes
 from .models import Asignacion, ChequesAccesorios, Documentos, Clientes
 from clientes.models import Datos_compradores
-from empresa.models import Datos_participantes
 from pais.models import Bancos, Feriados
-from bases.models import Usuario_empresa
+from bases.models import Usuario_empresa, Empresas
 
 from bases.views import enviarPost, SinPrivilegios
 
 import datetime
 
+FACTURAS_PURAS = 'F'
+FACTURAS_CON_ACCESORIOS = 'A'
+DIAS_PRUEBA_SISTEMA =60
 # Create your views here.
 class SolicitudesView(SinPrivilegios, generic.ListView):
     model = Asignacion
@@ -41,8 +44,10 @@ class SolicitudesView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(SolicitudesView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -66,8 +71,10 @@ class AsignacionFacturasPurasView(SinPrivilegios, generic.UpdateView):
         return kwargs
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(AsignacionFacturasPurasView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
        
@@ -91,8 +98,10 @@ class AsignacionConAccesoriosView(SinPrivilegios, generic.UpdateView):
         return kwargs
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(AsignacionConAccesoriosView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -113,8 +122,10 @@ class ClienteCrearView(SinPrivilegios, generic.CreateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(ClienteCrearView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -125,7 +136,8 @@ def DatosAsignacionFacturasPurasNueva(request):
 
     template_name="solicitudes/datosasignacionfacturaspuras_form.html"
     
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                    empresa = id_empresa.empresa).count()
 
     contexto={'form': AsignacionesForm(empresa = id_empresa.empresa),
             'clientes' : Clientes.objects.all() ,
@@ -141,7 +153,8 @@ def DatosAsignacionConAccesoriosNueva(request):
 
     template_name="solicitudes/datosasignacionconaccesorios_form.html"
     
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
 
     contexto={'form': AsignacionesForm(empresa = id_empresa.empresa),
             'clientes' : Clientes.objects.all(),
@@ -197,7 +210,7 @@ def DatosFacturasPuras(request, cliente_id=None
 
         id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
         
-        tipoasignacion = 'F'
+        tipoasignacion = FACTURAS_PURAS
 
         if not cliente_id:
             # cuando es nuevo no hay parametros, se toma del request
@@ -348,6 +361,15 @@ def DatosFacturasPuras(request, cliente_id=None
                 if datoscomprador:
                     datoscomprador.save()
 
+            # grabar fecha de inicio de operaciones
+            factor = Empresas.objects.filter(pk = id_empresa.empresa.id).first()
+            if not factor.diniciooperaciones:
+                factor.diniciooperaciones = datetime.datetime.today()
+                if factor.lgratis:
+                    fin = datetime.datetime.today()+timedelta(days=DIAS_PRUEBA_SISTEMA)
+                    factor.dfinpruebas = fin
+                factor.save()
+
         return redirect("solicitudes:asignacionfacturaspuras_editar"
                         , pk= asignacion_id, )
 
@@ -368,7 +390,7 @@ def EliminarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
 
             # cambiar P por F(acturas puras)
             # if tipo_asignacion=="P":
-            if tipo_asignacion=='F':
+            if tipo_asignacion==FACTURAS_PURAS:
                 doc = Documentos.objects.filter(pk=documento_id).first()
             else:
                 # si es cheque actualizar el valor no negociado del documento
@@ -544,7 +566,8 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
     # aunque se envía el form de cheques, el mismo no se utliza con submit
     # por lo que no se validan los campos pero sirve para la lista 
     
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
 
     contexto={'form_asignacion':formulario,
         'form_documento':DocumentosForm,
@@ -560,7 +583,7 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
 
         idcliente = request.POST.get("id_cliente")
         tipo_factoring = request.POST.get("id_tipofactoring")
-        tipoasignacion = "A"
+        tipoasignacion = FACTURAS_CON_ACCESORIOS
 
         cliente = Clientes.objects.get(pk=idcliente)
 

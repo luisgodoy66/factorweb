@@ -96,17 +96,30 @@
 
                 <div class="col-sm-5">
                     <div class="user-area dropdown float-right">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"  aria-haspopup="true" aria-expanded="false" title="Ayuda">
+                            <!-- <img class="user-avatar rounded-circle" src="{% static 'factorweb/images/admin.png' %}" alt="User Avatar"> -->
+                            <i class="fa fa-question-circle"></i>
+                        </a>
+                        <div class="user-menu dropdown-menu" >
+                            
+                            <a class="nav-link" href="https://www.codigobambu.store/preguntas-frecuentes" target="ayuda-margarita">
+                                <i class="fa fa-external-link"></i> Preguntas frecuentes</a>
+                        </div>
+                    </div>
+
+                    <div class="user-area dropdown float-right">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Usuario">
                             <!-- <img class="user-avatar rounded-circle" src="{% static 'factorweb/images/admin.png' %}" alt="User Avatar"> -->
                             {{ user.username}}
                         </a>
 
                         <div class="user-menu dropdown-menu">
-                            <!-- <a class="nav-link" href="#"><i class="fa fa-user"></i> Perfil {{ user.username }}</a> -->
 
                             <!-- <a class="nav-link" href="#"><i class="fa fa-user"></i> Notifications <span class="count">13</span></a>
                             <a class="nav-link" href="#"><i class="fa fa-cog"></i> Settings</a> -->
 
+                            <a class="nav-link" href="{% url 'bases:usuario_editar' user.id %}"><i class="fa fa-edit"></i> Editar</a>
+                            <a class="nav-link" href="{% url 'bases:usuario_password' user.id %}"><i class="fa fa-key"></i> Password</a>
                             <a class="nav-link" href="{% url 'bases:logout' %}"><i class="fa fa-power-off"></i> Logout</a>
                         </div>
                     </div>
@@ -161,4 +174,33 @@
 {% endblock %}
 
 {% block content %}
+            {% block alerta %}
+            {% if user.usuario_empresa.get.empresa.lbloqueada %}
+            <div class="col-sm-12">
+                <div class="alert  alert-danger alert-dismissible fade show" role="alert">
+                    <span class="badge badge-pill badge-danger">Estado bloqueado</span>
+                        Para continuar usando Margarita comuníquese con Código Bambú.
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+            {% else %}
+                {% if user.usuario_empresa.get.empresa.lgratis %}
+                <div class="col-sm-12">
+                    <div class="alert  alert-info alert-dismissible fade show" role="alert">
+                        <span class="badge badge-pill badge-info">Período de prueba</span>
+                        {% if user.usuario_empresa.get.empresa.dfinpruebas %}
+                            El período termina el {{user.usuario_empresa.get.empresa.dfinpruebas }}
+                        {% else %}
+                            Tendrá 60 días para probar el sistema
+                        {% endif %}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            {% endif %}
+            {% endblock alerta %}
 {% endblock %}

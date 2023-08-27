@@ -30,8 +30,10 @@ class TiposFactoringView(SinPrivilegios, generic.ListView):
         return qs
     
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(TiposFactoringView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -51,8 +53,10 @@ class TipoFactoringNew(SinPrivilegios, generic.CreateView):
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(TipoFactoringNew, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -70,8 +74,10 @@ class TipoFactoringEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(TipoFactoringEdit, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -90,8 +96,10 @@ class TasasFactoringView(SinPrivilegios, generic.ListView):
         return qs
     
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(TasasFactoringView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -105,14 +113,16 @@ class TasaFactoringNew(SinPrivilegios, generic.CreateView):
     permission_required="empresa.add_tasas_factoring"
 
     def form_valid(self, form):
-        form.instance.cxusuariocrea = self.request.user
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.cxusuariocrea = self.request.user
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(TasaFactoringNew, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -130,8 +140,10 @@ class TasaFactoringEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(TasaFactoringEdit, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -150,8 +162,10 @@ class ClasesParticipanteView(SinPrivilegios, generic.ListView):
         return qs
     
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(ClasesParticipanteView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -165,14 +179,16 @@ class ClasesParticipanteNew(SinPrivilegios, generic.CreateView):
     permission_required="empresa.add_clases_cliente"
 
     def form_valid(self, form):
-        form.instance.cxusuariocrea = self.request.user
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.cxusuariocrea = self.request.user
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(ClasesParticipanteNew, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -190,8 +206,10 @@ class CuentasBancariasView(SinPrivilegios, generic.ListView):
         return qs
     
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(CuentasBancariasView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -217,8 +235,10 @@ class CuentaBancariaNew(SinPrivilegios, generic.CreateView):
         return kwargs
     
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(CuentaBancariaNew, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
        
@@ -242,8 +262,10 @@ class CuentaBancariaEdit(SinPrivilegios, generic.UpdateView):
         return kwargs
     
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(CuentaBancariaEdit, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -262,8 +284,10 @@ class LocalidadesView(SinPrivilegios, generic.ListView):
         return qs
     
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(LocalidadesView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -283,8 +307,10 @@ class LocalidadesNew(SinPrivilegios, generic.CreateView):
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(LocalidadesNew, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -302,8 +328,10 @@ class LocalidadesEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(LocalidadesEdit, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -389,7 +417,9 @@ class DatosEmpresaEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(DatosEmpresaEdit, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context

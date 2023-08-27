@@ -17,7 +17,9 @@
     <div class="card bg-flat-color-0">
         <div class="card-body">
             <div class="dropdown float-right">
-                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                <button class="btn bg-transparent dropdown-toggle theme-toggle " 
+                    {% if user.usuario_empresa.get.empresa.lbloqueada %} disabled {% endif %}
+                    type="button" id="dropdownMenuButton1" data-toggle="dropdown">
                     <i class="fa fa-bars"></i>
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
@@ -25,7 +27,6 @@
                         <a class="dropdown-item" href="{% url 'solicitudes:cliente_nuevo' %}">Nuevo solicitante</a>
                         <a class="dropdown-item" href="{% url 'solicitudes:asignacionfacturaspuras_nueva' %}">Nueva solicitud de facturas puras</a>
                         <a class="dropdown-item" href="{% url 'solicitudes:asignacionconaccesorios_nueva' %}">Nueva solicitud de facturas con accesorios</a>
-                        <a class="dropdown-item" href="#">Imprimir</a>
                     </div>
                 </div>
             </div>

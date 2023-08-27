@@ -55,7 +55,9 @@ class LineasView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False, empresa = id_empresa.empresa).count()
         context = super(LineasView, self).get_context_data(**kwargs)
         context["solicitudes_pendientes"]=sp
 
@@ -74,7 +76,9 @@ class CuentasBancariasView(SinPrivilegios, generic.ListView):
                                               , empresa = id_empresa.empresa)
 
     def get_context_data(self, **kwargs):
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False, empresa = id_empresa.empresa).count()
         context = super(CuentasBancariasView, self).get_context_data(**kwargs)
         context["solicitudes_pendientes"]=sp
 
@@ -177,7 +181,9 @@ class CuentasBancariasDeudoresView(SinPrivilegios, generic.ListView):
                     , empresa = id_empresa.empresa)
 
     def get_context_data(self, **kwargs):
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False, empresa = id_empresa.empresa).count()
         context = super(CuentasBancariasDeudoresView, self).get_context_data(**kwargs)
         context["solicitudes_pendientes"]=sp
 
@@ -206,7 +212,9 @@ class CuentasBancariasDeudorNew(SinPrivilegios, generic.CreateView):
         return kwargs
        
     def get_context_data(self, **kwargs):
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False, empresa = id_empresa.empresa).count()
         context = super(CuentasBancariasDeudorNew, self).get_context_data(**kwargs)
         context["solicitudes_pendientes"]=sp
 
@@ -296,7 +304,9 @@ class CompradoresView(SinPrivilegios, generic.ListView):
         return qs
     
     def get_context_data(self, **kwargs):
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False, empresa = id_empresa.empresa).count()
         context = super(CompradoresView, self).get_context_data(**kwargs)
         context["solicitudes_pendientes"]=sp
 
@@ -315,7 +325,9 @@ class CuposCompradoresView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False, empresa = id_empresa.empresa).count()
         context = super(CuposCompradoresView, self).get_context_data(**kwargs)
         context["solicitudes_pendientes"]=sp
 
@@ -382,7 +394,9 @@ class ClientesSolicitudesView(SinPrivilegios, generic.ListView):
                     , empresa = id_empresa.empresa)
 
     def get_context_data(self, **kwargs):
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False, empresa = id_empresa.empresa).count()
         context = super(ClientesSolicitudesView, self).get_context_data(**kwargs)
         context["solicitudes_pendientes"]=sp
 
@@ -486,7 +500,8 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
                     }
                     formulario=ParticipanteForm(e)
 
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False, empresa = id_empresa.empresa).count()
     
     contexto={'datosparticipante':datosparticipante
             , 'form_participante':formulario
@@ -599,6 +614,10 @@ def DatosClienteNatural(request, cliente_id=None):
     cliente = Datos_generales.objects\
         .filter(cxcliente=cliente_id).first()
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False, empresa = id_empresa.empresa).count()
+
     if request.method=='GET':
         datoscliente = Personas_naturales.objects\
             .filter(cxcliente=cliente_id).first()
@@ -619,8 +638,6 @@ def DatosClienteNatural(request, cliente_id=None):
         else:
             formulario=PersonaNaturalForm()
     
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
-
     contexto={'nombrecliente':cliente
             , 'form_cliente':formulario
             , 'solicitudes_pendientes':sp
@@ -720,7 +737,9 @@ def DatosClienteJuridico(request, cliente_id=None):
         else:
             formulario=PersonaJuridicaForm()
 
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False, empresa = id_empresa.empresa).count()
 
     contexto={'nombrecliente':cliente
               , 'datoscliente':datoscliente
@@ -835,8 +854,12 @@ def DatosClienteJuridico(request, cliente_id=None):
 @permission_required('clientes.view_cuentas_bancarias', login_url='bases:sin_permisos')
 def CuentasBancariasCliente(request, cliente_id):
     template_name = "clientes/listacuentasbancariascliente.html"
+
     cliente = Datos_generales.objects.filter(cxcliente=cliente_id).first()
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False, empresa = id_empresa.empresa).count()
+    
     contexto={'cliente':cliente
               , 'solicitudes_pendientes':sp
             }
@@ -986,7 +1009,9 @@ def DatosCompradores(request, comprador_id=None):
         else:
             formulario=ParticipanteForm()
     
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False, empresa = id_empresa.empresa).count()
             
     contexto={'datosparticipante':datosparticipante
             , 'form_participante':formulario

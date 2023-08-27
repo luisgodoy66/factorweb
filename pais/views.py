@@ -23,8 +23,10 @@ class BancosView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(BancosView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -44,8 +46,10 @@ class BancosNew(SinPrivilegios, generic.CreateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(BancosNew, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -63,8 +67,10 @@ class BancosEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(BancosEdit, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -81,8 +87,10 @@ class FeriadosView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(FeriadosView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -102,8 +110,10 @@ class FeriadosNew(SinPrivilegios, generic.CreateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(FeriadosNew, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -121,7 +131,9 @@ class FeriadosEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(FeriadosEdit, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context

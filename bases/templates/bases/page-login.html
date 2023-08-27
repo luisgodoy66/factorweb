@@ -4,14 +4,14 @@
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
 <!--[if gt IE 8]><!-->
-<html class="no-js" lang="en">
+<html class="no-js" lang="es">
 <!--<![endif]-->
 
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Sufee Admin - HTML5 Admin Template</title>
-    <meta name="description" content="Sufee Admin - HTML5 Admin Template">
+    <title>Margarita - login</title>
+    <meta name="description" content="Margarita - login">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="apple-touch-icon" href="apple-icon.png">
@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="{% static 'factorweb/vendors/font-awesome/css/font-awesome.min.css' %}">
     <link rel="stylesheet" href="{% static 'factorweb/vendors/themify-icons/css/themify-icons.css' %}">
     <link rel="stylesheet" href="{% static 'factorweb/vendors/flag-icon-css/css/flag-icon.min.css' %}">
-    <link rel="stylesheet" href="{% static 'factorweb/vendors/selectFX/css/cs-skin-elastic.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'factorweb/vendors/selectFX/css/cs-skin-elastic.css' %}"> -->
 
     <link rel="stylesheet" href="{% static 'factorweb/assets/css/style.css' %}">
 
@@ -50,7 +50,7 @@
                             {% for campo in form %}
                                 {% if campo.errors %}
                                     {% for error in campo.errors %}
-                                        {{ error | escape }}
+                                        {{ error | escape }}<br>
                                     {% endfor %}
                                 {% endif %}
                             {% endfor %}
@@ -58,7 +58,7 @@
 
                         {% if form.non_field_errors %}
                             {% for error in form.non_field_errors %}
-                                {{ error | escape }}
+                                {{ error | escape }}<br>
                             {% endfor %}
                         {% endif %}
 

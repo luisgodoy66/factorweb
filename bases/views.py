@@ -3,20 +3,23 @@ from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin\
     , PermissionRequiredMixin
 from django.db import connection
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.urls import reverse_lazy
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.models import User
+from django.shortcuts import redirect, render
+from django.contrib.auth.hashers import make_password
 
 from solicitudes.models import Asignacion
 from operaciones.models import Documentos
 from cobranzas.models import Cheques_protestados
 from datetime import date, timedelta
 from .models import Usuario_empresa
+from .forms import Userform, UserPasswordForm
 
 class Home(LoginRequiredMixin, generic.TemplateView):
-    # model = Asignacion
     template_name='bases/home.html'
     login_url='bases:login'
-    # context_object_name='consulta'
 
 class MixinFormInvalid:
     def form_invalid(self,form):
@@ -147,6 +150,8 @@ def convierte_cifra(numero,sw):
  
     return "%s %s %s" %(texto_centena,texto_decena,texto_unidad)
 
+@login_required(login_url='/login/')
+@permission_required('operaciones.view_documentos', login_url='bases:sin_permisos')
 def dashboard(request):
     template_name='bases/dashboard.html'
     # para que tome todo el día de hoy estoy poniendo hasta mañana
@@ -163,7 +168,8 @@ def dashboard(request):
     if prot['Total']:
         protestos = prot['Total']
 
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
 
     datos = { 'desde':desde
         , 'hasta':hasta
@@ -173,3 +179,86 @@ def dashboard(request):
         , 'solicitudes_pendientes':sp
     }
     return render(request, template_name, datos)
+
+@login_required(login_url='/login/')
+# @permission_required('???.change_user', login_url='bases:sin_permisos')
+def user_editar(request,pk=None):
+    template_name = "bases/editar_usuario.html"
+    context = {}
+    form = None
+    obj = None
+
+    if request.method == "GET":
+        if not pk:
+            form = Userform(instance = None )
+        else:
+            obj = User.objects.filter(id=pk).first()
+            form = Userform(instance = obj)
+        context["form"] = form
+        context["obj"] = obj
+
+        # grupos_usuarios = None
+        # grupos = None
+        # if obj:
+        #     grupos_usuarios = obj.groups.all()
+        #     grupos = Group.objects.filter(~Q(id__in=obj.groups.values('id')))
+        
+        # context["grupos_usuario"]=grupos_usuarios
+        # context["grupos"]=grupos
+    
+    if request.method == "POST":
+        data = request.POST
+        e = data.get("email")
+        fn = data.get("first_name")
+        ln = data.get("last_name")
+
+        if pk:
+            obj = User.objects.filter(id=pk).first()
+            if not obj:
+                print("Error Usuario No Existe")
+            else:
+                obj.email = e
+                obj.first_name = fn
+                obj.last_name = ln
+                obj.save()
+        else:
+            obj = User.objects.create_user(
+                email = e,
+                first_name = fn,
+                last_name = ln
+            )
+        return redirect('bases:home')
+    
+    return render(request,template_name,context)
+
+@login_required(login_url='/login/')
+# @permission_required('???.change_user', login_url='bases:sin_permisos')
+def user_password(request,pk):
+    template_name = "bases/password_usuario.html"
+    context = {}
+
+    obj = User.objects.filter(id=pk).first()
+    form = UserPasswordForm(instance = obj)
+
+    context["obj"] = obj
+    context["form"] = form
+
+    if not obj:
+        print("Error Usuario No Existe")
+
+    # if request.method == "GET":
+    
+    if request.method == "POST":
+        data = request.POST
+        p = data.get("password")
+        p2 = data.get("password2")
+        if p != p2:
+            context["error"] = 'No existe coincidencia con la confirmación. '
+        else:
+            obj.password = make_password(p)
+            obj.save()
+            return redirect('bases:home')
+    
+    return render(request,template_name,context)
+
+

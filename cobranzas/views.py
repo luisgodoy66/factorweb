@@ -59,7 +59,9 @@ class DocumentosVencidosView(SinPrivilegios, generic.ListView):
         fecha_corte = date.today() 
         context['fecha_corte'] =  fecha_corte
         context['por_vencer'] = 'No'
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
 
         return context
@@ -81,7 +83,9 @@ class DocumentosPorVencerView(SinPrivilegios, generic.ListView):
         fecha_corte = date.today() + timedelta(days=7)
         context['fecha_corte'] =  fecha_corte
         context['por_vencer'] = 'Si'
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
 
         return context
@@ -104,7 +108,9 @@ class ChequesADepositarView(SinPrivilegios, generic.ListView):
         context = super(ChequesADepositarView, self).get_context_data(*args,**kwargs) 
         fecha_corte = date.today() 
         context['fecha_corte'] =  fecha_corte#.strftime("%Y-%m-%d")
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
 
         return context
@@ -182,7 +188,9 @@ class CobranzasDocumentosView(SinPrivilegios, generic.FormView):
         context["tipo"]="Cobranza"
         context["por_vencer"]=por_vencer
 
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
 
         return context
@@ -211,8 +219,8 @@ class CobranzasConsulta(SinPrivilegios, generic.TemplateView):
         context["clientes"] = Datos_generales.objects\
             .filter(empresa = id_empresa.empresa)
             # .order_by('cxcliente__cxcliente__ctnombre')
-        sp = Asignacion.objects.filter(cxestado='P')\
-            .filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
  
@@ -253,7 +261,9 @@ class CobranzasPorConfirmarView(SinPrivilegios, generic.ListView):
         return cobranzas.union(recuperaciones)
 
     def get_context_data(self, **kwargs):
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context = super(CobranzasPorConfirmarView, self).get_context_data(**kwargs)
         context['solicitudes_pendientes'] = sp
         return context
@@ -287,7 +297,9 @@ class CobranzasPendientesLiquidarView(SinPrivilegios, generic.ListView):
         return cobranzas.union(recuperaciones)
 
     def get_context_data(self, **kwargs):
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context = super(CobranzasPendientesLiquidarView, self).get_context_data(**kwargs)
         context['solicitudes_pendientes'] = sp
         return context
@@ -306,7 +318,9 @@ class LiquidacionesPendientesPagarView(SinPrivilegios, generic.ListView):
             , leliminado = False, ddesembolso__lte = date.today())
 
     def get_context_data(self, **kwargs):
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context = super(LiquidacionesPendientesPagarView, self).get_context_data(**kwargs)
         context['solicitudes_pendientes'] = sp
         return context
@@ -326,7 +340,9 @@ class MotivosProtestoView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context = super(MotivosProtestoView, self).get_context_data(**kwargs)
         context['solicitudes_pendientes'] = sp
         return context
@@ -347,7 +363,9 @@ class MotivoProtestoNew(SinPrivilegios, generic.CreateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context = super(MotivoProtestoNew, self).get_context_data(**kwargs)
         context['solicitudes_pendientes'] = sp
         return context
@@ -367,7 +385,9 @@ class MotivoProtestoEdit(SinPrivilegios, generic.UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(MotivoProtestoEdit, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -403,7 +423,9 @@ class ProtestoCobranzaNew(SinPrivilegios, generic.CreateView):
         context["codigo_cobranza"] = cobranza.cxcobranza
         context["tipo_operacion"]='Cobranza'
         context["lista_deposito"]=lista_deposito
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
 
         return context
@@ -428,7 +450,9 @@ class ProtestosPendientesView(SinPrivilegios, generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super(ProtestosPendientesView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -503,7 +527,9 @@ class RecuperacionProtestoView(SinPrivilegios, generic.FormView):
         context["deudor_id"] = deudor_id
         context["cuentas_conjuntas"] = cuentas_conjuntas
         context["tipo"]="Recuperación"
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
 
         return context
@@ -546,7 +572,9 @@ class ProtestoRecuperacionNew(SinPrivilegios, generic.CreateView):
         context["codigo_cobranza"] = cobranza.cxrecuperacion
         context["tipo_operacion"]='Recuperacion'
         context["lista_deposito"]=lista_deposito
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
 
         return context
@@ -568,7 +596,9 @@ class LiquidacionesEnNegativoPendientesView(SinPrivilegios, generic.ListView):
     def get_context_data(self, **kwargs):
 
         context = super(LiquidacionesEnNegativoPendientesView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
 
         return context
@@ -616,8 +646,9 @@ class CobranzasCargosView(SinPrivilegios, generic.FormView):
         context["cliente"] = cliente
         context["tipo_factoring"] = tipo_factoring
         context["tipo_deuda"] = tipo_deuda
-        sp = Asignacion.objects.filter(cxestado='P')\
-            .filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
 
         return context
@@ -643,7 +674,9 @@ class AmpliacionesConsulta(SinPrivilegios, generic.TemplateView):
         context = super(AmpliacionesConsulta, self).get_context_data(**kwargs)
         context["desde"] = desde
         context["hasta"] =hasta
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -652,7 +685,9 @@ class AmpliacionesConsulta(SinPrivilegios, generic.TemplateView):
 def CobranzaPorCondonar(request,pk, tipo_operacion):
     template_name = "cobranzas/detallecobroporcondonar.html"
     
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                    empresa = id_empresa.empresa).count()
 
     if tipo_operacion=='C':
         operacion = Documentos_cabecera.objects.filter(pk=pk).first()
@@ -692,7 +727,8 @@ def GeneraListaCarteraPorVencerJSON(request, fecha_corte = None):
     docjson = tempBlogs
 
     # crear el contexto
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                    empresa = id_empresa.empresa).count()
     
     data = {"total": documentos.count(),
         "totalNotFiltered": documentos.count(),
@@ -982,7 +1018,8 @@ def DepositoCheques(request, ids_cheques, total_cartera, cuenta_destino
                 .objects.filter(cxcliente = id_cliente , leliminado = False
                                 , lactiva = True)\
                 .all()
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                    empresa = id_empresa.empresa).count()
     
     contexto = {"cheques" : result
         , "total_cartera" : total_cartera
@@ -1338,7 +1375,9 @@ def DetalleDocumentosRecuperadosSalida(doc):
 # distincion de la tabla de recuperaciones
 def DatosDiasACondonar(request, id, dias, cobranza_id, tipo_operacion):
     template_name = "cobranzas/datosdiasacondonar_modal.html"
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                    empresa = id_empresa.empresa).count()
     
     contexto={
         "id": id,
@@ -1570,7 +1609,8 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
             }
         formulario = DesembolsarForm(e, empresa = id_empresa.empresa)
 
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                    empresa = id_empresa.empresa).count()
 
         contexto={'liquidacion':liquidacion.dliquidacion
             , 'instruccion_de_pago':liquidacion.ctinstrucciondepago
@@ -2176,7 +2216,8 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
 
         neto = total_vuelto + total_sobrepagos - total_cargos
 
-        sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                    empresa = id_empresa.empresa).count()
 
     contexto={
         "nombredecliente" : cobranza.cxcliente.cxcliente.ctnombre,
@@ -2967,7 +3008,8 @@ def AmpliacionDePlazo(request, ids, tipo_factoring, tipo_asignacion, id_cliente)
 
     cliente = Datos_generales.objects.filter(pk = id_cliente).first()
     
-    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
+    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                    empresa = id_empresa.empresa).count()
 
     context={
         'ids':ids,
