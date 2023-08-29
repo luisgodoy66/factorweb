@@ -45,11 +45,11 @@ class Datos_generales(ClaseModelo):
     npromediodemoraderecuperacion=models.DecimalField(max_digits=8, decimal_places=2, default=0,
         help_text='promedio de recuperacion de documentos negociados protestados'    )
     ctemailfacturacionelectronica=models.EmailField(null=True,
-        help_text='direccion email para factracion electronica'    )
+        help_text='Dirección email para factracion electronica'    )
     cxreferidopor=models.CharField(max_length=4, null=True,
         help_text='codigo de freelancer que refiere'    )
     cxorigen=models.CharField(max_length=5,null=True,
-        help_text='codigo de localidad / oficina asignada del cliente'    )
+        help_text='Código de localidad / oficina asignada del cliente'    )
     # cxestado=models.CharField(max_length=1, default='A'    )
     dprelegal=models.DateTimeField(null=True,
         help_text='fecha que cae en estado de pre legal'    )

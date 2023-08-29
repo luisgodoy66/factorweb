@@ -50,6 +50,10 @@ class TipoFactoringNew(SinPrivilegios, generic.CreateView):
         form.instance.cxusuariocrea = self.request.user
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         form.instance.empresa = id_empresa.empresa
+        # marcar como tipo de factoring creado
+        empresa = Empresas.objects.filter (pk = id_empresa.empresa.id).first()
+        empresa.ltipofactoringconfigurado = True
+        empresa.save()
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
@@ -60,6 +64,16 @@ class TipoFactoringNew(SinPrivilegios, generic.CreateView):
         context['solicitudes_pendientes'] = sp
         return context
 
+    def get_success_url(self):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        empresa = Empresas.objects.filter (pk = id_empresa.empresa.id).first()
+        if not empresa.ltasasfactoringconfiguradas :
+            return reverse_lazy("bases:home")
+        if not empresa.ltipofactoringconfigurado :
+            return reverse_lazy("bases:home")
+
+        return reverse_lazy("empresa:listatiposfactoring")
+    
 class TipoFactoringEdit(SinPrivilegios, generic.UpdateView):
     model = Tipos_factoring
     template_name="empresa/datostipofactoring_form.html"
@@ -137,6 +151,11 @@ class TasaFactoringEdit(SinPrivilegios, generic.UpdateView):
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
+        # marcar como tipo de factoring creado
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        empresa = Empresas.objects.filter (pk = id_empresa.empresa.id).first()
+        empresa.ltasasfactoringconfiguradas = True
+        empresa.save()
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
@@ -146,6 +165,16 @@ class TasaFactoringEdit(SinPrivilegios, generic.UpdateView):
                                        empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
+
+    def get_success_url(self):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        empresa = Empresas.objects.filter (pk = id_empresa.empresa.id).first()
+        if not empresa.ltasasfactoringconfiguradas :
+            return reverse_lazy("bases:home")
+        if not empresa.ltipofactoringconfigurado :
+            return reverse_lazy("bases:home")
+
+        return reverse_lazy("empresa:listatasasfactoring")
 
 class ClasesParticipanteView(SinPrivilegios, generic.ListView):
     model = Clases_cliente
@@ -408,7 +437,7 @@ class DatosEmpresaEdit(SinPrivilegios, generic.UpdateView):
     template_name="empresa/datosempresa_form.html"
     form_class=EmpresaForm
     context_object_name='empresa'
-    success_url= reverse_lazy("bases:dashboard")
+    success_url= reverse_lazy("bases:home")
     login_url = 'bases:login'
     permission_required="empresa.change_empresas"
 

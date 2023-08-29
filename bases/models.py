@@ -8,14 +8,14 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class Empresas(models.Model):
-    ctruccompania = models.CharField(max_length=13, default='')
-    ctnombre = models.CharField(max_length=60)
+    ctruccompania = models.CharField(max_length=13, default='', null=True)
+    ctnombre = models.CharField(max_length=60, null=True,)
     lgratis = models.BooleanField(default=True)
     nmaximooperaciones = models.SmallIntegerField(default=10)
     lbloqueada = models.BooleanField(default=False)
     dcreacion = models.DateTimeField(auto_now_add=True)
-    ctgerente = models.CharField(max_length=25, default='')
-    ctdireccion = models.CharField(max_length=60, default='')
+    ctgerente = models.CharField(max_length=25, default='', null=True)
+    ctdireccion = models.CharField(max_length=60, default='', null=True)
     ctcontribuyenteespecial = models.CharField(max_length= 4, default='0000', null=True)
     lregimenrimpe = models.BooleanField(default=False)
     dmodificacion = models.DateTimeField(auto_now=True)
@@ -24,6 +24,8 @@ class Empresas(models.Model):
     ctciudad = models.CharField(max_length=20, default='')
     diniciooperaciones = models.DateField(null=True)
     dfinpruebas = models.DateField(null=True)
+    ltipofactoringconfigurado= models.BooleanField(default=False)
+    ltasasfactoringconfiguradas= models.BooleanField(default=False)
 
     def __str__(self):
         return self.ctnombre

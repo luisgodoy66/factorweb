@@ -5,14 +5,14 @@ from bases.models import ClaseModelo
 from datetime import date
 
 class Bancos(ClaseModelo):
-    ctbanco =models.TextField(unique=True)
+    ctbanco =models.TextField()
     llocal = models.BooleanField(default=True)
 
     def __str__(self):
         return self.ctbanco
 
 class Feriados(ClaseModelo):
-    dferiado = models.DateField(unique=True)
+    dferiado = models.DateField()
     llaborable = models.BooleanField(default=False)
 
     def __str__(self):

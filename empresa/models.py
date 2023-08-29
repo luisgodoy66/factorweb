@@ -135,7 +135,7 @@ class Tipos_factoring(ClaseModelo):
     ctinicialesliquidacioncobranza = models.CharField(max_length=3, blank=True)
     lacumulagaoaatasagao = models.BooleanField(default= False)
     lfactoringproveedores = models.BooleanField(default= False)
-    ctinicialesasignacion = models.CharField(max_length=3, blank=True, null=True)
+    ctinicialesasignacion = models.CharField(max_length=3, blank=True, default='OP-')
     lcargadcenampliacionplazo = models.BooleanField(default= False)
     lgenerafacturaenaceptacion = models.BooleanField(default=True)
     
