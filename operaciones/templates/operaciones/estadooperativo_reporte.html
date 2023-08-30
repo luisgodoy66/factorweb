@@ -107,6 +107,32 @@
             </div>
         </div>
     </div>
+    <div class="col-md-3 col-lg-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="clearfix">
+                    <i class="fa fa-dollar bg-flat-color-5 p-3 font-2xl mr-3 float-left text-light"></i>
+                    <div class="h5 text-secondary mb-0 mt-1">{{total_cartera_protestos}}</div>
+                    <div class="text-muted text-uppercase font-weight-bold font-xs small">
+                        Cartera y protestos</div>
+                </div>
+                <div class="b-b-1 pt-3"></div>
+                <hr>
+                <div class="more-info pt-2" style="margin-bottom:-10px;">
+                    <a class="font-weight-bold font-xs btn-block text-muted small" 
+                    href="{% url 'operaciones:detalle_facturas_pendientes' cliente_id %}"  target="cartera">
+                    Detalle de facturas pendientes
+                    <i class="fa fa-angle-right float-right font-lg"></i></a>
+                </div>
+                <div class="more-info pt-2" style="margin-bottom:-10px;">
+                    <a class="font-weight-bold font-xs btn-block text-muted small" 
+                    href="{% url 'operaciones:detalle_cheques_pendientes' cliente_id %}"  target="cartera">
+                    Detalle de cheques pendientes
+                    <i class="fa fa-angle-right float-right font-lg"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="col-xl-6">
         <div class="card">
             <div class="card-header">

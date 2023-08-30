@@ -109,7 +109,9 @@ urlpatterns = [
          , name='detalle_facturas_pendientes'),
     path('impresioncarterapendiente/', ImpresionFacturasPendientes
          , name='detalle_facturas_pendientes'),
-    path('impresionchequespendientes', ImpresionAccesoriosPendientes
+    path('impresionchequespendientes/', ImpresionAccesoriosPendientes
+         , name='detalle_cheques_pendientes'),
+    path('impresionchequespendientes/<id_cliente>', ImpresionAccesoriosPendientes
          , name='detalle_cheques_pendientes'),
     path('impresionresumenasignaciones/<desde>/<hasta>/<clientes>'
          , ImpresionResumenAsignaciones, name='resumen_asignaciones'),

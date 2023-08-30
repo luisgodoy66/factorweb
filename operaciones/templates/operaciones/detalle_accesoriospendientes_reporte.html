@@ -12,7 +12,7 @@
         @page {
             size: A4;
             margin: 1cm;
-            size: landscape;
+            size: portrait;
         }
         .table thead th {
                 vertical-align:  top ;
@@ -79,14 +79,14 @@
                                     <td>{{ item.documento__cxcomprador__cxcomprador__ctnombre }}</td>
                                     <td>{{ item.documento__cxasignacion__cxasignacion }}</td>
                                     <td>{{ item.documento__ctdocumento }}</td>
-                                    <td width="20%">{{ item.descripcion }}</td>
+                                    <td>{{ item.descripcion }}</td>
                                     <td class="centrado">{{ item.vencimiento |date:"Y-m-d"}}</td>
                                     <td>{{ item.dias_negociados }}</td>
                                     <td> {% if item.ndiasprorroga > 0 %}<h4>{% endif %}
                                         {{ item.dias_vencidos }}
                                         {% if item.ndiasprorroga > 0 %}</h4>{% endif %}
                                     </td>
-                                    <td class="numero">{{ item.ntotal }}</td>
+                                    <td class="numero" width="8%">{{ item.ntotal }}</td>
                                 </tr>
                                 {% endfor %}
                                 <tr></tr>

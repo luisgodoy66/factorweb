@@ -3,7 +3,7 @@ from django import forms
 
 from .models import Clases_cliente, Datos_participantes, \
     Tipos_factoring, Tasas_factoring, Cuentas_bancarias, Localidades, Puntos_emision
-from pais.models import Bancos
+from pais.models import Bancos, Actividades
 
 class ParticipanteForm(forms.ModelForm):
     class Meta:
@@ -13,15 +13,15 @@ class ParticipanteForm(forms.ModelForm):
             , 'ctdireccion'
             ,'cttelefono1', 'cttelefono2', 'ctemail'
             , 'ctemail2', 'ctcelular','ctgirocomercial', 'cxusuariocrea'
-            , 'cxactividad', 'dinicioactividades']
+            , 'dinicioactividades', 'actividad']
         labels={'cxtipoid':'Tipo cliente', 'cxparticipante':'Identificación'
             ,'ctnombre': 'Nombre completo'
             , 'ctdireccion':'Dirección', 'cttelefono1': 'Teléfono principal'
             , 'cttelefono2':'Teléfono secundario', 'ctemail':'Email 1'
             , 'ctemail2':'Email 2', 'ctcelular':'Celular'
             ,'ctgirocomercial':'Giro comercial'
-            , 'cxactividad':'Código de actividad'
             , 'dinicioactividades':'Inicio de actividades'
+            , 'actividad':'Actividad económica'
             }        
         widgets={'ctdireccion': forms.Textarea(attrs={'rows': '3'}),
             'ctgirocomercial':forms.Textarea(attrs={'rows': '5'}),
@@ -35,6 +35,7 @@ class ParticipanteForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
@@ -42,6 +43,10 @@ class ParticipanteForm(forms.ModelForm):
             })
         self.fields['cxtipoid'].empty_label="Seleccione tipo de identificación"
         # self.fields['dinicioactividades'].widget.attrs['readonly']=True
+        if empresa:
+            self.fields['actividad'].queryset = Actividades.objects\
+                .filter(empresa=empresa, leliminado = False, )\
+                .order_by('cxactividad')
 
     def clean(self) :
         try:

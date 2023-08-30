@@ -100,7 +100,7 @@
                 data: formData
             })
             .done(function(r,textStatus,xhr){
-                if(xhr.status=200){
+                if(r=="OK"){
                     // para que esto funcione la tabla debe tener el siguiente dato
                     // data-unique-id="id"
                     i = capturaValor('id_id');
@@ -116,7 +116,7 @@
                     CerrarModal();
                 }
                 else{
-                    alert(textStatus);
+                    MensajeError(r);
                 }
             }).fail(function (error) {
                 MensajeError(error.responseText);

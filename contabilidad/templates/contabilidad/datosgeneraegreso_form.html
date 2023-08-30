@@ -96,6 +96,17 @@
 
 
                 </div>
+                <div class="col-lg-6">
+                    {% if forma_pago == 'TRA' %}
+                    <div class="col-md-12">
+                        <div class="alert alert-info" role="alert">
+                            Para registrar nuevas cuentas bancarias del cliente use <a href="{% url 'clientes:listacuentasbancarias' %}"
+                             class="alert-link">este link</a>.
+                        </div>
+                    </div>
+                    {% endif %}
+    
+                </div>  
             </div>    
             
             <div class="card-footer">

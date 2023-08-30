@@ -1509,6 +1509,8 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
     estado_cliente=''
     clase_cliente =''
     color_estado = 1
+    cartera = 0
+    protestos=0
 
     template_path = 'operaciones/estadooperativo_reporte.html'
 
@@ -1548,6 +1550,14 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
     sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
                                        empresa = id_empresa.empresa).count()
 
+    total_cartera = Documentos.objects.TotalCarteraCliente(cliente_id)
+    if total_cartera['Total']:
+        cartera = total_cartera['Total']
+
+    total_protesto = Cheques_protestados.objects.TotalProtestosCliente(cliente_id)
+    if total_protesto['Total']:
+        protestos = total_protesto['Total']
+
     context={
         'cliente_id':cliente_id,
         'valor_linea':valor_linea,
@@ -1558,7 +1568,8 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
         'estado': estado_cliente,
         'clase':clase_cliente,
         'color_estado':color_estado,
-        'solicitudes_pendientes':sp
+        'solicitudes_pendientes':sp,
+        'total_cartera_protestos': cartera+protestos,
         }
     return render(request, template_path, context)
 

@@ -246,6 +246,16 @@ class Protestos_Manager(models.Manager):
                     )
         return cp.union(rp)
         
+    def TotalProtestosCliente(self, id_cliente):
+        print(id_cliente)
+        return self.filter(leliminado=False
+                           , nsaldocartera__gt = 0)\
+                    .filter(Q(cheque__cheque_cobranza__cxcliente = id_cliente
+                              , cxtipooperacion='C')
+                            |Q(cheque__cheque_recuperacion__cxcliente = id_cliente
+                               , cxtipooperacion='R'))\
+            .aggregate(Total = Sum('nsaldocartera'))
+
 class Cheques_protestados(ClaseModelo):
     FORMAS_DE_COBRO = (
         ('CHE', 'Cheque'),

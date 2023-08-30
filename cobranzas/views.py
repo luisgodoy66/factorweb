@@ -567,7 +567,7 @@ class ProtestoRecuperacionNew(SinPrivilegios, generic.CreateView):
         context = super(ProtestoRecuperacionNew, self).get_context_data(**kwargs)
         context["cheque"]=cheque
         context["cobranza"] = cobranza
-        context["id_cliente"] = cobranza.cxcliente.cxcliente.cxparticipante
+        context["id_cliente"] = cobranza.cxcliente.id
         context["forma_cobro"] = cobranza.cxformacobro
         context["codigo_cobranza"] = cobranza.cxrecuperacion
         context["tipo_operacion"]='Recuperacion'
@@ -3577,6 +3577,7 @@ def ModificarCobranza(request,id, tipo_operacion):
              'cxcuentaconjunta': cuenta_compartida,
              }
         form_cobranza=CobranzasDocumentosForm(e, empresa = id_empresa.empresa)
+
     else:
         cobranza=Recuperaciones_cabecera.objects.get(pk=id)
         fecha_cobro = cobranza.dcobranza
@@ -3606,6 +3607,9 @@ def ModificarCobranza(request,id, tipo_operacion):
 
     if request.method == 'POST':
         # ACTUALIZAR los campos
+        if cobranza.lcontabilizada:
+            return HttpResponse("Cobranza ha sido contabilizada. No se puede modificar.")
+        
         cobro = request.POST.get("dcobranza")
         deposito = request.POST.get("ddeposito")
 
@@ -3619,7 +3623,7 @@ def ModificarCobranza(request,id, tipo_operacion):
                                 .filter(pk=x).first()
         else:
             x = request.POST.get('cxcuentadeposito')
-            cuenta_deposito = Cuentas_bancarias.objects.filter(pk = x).first()
+            cuenta_deposito = CuentasEmpresa.objects.filter(pk = x).first()
 
         cobranza.cxcuentaconjunta = cuenta_compartida
         cobranza.cxcuentadeposito = cuenta_deposito

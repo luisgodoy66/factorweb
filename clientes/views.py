@@ -10,7 +10,7 @@ from .models import Cuenta_transferencia, Datos_generales, Personas_juridicas, P
 from solicitudes.models import Clientes as Solicitante
 from solicitudes.models import Asignacion as Asignacion
 from bases.models import Usuario_empresa
-from empresa.models import Datos_participantes, Localidades
+from empresa.models import Datos_participantes, Localidades, Actividades
 
 from empresa.forms import ParticipanteForm
 from .forms import  ClienteForm, PersonaNaturalForm, PersonaJuridicaForm\
@@ -460,11 +460,11 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
                 'cttelefono2':datosparticipante.cttelefono2,
                 'ctcelular':datosparticipante.ctcelular,
                 'ctgirocomercial':datosparticipante.ctgirocomercial,
-                'cxactividad':datosparticipante.cxactividad,
+                'actividad':datosparticipante.actividad,
                 'dinicioactividades':date.isoformat(datosparticipante.dinicioactividades),
             }
             idcliente=datosparticipante.cxparticipante
-            formulario=ParticipanteForm(e)
+            formulario=ParticipanteForm(e, empresa = id_empresa.empresa)
             # si encuentra registro de datos participantes buscar en datos de cliente
 
             datoscliente = Datos_generales.objects\
@@ -478,7 +478,7 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
                 }
                 form_cliente=ClienteForm(e, empresa = id_empresa.empresa)
         else:
-            formulario=ParticipanteForm()
+            formulario=ParticipanteForm(empresa = id_empresa.empresa)
             form_cliente=ClienteForm(empresa = id_empresa.empresa)
 
             # si viene desde la opción de arrastre desde solicitud
@@ -498,7 +498,7 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
                         'ctcelular':solicitante.ctcelular,
                         'ctgirocomercial':solicitante.ctgirocomercial,
                     }
-                    formulario=ParticipanteForm(e)
+                    formulario=ParticipanteForm(e,empresa = id_empresa.empresa)
 
     sp = Asignacion.objects.filter(cxestado='P')\
             .filter(leliminado=False, empresa = id_empresa.empresa).count()
@@ -524,11 +524,12 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
         ctemail=request.POST.get("ctemail")
         ctemail2=request.POST.get("ctemail2")
         ctgirocomercial=request.POST.get("ctgirocomercial")
-        cxactividad = request.POST.get("cxactividad")
+        cxactividad = request.POST.get("actividad")
         dinicioactividades = request.POST.get("dinicioactividades")
 
         datosparticipante = Datos_participantes.objects\
             .filter(cxparticipante=idcliente, empresa = id_empresa.empresa).first()
+        actividad = Actividades.objects.filter(pk = cxactividad).first()
 
         if not datosparticipante:
             datosparticipante = Datos_participantes(
@@ -544,7 +545,7 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
                 ctcelular=ctcelular,
                 ctgirocomercial=ctgirocomercial,
                 cxusuariocrea= request.user,
-                cxactividad = cxactividad,
+                actividad = actividad,
                 dinicioactividades = dinicioactividades,
                 empresa = id_empresa.empresa,
             )
@@ -564,7 +565,7 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
             datosparticipante.ctcelular=ctcelular
             datosparticipante.ctgirocomercial=ctgirocomercial
             datosparticipante.cxusuariomodifica = request.user.id
-            datosparticipante.cxactividad = cxactividad
+            datosparticipante.actividad = actividad
             datosparticipante.dinicioactividades = dinicioactividades
 
             datosparticipante.save()
@@ -982,6 +983,7 @@ def DatosCompradores(request, comprador_id=None):
     idcomprador={}
     datosparticipante={}
     formulario={}
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     
     if request.method=='GET':
         datosparticipante = Datos_participantes.objects\
@@ -1001,15 +1003,14 @@ def DatosCompradores(request, comprador_id=None):
                 'cttelefono2':datosparticipante.cttelefono2,
                 'ctcelular':datosparticipante.ctcelular,
                 'ctgirocomercial':datosparticipante.ctgirocomercial,
-                'cxactividad':datosparticipante.cxactividad,
+                'actividad':datosparticipante.actividad,
             }
             idcomprador=datosparticipante.cxparticipante
-            formulario=ParticipanteForm(e)
+            formulario=ParticipanteForm(e,empresa = id_empresa.empresa)
 
         else:
-            formulario=ParticipanteForm()
+            formulario=ParticipanteForm(empresa = id_empresa.empresa)
     
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     sp = Asignacion.objects.filter(cxestado='P')\
             .filter(leliminado=False, empresa = id_empresa.empresa).count()
             
@@ -1034,7 +1035,8 @@ def DatosCompradores(request, comprador_id=None):
         ctemail=request.POST.get("ctemail")
         ctemail2=request.POST.get("ctemail2")
         ctgirocomercial=request.POST.get("ctgirocomercial")
-        cxactividad = request.POST.get("cxactividad")
+        cxactividad = request.POST.get("actividad")
+        actividad = Actividades.objects.filter(pk = cxactividad).first()
 
         if not comprador_id:
             datosparticipante = Datos_participantes(
@@ -1050,7 +1052,7 @@ def DatosCompradores(request, comprador_id=None):
                 ctcelular=ctcelular,
                 ctgirocomercial=ctgirocomercial,
                 cxusuariocrea= request.user,
-                cxactividad = cxactividad,
+                actividad = actividad,
                 empresa = id_empresa.empresa,
             )
             if datosparticipante:
@@ -1073,14 +1075,16 @@ def DatosCompradores(request, comprador_id=None):
                 datosparticipante.ctcelular=ctcelular
                 datosparticipante.ctgirocomercial=ctgirocomercial
                 datosparticipante.cxusuariomodifica = request.user.id
-                datosparticipante.cxactividad=cxactividad
+                datosparticipante.actividad=actividad
 
                 datosparticipante.save()
             
         # datos en tabla compradores
-
+            datosparticipante.save()
+        
+        # datos en tabla clientes
         datoscomprador = Datos_compradores.objects\
-            .filter(cxcomprador=idcomprador).first()
+            .filter(cxcomprador=datosparticipante).first()
 
         if not datoscomprador:
             datoscomprador= Datos_compradores(

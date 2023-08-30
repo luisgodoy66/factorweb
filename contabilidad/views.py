@@ -1515,19 +1515,12 @@ def GenerarEgresoDiario(request):
     if pid_factura =='None':
         pid_factura= 'NULL'
         
-    print("CALL uspGenerarEgresoContabilidad( '{0}',{1},'{2}','{3}'\
-                         ,{4},'{5}',{6},'{7}','{8}'\
-                         ,{9},{10},{11},'',0)"
-        .format(psforma_pago, pid_desembolso, pscxbeneficiario, psrecibidopor\
-                , pid_cuentapago, pscheque, pid_cuentadestino, psconcepto, pdemision\
-            ,pnvalor, pid_factura, nusuario))
     resultado=enviarPost("CALL uspGenerarEgresoContabilidad( '{0}',{1},'{2}','{3}'\
                          ,{4},'{5}',{6},'{7}','{8}'\
                          ,{9},{10},{11},'',0)"
         .format(psforma_pago, pid_desembolso, pscxbeneficiario, psrecibidopor\
                 , pid_cuentapago, pscheque, pid_cuentadestino, psconcepto, pdemision\
             ,pnvalor, pid_factura, nusuario))
-    print(resultado)
     return HttpResponse(resultado)
 
 @login_required(login_url='/login/')

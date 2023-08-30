@@ -18,3 +18,10 @@ class Feriados(ClaseModelo):
     def __str__(self):
         # return date.isoformat(self.dferiado)
         return self.dferiado.strftime("%Y-%m-%d") 
+    
+class Actividades(ClaseModelo):
+    cxactividad = models.CharField(max_length=10)
+    ctactividad = models.TextField()    
+
+    def __str__(self):
+        return "{} {}".format(self.cxactividad, self.ctactividad)

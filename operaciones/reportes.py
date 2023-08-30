@@ -335,10 +335,21 @@ def ImpresionFacturasPendientes(request, clientes = None):
        return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
-def ImpresionAccesoriosPendientes(request):
+def ImpresionAccesoriosPendientes(request, id_cliente=None):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+#     se esta filtrando por un solo cliente por lo que el arreglo no hace falta
+#     arr_clientes = []
      
-    cartera = ChequesAccesorios.objects.cheques_pendientes(id_empresa.empresa)
+#     if clientes != None:
+#         ids = clientes.split(',')
+#         for id in ids:
+#             arr_clientes.append(id)
+
+    if id_cliente == None:
+        cartera = ChequesAccesorios.objects.cheques_pendientes(id_empresa.empresa)
+    else:
+        cartera = ChequesAccesorios.objects.cheques_pendientes_cliente(id_cliente)
+
     total = cartera.aggregate(total = Sum('ntotal'))
 
     template_path = 'operaciones/detalle_accesoriospendientes_reporte.html'
