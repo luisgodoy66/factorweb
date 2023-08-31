@@ -8,14 +8,14 @@ from decimal import Decimal
 from .models import Impuestos_facturaventa, Items_facturaventa, Factura_venta\
     , Diario_cabecera
 
-def GeneraXMLFactura(request, ids_facturas):
+def GeneraXMLFactura(request, ids_facturas, ambiente):
     # clave de acceso
     ids = ids_facturas.split(',')
     for id_factura in ids:
 
         factura = Factura_venta.objects.get(pk = id_factura)
         claveacceso = time.strftime('%d%m%Y',time.strptime(str(factura.demision), '%Y-%m-%d')) \
-            + '01' +factura.empresa.ctruccompania + '2' \
+            + '01' +factura.empresa.ctruccompania + ambiente \
             + factura.puntoemision.cxestablecimiento \
             + factura.puntoemision.cxpuntoemision\
             + factura.cxnumerofactura.zfill(9) \
@@ -30,7 +30,7 @@ def GeneraXMLFactura(request, ids_facturas):
         documento.set('version','1.1.0')
 
         # generar infoTributaria
-        infoTributaria = _get_tax_element(factura, claveacceso, '1')
+        infoTributaria = _get_tax_element(factura, claveacceso, ambiente)
         documento.append(infoTributaria)
         
         # generar infoFactura
@@ -76,7 +76,7 @@ def _get_tax_element( invoice, access_key, ambiente):
     etree.SubElement(infoTributaria, 'codDoc').text = invoice.cxtipodocumento
     etree.SubElement(infoTributaria, 'estab').text = invoice.puntoemision.cxestablecimiento
     etree.SubElement(infoTributaria, 'ptoEmi').text = invoice.puntoemision.cxpuntoemision
-    etree.SubElement(infoTributaria, 'secuencial').text = invoice.cxnumerofactura
+    etree.SubElement(infoTributaria, 'secuencial').text = invoice.cxnumerofactura.zfill(9)
     etree.SubElement(infoTributaria, 'dirMatriz').text = company.ctdireccion
     return infoTributaria
 
@@ -110,7 +110,8 @@ def _get_invoice_element( invoice):
     infoFactura = etree.Element('infoFactura')
     etree.SubElement(infoFactura, 'fechaEmision').text = time.strftime('%d/%m/%Y',time.strptime(str(invoice.demision), '%Y-%m-%d'))
     etree.SubElement(infoFactura, 'dirEstablecimiento').text = invoice.puntoemision.ctdireccion
-    etree.SubElement(infoFactura, 'contribuyenteEspecial').text = company.ctcontribuyenteespecial
+    if int(company.ctcontribuyenteespecial) >0:
+        etree.SubElement(infoFactura, 'contribuyenteEspecial').text = company.ctcontribuyenteespecial
     etree.SubElement(infoFactura, 'obligadoContabilidad').text = 'SI'
     etree.SubElement(infoFactura, 'tipoIdentificacionComprador').text = tipoIdentificacion[cliente.cxtipoid]
     etree.SubElement(infoFactura, 'razonSocialComprador').text = cliente.ctnombre
@@ -121,14 +122,22 @@ def _get_invoice_element( invoice):
     #totalConImpuestos
     totalConImpuestos = etree.Element('totalConImpuestos')
     imp = Impuestos_facturaventa.objects.filter(factura = invoice.id)
-    for tax in imp:
+    if imp:
+        for tax in imp:
 
-        totalImpuesto = etree.Element('totalImpuesto')
-        etree.SubElement(totalImpuesto, 'codigo').text = codigoImpuesto[tax.cximpuesto]
-        etree.SubElement(totalImpuesto, 'codigoPorcentaje').text = tarifaImpuesto[tax.cxporcentaje]
-        etree.SubElement(totalImpuesto, 'baseImponible').text = '{:.2f}'.format(tax.nbase)
-        etree.SubElement(totalImpuesto, 'valor').text = '{:.2f}'.format(tax.nvalor)
-        totalConImpuestos.append(totalImpuesto)
+            totalImpuesto = etree.Element('totalImpuesto')
+            etree.SubElement(totalImpuesto, 'codigo').text = codigoImpuesto[tax.cximpuesto]
+            etree.SubElement(totalImpuesto, 'codigoPorcentaje').text = tarifaImpuesto[tax.cxporcentaje]
+            etree.SubElement(totalImpuesto, 'baseImponible').text = '{:.2f}'.format(tax.nbase)
+            etree.SubElement(totalImpuesto, 'valor').text = '{:.2f}'.format(tax.nvalor)
+            totalConImpuestos.append(totalImpuesto)
+    else:            
+            totalImpuesto = etree.Element('totalImpuesto')
+            etree.SubElement(totalImpuesto, 'codigo').text = '2'
+            etree.SubElement(totalImpuesto, 'codigoPorcentaje').text = '0'
+            etree.SubElement(totalImpuesto, 'baseImponible').text = '{:.2f}'.format(invoice.nbaseiva)
+            etree.SubElement(totalImpuesto, 'valor').text = '{:.2f}'.format(0)
+            totalConImpuestos.append(totalImpuesto)
             
     infoFactura.append(totalConImpuestos)
     
@@ -246,7 +255,15 @@ def calculate_check_digit(number):
     # Convert the number to a list of integers
     digits = [int(d) for d in str(number)]
     # Calculate the weighted sum of the digits
-    weighted_sum = sum((len(digits) + 1 - i) * d for i, d in enumerate(digits))
+    # weighted_sum = sum((len(digits) + 1 - i) * d for i, d in enumerate(digits))
+    weighted_sum = 0
+    i = len(digits)
+    while i>0:
+        # iterar de 2 al 7 usando sentencia for?
+        for j in range(2,8):
+            weighted_sum += digits[i-1] * j
+            i -=1
+
     # Calculate the remainder when dividing the weighted sum by 11
     remainder = weighted_sum % 11
     # Calculate the check digit

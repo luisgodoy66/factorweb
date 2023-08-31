@@ -304,64 +304,64 @@ class Documentos_protestados_Manager(models.Manager):
             .aggregate(
                 fvencido_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo90
                                 , accesorio__isnull = True) ) 
-                , avencido_mas_90 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__lt = vcdo90
+                , avencido_mas_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo90
                                 , accesorio__isnull = False) ) 
                 , fvencido_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo60
                                 , documento__dvencimiento__gte = vcdo90
                                 , accesorio__isnull = True) ) 
-                , avencido_90 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__lt = vcdo60
+                , avencido_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo60
                                 , documento__dvencimiento__gte = vcdo90
                                 , accesorio__isnull = False) ) 
                 , fvencido_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo30
                                 , documento__dvencimiento__gte = vcdo60
                                 , accesorio__isnull = True) ) 
-                , avencido_60 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__lt = vcdo30
+                , avencido_60 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo30
                                 , documento__dvencimiento__gte = vcdo60
                                 , accesorio__isnull = False) ) 
                 , fvencido_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = datetime.today()
                                 , documento__dvencimiento__gte = vcdo30
                                 , accesorio__isnull = True) ) 
-                , avencido_30 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__lt = datetime.today()
+                , avencido_30 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = datetime.today()
                                 , documento__dvencimiento__gte = vcdo30
                                 , accesorio__isnull = False) ) 
                 ,fporvencer_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__gte = datetime.today()
                                 , documento__dvencimiento__lte = xver30
                                 , accesorio__isnull = True) ) 
-                ,aporvencer_30 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__gte = datetime.today()
+                ,aporvencer_30 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gte = datetime.today()
                                 , documento__dvencimiento__lte = xver30
                                 , accesorio__isnull = False ) )
                 ,fporvencer_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver30
                                 , documento__dvencimiento__lte = xver60
                                 , accesorio__isnull = True) ) 
-                ,aporvencer_60 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__gt = xver30
+                ,aporvencer_60 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver30
                                 , documento__dvencimiento__lte = xver60
                                 , accesorio__isnull = False) ) 
                 ,fporvencer_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver60
                                 , documento__dvencimiento__lte = xver90
                                 , accesorio__isnull = True) ) 
-                ,aporvencer_90 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__gt = xver60
+                ,aporvencer_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver60
                                 , documento__dvencimiento__lte = xver90
                                 , accesorio__isnull = False) ) 
                 , fporvencer_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver90
                                 , accesorio__isnull = True)) 
-                , aporvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio__documento__dvencimiento__gt = xver90
+                , aporvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver90
                                 , accesorio__isnull = False)) 
                 )
         fvm90 = protestados["fvencido_mas_90"]
-        avm90=protestados["avencido_mas_90"]
         fv90 = protestados["fvencido_90"]
-        av90=protestados["avencido_90"]
         fv60 = protestados["fvencido_60"]
-        av60=protestados["avencido_60"]
         fv30 = protestados["fvencido_30"]
-        av30=protestados["avencido_30"]
         fx30 = protestados["fporvencer_30"]
-        ax30=protestados["aporvencer_30"]
         fx60 = protestados["fporvencer_60"]
-        ax60=protestados["aporvencer_60"]
         fx90 = protestados["fporvencer_90"]
-        ax90=protestados["aporvencer_90"]
         fxm90 = protestados["fporvencer_mas_90"]
+        avm90=protestados["avencido_mas_90"]
+        av90=protestados["avencido_90"]
+        av60=protestados["avencido_60"]
+        av30=protestados["avencido_30"]
+        ax30=protestados["aporvencer_30"]
+        ax60=protestados["aporvencer_60"]
+        ax90=protestados["aporvencer_90"]
         axm90=protestados["aporvencer_mas_90"]
         if not fvm90: fvm90=0
         if not fv90: fv90=0
@@ -439,20 +439,20 @@ class Documentos_protestados_Manager(models.Manager):
                            , empresa = id_empresa)\
             .values('documento__cxcliente__cxcliente__ctnombre')\
             .annotate(
-                vencido_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo90) ) 
-                , vencido_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo60
-                                , documento__dvencimiento__gte = vcdo90))
-                , vencido_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo30
-                                , documento__dvencimiento__gte = vcdo60))
-                , vencido_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = datetime.today()
-                                , documento__dvencimiento__gte = vcdo30))
-                ,porvencer_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__gte = datetime.today()
-                                , documento__dvencimiento__lte = xver30))
-                ,porvencer_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver30
-                                , documento__dvencimiento__lte = xver60))
-                ,porvencer_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver60
-                                , documento__dvencimiento__lte = xver90))
-                , porvencer_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver90))
+                vencido_mas_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo90) ) 
+                , vencido_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo60
+                                , accesorio__dvencimiento__gte = vcdo90))
+                , vencido_60 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo30
+                                , accesorio__dvencimiento__gte = vcdo60))
+                , vencido_30 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = datetime.today()
+                                , accesorio__dvencimiento__gte = vcdo30))
+                ,porvencer_30 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gte = datetime.today()
+                                , accesorio__dvencimiento__lte = xver30))
+                ,porvencer_60 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver30
+                                , accesorio__dvencimiento__lte = xver60))
+                ,porvencer_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver60
+                                , accesorio__dvencimiento__lte = xver90))
+                , porvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver90))
                 , total = Sum('nsaldo')
                 )\
             .order_by()

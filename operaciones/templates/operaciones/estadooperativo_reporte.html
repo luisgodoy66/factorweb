@@ -111,7 +111,19 @@
         <div class="card">
             <div class="card-body">
                 <div class="clearfix">
-                    <i class="fa fa-dollar bg-flat-color-5 p-3 font-2xl mr-3 float-left text-light"></i>
+                    <i class="fa fa-dollar 
+                    {% if color_estado == 1 %} 
+                        bg-flat-color-1
+                    {% elif color_estado == 2 %}
+                        bg-flat-color-2
+                    {% elif color_estado == 3 %}
+                        bg-flat-color-3
+                    {% elif color_estado == 4 %}
+                        bg-flat-color-4
+                    {% elif color_estado == 5 %}
+                        bg-flat-color-5
+                    {% endif %}                           
+                    p-3 font-2xl mr-3 float-left text-light"></i>
                     <div class="h5 text-secondary mb-0 mt-1">{{total_cartera_protestos}}</div>
                     <div class="text-muted text-uppercase font-weight-bold font-xs small">
                         Cartera y protestos</div>

@@ -164,6 +164,7 @@ def dashboard(request):
     docs = Documentos.objects.TotalCartera(id_empresa.empresa)
     if docs['Total']:
         cartera = docs['Total']
+        
     prot = Cheques_protestados.objects.TotalProtestos(id_empresa.empresa)
     if prot['Total']:
         protestos = prot['Total']

@@ -7,11 +7,9 @@ window.onload=function(){
             calcular_factura();
         });
 
-        alert('inico')
         xmlFile.addEventListener('change', function() {
           CargaXMLfactura(xmlFile)
         })
-        alert('fin')
     
     // validar antes de enviar
     jQuery("#frmSolicitud").submit(function(e){

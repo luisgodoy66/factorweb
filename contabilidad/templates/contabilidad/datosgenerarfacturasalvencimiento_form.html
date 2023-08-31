@@ -22,20 +22,21 @@
             <div class="card-header">
                 <strong>generar factura</strong> 
             </div>
-            <div class="card-body card-block">
+            <div hidden><input id="ambiente" value='{{ambiente}}'></div>
+             <div class="card-body card-block">
                     <!-- columna izquierda -->
                 <div class="col-lg-6">
                     <div class="row form-group " id="filtro" >
                         <div class="col-md-5">
                             <label for="fechacorte">Perìodo:</label>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <input type="text" class="form-control" name="añocorte"  
                             id="añocorte" placeholder="Ingrese año" 
                             aria-label="Ingrese año" value="{{ año }}">
                         </div>
                         <!-- lista de meses ? -->
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <select name="mes" id="cmb_mes" class="form-control" >
                                 <option value="01" {% if mes == 1 %} selected {% endif %}>Enero</option>
                                 <option value="02" {% if mes == 2 %} selected {% endif %}>Febrero</option>

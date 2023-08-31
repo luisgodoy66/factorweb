@@ -93,7 +93,7 @@ urlpatterns = [
     path('generarfacturadiario/',GenerarFacturaDiario, ),
     path('listadesembolsospendientes',DesembolsosPendientesView.as_view()
          , name="listadesembolsospendientes"),
-    path('generarxmlfactura/<ids_facturas>',GeneraXMLFactura, ),
+    path('generarxmlfactura/<ids_facturas>/<ambiente>',GeneraXMLFactura, ),
     path('generaregreso/<int:pk>/<forma_pago>/<operacion>',GenerarComprobanteEgreso
          , name="generar_egreso"),
     path('imprimircomprobanteegreso/<int:diario_id>',ImpresionComprobanteEgreso

@@ -1275,6 +1275,7 @@ def GenerarFactura(request, pk, tipo, operacion):
     porc_iva={}
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     sp = Asignacion.objects.filter(cxestado='P'
                                    , leliminado=False
                                    , empresa = id_empresa.empresa).count()
@@ -1365,6 +1366,7 @@ def GenerarFactura(request, pk, tipo, operacion):
                 , 'valor_dc': valor_dc 
                 , 'valor_dcv': valor_dcv
                 , 'valor_gaoa': valor_gaoa
+                , 'ambiente': id_empresa.empresa.ambientesri
                 }    
     
     return render(request, template_name, contexto)
@@ -1932,6 +1934,7 @@ def generaFacturasAlVencimiento(request):
                 , 'form': formulario
                 , 'concepto':concepto
                 , 'tipo_factoring': tipos_factoring
+                , 'ambiente': id_empresa.empresa.ambientesri
                 }    
     
     return render(request, template_name, contexto)

@@ -55,7 +55,8 @@ class Datos_generales(ClaseModelo):
         help_text='fecha que cae en estado de pre legal'    )
     dlegal=models.DateTimeField(null=True,
         help_text='fecha que cae en estado de legal en proceso de envio a legal del sistema'    )
-    cxlocalidad =models.ForeignKey(Localidades, on_delete=models.DO_NOTHING, null=True)
+    cxlocalidad =models.ForeignKey(Localidades, on_delete=models.DO_NOTHING, null=True,
+        help_text='Cree más sucursales en la opción Localidades del menú Configuración/Empresa'    )
     
     def __str__(self):
         return self.cxcliente.ctnombre

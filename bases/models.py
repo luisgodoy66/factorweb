@@ -8,6 +8,10 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class Empresas(models.Model):
+    AMBIENTES_SRI = (
+        ('1', 'Pruebas'),
+        ('2', 'Producción'),
+    )
     ctruccompania = models.CharField(max_length=13, default='', null=True)
     ctnombre = models.CharField(max_length=60, null=True,)
     lgratis = models.BooleanField(default=True)
@@ -20,7 +24,7 @@ class Empresas(models.Model):
     lregimenrimpe = models.BooleanField(default=False)
     dmodificacion = models.DateTimeField(auto_now=True)
     cxusuariomodifica = models.IntegerField(blank=True, null=True)
-    ambientesri = models.CharField(max_length=1, default='1')
+    ambientesri = models.CharField(max_length=1, choices=AMBIENTES_SRI, default='1')
     ctciudad = models.CharField(max_length=20, default='')
     diniciooperaciones = models.DateField(null=True)
     dfinpruebas = models.DateField(null=True)

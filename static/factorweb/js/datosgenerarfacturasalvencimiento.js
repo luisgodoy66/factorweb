@@ -1,3 +1,4 @@
+const ambiente = capturaValor('ambiente')
 window.onload=function(){
     jQuery('#id_puntoemision')
         .change(function(){
@@ -47,7 +48,7 @@ function GenerarFacturas(){
         }
         else{
             // barrer las facturas generadas y generar el XML
-            fetchProcesar("/contabilidad/generarxmlfactura/"+data,function(asiento){
+            fetchProcesar("/contabilidad/generarxmlfactura/"+data+"/"+ambiente,function(asiento){
                 // url = window.location.origin
                 // url = url + "/contabilidad/imprimirdiariocontable/"+asiento;
                 // window.open( url);
