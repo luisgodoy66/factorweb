@@ -290,3 +290,24 @@ class Socios(ClaseModelo):
     def __str__(self):
         return self.ctsocio
 
+class Datos_operativos_hist(ClaseModelo):
+    ESTADOS_DE_CLIENTES = (
+        ('A', 'Activo'),
+        ('B', 'Baja'),
+        ('I', 'Inactivo'),
+        ('P', 'Pre legal'),
+        ('L', 'Legal'),
+        ('X', 'Bloqueado'),
+    )
+    cxcliente=models.ForeignKey(Datos_generales, on_delete=models.RESTRICT
+        , related_name="datos_operativos_hist")
+    cxclase =models.ForeignKey(Clases_cliente, on_delete=models.DO_NOTHING)
+    nporcentajeanticipo = models.SmallIntegerField(default= 80)
+    ntasacomision = models.DecimalField(max_digits=11, decimal_places=8, default=0) 
+    ntasadescuentocartera = models.DecimalField(max_digits=11, decimal_places=8, default = 0)
+    ntasagaoa= models.DecimalField(max_digits=11, decimal_places=8, default=0) 
+    cxbeneficiarioasignacion = models.CharField(max_length=13, blank=True, null=True)
+    ctbeneficiarioasignacion = models.TextField(blank=True, null=True)
+    cxbeneficiariocobranzas = models.CharField(max_length=13, blank=True, null=True)
+    ctbeneficiariocobranzas = models.TextField(blank=True, null=True)
+    cxestado=models.CharField(max_length=1, default='A', choices=ESTADOS_DE_CLIENTES  )

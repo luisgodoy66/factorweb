@@ -27,14 +27,14 @@ window.onload=function(){
 }
 
 window.operateEvents = {
-    'click .imprimir': function (e, value, row, index) {
+    'click .xml': function (e, value, row, index) {
       ImprimirCobranza(row.id, row.TipoOperacion, row.Cliente)
       },
     };
       
 function operateFormatter(value, row, index) {
     return [
-        '<a class="imprimit" href="javascript:void(0)" title="Imprimir ">',
+        '<a class="xml" href="javascript:void(0)" title="Genera XML ">',
         '<i class="fa fa-rotate-left"></i>',
         '</a>  ',
       ].join('')

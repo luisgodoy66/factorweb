@@ -247,7 +247,6 @@ class Protestos_Manager(models.Manager):
         return cp.union(rp)
         
     def TotalProtestosCliente(self, id_cliente):
-        print(id_cliente)
         return self.filter(leliminado=False
                            , nsaldocartera__gt = 0)\
                     .filter(Q(cheque__cheque_cobranza__cxcliente = id_cliente
@@ -310,43 +309,44 @@ class Documentos_protestados_Manager(models.Manager):
                                 , documento__dvencimiento__gte = vcdo90
                                 , accesorio__isnull = True) ) 
                 , avencido_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo60
-                                , documento__dvencimiento__gte = vcdo90
+                                , accesorio__dvencimiento__gte = vcdo90
                                 , accesorio__isnull = False) ) 
                 , fvencido_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo30
                                 , documento__dvencimiento__gte = vcdo60
                                 , accesorio__isnull = True) ) 
                 , avencido_60 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo30
-                                , documento__dvencimiento__gte = vcdo60
+                                , accesorio__dvencimiento__gte = vcdo60
                                 , accesorio__isnull = False) ) 
                 , fvencido_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = datetime.today()
                                 , documento__dvencimiento__gte = vcdo30
                                 , accesorio__isnull = True) ) 
                 , avencido_30 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = datetime.today()
-                                , documento__dvencimiento__gte = vcdo30
+                                , accesorio__dvencimiento__gte = vcdo30
                                 , accesorio__isnull = False) ) 
                 ,fporvencer_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__gte = datetime.today()
                                 , documento__dvencimiento__lte = xver30
                                 , accesorio__isnull = True) ) 
                 ,aporvencer_30 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gte = datetime.today()
-                                , documento__dvencimiento__lte = xver30
+                                , accesorio__dvencimiento__lte = xver30
                                 , accesorio__isnull = False ) )
                 ,fporvencer_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver30
                                 , documento__dvencimiento__lte = xver60
                                 , accesorio__isnull = True) ) 
                 ,aporvencer_60 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver30
-                                , documento__dvencimiento__lte = xver60
+                                , accesorio__dvencimiento__lte = xver60
                                 , accesorio__isnull = False) ) 
                 ,fporvencer_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver60
                                 , documento__dvencimiento__lte = xver90
                                 , accesorio__isnull = True) ) 
                 ,aporvencer_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver60
-                                , documento__dvencimiento__lte = xver90
+                                , accesorio__dvencimiento__lte = xver90
                                 , accesorio__isnull = False) ) 
                 , fporvencer_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver90
                                 , accesorio__isnull = True)) 
                 , aporvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver90
                                 , accesorio__isnull = False)) 
                 )
+        print(protestados)
         fvm90 = protestados["fvencido_mas_90"]
         fv90 = protestados["fvencido_90"]
         fv60 = protestados["fvencido_60"]

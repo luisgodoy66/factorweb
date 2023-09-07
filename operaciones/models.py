@@ -28,8 +28,7 @@ class Datos_operativos(ClaseModelo):
     )
     dalta = models.DateTimeField(auto_created=True) 
     cxtipoliquidacioncobranza = models.CharField(max_length=1, default="L", null=True) 
-    cxclase =models.ForeignKey(Clases_cliente, on_delete=models.DO_NOTHING
-    )
+    cxclase =models.ForeignKey(Clases_cliente, on_delete=models.DO_NOTHING)
     nporcentajeanticipo = models.SmallIntegerField(default= 80)
     ntasacomision = models.DecimalField(max_digits=11, decimal_places=8, default=0) 
     ntasadescuentocartera = models.DecimalField(max_digits=11, decimal_places=8, default = 0)
@@ -86,6 +85,7 @@ class Asignacion(ClaseModelo):
     nmayorplazonegociacion = models.SmallIntegerField(default=0, )
     lfacturagenerada = models.BooleanField(default=False)
     nporcentajeiva = models.DecimalField(max_digits=5, decimal_places=2, default=12)
+    lanexosimpresos= models.BooleanField(default=False)
     
     def __str__(self):
         return self.cxasignacion
@@ -802,7 +802,7 @@ class Desembolsos(ClaseModelo):
     nvalor =  models.DecimalField(max_digits=10, decimal_places=2)
     cxformapago = models.CharField(max_length=3, choices=FORMAS_DE_PAGO)
     cxcuentapago = models.ForeignKey(Cuentas_bancarias, on_delete=models.RESTRICT
-        , null = True)
+        , null = True, blank=True)
     cxbeneficiario = models.CharField(max_length=13, blank=True, null=True)
     ctbeneficiario = models.TextField(blank=True, null=True)
     cxcuentadestino = models.ForeignKey(Cuenta_transferencia

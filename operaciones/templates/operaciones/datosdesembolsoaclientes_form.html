@@ -42,7 +42,10 @@
                                     {{ operacion}}
                                 </div>
                                 <div hidden>
+                                    {{ form.cxtipooperacion}}
+                                    {{ form.cxcliente}}
                                     {{ form.cxoperacion}}
+                                    {{ form.cxbeneficiario}}
                                 </div>
                         </div>  
                         <div class="row form-group">
@@ -82,7 +85,7 @@
                                 {{ form.ctbeneficiario.label }}
                             </label></div>
                             <div class="col-md-7">
-                                {{ beneficiario }}
+                                {{ form.ctbeneficiario }}
                             </div>
                         </div>  
                         <div class="dropdown-divider"></div>
@@ -96,7 +99,8 @@
                         </div>  
                         <div class="row form-group">
                             <div class="col col-md-5">
-                                <label for="id_nvalor" class=" form-control-label">
+                                {{form.cxcuentapago.errors}}
+                                <label for="{{ form.cxcuentapago.id_for_label }}" class=" form-control-label">
                                     {{ form.cxcuentapago.label }}</label>
                             </div>
                             <div class="col-md-7">
@@ -118,6 +122,7 @@
                 <button type="submit" class="btn btn-primary btn-sm">
                     <i class="fa fa-dot-circle-o"></i> Desembolso
                 </button>
+                {{error}}
 
             </div>
         </div>

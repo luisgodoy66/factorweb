@@ -151,10 +151,8 @@ class ClientesForm(forms.ModelForm):
             )
 
             if not self.instance.pk:
-                print("Identificación ya existe")
                 raise forms.ValidationError("Identificación ya registrada anteriormente")
             elif self.instance.pk!=sc.pk:
-                print("Cambio no permitido")
                 raise forms.ValidationError("Cambio No Permitido")
         except Clientes.DoesNotExist:
             pass

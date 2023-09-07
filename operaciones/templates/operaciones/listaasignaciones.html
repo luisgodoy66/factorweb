@@ -79,6 +79,14 @@
                                     class="btn btn-success btn-sm" role="button" target="reporte"
                                     title="Imprimir"><i class="fa fa-print"></i>
                                 </a>
+                                <a href="{% url 'operaciones:generaranexos' item.id %}"  title="Anexos"
+                                    {% if item.lanexosimpresos %}
+                                    class="btn btn-secondary btn-sm" 
+                                    {% else %}
+                                    class="btn btn-primary btn-sm" 
+                                    {% endif %}
+                                    role="button" target="reporte">
+                                    <i class="fa fa-paperclip"></i></a>
                                 <button onclick="ReversarAceptacionAsignacion( {{item.id}})" 
                                     class="btn btn-danger btn-sm"  title="Reversar" role="button">
                                     <i class="fa fa-rotate-left"></i>

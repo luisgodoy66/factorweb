@@ -668,15 +668,35 @@ class AmpliacionesConsulta(SinPrivilegios, generic.TemplateView):
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
         # obtener primer día del mes actual
+        
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
         desde = date.today() + timedelta(days=-date.today().day +1)
         hasta = date.today()
+
+        # datos de tasa gaoa/dc
+        gaoa = Tasas_factoring.objects\
+            .filter(cxtasa="GAOA", empresa = id_empresa.empresa).first()
+        
+        if not gaoa:
+            return HttpResponse("no encontró tasa de gaoa")
+        
+        dc = Tasas_factoring.objects\
+            .filter(cxtasa="DCAR", empresa = id_empresa.empresa).first()
+        
+        if not dc:
+            return HttpResponse("no encontró tasa de descuento de cartera")
+        
+        gaoa_iniciales= gaoa.ctinicialesentablas
+
+        cd_iniciales= dc.ctinicialesentablas
 
         context = super(AmpliacionesConsulta, self).get_context_data(**kwargs)
         context["desde"] = desde
         context["hasta"] =hasta
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        context["gaoa_iniciales"] =gaoa_iniciales
+        context["dc_iniciales"] =cd_iniciales
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -1591,6 +1611,7 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
     template_name = "operaciones/datosdesembolsoaclientes_form.html"
     contexto = {}
     formulario={}
+    error = ''
 
     cliente = Datos_generales.objects.filter(pk=cliente_ruc).first()
     datosoperativos = Datos_operativos.objects.filter(cxcliente = cliente_ruc).first()
@@ -1605,41 +1626,28 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
 
         e={'cxtipooperacion':'C'
             , 'cxoperacion':liquidacion.id
+            , 'cxcliente':cliente_ruc
             , 'nvalor': liquidacion.nneto
+            , 'cxbeneficiario':datosoperativos.cxbeneficiarioasignacion
+            , 'ctbeneficiario':datosoperativos.ctbeneficiariocobranzas
             }
         formulario = DesembolsarForm(e, empresa = id_empresa.empresa)
 
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                    empresa = id_empresa.empresa).count()
-
-        contexto={'liquidacion':liquidacion.dliquidacion
-            , 'instruccion_de_pago':liquidacion.ctinstrucciondepago
-            , "cuenta_transferencia":cuenta_transferencia
-            , 'id_beneficiario': datosoperativos.cxbeneficiariocobranzas
-            , 'beneficiario': datosoperativos.ctbeneficiariocobranzas
-            , "form":formulario
-            , 'cliente':cliente
-            , 'tipo_operacion':'C'
-            , 'operacion':liquidacion.cxliquidacion
-            , 'solicitudes_pendientes':sp
-        }
-
     if request.method=="POST":
 
-        with transaction.atomic():
-            # 1. Actualizar el estado de la liquidacion
-            liquidacion.ldesembolsada = True
-            liquidacion.cxestado = 'P'
-            liquidacion.save()
+        formulario = DesembolsarForm(request.POST,empresa = id_empresa.empresa)
 
-            # 2. grabar el desembolso
-            operacion = request.POST.get("cxoperacion")
-            forma_pago = request.POST.get("cxformapago")
+        if formulario.is_valid():
 
-            if forma_pago =="MOV":
+            operacion = formulario.cleaned_data["cxoperacion"]
+            forma_pago = formulario.cleaned_data["cxformapago"]
+
+            if forma_pago =="MOV" or forma_pago =='EFE':
                 cuenta_pago = None
             else:
-                x = request.POST.get("cxcuentapago")
+                x = formulario.cleaned_data["cxcuentapago"]
+                if x == None:
+                    error='Falta cuenta de pago'
                 cuenta_pago = CuentasEmpresa.objects.filter(pk = x).first()
 
             if forma_pago=="CHE":
@@ -1654,22 +1662,48 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
             else:
                 cuenta_destino = None
 
-            desembolso = Desembolsos(cxtipooperacion='C'
-                , cxoperacion = operacion
-                , cxcliente = cliente
-                , nvalor = liquidacion.nneto
-                , cxformapago = forma_pago
-                , cxcuentapago = cuenta_pago
-                , cxbeneficiario =id_beneficiario
-                , ctbeneficiario = beneficiario
-                , cxcuentadestino = cuenta_destino
-                , cxusuariocrea = request.user
-                , empresa = id_empresa.empresa,
-                )
-            
-            desembolso.save()
+            if error =='':
+                with transaction.atomic():
+                    # 1. Actualizar el estado de la liquidacion
+                    liquidacion.ldesembolsada = True
+                    liquidacion.cxestado = 'P'
+                    liquidacion.save()
 
-        return redirect("cobranzas:listaliquidacionespendientespagar")
+                    # 2. grabar el desembolso
+                    desembolso = Desembolsos(cxtipooperacion='C'
+                        , cxoperacion = operacion
+                        , cxcliente = cliente
+                        , nvalor = liquidacion.nneto
+                        , cxformapago = forma_pago
+                        , cxcuentapago = cuenta_pago
+                        , cxbeneficiario =id_beneficiario
+                        , ctbeneficiario = beneficiario
+                        , cxcuentadestino = cuenta_destino
+                        , cxusuariocrea = request.user
+                        , empresa = id_empresa.empresa,
+                        )
+                    
+                    desembolso.save()
+
+                return redirect("cobranzas:listaliquidacionespendientespagar")
+        else:
+            print('invalido')
+
+    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                empresa = id_empresa.empresa).count()
+
+    contexto={'liquidacion':liquidacion.dliquidacion
+        , 'instruccion_de_pago':liquidacion.ctinstrucciondepago
+        , "cuenta_transferencia":cuenta_transferencia
+        # , 'id_beneficiario': datosoperativos.cxbeneficiariocobranzas
+        # , 'beneficiario': datosoperativos.ctbeneficiariocobranzas
+        , "form":formulario
+        , 'cliente':cliente
+        , 'tipo_operacion':'C'
+        , 'operacion':liquidacion.cxliquidacion
+        , 'solicitudes_pendientes':sp
+        , 'error':error
+    }
 
     return render(request, template_name, contexto)
 

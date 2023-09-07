@@ -118,7 +118,8 @@ class DesembolsarForm(forms.ModelForm):
             , 'cxcliente':'Id de cliente', 'cxoperacion':'Código de operación'
             , 'cxbeneficiario':'id de beneficiario'
         }
-        # widgets={'ctinstrucciondepago': forms.Textarea(attrs={'rows': '2'}), }
+        widgets={
+            'ctbeneficiario':forms.Textarea(attrs={'rows':'1'}, )}
 
     def __init__(self, *args, **kwargs):
         empresa = kwargs.pop('empresa', None)
@@ -129,6 +130,7 @@ class DesembolsarForm(forms.ModelForm):
                 'class':'form-control'
             })
         self.fields['nvalor'].widget.attrs['readonly']=True
+        self.fields['ctbeneficiario'].widget.attrs['readonly']=True
 
         if empresa:
             self.fields['cxcuentapago'].queryset = Cuentas_bancarias.objects\

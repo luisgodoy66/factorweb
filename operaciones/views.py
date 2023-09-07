@@ -344,12 +344,39 @@ class DesembolsosConsulta(SinPrivilegios, generic.TemplateView):
         context['solicitudes_pendientes'] = sp
         return context
  
+class DatosOperativosHistoricoView(SinPrivilegios, generic.ListView):
+    model = ModeloCliente.Datos_operativos_hist
+    template_name = "clientes/listadatosoperativoshistorico.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="clientes.view_datos_operativos_hist"
+
+    def get_queryset(self) :
+        id_cliente = self.kwargs.get('id_cliente')
+        qs=ModeloCliente.Datos_operativos_hist.objects.filter(leliminado = False
+                                                              , cxcliente = id_cliente)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        id_cliente = self.kwargs.get('id_cliente')
+        cliente = ModeloCliente.Datos_generales.objects\
+            .filter(pk=id_cliente).first()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        
+        context = super(DatosOperativosHistoricoView, self).get_context_data(**kwargs)
+        context['solicitudes_pendientes'] = sp
+        context['cliente'] = cliente
+        return context
+
 @login_required(login_url='/login/')
 @permission_required('operaciones.add_desembolsos', login_url='bases:sin_permisos')
 def DesembolsarAsignacion(request, pk, cliente_id):
     template_name = "operaciones/datosdesembolsoaclientes_form.html"
     contexto = {}
     formulario={}
+    error = ''
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
@@ -367,61 +394,28 @@ def DesembolsarAsignacion(request, pk, cliente_id):
 
         e={'cxtipooperacion':'A'
             , 'cxoperacion':asignacion.id
+            , 'cxcliente':cliente_id
             , 'nvalor': asignacion.neto()
+            , 'cxbeneficiario':datosoperativos.cxbeneficiarioasignacion
+            , 'ctbeneficiario':datosoperativos.ctbeneficiarioasignacion
             }
         formulario = DesembolsarForm(e, empresa = id_empresa.empresa)
 
-        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
-
-        contexto={'liquidacion':asignacion.dnegociacion
-            , 'instruccion_de_pago':asignacion.ctinstrucciondepago
-            , "cuenta_transferencia":cuenta_transferencia
-            , 'id_beneficiario': datosoperativos.cxbeneficiarioasignacion
-            , 'beneficiario': datosoperativos.ctbeneficiarioasignacion
-            , "form":formulario
-            , 'cliente':cliente
-            , 'tipo_operacion':'A'
-            , 'operacion':asignacion.cxasignacion
-            , 'solicitudes_pendientes':sp
-        }
-
     if request.method=="POST":
 
-        with transaction.atomic():
-            # 1. Actualizar el estado de la ASIGNACION
-            # Cambiar L por P(agada)
-            # asignacion.cxestado = 'L'
-            asignacion.cxestado = 'P'
-            asignacion.save()
+        formulario = DesembolsarForm(request.POST)
 
-            # 2. Cobrar los cargos generados por la negociación
-            # (Se generaron en la aceptacion)
+        if formulario.is_valid():
 
-            valor = asignacion.nanticipo
+            operacion = formulario.cleaned_data["cxoperacion"]
+            forma_pago = formulario.cleaned_data["cxformapago"]
 
-            cargos = Cargos_detalle.objects\
-                .filter(cxasignacion=asignacion\
-                    , cxcliente_id=cliente_id).all()
-
-            for cargo in cargos:
-                if valor >= cargo.nsaldo:
-                    cargo.nsaldo = 0
-                    cargo.save()
-                    valor = valor - cargo.nsaldo
-                else:
-                    cargo.nsaldo = cargo.nsaldo - valor
-                    cargo.save()
-                    valor = 0
-
-            # 3. grabar el desembolso
-            operacion = request.POST.get("cxoperacion")
-            forma_pago = request.POST.get("cxformapago")
-
-            if forma_pago =="MOV":
+            if forma_pago =="MOV" or forma_pago =='EFE':
                 cuenta_pago = None
             else:
-                x = request.POST.get("cxcuentapago")
+                x = formulario.cleaned_data["cxcuentapago"]
+                if x == None:
+                    error='Falta cuenta de pago'
                 cuenta_pago = Cuentas_bancarias.objects.filter(pk = x).first()
 
             if forma_pago=="CHE":
@@ -436,22 +430,66 @@ def DesembolsarAsignacion(request, pk, cliente_id):
             else:
                 cuenta_destino = None
 
-            liquidacion = Desembolsos(cxtipooperacion='A'
-                , cxoperacion = operacion
-                , cxcliente = cliente
-                , nvalor = asignacion.neto()
-                , cxformapago = forma_pago
-                , cxcuentapago = cuenta_pago
-                , cxbeneficiario =id_beneficiario
-                , ctbeneficiario = beneficiario
-                , cxcuentadestino = cuenta_destino
-                , cxusuariocrea = request.user,
-                empresa = id_empresa.empresa,
-                )
-            
-            liquidacion.save()
+            if error =='':
+                with transaction.atomic():
+                    # 1. Actualizar el estado de la ASIGNACION
+                    # Cambiar L por P(agada)
+                    # asignacion.cxestado = 'L'
+                    asignacion.cxestado = 'P'
+                    asignacion.save()
 
-        return redirect("operaciones:listaasignacionespendientesdesembolsar")
+                    # 2. Cobrar los cargos generados por la negociación
+                    # (Se generaron en la aceptacion)
+
+                    valor = asignacion.nanticipo
+
+                    cargos = Cargos_detalle.objects\
+                        .filter(cxasignacion=asignacion\
+                            , cxcliente_id=cliente_id).all()
+
+                    for cargo in cargos:
+                        if valor >= cargo.nsaldo:
+                            cargo.nsaldo = 0
+                            cargo.save()
+                            valor = valor - cargo.nsaldo
+                        else:
+                            cargo.nsaldo = cargo.nsaldo - valor
+                            cargo.save()
+                            valor = 0
+
+                    # 3. grabar el desembolso
+                    liquidacion = Desembolsos(cxtipooperacion='A'
+                        , cxoperacion = operacion
+                        , cxcliente = cliente
+                        , nvalor = asignacion.neto()
+                        , cxformapago = forma_pago
+                        , cxcuentapago = cuenta_pago
+                        , cxbeneficiario =id_beneficiario
+                        , ctbeneficiario = beneficiario
+                        , cxcuentadestino = cuenta_destino
+                        , cxusuariocrea = request.user,
+                        empresa = id_empresa.empresa,
+                        )
+                    
+                    liquidacion.save()
+
+                return redirect("operaciones:listaasignacionespendientesdesembolsar")
+
+    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                    empresa = id_empresa.empresa).count()
+
+    contexto={'liquidacion':asignacion.dnegociacion
+        , 'instruccion_de_pago':asignacion.ctinstrucciondepago
+        , "cuenta_transferencia":cuenta_transferencia
+        # , 'id_beneficiario': datosoperativos.cxbeneficiarioasignacion
+        # , 'beneficiario': datosoperativos.ctbeneficiarioasignacion
+        , "form":formulario
+        , 'cliente':cliente
+        , 'tipo_operacion':'A'
+        , 'operacion':asignacion.cxasignacion
+        , 'solicitudes_pendientes':sp
+        , 'error':error
+    }
 
     return render(request, template_name, contexto)
 
@@ -539,6 +577,7 @@ def DatosOperativos(request, cliente_id=None):
             )
             if datoscliente:
                 datoscliente.save()
+                
         else:
             datoscliente.dalta=dalta
             datoscliente.cxclase = idclase
@@ -556,6 +595,23 @@ def DatosOperativos(request, cliente_id=None):
             datoscliente.save()
 
         # nota: crear un registro historico del cambio realizado
+        datoshistorico= ModeloCliente.Datos_operativos_hist(
+            cxclase=idclase,
+            nporcentajeanticipo=nporcentajeanticipo,
+            cxcliente = cliente,
+            ntasacomision = ntasacomision,
+            ntasadescuentocartera = ntasadescuentocartera,
+            ntasagaoa = ntasagaoa,
+            cxbeneficiarioasignacion = id_beneficiario_asgn,
+            ctbeneficiarioasignacion = beneficiario_asgn,
+            cxbeneficiariocobranzas = id_beneficiario_cobr,
+            ctbeneficiariocobranzas = beneficiario_cobr,
+            cxusuariocrea = request.user,
+            cxestado = estado,
+            empresa = id_empresa.empresa,
+        )
+
+        datoshistorico.save()
 
         return redirect("operaciones:listadatosoperativos")
 
@@ -1341,12 +1397,16 @@ def GenerarAnexos(request,asignacion_id):
                 }
             plantilla.render(context)
             plantilla.save(archivo)
+
+        # marcar la asignación como generados los anexos
+        asignacion.lanexosimpresos = True
+        asignacion.save()
     else:
         return HttpResponse("No se ha definido ningún anexo ")
     
         # subprocess.run(["word.exe",archivo])
 
-    return HttpResponse("Se han generado archivos en la carpeta correspondientes")
+    return HttpResponse("Se han generado archivos en las carpetas correspondientes")
 
 @login_required(login_url='/login/')
 @permission_required('operaciones.change_asignacion', login_url='bases:sin_permisos')
@@ -1451,7 +1511,6 @@ def GeneraResumenAntigüedadCarteraJSON(request):
     acc_quitados =  Cheques_quitados.objects.antigüedad_cartera(id_empresa.empresa)
     cheques = ChequesAccesorios.objects.antigüedad_cartera(id_empresa.empresa)
     protestados = Documentos_protestados.objects.antigüedad_cartera(id_empresa.empresa)
-
     fvm90 = documentos["vencido_mas_90"]
     avm90=acc_quitados["vencido_mas_90"]
     fv90 = documentos["vencido_90"]

@@ -6,7 +6,8 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Participantes</a></li>
                     <li><a href="#">Clientes</a></li>
-                    <li class="active">Datos operativos</li>
+                    <li><a href="{% url 'operaciones:listadatosoperativos' %}">Datos operativos</a></li>
+                    <li class="active">{{cliente}}</li>
                 </ol>
             </div>
         </div>
@@ -35,7 +36,7 @@
                 {% if error %}
                     {{ error }}
                 {% else %}
-                 No hay clientes registrados.
+                 No hay historico registrado.
                {% endif %}
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -47,40 +48,39 @@
 
                 <table class="table table-striped table-bordered" id="bootstrap-data-table-export">
                     <thead>
-                        <th>Id</th>
-                        <th>Nombre</th>
+                        <th>Fecha</th>
                         <th>Clase</th>
                         <th>% anticipo</th>
                         <th>Tasa GAO</th>
                         <th>Tasa de descuento </th>
                         <th>Tasa de GAO adicional </th>
+                        <th>Beneficiario asignación </th>
+                        <th>Beneficiario cobranza </th>
                         <th>Estado</th>
-                        <th>Alta</th>
-                        <th class="all">Acciones</th>
                     </thead>
                     <tbody>
                         {% for item in consulta %}
                         <tr>
-                            <td>{{ item.cxcliente.cxparticipante }}</td>
-                            <td>{{ item }}</td>
-                            <td>{{ item.datos_operativos.get.cxclase }}</td>
-                            <td>{{ item.datos_operativos.get.nporcentajeanticipo }}</td>
-                            <td>{{ item.datos_operativos.get.ntasacomision }}</td>
-                            <td>{{ item.datos_operativos.get.ntasadescuentocartera }}</td>
-                            <td>{{ item.datos_operativos.get.ntasagaoa }}</td>
-                            <td>{{ item.datos_operativos.get.cxestado}}</td>
-                            <td>{{ item.datos_operativos.get.dalta|date:"Y-m-d" }}</td>
-                            <td>
-                                <a href="{% url 'operaciones:datosoperativos_editar' item.cxcliente.id %}" 
-                                    class="btn btn-warning btn-sm" title="Editar" role="button"><i class="fa fa-edit"></i></a>
-                                <a href="{% url 'clientes:listadatosoperativoshistorico' item.id %}" 
-                                    class="btn btn-primary btn-sm" title="Historia" role="button"><i class="fa fa-archive"></i></a>
-                            </td>
+                            <td>{{ item.dregistro }}</td>
+                            <td>{{ item.cxclase }}</td>
+                            <td>{{ item.nporcentajeanticipo }}</td>
+                            <td>{{ item.ntasacomision }}</td>
+                            <td>{{ item.ntasadescuentocartera }}</td>
+                            <td>{{ item.ntasagaoa }}</td>
+                            <td>{{ item.ctbeneficiarioasignacion }}</td>
+                            <td>{{ item.ctbeneficiariocobranzas }}</td>
+                            <td>{{ item.cxestado}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             <!-- </div> -->
+
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'operaciones:listadatosoperativos' %}" class="btn btn-danger btn-sm">
+                <i class="fa fa-ban"></i> Salir
+            </a>
 
         </div>
 

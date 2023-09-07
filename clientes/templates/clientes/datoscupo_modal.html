@@ -1,4 +1,4 @@
-<div class="modal-dialog ">
+<div class="modal-dialog modal-md">
     <div class="modal-content">
 
         <form  method="POST" rol="form" id="frmCupo" class="form-horizontal"
@@ -24,31 +24,31 @@
                 <div class="card-body card-block">
                 <!-- <div class="col-lg-6"> -->
                     <div class="row form-group" {% if consulta.cxcomprador %} hidden {% endif %}>
-                        <div class="col-md-6"><label for="id_cxcomprador" class=" form-control-label"> 
+                        <div class="col-md-4"><label for="id_cxcomprador" class=" form-control-label"> 
                             {{ form.cxcomprador.label}}</label></div>
-                        <div class="col-md-6">
+                        <div class="col-md-8">
                             {{ form.cxcomprador}}
                         </div>
                     </div>
                     <div class="row form-group" {% if consulta.cxcomprador %} hidden {% endif %}>
-                        <div class="col-md-6"><label for="id_cxcliente" class=" form-control-label"> 
+                        <div class="col-md-4"><label for="id_cxcliente" class=" form-control-label"> 
                             {{ form.cxcliente.label}}</label></div>
-                        <div class="col-md-6">
+                        <div class="col-md-8">
                             {{ form.cxcliente}}
                         </div>
                     </div>
                     <div class="row form-group">
-                        <div class="col-md-6"><label for="id_cxmoneda" class=" form-control-label">
+                        <div class="col-md-4"><label for="id_cxmoneda" class=" form-control-label">
                             {{ form.cxmoneda.label}}</label></div>
-                        <div class="col-md-6">
+                        <div class="col-md-8">
                             {{ form.cxmoneda}}
                             <small class="form-text text-muted">Máximo 3 caracteres</small>
                         </div>
                     </div>
                     <div class="row form-group">
-                        <div class="col-md-6"><label for="id_ncupocartera" class=" form-control-label">
+                        <div class="col-md-4"><label for="id_ncupocartera" class=" form-control-label">
                             {{ form.ncupocartera.label}}</label></div>
-                        <div class="col-md-6">
+                        <div class="col-md-8">
                             {{ form.ncupocartera}}
                         </div>
                     </div>
@@ -60,9 +60,9 @@
                         </div>
                     </div> -->
                     <div class="row form-group">
-                        <div class="col-md-6"><label for="id_lsenotifica" class=" form-control-label"> 
+                        <div class="col-md-4"><label for="id_lsenotifica" class=" form-control-label"> 
                             {{ form.lsenotifica.label}}</label></div>
-                        <div class="col ">
+                        <div class="col-md-8 ">
                             <label class="switch switch-3d switch-success mr-3">
                                 <input type="checkbox" class="switch-input" 
                                 {% if  consulta.lsenotifica %} checked {% endif %} 
@@ -73,9 +73,9 @@
                         </div>
                     </div>
                     <div class="row form-group">
-                        <div class="col-md-6"><label for="id_lactivo" class=" form-control-label">
+                        <div class="col-md-4"><label for="id_lactivo" class=" form-control-label">
                             {{ form.lactivo.label}}</label></div>
-                        <div class="col ">
+                        <div class="col-md-8 ">
                             <label class="switch switch-3d switch-success mr-3">
                                 <input type="checkbox" class="switch-input" 
                                 {% if  consulta.lactivo %} checked {% endif %} 

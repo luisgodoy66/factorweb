@@ -8,6 +8,8 @@ from .views import  ClientesView,  DatosClientes, DatosClienteNatural \
     , CuentasBancariasDeudorNew, CuentasBancariasDeudorEdit, ClientesSolicitudesView\
     , CompradorEdit,CuentasBancariasEdit
 
+from operaciones.views import DatosOperativosHistoricoView
+
 urlpatterns = [
     path('listaclientessolicitudes/',ClientesSolicitudesView.as_view()
         , name='listaclientessolicitudes'),
@@ -56,4 +58,6 @@ urlpatterns = [
     # estado operativo
     path('editestadoclasecomprador/<int:pk>',CompradorEdit.as_view()
         , name='estadoclasecomprador_editar'),
+    path('listadatosoperativoshistorico/<id_cliente>',DatosOperativosHistoricoView.as_view(), \
+        name='listadatosoperativoshistorico'),
 ]

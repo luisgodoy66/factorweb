@@ -91,8 +91,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME':  'factorwebdb',
         # cambiar estas líneas para actualizar la base de producción. 1 es prueba 2 es produccion
-        'HOST':  'database-1.c5i2bulrjalv.us-east-2.rds.amazonaws.com',
-        # 'HOST':  'database-2.c5i2bulrjalv.us-east-2.rds.amazonaws.com',
+        # 'HOST':  'database-1.c5i2bulrjalv.us-east-2.rds.amazonaws.com',
+        'HOST':  'database-2.c5i2bulrjalv.us-east-2.rds.amazonaws.com',
         'USER': 'postgres',
         'PASSWORD':os.getenv("PASSWORD_BD"),
         # 'PASSWORD':os.environ["PASSWORD_BD"],
