@@ -4,7 +4,7 @@
         <div class="page-header float-right">
             <div class="page-title">
                 <ol class="breadcrumb text-right">
-                    <li><a href="#">Extras</a></li>
+                    <li><a href="#">configuración</a></li>
                     <li><a href="#">Tablas</a></li>
                     <li class="active">Movimientos</li>
                 </ol>
@@ -62,9 +62,9 @@
                             <td>{{ item.cxmovimiento }}</td>
                             <td>{{ item.ctmovimiento }}</td>
                             <td>{{ item.cxsigno }}</td>
-                            <td>{{ item.lcolateral }}</td>
-                            <td>{{ item.litemfactura }}</td>
-                            <td>{{ item.lcargo }}</td>
+                            <td>{{ item.lcolateral|yesno:'Si,No' }}</td>
+                            <td>{{ item.litemfactura|yesno:'Si,No' }}</td>
+                            <td>{{ item.lcargo|yesno:'Si,No' }}</td>
                             <td>
                                 <a href="{% url 'operaciones:movimiento_editar' item.id %}"  title="Editar"
                                     class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>

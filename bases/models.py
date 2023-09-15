@@ -13,7 +13,7 @@ class Empresas(models.Model):
         ('2', 'Producción'),
     )
     ctruccompania = models.CharField(max_length=13, default='', null=True)
-    ctnombre = models.CharField(max_length=60, null=True,)
+    ctnombre = models.CharField(max_length=60, blank=True,)
     lgratis = models.BooleanField(default=True)
     nmaximooperaciones = models.SmallIntegerField(default=10)
     lbloqueada = models.BooleanField(default=False)

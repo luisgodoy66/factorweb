@@ -153,6 +153,7 @@ class MaestroMovimientosForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
+        self.fields['cxmovimiento'].widget.attrs['readonly']=True
 
 class CondicionesOperativasForm(forms.ModelForm):
     class Meta:

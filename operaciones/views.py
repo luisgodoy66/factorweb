@@ -413,7 +413,11 @@ def DesembolsarAsignacion(request, pk, cliente_id):
             if forma_pago =="MOV" or forma_pago =='EFE':
                 cuenta_pago = None
             else:
-                x = formulario.cleaned_data["cxcuentapago"]
+                # esta linea muestra el __str__
+                # x = formulario.cleaned_data["cxcuentapago"]
+                # esta línea muestra id
+                x = request.POST.get("cxcuentapago")                
+                
                 if x == None:
                     error='Falta cuenta de pago'
                 cuenta_pago = Cuentas_bancarias.objects.filter(pk = x).first()

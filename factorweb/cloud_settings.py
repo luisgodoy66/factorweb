@@ -21,7 +21,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
+DEBUG = True
 # ALLOWED_HOSTS = ['factorweb-dev2.us-east-2.elasticbeanstalk.com','localhost', '*']
 # CSRF_TRUSTED_ORIGINS=['http://factorweb-dev2.us-east-2.elasticbeanstalk.com/']
 # # ALLOWED_HOSTS = ['factorweb-dev.us-east-2.elasticbeanstalk.com','localhost', '127.0.0.1','*']
@@ -91,6 +91,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME':  'factorwebdb',
         # cambiar estas líneas para actualizar la base de producción. 1 es prueba 2 es produccion
+        # 08-sep-23 l.g.    Se eliminó la base 1 que servía de prueba
         # 'HOST':  'database-1.c5i2bulrjalv.us-east-2.rds.amazonaws.com',
         'HOST':  'database-2.c5i2bulrjalv.us-east-2.rds.amazonaws.com',
         'USER': 'postgres',

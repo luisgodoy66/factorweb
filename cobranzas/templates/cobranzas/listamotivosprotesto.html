@@ -60,7 +60,7 @@
                             <td>{{ item.id }}</td>
                             <td>{{ item.ctmotivoprotesto }}</td>
                             <td>{{ item.ctabreviacion }}</td>
-                            <td>{{ item.lresponsabilidadgirador }}</td>
+                            <td>{{ item.lresponsabilidadgirador|yesno:'Si,No' }}</td>
                             <td>
                                 <a href="{% url 'cobranzas:motivoprotesto_editar' item.id %}" 
                                     class="btn btn-warning btn-sm" role="button">
