@@ -1413,7 +1413,7 @@ def GenerarAnexos(request,asignacion_id):
     
         # subprocess.run(["word.exe",archivo])
 
-    return HttpResponse("Se han generado archivos en las carpetas correspondientes")
+    return HttpResponse("Se han generado archivos en las carpetas correspondientes. Puede cerrar esta página.")
 
 @login_required(login_url='/login/')
 @permission_required('operaciones.change_asignacion', login_url='bases:sin_permisos')

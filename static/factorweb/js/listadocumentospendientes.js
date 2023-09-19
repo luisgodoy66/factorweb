@@ -5,13 +5,13 @@ var $cobroconcheque = jQuery("#cobroconcheque")
 var $cobroconefectivo = jQuery("#cobroconefectivo")
 var $cobroconmovimiento = jQuery("#cobroconmovimiento")
 var $cobrocontransferencia = jQuery("#cobrocontransferencia")
-const filtro = capturaValor("filtro")
+const por_vencer = capturaValor("filtro")
 var $ampliar_plazo = jQuery("#ampliarplazo")
 
 window.onload=function(){
 
     // si la lista es de cartera vencida no debe mostrar filtro
-    if (filtro=='Si'){
+    if (por_vencer=='Si'){
       document.querySelector('#filtro_por_vencer').removeAttribute('hidden');
     }
   
@@ -123,7 +123,7 @@ function CobroDeDocumentos(forma){
       }, 0)
 
     url = '/cobranzas/cobrodedocumentos/'+ids+'/'+total_cartera+'/'+forma+'/'
-      +id_cliente+'/'+un_solo_comprador+'/'+id_comprador+'/'+tipo_factoring+'/'+filtro;
+      +id_cliente+'/'+un_solo_comprador+'/'+id_comprador+'/'+tipo_factoring+'/'+por_vencer;
     
     location.href=url
   }
@@ -135,7 +135,7 @@ window.operateEvents = {
     if(row.Anticipa100){
       alert("No puede ejecutar la prorroga de un documento al que se ha anticipado el 100 %. Debe realizar una ampliación de plazo")
     }else{
-      Prorroga(row.id, row.Tipo_asignacion, row.Vencimiento, row.Documento)
+      Prorroga(row.id, row.Tipo_asignacion, row.Vencimiento, row.Documento, por_vencer)
     }
   },
 };
@@ -148,3 +148,25 @@ return [
 ].join('')
 }
 
+function cellStyle(value, row, index) {
+  var classes = [
+    'bg-blue',
+    'bg-green',
+    'bg-orange',
+    'bg-yellow',
+    'bg-red'
+  ]
+
+  if (row.Prorroga == 0) {
+    return {
+      css: {
+        color: 'black'
+      }
+      }
+  }
+  return {
+    css: {
+      color: 'blue'
+    }
+  }
+}

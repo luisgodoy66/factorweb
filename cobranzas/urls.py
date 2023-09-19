@@ -66,7 +66,8 @@ urlpatterns = [
          , CanjeDeCheque, name='canjearchequeaccesorio'),
     path('quitaraccesorio/<int:cheque_id>/<cliente_id>'
          , QuitarAccesorio, name='quitarchequeaccesorio'),
-    path('prorroga/<int:id>/<tipo_asignacion>/<vencimiento>/<numero_factura>', Prorroga, name='prorroga' ),
+    path('prorroga/<int:id>/<tipo_asignacion>/<vencimiento>/<numero_factura>/<porvencer>'
+         , Prorroga, name='prorroga' ),
     path('modificarcobranza/<int:id>/<tipo_operacion>', ModificarCobranza
          , name= 'modificar_cobranza'),
     path('detallecobranzas/<desde>/<hasta>/<clientes>', ImpresionDetalleCobranzas

@@ -769,15 +769,15 @@ def GeneraListaCarterPorVencerJSONSalida(doc):
     output["Asignacion"] = doc.cxasignacion.cxasignacion
     output["Documento"] = doc.ctdocumento
     output["Vencimiento"] = doc.vencimiento().strftime("%Y-%m-%d")
-    if doc.ncontadorprorrogas > 0 :
-        output["Vencimiento"] += ' *'
+    # if doc.ncontadorprorrogas > 0 :
+    #     output["Vencimiento"] += ' *'
     output["Saldo"] = doc.nsaldo
     if doc.dultimacobranza:
         output["UltimaCobranza"] = doc.dultimacobranza.strftime("%Y-%m-%d")
     else:
         output["UltimaCobranza"] =''
     output["Anticipa100"] = doc.cxtipofactoring.lanticipatotalnegociado
-    output["Tipo_asignacion"] = 'F'
+    output["Tipo_asignacion"] = FACTURAS_PURAS
     output["Prorroga"] = doc.ndiasprorroga
     
     return output
@@ -3323,10 +3323,10 @@ def SumaCargos(request,ids, tipo_asignacion, gaoa_carga_iva, dc_carga_iva
 @permission_required('operaciones.change_documentos', login_url='bases:sin_permisos')
 # este privilegio esta enfocado en la tabla de documentos y no esta haciendo 
 # distincion de la tabla de accesorios
-def Prorroga(request, id, tipo_asignacion, vencimiento, numero_factura):
+def Prorroga(request, id, tipo_asignacion, vencimiento, numero_factura, porvencer='No'):
     template_path = 'cobranzas/datosdiasprorroga_modal.html'
 
-    if tipo_asignacion =='F':
+    if tipo_asignacion ==FACTURAS_PURAS:
         documento = Documentos.objects.filter(pk=id).first()
     else:
         documento = ChequesAccesorios.objects.filter(pk=id).first()
@@ -3338,6 +3338,7 @@ def Prorroga(request, id, tipo_asignacion, vencimiento, numero_factura):
         'numero_factura' : numero_factura, 
         'cantidad_prorrogas' : documento.ncontadorprorrogas,
         'dias':0,
+        'por_vencer': porvencer,
         }
     
     if request.method =="POST":
@@ -3351,6 +3352,9 @@ def Prorroga(request, id, tipo_asignacion, vencimiento, numero_factura):
             documento.save()
         else:
             return "docuemnto no encontrada"
+
+        if porvencer == 'Si':
+            return redirect("cobranzas:listadocumentosporvencer",)
 
         if tipo_asignacion==FACTURAS_PURAS:
             return redirect("cobranzas:listadocumentosvencidos",)

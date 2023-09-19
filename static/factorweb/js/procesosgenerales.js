@@ -148,14 +148,14 @@ function AmpliacionDePlazo(tipo_asignacion){
   return false
 }
 
-function Prorroga(id, tipo_asignacion, vencimiento, documento){
+function Prorroga(id, tipo_asignacion, vencimiento, documento, por_vencer){
   // si el id es negativo es un accesorio quitado que aparece en la cartera vencida
   if (id < 0){
     id = -id
     tipo_asignacion='A'
   }
   AbrirModal("/cobranzas/prorroga/"+ id + '/' + tipo_asignacion
-    +'/'+vencimiento+'/'+documento)
+    +'/'+vencimiento+'/'+documento+'/'+por_vencer)
 }
 
 function ImprimirAmpliacionPlazo(ampliacion_id){
