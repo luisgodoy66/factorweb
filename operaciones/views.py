@@ -1378,32 +1378,37 @@ def GenerarAnexos(request,asignacion_id):
             ruta_anexo_generado = anexo.ctrutageneracion
             ruta_plantilla = anexo.ctrutaanexo
             
-            plantilla = DocxTemplate(ruta_plantilla)
-            
-            archivo = ruta_anexo_generado + anexo.ctnombre + ' DE ' \
-                + cliente.ctnombre+"-" \
-                + asignacion.cxasignacion+".docx"
+            try:
+                
+                plantilla = DocxTemplate(ruta_plantilla)
+                
+                archivo = ruta_anexo_generado + anexo.ctnombre + ' DE ' \
+                    + cliente.ctnombre+"-" \
+                    + asignacion.cxasignacion+".docx"
 
-            fecha_negociacion = asignacion.dnegociacion
+                fecha_negociacion = asignacion.dnegociacion
 
-            context = { 
-                'direccioncliente' : cliente.ctdireccion ,
-                'fechanegociacion': fecha_negociacion.strftime("%Y-%B-%d"),
-                'idcliente': cliente.cxparticipante,
-                'idrepresentantelegal':rl_id,
-                'maximoplazonegociacion':asignacion.nmayorplazonegociacion,
-                'nombrecliente':cliente.ctnombre,
-                'nombrerepresentantelegal':rl_nombre,
-                'totalanticipo': asignacion.nanticipo,
-                'totalanticipoenletras': numero_a_letras(asignacion.nanticipo),
-                'empresafactor':factor.ctnombre,
-                'rucfactor':factor.ctruccompania,
-                'direccionfactor':factor.ctdireccion,
-                'ciudadfactor': factor.ctciudad,
-                'cargorepresentantelegal': rl_cargo,
-                }
-            plantilla.render(context)
-            plantilla.save(archivo)
+                context = { 
+                    'direccioncliente' : cliente.ctdireccion ,
+                    'fechanegociacion': fecha_negociacion.strftime("%Y-%B-%d"),
+                    'idcliente': cliente.cxparticipante,
+                    'idrepresentantelegal':rl_id,
+                    'maximoplazonegociacion':asignacion.nmayorplazonegociacion,
+                    'nombrecliente':cliente.ctnombre,
+                    'nombrerepresentantelegal':rl_nombre,
+                    'totalanticipo': asignacion.nanticipo,
+                    'totalanticipoenletras': numero_a_letras(asignacion.nanticipo),
+                    'empresafactor':factor.ctnombre,
+                    'rucfactor':factor.ctruccompania,
+                    'direccionfactor':factor.ctdireccion,
+                    'ciudadfactor': factor.ctciudad,
+                    'cargorepresentantelegal': rl_cargo,
+                    }
+                plantilla.render(context)
+                plantilla.save(archivo)
+                
+            except TypeError as err:
+                return HttpResponse("Se ha producido en error en la generación del anexo.{}".format(err))
 
         # marcar la asignación como generados los anexos
         asignacion.lanexosimpresos = True
