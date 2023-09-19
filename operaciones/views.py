@@ -1363,10 +1363,12 @@ def GenerarAnexos(request,asignacion_id):
                 .filter(cxcliente = cliente).first()
             if datos:
                 rl_id = datos.cxrepresentante1
+                rl_cargo = datos.ctcargorepresentante1
                 rl_nombre = datos.ctrepresentante1
         else:
             rl_id = cliente.cxparticipante
             rl_nombre = cliente.ctnombre
+            rl_cargo = ''
         
         # datos del factor
         factor = Empresas.objects.filter(pk = id_empresa.empresa.id).first()
@@ -1398,6 +1400,7 @@ def GenerarAnexos(request,asignacion_id):
                 'rucfactor':factor.ctruccompania,
                 'direccionfactor':factor.ctdireccion,
                 'ciudadfactor': factor.ctciudad,
+                'cargorepresentantelegal': rl_cargo,
                 }
             plantilla.render(context)
             plantilla.save(archivo)
