@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 # ALLOWED_HOSTS = ['factorweb-dev.us-east-2.elasticbeanstalk.com','localhost', '127.0.0.1','*']
 # CSRF_TRUSTED_ORIGINS=['http://factorweb-dev.us-east-2.elasticbeanstalk.com/']
 ALLOWED_HOSTS = ['codigobambu.com','www.codigobambu.com','*']
@@ -151,6 +151,8 @@ AWS_SECRET_ACCESS_KEY=os.environ["AWS_SECRET_ACCESS_KEY"]
 AWS_STORAGE_BUCKET_NAME="factorweb-bucket"
 
 DEFAULT_FILE_STORAGE="storages.backends.s3boto3.S3Boto3Storage"
+# PARA django 4.2>
+# STORAGE={"staticfiles":{"BACKEND":"storages.backends.s3boto3.S3Boto3Storage"}}
 STATICFILES_STORAGE="storages.backends.s3boto3.S3Boto3Storage"
 
 AWS_S3_CUSTOM_DOMAIN="%s.s3.amazonaws.com" % AWS_STORAGE_BUCKET_NAME

@@ -1645,7 +1645,10 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
             if forma_pago =="MOV" or forma_pago =='EFE':
                 cuenta_pago = None
             else:
-                x = formulario.cleaned_data["cxcuentapago"]
+                # esta linea muestra el __str__
+                # x = formulario.cleaned_data["cxcuentapago"]
+                # esta línea muestra id
+                x = request.POST.get("cxcuentapago")                
                 if x == None:
                     error='Falta cuenta de pago'
                 cuenta_pago = CuentasEmpresa.objects.filter(pk = x).first()
@@ -2824,7 +2827,7 @@ def ObtenerOtrosCargosDeDocumento(id_documento, listaotroscargos):
         # buscar la factura correspondiente para indicarla en el registro 
         factura = Factura_venta.objects\
             .filter(operacion = cargo.cxasignacion.id).first()
-        
+
         if factura:
             listaotroscargos.append(GeneraOtroCargoJSONSalida(
                 cargo.id, cargo.cxmovimiento.ctmovimiento

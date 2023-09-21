@@ -14,7 +14,7 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
-<form  method="post"  class="form-horizontal">
+<form  method="post"  class="form-horizontal" enctype="multipart/form-data">
     <div class="col-lg-12">
         <div class="card">
             <div class="card-header">
@@ -37,11 +37,10 @@
 
                     <div class="row form-group">
                         <div class="col-md-3">
-                            {{ form.ctrutaanexo.label }}
+                            {{ form.fanexo.label }}
                         </div>
                         <div class="col-md-9">
-                            {{ form.ctrutaanexo }}
-                            <small class="form-text text-muted">defina la ubicación de la plantilla del anexo incluyendo el nombre del archivo</small>
+                            {{ form.fanexo }}
                         </div>
                     </div>
 

@@ -59,7 +59,7 @@
                         <tr>
                             <td>{{ item.id }}</td>
                             <td>{{ item }}</td>
-                            <td>{{ item.lactivo }}</td>
+                            <td>{{ item.lactivo | yesno:'Si,No'}}</td>
                             <td>{{ item.ctrutageneracion }}</td>
                             <td>
                                 <a href="{% url 'operaciones:anexo_editar' item.id %}" title="Editar"

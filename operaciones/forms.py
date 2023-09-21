@@ -260,26 +260,30 @@ class TasasAccesoriosForm(forms.ModelForm):
             })
 
 class AnexosForm(forms.ModelForm):
+    # fanexo = forms.FileField(widget=forms.FileInput(attrs={'class':'form-control-file'}))
+    # ctnombre = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))    
+    # ctrutageneracion = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
     class Meta:
         model=Anexos
 
-        fields=['ctnombre', 'lactivo', 'ctrutageneracion','ctrutaanexo']
+        fields=['ctnombre', 'lactivo', 'ctrutageneracion','fanexo']
 
         labels={'ctnombre':'Descripción', 'lactivo':'Activo'
             , 'ctrutageneracion':'Directorio de anexos generados'
-            , 'ctrutaanexo': 'Ruta de archivo anexo'}
+            , 'fanexo': 'Ruta de archivo anexo'}
 
         widgets={'ctnombre': forms.Textarea(attrs={'rows': '1'}), 
             'ctrutageneracion': forms.Textarea(attrs={'rows': '1'}), 
-            'ctrutaanexo':forms.Textarea(attrs={'rows':'1'})}
+            # 'ctrutaanexo':forms.Textarea(attrs={'rows':'1'})
+            }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
         
-        for f in iter(self.fields):
-            self.fields[f].widget.attrs.update({
-                'class':'form-control'
-            })
+    #     for f in iter(self.fields):
+    #         self.fields[f].widget.attrs.update({
+    #             'class':'form-control'
+    #         })
 
 class TasasAPAccesoriosForm(forms.ModelForm):
     # demision = forms.DateInput()

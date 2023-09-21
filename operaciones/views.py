@@ -290,9 +290,7 @@ class AnexosEdit(SinPrivilegios, generic.UpdateView):
     permission_required="operaciones.change_anexos"
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        form.instance.cxusuariocrea = self.request.user
-        form.instance.empresa = id_empresa.empresa
+        form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -1376,7 +1374,7 @@ def GenerarAnexos(request,asignacion_id):
         for anexo in anexos:
 
             ruta_anexo_generado = anexo.ctrutageneracion
-            ruta_plantilla = anexo.ctrutaanexo
+            ruta_plantilla = anexo.fanexo
             
             try:
                 
