@@ -1,5 +1,6 @@
 var $table = jQuery('#table')
 var $btnFiltrar = jQuery('#btnFiltrar')
+const ambiente = capturaValor('ambiente')
 
 window.onload=function(){
     
@@ -28,14 +29,14 @@ window.onload=function(){
 
 window.operateEvents = {
     'click .xml': function (e, value, row, index) {
-      ImprimirCobranza(row.id, row.TipoOperacion, row.Cliente)
+      generarXMLFactura(row.id, ambiente)
       },
     };
       
 function operateFormatter(value, row, index) {
     return [
         '<a class="xml" href="javascript:void(0)" title="Genera XML ">',
-        '<i class="fa fa-rotate-left"></i>',
+        '<i class="fa fa-download"></i>',
         '</a>  ',
       ].join('')
 }

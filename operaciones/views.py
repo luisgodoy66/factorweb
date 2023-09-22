@@ -1,3 +1,4 @@
+import io
 import json
 # from unicodedata import decimal
 from django.views import generic
@@ -1373,14 +1374,14 @@ def GenerarAnexos(request,asignacion_id):
 
         for anexo in anexos:
 
-            ruta_anexo_generado = anexo.ctrutageneracion
+            # ruta_anexo_generado = anexo.ctrutageneracion
             ruta_plantilla = anexo.fanexo
             
             try:
                 
                 plantilla = DocxTemplate(ruta_plantilla)
                 
-                archivo = ruta_anexo_generado + anexo.ctnombre + ' DE ' \
+                archivo = anexo.ctnombre + ' DE ' \
                     + cliente.ctnombre+"-" \
                     + asignacion.cxasignacion+".docx"
 
@@ -1403,8 +1404,9 @@ def GenerarAnexos(request,asignacion_id):
                     'cargorepresentantelegal': rl_cargo,
                     }
                 plantilla.render(context)
-                plantilla.save(archivo)
-                
+                # NOTA: como hace return no continua con otro anexos ni marca la asignacion
+                return bajararchivo(plantilla,archivo)
+
             except TypeError as err:
                 return HttpResponse("Se ha producido en error en la generación del anexo.{}".format(err))
 
@@ -1414,9 +1416,20 @@ def GenerarAnexos(request,asignacion_id):
     else:
         return HttpResponse("No se ha definido ningún anexo ")
     
-        # subprocess.run(["word.exe",archivo])
-
     return HttpResponse("Se han generado archivos en las carpetas correspondientes. Puede cerrar esta página.")
+
+def bajararchivo(plantilla, nombrearchivo):
+    # Save document to memory and download to the user's browser
+    document_data = io.BytesIO()
+    plantilla.save(document_data)
+    document_data.seek(0)
+    response = HttpResponse(
+        document_data.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    )
+    response["Content-Disposition"] = 'attachment; filename = "' + nombrearchivo 
+    response["Content-Encoding"] = "UTF-8"
+    return response                
 
 @login_required(login_url='/login/')
 @permission_required('operaciones.change_asignacion', login_url='bases:sin_permisos')

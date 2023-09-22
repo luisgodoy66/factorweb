@@ -148,25 +148,3 @@ return [
 ].join('')
 }
 
-function cellStyle(value, row, index) {
-  var classes = [
-    'bg-blue',
-    'bg-green',
-    'bg-orange',
-    'bg-yellow',
-    'bg-red'
-  ]
-
-  if (row.Prorroga == 0) {
-    return {
-      css: {
-        color: 'black'
-      }
-      }
-  }
-  return {
-    css: {
-      color: 'blue'
-    }
-  }
-}

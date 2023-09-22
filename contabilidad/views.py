@@ -1047,6 +1047,8 @@ class FacturasConsulta(SinPrivilegios, generic.TemplateView):
         context["desde"] = desde
         context["hasta"] =hasta
         context['solicitudes_pendientes'] = sp
+        context['ambiente']= id_empresa.empresa.ambientesri
+
         return context
 
 class ListaProtestosAGenerar(SinPrivilegios, generic.TemplateView):

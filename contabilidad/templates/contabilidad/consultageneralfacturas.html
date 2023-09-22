@@ -18,6 +18,7 @@
         <div hidden>
             <input type="text" value = {{desde | date:"Y-m-d"}} id="id_desde">
             <input type="text" value = {{hasta | date:"Y-m-d"}} id="id_hasta">
+            <input id="ambiente" value='{{ambiente}}'>
         </div>
         <div class="card-body">
             <div class="row form-group ">
@@ -88,9 +89,9 @@
                         <th data-field="Saldo" data-filter-control="input"data-sortable="true" >Saldo</th>
                         <th data-field="Operacion" data-filter-control="input"data-sortable="true" >Operación origen</th>
                         <!-- <th data-field="Estado" data-filter-control="input"data-sortable="true" >Estado</th> -->
-                        <!-- <th data-field="operate" data-sortable="true" data-events="window.operateEvents"
+                        <th data-field="operate" data-sortable="true" data-events="window.operateEvents"
                             data-formatter="operateFormatter" data-click-to-select="false">Acción</th>
-                        </tr> -->
+                        </tr>
                     </thead>
                 </table>
             </small>

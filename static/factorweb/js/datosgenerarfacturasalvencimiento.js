@@ -47,14 +47,8 @@ function GenerarFacturas(){
             MensajeError('Ningún registro encontrado para el mes indicado.')
         }
         else{
-            // barrer las facturas generadas y generar el XML
-            fetchProcesar("/contabilidad/generarxmlfactura/"+data+"/"+ambiente,function(asiento){
-                // url = window.location.origin
-                // url = url + "/contabilidad/imprimirdiariocontable/"+asiento;
-                // window.open( url);
                 alert('Revise los asientos generados.')
                 window.location.href = "/contabilidad/listaasientoscontables";
-            })
         }
       })
   })

@@ -1,35 +1,12 @@
-const ambiente = capturaValor('ambiente')
+// se cambia la generacion del xml a la ventana de conbsultas , por ahora. debe
+// haber una lista de facturas pendientes por generar XML
+// const ambiente = capturaValor('ambiente')
 
 window.onload=function(){
     jQuery('#id_puntoemision')
         .change(function(){
         SecuenciaPorPuntoEmision( capturaValor("id_puntoemision"));
         });
-
-    // jQuery("#frmGenera").submit(function(e){
-    //     e.preventDefault();
-    //     var formData = jQuery("form").serializeArray();
-    //     var token = jQuery("[name=csrfmiddlewaretoken]").val();
-    //     // console.log(formData);
-    //     jQuery.ajax({
-    //         method:"POST",
-    //         headers: {'X-CSRFToken': token },
-    //         data: formData
-    //     })
-    //     .done(function(r,textStatus,xhr){
-    //         if(xhr.status=200){
-    //             alert(xhr.responseText)
-    //             MensajeOK('Archivo grabado en carpeta Descargas');
-    //             location.href = "/contabilidad/listapendientesgenerarfactura";
-    //             window.open('/contabilidad/imprimirdiariocontable/'+xhr.responseText);            
-    //         }
-    //         else{
-    //             alert(textStatus);
-    //         }
-    //     }).fail(function (error) {
-    //         MensajeError(error.responseText);
-    //     });
-    // });
 
     }  
 
@@ -75,16 +52,13 @@ function GenerarFactura(){
         "ndescuentocarteravencido" : capturaValor("valor_dcv"),
         }
 
-    fetchPostear("/contabilidad/generarfacturadiario/", objeto, function(factura){
+    fetchPostear("/contabilidad/generarfacturadiario/", objeto, function(asiento){
         // regresar a la lista de generar factura
         window.location.href = "/contabilidad/listapendientesgenerarfactura";
-        fetchProcesar("/contabilidad/generarxmlfactura/"+factura+"/"+ambiente,function(asiento){
-            // en una nueva ventana abrir el reporte de asiento
-            url = window.location.origin
-            url = url + "/contabilidad/imprimirdiariocontable/"+asiento;
-            window.open( url);
 
-        })
-      })
+        url = window.location.origin
+        url = url + "/contabilidad/imprimirdiariocontable/"+asiento;
+        window.open( url);
+          })
   })    
 }

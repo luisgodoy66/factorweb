@@ -404,3 +404,32 @@ function CargaXMLfactura(xmlFile){
 };
 
 }
+
+function ProrrogaStyle(value, row, index) {
+  var classes = [
+    'bg-blue',
+    'bg-green',
+    'bg-orange',
+    'bg-yellow',
+    'bg-red'
+  ]
+
+  if (row.Prorroga == 0) {
+    return {
+      css: {
+        color: 'black'
+      }
+      }
+  }
+  return {
+    css: {
+      color: 'blue'
+    }
+  }
+}
+
+function generarXMLFactura(factura, ambiente){
+  // nota: marcar la factura como ya generado XML
+    window.location.href = "/contabilidad/generarxmlfactura/"+factura+"/"+ambiente;
+
+}

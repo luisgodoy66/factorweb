@@ -59,7 +59,7 @@ def ImpresionDiarioContable(request, diario_id):
     diario = Diario_cabecera.objects.filter(id= diario_id).first()
     
     if not diario:
-        return HttpResponse("no encontró diario contable")
+        return HttpResponse("no encontró diario contable "+ str(diario_id))
 
     # cuando la forma de pago es DEP es deposito de accesorios y de ahí debe
     # tomar la fecha de vencimiento

@@ -1005,8 +1005,8 @@ def GeneraListaChequesADepositarJSONSalida(doc):
     output["Asignacion"] = doc.documento.cxasignacion.cxasignacion
     output["Documento"] = doc.documento.ctdocumento
     output["Vencimiento"] = doc.vencimiento().strftime("%Y-%m-%d")
-    if doc.ncontadorprorrogas > 0 :
-        output["Vencimiento"] += ' *'
+    # if doc.ncontadorprorrogas > 0 :
+    #     output["Vencimiento"] += ' *'
     output["Valor"] = doc.ntotal
     output["Datos"] = doc.cxbanco.ctbanco +' CTA.'+ doc.ctcuenta + ' CH/' + doc.ctcheque
     output["Anticipa100"] = doc.documento.cxtipofactoring.lanticipatotalnegociado

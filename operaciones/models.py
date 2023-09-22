@@ -673,9 +673,9 @@ class Condiciones_operativas_detalle(ClaseModelo):
 class Anexos(ClaseModelo):
     ctnombre = models.TextField()
     lactivo = models.BooleanField(default=True)
-    ctrutageneracion = models.TextField()
+    # ctrutageneracion = models.TextField()
     # ctrutaanexo = models.TextField()
-    fanexo = models.FileField(upload_to='static/factorweb/anexos/', blank=True, )
+    fanexo = models.FileField(upload_to='anexos/', blank=True, )
     
     def __str__(self):
         return self.ctnombre

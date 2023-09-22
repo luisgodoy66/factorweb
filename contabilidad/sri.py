@@ -1,6 +1,8 @@
-import xml.etree.cElementTree as etree
+# import xml.etree.cElementTree as etree
+import xml.etree.ElementTree as etree
 import time
 import os
+import io
 
 from django.shortcuts import redirect, HttpResponse
 from decimal import Decimal
@@ -52,15 +54,34 @@ def GeneraXMLFactura(request, ids_facturas, ambiente):
 
         tree = etree.ElementTree(documento)
 
-        # Set the path for the Downloads folder
-        folder = os.path.join(os.path.expanduser("~"), "Downloads")
+        # # Set the path for the Downloads folder
+        # folder = os.path.join(os.path.expanduser("~"), "Downloads")
 
-        # Set the full path for the file
-        file_path = os.path.join(folder, claveacceso+".XML")
+        # # Set the full path for the file
+        # file_path = os.path.join(folder, claveacceso+".XML")
 
-        tree.write(file_path)
+        # tree.write(claveacceso+".XML")
+
+        try:
+            
+            # return generar_xml(request)
+            return bajararchivo(request, tree ,claveacceso+".XML")
+        except TypeError as err:
+            return HttpResponse("Se ha producido en error en la generación del archivo.{}".format(err))
+    
     # SIGUIENDO el formato de las rtinas fetch, debo devolver 'OK' primero
-    return HttpResponse( "OK"+str(factura.asiento.id))
+    # return HttpResponse( "OK"+str(factura.asiento.id))
+    return HttpResponse( "OK")
+
+def bajararchivo(request,tree, nombrearchivo):
+    # Save document to memory and download to the user's browser
+    # tree.write(claveacceso+".XML")
+    tree = tree.getroot()
+    document_data = etree.tostring(tree)
+    # document_data.seek(0)
+    response = HttpResponse(document_data,content_type="application/xml",)
+    response["Content-Disposition"] = 'attachment; filename = "' + nombrearchivo 
+    return response                
 
 def _get_tax_element( invoice, access_key, ambiente):
     """
