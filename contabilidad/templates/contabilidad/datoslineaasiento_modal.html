@@ -57,33 +57,14 @@
                         onclick="return CerrarModal()">
                         <i class="fa fa-ban"></i> Cerrar
                     </button>
-                    {% if cheque %}
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            <i class="fa fa-dot-circle-o"></i> Grabar
-                        </button>
-                    {% else %}
                         <button type="button" class="btn btn-primary btn-sm"
                             onclick="AgregarFila()" >
                             <i class="fa fa-dot-circle-o"></i> Grabar
                         </button>
-                    {% endif %}
                 </div>
             </div>
             <!-- </div> -->
         </form>
 
     </div>
-
-    <!-- {% block js_page %}
-    <script>
-        // este modal viene desde nuevo registro o edicion de cheque. Si es nuevo
-        // (no hay cheque), inicializar los valores del comprador y total
-        if ( capturaValor("id_cheque") == 'None')
-        {
-            inicializaValor("id_ctgirador",capturaValor("id_ctcomprador"))
-            inicializaValor("cheque_nvalor",capturaValor("id_ntotal"))
-        }
-        
-    </script>
-    {% endblock %} -->
 </div>    

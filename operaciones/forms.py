@@ -265,10 +265,12 @@ class AnexosForm(forms.ModelForm):
     class Meta:
         model=Anexos
 
-        fields=['ctnombre', 'lactivo', 'fanexo']
+        fields=['ctnombre', 'lactivo', 'fanexo', 'cxtipocliente']
 
         labels={'ctnombre':'Descripción', 'lactivo':'Activo'
-            , 'fanexo': 'Ruta de archivo anexo'}
+            , 'fanexo': 'Ruta de archivo anexo'
+            , 'cxtipocliente': 'Tipo de cliente'
+            }
 
         widgets={'ctnombre': forms.Textarea(attrs={'rows': '1'}), 
             }

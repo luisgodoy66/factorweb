@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.db import transaction
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import redirect, render
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Q
 from django.utils.dateparse import parse_date
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -1352,8 +1352,9 @@ def GenerarAnexos(request,asignacion_id):
     cliente = Datos_participantes.objects\
         .filter(id=asignacion.cxcliente.cxcliente.id).first()
 
-    anexos = Anexos.objects.filter(lactivo = True
-                                   , empresa = id_empresa.empresa).all()
+    # obtener el tipo de cliente
+    anexos = Anexos.objects.filter(lactivo = True, empresa = id_empresa.empresa)\
+        .filter(Q(cxtipocliente = cliente.datos_generales.cxtipocliente)| Q(cxtipocliente = 'T')).all()
 
     if anexos:
         # datos del cliente

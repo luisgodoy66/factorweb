@@ -1594,7 +1594,7 @@ def AsientoDiarioNuevo(request, diario_id = None):
                 # nueva = False
 
             if not diario_id:
-                return redirect("contabilidad:listaasientocontables")
+                return redirect("contabilidad:listaasientoscontables")
 
             # grabar detalle 
 

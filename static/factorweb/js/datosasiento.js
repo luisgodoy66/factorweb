@@ -17,7 +17,7 @@ window.onload=function(){
       });
     
       if (total_debe != total_haber){
-          alert("Totales de debe y haber no cuadran ")
+          alert("Totales de debe y haber no cuadran: " )
           return false;
       };
 
@@ -60,7 +60,7 @@ window.onload=function(){
       })
       .done(function(r,textStatus,xhr){
           if(xhr.status=200){
-            location.href="/contabilidad/listaasientocontables/";
+            location.href="/contabilidad/listaasientoscontables/";
             // en una nueva ventana abrir el reporte 
             url = window.location.origin
             url = url + "/contabilidad/imprimirdiariocontable/"+xhr.responseText;
@@ -136,6 +136,33 @@ function AgregarFila( ){
 
   CerrarModal();
 
+}
+
+function eliminarFila(btn){
+  var td=btn.parentNode
+  var tr =td.parentNode
+  var trpadre = tr.parentNode
+  // actualizar totales
+  totaldebe=capturaValor("total_debe")
+  totalhaber=capturaValor("total_haber")
+
+  var tipo = tr.children[5].innerText
+  if (tipo=='D') {
+    var valordebe = tr.children[2].innerText
+    total_debe += parseFloat( valordebe)
+    sumadebe = parseFloat(totaldebe) - parseFloat(valordebe)
+    
+    inicializaValor("total_debe", sumadebe)
+  }
+  if (tipo=='H') {
+    var valorhaber = tr.children[3].innerText
+    total_haber += parseFloat( valorhaber)
+    sumahaber = parseFloat(totalhaber) - parseFloat(valorhaber)
+
+    inicializaValor("total_haber", sumahaber)
+  }
+
+  trpadre.removeChild(tr)
 }
 
 

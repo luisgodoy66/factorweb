@@ -671,11 +671,16 @@ class Condiciones_operativas_detalle(ClaseModelo):
         return self.cxcondicion
 
 class Anexos(ClaseModelo):
+    TIPOS_DE_CLIENTES = (
+        ('N', 'Natural'),
+        ('J', 'Jurídico'),
+        ('T', 'Todos'),
+    )
     ctnombre = models.TextField()
     lactivo = models.BooleanField(default=True)
-    # ctrutageneracion = models.TextField()
-    # ctrutaanexo = models.TextField()
     fanexo = models.FileField(upload_to='anexos/', blank=True, )
+    cxtipocliente=models.CharField(max_length=1, choices=TIPOS_DE_CLIENTES,
+        help_text='tipo de cliente: natural , jurídico, todos', default='J')
     
     def __str__(self):
         return self.ctnombre
