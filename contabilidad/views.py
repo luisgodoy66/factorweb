@@ -1249,6 +1249,26 @@ class ListaTransferenciasAGenerar(SinPrivilegios, generic.TemplateView):
         context['solicitudes_pendientes'] = sp
         return context
 
+class ListaRecuperacionesAGenerar(SinPrivilegios, generic.TemplateView):
+    template_name = "contabilidad/listarecuperacionespendientescontabilizar.html"
+    login_url = 'bases:login'
+    permission_required="contabilidad.add_diario_cabecera"
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        # obtener primer día del mes actual
+        desde = date.today() + timedelta(days=-date.today().day +1)
+        hasta = date.today()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+
+        context = super(ListaRecuperacionesAGenerar, self).get_context_data(**kwargs)
+        context["desde"] = desde
+        context["hasta"] = hasta
+        context['solicitudes_pendientes'] = sp
+        return context
+ 
 @login_required(login_url='/login/')
 @permission_required('contabilidad.view_cuentas_especiales', login_url='bases:sin_permisos')
 def BuscarCuentasEspeciales(request):
@@ -2134,6 +2154,63 @@ def GeneraListaTransferenciasJSONSalida(doc):
 @permission_required('contabilidad.add_diario_cabecera', login_url='bases:sin_permisos')
 def GenerarAsientosTransferencias(request,ids):
     resultado=enviarPost("CALL uspGenerarAsientosTransferencias( '{0}',{1},'')"
+        .format(ids, request.user.id, ))
+
+    if resultado[0] !='OK':
+        return HttpResponse(resultado)
+    return HttpResponse('OK')
+
+def GeneraListaRecuperacionesJSON(request, desde = None, hasta= None):
+    # Es invocado desde la url de una tabla bt
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    if desde == 'None':
+        cobranzas = Recuperaciones_cabecera.objects\
+            .filter(lcontabilizada = False, leliminado = False
+                    ,empresa = id_empresa.empresa).order_by('dcobranza')
+    else:
+        cobranzas = Recuperaciones_cabecera.objects\
+            .filter(lcontabilizada = False, leliminado = False
+                    , dcobranza__gte = desde, dcobranza__lte = hasta
+                    , empresa = id_empresa.empresa)\
+            .order_by('dcobranza')
+        
+    tempBlogs = []
+    print(cobranzas)
+    for i in range(len(cobranzas)):
+        tempBlogs.append(GeneraListaRecuperacionesJSONSalida(cobranzas[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": cobranzas.count(),
+        "totalNotFiltered": cobranzas.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaRecuperacionesJSONSalida(cobranza):
+    output = {}
+
+    output["id"] = cobranza.id
+    output["Fecha"] = cobranza.dcobranza.strftime("%Y-%m-%d")
+    output["Cliente"] = cobranza.cxcliente.cxcliente.ctnombre
+    output["Valor"] = cobranza.nvalor
+    output["TipoFactoring"] = cobranza.cxtipofactoring.ctabreviacion
+    if cobranza.ldepositoencuentaconjunta:
+        output["Deposito"] = 'Cuenta del cliente'
+    else:
+        output["Deposito"] = cobranza.cxcuentadeposito.__str__()
+    output["Cobranza"] = cobranza.cxrecuperacion
+    output["Sobrepago"] = cobranza.nsobrepago
+
+    return output
+
+@login_required(login_url='/login/')
+@permission_required('contabilidad.add_diario_cabecera', login_url='bases:sin_permisos')
+def GenerarAsientosRecuperaciones(request,ids):
+    resultado=enviarPost("CALL uspGenerarAsientosRecuperaciones( '{0}',{1},'')"
         .format(ids, request.user.id, ))
 
     if resultado[0] !='OK':

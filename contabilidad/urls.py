@@ -18,7 +18,9 @@ from .views import CuentasView, CuentasEspecialesEdit, BuscarCuentasEspeciales\
     , GeneraListaFacturasJSON, GeneraListaProtestosJSON, ListaProtestosAGenerar\
     , GenerarAsientosProtestos, CuentasCargosFactoringView, CuentaCargoTipoFactoringNew\
     , CuentaCargoTipoFactoringEdit, CuentasCargoTiposFactoringView\
-    , GeneraListaTransferenciasJSON, ListaTransferenciasAGenerar, GenerarAsientosTransferencias
+    , GeneraListaTransferenciasJSON, ListaTransferenciasAGenerar\
+    , GenerarAsientosTransferencias, GeneraListaRecuperacionesJSON\
+    , GenerarAsientosRecuperaciones, ListaRecuperacionesAGenerar
 
 from .sri import GeneraXMLFactura
 from .reportes import ImpresionDiarioContable, ImpresionComprobanteEgreso\
@@ -156,4 +158,9 @@ urlpatterns = [
    path('transferenciaspendientesjson/<desde>/<hasta>',GeneraListaTransferenciasJSON
          , name="transferenciaspendientes_json"),
     path('generarasientostransferencias/<ids>', GenerarAsientosTransferencias),
+    path('listarecuperacionespendientescontabilizar/',ListaRecuperacionesAGenerar.as_view()
+         , name="listarecuperacionespendientescontabilizar"),    
+    path('recuperacionespendientesjson/<desde>/<hasta>',GeneraListaRecuperacionesJSON
+         , name="recuperacionespendientes_json"),
+    path('generarasientosrecuperaciones/<ids>', GenerarAsientosRecuperaciones),
 ]

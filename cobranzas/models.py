@@ -277,7 +277,7 @@ class Cheques_protestados(ClaseModelo):
     dultimacobranza = models.DateTimeField(null=True) 
     cxtipooperacion = models.CharField(max_length=1, choices=TIPO_OPERACION)
     notadedebito = models.ForeignKey(Notas_debito_cabecera, on_delete=models.CASCADE, null=True)
-    lcontabilizada = models.BooleanField(default=False, null=True)
+    lcontabilizada = models.BooleanField(default=False)
     asiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
                                      , related_name="asiento_protesto"
                                      , null=True)
@@ -505,7 +505,10 @@ class Recuperaciones_cabecera(ClaseModelo):
     ldepositoencuentaconjunta = models.BooleanField(default=False)
     cxcuentaconjunta = models.ForeignKey(CuentasConjuntasModels.Cuentas_bancarias
         , on_delete=models.RESTRICT, null = True, related_name="cuentaconjunta_deposito")
-    lcontabilizada = models.BooleanField(default=False, null=True)
+    lcontabilizada = models.BooleanField(default=False)
+    asiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
+                                     , related_name="asiento_recuperacion"
+                                     , null=True)
 
     def __str__(self):
         return self.cxrecuperacion
