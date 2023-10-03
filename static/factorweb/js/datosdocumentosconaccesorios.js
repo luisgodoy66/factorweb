@@ -118,7 +118,10 @@ function calcular_factura()
     valor_nonegociado = valor_nonegociado<0 ? 0 : valor_nonegociado
 
     stotal = antes_de_iva + iva;
+    stotal = +(Math.round(stotal + "e+2")  + "e-2");
+
     total  = stotal - retencion_iva - retencion_renta - valor_nonegociado;
+    total = +(Math.round(total + "e+2")  + "e-2");
 
     jQuery('#id_nvalorantesiva').val(antes_de_iva);
     jQuery('#id_niva').val(iva);

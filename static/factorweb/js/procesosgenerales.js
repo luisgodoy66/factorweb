@@ -433,3 +433,20 @@ function generarXMLFactura(factura, ambiente){
     window.location.href = "/contabilidad/generarxmlfactura/"+factura+"/"+ambiente;
 
 }
+
+function generaAnexos(id_asignacion, tipo_cliente){
+  // nota: marcar la factura como ya generado XML
+  fetchRecuperar('/operaciones/anexosactivos/'+tipo_cliente, function(anexos){
+    for (let a = 0; a < anexos.length; a++){
+      let anexo = anexos[a]
+      window.location.href = "/operaciones/generaranexo/"+id_asignacion+"/"+anexo
+      if (anexos.length >1){
+        alert('Un anexo generado.')
+      }
+      // nota: marcar asignación como anexos generados
+    }
+
+  })
+
+
+}

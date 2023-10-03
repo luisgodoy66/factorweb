@@ -15,7 +15,8 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     GeneraListaCargosPendientesClienteJSON, GeneraListaChequesQuitadosClienteJSON,\
     GeneraListaProtestosPendientesClienteJSON, GeneraListaCanjesClienteJSON,\
     CondicionesOperativasUpdate, DatosCondicionOperativaNueva, DesembolsosConsulta,\
-    GeneraListaDesembolsosJSON, CondicionesOperativasInactivar
+    GeneraListaDesembolsosJSON, CondicionesOperativasInactivar,\
+    ConsultaAnexosActivos, GenerarAnexo
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
@@ -117,6 +118,8 @@ urlpatterns = [
          , ImpresionResumenAsignaciones, name='resumen_asignaciones'),
     path('impresionresumenasignaciones/<desde>/<hasta>/', ImpresionResumenAsignaciones
          , name='resumen_asignaciones'),
+    path("anexosactivos/<tipo_cliente>", ConsultaAnexosActivos),
+    path("generaranexo/<int:asignacion_id>/<anexo_id>", GenerarAnexo),
 # desembolsos
     path('listaasignacionespendientesdesembolsar/',AsignacionesPendientesDesembolsarView.as_view(), \
         name='listaasignacionespendientesdesembolsar'),

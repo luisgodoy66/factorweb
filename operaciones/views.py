@@ -1406,7 +1406,7 @@ def GenerarAnexos(request,asignacion_id):
                     }
                 plantilla.render(context)
                 # NOTA: como hace return no continua con otro anexos ni marca la asignacion
-                return bajararchivo(plantilla,archivo)
+                return bajararchivo(request,plantilla,archivo)
 
             except TypeError as err:
                 return HttpResponse("Se ha producido en error en la generación del anexo.{}".format(err))
@@ -1419,7 +1419,7 @@ def GenerarAnexos(request,asignacion_id):
     
     return HttpResponse("Se han generado archivos en las carpetas correspondientes. Puede cerrar esta página.")
 
-def bajararchivo(plantilla, nombrearchivo):
+def bajararchivo(request,plantilla, nombrearchivo):
     # Save document to memory and download to the user's browser
     document_data = io.BytesIO()
     plantilla.save(document_data)
@@ -2036,3 +2036,85 @@ def CondicionesOperativasInactivar(request,id):
         return HttpResponse("FAIL")
     
     return HttpResponse("FAIL")
+
+@login_required(login_url="/login/")
+@permission_required("operaciones.view_anexos",login_url="/login/")
+def ConsultaAnexosActivos(request, tipo_cliente):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    # tipo_cliente=cliente.datos_generales.cxtipocliente
+
+    anexos = Anexos.objects.filter(lactivo = True, empresa = id_empresa.empresa)\
+        .filter(Q(cxtipocliente = tipo_cliente)| Q(cxtipocliente = 'T'))\
+            .all()
+
+    data = []
+    for obj in anexos:
+        data.append(obj.id)
+
+    return HttpResponse(json.dumps(data))
+
+def GenerarAnexo(request, asignacion_id, anexo_id):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    asignacion = Asignacion.objects.filter(pk=asignacion_id).first()
+    
+    anexo = Anexos.objects.filter(pk=anexo_id).first()
+
+    # datos del cliente
+    if asignacion.cxcliente.cxtipocliente =="J":
+
+        datos = ModeloCliente.Personas_juridicas.objects\
+            .filter(cxcliente = asignacion.cxcliente.cxcliente.id).first()
+        if datos:
+            rl_id = datos.cxrepresentante1
+            rl_cargo = datos.ctcargorepresentante1
+            rl_nombre = datos.ctrepresentante1
+    else:
+        rl_id = asignacion.cxcliente.cxcliente.cxparticipante
+        rl_nombre = asignacion.cxcliente.cxcliente.ctnombre
+        rl_cargo = ''
+        
+    # datos del factor
+    factor = Empresas.objects.filter(pk = id_empresa.empresa.id).first()
+
+    # ruta_anexo_generado = anexo.ctrutageneracion
+    ruta_plantilla = anexo.fanexo
+    
+    try:
+        
+        plantilla = DocxTemplate(ruta_plantilla)
+        
+        archivo = anexo.ctnombre + ' DE ' \
+            + asignacion.cxcliente.cxcliente.ctnombre +"-" \
+            + asignacion.cxasignacion+".docx"
+
+        fecha_negociacion = asignacion.dnegociacion
+
+        context = { 
+            'direccioncliente' : asignacion.cxcliente.cxcliente.ctdireccion ,
+            'fechanegociacion': fecha_negociacion.strftime("%Y-%B-%d"),
+            'idcliente': asignacion.cxcliente.cxcliente.cxparticipante,
+            'idrepresentantelegal':rl_id,
+            'maximoplazonegociacion':asignacion.nmayorplazonegociacion,
+            'nombrecliente':asignacion.cxcliente.cxcliente.ctnombre,
+            'nombrerepresentantelegal':rl_nombre,
+            'totalanticipo': asignacion.nanticipo,
+            'totalanticipoenletras': numero_a_letras(asignacion.nanticipo),
+            'empresafactor':factor.ctnombre,
+            'rucfactor':factor.ctruccompania,
+            'direccionfactor':factor.ctdireccion,
+            'ciudadfactor': factor.ctciudad,
+            'cargorepresentantelegal': rl_cargo,
+            }
+        plantilla.render(context)
+        return bajararchivo(request,plantilla,archivo)
+
+    except TypeError as err:
+        return HttpResponse("Se ha producido en error en la generación del anexo.{}".format(err))
+
+    # marcar la asignación como generados los anexos
+    asignacion.lanexosimpresos = True
+    asignacion.save()
+    
+

@@ -186,7 +186,11 @@ class Linea_factoring_hist(ClaseModelo):
 class Personas_juridicas(ClaseModelo):
     TIPOS_DE_EMPRESAS = (
         ('ANO', 'Anónima'),
-        ('LTD', 'Limitada'),
+        ('LTD', 'Resposabilidad Limitada'),
+        ('SAS', 'Por acciones simplificadas'),
+        ('COL', 'Nombre colectivo'),
+        ('SIM', 'En comandita simple'),
+        ('MIX', 'Economía mixta'),
     )
     TIPOS_DE_ESTADO_CIVIL = (
         ('S', 'Soltero'),
