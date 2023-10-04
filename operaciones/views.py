@@ -2094,6 +2094,7 @@ def GenerarAnexo(request, asignacion_id, anexo_id):
         context = { 
             'direccioncliente' : asignacion.cxcliente.cxcliente.ctdireccion ,
             'fechanegociacion': fecha_negociacion.strftime("%Y-%B-%d"),
+            'fechalarganegociacion': fecha_negociacion.strftime("%d de %B de %Y"),
             'idcliente': asignacion.cxcliente.cxcliente.cxparticipante,
             'idrepresentantelegal':rl_id,
             'maximoplazonegociacion':asignacion.nmayorplazonegociacion,

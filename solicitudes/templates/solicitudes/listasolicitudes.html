@@ -84,7 +84,7 @@
                                 </a>
                                 <a href="{% url 'operaciones:aceptarasignacion' item.id %}" title="Aceptar"
                                     class="btn btn-success btn-sm" role="button"><i class="fa fa-check"></i></a>
-                                <a href="#" onclick='EliminarAsignacion({{item.id}},{{item.cxcliente}})' title="Eliminar"
+                                <a href="#" onclick='EliminarAsignacion({{item.id}},"{{item.cxcliente}}")' title="Eliminar"
                                     class="btn btn-danger btn-sm" role="button"><i class="fa fa-trash"></i></a>
                             </td>
                         </tr>

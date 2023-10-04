@@ -1,5 +1,7 @@
 from pathlib import Path
 import os   
+import locale
+locale.setlocale(locale.LC_TIME, '')
 # from decouple import config
 # # 06-ene-23 l.g.    cambiar de decouple a dotenv
 # 09-ene-23 l.g.    usar environ y el archivo de configuracion de elasticbeanstalk
@@ -127,7 +129,7 @@ LANGUAGE_CODE = 'es-ec'
 
 TIME_ZONE = 'America/Guayaquil'
 
-USE_I18N = False
+USE_I18N = True
 
 USE_TZ = False
 
