@@ -3,8 +3,8 @@
 
         <form  method="POST" rol="form" id="frmLinea" class="form-horizontal" enctype="multipart/form-data"
                 action="{% url 'clientes:estadoclasecomprador_editar' pk %}"
-            >
-            <!-- <div class="col"> -->
+                onsubmit="return checkSubmit();">
+                <!-- <div class="col"> -->
             <div class="card">
 
                 {% csrf_token %}
@@ -45,3 +45,9 @@
     </div>
 </div>
 
+{% block js_page %}
+<script>
+     enviando = false; //Obligaremos a entrar el if en el primer submit
+     
+</script>
+{% endblock %}

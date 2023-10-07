@@ -1,74 +1,73 @@
 {% extends 'bases/home.html' %}
 {% load static %}
+{% load humanize %}
 {% block content %}
 <div class="content mt-3">
-    <!-- <div class="col-sm-6 col-lg-3">
-        <div class="card text-white bg-flat-color-1">
-            <div class="card-body pb-0">
-                <div class="dropdown float-right">
-                    <button class="btn bg-transparent dropdown-toggle theme-toggle text-light" type="button" id="dropdownMenuButton1" data-toggle="dropdown">
-                        <i class="fa fa-cog"></i>
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                        <div class="dropdown-menu-content">
-                            <a class="dropdown-item" href="#">Seleccionar año</a>
+    <div class="col-md-6 col-lg-6">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="clearfix">
+                        <i class="fa fa-dollar bg-flat-color-5 p-3 font-2xl mr-3 float-left text-light"></i>
+                        <div class="h5 text-secondary mb-0 mt-1">{{total_cartera_protestos|intcomma}}</div>
+                        <div class="text-muted text-uppercase font-weight-bold font-xs small">
+                            Cartera y protestos</div>
+                    </div>
+                    <div class="b-b-1 pt-3"></div>
+                    <hr>
+                    <div class="more-info pt-2" style="margin-bottom:-10px;">
+                        <a class="font-weight-bold font-xs btn-block text-muted small" 
+                        href="{% url 'operaciones:antigüedad_por_cliente' %}"  target="cartera">
+                        Antigüedad por cliente
+                        <i class="fa fa-angle-right float-right font-lg"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="clearfix">
+                        <i class="fa fa-bell bg-danger p-3 font-2xl mr-3 float-left text-light"></i>
+                        <div class="h5 text-secondary mb-0 mt-1">{{total_protestos|intcomma}}</div>
+                        <div class="text-muted text-uppercase font-weight-bold font-xs small">
+                            Protestos</div>
+                    </div>
+                    <div class="b-b-1 pt-3"></div>
+                    <hr>
+                    <div class="more-info pt-2" style="margin-bottom:-10px;">
+                        <a class="font-weight-bold font-xs btn-block text-muted small" 
+                        href="{% url 'cobranzas:protestos_pendientes' %}" target="protestos">
+                            Listado de cheques protestados
+                        <i class="fa fa-angle-right float-right font-lg"></i></a>
+                    </div>
+                </div>
+            </div>
+           
+        </div>
+        <div class="col-lg-6 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="stat-widget-one">
+                        <div class="stat-icon dib"><i class="ti-money text-success border-success"></i></div>
+                        <div class="stat-content dib">
+                            <div class="stat-text">Total negociado</div>
+                            <div class="stat-digit">{{ total_negociado|intcomma}}</div>
                         </div>
                     </div>
                 </div>
-                <h4 class="mb-0">
-                    <span class="count">120</span>
-                </h4>
-                <p class="text-light">Operaciones acumuladas</p>
-
-                <div class="chart-wrapper px-0" style="height:70px;" height="70">
-                    <canvas id="widgetChart1"></canvas>
-                </div>
-
-            </div>
-
-        </div>
-    </div> -->
-    <div class="col-6 col-lg-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="clearfix">
-                    <i class="fa fa-dollar bg-flat-color-5 p-3 font-2xl mr-3 float-left text-light"></i>
-                    <div class="h5 text-secondary mb-0 mt-1">{{total_cartera_protestos}}</div>
-                    <div class="text-muted text-uppercase font-weight-bold font-xs small">
-                        Cartera y protestos</div>
-                </div>
-                <div class="b-b-1 pt-3"></div>
-                <hr>
-                <div class="more-info pt-2" style="margin-bottom:-10px;">
-                    <a class="font-weight-bold font-xs btn-block text-muted small" 
-                    href="{% url 'operaciones:antigüedad_por_cliente' %}"  target="cartera">
-                    Antigüedad por cliente
-                    <i class="fa fa-angle-right float-right font-lg"></i></a>
-                </div>
             </div>
         </div>
     </div>
-    <div class="col-6 col-lg-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="clearfix">
-                    <i class="fa fa-bell bg-danger p-3 font-2xl mr-3 float-left text-light"></i>
-                    <div class="h5 text-secondary mb-0 mt-1">{{total_protestos}}</div>
-                    <div class="text-muted text-uppercase font-weight-bold font-xs small">
-                        Protestos</div>
-                </div>
-                <div class="b-b-1 pt-3"></div>
-                <hr>
-                <div class="more-info pt-2" style="margin-bottom:-10px;">
-                    <a class="font-weight-bold font-xs btn-block text-muted small" 
-                    href="{% url 'cobranzas:protestos_pendientes' %}" target="protestos">
-                        Listado de cheques protestados
-                    <i class="fa fa-angle-right float-right font-lg"></i></a>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-3">Cartera negociada </h4>
+                    <canvas id="lineChart"></canvas>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="animated fadeIn">
+    <!-- <div class="animated fadeIn"> -->
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-body">
@@ -78,7 +77,7 @@
             </div>
         </div><!-- /# column -->
 
-   </div>
+   <!-- </div> -->
     <div class="col-xl-6">
         <div class="card">
             <div class="card-header">
@@ -210,11 +209,113 @@
 
 {% endblock %}
 {% block js_page %}
-<script type="text/javascript" src="{% static 'factorweb/js/dashboard.js' %}"></script>
+<!-- <script type="text/javascript" src="{% static 'factorweb/js/dashboard.js' %}"></script> -->
 <!-- Chart js -->
 <script src="{% static 'factorweb/vendors/chart.js/dist/Chart.bundle.min.js' %}"></script>
 <!-- <script src="{% static 'factorweb/assets/js/dashboard.js' %}"></script> -->
 <script src="{% static 'factorweb/assets/js/widgets.js' %}"></script>
 <!-- <script src="{% static 'factorweb/assets/js/init-scripts/chart-js/chartjs-init.js' %}"></script> -->
-    
+<script>
+var $table = jQuery('#table')
+var $tb_asgn = jQuery('#tb_asgn')
+var $tb_liqcob = jQuery('#tb_liqcob')
+var $tb_cobcar = jQuery('#tb_cobcar')
+
+window.onload=function(){
+
+  // configuracin de las tablas
+  $table.bootstrapTable({locale:"es-EC"});
+  $tb_asgn.bootstrapTable({locale:"es-EC"});
+  $tb_liqcob.bootstrapTable({locale:"es-EC"});
+  $tb_cobcar.bootstrapTable({locale:"es-EC"});
+
+  antigüedadcartera("/operaciones/antigüedadcartera");
+  carteranegociada("/operaciones/carteranegociada/{{año}}")
+}
+
+window.operateEvents = {
+  'click .revertir': function (e, value, row, index) {
+    ReversarCobranza(row.id, row.TipoOperacion, row.Cliente)
+  },
+  'click .imprimir': function (e, value, row, index) {
+    ImprimirCobranza( row.id, row.TipoOperacion)
+  },
+  'click .editar': function (e, value, row, index) {
+    ModificarCobranza( row.id, row.TipoOperacion, row.Contabilizada)
+  },
+};
+
+function operateFormatter(value, row, index) {
+return [
+  '<a class="revertir" href="javascript:void(0)" title="Reverso de cobranza">',
+  '<i class="fa fa-rotate-left"></i>',
+  '</a>  ',
+  '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
+  '<i class="fa fa-print"></i>',
+  '</a>  ',
+].join('')
+}
+
+window.operateEventsAsgn = {
+  'click .revertir': function (e, value, row, index) {
+    ReversarAceptacionAsignacion(row.id,row.Asignacion )
+  },
+  'click .imprimir': function (e, value, row, index) {
+    ImprimirAsignacion( row.id, )
+  },
+};
+
+function operateFormatterAsgn(value, row, index) {
+return [
+  '<a class="revertir" href="javascript:void(0)" title="Reverso de asignación">',
+  '<i class="fa fa-rotate-left"></i>',
+  '</a>  ',
+  '<a class="imprimir" href="javascript:void(0)" title="Imprimir asignación">',
+  '<i class="fa fa-print"></i>',
+  '</a>  ',
+].join('')
+}
+
+window.operateEventsLiqCob = {
+  'click .revertir': function (e, value, row, index) {
+    ReversarliquidacionCobranza(row.id, )
+  },
+  'click .imprimir': function (e, value, row, index) {
+    ImprimirLiquidacionCobranza( row.id, )
+  },
+};
+
+function operateFormatterLiqCob(value, row, index) {
+return [
+  '<a class="revertir" href="javascript:void(0)" title="Reverso de liquidación">',
+  '<i class="fa fa-rotate-left"></i>',
+  '</a>  ',
+  '<a class="imprimir" href="javascript:void(0)" title="Imprimir liquidación">',
+  '<i class="fa fa-print"></i>',
+  '</a>  ',
+].join('')
+}
+
+window.operateEventsCobCar = {
+  'click .revertir': function (e, value, row, index) {
+    ReversarCobranza(row.id, row.TipoOperacion, row.Cliente)
+  },
+  'click .imprimir': function (e, value, row, index) {
+    ImprimirCobranzaCargos( row.id, )
+  },
+};
+
+function operateFormatterCobCar(value, row, index) {
+return [
+  '<a class="revertir" href="javascript:void(0)" title="Reverso de cobranza">',
+  '<i class="fa fa-rotate-left"></i>',
+  '</a>  ',
+  '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
+  '<i class="fa fa-print"></i>',
+  '</a>  ',
+].join('')
+}
+
+
+</script>    
 {% endblock %}

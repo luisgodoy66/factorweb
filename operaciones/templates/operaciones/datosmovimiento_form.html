@@ -16,7 +16,7 @@
 {% endblock breadcrumbs %}
 {% block content %}
 <form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal">
-    <div class="col-lg-6">
+    <div class="col-lg-12">
         <div class="card">
             {% csrf_token %}
             <div class="card-header">
@@ -24,7 +24,7 @@
             </div>
             <div class="card-body card-block">
                 <!-- columna izquierda -->
-                <!-- <div class="col-lg-6"> -->
+                <div class="col-md-6">
                     
                     <div class="row form-group">
                         <div class="col col-md-5">
@@ -109,7 +109,20 @@
                             <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
                         </div>
                     </div>
+                </div>  
+                <div class="col-md-6">
+                    <div class="alert alert-info" role="alert">
+                        Un movimiento que afecta a cartera no debe marcarse como ítem de factura o cargo y; 
+                        afectará a la cartera con un signo, ejemplo "Cobranza"
+                        Un movimiento que no afecta a la cartera no importa que signo tenga y 
+                        podría ser ítem de factura o cargo o ninguno de los dos, como las liquidaciones.
+                        Un movimiento que es ítem de factura no debe ser cargo (no ítem factura),
+                        ejemplo el GAO.
+                        Un movimiento que es cargo no debe ser ítem de factura. Los cargos son los valores
+                        que se descuentan en una liquidación pero no son ítems de factura, como las "Bajas"
 
+                    </div>
+                </div>
             </div>    
             
             <div class="card-footer">

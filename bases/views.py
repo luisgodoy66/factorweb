@@ -11,7 +11,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.hashers import make_password
 
 from solicitudes.models import Asignacion
-from operaciones.models import Documentos
+from operaciones.models import Documentos, Asignacion as Operaciones
 from cobranzas.models import Cheques_protestados
 from datetime import date, timedelta
 from .models import Usuario_empresa
@@ -172,12 +172,18 @@ def dashboard(request):
     sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
                                        empresa = id_empresa.empresa).count()
 
+    # obtener el último año de proceso
+    ultimo_registro = Operaciones.objects.order_by('-dregistro').last()
+    total_negociado = Operaciones.objects.total_negociado(id_empresa.empresa)
+
     datos = { 'desde':desde
         , 'hasta':hasta
         , 'total_cartera': cartera
         , 'total_protestos':protestos
         , 'total_cartera_protestos':cartera+protestos
         , 'solicitudes_pendientes':sp
+        , 'año':ultimo_registro.dnegociacion.year
+        , 'total_negociado': total_negociado['Total']
     }
     return render(request, template_name, datos)
 

@@ -107,17 +107,21 @@ class TasaFactoringForm(forms.ModelForm):
         model = Tasas_factoring
 
         fields=[
-            'cxtasa', 'cttasa', 'lflat','ndiasperiocidad'
+            'cxtasa'
+            # , 'cttasa'
+            , 'lflat','ndiasperiocidad'
             ,'limprimeenreporte', 'ctdescripcionenreporte'
-            , 'lcargaiva', 'lsobreanticipo', 'ctinicialesentablas'
+            # , 'lcargaiva'
+            , 'lsobreanticipo', 'ctinicialesentablas'
         ]
         labels={
-            'cxtasa':'Código', 'cttasa':'Descripción'
+            'cxtasa':'Código'
+            # , 'cttasa':'Descripción'
             , 'lflat':'Cálculo con tasa flat'
             , 'ndiasperiocidad': 'Días de periocidad'
             , 'limprimeenreporte':'Se imprime en reportes'
             , 'ctdescripcionenreporte':'Nombre en reportes'
-            , 'lcargaiva':'Carga IVA'
+            # , 'lcargaiva':'Carga IVA'
             , 'lsobreanticipo': 'Cálculo sobre el valor anticipado'
             , 'ctinicialesentablas':'Iniciales a mostrarse en tablas'
         }

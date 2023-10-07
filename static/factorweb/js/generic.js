@@ -254,3 +254,13 @@ function capturarEdicion(btn){
     return valores
 }
 
+function checkSubmit() {
+    if (!enviando) {
+        enviando= true;
+        return true;
+    } else {
+        //Si llega hasta aca significa que pulsaron 2 veces el boton submit
+        alert("El formulario ya se esta enviando");
+        return false;
+    }
+}

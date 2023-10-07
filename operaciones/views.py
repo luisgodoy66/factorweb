@@ -1029,7 +1029,8 @@ def DetalleDocumentoADiccionario(doc, tipo_asignacion):
 
     return output
 
-def SumaCargos(request,asignacion_id, gao_carga_iva, dc_carga_iva, carga_gao, carga_dc, porcentaje_iva=12):
+def SumaCargos(request,asignacion_id, gao_carga_iva, dc_carga_iva, carga_gao
+               , carga_dc, porcentaje_iva, otros_cargos = None):
     # lee los datos de la tabla solicutid documentos
 
     g=Decimal(0); d=Decimal(0); 
@@ -1066,12 +1067,12 @@ def SumaCargos(request,asignacion_id, gao_carga_iva, dc_carga_iva, carga_gao, ca
         d = total_dc["ndescuentocartera__sum"]
 
     # iva
-    base = 0
-    if gao_carga_iva=="Si": base += g
+    base_iva = 0
+    if gao_carga_iva=="Si": base_iva += g
 
-    if dc_carga_iva=="Si":  base += d
+    if dc_carga_iva=="Si":  base_iva += d
 
-    iva = round( base * porcentaje_iva / 100,2)
+    iva = round( base_iva * porcentaje_iva / 100,2)
     # redondear a 2 decimales?
     # neto
     neto =   a -g - d - iva
@@ -2119,3 +2120,14 @@ def GenerarAnexo(request, asignacion_id, anexo_id):
     asignacion.save()
     
 
+def GeneraResumenCarteraNegociadaJSON(request, año):
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    actual = Asignacion.objects.operaciones_negociadas(id_empresa.empresa, año)
+    anterior = Asignacion.objects.operaciones_negociadas(id_empresa.empresa, año-1)
+    
+    data = { "actual":actual,
+            "anterior":anterior}
+    
+    return JsonResponse( data)

@@ -61,7 +61,7 @@ function ReversarCobranza(operacion_id, tipo_operacion, nombre_cliente = null){
 function ImprimirAsignacion(id, ){
   // en una nueva ventana abrir el reporte de asignación
   url = window.location.origin
-  url = url + "/operaciones/reporteasignacion/"+id;
+  url = url + "/actual/reporteasignacion/"+id;
 window.open( url);
 
 }
@@ -71,7 +71,7 @@ function ReversarAceptacionAsignacion(asignacion_id, codigo_asgn = ''){
   // formulario por eso no usa fetchPostear
 
   MensajeConfirmacion("Reversar aceptación " +  codigo_asgn +"?",function(){
-      fetchProcesar("/operaciones/reversaraceptacionasignacion/"+  asignacion_id,  function(){
+      fetchProcesar("/actual/reversaraceptacionasignacion/"+  asignacion_id,  function(){
           location.reload();
       })
   })
@@ -436,10 +436,10 @@ function generarXMLFactura(factura, ambiente){
 
 function generaAnexos(id_asignacion, tipo_cliente){
   // nota: marcar la factura como ya generado XML
-  fetchRecuperar('/operaciones/anexosactivos/'+tipo_cliente, function(anexos){
+  fetchRecuperar('/actual/anexosactivos/'+tipo_cliente, function(anexos){
     for (let a = 0; a < anexos.length; a++){
       let anexo = anexos[a]
-      window.location.href = "/operaciones/generaranexo/"+id_asignacion+"/"+anexo
+      window.location.href = "/actual/generaranexo/"+id_asignacion+"/"+anexo
       if (anexos.length >1){
         alert('Un anexo generado.')
       }
@@ -449,4 +449,73 @@ function generaAnexos(id_asignacion, tipo_cliente){
   })
 
 
+}
+
+function carteranegociada(url){
+
+    //line chart
+  fetchRecuperar(url,function(cartera){
+      var ctx = document.getElementById( "lineChart" );
+    ctx.height = 150;
+    var myChart = new Chart( ctx, {
+        type: 'line',
+        data: {
+            labels: [ "Ene", "Feb", "Mar", "Abr", "May", "Jun"
+              , "Jul" , "Ago", "Sep", "Oct", "Nov", "Dic"],
+            datasets: [
+                {
+                    label: "Año anterior",
+                    borderColor: "rgba(0,0,0,.09)",
+                    borderWidth: "1",
+                    backgroundColor: "rgba(0,0,0,.07)",
+                    data: [ cartera['anterior']['enero']
+                      , cartera['anterior']['febrero']
+                      , cartera['anterior']['marzo']
+                      , cartera['anterior']['abril']
+                      , cartera['anterior']['mayo']
+                      , cartera['anterior']['junio']
+                      , cartera['anterior']['julio'] 
+                      , cartera['anterior']['agosto'] 
+                      , cartera['anterior']['septiembre'] 
+                      , cartera['anterior']['octubre'] 
+                      , cartera['anterior']['noviembre'] 
+                      , cartera['anterior']['diciembre'] 
+                    ]
+                            },
+                {
+                    label: "Año actual",
+                    borderColor: "rgba(0, 123, 255, 0.9)",
+                    borderWidth: "1",
+                    backgroundColor: "rgba(0, 123, 255, 0.5)",
+                    pointHighlightStroke: "rgba(26,179,148,1)",
+                    data: [ cartera['actual']['enero']
+                      , cartera['actual']['febrero']
+                      , cartera['actual']['marzo']
+                      , cartera['actual']['abril']
+                      , cartera['actual']['mayo']
+                      , cartera['actual']['junio']
+                      , cartera['actual']['julio'] 
+                      , cartera['actual']['agosto'] 
+                      , cartera['actual']['septiembre'] 
+                      , cartera['actual']['octubre'] 
+                      , cartera['actual']['noviembre'] 
+                      , cartera['actual']['diciembre'] 
+                    ]
+                            }
+                        ]
+        },
+        options: {
+            responsive: true,
+            tooltips: {
+                mode: 'index',
+                intersect: false
+            },
+            hover: {
+                mode: 'nearest',
+                intersect: true
+            }
+
+        }
+    } );
+  })
 }

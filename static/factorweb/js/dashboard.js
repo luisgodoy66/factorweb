@@ -12,7 +12,7 @@ window.onload=function(){
   $tb_cobcar.bootstrapTable({locale:"es-EC"});
 
   antigüedadcartera("/operaciones/antigüedadcartera");
-
+  carteranegociada("/operaciones/carteranegociada/2023")
 }
 
 window.operateEvents = {

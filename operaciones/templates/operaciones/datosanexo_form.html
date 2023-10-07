@@ -14,7 +14,8 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
-<form  method="post"  class="form-horizontal" enctype="multipart/form-data">
+<form  method="post"  class="form-horizontal" enctype="multipart/form-data"
+    onsubmit="return checkSubmit();">
     <div class="col-lg-12">
         <div class="card">
             <div class="card-header">
@@ -95,3 +96,8 @@
 </form>
 {% endblock %}
 
+{% block js_page %}
+<script>
+    enviando = false; //Obligaremos a entrar el if en el primer submit
+</script>
+{% endblock %}

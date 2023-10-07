@@ -12,7 +12,7 @@
                     action="{% url 'solicitudes:facturaspuras_editar' asignacion_id cliente tipo_factoring %}"
                 {% endif %}
             {% endif %}
-            >
+            onsubmit="return checkSubmit();">
             <div class="card">
                 {% csrf_token %}
                 <div class="card-header">
@@ -169,6 +169,7 @@
         </form>
     </div>
     <script>
+        var enviando = false; //Obligaremos a entrar el if en el primer submit
 
         const xmlFile = document.getElementById('xmlFile');
         xmlFile.addEventListener('change', function() {

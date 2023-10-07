@@ -795,8 +795,8 @@ def GeneraListaAccesoriosQuitadosJSONSalida(acc):
     output["Asignacion"] = acc.documento.cxasignacion.cxasignacion
     output["Documento"] = acc.documento.ctdocumento
     output["Vencimiento"] = acc.vencimiento().strftime("%Y-%m-%d")
-    if acc.ncontadorprorrogas > 0 :
-        output["Vencimiento"] += ' *'
+    # if acc.ncontadorprorrogas > 0 :
+    #     output["Vencimiento"] += ' *'
     output["Saldo"] = acc.chequequitado.nsaldo
     if acc.chequequitado.dultimacobranza:
         output["UltimaCobranza"] = acc.chequequitado.dultimacobranza.strftime("%Y-%m-%d")
@@ -3488,7 +3488,6 @@ def GeneraListaFacturasPendientesJSON(request):
     return JsonResponse( data)
 
 def GeneraListaFacturasPendientesJSONSalida(transaccion):
-    print(transaccion)
     output = {}
     output["id"] = transaccion.id
     output["IdCliente"] = transaccion.cliente.id

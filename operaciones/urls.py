@@ -16,7 +16,7 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     GeneraListaProtestosPendientesClienteJSON, GeneraListaCanjesClienteJSON,\
     CondicionesOperativasUpdate, DatosCondicionOperativaNueva, DesembolsosConsulta,\
     GeneraListaDesembolsosJSON, CondicionesOperativasInactivar,\
-    ConsultaAnexosActivos, GenerarAnexo
+    ConsultaAnexosActivos, GenerarAnexo, GeneraResumenCarteraNegociadaJSON
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
@@ -120,6 +120,7 @@ urlpatterns = [
          , name='resumen_asignaciones'),
     path("anexosactivos/<tipo_cliente>", ConsultaAnexosActivos),
     path("generaranexo/<int:asignacion_id>/<anexo_id>", GenerarAnexo),
+    path('carteranegociada/<int:año>', GeneraResumenCarteraNegociadaJSON),
 # desembolsos
     path('listaasignacionespendientesdesembolsar/',AsignacionesPendientesDesembolsarView.as_view(), \
         name='listaasignacionespendientesdesembolsar'),

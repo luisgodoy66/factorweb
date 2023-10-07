@@ -16,8 +16,9 @@
 {% endblock breadcrumbs %}
 {% block content %}
 
-<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal">
-    <!-- <div class="col-lg-6"> -->
+<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal"
+    onsubmit="return checkSubmit();">
+<!-- <div class="col-lg-6"> -->
     <div class="card">
         {% csrf_token %}
         <div class="card-header">
@@ -288,10 +289,7 @@
 </form>
 {% endblock %}
 {% block js_page %}
-<script type="text/javascript" src="{% static 'factorweb/js/datoscliente.js' %}"></script>
 <script>
-    // objeto_fechas("#id_dvencimientocargorepresentante1");
-    // objeto_fechas("#id_dvencimientocargorepresentante2");
-    // objeto_fechas("#id_dvencimientocargorepresentante3");
+    enviando = false; //Obligaremos a entrar el if en el primer submit
 </script>
 {% endblock %}

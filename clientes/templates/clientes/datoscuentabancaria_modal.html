@@ -8,7 +8,7 @@
             {% else %}
                 action="{% url 'clientes:cuentabancaria_nueva' cliente_id %}"
             {% endif %}
-            >
+            onsubmit="return checkSubmit();">
             <!-- columna izquierda -->
             <div class="card">
                 {% csrf_token %}
@@ -82,6 +82,7 @@
                     </div>
                     <!-- datos de factura valores -->
                     <div class="col-md-6">
+                        <h5 class="heading-title mb-1 text-secondary">Cuenta de otro propietario</h5>
                         <div class="row form-group">
                             <div class="col col-xs-3"><label for="id_cxtipocliente" 
                                 class=" form-control-label">
@@ -122,3 +123,10 @@
         </form>
     </div>
 </div>
+
+{% block js_page %}
+<script>
+     enviando = false; //Obligaremos a entrar el if en el primer submit
+     
+</script>
+{% endblock %}

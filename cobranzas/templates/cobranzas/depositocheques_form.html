@@ -15,7 +15,9 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
-<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal">
+<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal"
+    onsubmit="return checkSubmit();">
+
     <div class="card bg-flat-color-0">
         {% csrf_token %}
         <div class="card-body">
@@ -100,6 +102,6 @@
 
 {% block js_page %}
 <script>
-    // objeto_fechas("#id_ddeposito");
+    enviando = false; //Obligaremos a entrar el if en el primer submit
 </script>
 {% endblock %}

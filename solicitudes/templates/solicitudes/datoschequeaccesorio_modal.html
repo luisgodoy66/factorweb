@@ -7,7 +7,7 @@
             {% else %}
                 action="{% url 'solicitudes:editarchequeaccesorio' tipo_factoring %}"
             {% endif %}
-            >
+            onsubmit="return checkSubmit();">
             <!-- <div class="col-md-12"> -->
             <div hidden>
                 <input type="text" value={{cheque}} id="id_cheque">
@@ -115,6 +115,7 @@
         // objeto_fechas("#id_dvencimiento");
         // este modal viene desde nuevo registro o edicion de cheque. Si es nuevo
         // (no hay cheque), inicializar los valores del comprador y total
+        var enviando = false; //Obligaremos a entrar el if en el primer submit
         if ( capturaValor("id_cheque") == 'None')
         {
             inicializaValor("id_ctgirador",capturaValor("id_ctcomprador"))

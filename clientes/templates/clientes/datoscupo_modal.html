@@ -7,7 +7,7 @@
             {% else %}
                 action="{% url 'clientes:cupo_nuevo' %}"
             {% endif %}
-            >
+            onsubmit="return checkSubmit();">
             <!-- <div class="col-xl-12 col-md-12 mb-12"> -->
                 <div class="card">
 
@@ -104,3 +104,9 @@
     </div>
 </div>
 
+{% block js_page %}
+<script>
+     enviando = false; //Obligaremos a entrar el if en el primer submit
+     
+</script>
+{% endblock %}

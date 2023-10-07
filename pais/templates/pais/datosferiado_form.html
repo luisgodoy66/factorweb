@@ -15,7 +15,8 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
-<form  method="post"  class="form-horizontal">
+<form  method="post"  class="form-horizontal"
+    onsubmit="return checkSubmit();">
     <div class="col-lg-6">
         <div class="card">
             <div class="card-header">
@@ -63,7 +64,7 @@
 </form>
 {% endblock %}
 {% block js_page %}
-    <script>
-        // objeto_fechas("#id_dferiado")
-    </script>
+<script>
+    enviando = false; //Obligaremos a entrar el if en el primer submit
+</script>
 {% endblock %}

@@ -346,7 +346,6 @@ class Documentos_protestados_Manager(models.Manager):
                 , aporvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver90
                                 , accesorio__isnull = False)) 
                 )
-        print(protestados)
         fvm90 = protestados["fvencido_mas_90"]
         fv90 = protestados["fvencido_90"]
         fv60 = protestados["fvencido_60"]

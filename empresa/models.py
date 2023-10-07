@@ -1,7 +1,6 @@
 from django.db import models
 from bases.models import ClaseModelo
 from pais.models import Bancos, Actividades
-
 # Create your models here.
 
 class Clases_cliente(ClaseModelo):
@@ -31,7 +30,7 @@ class Contador(ClaseModelo):
     nultimonumero=models.IntegerField(default=0)
 
 class Cuentas_bancarias(ClaseModelo):
-    cxbanco =models.OneToOneField(Bancos, on_delete=models.RESTRICT) 
+    cxbanco =models.ForeignKey(Bancos, on_delete=models.RESTRICT) 
     cxcuenta =models.CharField( max_length=20,null=False)
     ncheque =models.IntegerField(null=True)
     lformatopreimpreso =models.BooleanField(default=False)
@@ -43,6 +42,7 @@ class Cuentas_bancarias(ClaseModelo):
     def __str__(self):
         return '{} Cta.# {}'.format(self.cxbanco,self.cxcuenta)
 
+# validar en el modelo django el ingreso de registro con código único donde son dos campos los que coforman la clave?
 class Datos_participantes(ClaseModelo):
     TIPOS_DE_ID = (
         ('C', 'CEDULA'),
@@ -98,24 +98,6 @@ class Localidades(ClaseModelo):
     def __str__(self):
         return self.ctlocalidad
 
-class Tasas_factoring(ClaseModelo):
-    cxtasa = models.CharField(max_length=4)
-    cttasa = models.CharField(max_length=60, blank=True)
-    lflat = models.BooleanField(default=False)
-    ndiasperiocidad = models.DecimalField(max_digits=3, decimal_places=0, default=0)
-    ctdescripcionenreporte = models.TextField(blank=True)
-    limprimeenreporte = models.BooleanField(default=False)
-    lcargaiva = models.BooleanField(default=True)
-    lsobreanticipo = models.BooleanField(default=True)
-    ctinicialesentablas = models.CharField(max_length=4,null=True)
-
-    def __str__(self):
-        return self.cttasa
-    def save(self):
-        self.cxtasa=self.cxtasa.upper()
-        self.cttasa=self.cttasa.upper()
-        return super(Tasas_factoring, self).save()
-   
 class Tipos_factoring(ClaseModelo):
     # cxtipofactoring = models.CharField(max_length=3 , )
     cttipofactoring = models.CharField(max_length= 40) 
@@ -162,3 +144,24 @@ class Puntos_emision(ClaseModelo):
     def __str__(self):
         return "{}-{}".format(self.cxestablecimiento, self.cxpuntoemision)
 
+# from operaciones.models import Movimientos_maestro
+class Tasas_factoring(ClaseModelo):
+    cxtasa = models.CharField(max_length=4)
+    cttasa = models.CharField(max_length=60, blank=True)
+    lflat = models.BooleanField(default=False)
+    ndiasperiocidad = models.DecimalField(max_digits=3, decimal_places=0, default=0)
+    ctdescripcionenreporte = models.TextField(blank=True)
+    limprimeenreporte = models.BooleanField(default=False)
+    lcargaiva = models.BooleanField(default=True)
+    lsobreanticipo = models.BooleanField(default=True)
+    ctinicialesentablas = models.CharField(max_length=4,null=True)
+    # movimiento = models.ForeignKey(Movimientos_maestro
+    #                                , on_delete=models.DO_NOTHING, null=True)
+
+    def __str__(self):
+        return self.cttasa
+    def save(self):
+        self.cxtasa=self.cxtasa.upper()
+        self.cttasa=self.cttasa.upper()
+        return super(Tasas_factoring, self).save()
+   

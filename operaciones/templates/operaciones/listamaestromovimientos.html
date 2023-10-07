@@ -50,10 +50,10 @@
                     <thead>
                         <th>Código</th>
                         <th>Descripción</th>
-                        <th>Signo</th>
                         <th>Afecta a cartera</th>
+                        <th>Signo</th>
                         <th>Es item de factura</th>
-                        <th>Es cargo</th>
+                        <th>Es cargo (No ítem factura)</th>
                         <th class="all">Acciones</th>
                     </thead>
                     <tbody>
@@ -61,8 +61,8 @@
                         <tr>
                             <td>{{ item.cxmovimiento }}</td>
                             <td>{{ item.ctmovimiento }}</td>
-                            <td>{{ item.cxsigno }}</td>
                             <td>{{ item.lcolateral|yesno:'Si,No' }}</td>
+                            <td>{{ item.cxsigno }}</td>
                             <td>{{ item.litemfactura|yesno:'Si,No' }}</td>
                             <td>{{ item.lcargo|yesno:'Si,No' }}</td>
                             <td>

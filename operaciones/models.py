@@ -43,6 +43,55 @@ class Datos_operativos(ClaseModelo):
     def __str__(self):
         return self.cxcliente.cxcliente.ctnombre
   
+class Movimientos_maestro(ClaseModelo):
+    TIPOS_DE_SIGNOS = (
+        ('+', 'Suma'),
+        ('-', 'Resta'),
+    )
+    cxmovimiento = models.CharField(max_length=4) 
+    ctmovimiento= models.CharField(max_length=60) 
+    cxsigno= models.CharField(max_length=1, choices=TIPOS_DE_SIGNOS) 
+    litemfactura = models.BooleanField(default=False)
+    lcolateral = models.BooleanField()
+    cxmovimientopadre = models.CharField(max_length=4) 
+    lcargo = models.BooleanField(default=False)
+    # lcargaiva = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.ctmovimiento
+
+    def save(self):
+        self.cxmovimiento=self.cxmovimiento.upper()
+        return super(Movimientos_maestro, self).save()
+
+class Asignacion_manager(models.Manager):
+    def operaciones_negociadas(self, id_empresa, año):
+        # en django obtener el año del campo date llamado ddesembolso?
+        return self.filter(ddesembolso__year = año,
+            cxestado = "P"
+            , leliminado = False
+            , empresa = id_empresa)\
+            .aggregate(enero = Sum('nvalor', filter=Q(ddesembolso__month=1))
+                       , febrero= Sum('nvalor', filter=Q(ddesembolso__month=2))
+                       , marzo= Sum('nvalor', filter=Q(ddesembolso__month=3))
+                       , abril= Sum('nvalor', filter=Q(ddesembolso__month=4))
+                       , mayo= Sum('nvalor', filter=Q(ddesembolso__month=5))
+                       , junio= Sum('nvalor', filter=Q(ddesembolso__month=6))
+                       , julio= Sum('nvalor', filter=Q(ddesembolso__month=7))
+                       , agosto= Sum('nvalor', filter=Q(ddesembolso__month=8))
+                       , septiembre= Sum('nvalor', filter=Q(ddesembolso__month=9))
+                       , octubre= Sum('nvalor', filter=Q(ddesembolso__month=10))
+                       , noviembre= Sum('nvalor', filter=Q(ddesembolso__month=11))
+                       , diciembre= Sum('nvalor', filter=Q(ddesembolso__month=12))
+                       )
+    
+    def total_negociado(self, id_empresa):
+        return self.filter(
+            cxestado = "P"
+            , leliminado = False
+            , empresa = id_empresa)\
+            .aggregate(Total = Sum('nvalor'))
+
 class Asignacion(ClaseModelo):
     TIPOS_DE_ASIGNACION = (
         ('A', 'Con accesorios'),
@@ -68,25 +117,25 @@ class Asignacion(ClaseModelo):
     nvalor = models.DecimalField(max_digits=15, decimal_places =2) 
     nanticipo = models.DecimalField(max_digits=10, decimal_places= 2, default=0)
     # cxexcesolineafactoring = models.CharField(max_length=6) 
-    cxestado = models.CharField(max_length=1, default="L", 
-        choices=ESTADOS_DE_ASIGNACION) 
+    cxestado = models.CharField(max_length=1, default="L", choices=ESTADOS_DE_ASIGNACION) 
     ctbancochequegarantia = models.CharField(max_length=25, blank=True, null=True) 
     ctcuentachequegarantia = models.CharField(max_length=15, blank=True, null=True) 
     ctnumerochequegarantia = models.CharField(max_length=7, blank=True, null=True) 
     dchequegaratia = models.DateTimeField(auto_created=True, null=True) 
     ngao = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
-    ndescuentodecartera = models.DecimalField(max_digits=10,
-        decimal_places= 2, default= 0)
+    ndescuentodecartera = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
+    # notrocargo = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
     niva = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
     ctinstrucciondepago = models.TextField(blank=True)
-    nretencionenfactura = models.DecimalField(max_digits=10 ,
-        decimal_places= 2, default= 0)
+    nretencionenfactura = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
     lcartacesiongenerada = models.BooleanField(default=False, null=True) 
     nmayorplazonegociacion = models.SmallIntegerField(default=0, )
     lfacturagenerada = models.BooleanField(default=False)
     nporcentajeiva = models.DecimalField(max_digits=5, decimal_places=2, default=12)
     lanexosimpresos= models.BooleanField(default=False)
     
+    objects = Asignacion_manager()
+
     def __str__(self):
         return self.cxasignacion
 
@@ -574,26 +623,6 @@ class ChequesAccesorios(ClaseModelo):
     def total_cargos(self):
         return self.ngao + self.ndescuentocartera
     
-class Movimientos_maestro(ClaseModelo):
-    TIPOS_DE_SIGNOS = (
-        ('+', 'Suma'),
-        ('-', 'Resta'),
-    )
-    cxmovimiento = models.CharField(max_length=4) 
-    ctmovimiento= models.CharField(max_length=60) 
-    cxsigno= models.CharField(max_length=1, choices=TIPOS_DE_SIGNOS) 
-    litemfactura = models.BooleanField(default=False)
-    lcolateral = models.BooleanField()
-    cxmovimientopadre = models.CharField(max_length=4) 
-    lcargo = models.BooleanField(default=False)
-    
-    def __str__(self):
-        return self.ctmovimiento
-
-    def save(self):
-        self.cxmovimiento=self.cxmovimiento.upper()
-        return super(Movimientos_maestro, self).save()
-
 class Movimientos_clientes(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
         , on_delete=models.RESTRICT

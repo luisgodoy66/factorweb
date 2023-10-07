@@ -64,6 +64,7 @@ class AsignacionesForm(forms.ModelForm):
         model=Asignacion
         fields=['cxcliente', 'nanticipo', 'nvalor', 'ngao', 'ndescuentodecartera'
             , 'dnegociacion', 'ddesembolso', 'ctinstrucciondepago', 'niva'
+            # , 'notrocargo'
         ]
         labels={'cxcliente':'Cliente', 'nanticipo':'Anticipo'
             , 'nvalor':'Total negociado', 'ngao':'Comisión'
@@ -142,8 +143,8 @@ class MaestroMovimientosForm(forms.ModelForm):
         fields=['cxmovimiento', 'ctmovimiento', 'cxsigno', 'litemfactura'
             , 'lcolateral', 'cxmovimientopadre', 'lcargo']
         labels={'cxmovimiento':'Código', 'ctmovimiento':'Descripción'
-            , 'cxsigno': 'Signo', 'litemfactura': 'Es item de factura'
-            , 'lcolateral': 'Afecta a cartera', 'lcargo':'Es cargo'
+            , 'cxsigno': 'Signo', 'litemfactura': 'Es ítem de factura'
+            , 'lcolateral': 'Afecta a cartera', 'lcargo':'Es cargo (No ítem factura)'
             , 'cxmovimientopadre':'Movimiento padre'}
 
     def __init__(self, *args, **kwargs):
