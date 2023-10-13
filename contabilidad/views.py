@@ -1269,6 +1269,35 @@ class ListaRecuperacionesAGenerar(SinPrivilegios, generic.TemplateView):
         context['solicitudes_pendientes'] = sp
         return context
  
+class DesbloquearMes(SinPrivilegios, generic.TemplateView):
+    template_name = "contabilidad/datosdesbloquearmes.html"
+    permission_required="contabilidad.view_saldos"
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+
+        mescerrado = Control_meses.objects\
+            .filter(lbloqueado = True, empresa = id_empresa.empresa)\
+            .values('empresa')\
+            .annotate(ultimomes = Max(Concat('año','mes')))
+        print(mescerrado)
+        if mescerrado:
+            añomes = mescerrado[0]['ultimomes']
+            año = añomes[0:4]
+            mes = int(añomes[4:6])
+        else:
+            return HttpResponse("Ningún mes encontrado como cerrado.")
+
+        context = super(DesbloquearMes, self).get_context_data(**kwargs)
+        context['solicitudes_pendientes'] = sp
+        context['año'] = año
+        context['mes'] = mes
+
+        return context
+
 @login_required(login_url='/login/')
 @permission_required('contabilidad.view_cuentas_especiales', login_url='bases:sin_permisos')
 def BuscarCuentasEspeciales(request):
@@ -2216,4 +2245,15 @@ def GenerarAsientosRecuperaciones(request,ids):
     if resultado[0] !='OK':
         return HttpResponse(resultado)
     return HttpResponse('OK')
+
+@login_required(login_url='/login/')
+@permission_required('contabilidad.change_saldos', login_url='bases:sin_permisos')
+def DesbloqueoDeMes(request, año, mes):
+    nusuario = request.user.id
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    resultado=enviarPost("CALL uspDesbloqueoMesContabilidad( '{0}',{1},{2},{3},'')"
+        .format(año, mes, nusuario, id_empresa.empresa.id))
+    
+    return HttpResponse(resultado)
 

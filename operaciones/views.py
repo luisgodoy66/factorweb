@@ -1344,81 +1344,81 @@ def EliminarDetalleCondicionOperativa(request, detalle_id):
 
     return HttpResponse("OK")
 
-def GenerarAnexos(request,asignacion_id):
+# def GenerarAnexos(request,asignacion_id):
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+#     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    asignacion = Asignacion.objects.filter(pk=asignacion_id).first()
+#     asignacion = Asignacion.objects.filter(pk=asignacion_id).first()
     
-    cliente = Datos_participantes.objects\
-        .filter(id=asignacion.cxcliente.cxcliente.id).first()
+#     cliente = Datos_participantes.objects\
+#         .filter(id=asignacion.cxcliente.cxcliente.id).first()
 
-    # obtener el tipo de cliente
-    anexos = Anexos.objects.filter(lactivo = True, empresa = id_empresa.empresa)\
-        .filter(Q(cxtipocliente = cliente.datos_generales.cxtipocliente)| Q(cxtipocliente = 'T')).all()
+#     # obtener el tipo de cliente
+#     anexos = Anexos.objects.filter(lactivo = True, empresa = id_empresa.empresa)\
+#         .filter(Q(cxtipocliente = cliente.datos_generales.cxtipocliente)| Q(cxtipocliente = 'T')).all()
 
-    if anexos:
-        # datos del cliente
-        if cliente.datos_generales.cxtipocliente =="J":
-            datos = ModeloCliente.Personas_juridicas.objects\
-                .filter(cxcliente = cliente).first()
-            if datos:
-                rl_id = datos.cxrepresentante1
-                rl_cargo = datos.ctcargorepresentante1
-                rl_nombre = datos.ctrepresentante1
-        else:
-            rl_id = cliente.cxparticipante
-            rl_nombre = cliente.ctnombre
-            rl_cargo = ''
+#     if anexos:
+#         # datos del cliente
+#         if cliente.datos_generales.cxtipocliente =="J":
+#             datos = ModeloCliente.Personas_juridicas.objects\
+#                 .filter(cxcliente = cliente).first()
+#             if datos:
+#                 rl_id = datos.cxrepresentante1
+#                 rl_cargo = datos.ctcargorepresentante1
+#                 rl_nombre = datos.ctrepresentante1
+#         else:
+#             rl_id = cliente.cxparticipante
+#             rl_nombre = cliente.ctnombre
+#             rl_cargo = ''
         
-        # datos del factor
-        factor = Empresas.objects.filter(pk = id_empresa.empresa.id).first()
+#         # datos del factor
+#         factor = Empresas.objects.filter(pk = id_empresa.empresa.id).first()
 
-        for anexo in anexos:
+#         for anexo in anexos:
 
-            # ruta_anexo_generado = anexo.ctrutageneracion
-            ruta_plantilla = anexo.fanexo
+#             # ruta_anexo_generado = anexo.ctrutageneracion
+#             ruta_plantilla = anexo.fanexo
             
-            try:
+#             try:
                 
-                plantilla = DocxTemplate(ruta_plantilla)
+#                 plantilla = DocxTemplate(ruta_plantilla)
                 
-                archivo = anexo.ctnombre + ' DE ' \
-                    + cliente.ctnombre+"-" \
-                    + asignacion.cxasignacion+".docx"
+#                 archivo = anexo.ctnombre + ' DE ' \
+#                     + cliente.ctnombre+"-" \
+#                     + asignacion.cxasignacion+".docx"
 
-                fecha_negociacion = asignacion.dnegociacion
+#                 fecha_negociacion = asignacion.dnegociacion
 
-                context = { 
-                    'direccioncliente' : cliente.ctdireccion ,
-                    'fechanegociacion': fecha_negociacion.strftime("%Y-%B-%d"),
-                    'idcliente': cliente.cxparticipante,
-                    'idrepresentantelegal':rl_id,
-                    'maximoplazonegociacion':asignacion.nmayorplazonegociacion,
-                    'nombrecliente':cliente.ctnombre,
-                    'nombrerepresentantelegal':rl_nombre,
-                    'totalanticipo': asignacion.nanticipo,
-                    'totalanticipoenletras': numero_a_letras(asignacion.nanticipo),
-                    'empresafactor':factor.ctnombre,
-                    'rucfactor':factor.ctruccompania,
-                    'direccionfactor':factor.ctdireccion,
-                    'ciudadfactor': factor.ctciudad,
-                    'cargorepresentantelegal': rl_cargo,
-                    }
-                plantilla.render(context)
-                # NOTA: como hace return no continua con otro anexos ni marca la asignacion
-                return bajararchivo(request,plantilla,archivo)
+#                 context = { 
+#                     'direccioncliente' : cliente.ctdireccion ,
+#                     'fechanegociacion': fecha_negociacion.strftime("%Y-%B-%d"),
+#                     'idcliente': cliente.cxparticipante,
+#                     'idrepresentantelegal':rl_id,
+#                     'maximoplazonegociacion':asignacion.nmayorplazonegociacion,
+#                     'nombrecliente':cliente.ctnombre,
+#                     'nombrerepresentantelegal':rl_nombre,
+#                     'totalanticipo': asignacion.nanticipo,
+#                     'totalanticipoenletras': numero_a_letras(asignacion.nanticipo),
+#                     'empresafactor':factor.ctnombre,
+#                     'rucfactor':factor.ctruccompania,
+#                     'direccionfactor':factor.ctdireccion,
+#                     'ciudadfactor': factor.ctciudad,
+#                     'cargorepresentantelegal': rl_cargo,
+#                     }
+#                 plantilla.render(context)
+#                 # NOTA: como hace return no continua con otro anexos ni marca la asignacion
+#                 return bajararchivo(request,plantilla,archivo)
 
-            except TypeError as err:
-                return HttpResponse("Se ha producido en error en la generación del anexo.{}".format(err))
+#             except TypeError as err:
+#                 return HttpResponse("Se ha producido en error en la generación del anexo.{}".format(err))
 
-        # marcar la asignación como generados los anexos
-        asignacion.lanexosimpresos = True
-        asignacion.save()
-    else:
-        return HttpResponse("No se ha definido ningún anexo ")
+#         # marcar la asignación como generados los anexos
+#         asignacion.lanexosimpresos = True
+#         asignacion.save()
+#     else:
+#         return HttpResponse("No se ha definido ningún anexo ")
     
-    return HttpResponse("Se han generado archivos en las carpetas correspondientes. Puede cerrar esta página.")
+#     return HttpResponse("Se han generado archivos en las carpetas correspondientes. Puede cerrar esta página.")
 
 def bajararchivo(request,plantilla, nombrearchivo):
     # Save document to memory and download to the user's browser
@@ -2131,3 +2131,13 @@ def GeneraResumenCarteraNegociadaJSON(request, año):
             "anterior":anterior}
     
     return JsonResponse( data)
+
+def MarcarAnexoGenerado(request, asignacion_id):
+
+    asignacion = Asignacion.objects.filter(pk=asignacion_id).first()
+    
+    # marcar la asignación como generados los anexos
+    asignacion.lanexosimpresos = True
+    asignacion.save()
+
+    return HttpResponse( "OK")

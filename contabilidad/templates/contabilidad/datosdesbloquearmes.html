@@ -7,7 +7,7 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">contabilidad</a></li>
                     <li><a href="#">reportes</a></li>
-                    <li class="active">balance general</li>
+                    <li class="active">Desbloquear mes</li>
                 </ol>
             </div>
         </div>
@@ -21,13 +21,13 @@
                     <label for="fechacorte">Perìodo:</label>
                 </div>
                 <div class="col-md-2">
-                    <input type="text" class="form-control" name="añocorte"  
+                    <input type="text" class="form-control" name="añocorte"  readonly
                     id="añocorte" placeholder="Ingrese año" 
                     aria-label="Ingrese fecha de corte" value="{{ año }}">
                 </div>
                 <!-- lista de meses ? -->
                 <div class="col-md-2">
-                    <select name="mes" id="cmb_mes" class="form-control" >
+                    <select name="mes" id="cmb_mes" class="form-control" disabled>
                         <option value="01" {% if mes == 1 %} selected {% endif %}>Enero</option>
                         <option value="02" {% if mes == 2 %} selected {% endif %}>Febrero</option>
                         <option value="03" {% if mes == 3 %} selected {% endif %}>Marzo</option>
@@ -45,14 +45,8 @@
 
                 <div class="col-md-2">
                     <button class="btn btn-success btn-sm"  role="button" 
-                        id="btnConsultar">  
-                        <i class="fa fa-print"></i> Consultar
-                    </button>
-                </div>
-                <div class="col-md-2">
-                    <button class="btn btn-success btn-sm"  role="button" 
                         id="btnBloquear">  
-                        <i class="fa fa-lock"></i> Bloquear
+                        <i class="fa fa-lock"></i> Desbloquear
                     </button>
                 </div>
             </div>
@@ -72,36 +66,21 @@ var $btnBloquear = jQuery('#btnBloquear')
 
 window.onload=function(){
 
-    $btnConsultar.click(function () {
-
-        var select = document.getElementById('cmb_mes');
-        var mes = select.options[select.selectedIndex].value;
-
-        ConsultaBG(capturaValor('añocorte'), mes)
-    })
-
     $btnBloquear.click(function () {
         var select = document.getElementById('cmb_mes');
         var mes = select.options[select.selectedIndex].value;
 
-        BloquearMes(capturaValor('añocorte'), mes)
+        DesbloquearMes(capturaValor('añocorte'), mes)
     })
 
 };
     
-function ConsultaBG(año,mes){
-        
-    // en una nueva ventana abrir el reporte de asignación
-    url = window.location.origin
-    url = url + "/contabilidad/reportebalancegeneral/"+año+"/"+mes;
-    window.open( url);
-}
 
-function BloquearMes(año, mes){
+function DesbloquearMes(año, mes){
     
-    MensajeConfirmacion("Continúa con el bloqueo del mes?", function(){
-        fetchProcesar("/contabilidad/cierredemes/"+año+"/"+mes, function(){
-            MensajeOK("Mes ha sido bloqueado")
+    MensajeConfirmacion("Continúa con el desbloqueo del mes?", function(){
+        fetchProcesar("/contabilidad/desbloqueodemes/"+año+"/"+mes, function(){
+            MensajeOK("Mes ha sido desbloqueado")
         })
     })
 }    

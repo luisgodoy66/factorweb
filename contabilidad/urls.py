@@ -20,7 +20,8 @@ from .views import CuentasView, CuentasEspecialesEdit, BuscarCuentasEspeciales\
     , CuentaCargoTipoFactoringEdit, CuentasCargoTiposFactoringView\
     , GeneraListaTransferenciasJSON, ListaTransferenciasAGenerar\
     , GenerarAsientosTransferencias, GeneraListaRecuperacionesJSON\
-    , GenerarAsientosRecuperaciones, ListaRecuperacionesAGenerar
+    , GenerarAsientosRecuperaciones, ListaRecuperacionesAGenerar, DesbloquearMes\
+    , DesbloqueoDeMes
 
 from .sri import GeneraXMLFactura
 from .reportes import ImpresionDiarioContable, ImpresionComprobanteEgreso\
@@ -163,4 +164,6 @@ urlpatterns = [
     path('recuperacionespendientesjson/<desde>/<hasta>',GeneraListaRecuperacionesJSON
          , name="recuperacionespendientes_json"),
     path('generarasientosrecuperaciones/<ids>', GenerarAsientosRecuperaciones),
+    path('consultadesbloqueodemes',DesbloquearMes.as_view(), name="desbloqueo_mes"),
+    path('desbloqueodemes/<año>/<mes>',DesbloqueoDeMes),
 ]

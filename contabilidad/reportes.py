@@ -201,11 +201,15 @@ def ImpresionBalanceGeneral(request, año, mes):
     last_day = calendar.monthrange(int(año), int(mes))[1]
     # convertir string a date?
     fecha = datetime.strptime(año+"-"+mes+"-"+str(last_day), "%Y-%m-%d")
+
+    # total pasivo y patrimonio
+    pyp = result[0]['totalpasivopatrimonio']
     
     context = {
          'activo': result,
          'empresa': id_empresa.empresa,
-         'fecha_corte':fecha
+         'fecha_corte':fecha,
+         'pasivo_patrimonio':pyp,
       }
 
     # Create a Django response object, and specify content_type as pdf

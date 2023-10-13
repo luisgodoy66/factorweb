@@ -80,7 +80,7 @@
                                             </tr>
                                             {% for item in item_nivel4.list %}
                                                 <tr>
-                                                <td width="85%">{{item.idcuenta}}{{ item.descripcion }}</td>
+                                                <td width="85%">{{item.idcuenta}} {{ item.descripcion }}</td>
                                                 <td class="numero">{{ item.saldoactual|intcomma }}</td>
                                                 <td></td>
                                                 </tr>
@@ -101,7 +101,12 @@
                                 </tr>
                                 
                             {% endfor %}
-                        </tbody>
+                            <tr></tr>
+                            <tr>
+                                <td class="numero" colspan="2"><h2>TOTAL PASIVO Y PATRIMONIO</h2></td>
+                                <td class="numero"><h2>{{ pasivo_patrimonio|intcomma }}</h2></td>
+                            </tr>
+                    </tbody>
                     </table>
 
                 </div>

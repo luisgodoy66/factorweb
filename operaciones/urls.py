@@ -7,7 +7,7 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     MaestroMovimientoEdit, CondicionesOperativasView, DatosCondicionesOperativas,\
     DetalleCondicionOperativa, EliminarDetalleCondicionOperativa, AnexosView, \
     EditarTasasDocumentoSolicitud, GeneraDetalleParaTabla1, AnexosEdit,\
-    AsignacionesPendientesDesembolsarView, DesembolsarAsignacion, GenerarAnexos, \
+    AsignacionesPendientesDesembolsarView, DesembolsarAsignacion, \
     ReversaAceptacionAsignacion, GeneraListaAsignacionesJSON, \
     GeneraListaAsignacionesRegistradasJSON, GeneraResumenAntigüedadCarteraJSON,\
     EstadosOperativosView, EstadoOperativoCliente, AntigüedadCarteraClienteJSON,\
@@ -16,7 +16,8 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     GeneraListaProtestosPendientesClienteJSON, GeneraListaCanjesClienteJSON,\
     CondicionesOperativasUpdate, DatosCondicionOperativaNueva, DesembolsosConsulta,\
     GeneraListaDesembolsosJSON, CondicionesOperativasInactivar,\
-    ConsultaAnexosActivos, GenerarAnexo, GeneraResumenCarteraNegociadaJSON
+    ConsultaAnexosActivos, GenerarAnexo, GeneraResumenCarteraNegociadaJSON, \
+    MarcarAnexoGenerado
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
@@ -92,7 +93,7 @@ urlpatterns = [
         name='reporteasignacion'),
     path("reporteasignaciondesdesolicitud/<int:asignacion_id>",
         ImpresionAsignacionDesdeSolicitud ),
-    path("generaranexos/<int:asignacion_id>", GenerarAnexos, name="generaranexos"),
+    # path("generaranexos/<int:asignacion_id>", GenerarAnexos, name="generaranexos"),
     path('listaanexos/',AnexosView.as_view(), name='listaanexos'),
     path('nuevoanexo/',AnexosNew.as_view(), name='anexo_nuevo'),
     path('editaranexo/<int:pk>',AnexosEdit.as_view(), name='anexo_editar'),
@@ -121,6 +122,7 @@ urlpatterns = [
     path("anexosactivos/<tipo_cliente>", ConsultaAnexosActivos),
     path("generaranexo/<int:asignacion_id>/<anexo_id>", GenerarAnexo),
     path('carteranegociada/<int:año>', GeneraResumenCarteraNegociadaJSON),
+    path('marcaanexogenerado/<int:asignacion_id>', MarcarAnexoGenerado),
 # desembolsos
     path('listaasignacionespendientesdesembolsar/',AsignacionesPendientesDesembolsarView.as_view(), \
         name='listaasignacionespendientesdesembolsar'),
