@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import Sum, Q, F, ExpressionWrapper, DateField, CharField\
+    , Value
 
 # Create your models here.
 from bases.models import ClaseModelo
@@ -137,6 +139,35 @@ class Cuentas_provisiones(ClaseModelo):
 
 from operaciones.models import  Notas_debito_cabecera
 
+class Facturas_manager(models.Manager):
+    def ingresos_mensuales(self, id_empresa, año):
+        return self.filter(demision__year = año,
+            cxestado = "A"
+            , leliminado = False
+            , empresa = id_empresa)\
+            .aggregate(enero = Sum(F('nbasenoiva')+F('nbaseiva'), filter=Q(demision__month=1))
+                       , febrero= Sum(F('nbasenoiva')+F('nbaseiva'), filter=Q(demision__month=2))
+                       , marzo= Sum(F('nbasenoiva')+F('nbaseiva'), filter=Q(demision__month=3))
+                       , abril= Sum(F('nbasenoiva')+F('nbaseiva'), filter=Q(demision__month=4))
+                       , mayo= Sum(F('nbasenoiva')+F('nbaseiva'), filter=Q(demision__month=5))
+                       , junio= Sum(F('nbasenoiva')+F('nbaseiva'), filter=Q(demision__month=6))
+                       , julio= Sum(F('nbasenoiva')+F('nbaseiva'), filter=Q(demision__month=7))
+                       , agosto= Sum(F('nbasenoiva')+F('nbaseiva'), filter=Q(demision__month=8))
+                       , septiembre= Sum(F('nbasenoiva')+F('nbaseiva'), filter=Q(demision__month=9))
+                       , octubre= Sum(F('nbasenoiva')+F('nbaseiva'), filter=Q(demision__month=10))
+                       , noviembre= Sum(F('nbasenoiva')+F('nbaseiva'), filter=Q(demision__month=11))
+                       , diciembre= Sum(F('nbasenoiva')+F('nbaseiva'), filter=Q(demision__month=12))
+                       )
+
+# en el orm de django acumular la suma de dos campos?
+    def ingresos_delaño(self, id_empresa, año):
+        return self.filter(demision__year = año,
+            cxestado = "A"
+            , leliminado = False
+            , empresa = id_empresa)\
+            .aggregate(Total = Sum(F('nbasenoiva')+F('nbaseiva'))
+                       )
+
 class Factura_venta(ClaseModelo):
     TIPOS_DE_OPERACION = (
         ('LA', 'Liquidación de asignación'),
@@ -167,8 +198,9 @@ class Factura_venta(ClaseModelo):
                                      , null=True)
     notadebito = models.OneToOneField(Notas_debito_cabecera, null=True
         ,related_name="factura_notadedebito", on_delete=models.CASCADE)
-# nota: quitar el null en notadebito
 
+    objects = Facturas_manager()
+    
     def __str__(self):
         return "{}-{}-{}".format(self.puntoemision.cxestablecimiento
                                  , self.puntoemision.cxpuntoemision, self.cxnumerofactura)

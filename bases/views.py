@@ -13,6 +13,8 @@ from django.contrib.auth.hashers import make_password
 from solicitudes.models import Asignacion
 from operaciones.models import Documentos, Asignacion as Operaciones
 from cobranzas.models import Cheques_protestados
+from contabilidad.models import Factura_venta
+
 from datetime import date, timedelta
 from .models import Usuario_empresa
 from .forms import Userform, UserPasswordForm
@@ -175,7 +177,8 @@ def dashboard(request):
     # obtener el último año de proceso
     ultimo_registro = Operaciones.objects.order_by('-dregistro').last()
     total_negociado = Operaciones.objects.total_negociado(id_empresa.empresa)
-
+    ingresos_año = Factura_venta.objects.ingresos_delaño(id_empresa.empresa
+                                                        ,ultimo_registro.dnegociacion.year)
     datos = { 'desde':desde
         , 'hasta':hasta
         , 'total_cartera': cartera
@@ -184,6 +187,7 @@ def dashboard(request):
         , 'solicitudes_pendientes':sp
         , 'año':ultimo_registro.dnegociacion.year
         , 'total_negociado': total_negociado['Total']
+        , 'ingreso_acumulado': ingresos_año['Total']
     }
     return render(request, template_name, datos)
 

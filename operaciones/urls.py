@@ -17,7 +17,7 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     CondicionesOperativasUpdate, DatosCondicionOperativaNueva, DesembolsosConsulta,\
     GeneraListaDesembolsosJSON, CondicionesOperativasInactivar,\
     ConsultaAnexosActivos, GenerarAnexo, GeneraResumenCarteraNegociadaJSON, \
-    MarcarAnexoGenerado
+    MarcarAnexoGenerado, IngresosGeneradosJSON
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
@@ -104,7 +104,6 @@ urlpatterns = [
          , name="asignaciones_json"),
     path('asignacionesregistradasjson/<desde>/<hasta>',GeneraListaAsignacionesRegistradasJSON
         , name="asignacionesregistradas_json"),
-    path('antigüedadcartera', GeneraResumenAntigüedadCarteraJSON),
     path('impresioncartera', ImpresionAntiguedadCartera
          , name='antigüedad_por_cliente'),
     path('impresioncarterapendiente/<clientes>', ImpresionFacturasPendientes
@@ -121,8 +120,11 @@ urlpatterns = [
          , name='resumen_asignaciones'),
     path("anexosactivos/<tipo_cliente>", ConsultaAnexosActivos),
     path("generaranexo/<int:asignacion_id>/<anexo_id>", GenerarAnexo),
-    path('carteranegociada/<int:año>', GeneraResumenCarteraNegociadaJSON),
     path('marcaanexogenerado/<int:asignacion_id>', MarcarAnexoGenerado),
+# dashboard
+    path('antigüedadcartera', GeneraResumenAntigüedadCarteraJSON),
+    path('carteranegociada/<int:año>', GeneraResumenCarteraNegociadaJSON),
+    path('ingresosgenerados/<int:año>', IngresosGeneradosJSON),
 # desembolsos
     path('listaasignacionespendientesdesembolsar/',AsignacionesPendientesDesembolsarView.as_view(), \
         name='listaasignacionespendientesdesembolsar'),

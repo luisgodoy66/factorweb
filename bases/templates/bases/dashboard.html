@@ -3,7 +3,9 @@
 {% load humanize %}
 {% block content %}
 <div class="content mt-3">
+    <!-- totales -->
     <div class="col-md-6 col-lg-6">
+        <!-- total cartera y protestos -->
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-body">
@@ -24,6 +26,7 @@
                 </div>
             </div>
         </div>
+        <!-- total de protestos -->
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-body">
@@ -45,11 +48,12 @@
             </div>
            
         </div>
+        <!-- total negociado -->
         <div class="col-lg-6 col-md-6">
             <div class="card">
                 <div class="card-body">
                     <div class="stat-widget-one">
-                        <div class="stat-icon dib"><i class="ti-money text-success border-success"></i></div>
+                        <div class="stat-icon dib"><i class="ti-file text-success border-success"></i></div>
                         <div class="stat-content dib">
                             <div class="stat-text">Total negociado</div>
                             <div class="stat-digit">{{ total_negociado|intcomma}}</div>
@@ -58,16 +62,32 @@
                 </div>
             </div>
         </div>
-    </div>
-        <div class="col-lg-6">
+        <!-- total ingresos año -->
+        <div class="col-lg-6 col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="mb-3">Cartera negociada </h4>
-                    <canvas id="lineChart"></canvas>
+                    <div class="stat-widget-one">
+                        <div class="stat-icon dib"><i class="ti-money text-primary border-primary"></i></div>
+                        <div class="stat-content dib">
+                            <div class="stat-text">Facturado año actual</div>
+                            <div class="stat-digit">{{ ingreso_acumulado|intcomma}}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
+    <!-- grafico cartera negociada -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="mb-3">Cartera negociada </h4>
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+    </div>
     <!-- <div class="animated fadeIn"> -->
+    <!-- <div class="row"> -->
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-body">
@@ -76,8 +96,18 @@
                 </div>
             </div>
         </div><!-- /# column -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-3">Ingresos facturados</h4>
+                    <canvas id="IngresosGenerados"></canvas>
+                </div>
+            </div>
+        </div><!-- /# column -->
 
-   <!-- </div> -->
+    <!-- </div> -->
+
+    <!-- cobranzas de cartera -->
     <div class="col-xl-6">
         <div class="card">
             <div class="card-header">
@@ -111,6 +141,7 @@
         </div>
     </div>
 
+    <!-- asignaciones aceptadas -->
     <div class="col-xl-6">
         <div class="card">
             <div class="card-header">
@@ -140,7 +171,7 @@
         </div>
     </div>
 
-
+    <!-- liquidaciones de cobranzas -->
     <div class="col-xl-6">
         <div class="card">
             <div class="card-header">
@@ -170,6 +201,7 @@
         </div>
     </div>
 
+    <!-- cobranzas de cargos -->
     <div class="col-xl-6">
         <div class="card">
             <div class="card-header">
@@ -216,106 +248,106 @@
 <script src="{% static 'factorweb/assets/js/widgets.js' %}"></script>
 <!-- <script src="{% static 'factorweb/assets/js/init-scripts/chart-js/chartjs-init.js' %}"></script> -->
 <script>
-var $table = jQuery('#table')
-var $tb_asgn = jQuery('#tb_asgn')
-var $tb_liqcob = jQuery('#tb_liqcob')
-var $tb_cobcar = jQuery('#tb_cobcar')
+    var $table = jQuery('#table')
+    var $tb_asgn = jQuery('#tb_asgn')
+    var $tb_liqcob = jQuery('#tb_liqcob')
+    var $tb_cobcar = jQuery('#tb_cobcar')
 
-window.onload=function(){
+    window.onload=function(){
 
-  // configuracin de las tablas
-  $table.bootstrapTable({locale:"es-EC"});
-  $tb_asgn.bootstrapTable({locale:"es-EC"});
-  $tb_liqcob.bootstrapTable({locale:"es-EC"});
-  $tb_cobcar.bootstrapTable({locale:"es-EC"});
+    // configuracin de las tablas
+    $table.bootstrapTable({locale:"es-EC"});
+    $tb_asgn.bootstrapTable({locale:"es-EC"});
+    $tb_liqcob.bootstrapTable({locale:"es-EC"});
+    $tb_cobcar.bootstrapTable({locale:"es-EC"});
 
-  antigüedadcartera("/operaciones/antigüedadcartera");
-  carteranegociada("/operaciones/carteranegociada/{{año}}")
-}
+    antigüedadcartera("/operaciones/antigüedadcartera");
+    carteranegociada("/operaciones/carteranegociada/{{año}}")
+    ingresosGenerados("/operaciones/ingresosgenerados/{{año}}")
+    }
 
-window.operateEvents = {
-  'click .revertir': function (e, value, row, index) {
-    ReversarCobranza(row.id, row.TipoOperacion, row.Cliente)
-  },
-  'click .imprimir': function (e, value, row, index) {
-    ImprimirCobranza( row.id, row.TipoOperacion)
-  },
-  'click .editar': function (e, value, row, index) {
-    ModificarCobranza( row.id, row.TipoOperacion, row.Contabilizada)
-  },
-};
+    window.operateEvents = {
+    'click .revertir': function (e, value, row, index) {
+        ReversarCobranza(row.id, row.TipoOperacion, row.Cliente)
+    },
+    'click .imprimir': function (e, value, row, index) {
+        ImprimirCobranza( row.id, row.TipoOperacion)
+    },
+    'click .editar': function (e, value, row, index) {
+        ModificarCobranza( row.id, row.TipoOperacion, row.Contabilizada)
+    },
+    };
 
-function operateFormatter(value, row, index) {
-return [
-  '<a class="revertir" href="javascript:void(0)" title="Reverso de cobranza">',
-  '<i class="fa fa-rotate-left"></i>',
-  '</a>  ',
-  '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
-  '<i class="fa fa-print"></i>',
-  '</a>  ',
-].join('')
-}
+    function operateFormatter(value, row, index) {
+    return [
+    '<a class="revertir" href="javascript:void(0)" title="Reverso de cobranza">',
+    '<i class="fa fa-rotate-left"></i>',
+    '</a>  ',
+    '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
+    '<i class="fa fa-print"></i>',
+    '</a>  ',
+    ].join('')
+    }
 
-window.operateEventsAsgn = {
-  'click .revertir': function (e, value, row, index) {
-    ReversarAceptacionAsignacion(row.id,row.Asignacion )
-  },
-  'click .imprimir': function (e, value, row, index) {
-    ImprimirAsignacion( row.id, )
-  },
-};
+    window.operateEventsAsgn = {
+    'click .revertir': function (e, value, row, index) {
+        ReversarAceptacionAsignacion(row.id,row.Asignacion )
+    },
+    'click .imprimir': function (e, value, row, index) {
+        ImprimirAsignacion( row.id, )
+    },
+    };
 
-function operateFormatterAsgn(value, row, index) {
-return [
-  '<a class="revertir" href="javascript:void(0)" title="Reverso de asignación">',
-  '<i class="fa fa-rotate-left"></i>',
-  '</a>  ',
-  '<a class="imprimir" href="javascript:void(0)" title="Imprimir asignación">',
-  '<i class="fa fa-print"></i>',
-  '</a>  ',
-].join('')
-}
+    function operateFormatterAsgn(value, row, index) {
+    return [
+    '<a class="revertir" href="javascript:void(0)" title="Reverso de asignación">',
+    '<i class="fa fa-rotate-left"></i>',
+    '</a>  ',
+    '<a class="imprimir" href="javascript:void(0)" title="Imprimir asignación">',
+    '<i class="fa fa-print"></i>',
+    '</a>  ',
+    ].join('')
+    }
 
-window.operateEventsLiqCob = {
-  'click .revertir': function (e, value, row, index) {
-    ReversarliquidacionCobranza(row.id, )
-  },
-  'click .imprimir': function (e, value, row, index) {
-    ImprimirLiquidacionCobranza( row.id, )
-  },
-};
+    window.operateEventsLiqCob = {
+    'click .revertir': function (e, value, row, index) {
+        ReversarliquidacionCobranza(row.id, )
+    },
+    'click .imprimir': function (e, value, row, index) {
+        ImprimirLiquidacionCobranza( row.id, )
+    },
+    };
 
-function operateFormatterLiqCob(value, row, index) {
-return [
-  '<a class="revertir" href="javascript:void(0)" title="Reverso de liquidación">',
-  '<i class="fa fa-rotate-left"></i>',
-  '</a>  ',
-  '<a class="imprimir" href="javascript:void(0)" title="Imprimir liquidación">',
-  '<i class="fa fa-print"></i>',
-  '</a>  ',
-].join('')
-}
+    function operateFormatterLiqCob(value, row, index) {
+    return [
+    '<a class="revertir" href="javascript:void(0)" title="Reverso de liquidación">',
+    '<i class="fa fa-rotate-left"></i>',
+    '</a>  ',
+    '<a class="imprimir" href="javascript:void(0)" title="Imprimir liquidación">',
+    '<i class="fa fa-print"></i>',
+    '</a>  ',
+    ].join('')
+    }
 
-window.operateEventsCobCar = {
-  'click .revertir': function (e, value, row, index) {
-    ReversarCobranza(row.id, row.TipoOperacion, row.Cliente)
-  },
-  'click .imprimir': function (e, value, row, index) {
-    ImprimirCobranzaCargos( row.id, )
-  },
-};
+    window.operateEventsCobCar = {
+    'click .revertir': function (e, value, row, index) {
+        ReversarCobranza(row.id, row.TipoOperacion, row.Cliente)
+    },
+    'click .imprimir': function (e, value, row, index) {
+        ImprimirCobranzaCargos( row.id, )
+    },
+    };
 
-function operateFormatterCobCar(value, row, index) {
-return [
-  '<a class="revertir" href="javascript:void(0)" title="Reverso de cobranza">',
-  '<i class="fa fa-rotate-left"></i>',
-  '</a>  ',
-  '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
-  '<i class="fa fa-print"></i>',
-  '</a>  ',
-].join('')
-}
-
+    function operateFormatterCobCar(value, row, index) {
+    return [
+    '<a class="revertir" href="javascript:void(0)" title="Reverso de cobranza">',
+    '<i class="fa fa-rotate-left"></i>',
+    '</a>  ',
+    '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
+    '<i class="fa fa-print"></i>',
+    '</a>  ',
+    ].join('')
+    }
 
 </script>    
 {% endblock %}
