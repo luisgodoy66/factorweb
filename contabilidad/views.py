@@ -1533,15 +1533,16 @@ def GenerarFacturaDiario(request):
     pniva=objeto["niva"]
     nusuario = request.user.id
     porcentaje_iva = objeto["porcentaje_iva"]
+    secuencia = objeto["secuencia"]
 
     resultado=enviarPost("CALL uspGenerarFacturaContabilidad( '{0}',{1},{2},{3}\
                          ,{4},{5},{6},'{7}',{8}\
                          ,{9},{10},{11},'{12}'\
-                         ,{13},{14},'',0)"
+                         ,{13},{14}, {15},'',0)"
         .format(pstipo_operacion,pid_operacion,pid_puntoemision,pid_cliente\
                 , pnbase_iva, pnbase_noiva, pniva, psconcepto, pngao\
             ,pndescuentocartera, pngaoa, pndescuentocarteravencido, pdemision
-            , porcentaje_iva, nusuario))
+            , porcentaje_iva, nusuario, secuencia))
     return HttpResponse(resultado)
 
 def GenerarEgresoDiario(request):

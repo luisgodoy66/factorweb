@@ -50,6 +50,7 @@ function GenerarFactura(){
         "ngaoa" : capturaValor("valor_gaoa"),
         "niva" : capturaValor("id_niva"),
         "ndescuentocarteravencido" : capturaValor("valor_dcv"),
+        "secuencia" : capturaValor("id_cxnumerofactura"),
         }
 
     fetchPostear("/contabilidad/generarfacturadiario/", objeto, function(asiento){
