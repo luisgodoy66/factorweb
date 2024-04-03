@@ -1957,7 +1957,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
     total_cargos=0
     total_sobrepagos=0
     base_iva=0
-    porcentaje_iva = 12
+    porcentaje_iva = 15
     listacargos = []
     listaotroscargos = []
     listacobranzas =[]
@@ -3053,7 +3053,7 @@ def AmpliacionDePlazo(request, ids, tipo_factoring, tipo_asignacion, id_cliente)
         'tipo_asignacion':tipo_asignacion,
         'gaoa': dic_gaoa,
         'dc' : dic_dc,
-        'porcentaje_iva':12,
+        'porcentaje_iva':15,
         'id_cliente': id_cliente, 
         'cliente': cliente.cxcliente.ctnombre,
         'tipo_factoring': tipo_factoring.id,
@@ -3258,7 +3258,7 @@ def GeneraDetalleCargosAmpliacionPlazoOutput(doc, tipo_asignacion):
     return output
 
 def SumaCargos(request,ids, tipo_asignacion, gaoa_carga_iva, dc_carga_iva
-               , porcentaje_iva=12):
+               , porcentaje_iva=15):
     # lee los datos de la tabla solicutid documentos
     arr_acc = []    # estos dos arreglos son
     arr_fac = []    # usados para separar facturas de accesorio quitados

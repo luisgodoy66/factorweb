@@ -175,10 +175,11 @@ def dashboard(request):
                                        empresa = id_empresa.empresa).count()
 
     # obtener el último año de proceso
-    ultimo_registro = Operaciones.objects.order_by('-dregistro').last()
+    ultimo_registro = Operaciones.objects.order_by('-dregistro').first()
     total_negociado = Operaciones.objects.total_negociado(id_empresa.empresa)
     ingresos_año = Factura_venta.objects.ingresos_delaño(id_empresa.empresa
                                                         ,ultimo_registro.dnegociacion.year)
+    print(ultimo_registro.dnegociacion, ultimo_registro)
     datos = { 'desde':desde
         , 'hasta':hasta
         , 'total_cartera': cartera
