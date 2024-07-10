@@ -24,6 +24,7 @@ from bases.models import Usuario_empresa, Empresas
 from bases.views import enviarPost, SinPrivilegios
 
 import datetime
+import json
 
 FACTURAS_PURAS = 'F'
 FACTURAS_CON_ACCESORIOS = 'A'
@@ -833,3 +834,160 @@ def DatosAccesorioEditar(request, accesorio_id = None, tipo_factoring_id = None)
         return redirect("solicitudes:asignacionconaccesorios_editar", pk= asg_id)
 
     return render(request, template_name, contexto)
+
+def PedirArchivoXML(request):
+    template_name = "solicitudes/importarasignacion_modal.html"
+    return render(request, template_name)
+from django.http import JsonResponse
+from django.db import DataError
+
+def ImportarOperacion(request):
+    objeto=json.loads(request.body.decode("utf-8"))
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    id_cliente=objeto["id_cliente"]
+    nombre_cliente=objeto["nombre_cliente"]
+    tipo_factoring=objeto["tipo_factoring"]
+    tipo_operacion=objeto["tipo_operacion"]
+    numero_documentos=objeto["numero_documentos"]
+    total_negociado=objeto["total_negociado"]
+    documentos=objeto["documentos"]
+
+    # buscar el tipo de factoring para condiciones
+    tipoFactoring = Tipos_factoring.objects\
+        .filter(ctabreviacion=tipo_factoring, empresa = id_empresa.empresa).first()
+    
+    if not tipoFactoring:
+        return HttpResponse("Tipo de factoring no encontrado. Use los nombres abreviados de tipos de factoring", status=400)
+                
+    with transaction.atomic():
+        try:
+            # Intenta realizar operaciones de base de datos aquí
+            # Por ejemplo, guardar un objeto que podría exceder el largo máximo permitido para un campo
+            # grabar el cliente
+            cliente = Clientes.objects.filter(cxcliente=id_cliente).first()
+            if not cliente:
+                cliente = Clientes(
+                    cxcliente = id_cliente,
+                    ctnombre = nombre_cliente,
+                    cxusuariocrea = request.user,
+                    empresa = id_empresa.empresa,
+                )
+                if cliente:
+                    cliente.save()
+
+            # grabar la asignacion
+            asignacion = Asignacion(
+                cxcliente = cliente,
+                cxtipofactoring = tipoFactoring,
+                cxtipo = tipo_operacion,
+                nvalor = total_negociado,
+                ncantidaddocumentos = numero_documentos,
+                cxusuariocrea = request.user,
+                empresa = id_empresa.empresa,
+            )
+            if asignacion:
+                asignacion.save()
+                asignacion_id = asignacion.id
+
+            # grabar los documentos
+            for doc in documentos:
+                id_comprador=doc["ruc_comprador"]
+                nombre_comprador=doc["nombre_comprador"]
+                emision =doc["emision"]
+                serie1=doc["serie1"]
+                serie2=doc["serie2"]
+                documento=doc["numero_documento"]
+                vencimiento =doc["vencimiento"]
+                valor_antes_de_iva =doc["valor_antes_iva"]
+                iva =doc["valor_iva"]
+                retencion_iva =doc["retencion_iva"]
+                retencion_renta =doc["retencion_renta"]
+                total = doc["total"]
+
+                # segun tipo de factoring no acepte vencimientos en feriados
+                # cambiar la fecha de vencimiento
+
+                if not tipoFactoring.lpermitediasferiados:
+
+                    fecha = parse_date(vencimiento)
+                    
+                    while Feriados.objects.filter(dferiado = vencimiento)\
+                        .filter(llaborable = False).first() \
+                            or fecha.weekday()== 6 or fecha.weekday() == 5:
+                            
+                        fecha = parse_date(vencimiento)
+                        fecha = fecha + datetime.timedelta(days=1)
+                        vencimiento = date.isoformat(fecha)
+
+                detalle = Documentos(
+                    cxasignacion=asignacion,
+                    cxcomprador = id_comprador,
+                    ctcomprador = nombre_comprador,
+                    ctdocumento = documento,
+                    demision  = emision,
+                    dvencimiento  = vencimiento,
+                    nvalorantesiva = valor_antes_de_iva,
+                    niva = iva,
+                    nretencioniva = retencion_iva,
+                    nretencionrenta = retencion_renta,
+                    ntotal = total,
+                    ctserie1 = serie1,
+                    ctserie2 = serie2,
+                    cxusuariocrea = request.user,
+                    empresa = id_empresa.empresa,
+                )
+
+                if detalle:
+                    detalle.save()
+
+                # grabar comprador , si es nuevo
+                datosparticipante = Datos_participantes.objects\
+                    .filter(cxparticipante = id_comprador
+                            , empresa = id_empresa.empresa).first()
+                if not datosparticipante:
+
+                    cxtipoid = doc["tipo_id_comprador"]
+
+                    datosparticipante=Datos_participantes(
+                        cxtipoid=cxtipoid,
+                        cxparticipante=id_comprador,
+                        ctnombre=nombre_comprador,
+                        cxusuariocrea = request.user,
+                        empresa = id_empresa.empresa,
+                    )
+                    if datosparticipante:
+                        datosparticipante.save()
+
+                comprador = Datos_compradores.objects\
+                    .filter(cxcomprador = datosparticipante.id).first()
+
+                if not comprador:
+                    datoscomprador=Datos_compradores(
+                        cxcomprador = datosparticipante,
+                        cxusuariocrea = request.user,
+                        empresa = id_empresa.empresa
+                    )
+                    if datoscomprador:
+                        datoscomprador.save()
+
+            # grabar fecha de inicio de operaciones
+            factor = Empresas.objects.filter(pk = id_empresa.empresa.id).first()
+            if not factor.diniciooperaciones:
+                factor.diniciooperaciones = datetime.datetime.today()
+                if factor.lgratis:
+                    fin = datetime.datetime.today()+timedelta(days=DIAS_PRUEBA_SISTEMA)
+                    factor.dfinpruebas = fin
+                factor.save()
+
+        except DataError as e:
+            error_message = str(e)
+            # Captura errores específicos de la base de datos, como el exceso en el largo del dato
+            return HttpResponse( error_message + '. Por favor, verifica y vuelve a intentarlo.', status=400)
+        except Exception as e:
+            error_message = str(e)
+            # Captura otros errores generales
+            return HttpResponse('Ha ocurrido un error inesperado: ' + error_message, status=500)
+
+        return HttpResponse("OK"+str(asignacion_id))
+

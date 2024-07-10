@@ -4,7 +4,7 @@ from solicitudes.views import SolicitudesView, DetalleSolicitudFacturasPuras , \
     DatosAsignacionConAccesorios,  DatosFacturasPuras, \
     AsignacionFacturasPurasView, DatosAsignacionFacturasPurasNueva, \
     DatosAsignacionConAccesoriosNueva, AsignacionConAccesoriosView, \
-    ClienteCrearView, DatosAccesorioEditar\
+    ClienteCrearView, DatosAccesorioEditar, ImportarOperacion, PedirArchivoXML
 # ,DatosChequeAccesorio
 
 urlpatterns=[
@@ -41,5 +41,7 @@ urlpatterns=[
         , name="editarchequeaccesorio"),
     path('eliminardetalleasignacion/<int:asignacion_id>/<int:documento_id>/<tipo_asignacion>'
         ,EliminarDocumento),
+    path('importarxml',PedirArchivoXML, name='importar_xml'),
+    path('importaroperacion',ImportarOperacion, name='importar_xml_facturaspuras'),
 
 ]

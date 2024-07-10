@@ -308,7 +308,9 @@ function CargaXMLfactura(xmlFile){
   const file = xmlFile.files[0];
   const reader = new FileReader();
   var parser = new DOMParser();
+
   reader.readAsText(file);
+
   reader.onload = function() {
       const xml = reader.result;
       // process the xml here
@@ -590,3 +592,138 @@ function ingresosGenerados(url){
 } );
   })
 }
+
+function CargaXMLOperacion(xmlFile){
+  return new Promise((resolve, reject) => {
+
+  const file = xmlFile.files[0];
+  const reader = new FileReader();
+
+  reader.readAsText(file);
+  reader.onerror = function(event) {
+    reject(new Error("Error al leer el archivo"));
+  };
+  reader.onload = function() {
+      const xml = reader.result;
+      var parser = new DOMParser();
+      // process the xml here
+      var xmlDoc = parser.parseFromString(xml,"text/xml");
+
+      if (xmlDoc.documentElement.localName != 'ASIGNACION'){
+        alert('No corresponde')
+        reject(new Error('No corresponde'));          
+      }
+      else{
+          let cliente = xmlDoc.getElementsByTagName("CLIENTE")[0].childNodes;
+          for (let i in cliente){
+            switch(cliente[i].nodeName){
+              case "RUC":
+                ruc_cliente = cliente[i].childNodes[0].nodeValue;
+                break;
+              case "NOMBRE":
+                nombre_cliente = cliente[i].childNodes[0].nodeValue;
+                break;
+            }
+          }
+
+          let tipo_operacion = xmlDoc.getElementsByTagName("TIPO")[0].childNodes[0].nodeValue
+          let tipo_factoring = xmlDoc.getElementsByTagName("TIPOFAC")[0].childNodes[0].nodeValue ;
+          let lista = xmlDoc.getElementsByTagName("LISTA")[0].children ;
+          let documentos = lista[0].children
+          
+          valorNegociado=0;
+
+          let docs = []; // Paso 1
+
+          for (let i in documentos) {
+              let detalle1 = documentos[i].children;
+              let objetoDetalle = {}; // Paso 2
+
+              for (let j in detalle1) {
+                  switch (detalle1[j].nodeName) {
+                      case "TIPIDCOMP":
+                          objetoDetalle.tipo_id_comprador = detalle1[j].childNodes[0].nodeValue;
+                          break;
+                      case "RUCCOMP":
+                          objetoDetalle.ruc_comprador = detalle1[j].childNodes[0].nodeValue;
+                          break;
+                      case "NOMBRECOMP":
+                          objetoDetalle.nombre_comprador = detalle1[j].childNodes[0].nodeValue;
+                          break;
+                      case "DOCTIPO":
+                          objetoDetalle.tipo_documento = detalle1[j].childNodes[0].nodeValue;
+                          break;
+                      case "SERIE1":
+                          objetoDetalle.serie1 = detalle1[j].childNodes[0].nodeValue;
+                          break;
+                      case "SERIE2":
+                          objetoDetalle.serie2 = detalle1[j].childNodes[0].nodeValue;
+                          break;
+                      case "NUMFACTURA":
+                          objetoDetalle.numero_documento = detalle1[j].childNodes[0].nodeValue;
+                          break;
+                      case "EMISION":
+                          objetoDetalle.emision = detalle1[j].childNodes[0].nodeValue;
+                          break;
+                      case "ACCTIPO":
+                          objetoDetalle.tipo_accesorio = detalle1[j].childNodes[0].nodeValue;
+                          break;
+                      case "BANCO" && tipo_operacion == 'A':
+                          objetoDetalle.banco_accesorio = detalle1[j].childNodes[0].nodeValue;
+                          break;
+                      case "CTA" && tipo_operacion == 'A':
+                          objetoDetalle.cuenta_accesorio = detalle1[j].childNodes[0].nodeValue;
+                          break;
+                      case "CHEQUE" && tipo_operacion == 'A':
+                          objetoDetalle.cheque_accesorio = detalle1[j].childNodes[0].nodeValue;
+                          break;
+                      case "PLAZA" && tipo_operacion == 'A':
+                          objetoDetalle.plaza_accesorio = detalle1[j].childNodes[0].nodeValue;
+                          break;
+                      case "GIRADOR" && tipo_operacion == 'A':
+                          objetoDetalle.girador_accesorio = detalle1[j].childNodes[0].nodeValue;
+                          break;
+                      case "VENCIMIENTO":
+                          objetoDetalle.vencimiento = detalle1[j].childNodes[0].nodeValue;
+                          break;
+                      case "VALORANTESDEIVA":
+                          objetoDetalle.valor_antes_iva = parseFloat((parseFloat(detalle1[j].childNodes[0].nodeValue) * 1).toFixed(3));
+                          break;
+                      case "IVA":
+                          objetoDetalle.valor_iva = parseFloat((parseFloat(detalle1[j].childNodes[0].nodeValue) * 1).toFixed(3));
+                          break;
+                      case "RETENCIONIVA":
+                          objetoDetalle.retencion_iva = parseFloat((parseFloat(detalle1[j].childNodes[0].nodeValue) * 1).toFixed(3));
+                          break;
+                      case "RETENCIONRENTA":
+                          objetoDetalle.retencion_renta = parseFloat((parseFloat(detalle1[j].childNodes[0].nodeValue) * 1).toFixed(3));
+                          break;
+                      case "MONTO":
+                        objetoDetalle.total = objetoDetalle.valor_antes_iva 
+                                          + objetoDetalle.valor_iva 
+                                          - objetoDetalle.retencion_iva 
+                                          - objetoDetalle.retencion_renta;
+                        valorNegociado += objetoDetalle.total;
+                  }
+              }
+              if (detalle1 != undefined){
+                docs.push(objetoDetalle); // Paso 5
+              }
+          }
+          
+          resultado = {
+            id_cliente: ruc_cliente,
+            nombre_cliente: nombre_cliente,
+            tipo_factoring : tipo_factoring,
+            tipo_operacion: tipo_operacion,
+            numero_documentos: documentos.length,
+            total_negociado : valorNegociado,
+            documentos: docs,
+          }
+    }
+    resolve(resultado);
+};
+
+});
+}
+
