@@ -1,0 +1,129 @@
+{% extends 'bases/home.html' %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Extras</a></li>
+                    <li><a href="#">Configuración</a></li>
+                    <li><a href="{% url 'empresa:listatasasfactoring' %}">Otros Cargos</a></li>
+                    <li class="active">editar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post"  class="form-horizontal">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">
+                <strong>Datos</strong> 
+                de {{ nombre }} 
+            </div>
+                {% csrf_token %}
+            <div class="card-body card-block">
+
+                    <div class="row form-group" hidden>
+                        <div class="col col-md-5"><label for="id_movimiento" 
+                            class=" form-control-label">Código de movimiento en maestro</label></div>
+                        <div class="col-md-7">
+                            {{ form.movimiento}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-5"><label for="id_ctabreviacion" 
+                            class=" form-control-label">{{form.ctabreviacion.label}}</label></div>
+                        <div class="col-md-7">
+                            {{ form.ctabreviacion}}
+                            <small class="form-text text-muted">Máximo 30 caracteres</small>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-5"><label for="id_ctabreviacion" 
+                            class=" form-control-label">{{form.nvalor.label}}</label></div>
+                        <div class="col-md-7">
+                            {{ form.nvalor}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-5"><label for="id_lcargaenliquidacionasignacion" 
+                            class=" form-control-label">{{ form.lcargaenliquidacionasignacion.label}}</label></div>
+                        <div class="col-md-7 ">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  otrocargo.lcargaenliquidacionasignacion %} checked {% endif %} 
+                                id = "id_lcargaenliquidacionasignacion" name = "lcargaenliquidacionasignacion"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-5"><label for="id_lcargaenliquidacioncobranza" 
+                            class=" form-control-label">{{ form.lcargaenliquidacioncobranza.label}}</label></div>
+                        <div class="col-md-7 ">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  otrocargo.lcargaenliquidacioncobranza %} checked {% endif %} 
+                                id = "id_lcargaenliquidacioncobranza" name = "lcargaenliquidacioncobranza"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-5 "><label for="id_lcargaiva" 
+                            class=" form-control-label">{{ form.lcargaiva.label}}</label></div>
+                        <div class="col">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  otrocargo.lcargaiva %} checked {% endif %} 
+                                id = "id_lcargaiva" name = "lcargaiva"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-5 "><label for="id_activo" 
+                            class=" form-control-label">{{ form.lactivo.label}}</label></div>
+                        <div class="col">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  otrocargo.lactivo %} checked {% endif %} 
+                                id = "id_lactivo" name = "lactivo"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                {{ form.errors}}
+            </div>    
+
+            <div class="card-footer">
+                <a href="{% url 'empresa:listaotroscargos' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <span class="fa fa-dot-circle-o"></span> Grabar
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+{% block js_page %}
+<script>
+    // grabar el código del movimiento en el campo movmiento
+    jQuery(document).ready(function(){
+        movimiento = "{{ movimiento_id }}";
+        console.log(movimiento);
+        jQuery('#id_movimiento').val(movimiento);
+    });
+</script>
+{% endblock %}

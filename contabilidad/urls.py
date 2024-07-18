@@ -86,6 +86,7 @@ urlpatterns = [
     path('cuentaprovisiontasatipofactoringeditar/<tipofactoring>/<int:tipofactoring_id>/<tasafactoring>/<int:tasafactoring_id>/<int:pk>'
          ,CuentaProvisionTasaTipoFactoringEdit.as_view()
          , name="cuentaprovisiontasatipofactoring_editar"),
+         
     path('listapendientesgenerarfactura',PendientesGenerarFacturaView.as_view()
          , name="listapendientesgenerarfactura"),
     path('generarfactura/<int:pk>/<tipo>/<operacion>',GenerarFactura

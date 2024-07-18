@@ -1,16 +1,18 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required, permission_required
 from django.views import generic
 from django.urls import reverse_lazy
+from django.http import HttpResponse, JsonResponse
+from django.db.models import Value, CharField, BooleanField, IntegerField
 
 from .models import Tipos_factoring, Tasas_factoring, Clases_cliente\
-    , Cuentas_bancarias, Localidades, Puntos_emision
-from bases.models import Usuario_empresa
+    , Cuentas_bancarias, Localidades, Puntos_emision, Otros_cargos
+from bases.models import Usuario_empresa, Empresas
 from solicitudes.models import Asignacion
-from bases.models import Empresas
+from empresa.models import Movimientos_maestro
 
 from .forms import CuentaBancariaForm, TipoFactoringForm, TasaFactoringForm\
-    , ClasesParticipantesForm, LocalidadForm, PuntoEmisionForm
+    , ClasesParticipantesForm, LocalidadForm, PuntoEmisionForm, OtroCargoForm
 from bases.forms import EmpresaForm
 
 from bases.views import enviarPost, SinPrivilegios
@@ -106,7 +108,7 @@ class TasasFactoringView(SinPrivilegios, generic.ListView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         qs=Tasas_factoring.objects.filter(leliminado = False
                                      , empresa = id_empresa.empresa)\
-                                     .order_by("cttasa")
+                                     .order_by("cxtasa")
         return qs
     
     def get_context_data(self, **kwargs):
@@ -452,3 +454,212 @@ class DatosEmpresaEdit(SinPrivilegios, generic.UpdateView):
                                        empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
+
+from django.db.models import Prefetch
+
+class OtrosCargosView(SinPrivilegios, generic.ListView):
+    model = Movimientos_maestro
+    template_name = "empresa/listaotroscargos.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="empresa.view_otros_cargos"
+
+    def get_queryset(self) :
+        # id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+
+        # mov = Movimientos_maestro.objects\
+        #     .exclude(cxmovimiento__in=('GAO', 'DCAR', 'DCAV', 'GAOA'))\
+        #     .filter(litemfactura=True, empresa = id_empresa.empresa)\
+        #     .values('id', 'ctmovimiento')\
+        #     .annotate(abreviacion=Value('', output_field=CharField()), 
+        #             cargaiva=Value(False, output_field=BooleanField()),
+        #             liquidacion_asignacion=Value(False, output_field=BooleanField()),
+        #             liquidacion_cobranza=Value(False, output_field=BooleanField()),
+        #             valor=Value(0, output_field=IntegerField()),
+        #             id_cargo=Value(None, output_field=IntegerField()),
+        #             activo=Value(True, output_field=BooleanField()))
+        
+        # for m in mov:
+        #     x = Otros_cargos.objects.filter(movimiento = m['id']).first()
+        #     if x:
+        #         m['abreviacion'] = x.ctabreviacion
+        #         m['cargaiva'] = x.lcargaiva
+        #         m['liquidacion_asignacion'] = x.lcargaenliquidacionasignacion
+        #         m['liquidacion_cobranza'] = x.lcargaenliquidacioncobranza
+        #         m['valor'] = x.nvalor
+        #         m['id_cargo'] = x.id
+        #         m['activo'] = x.lactivo
+        # qs = list(mov)
+        # #
+        # return qs
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Movimientos_maestro.objects\
+            .exclude(cxmovimiento__in=('GAO', 'DCAR', 'DCAV', 'GAOA'))\
+            .filter(leliminado = False
+                    , litemfactura = True
+                    , empresa = id_empresa.empresa)\
+            .order_by("ctmovimiento")
+        # qs=Otros_cargos.objects.filter(leliminado = False
+        #                              , empresa = id_empresa.empresa)\
+        #                              .order_by("ctabreviacion")
+        return qs
+    
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(OtrosCargosView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class OtroCargoNew(SinPrivilegios, generic.CreateView):
+    model = Otros_cargos
+    template_name="empresa/datosotrocargo_form.html"
+    form_class=OtroCargoForm
+    context_object_name='otrocargo'
+    success_url= reverse_lazy("empresa:listaotroscargos")
+    login_url = 'bases:login'
+    permission_required="empresa.add_otros_cargos"
+
+    def form_valid(self, form):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.cxusuariocrea = self.request.user
+        form.instance.empresa = id_empresa.empresa
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        nombre_movimiento = self.kwargs.get('movimiento')
+        movimiento_id = self.kwargs.get('movimiento_id')
+
+        context = super(OtroCargoNew, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        context['nombre'] = nombre_movimiento
+        context['movimiento_id'] = movimiento_id
+
+        return context
+
+class OtroCargoEdit(SinPrivilegios, generic.UpdateView):
+    model = Otros_cargos
+    template_name="empresa/datosotrocargo_form.html"
+    form_class=OtroCargoForm
+    context_object_name='otrocargo'
+    success_url= reverse_lazy("empresa:listaotroscargos")
+    login_url = 'bases:login'
+    permission_required="empresa.change_otros_cargos"
+  
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        nombre_movimiento = self.kwargs.get('movimiento')
+        movimiento_id = self.kwargs.get('movimiento_id')
+
+        context = super(OtroCargoEdit, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        context['nombre'] = nombre_movimiento
+        context['movimiento_id'] = movimiento_id
+
+        return context
+
+def OtrosCargosJSON(request):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    resultado=[]
+    lista = Otros_cargos.objects.filter(leliminado = False, lactivo = True
+                                     , empresa = id_empresa.empresa)\
+                                     .order_by("ctabreviacion")\
+        .values('ctabreviacion', 'nvalor')
+
+    # convertir un queryset a arreglo json?
+    resultado = list(lista)
+    print(resultado)
+    return HttpResponse(JsonResponse( resultado, safe=False))
+
+# def DatosOtroCargo(request, nombre, id_movimiento, id_cargo=None):
+#     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+#     template_name = "empresa/datosotrocargo_form.html"
+#     otro_cargo = None
+
+#     if id_cargo != 'None':
+#         otro_cargo = Otros_cargos.objects.filter(pk = id_cargo).first()
+#         print(otro_cargo)
+
+#     if request.method=='GET':
+#         if otro_cargo:
+#             e = {
+#                 # 'id': otro_cargo.id,
+#                 'ctabreviacion': otro_cargo.ctabreviacion,
+#                 'lcargaiva': otro_cargo.lcargaiva,
+#                 'lcargaenliquidacionasignacion': otro_cargo.lcargaenliquidacionasignacion,
+#                 'lcargaenliquidacioncobranza': otro_cargo.lcargaenliquidacioncobranza,
+#                 'nvalor': otro_cargo.nvalor,
+#                 'lactivo': otro_cargo.lactivo
+#             }
+
+#             formulario=OtroCargoForm(e )
+#         else:
+#             formulario=OtroCargoForm()
+
+#         contexto={'form':formulario
+#                   , 'nombre':nombre
+#                   , 'otrocargo':otro_cargo
+#                   }
+        
+#         return render(request, template_name, contexto)
+        
+#     if request.method == 'POST':
+#         data = request.POST
+#         if 'lcargaiva' in data:
+#             cargaiva = data['lcargaiva'] == 'on'
+#         else:
+#             cargaiva = False
+
+#         if 'lcargaenliquidacionasignacion' in data:
+#             cargaenliquidacionasignacion = data['lcargaenliquidacionasignacion'] == 'on'
+#         else:
+#             cargaenliquidacionasignacion = False
+
+#         if 'lactivo' in data:
+#             lactivo = data['lactivo'] == 'on'
+#         else:
+#             lactivo = False
+        
+#         if 'lcargaenliquidacioncobranza' in data:
+#             cargaenliquidacioncobranza = data['lcargaenliquidacioncobranza'] == 'on'
+#         else:
+#             cargaenliquidacioncobranza = False
+
+
+#         print(data)
+
+#         if otro_cargo:
+#             otro_cargo.ctabreviacion = data['ctabreviacion']
+#             otro_cargo.lcargaiva = cargaiva
+#             otro_cargo.lcargaenliquidacionasignacion = cargaenliquidacionasignacion
+#             otro_cargo.lcargaenliquidacioncobranza = cargaenliquidacioncobranza
+#             otro_cargo.nvalor = data['nvalor']
+#             otro_cargo.lactivo = lactivo
+#             otro_cargo.movimiento = id_movimiento
+#             otro_cargo.cxusuariomodifica = request.user.id
+#             otro_cargo.empresa = id_empresa.empresa
+#             otro_cargo.save()
+#         else:
+#             datos = Otros_cargos(
+#                 ctabreviacion = data['ctabreviacion']
+#                 , lcargaiva = data['lcargaiva'] == cargaiva
+#                 , lcargaenliquidacionasignacion = cargaenliquidacionasignacion
+#                 , lcargaenliquidacioncobranza = cargaenliquidacioncobranza
+#                 , nvalor = data['nvalor']
+#                 , lactivo = lactivo
+#                 , movimiento = id_movimiento
+#                 , cxusuariocrea = request.user
+#                 , empresa = id_empresa.empresa
+#             )
+#             datos.save()
+#         return redirect("empresa:listaotroscargos")

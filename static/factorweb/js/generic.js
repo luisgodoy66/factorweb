@@ -90,6 +90,10 @@ function inicializaValor(Elemento, Valor){
     document.getElementById(Elemento).value=Valor
 }
 
+function inicializarInner(Elemento, Valor){
+    document.getElementById(Elemento).innerHTML=Valor
+}
+
 function CerrarSideBar(){
     jQuery("#menuToggle").click();
 }

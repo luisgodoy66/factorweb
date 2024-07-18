@@ -15,11 +15,12 @@ from .forms import DatosOperativosForm, AsignacionesForm, MaestroMovimientosForm
     TasasDocumentosForm, TasasAccesoriosForm, DesembolsarForm, AnexosForm
 
 from .models import Cargos_detalle, Condiciones_operativas_detalle, Datos_operativos \
-    , Asignacion,  Movimientos_maestro, Condiciones_operativas_cabecera, Anexos\
+    , Asignacion,  Condiciones_operativas_cabecera, Anexos\
     , Desembolsos, Documentos, ChequesAccesorios, Notas_debito_cabecera\
     , Cheques_quitados, Ampliaciones_plazo_cabecera, Cheques_canjeados
 from empresa.models import  Clases_cliente, Datos_participantes, \
-    Tasas_factoring, Tipos_factoring, Cuentas_bancarias
+    Tasas_factoring, Tipos_factoring, Cuentas_bancarias, Otros_cargos\
+    ,Movimientos_maestro
 from cobranzas.models import Documentos_protestados, Liquidacion_cabecera\
     , Documentos_cabecera, Recuperaciones_cabecera, Cheques_protestados
 from bases.models import Usuario_empresa, Empresas
@@ -646,11 +647,19 @@ def AceptarAsignacion(request, asignacion_id=None):
     # buscar el tipo de factoring 
     tipo_factoring = Tipos_factoring.objects.get(pk=asignacion.cxtipofactoring_id)
     if not tipo_factoring:
-        return HttpResponse("Tipo de factoring no existe:" + asignacion.cxtipofactoring_id)
+        return HttpResponse("Tipo de factoring no existe:" + asignacion.cxtipofactoring_id
+                            , status=404)
     if tipo_factoring.lgeneradcenaceptacion:
         carga_dc="Si"
     if tipo_factoring.lgeneragaoenaceptacion:
         carga_gao="Si"
+
+    # cargar los cargos
+    if tipo_factoring.laplicaotroscargos:
+        otros_cargos = Otros_cargos.objects\
+            .filter(empresa = id_empresa.empresa, leliminado=False, lactivo=True)
+    else:
+        otros_cargos = None
 
     # si tipo de factoring usa condición operativa cargarla
     if tipo_factoring.lmanejacondicionesoperativas:
@@ -734,7 +743,9 @@ def AceptarAsignacion(request, asignacion_id=None):
         'tipo_asignacion':asignacion.cxtipo,
         "cuenta_transferencia":cuenta_transferencia,
         "beneficiario": beneficiario,
-        'solicitudes_pendientes':sp
+        'solicitudes_pendientes':sp,
+        'otros_cargos':otros_cargos,
+        'usa_otros_cargos':tipo_factoring.laplicaotroscargos
     }
 
     return render(request, template_name, contexto)
@@ -1030,7 +1041,7 @@ def DetalleDocumentoADiccionario(doc, tipo_asignacion):
     return output
 
 def SumaCargos(request,asignacion_id, gao_carga_iva, dc_carga_iva, carga_gao
-               , carga_dc, porcentaje_iva, otros_cargos = None):
+               , carga_dc, porcentaje_iva):
     # lee los datos de la tabla solicutid documentos
 
     g=Decimal(0); d=Decimal(0); 
@@ -1066,12 +1077,21 @@ def SumaCargos(request,asignacion_id, gao_carga_iva, dc_carga_iva, carga_gao
         total_dc = documentos.aggregate(Sum('ndescuentocartera'))
         d = total_dc["ndescuentocartera__sum"]
 
-    # iva
+    # bases
     base_iva = 0
-    if gao_carga_iva=="Si": base_iva += g
+    base_noiva = 0
 
-    if dc_carga_iva=="Si":  base_iva += d
+    if gao_carga_iva == "Si":
+        base_iva += g
+    else:
+        base_noiva += g
 
+    if dc_carga_iva=="Si":  
+        base_iva += d
+    else:
+        base_noiva += d
+
+    # iva
     iva = round( base_iva * porcentaje_iva / 100,2)
     # redondear a 2 decimales?
     # neto
@@ -1082,6 +1102,8 @@ def SumaCargos(request,asignacion_id, gao_carga_iva, dc_carga_iva, carga_gao
         , 'dc':str(d)
         , 'anticipo': str(a)
         , 'iva': str(iva)
+        , 'base_iva': str(base_iva)
+        , 'base_noiva': str(base_noiva)
         , 'neto':str(neto)}
 
     return HttpResponse(json.dumps(data), content_type = "application/json")
@@ -1173,13 +1195,16 @@ def AceptarDocumentos(request):
     psinstruccionpago=objeto["sinstruccionpago"]
     nusuario = request.user.id
     porcentaje_iva = objeto["porcentaje_iva"]
+    otros_cargos = objeto["arr_otros_cargos"]
+    base_iva = objeto["base_iva"]
+    base_noiva = objeto["base_noiva"]
 
     resultado=enviarPost("CALL uspAceptarAsignacion( {0},'{1}', '{2}',{3},{4}\
         ,{5},{6},'{7}',{8},'{9}'\
-        ,{10},'')"
+        ,{10}, '{11}',{12},{13},'')"
         .format(pid_asignacion,pdnegociacion,pddesembolso,pnanticipo,pngao\
             ,pndescuentocartera,pniva,psinstruccionpago,nusuario, pslocalidad
-            , porcentaje_iva))
+            , porcentaje_iva, otros_cargos, base_iva, base_noiva))
 
     return HttpResponse(resultado)
 

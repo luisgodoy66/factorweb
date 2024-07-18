@@ -1,8 +1,8 @@
 from dataclasses import fields
 from django import forms
 
-from .models import Clases_cliente, Datos_participantes, \
-    Tipos_factoring, Tasas_factoring, Cuentas_bancarias, Localidades, Puntos_emision
+from .models import Clases_cliente, Datos_participantes, Tipos_factoring, \
+    Tasas_factoring, Cuentas_bancarias, Localidades, Puntos_emision, Otros_cargos
 from pais.models import Bancos, Actividades
 
 class ParticipanteForm(forms.ModelForm):
@@ -71,8 +71,10 @@ class TipoFactoringForm(forms.ModelForm):
             , 'lmanejalineafactoring', 'lanticipatotalnegociado', 'ndiasgracia', 'lpermitediasferiados'
             , 'lmanejacondicionesoperativas', 'lcargagaoa', 'lgeneradcenaceptacion', 'lgeneragaoenaceptacion'
             , 'lesnegociada', 'lcobramorabc', 'ctinicialesliquidacioncobranza'
-            , 'lacumulagaoaatasagao', 'lfactoringproveedores', 'ctinicialesasignacion'
-            , 'lcargadcenampliacionplazo','lgenerafacturaenaceptacion'
+            , 'lacumulagaoaatasagao'
+            # , 'lfactoringproveedores'
+            , 'ctinicialesasignacion'
+            , 'lcargadcenampliacionplazo','lgenerafacturaenaceptacion', 'laplicaotroscargos'
         ]
         labels={
             'cttipofactoring':'Descripción'
@@ -89,10 +91,11 @@ class TipoFactoringForm(forms.ModelForm):
             , 'lcobramorabc':'Cobra intereses del banco central'
             , 'ctinicialesliquidacioncobranza': 'Iniciales de liquidación de cobranzas'
             , 'lacumulagaoaatasagao':'Suma la tasa de comisión adicional a la tasa negociada'
-            , 'lfactoringproveedores':'Factoring proveedores'
+            # , 'lfactoringproveedores':'Factoring proveedores'
             , 'ctinicialesasignacion':'Iniciales de asignaciones aceptadas'
             , 'lcargadcenampliacionplazo':'Carga descuento en ampliaciones de plazo'
             , 'lgenerafacturaenaceptacion': 'Requiere generar factura en negociación'
+            , 'laplicaotroscargos': 'Aplica otros cargos'
         }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -111,7 +114,7 @@ class TasaFactoringForm(forms.ModelForm):
             # , 'cttasa'
             , 'lflat','ndiasperiocidad'
             ,'limprimeenreporte', 'ctdescripcionenreporte'
-            # , 'lcargaiva'
+            , 'lcargaiva'
             , 'lsobreanticipo', 'ctinicialesentablas'
         ]
         labels={
@@ -121,7 +124,7 @@ class TasaFactoringForm(forms.ModelForm):
             , 'ndiasperiocidad': 'Días de periocidad'
             , 'limprimeenreporte':'Se imprime en reportes'
             , 'ctdescripcionenreporte':'Nombre en reportes'
-            # , 'lcargaiva':'Carga IVA'
+            , 'lcargaiva':'Carga IVA'
             , 'lsobreanticipo': 'Cálculo sobre el valor anticipado'
             , 'ctinicialesentablas':'Iniciales a mostrarse en tablas'
         }
@@ -208,4 +211,31 @@ class PuntoEmisionForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-            
+
+class OtroCargoForm(forms.ModelForm):
+    
+    class Meta:
+        model = Otros_cargos
+
+        fields=[
+            'ctabreviacion', 'nvalor'
+            ,'lcargaenliquidacionasignacion', 'lcargaenliquidacioncobranza'
+            , 'lcargaiva', 'lactivo', 'movimiento'
+        ]
+        labels={
+            # 'ctcargo':'Nombre',
+            'ctabreviacion':'Nombre corto'
+            , 'nvalor':'Valor'
+            , 'lcargaenliquidacionasignacion':'Aplica a liquidación de asignación'
+            , 'lcargaenliquidacioncobranza':'Aplica a liquidación de cobranza'
+            , 'lcargaiva':'Carga IVA'
+            , 'lactivo':'Activo'
+            }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+

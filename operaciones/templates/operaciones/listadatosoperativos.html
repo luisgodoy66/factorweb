@@ -47,8 +47,8 @@
 
                 <table class="table table-striped table-bordered" id="bootstrap-data-table-export">
                     <thead>
-                        <th>Id</th>
                         <th>Nombre</th>
+                        <th>Id</th>
                         <th>Clase</th>
                         <th>% anticipo</th>
                         <th>Tasa GAO</th>
@@ -61,8 +61,8 @@
                     <tbody>
                         {% for item in consulta %}
                         <tr>
-                            <td>{{ item.cxcliente.cxparticipante }}</td>
                             <td>{{ item }}</td>
+                            <td>{{ item.cxcliente.cxparticipante }}</td>
                             <td>{{ item.datos_operativos.get.cxclase }}</td>
                             <td>{{ item.datos_operativos.get.nporcentajeanticipo }}</td>
                             <td>{{ item.datos_operativos.get.ntasacomision }}</td>

@@ -121,6 +121,7 @@ class Tipos_factoring(ClaseModelo):
     ctinicialesasignacion = models.CharField(max_length=3, blank=True, default='OP-')
     lcargadcenampliacionplazo = models.BooleanField(default= False)
     lgenerafacturaenaceptacion = models.BooleanField(default=True)
+    laplicaotroscargos = models.BooleanField(default=False)
     
     def __str__(self):
         return self.ctabreviacion
@@ -144,10 +145,31 @@ class Puntos_emision(ClaseModelo):
     def __str__(self):
         return "{}-{}".format(self.cxestablecimiento, self.cxpuntoemision)
 
-# from operaciones.models import Movimientos_maestro
+class Movimientos_maestro(ClaseModelo):
+    TIPOS_DE_SIGNOS = (
+        ('+', 'Suma'),
+        ('-', 'Resta'),
+    )
+    cxmovimiento = models.CharField(max_length=4) 
+    ctmovimiento= models.CharField(max_length=60) 
+    cxsigno= models.CharField(max_length=1, choices=TIPOS_DE_SIGNOS) 
+    litemfactura = models.BooleanField(default=False)
+    lcolateral = models.BooleanField()
+    cxmovimientopadre = models.CharField(max_length=4) 
+    lcargo = models.BooleanField(default=False)
+    # lcargaiva = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.ctmovimiento
+
+    def save(self):
+        self.cxmovimiento=self.cxmovimiento.upper()
+        self.cxmovimientopadre=self.cxmovimientopadre.upper()
+        return super(Movimientos_maestro, self).save()
+
 class Tasas_factoring(ClaseModelo):
     cxtasa = models.CharField(max_length=4)
-    cttasa = models.CharField(max_length=60, blank=True)
+    # cttasa = models.CharField(max_length=60, blank=True)
     lflat = models.BooleanField(default=False)
     ndiasperiocidad = models.DecimalField(max_digits=3, decimal_places=0, default=0)
     ctdescripcionenreporte = models.TextField(blank=True)
@@ -155,13 +177,34 @@ class Tasas_factoring(ClaseModelo):
     lcargaiva = models.BooleanField(default=True)
     lsobreanticipo = models.BooleanField(default=True)
     ctinicialesentablas = models.CharField(max_length=4,null=True)
-    # movimiento = models.ForeignKey(Movimientos_maestro
-    #                                , on_delete=models.DO_NOTHING, null=True)
+    movimiento = models.ForeignKey(Movimientos_maestro
+                                   , on_delete=models.DO_NOTHING, null=True)
 
     def __str__(self):
-        return self.cttasa
+        return self.movimiento.ctmovimiento
     def save(self):
         self.cxtasa=self.cxtasa.upper()
-        self.cttasa=self.cttasa.upper()
+        # self.cttasa=self.cttasa.upper()
         return super(Tasas_factoring, self).save()
+   
+# from operaciones.models import Movimientos_maestro
+class Otros_cargos(ClaseModelo):
+    ctabreviacion = models.CharField(max_length= 30) 
+    lcargaiva = models.BooleanField(default=True)
+    lcargaenliquidacionasignacion = models.BooleanField(default=False)
+    lcargaenliquidacioncobranza = models.BooleanField(default=False)
+    nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    lactivo = models.BooleanField(default=True)
+    movimiento = models.ForeignKey(Movimientos_maestro
+                                   , related_name='otroscargo_movimiento'
+                                   , on_delete=models.DO_NOTHING, null=True)
+    # movimiento = models.BigIntegerField(null=True)
+
+    def __str__(self):
+        return self.ctabreviacion
+    
+    def save(self):
+        # self.ctcargo=self.ctcargo.upper()
+        self.ctabreviacion=self.ctabreviacion.upper()
+        return super(Otros_cargos, self).save()
    

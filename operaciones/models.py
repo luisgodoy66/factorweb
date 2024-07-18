@@ -7,7 +7,8 @@ from django.db.models.functions import Concat
 from django.utils.dateparse import parse_date
 
 from bases.models import ClaseModelo
-from empresa.models import Clases_cliente, Tipos_factoring, Cuentas_bancarias
+from empresa.models import Clases_cliente, Tipos_factoring, Cuentas_bancarias\
+    , Movimientos_maestro
 from clientes.models import Datos_generales as Datos_generales_cliente\
     , Cuenta_transferencia, Datos_compradores
 from pais.models import Bancos
@@ -43,27 +44,6 @@ class Datos_operativos(ClaseModelo):
     def __str__(self):
         return self.cxcliente.cxcliente.ctnombre
   
-class Movimientos_maestro(ClaseModelo):
-    TIPOS_DE_SIGNOS = (
-        ('+', 'Suma'),
-        ('-', 'Resta'),
-    )
-    cxmovimiento = models.CharField(max_length=4) 
-    ctmovimiento= models.CharField(max_length=60) 
-    cxsigno= models.CharField(max_length=1, choices=TIPOS_DE_SIGNOS) 
-    litemfactura = models.BooleanField(default=False)
-    lcolateral = models.BooleanField()
-    cxmovimientopadre = models.CharField(max_length=4) 
-    lcargo = models.BooleanField(default=False)
-    # lcargaiva = models.BooleanField(default=False)
-    
-    def __str__(self):
-        return self.ctmovimiento
-
-    def save(self):
-        self.cxmovimiento=self.cxmovimiento.upper()
-        return super(Movimientos_maestro, self).save()
-
 class Asignacion_manager(models.Manager):
     def operaciones_negociadas(self, id_empresa, año):
         # en django obtener el año del campo date llamado ddesembolso?
@@ -124,8 +104,11 @@ class Asignacion(ClaseModelo):
     dchequegaratia = models.DateTimeField(auto_created=True, null=True) 
     ngao = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
     ndescuentodecartera = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
-    # notrocargo = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
+    notroscargos = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
+    nbaseiva = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
+    nbasenoiva = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
     niva = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
+    jotroscargos = models.JSONField(blank=True, null=True)
     ctinstrucciondepago = models.TextField(blank=True)
     nretencionenfactura = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
     lcartacesiongenerada = models.BooleanField(default=False, null=True) 
@@ -140,10 +123,14 @@ class Asignacion(ClaseModelo):
         return self.cxasignacion
 
     def cargos(self):
-        return self.ngao + self.ndescuentodecartera
+        return self.ngao + self.ndescuentodecartera + self.notroscargos
 
     def neto(self):
-        return self.nanticipo - self.ngao - self.ndescuentodecartera - self.niva
+        return (self.nanticipo 
+                - self.ngao 
+                - self.notroscargos
+                - self.ndescuentodecartera 
+                - self.niva)
 
 class Documentos_Manager(models.Manager):
     def facturas_pendientes(self, fecha_corte, id_empresa):
@@ -629,9 +616,8 @@ class Movimientos_clientes(ClaseModelo):
         , related_name="movimientos"
     )
     cxtipofactoring = models.BigIntegerField(null=True) 
-    cxmovimiento = models.ForeignKey(Movimientos_maestro
-        , on_delete=models.CASCADE
-        , related_name="maestro_movimientos") 
+    cxmovimiento = models.ForeignKey(Movimientos_maestro, on_delete=models.CASCADE
+                                     , related_name="maestro_movimientos", null=True) 
     nvalor = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
     cxoperacion = models.CharField(max_length=10) 
     dmovimiento = models.DateField() 
@@ -649,7 +635,7 @@ class Cargos_detalle(ClaseModelo):
     cxdocumento  = models.ForeignKey(Documentos, on_delete=models.RESTRICT
         , null=True)  
     cxmovimiento = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT
-                                     ,related_name='cargo_movimiento')
+                                     ,related_name='cargo_movimiento', null=True)
     nvalor = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
     nsaldo = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
     dultimageneracioncargos = models.DateField()

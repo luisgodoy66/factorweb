@@ -4,11 +4,11 @@ from pyexpat import model
 from django import forms
 
 from .models import Condiciones_operativas_detalle, Datos_operativos, \
-    Asignacion, Movimientos_maestro, Condiciones_operativas_cabecera, Anexos\
+    Asignacion, Condiciones_operativas_cabecera, Anexos\
         , Desembolsos, Documentos, ChequesAccesorios
 from solicitudes import models as ModelosSolicitudes
-from empresa.models import Clases_cliente, Tipos_factoring, Cuentas_bancarias
-
+from empresa.models import Clases_cliente, Tipos_factoring, Cuentas_bancarias\
+    ,Movimientos_maestro
 from datetime import date
 
 class DatosOperativosForm(forms.ModelForm):
@@ -149,12 +149,16 @@ class MaestroMovimientosForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        nuevo = kwargs.pop('nuevo', False)
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        self.fields['cxmovimiento'].widget.attrs['readonly']=True
+        # if nuevo:
+        #     self.fields['cxmovimiento'].widget.attrs['readonly']=False
+        # else:
+        #     self.fields['cxmovimiento'].widget.attrs['readonly']=True
 
 class CondicionesOperativasForm(forms.ModelForm):
     class Meta:

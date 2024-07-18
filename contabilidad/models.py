@@ -7,6 +7,8 @@ from bases.models import ClaseModelo
 from empresa.models import Cuentas_bancarias, Tipos_factoring,  Puntos_emision
 from clientes.models import Datos_generales
 from operaciones.models import Documentos, ChequesAccesorios
+from empresa.models import Movimientos_maestro
+
 
 class Plan_cuentas(ClaseModelo):
     cxcuenta =  models.CharField( max_length=15)
@@ -104,11 +106,9 @@ class Cuentas_tiposfactoring(ClaseModelo):
     def __str__(self):
         return self.cuenta
 
-from operaciones.models import Movimientos_maestro
-
 class Cuentas_tasasfactoring(ClaseModelo):
     tasafactoring = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT
-                                      , related_name="cuenta_tasafactoring")
+                                      , related_name="cuenta_tasafactoring", null=True)
     tipofactoring = models.ForeignKey(Tipos_factoring, on_delete=models.RESTRICT
                                       , related_name="cuenta_tasatipofactoring")
     cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT)
@@ -118,7 +118,7 @@ class Cuentas_tasasfactoring(ClaseModelo):
 
 class Cuentas_diferidos(ClaseModelo):
     tasafactoring = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT
-                                      , related_name="cuentadiferido_tasafactoring")
+                                      , related_name="cuentadiferido_tasafactoring", null=True)
     tipofactoring = models.ForeignKey(Tipos_factoring, on_delete=models.RESTRICT
                                       , related_name="cuentadiferido_tasatipofactoring")
     cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
@@ -128,7 +128,7 @@ class Cuentas_diferidos(ClaseModelo):
 
 class Cuentas_provisiones(ClaseModelo):
     tasafactoring = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT
-                                      , related_name="cuentaprovision_tasafactoring")
+                                      , related_name="cuentaprovision_tasafactoring", null=True)
     tipofactoring = models.ForeignKey(Tipos_factoring, on_delete=models.RESTRICT
                                       , related_name="cuentaprovision_tasatipofactoring")
     cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
@@ -207,7 +207,7 @@ class Factura_venta(ClaseModelo):
 
 class Items_facturaventa(ClaseModelo):
     factura = models.ForeignKey(Factura_venta, on_delete=models.RESTRICT)
-    item = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT)
+    item = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT,null=True)
     nvalor = models.DecimalField(max_digits=10, decimal_places=2)
     lcargaiva = models.BooleanField()
 
@@ -244,7 +244,7 @@ class Comprobante_egreso(ClaseModelo):
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 class Provisiones(ClaseModelo):
-    cargo = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT)
+    cargo = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT, null=True)
     documento = models.ForeignKey(Documentos, on_delete=models.CASCADE)
     accesorio = models.ForeignKey(ChequesAccesorios, on_delete=models.CASCADE, null=True)
     nvalor = models.DecimalField(max_digits=10, decimal_places=2)
@@ -334,7 +334,7 @@ class Cuentas_nivel1(ClaseModelo):
 
 class Cuentas_cargosfactoring(ClaseModelo):
     cargo = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT
-                                      , related_name="cuenta_cargo")
+                                      , related_name="cuenta_cargo", null=True)
     tipofactoring = models.ForeignKey(Tipos_factoring, on_delete=models.RESTRICT
                                       , related_name="cuenta_cargotipofactoring")
     cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT)

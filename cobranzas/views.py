@@ -278,17 +278,17 @@ class CobranzasPendientesLiquidarView(SinPrivilegios, generic.ListView):
     def get_queryset(self):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
 
-        cobranzas= Documentos_cabecera.objects.filter(Q(cxestado='C'\
-            , empresa = id_empresa.empresa
-            , leliminado = False) | Q(cxformapago__in=["EFE", "MOV"], cxestado='A'))\
+        cobranzas= Documentos_cabecera.objects\
+            .filter( leliminado = False , empresa = id_empresa.empresa)\
+            .filter(Q(cxestado='C' ) | Q(cxformapago__in=["EFE", "MOV"], cxestado='A'))\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion'
                 ,'cxcobranza','cxformapago','nvalor', 'cxcuentadeposito__cxcuenta'
                 , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'C'",''))
 
-        recuperaciones = Recuperaciones_cabecera.objects.filter(Q(cxestado='C'\
-            , empresa = id_empresa.empresa
-            , leliminado = False) | Q(cxformacobro__in=["EFE", "MOV"], cxestado='A'))\
+        recuperaciones = Recuperaciones_cabecera.objects\
+            .filter( leliminado = False , empresa = id_empresa.empresa)\
+            .filter(Q(cxestado='C')| Q(cxformacobro__in=["EFE", "MOV"], cxestado='A'))\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion'
                 ,'cxrecuperacion','cxformacobro','nvalor', 'cxcuentadeposito__cxcuenta'
@@ -1475,19 +1475,34 @@ def GeneraListaCobranzasPendientesProcesarJSON(request):
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
+    # cobranzas= Documentos_cabecera.objects\
+    #     .filter(Q(cxestado='C', empresa = id_empresa.empresa\
+    #               ,leliminado = False) | Q(cxformapago__in=["EFE", "MOV"]
+    #                                        , cxestado='A'))\
+    #         .values('cxcliente__cxcliente__ctnombre','ddeposito'
+    #         ,'cxtipofactoring__ctabreviacion', 'dcobranza', 'nsobrepago'
+    #         ,'cxcobranza','cxformapago','nvalor', 'cxcuentadeposito__cxcuenta'
+    #         , 'id', 'cxcheque_id','cxcliente').annotate(tipo=RawSQL("select 'C'",''))
+
+    # recuperaciones = Recuperaciones_cabecera.objects\
+    #     .filter(Q(cxestado='C', empresa = id_empresa.empresa\
+    #               ,leliminado = False) | Q(cxformacobro__in=["EFE", "MOV"]
+    #                                        , cxestado='A'))\
+    #         .values('cxcliente__cxcliente__ctnombre','ddeposito'
+    #         ,'cxtipofactoring__ctabreviacion', 'dcobranza', 'nsobrepago'
+    #         ,'cxrecuperacion','cxformacobro','nvalor', 'cxcuentadeposito__cxcuenta'
+    #         , 'id', 'cxcheque_id','cxcliente').annotate(tipo=RawSQL("select 'R'",''))
     cobranzas= Documentos_cabecera.objects\
-        .filter(Q(cxestado='C', empresa = id_empresa.empresa\
-                  ,leliminado = False) | Q(cxformapago__in=["EFE", "MOV"]
-                                           , cxestado='A'))\
+        .filter( leliminado = False , empresa = id_empresa.empresa)\
+        .filter(Q(cxestado='C' ) | Q(cxformapago__in=["EFE", "MOV"], cxestado='A'))\
             .values('cxcliente__cxcliente__ctnombre','ddeposito'
             ,'cxtipofactoring__ctabreviacion', 'dcobranza', 'nsobrepago'
             ,'cxcobranza','cxformapago','nvalor', 'cxcuentadeposito__cxcuenta'
             , 'id', 'cxcheque_id','cxcliente').annotate(tipo=RawSQL("select 'C'",''))
 
     recuperaciones = Recuperaciones_cabecera.objects\
-        .filter(Q(cxestado='C', empresa = id_empresa.empresa\
-                  ,leliminado = False) | Q(cxformacobro__in=["EFE", "MOV"]
-                                           , cxestado='A'))\
+        .filter( leliminado = False , empresa = id_empresa.empresa)\
+        .filter(Q(cxestado='C')| Q(cxformacobro__in=["EFE", "MOV"], cxestado='A'))\
             .values('cxcliente__cxcliente__ctnombre','ddeposito'
             ,'cxtipofactoring__ctabreviacion', 'dcobranza', 'nsobrepago'
             ,'cxrecuperacion','cxformacobro','nvalor', 'cxcuentadeposito__cxcuenta'

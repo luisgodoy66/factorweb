@@ -1369,25 +1369,29 @@ def GenerarFactura(request, pk, tipo, operacion):
         valor_iva=documento_origen.niva
         desembolso=documento_origen.notadebito.dnotadebito
 
-    id_operacion=documento_origen.id    
-    id_cliente=documento_origen.cxcliente
+    id_operacion = documento_origen.id    
+    id_cliente = documento_origen.cxcliente
+    porc_iva = documento_origen.nporcentajeiva
     cliente = documento_origen.cxcliente.cxcliente.ctnombre
-    porc_iva=documento_origen.nporcentajeiva
 
-    if gao.lcargaiva:
-        base_iva = valor_gao
+    if tipo == 'LA':
+        base_iva = documento_origen.nbaseiva
+        base_no_iva = documento_origen.nbasenoiva
     else:
-        base_no_iva = valor_gao
+        if gao.lcargaiva:
+            base_iva = valor_gao
+        else:
+            base_no_iva = valor_gao
 
-    if dc.lcargaiva:
-        base_iva += valor_dc + valor_dcv
-    else:
-        base_no_iva += valor_dc + valor_dcv
+        if dc.lcargaiva:
+            base_iva += valor_dc + valor_dcv
+        else:
+            base_no_iva += valor_dc + valor_dcv
 
-    if gaoa.lcargaiva:
-        base_iva += valor_gaoa
-    else:
-        base_no_iva += valor_gaoa
+        if gaoa.lcargaiva:
+            base_iva += valor_gaoa
+        else:
+            base_no_iva += valor_gaoa
 
     if request.method=='GET':
 

@@ -1,10 +1,13 @@
 from django.urls import URLPattern, path
 from .views import TiposFactoringView, TipoFactoringNew , TipoFactoringEdit\
     , TasasFactoringView, TasaFactoringNew, TasaFactoringEdit\
-    , ClasesParticipanteView, ClasesParticipanteNew\
+    , ClasesParticipanteView, ClasesParticipanteNew, OtrosCargosView\
     , CuentasBancariasView, CuentaBancariaNew, CuentaBancariaEdit\
     , LocalidadesView, LocalidadesNew, LocalidadesEdit, PuntosEmisionView\
-    , PuntoEmisionNew, PuntoEmisionEdit, DatosEmpresaEdit
+    , PuntoEmisionNew, PuntoEmisionEdit, DatosEmpresaEdit\
+    , OtroCargoEdit, OtroCargoNew\
+    , OtrosCargosJSON
+# , DatosOtroCargo
 
 urlpatterns = [
     path('listatiposfactoring/',TiposFactoringView.as_view()
@@ -19,6 +22,14 @@ urlpatterns = [
     , name='tasafactoring_nueva'),
     path('tasafactoringedit/<int:pk>',TasaFactoringEdit.as_view()
     , name='tasafactoring_editar'),
+    path('listaotroscargos/',OtrosCargosView.as_view()
+    , name='listaotroscargos'),
+    path('otrocargonuevo/<movimiento>/<movimiento_id>',OtroCargoNew.as_view()
+    , name='otrocargo_nuevo'),
+    path('otrocargoedit/<movimiento>/<movimiento_id>/<int:pk>',OtroCargoEdit.as_view()
+    , name='otrocargo_editar'),
+    # path('otrocargoedit/<nombre>/<id_movimiento>/<id_cargo>',DatosOtroCargo
+    # , name='otrocargo_editar'),
     path('listaclasesparticipantes/',ClasesParticipanteView.as_view()
     , name='listaclasesparticipantes'),
     path('datosclaseparticipante_nueva', ClasesParticipanteNew.as_view()
@@ -37,4 +48,5 @@ urlpatterns = [
     path('puntoemisioneditar/<int:pk>',PuntoEmisionEdit.as_view()
     , name='puntoemision_editar'),
     path('datosempresa/<int:pk>',DatosEmpresaEdit.as_view(), name='datosempresa'),
+    path('listaotroscargosjson', OtrosCargosJSON, name='listaotroscargos_json')
 ]

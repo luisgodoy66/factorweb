@@ -100,8 +100,9 @@ def ImpresionAsignacion(request, asignacion_id):
         , 'iniciales': dc.ctinicialesentablas}
     
     subtotal = asignacion.nanticipo - asignacion.ngao - asignacion.ndescuentodecartera
-    cargos = asignacion.ngao + asignacion.ndescuentodecartera
-    neto = subtotal - asignacion.niva
+    cargos_negociacion = asignacion.ngao + asignacion.ndescuentodecartera
+#     neto = subtotal - asignacion.niva
+#  el neto de la asignacion ya incluye los otros cargos
 
     context = {
         "asignacion" : asignacion,
@@ -109,8 +110,8 @@ def ImpresionAsignacion(request, asignacion_id):
         'gao': dic_gao,
         'dc' : dic_dc,
         'subtotal': subtotal,
-        'cargos': cargos,
-        'neto': neto,
+        'cargos_negociacion': cargos_negociacion,
+        'neto': asignacion.neto(),
         'empresa': id_empresa.empresa
     }
 

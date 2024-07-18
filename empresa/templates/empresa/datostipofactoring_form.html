@@ -26,17 +26,6 @@
             <div class="card-body card-block">
                 <div class="col-lg-5">
 
-                    <!-- <div class="row form-group">
-                        <div class="col col-md-6">
-                            <label for="id_cxtipoid" class=" form-control-label">
-                                {{ form.cxtipofactoring.label}}
-                            </label></div>
-                        <div class="col-12 col-md-6">
-                            {{ form.cxtipofactoring}}
-                            <small class="form-text text-muted">Máximo 3 caracteres</small>
-                        </div>
-                    </div>   -->
-
                     <div class="row form-group">
                         <div class="col col-md-5">
                             <label for="id_cxparticipante" class=" form-control-label">
@@ -225,7 +214,7 @@
                             </label>
                         </div>
                     </div>
-                    <div class="row form-group">
+                    <!-- <div class="row form-group">
                         <div class="col col-md-9"><label for="id_cxlocalidad" class=" form-control-label">
                             {{form.lfactoringproveedores.label}}</label></div>
                         <div class="col">
@@ -233,6 +222,19 @@
                                 <input type="checkbox" class="switch-input" 
                                 {% if  tipofactoring.lfactoringproveedores %} checked {% endif %} 
                                 id = "id_lfactoringproveedores" name = "lfactoringproveedores"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div> -->
+                    <div class="row form-group">
+                        <div class="col col-md-9"><label for="id_cxlocalidad" class=" form-control-label">
+                            {{form.laplicaotroscargos.label}}</label></div>
+                        <div class="col">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  tipofactoring.laplicaotroscargos %} checked {% endif %} 
+                                id = "id_laplicaotroscargos" name = "laplicaotroscargos"> 
                                 <span class="switch-label"></span> 
                                 <span class="switch-handle"></span>
                             </label>
