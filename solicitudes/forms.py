@@ -66,7 +66,7 @@ class DocumentosForm(forms.ModelForm):
                     'type': 'date'
                     }
                     ),
-            'nvalorantesiva':forms.NumberInput(attrs={'step': '1'}),
+            # 'nvalorantesiva':forms.NumberInput(attrs={'step': '1'}),
         }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

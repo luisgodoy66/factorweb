@@ -144,6 +144,7 @@
                             <label for="id_notroscargos" class=" form-control-label">{{item}}</label></div>
                         <div class="col-6 col-md-6">
                             <input type="number" step="1" class="otros_cargos form-control " value="{{item.nvalor}}" 
+                                data-cargo="{{item}}"
                                 data-cargaiva = {{item.lcargaiva}} min="0" data-idmovimiento="{{item.movimiento.id}}">
                         </div>
                     </div>  
@@ -512,9 +513,10 @@ function obtenerArregloCargos() {
     inputs.forEach(input => {
         // Verifica si data-cargaiva es 'True'
             const Id = input.getAttribute('data-idmovimiento');
+            const Cargo = input.getAttribute('data-cargo');
             const Valor = parseFloat(input.value) || 0; // Convierte el valor a número, asume 0 si no es numérico
             const CargaIVA = input.getAttribute('data-cargaiva');
-            arreglo.push({Id, Valor, CargaIVA}); 
+            arreglo.push({Id, Cargo, Valor, CargaIVA}); 
     });
     console.log('arreglo de cargos:', arreglo); // Muestra el acumulado en la consola
     return arreglo; 

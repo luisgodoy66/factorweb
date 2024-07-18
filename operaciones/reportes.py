@@ -64,12 +64,15 @@ def ImpresionAsignacion(request, asignacion_id):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     if asignacion.cxtipo==FACTURAS_PURAS:
+
         template_path = 'operaciones/asignacion_facturas_puras_reporte.html'
+
         documentos = Documentos.objects.filter(cxasignacion = asignacion)\
                 .filter(leliminado = False)\
                 .order_by('cxcomprador__cxcomprador__ctnombre')
     else:
         template_path = 'operaciones/asignacion_facturas_accesorios_reporte.html'
+
         documentos = ChequesAccesorios.objects\
             .filter(leliminado = False
                     , ncanjeadopor = None
@@ -103,7 +106,8 @@ def ImpresionAsignacion(request, asignacion_id):
     cargos_negociacion = asignacion.ngao + asignacion.ndescuentodecartera
 #     neto = subtotal - asignacion.niva
 #  el neto de la asignacion ya incluye los otros cargos
-
+    otros_cargos = asignacion.jotroscargos
+    print("otros cargos: ", otros_cargos)
     context = {
         "asignacion" : asignacion,
         "documentos" : documentos,
@@ -112,7 +116,8 @@ def ImpresionAsignacion(request, asignacion_id):
         'subtotal': subtotal,
         'cargos_negociacion': cargos_negociacion,
         'neto': asignacion.neto(),
-        'empresa': id_empresa.empresa
+        'empresa': id_empresa.empresa,
+        'otros_cargos': otros_cargos,
     }
 
     # Create a Django response object, and specify content_type as pdf

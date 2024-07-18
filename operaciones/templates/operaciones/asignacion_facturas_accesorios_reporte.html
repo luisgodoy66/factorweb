@@ -105,44 +105,44 @@
                             <tr></tr>
                             {% regroup documentos|dictsort:"documento.cxcomprador.cxcomprador.ctnombre" by documento.cxcomprador as documentos_list %}
                             {% for comprador in documentos_list %}
-                            <tr>
-                                <td class="subrayado" colspan="5"><h3>{{ comprador.grouper }}</h3></td>
-                                <td class="subrayado numero"><h3> {{comprador.list|running_total2|intcomma }}</h3></td>
-                                <td class="subrayado numero" colspan="3"><h3></h3></td>
-                                {% if gao.imprimir %}
+                                <tr>
+                                    <td class="subrayado" colspan="5"><h3>{{ comprador.grouper }}</h3></td>
+                                    <td class="subrayado numero"><h3> {{comprador.list|running_total2|intcomma }}</h3></td>
+                                    <td class="subrayado numero" colspan="3"><h3></h3></td>
+                                    {% if gao.imprimir %}
+                                        <td class="subrayado"></td>
+                                    {% endif %}
                                     <td class="subrayado"></td>
-                                {% endif %}
-                                <td class="subrayado"></td>
-                                {% if dc.imprimir %}
+                                    {% if dc.imprimir %}
+                                        <td class="subrayado"></td>
+                                    {% endif %}
                                     <td class="subrayado"></td>
-                                {% endif %}
-                                <td class="subrayado"></td>
-                                <td class="subrayado"></td>
-                            </tr>
-                            {% for item in comprador.list %}
-                            <tr></tr>
-                            <tr>
-                                <td>{{ item.id }}</td>
-                                <td width="10%">{{ item.documento.ctdocumento }}</td>
-                                <td>{{ item.documento.demision|date:"Y-m-d"  }}</td>
-                                <td width="20%">{{ item }}</td>
-                                <td class="fecha">{{ item.dvencimiento|date:"Y-m-d"  }}</td>
-                                <td class="numero">{{ item.ntotal }}</td>
-                                <td class="numero">{{ item.nplazo }}</td>
-                                <td class="numero">{{ item.nporcentajeanticipo }}</td>
-                                <td class="numero">{{ item.nanticipo }}</td>
-                                {% if gao.imprimir %}<td class="numero">
-                                    {{ item.ntasacomision|floatformat:2 }}</td>
-                                {% endif %}
-                                <td class="numero">{{ item.ngao }}</td>
-                                {% if dc.imprimir %}
-                                    <td class="numero">{{ item.ntasadescuento|floatformat:2 }}</td>
-                                {% endif %}
-                                <td class="numero">{{ item.ndescuentocartera }}</td>
-                                <td class="numero">{{ item.total_cargos}}</td>
-                            </tr>
-                            {% endfor %}
-                            <tr></tr>
+                                    <td class="subrayado"></td>
+                                </tr>
+                                {% for item in comprador.list %}
+                                    <tr></tr>
+                                    <tr>
+                                        <td>{{ item.id }}</td>
+                                        <td width="10%">{{ item.documento.ctdocumento }}</td>
+                                        <td>{{ item.documento.demision|date:"Y-m-d"  }}</td>
+                                        <td width="20%">{{ item }}</td>
+                                        <td class="fecha">{{ item.dvencimiento|date:"Y-m-d"  }}</td>
+                                        <td class="numero">{{ item.ntotal }}</td>
+                                        <td class="numero">{{ item.nplazo }}</td>
+                                        <td class="numero">{{ item.nporcentajeanticipo }}</td>
+                                        <td class="numero">{{ item.nanticipo }}</td>
+                                        {% if gao.imprimir %}<td class="numero">
+                                            {{ item.ntasacomision|floatformat:2 }}</td>
+                                        {% endif %}
+                                        <td class="numero">{{ item.ngao }}</td>
+                                        {% if dc.imprimir %}
+                                            <td class="numero">{{ item.ntasadescuento|floatformat:2 }}</td>
+                                        {% endif %}
+                                        <td class="numero">{{ item.ndescuentocartera }}</td>
+                                        <td class="numero">{{ item.total_cargos}}</td>
+                                    </tr>
+                                {% endfor %}
+                                <tr></tr>
                             {% endfor %}
                             <tr>
                                 <td></td>
@@ -173,7 +173,7 @@
                                 <td class="numero"><h4>{{ asignacion.ngao|intcomma }}</h4></td>
                                 {% if dc.imprimir %}<td></td>{% endif %}
                                 <td class="numero"><h4>{{ asignacion.ndescuentodecartera|intcomma }}</h4></td>
-                                <td class="numero"><h4>{{cargos|intcomma}}</h4></td>
+                                <td class="numero"><h4>{{cargos_negociacion|intcomma}}</h4></td>
                             </tr>
                             <tr></tr>
                             <tr>
@@ -188,6 +188,22 @@
                                 <td colspan="2"><h4>Anticipo menos cargos</h4></td>
                                 <td class="numero"><h4>{{ subtotal|intcomma }}</h4></td>
                             </tr>
+                            {% if asignacion.notroscargos > 0 %}
+                                {% for item in otros_cargos %}
+                                <tr>
+                                <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    {% if gao.imprimir %}<td></td>{% endif %}
+                                    <td colspan="2"><h4>{{item.Cargo}}</h4></td>
+                                    <td class="numero"><h4>{{ item.Valor|floatformat:"2u"}}</h4></td>
+                                </tr>
+                                {% endfor %}
+                            {% endif %}
                             <tr>
                                 <td></td>
                                 <td></td>

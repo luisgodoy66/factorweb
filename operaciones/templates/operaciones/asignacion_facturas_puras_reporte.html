@@ -186,8 +186,9 @@
                                 <td class="numero"><h4>{{ subtotal|intcomma}}</h4></td>
                             </tr>
                             {% if asignacion.notroscargos > 0 %}
+                            {% for item in otros_cargos %}
                             <tr>
-                                <td></td>
+                            <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
@@ -195,10 +196,11 @@
                                 <td></td>
                                 <td></td>
                                 {% if gao.imprimir %}<td></td>{% endif %}
-                                <td colspan="2"><h4>Otros cargos</h4></td>
-                                <td class="numero"><h4>{{ asignacion.notroscargos|intcomma}}</h4></td>
-                            </tr>
-                            {% endif %}
+                                <td colspan="2"><h4>{{item.Cargo}}</h4></td>
+                                <td class="numero"><h4>{{ item.Valor|floatformat:"2u"}}</h4></td>
+                        </tr>
+                            {% endfor %}
+                        {% endif %}
                             <tr>
                                 <td></td>
                                 <td></td>
