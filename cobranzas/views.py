@@ -18,7 +18,7 @@ from operaciones.models import Documentos, ChequesAccesorios, Datos_operativos\
 from clientes.models import Cuentas_bancarias, Datos_generales\
     , Cuenta_transferencia, Datos_compradores
 from empresa.models import Tasas_factoring, Cuentas_bancarias as CuentasEmpresa\
-    , Datos_participantes, Tipos_factoring
+    , Datos_participantes, Tipos_factoring, Otros_cargos
 from cuentasconjuntas import models as CuentasConjuntasModels
 from bases.models import Usuario_empresa
 from solicitudes.models import Asignacion
@@ -1585,7 +1585,6 @@ def Liquidacion(request, tipo_operacion):
     psidcliente=objeto["id_cliente"]
     pdliquidacion=objeto["fecha_liquidacion"]
     pddesembolso=objeto["ddesembolso"]
-    pnvalorliquidacion=objeto["valor_liquidacion"]
     pstipofactoring=objeto["tipo_factoring"]
     pnbaseiva=objeto["base_iva"]
     pnporcentajeiva=objeto["porcentaje_iva"]
@@ -1603,21 +1602,23 @@ def Liquidacion(request, tipo_operacion):
     pnotros = objeto["otros"]
     pnneto = objeto["neto"]
     pjcobranzas = objeto["cobranzas"]
-    pjotroscargos = objeto["otros_cargos"]
+    pjotroscargosnooperativos = objeto["otros_cargos_no_operativos"]
     pndescuentodecarteravencido =objeto["descuentodecarteravencido"]
+    otros_cargos = objeto["arr_otros_cargos"]
+    base_noiva = objeto["base_noiva"]
 
-    resultado=enviarPost("CALL uspLiquidarCobranzas( {0},'{1}', {2},{3}\
+    resultado=enviarPost("CALL uspLiquidarCobranzas( {0},'{1}', '{2}',{3}\
         ,'{4}'\
         ,{5},{6},{7},{8},{9},{10}\
         ,{11},{12},{13},{14},{15},{16},'{17}'\
         ,{18},'{19}','{20}','{21}','{22}'\
-        ,{23},'',0)"
-        .format(psidcliente ,pdliquidacion ,pnvalorliquidacion ,pstipofactoring
+        ,{23},{24},'',0)"
+        .format(psidcliente ,pdliquidacion ,otros_cargos ,pstipofactoring
          ,pddesembolso\
          ,pnvuelto ,pnsobrepago ,pngao ,pngaoa,pndescuentodecartera ,pnretenciones\
          ,pnbajas ,pnotros ,pnneto,pnbaseiva ,pnporcentajeiva ,pniva ,psinstruccionpago
-         ,nusuario ,padocumentos, pjcobranzas, tipo_operacion, pjotroscargos
-         , pndescuentodecarteravencido))
+         ,nusuario ,padocumentos, pjcobranzas, tipo_operacion, pjotroscargosnooperativos
+         , pndescuentodecarteravencido, base_noiva))
     return HttpResponse(resultado)
 
 @login_required(login_url='/login/')
@@ -1642,7 +1643,7 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
         e={'cxtipooperacion':'C'
             , 'cxoperacion':liquidacion.id
             , 'cxcliente':cliente_ruc
-            , 'nvalor': liquidacion.nneto
+            , 'nvalor': liquidacion.neto()
             , 'cxbeneficiario':datosoperativos.cxbeneficiarioasignacion
             , 'ctbeneficiario':datosoperativos.ctbeneficiariocobranzas
             }
@@ -1691,7 +1692,7 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
                     desembolso = Desembolsos(cxtipooperacion='C'
                         , cxoperacion = operacion
                         , cxcliente = cliente
-                        , nvalor = liquidacion.nneto
+                        , nvalor = liquidacion.neto()
                         , cxformapago = forma_pago
                         , cxcuentapago = cuenta_pago
                         , cxbeneficiario =id_beneficiario
@@ -1968,15 +1969,18 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
     total_gaoa =0
     total_cargoretenciones=0
     total_cargobajas=0
-    total_otroscargos=0
+    total_otroscargos_no_operativos=0
     total_cargos=0
     total_sobrepagos=0
     base_iva=0
+    base_noiva=0
     porcentaje_iva = 15
     listacargos = []
-    listaotroscargos = []
+    lista_otroscargos_no_operativos = []
     listacobranzas =[]
     vuelto_cobranza=0
+    tipo_factoring = None
+    otros_cargos = None
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
@@ -2012,7 +2016,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
             vuelto_cobranza = 0
             
             # buscar el tipo de factoring
-            tipofactoring = cobranza.cxtipofactoring
+            tipo_factoring = cobranza.cxtipofactoring
 
             for i in range(len(detalle_cobranza)):
 
@@ -2032,11 +2036,13 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                 if tipo_operacion=='R':
                     codigo_operacion = cobranza.cxrecuperacion
                     accesorios = documento_cobrado.documentoprotestado.accesorio
-                    base_bajas=documento_cobrado.nvalorbaja + documento_cobrado.nvalorbajacobranza
+                    base_bajas = (documento_cobrado.nvalorbaja 
+                                  + documento_cobrado.nvalorbajacobranza)
                 else:
                     codigo_operacion = cobranza.cxcobranza
                     # puede estar cobrando un cheque quitado lo que lo convierte en accesorio
-                    accesorios = cobranza.cxformapago == "DEP" or documento_cobrado.accesorioquitado
+                    accesorios = (cobranza.cxformapago == "DEP" 
+                                  or documento_cobrado.accesorioquitado)
                     base_bajas=documento_cobrado.nvalorbaja
                     base_retenciones = documento_cobrado.nretenciones
 
@@ -2044,14 +2050,16 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                 if accesorios:
                     if tipo_operacion=='R':
                         documento = documento_cobrado.documentoprotestado.accesorio
-                        vuelto = documento_cobrado.nvalorrecuperacion * (100 - documento.nporcentajeanticipo) /100
+                        vuelto = (documento_cobrado.nvalorrecuperacion 
+                                  * (100 - documento.nporcentajeanticipo) /100)
                     else:
                         if cobranza.cxformapago == "DEP":
                             documento = cobranza.cxaccesorio
                         else:
                             documento = accesorios
 
-                        vuelto = documento_cobrado.nvalorcobranza * (100 - documento.nporcentajeanticipo) /100
+                        vuelto = (documento_cobrado.nvalorcobranza 
+                                  * (100 - documento.nporcentajeanticipo) /100)
 
                     id_documento = documento.documento.id
                     fechadesembolso = documento.documento.cxasignacion.ddesembolso
@@ -2062,10 +2070,12 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                     # facturas puras
                     if tipo_operacion=='R':
                         documento = documento_cobrado.documentoprotestado.documento
-                        vuelto = documento_cobrado.nvalorrecuperacion * (100 - documento.nporcentajeanticipo) /100
+                        vuelto = (documento_cobrado.nvalorrecuperacion 
+                                  * (100 - documento.nporcentajeanticipo) /100)
                     else:
                         documento = documento_cobrado.cxdocumento
-                        vuelto = documento_cobrado.nvalorcobranza * (100 - documento.nporcentajeanticipo) /100
+                        vuelto = (documento_cobrado.nvalorcobranza 
+                                  * (100 - documento.nporcentajeanticipo) /100)
                     
                     id_documento = documento.id
                     fechadesembolso = documento.cxasignacion.ddesembolso
@@ -2081,7 +2091,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                     dias_vencidos = (fechacobrocalculo - documento.dvencimiento).days
 
                 # dias negociados
-                if not tipofactoring.lgenerafacturaenaceptacion \
+                if not tipo_factoring.lgenerafacturaenaceptacion \
                     and fechacobrocalculo > documento.dvencimiento\
                     and not documento.lfacturagenerada:
                     return HttpResponse('No ha generado factura al vencimiento')
@@ -2090,7 +2100,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                     # dc negociado. desde desembolso hasta cobranza
                     dias_negociados = (fechacobrocalculo - fechadesembolso).days
                 else:
-                    if tipofactoring.lgenerafacturaenaceptacion:                        
+                    if tipo_factoring.lgenerafacturaenaceptacion:                        
                         # dc negociado. desde desembolso hasta vencimiento
                         dias_negociados = (documento.dvencimiento - fechadesembolso).days
                     else:
@@ -2110,7 +2120,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                 dc = Tasas_factoring.objects\
                     .filter(cxtasa='DCAR', empresa = id_empresa.empresa).first()
                 
-                if not tipofactoring.lgeneradcenaceptacion:
+                if not tipo_factoring.lgeneradcenaceptacion:
 
                     # la tasa esta en el documento o en el accesorio
                     tasa_dc = documento.ntasadescuento
@@ -2152,7 +2162,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                 gao = Tasas_factoring.objects\
                     .filter(cxtasa="GAO", empresa = id_empresa.empresa).first()
 
-                if not tipofactoring.lgeneragaoenaceptacion:
+                if not tipo_factoring.lgeneragaoenaceptacion:
 
                     tasa_gao = documento.ntasacomision
 
@@ -2175,7 +2185,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                     return HttpResponse("No se ha encontrado tasa de GAOA")
 
                 # aplicar los días de gracia
-                if tipofactoring.lcargagaoa and dias_vencidos > tipofactoring.ndiasgracia:
+                if tipo_factoring.lcargagaoa and dias_vencidos > tipo_factoring.ndiasgracia:
 
                     tasa_gaoa = datos_operativos.ntasagaoa
 
@@ -2185,7 +2195,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                         base_gaoa = documento_cobrado.aplicado()
 
                     # si la tasa se acumula, sumarla a la tasa del documento
-                    if tipofactoring.lacumulagaoaatasagao:
+                    if tipo_factoring.lacumulagaoaatasagao:
                         tasa_gaoa += documento.ntasacomision
 
                     if gaoa.lflat :
@@ -2225,7 +2235,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                 #   considerando que se liquiden cobranzas que hagan referencia a un 
                 #   mismo docuento
 
-                total_otroscargos = ObtenerOtrosCargosDeDocumento(documento.id, listaotroscargos)
+                total_otroscargos_no_operativos = ObtenerOtrosCargosDeDocumento(documento.id, lista_otroscargos_no_operativos)
 
             # fin del for detalle
             total_sobrepagos += cobranza.nsobrepago
@@ -2245,35 +2255,58 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
 
             # si es recuperacion obtener cargos del protesto
             if tipo_operacion  == 'R':
-                total_otroscargos += ObtenerCargosDeProtestos(cobranza, listaotroscargos)
+                total_otroscargos_no_operativos += ObtenerCargosDeProtestos(cobranza, lista_otroscargos_no_operativos)
 
             # obtener cualkquier cargo cargado a la cobranza
-            total_otroscargos += ObtenerOtrosCargosDeCobranza(tipo_operacion
+            total_otroscargos_no_operativos += ObtenerOtrosCargosDeCobranza(tipo_operacion
                                                             , cobranza.id
                                                             , codigo_operacion
-                                                            , listaotroscargos)
+                                                            , lista_otroscargos_no_operativos)
         # fin for cobranzas
 
         # acumula base IVA de cargos
-        if dc.lcargaiva: base_iva += total_dc
-        if gao.lcargaiva: base_iva += total_gao
-        if gaoa.lcargaiva: base_iva += total_gaoa
+        if dc.lcargaiva: 
+            base_iva += total_dc
+        else:
+            base_noiva += total_dc
+
+        if gao.lcargaiva: 
+            base_iva += total_gao
+        else:
+            base_noiva += total_gao
+
+        if gaoa.lcargaiva: 
+            base_iva += total_gaoa
+        else:
+            base_noiva += total_gaoa
 
         total_iva = base_iva * porcentaje_iva / 100
 
         # Calcular neto
         total_cargos = (total_dc + total_dcv + total_gao + total_gaoa 
-                        + total_cargobajas + total_cargoretenciones+ total_iva 
-                        + total_otroscargos )
+                        + total_cargobajas + total_cargoretenciones 
+                        # + total_iva 
+                        )
+                        # + total_otroscargos_no_operativos )
 
-        neto = total_vuelto + total_sobrepagos - total_cargos
+        neto = (total_vuelto 
+                + total_sobrepagos 
+                - total_cargos - total_iva
+                - total_otroscargos_no_operativos)
 
+        # cargar los cargos
+        if tipo_factoring.laplicaotroscargos:
+            otros_cargos = Otros_cargos.objects\
+                .filter(empresa = id_empresa.empresa, leliminado=False
+                        , lactivo=True, lcargaenliquidacioncobranza = True)
+
+        # campana
         sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
                                     empresa = id_empresa.empresa).count()
 
     contexto={
         "nombredecliente" : cobranza.cxcliente.cxcliente.ctnombre,
-        "tipo_factoring" : tipofactoring.id,
+        "tipo_factoring" : tipo_factoring.id,
         "total_vuelto": round(total_vuelto,2),
         "total_sobrepagos": total_sobrepagos,
         "total_descuentocartera": round(total_dc + total_dcv,2),
@@ -2285,7 +2318,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
         "porcentaje_iva":porcentaje_iva,
         "total_cargoretenciones":round(total_cargoretenciones,2),
         "total_cargobajas": round(total_cargobajas,2),
-        "total_otros_cargos": round(total_otroscargos,2),
+        "total_otros_cargos": round(total_otroscargos_no_operativos,2),
         "nombre_dc": dc.ctdescripcionenreporte,
         "nombre_gao": gao.ctdescripcionenreporte,
         "nombre_gaoa": gaoa.ctdescripcionenreporte,
@@ -2297,11 +2330,14 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
         "data": json.dumps(listacargos),
         "form": LiquidarForm,
         "base_iva":base_iva,
+        "base_noiva":base_noiva,
         "cliente": cobranza.cxcliente.id,
         "cobranzas":json.dumps(listacobranzas),
         "tipo_operacion":tipo_operacion,
-        "otros_cargos":json.dumps(listaotroscargos),
-        "solicitudes_pendientes":sp
+        "cargos_no_operativos":json.dumps(lista_otroscargos_no_operativos),
+        "solicitudes_pendientes":sp,
+        'otros_cargos':otros_cargos,
+        'usa_otros_cargos':tipo_factoring.laplicaotroscargos,
     }
 
     return render(request, template_name, contexto)

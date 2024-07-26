@@ -65,7 +65,7 @@
                             <td>{{ item.cxtipofactoring }}</td>
                             <td>{{ item.ctinstrucciondepago }} </td>
                             <td>{{ item.ddesembolso|date:"Y/m/d" }}</td>
-                            <td>{{ item.nneto }}</td>
+                            <td>{{ item.neto }}</td>
                             <td>
                                 <a href="{% url 'cobranzas:desembolsarliquidacion' item.id item.cxcliente.id %}" 
                                 class="btn btn-primary btn-sm" role="button" title="Pagar">

@@ -635,6 +635,7 @@ def AceptarAsignacion(request, asignacion_id=None):
     carga_dc = "No"
     condicion_operativa={}
     beneficiario = ''
+    otros_cargos = None
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
@@ -647,7 +648,7 @@ def AceptarAsignacion(request, asignacion_id=None):
     # buscar el tipo de factoring 
     tipo_factoring = Tipos_factoring.objects.get(pk=asignacion.cxtipofactoring_id)
     if not tipo_factoring:
-        return HttpResponse("Tipo de factoring no existe:" + asignacion.cxtipofactoring_id
+        return HttpResponse("El tipo de factoring no existe: " + asignacion.cxtipofactoring_id
                             , status=404)
     if tipo_factoring.lgeneradcenaceptacion:
         carga_dc="Si"
@@ -657,9 +658,8 @@ def AceptarAsignacion(request, asignacion_id=None):
     # cargar los cargos
     if tipo_factoring.laplicaotroscargos:
         otros_cargos = Otros_cargos.objects\
-            .filter(empresa = id_empresa.empresa, leliminado=False, lactivo=True)
-    else:
-        otros_cargos = None
+            .filter(empresa = id_empresa.empresa, leliminado=False
+                    , lactivo=True, lcargaenliquidacionasignacion = True)
 
     # si tipo de factoring usa condición operativa cargarla
     if tipo_factoring.lmanejacondicionesoperativas:
@@ -686,13 +686,13 @@ def AceptarAsignacion(request, asignacion_id=None):
     gao = Tasas_factoring.objects.filter(cxtasa="GAO"
                                          , empresa = id_empresa.empresa).first()
     if not gao:
-        return HttpResponse("no encontró tasa de gao")
+        return HttpResponse("No fue encontrada la tasa de gao")
     if gao.lcargaiva: iva_gao = 'Si'
 
     dc = Tasas_factoring.objects.filter(cxtasa="DCAR"
                                         , empresa = id_empresa.empresa).first()
     if not dc:
-        return HttpResponse("no encontró tasa de descuento de cartera")
+        return HttpResponse("No fue encontrada la tasa de descuento de cartera")
     if dc.lcargaiva: iva_dc='Si'
 
     dic_gao  = {'carga_iva': iva_gao
@@ -710,16 +710,16 @@ def AceptarAsignacion(request, asignacion_id=None):
         .filter(cxparticipante=asignacion.cxcliente.cxcliente
                 , empresa = id_empresa.empresa).first()
     if not cliente:
-        return HttpResponse("solicitante no encontrado en lista de participantes")
+        return HttpResponse("El solicitante no fue encontrado en la lista de participantes")
 
-    # AUNQUE LO encuentra en participantes, podría se solo deudor
+    # AUNQUE LO encuentra en participantes, podría ser solo deudor
     # y no tener registro de cliente
 
     try:
         x= cliente.datos_generales.id
     except ObjectDoesNotExist:
     # Handle the error here
-        return HttpResponse("solicitante no encontrado en lista de clientes")
+        return HttpResponse("El solicitante no fue encontrado en la lista de clientes")
 
     # buscar en datos operativos el beneficiario del cheque
     datos_operativos = Datos_operativos.objects\

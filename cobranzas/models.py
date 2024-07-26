@@ -178,7 +178,11 @@ class Liquidacion_cabecera(ClaseModelo):
     nretenciones = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     nbajas = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     notros = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    notroscargos = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
+    nbaseiva = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
+    nbasenoiva = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
     niva = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    jotroscargos = models.JSONField(blank=True, null=True)
     nneto = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     ctinstrucciondepago = models.TextField()
     dliquidacion = models.DateTimeField()
@@ -191,6 +195,25 @@ class Liquidacion_cabecera(ClaseModelo):
     def __str__(self):
         return self.cxliquidacion
 
+    def cargos(self):
+        return (self.ngao 
+                + self.ngaoa
+                + self.ndescuentodecartera 
+                + self.ndescuentodecarteravencido
+                + self.nretenciones
+                + self.nbajas
+                + self.notros
+                + self.notroscargos)
+
+    def neto(self):
+        return (self.nvuelto
+                + self.nsobrepago 
+                - self.cargos()
+                - self.niva)
+
+    def otros_cargos(self):
+        return self.notroscargos + self.notros
+        
 class Liquidacion_detalle(ClaseModelo):
     TIPOS_DE_OPERACION = (
         ('R', 'Recuperación'),

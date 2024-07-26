@@ -1374,10 +1374,7 @@ def GenerarFactura(request, pk, tipo, operacion):
     porc_iva = documento_origen.nporcentajeiva
     cliente = documento_origen.cxcliente.cxcliente.ctnombre
 
-    if tipo == 'LA':
-        base_iva = documento_origen.nbaseiva
-        base_no_iva = documento_origen.nbasenoiva
-    else:
+    if tipo == 'AP':
         if gao.lcargaiva:
             base_iva = valor_gao
         else:
@@ -1392,6 +1389,9 @@ def GenerarFactura(request, pk, tipo, operacion):
             base_iva += valor_gaoa
         else:
             base_no_iva += valor_gaoa
+    else:
+        base_iva = documento_origen.nbaseiva
+        base_no_iva = documento_origen.nbasenoiva
 
     if request.method=='GET':
 
