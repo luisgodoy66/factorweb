@@ -837,3 +837,132 @@ class Desembolsos(ClaseModelo):
 
     def __str__(self):
         return self.cxformapago
+
+class Pagares_Manager(models.Manager):
+
+    def TotalPagaresCliente(self, id_cliente):
+        return self.filter(leliminado = False, nsaldo__gt = 0
+                           , cxcliente = id_cliente)\
+            .aggregate(Total = Sum('nsaldo'))
+    
+    def TotalPagares(self, id_empresa):
+        return self.filter(leliminado = False, nsaldo__gt = 0
+                           , empresa = id_empresa
+                           )\
+            .aggregate(Total = Sum('nsaldo'))
+
+class Pagares(ClaseModelo):
+    cxpagare = models.CharField(max_length=8 ) 
+    cxcliente=models.ForeignKey(Datos_generales_cliente
+        , on_delete=models.CASCADE
+        , related_name="cliente_pagare"
+    )
+    demision = models.DateField(auto_created=True) 
+    dvencimiento = models.DateField()
+    ncapital = models.DecimalField(max_digits=15, decimal_places =2) 
+    ninteres = models.DecimalField(max_digits=15, decimal_places =2)
+    nsaldo = models.DecimalField(max_digits=15, decimal_places =2)
+    cxestado = models.CharField(max_length=1, default="A", ) 
+    ntasainteres = models.DecimalField(max_digits=5, decimal_places=2)
+    nplazo = models.IntegerField()
+    ncantidadcuotas = models.IntegerField()
+    dultimacobranza = models.DateTimeField(null=True) 
+
+    objects = Pagares_Manager()
+
+    def __str__(self):
+        return self.cxpagare
+
+    def valor_total(self):
+        return self.ncapital + self.ninteres
+    
+class Cuotas_pagare_Manager(models.Manager):
+    
+    def cuotas_pendientes(self, fecha_corte, id_empresa):
+        fecha = parse_date(fecha_corte)
+        return self.filter(dfechapago__lte = fecha # - F('ndiasprorroga')
+                , leliminado = False, nsaldo__gt = 0
+                , empresa = id_empresa)
+
+    def antigüedad_cartera(self, id_empresa):
+        # grafico de antigüedad de cartera 
+        vcdo90 = datetime.today()+timedelta(days=-90)
+        vcdo60 = datetime.today()+timedelta(days=-60)
+        vcdo30 = datetime.today()+timedelta(days=-30)
+        xver30 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=60)
+        xver90 = datetime.today()+timedelta(days=90)
+
+        return self.filter( leliminado = False, nsaldo__gt = 0
+            , pagare__leliminado = False
+            , empresa = id_empresa)\
+            .aggregate(
+                vencido_mas_90 = Sum('nsaldo', filter=Q(dfechapago__lt = vcdo90) ) 
+                , vencido_90 = Sum('nsaldo', filter=Q(dfechapago__lt = vcdo60
+                    , dfechapago__gte = vcdo90))
+                , vencido_60 = Sum('nsaldo', filter=Q(dfechapago__lt = vcdo30
+                    , dfechapago__gte = vcdo60))
+                , vencido_30 = Sum('nsaldo', filter=Q(dfechapago__lt = datetime.today()
+                    , dfechapago__gte = vcdo30))
+                ,porvencer_30 = Sum('nsaldo', filter=Q(dfechapago__gte = datetime.today()
+                    , dfechapago__lte = xver30))
+                ,porvencer_60 = Sum('nsaldo', filter=Q(dfechapago__gt = xver30
+                    , dfechapago__lte = xver60))
+                ,porvencer_90 = Sum('nsaldo', filter=Q(dfechapago__gt = xver60
+                    , dfechapago__lte = xver90))
+                , porvencer_mas_90 = Sum('nsaldo', filter=Q(dfechapago__gt = xver90) ) 
+                )
+    
+    def antigüedad_por_cliente(self, id_empresa):
+        vcdo90 = datetime.today()+timedelta(days=-90)
+        vcdo60 = datetime.today()+timedelta(days=-60)
+        vcdo30 = datetime.today()+timedelta(days=-30)
+        xver30 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=60)
+        xver90 = datetime.today()+timedelta(days=90)
+
+        return self.filter( leliminado = False, nsaldo__gt = 0
+            , pagare__leliminado = False
+            , empresa = id_empresa)\
+            .values('pagare__cxcliente__cxcliente__ctnombre')\
+            .annotate(
+                vencido_mas_90 = Sum('nsaldo', filter=Q(dfechapago__lt = vcdo90) ) 
+                , vencido_90 = Sum('nsaldo', filter=Q(dfechapago__lt = vcdo60
+                    , dfechapago__gte = vcdo90))
+                , vencido_60 = Sum('nsaldo', filter=Q(dfechapago__lt = vcdo30
+                    , dfechapago__gte = vcdo60))
+                , vencido_30 = Sum('nsaldo', filter=Q(dfechapago__lt = datetime.today()
+                    , dfechapago__gte = vcdo30))
+                ,porvencer_30 = Sum('nsaldo', filter=Q(dfechapago__gte = datetime.today()
+                    , dfechapago__lte = xver30))
+                ,porvencer_60 = Sum('nsaldo', filter=Q(dfechapago__gt = xver30
+                    , dfechapago__lte = xver60))
+                ,porvencer_90 = Sum('nsaldo', filter=Q(dfechapago__gt = xver60
+                    , dfechapago__lte = xver90))
+                , porvencer_mas_90 = Sum('nsaldo', filter=Q(dfechapago__gt = xver90) ) 
+                , total = Sum('nsaldo')
+                )\
+            .order_by()
+
+class Pagare_detalle(ClaseModelo):
+    pagare = models.ForeignKey(Pagares, on_delete=models.CASCADE)
+    ncuota = models.SmallIntegerField()
+    dfechapago = models.DateField()
+    ninteres = models.DecimalField(max_digits=15, decimal_places=2)
+    ncapital = models.DecimalField(max_digits=15, decimal_places=2)
+    nsaldo = models.DecimalField(max_digits=15, decimal_places=2)
+    nsaldointeres = models.DecimalField(max_digits=15, decimal_places=2)
+    dultimacobranza = models.DateTimeField(null=True) 
+    cxestado = models.CharField(max_length=1, default="A") 
+
+    objects = Cuotas_pagare_Manager()
+
+    def __str__(self):
+        return "# {}".format(self.ncuota)
+    
+    def valor_cuota(self):
+        return self.ncapital + self.ninteres
+
+    def dias_vencidos(self):
+        return (date.today() - self.dfechapago)/timedelta(days=1)
+

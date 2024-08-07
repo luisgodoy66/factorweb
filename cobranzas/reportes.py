@@ -11,7 +11,7 @@ from django.contrib.staticfiles import finders
 from .models import  Documentos_cabecera, Documentos_detalle, Liquidacion_cabecera\
         , Liquidacion_detalle, Recuperaciones_cabecera, Recuperaciones_detalle\
         , Cheques, Cheques_protestados, Cargos_cabecera, Cargos_detalle\
-        , DebitosCuentasConjuntas
+        , DebitosCuentasConjuntas, Pagare_cabecera, Pagare_detalle
 from operaciones.models import Notas_debito_cabecera, Notas_debito_detalle
 from bases.models import Usuario_empresa
 from empresa.models import Tasas_factoring
@@ -532,19 +532,31 @@ def ImpresionCobranzaCargos(request, cobranza_id):
        return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
-def ImpresionProtestosPendientes(request):
+def ImpresionProtestosPendientes(request, id_cliente = None):
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
      
-    protestos = Cheques_protestados.objects.protestos_pendientes(id_empresa.empresa)
+    if id_cliente:         
+        protestos = Cheques_protestados.objects\
+            .protestos_pendientes_cliente(id_empresa.empresa, id_cliente)
+
+        tot_cobro = Cheques_protestados.objects\
+            .filter(empresa = id_empresa.empresa, leliminado = False
+                    , nsaldocartera__gt=0, cheque__cxparticipante = id_cliente)\
+                .aggregate(total_cartera = Sum('nvalorcartera')
+                        , total_saldo = Sum('nsaldocartera'))
+
+    else:
+        protestos = Cheques_protestados.objects\
+            .protestos_pendientes(id_empresa.empresa)
+
+        # totalizar el campo nsaldocartera de la tabla cheques_protestados
+        tot_cobro = Cheques_protestados.objects\
+            .filter(empresa = id_empresa.empresa, leliminado = False, nsaldocartera__gt=0)\
+                .aggregate(total_cartera = Sum('nvalorcartera')
+                        , total_saldo = Sum('nsaldocartera'))
 
     template_path = 'cobranzas/protestos_reporte.html'
-
-    # totalizar el campo nsaldocartera de la tabla cheques_protestados
-    tot_cobro = Cheques_protestados.objects\
-        .filter(empresa = id_empresa.empresa, leliminado = False, nsaldocartera__gt=0)\
-            .aggregate(total_cartera = Sum('nvalorcartera')
-                       , total_saldo = Sum('nsaldocartera'))
 
     context={
         "protestos" : protestos,
@@ -844,3 +856,98 @@ def ImpresionDetalleRecuperaciones(request, desde, hasta, clientes = None):
     if pisa_status.err:
        return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
+
+def ImpresionCobranzaCuota(request, cobranza_id):
+    detalle = {}
+    template_path = 'cobranzas/cobranzas_cuota_reporte.html'
+    forma_cobro = ''
+    datos_deposito='N/A'
+    codigo_forma = ''
+    fecha_protesto=''
+    motivo_protesto=''
+    nd_protesto = 0
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    # tomar el codigo de asignacion grabado en la solicitud
+    cobranza = Pagare_cabecera.objects.filter(id= cobranza_id).first()
+    
+    if not cobranza:
+        return HttpResponse("no encontró cobranza ")
+
+    # cuando la forma de pago es DEP es deposito de accesorios y de ahí debe
+    # tomar la fecha de vencimiento
+    detalle = Pagare_detalle.objects\
+        .filter(cobranza = cobranza_id, leliminado = False)
+
+    codigo_forma = cobranza.cxformapago
+
+    # cargar forma de cobro
+    if cobranza.cxformapago=="MOV":
+        forma_cobro = 'Movimiento contable'
+    else:
+        forma_cobro = 'Cliente '
+
+    if cobranza.cxformapago=="EFE":
+        forma_cobro += "paga en efectivo"
+    if cobranza.cxformapago=="TRA":
+        forma_cobro += 'transfiere de ' + cobranza.cxcuentatransferencia.__str__()
+    if cobranza.cxformapago=="CHE":
+        forma_cobro += 'emite cheque ' + cobranza.cxcheque.__str__()
+    if cobranza.cxformapago=="DEP":
+        forma_cobro = 'Se depositó accesorio ' + cobranza.cxcheque.__str__()
+    
+    if cobranza.cxformapago != "MOV":
+        datos_deposito = cobranza.ddeposito.strftime("%Y-%m-%d")
+        datos_deposito += ' en ' + cobranza.cxcuentadeposito.__str__()
+
+    # totales
+    tot_cobro = detalle.aggregate(Sum('nvalorcobranza'))
+
+    totales = {
+        "cobrado":tot_cobro["nvalorcobranza__sum"]
+        , "aplicado":tot_cobro["nvalorcobranza__sum"]
+    }
+
+    # si cobranza esta protstada, enviar datos del protestp
+    if cobranza.cxestado=='P':
+        cheque = Cheques.objects.filter(pk = cobranza.cxcheque.id).first()
+        protesto = Cheques_protestados.objects.filter(cheque = cheque
+                                                      , leliminado = False).first()
+        if protesto:
+            fecha_protesto = protesto.dprotesto
+            motivo_protesto = protesto.motivoprotesto.ctmotivoprotesto
+            if protesto.notadedebito:
+                nd_protesto = protesto.notadedebito.nvalor
+            else:
+                nd_protesto = None
+
+    context = {
+        "cobranza" : cobranza,
+        "detalle" : detalle,
+        "datos_forma_cobro" : forma_cobro,
+        "datos_deposito" : datos_deposito,
+        "forma_cobro": codigo_forma,
+        "totales": totales,
+        "fecha_protesto": fecha_protesto,
+        "motivo_protesto": motivo_protesto,
+        "nd_protesto":nd_protesto,
+        'empresa': id_empresa.empresa
+    }
+
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="cobranza "' \
+        + str(cobranza.cxcobranza) + ".pdf"
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+

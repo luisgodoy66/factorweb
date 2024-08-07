@@ -4,7 +4,8 @@ from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.contrib.staticfiles import finders
-from .models import Asignacion, Documentos, ChequesAccesorios, Cheques_quitados
+from .models import Asignacion, Documentos, ChequesAccesorios, Cheques_quitados,\
+    Pagares, Pagare_detalle
 from cobranzas.models import Documentos_protestados
 from django.shortcuts import render
 from empresa.models import Tasas_factoring
@@ -143,95 +144,75 @@ def ImpresionAntiguedadCartera(request, ):
     prot_facturas = Documentos_protestados.objects.antigüedad_por_cliente_facturas(id_empresa.empresa)
     prot_accesorios = Documentos_protestados.objects.antigüedad_por_cliente_accesorios(id_empresa.empresa)
     acc_quitados = Cheques_quitados.objects.antigüedad_por_cliente(id_empresa.empresa)
+    pagares = Pagare_detalle.objects.antigüedad_por_cliente(id_empresa.empresa)
 
     total_facturas = Documentos.objects.antigüedad_cartera(id_empresa.empresa)
     total_accesorios = ChequesAccesorios.objects.antigüedad_cartera(id_empresa.empresa)
     total_protestos = Documentos_protestados.objects.antigüedad_cartera(id_empresa.empresa)
     total_quitados = Cheques_quitados.objects.antigüedad_cartera(id_empresa.empresa)
+    total_pagares = Pagare_detalle.objects.antigüedad_cartera(id_empresa.empresa)
 
-    fvm90 = total_facturas['vencido_mas_90'] 
-    fv90 = total_facturas['vencido_90']
-    fv60 = total_facturas['vencido_60']
-    fv30 = total_facturas['vencido_30']
-    fx30 = total_facturas['porvencer_30']
-    fx60 = total_facturas['porvencer_60']
-    fx90 = total_facturas['porvencer_90']
-    fxm90 = total_facturas['porvencer_mas_90']
-    if not fvm90: fvm90=0
-    if not fv90: fv90=0
-    if not fv60: fv60=0
-    if not fv30: fv30=0
-    if not fx30: fx30=0
-    if not fx60: fx60=0
-    if not fx90: fx90=0
-    if not fxm90: fxm90=0
+    fvm90 = total_facturas['vencido_mas_90'] or 0
+    fv90 = total_facturas['vencido_90'] or 0
+    fv60 = total_facturas['vencido_60'] or 0
+    fv30 = total_facturas['vencido_30'] or 0
+    fx30 = total_facturas['porvencer_30'] or 0
+    fx60 = total_facturas['porvencer_60'] or 0
+    fx90 = total_facturas['porvencer_90'] or 0
+    fxm90 = total_facturas['porvencer_mas_90'] or 0
 
-    avm90 = total_accesorios['vencido_mas_90']
-    av90 = total_accesorios['vencido_90']
-    av60 = total_accesorios['vencido_60']
-    av30 = total_accesorios['vencido_30']
-    ax30 = total_accesorios['porvencer_30']
-    ax60 = total_accesorios['porvencer_60']
-    ax90 = total_accesorios['porvencer_90']
-    axm90 = total_accesorios['porvencer_mas_90']
-    if not avm90: avm90=0
-    if not av90: av90 = 0
-    if not av60: av60 = 0
-    if not av30: av30 = 0
-    if not ax30: ax30 = 0
-    if not ax60: ax60 = 0
-    if not ax90: ax90 = 0
-    if not axm90: axm90 = 0
+    avm90 = total_accesorios['vencido_mas_90'] or 0
+    av90 = total_accesorios['vencido_90'] or 0
+    av60 = total_accesorios['vencido_60'] or 0
+    av30 = total_accesorios['vencido_30'] or 0
+    ax30 = total_accesorios['porvencer_30'] or 0
+    ax60 = total_accesorios['porvencer_60'] or 0
+    ax90 = total_accesorios['porvencer_90'] or 0
+    axm90 = total_accesorios['porvencer_mas_90'] or 0
 
-    pvm90 = total_protestos['pvencido_mas_90']
-    pv90 = total_protestos['pvencido_90']
-    pv60 = total_protestos['pvencido_60']
-    pv30 = total_protestos['pvencido_30']
-    px30 = total_protestos['pporvencer_30']
-    px60 = total_protestos['pporvencer_60']
-    px90 = total_protestos['pporvencer_90']
-    pxm90 = total_protestos['pporvencer_mas_90']
-    if not pvm90: pvm90=0
-    if not pv90: pv90 = 0
-    if not pv60: pv60 = 0
-    if not pv30: pv30 = 0
-    if not px30: px30 = 0
-    if not px60: px60 = 0
-    if not px90: px90 = 0
-    if not pxm90: pxm90 = 0
+    pvm90 = total_protestos['pvencido_mas_90'] or 0
+    pv90 = total_protestos['pvencido_90'] or 0
+    pv60 = total_protestos['pvencido_60'] or 0
+    pv30 = total_protestos['pvencido_30'] or 0
+    px30 = total_protestos['pporvencer_30'] or 0
+    px60 = total_protestos['pporvencer_60'] or 0
+    px90 = total_protestos['pporvencer_90'] or 0
+    pxm90 = total_protestos['pporvencer_mas_90'] or 0
 
-    qvm90 = total_quitados['vencido_mas_90'] 
-    qv90 = total_quitados['vencido_90']
-    qv60 = total_quitados['vencido_60']
-    qv30 = total_quitados['vencido_30']
-    qx30 = total_quitados['porvencer_30']
-    qx60 = total_quitados['porvencer_60']
-    qx90 = total_quitados['porvencer_90']
-    qxm90 = total_quitados['porvencer_mas_90']
-    if not qvm90: qvm90=0
-    if not qv90: qv90=0
-    if not qv60: qv60=0
-    if not qv30: qv30=0
-    if not qx30: qx30=0
-    if not qx60: qx60=0
-    if not qx90: qx90=0
-    if not qxm90: qxm90=0
+    qvm90 = total_quitados['vencido_mas_90']  or 0
+    qv90 = total_quitados['vencido_90'] or 0
+    qv60 = total_quitados['vencido_60'] or 0
+    qv30 = total_quitados['vencido_30'] or 0
+    qx30 = total_quitados['porvencer_30'] or 0
+    qx60 = total_quitados['porvencer_60'] or 0
+    qx90 = total_quitados['porvencer_90'] or 0
+    qxm90 = total_quitados['porvencer_mas_90'] or 0
+
+    cvm90 = total_pagares['vencido_mas_90']  or 0
+    cv90 = total_pagares['vencido_90'] or 0
+    cv60 = total_pagares['vencido_60'] or 0
+    cv30 = total_pagares['vencido_30'] or 0
+    cx30 = total_pagares['porvencer_30'] or 0
+    cx60 = total_pagares['porvencer_60'] or 0
+    cx90 = total_pagares['porvencer_90'] or 0
+    cxm90 = total_pagares['porvencer_mas_90'] or 0
 
     template_path = 'operaciones/cartera_reporte.html'
 
     context = {
-        "documentos" : facturas.union(accesorios, prot_facturas, prot_accesorios, acc_quitados),
-        "totalvm90"  : fvm90+avm90+pvm90+qvm90,
-        "totalv90"   : fv90+av90+pv90+qv90,
-        "totalv60"   : fv60+av60+pv60+qv60,
-        "totalv30"   : fv30+av30+pv30+qv30,
-        "totalx30"   : fx30+ax30+px30+qx30,
-        "totalx60"   : fx60+ax60+px60+qx60,
-        "totalx90"   : fx90+ax90+px90+qx90,
-        "totalxm90"  : fxm90+axm90+pxm90+qxm90,
+        "documentos" : facturas.union(accesorios, prot_facturas, prot_accesorios, acc_quitados, pagares),
+        "totalvm90"  : fvm90+avm90+pvm90+qvm90+cvm90,
+        "totalv90"   : fv90+av90+pv90+qv90+cv90,
+        "totalv60"   : fv60+av60+pv60+qv60+cv60,
+        "totalv30"   : fv30+av30+pv30+qv30+cv30,
+        "totalx30"   : fx30+ax30+px30+qx30+cx30,
+        "totalx60"   : fx60+ax60+px60+qx60+cx60,
+        "totalx90"   : fx90+ax90+px90+qx90+cx90,
+        "totalxm90"  : fxm90+axm90+pxm90+qxm90+cxm90,
         "total" : fvm90+fv90+fv60+fv30+avm90+av90+av60+av30+pvm90+pv90+pv60+pv30
                 +fxm90+fx90+fx60+fx30+axm90+ax90+ax60+ax30+pxm90+px90+px60+px30
-                +qvm90+qv90+qv60+qv30+qx30+qx60+ax90+qxm90,
+                +qvm90+qv90+qv60+qv30+qx30+qx60+ax90+qxm90
+                +cvm90+cv90+cv60+cv30+cx30+cx60+cx90+cxm90,
         'empresa': id_empresa.empresa,
                 }
 
@@ -410,6 +391,86 @@ def ImpresionResumenAsignaciones(request, desde, hasta, clientes=None):
 
     total = cartera.aggregate(total = Sum('nvalor'))
 
+    context={
+        "detalle" : cartera,
+        'empresa': id_empresa.empresa,
+        'total': total['total']
+    }
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+def ImpresionPagare(request, pagare_id):
+    pagare = Pagares.objects.filter(id = pagare_id).first()
+    cuotas = {}
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    template_path = 'operaciones/pagare_reporte.html'
+
+    cuotas = Pagare_detalle.objects\
+        .filter(leliminado = False, pagare = pagare)\
+        .order_by('ncuota')
+                
+    
+    context = {
+        "pagare" : pagare,
+        "cuotas" : cuotas,
+        'total': pagare.valor_total(),
+        'empresa': id_empresa.empresa,
+    }
+
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="asgn"' + str(pagare_id) + ".pdf"
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(
+       html, dest=response, link_callback=link_callback)
+    # if error then show some funny view
+    if pisa_status.err:
+       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+def ImpresionPagaresPendientes(request, clientes=None):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    total = 0
+    template_path = 'operaciones/detalle_pagarespendientes_reporte.html'
+    arr_clientes = []
+    
+    if clientes != None:
+        ids = clientes.split(',')
+        for id in ids:
+            arr_clientes.append(id)
+
+    if clientes == None:
+        cartera = Pagare_detalle.objects\
+            .filter(empresa = id_empresa.empresa
+                    , leliminado = False, nsaldo__gt = 0)\
+            .order_by('pagare_cxcliente__cxcliente__ctnombre')
+    else:
+        cartera = Pagare_detalle.objects\
+            .filter(empresa = id_empresa.empresa
+                    , leliminado = False, nsaldo__gt = 0
+                    , pagare__cxcliente__in = arr_clientes)\
+            .order_by('pagare__cxcliente__cxcliente__ctnombre')
+
+    total = cartera.aggregate(total = Sum('nsaldo'))
+    
     context={
         "detalle" : cartera,
         'empresa': id_empresa.empresa,

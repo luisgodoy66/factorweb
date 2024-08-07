@@ -148,17 +148,17 @@ class MaestroMovimientosForm(forms.ModelForm):
             , 'cxmovimientopadre':'Movimiento padre'}
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         nuevo = kwargs.pop('nuevo', False)
+        super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        # if nuevo:
-        #     self.fields['cxmovimiento'].widget.attrs['readonly']=False
-        # else:
-        #     self.fields['cxmovimiento'].widget.attrs['readonly']=True
+        if nuevo:
+            self.fields['cxmovimiento'].widget.attrs['readonly']=False
+        else:
+            self.fields['cxmovimiento'].widget.attrs['readonly']=True
 
 class CondicionesOperativasForm(forms.ModelForm):
     class Meta:

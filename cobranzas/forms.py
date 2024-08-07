@@ -2,7 +2,8 @@ from pyexpat import model
 from django import forms
 
 from .models import Cheques, Documentos_cabecera, Liquidacion_cabecera\
-    , Cheques_protestados, Recuperaciones_cabecera, Cargos_cabecera
+    , Cheques_protestados, Recuperaciones_cabecera, Cargos_cabecera\
+    , Pagare_cabecera
 from operaciones.models import Motivos_protesto_maestro, ChequesAccesorios
 from empresa.models import Cuentas_bancarias
 from cuentasconjuntas.models import Cuentas_bancarias as Cuentas_compartidas
@@ -306,3 +307,56 @@ class AccesoriosForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
+
+class CobranzasPagareForm(forms.ModelForm):
+
+    class Meta:
+        model=Pagare_cabecera
+        fields=['cxcliente', 'cxformapago'
+            , 'nvalor', 'dcobranza', 'nsobrepago', 'cxcuentadeposito'
+            , 'ddeposito', 'cxcuentatransferencia'
+        ]
+        labels={'cxcliente':'Cliente'
+            , 'cxformapago':'Forma de cobro','nvalor':'Valor recibido'
+            , 'dcobranza':'Fecha de cobro', 'nsobrepago':'Sobrepago'
+            , 'cxcuentadeposito':'Cuenta de la empresa'
+            , 'ddeposito': 'Fecha de depósito'
+            , 'cxcuentatransferencia': 'Cuenta de origen de transferencia'
+        }
+        widgets = {
+            'dcobranza': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+            'ddeposito': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Seleccione una fecha',
+                    'type': 'date'
+                    }
+                    ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+        self.fields['nsobrepago'].widget.attrs['readonly']=True
+        self.fields['dcobranza'].widget.attrs['value']=date.today
+        self.fields['ddeposito'].widget.attrs['value']=date.today
+
+        if empresa:
+            self.fields['cxcuentadeposito'].queryset = Cuentas_bancarias.objects\
+                .filter(empresa=empresa, lactiva = True, leliminado = False)
+
+    def clean_ddeposito(self):
+        data = self.cleaned_data['ddeposito']
+
+        return data

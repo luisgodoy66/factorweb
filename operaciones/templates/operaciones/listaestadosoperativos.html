@@ -1,4 +1,6 @@
 {% extends 'bases/home.html' %}
+{% load humanize %}
+{% block title %}Estados operativos de clientes{% endblock %}
 {% block breadcrumbs %}
     <div class="col-sm-8">
         <div class="page-header float-right">
@@ -65,9 +67,9 @@
                             <td>{{ item }}</td>
                             <td>{{ item.datos_operativos.get.cxclase }}</td>
                             <td>{{ item.datos_operativos.get.dalta |date:'Y-m-d'}}</td>
-                            <td>{{ item.linea_factoring.get.nvalor }}</td>
-                            <td>{{ item.linea_factoring.get.nutilizado }}</td>
-                            <td>{{ item.linea_factoring.get.disponible }}</td>
+                            <td>{{ item.linea_factoring.get.nvalor|intcomma }}</td>
+                            <td>{{ item.linea_factoring.get.utilizado|intcomma }}</td>
+                            <td>{{ item.linea_factoring.get.disponible|intcomma }}</td>
                             <td>{{ item.linea_factoring.get.porcentaje_disponible }}</td>
                             <td>{{ item.datos_operativos.get.cxestado }}</td>
                             <td>{{ item.datos_operativos.get.dultimanegociacion |date:"Y-m-d"}}</td>

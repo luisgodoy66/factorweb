@@ -174,6 +174,7 @@ class Factura_venta(ClaseModelo):
         ('LC', 'Liquidación de cobranza'),
         ('AP', 'Ampliación de plazo'),
         ('VF', 'Vencimiento de factura'),
+        ('CP', 'Cobro de pagaré')
     )
     cliente = models.ForeignKey(Datos_generales, on_delete=models.RESTRICT)
     puntoemision = models.ForeignKey(Puntos_emision, on_delete=models.RESTRICT)
@@ -339,6 +340,15 @@ class Cuentas_cargosfactoring(ClaseModelo):
                                       , related_name="cuenta_cargotipofactoring")
     cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT)
 
+    def __str__(self):
+        return self.cuenta
+
+class Cuentas_reestructuracion(ClaseModelo):
+    cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT)
+    cuentaporcobrar = models.ForeignKey(Plan_cuentas,on_delete=models.RESTRICT
+                                        , related_name='reestructuracion_cxc')
+    cuentainteres = models.ForeignKey(Plan_cuentas,on_delete=models.RESTRICT
+                                        , related_name='reestructuracion_interes')
     def __str__(self):
         return self.cuenta
 

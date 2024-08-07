@@ -15,7 +15,8 @@ import json
 from .models import Plan_cuentas, Cuentas_especiales, Cuentas_bancos\
     , Cuentas_tiposfactoring, Cuentas_tasasfactoring, Factura_venta\
     , Cuentas_diferidos, Cuentas_provisiones, Diario_cabecera, Transaccion\
-    , Comprobante_egreso, Control_meses, Cuentas_cargosfactoring
+    , Comprobante_egreso, Control_meses, Cuentas_cargosfactoring\
+    , Cuentas_reestructuracion
 from bases.models import Usuario_empresa
 from solicitudes.models import Asignacion
 from empresa.models import Cuentas_bancarias, Tipos_factoring, Puntos_emision\
@@ -23,7 +24,7 @@ from empresa.models import Cuentas_bancarias, Tipos_factoring, Puntos_emision\
 from operaciones.models import Asignacion as Operacion, Movimientos_maestro\
     , Ampliaciones_plazo_cabecera, Desembolsos
 from cobranzas.models import Liquidacion_cabecera, Documentos_cabecera as Cobranzas\
-    , Cheques_protestados, Recuperaciones_cabecera
+    , Cheques_protestados, Recuperaciones_cabecera, Factura_cuota, Pagare_cabecera
 from cuentasconjuntas.models import Transferencias
 
 from bases.views import enviarPost, SinPrivilegios
@@ -32,7 +33,7 @@ from .forms import CuentasEspecialesForm, CuentasBancosForm, FacturaVentaForm\
     , CuentasTiposFactoringForm, CuentasTasaTiposFactoringForm\
     , ComprobanteEgresoForm, CuentasDiferidoTasaTiposFactoringForm\
     , CuentasProvisionTasaTiposFactoringForm, PlanCuentasForm, DiarioCabeceraForm\
-    , TransaccionForm, CuentasCargoTiposFactoringForm
+    , TransaccionForm, CuentasCargoTiposFactoringForm, CuentasReestructuracionForm
 
 import xml.etree.cElementTree as etree
 from datetime import date, timedelta, datetime
@@ -812,7 +813,8 @@ class PendientesGenerarFacturaView(SinPrivilegios, generic.ListView):
             .filter(leliminado = False, empresa = id_empresa.empresa
                     , lfacturagenerada = False
                     , cxtipofactoring__lgenerafacturaenaceptacion = True)\
-            .values('cxcliente__cxcliente__ctnombre', 'cxasignacion', 'ddesembolso', 'id')\
+            .values('cxcliente__cxcliente__ctnombre', 'cxasignacion'
+                    , 'ddesembolso', 'id')\
             .annotate(tipo_operacion = RawSQL("select 'Asignación'",'')
                       , tipo = RawSQL("select 'LA'",''))\
             .order_by('dregistro')
@@ -820,7 +822,8 @@ class PendientesGenerarFacturaView(SinPrivilegios, generic.ListView):
         cobr=Liquidacion_cabecera.objects\
             .filter(leliminado = False, empresa = id_empresa.empresa
                     , lfacturagenerada = False)\
-            .values('cxcliente__cxcliente__ctnombre', 'cxliquidacion', 'ddesembolso', 'id')\
+            .values('cxcliente__cxcliente__ctnombre', 'cxliquidacion'
+                    , 'ddesembolso', 'id')\
             .annotate(tipo_operacion = RawSQL("select 'Liquidación de cobranza'",'')
                       , tipo = RawSQL("select 'LC'",''))\
             .order_by('dregistro')
@@ -828,12 +831,22 @@ class PendientesGenerarFacturaView(SinPrivilegios, generic.ListView):
         ampl=Ampliaciones_plazo_cabecera.objects\
             .filter(leliminado = False, empresa = id_empresa.empresa
                     , lfacturagenerada = False)\
-            .values('cxcliente__cxcliente__ctnombre', 'notadebito__cxnotadebito', 'dregistro', 'id')\
+            .values('cxcliente__cxcliente__ctnombre', 'notadebito__cxnotadebito'
+                    , 'dregistro', 'id')\
             .annotate(tipo_operacion = RawSQL("select 'Ampliación de plazo'",'')
                       , tipo = RawSQL("select 'AP'",''))\
             .order_by('dregistro')
         
-        return asgn.union(cobr,ampl)
+        paga=Factura_cuota.objects\
+            .filter(leliminado = False, empresa = id_empresa.empresa
+                    , lfacturagenerada = False)\
+            .values('cuota__pagare__cxcliente__cxcliente__ctnombre', 'cobranzacuota__cobranza__cxcobranza'
+                    , 'dregistro', 'id')\
+            .annotate(tipo_operacion = RawSQL("select 'Cobro de pagaré'",'')
+                      , tipo = RawSQL("select 'CP'",''))\
+            .order_by('dregistro')
+
+        return asgn.union(cobr,ampl, paga)
     
     def get_context_data(self, **kwargs):
         context = super(PendientesGenerarFacturaView, self).get_context_data(**kwargs)
@@ -1298,6 +1311,64 @@ class DesbloquearMes(SinPrivilegios, generic.TemplateView):
 
         return context
 
+class CuentasReestructuracionNew(SinPrivilegios, generic.CreateView):
+    model = Cuentas_reestructuracion
+    template_name = "contabilidad/datoscuentasreestructuracion_form.html"
+    context_object_name='cuentas'
+    form_class = CuentasReestructuracionForm
+    success_url= reverse_lazy("contabilidad:listacuentascontables")
+    login_url = 'bases:login'
+    permission_required="contabilidad.change_cuentas_reestructuracion"
+
+    def form_valid(self, form):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
+        form.instance.cxusuariocrea = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(CuentasReestructuracionNew, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super(CuentasReestructuracionNew, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+
+class CuentasReestructuracionEdit(SinPrivilegios, generic.UpdateView):
+    model = Cuentas_reestructuracion
+    template_name='contabilidad/datoscuentasreestructuracion_form.html'
+    context_object_name='cuentas'
+    form_class = CuentasReestructuracionForm
+    success_url= reverse_lazy("contabilidad:listacuentascontables")
+    login_url = 'bases:login'
+    permission_required="contabilidad.change_cuentas_reestructuracion"
+
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+
+        context = super(CuentasReestructuracionEdit, self).get_context_data(**kwargs)
+        # context["id"]=pk
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super(CuentasReestructuracionEdit, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+    
 @login_required(login_url='/login/')
 @permission_required('contabilidad.view_cuentas_especiales', login_url='bases:sin_permisos')
 def BuscarCuentasEspeciales(request):
@@ -1350,7 +1421,7 @@ def GenerarFactura(request, pk, tipo, operacion):
         documento_origen = Operacion.objects.get(id=pk)
         valor_gao = documento_origen.ngao
         valor_dc = documento_origen.ndescuentodecartera
-        valor_iva=documento_origen.niva
+        # valor_iva=documento_origen.niva
         desembolso=documento_origen.ddesembolso
 
     if tipo == 'LC':
@@ -1359,20 +1430,19 @@ def GenerarFactura(request, pk, tipo, operacion):
         valor_dc = documento_origen.ndescuentodecartera
         valor_dcv = documento_origen.ndescuentodecarteravencido
         valor_gaoa = documento_origen.ngaoa
-        valor_iva=documento_origen.niva
+        # valor_iva=documento_origen.niva
         desembolso=documento_origen.ddesembolso
 
     if tipo == 'AP':
         documento_origen = Ampliaciones_plazo_cabecera.objects.get(id=pk)
         valor_gaoa = documento_origen.ncomision
         valor_dcv = documento_origen.ndescuentodecartera
-        valor_iva=documento_origen.niva
+        # valor_iva=documento_origen.niva
         desembolso=documento_origen.notadebito.dnotadebito
 
-    id_operacion = documento_origen.id    
-    id_cliente = documento_origen.cxcliente
-    porc_iva = documento_origen.nporcentajeiva
-    cliente = documento_origen.cxcliente.cxcliente.ctnombre
+    if tipo == 'CP':
+        documento_origen = Factura_cuota.objects.get(id=pk)
+        desembolso=documento_origen.cobranzacuota.cobranza.dcobranza
 
     if tipo == 'AP':
         if gao.lcargaiva:
@@ -1393,6 +1463,19 @@ def GenerarFactura(request, pk, tipo, operacion):
         base_iva = documento_origen.nbaseiva
         base_no_iva = documento_origen.nbasenoiva
 
+    if tipo == 'CP':
+        id_operacion = documento_origen.id
+        id_cliente = documento_origen.cuota.pagare.cxcliente
+        porc_iva = 15
+        cliente = documento_origen.cuota.pagare.cxcliente.cxcliente.ctnombre
+    else:
+        id_operacion = documento_origen.id  
+        id_cliente = documento_origen.cxcliente
+        porc_iva = documento_origen.nporcentajeiva
+        cliente = documento_origen.cxcliente.cxcliente.ctnombre
+
+    valor_iva = round(base_iva  * porc_iva / 100, 2)
+
     if request.method=='GET':
 
         e = {
@@ -1400,7 +1483,7 @@ def GenerarFactura(request, pk, tipo, operacion):
             'demision': desembolso,
             'cxestado':'A',
             'niva' : valor_iva,
-            'nvalor':valor_gao + valor_dc + valor_dcv + valor_gaoa + valor_iva,
+            'nvalor':base_iva + base_no_iva + valor_iva,
             'nbaseiva':base_iva,
             'nbasenoiva':base_no_iva,
             'nporcentajeiva':porc_iva,
@@ -1539,14 +1622,25 @@ def GenerarFacturaDiario(request):
     porcentaje_iva = objeto["porcentaje_iva"]
     secuencia = objeto["secuencia"]
 
-    resultado=enviarPost("CALL uspGenerarFacturaContabilidad( '{0}',{1},{2},{3}\
-                         ,{4},{5},{6},'{7}',{8}\
-                         ,{9},{10},{11},'{12}'\
-                         ,{13},{14}, {15},'',0)"
-        .format(pstipo_operacion,pid_operacion,pid_puntoemision,pid_cliente\
-                , pnbase_iva, pnbase_noiva, pniva, psconcepto, pngao\
-            ,pndescuentocartera, pngaoa, pndescuentocarteravencido, pdemision
-            , porcentaje_iva, nusuario, secuencia))
+    if pstipo_operacion != 'CP':
+        resultado=enviarPost("CALL uspGenerarFacturaContabilidad( '{0}',{1},{2},{3}\
+                            ,{4},{5},{6},'{7}',{8}\
+                            ,{9},{10},{11},'{12}'\
+                            ,{13},{14}, {15},'',0)"
+            .format(pstipo_operacion,pid_operacion,pid_puntoemision,pid_cliente\
+                    , pnbase_iva, pnbase_noiva, pniva, psconcepto, pngao\
+                ,pndescuentocartera, pngaoa, pndescuentocarteravencido, pdemision
+                , porcentaje_iva, nusuario, secuencia))
+    else:
+        resultado=enviarPost("CALL uspGenerarFacturaContabilidadCobroCuota( '{0}'\
+                             ,{1},{2},{3}\
+                            ,{4},{5},{6},'{7}','{8}'\
+                            ,{9},{10}, {11},'',0)"
+            .format(pstipo_operacion
+                    , pid_operacion,pid_puntoemision,pid_cliente
+                    , pnbase_iva, pnbase_noiva, pniva, psconcepto, pdemision
+                , porcentaje_iva, nusuario, secuencia))
+
     return HttpResponse(resultado)
 
 def GenerarEgresoDiario(request):
@@ -1898,16 +1992,59 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     if desde == 'None':
-        cobranzas = Cobranzas.objects\
+        cartera = Cobranzas.objects\
             .filter(lcontabilizada = False, leliminado = False
-                    ,empresa = id_empresa.empresa).order_by('dcobranza')
+                    , empresa = id_empresa.empresa)\
+            .values('dcobranza', 'id', 'cxcobranza', 'nsobrepago'
+                    ,'cxcliente__cxcliente__ctnombre'
+                    ,'nvalor'
+                    , 'cxcuentadeposito__cxbanco__ctbanco'
+                    , 'cxcuentadeposito__cxcuenta'
+                    , 'ldepositoencuentaconjunta'
+                    ,'cxtipofactoring__ctabreviacion'
+                    )
+        
+        cobrocuotas = Pagare_cabecera.objects\
+            .filter(lcontabilizada = False, leliminado = False
+                    , empresa = id_empresa.empresa)\
+            .values('dcobranza', 'id', 'cxcobranza', 'nsobrepago'
+                    ,'cxcliente__cxcliente__ctnombre'
+                    ,'nvalor'
+                    , 'cxcuentadeposito__cxbanco__ctbanco'
+                    , 'cxcuentadeposito__cxcuenta'
+                    )\
+            .annotate(depositoencuentaconjunta = RawSQL("select False",'')
+                        ,tipo=RawSQL("select 'PAGARE'",'')
+                        )
+                    
     else:
-        cobranzas = Cobranzas.objects\
+        cartera = Cobranzas.objects\
             .filter(lcontabilizada = False, leliminado = False
                     , dcobranza__gte = desde, dcobranza__lte = hasta
                     , empresa = id_empresa.empresa)\
-            .order_by('dcobranza')
-        
+            .values('dcobranza', 'id', 'cxcobranza', 'nsobrepago'
+                    ,'cxcliente__cxcliente__ctnombre'
+                    ,'nvalor'
+                    , 'cxcuentadeposito__cxbanco__ctbanco'
+                    , 'cxcuentadeposito__cxcuenta'
+                    , 'ldepositoencuentaconjunta'
+                    ,'cxtipofactoring__ctabreviacion'
+                    )
+
+        cobrocuotas = Pagare_cabecera.objects\
+            .filter(lcontabilizada = False, leliminado = False
+                    , empresa = id_empresa.empresa)\
+            .values('dcobranza', 'id', 'cxcobranza', 'nsobrepago'
+                    ,'cxcliente__cxcliente__ctnombre'
+                    ,'nvalor'
+                    , 'cxcuentadeposito__cxbanco__ctbanco'
+                    , 'cxcuentadeposito__cxcuenta'
+                    )\
+            .annotate(depositoencuentaconjunta = RawSQL("select False",'')
+                        ,tipo=RawSQL("select 'PAGARE'",'')
+                        )
+    cobranzas = cartera.union(cobrocuotas).order_by('dcobranza')    
+
     tempBlogs = []
     for i in range(len(cobranzas)):
         tempBlogs.append(GeneraListaCobranzasJSONSalida(cobranzas[i])) 
@@ -1924,17 +2061,18 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
 def GeneraListaCobranzasJSONSalida(cobranza):
     output = {}
 
-    output["id"] = cobranza.id
-    output["Fecha"] = cobranza.dcobranza.strftime("%Y-%m-%d")
-    output["Cliente"] = cobranza.cxcliente.cxcliente.ctnombre
-    output["Valor"] = cobranza.nvalor
-    output["TipoFactoring"] = cobranza.cxtipofactoring.ctabreviacion
-    if cobranza.ldepositoencuentaconjunta:
+    output["id"] = cobranza['id']
+    output["Fecha"] = cobranza['dcobranza'].strftime("%Y-%m-%d")
+    output["Cliente"] = cobranza['cxcliente__cxcliente__ctnombre']
+    output["Valor"] = cobranza['nvalor']
+    output["TipoFactoring"] = cobranza['cxtipofactoring__ctabreviacion']
+    if cobranza['ldepositoencuentaconjunta']:
         output["Deposito"] = 'Cuenta del cliente'
     else:
-        output["Deposito"] = cobranza.cxcuentadeposito.__str__()
-    output["Cobranza"] = cobranza.cxcobranza
-    output["Sobrepago"] = cobranza.nsobrepago
+        output["Deposito"] = cobranza['cxcuentadeposito__cxbanco__ctbanco'] \
+            + ' Cta # ' + cobranza['cxcuentadeposito__cxcuenta']  
+    output["Cobranza"] = cobranza['cxcobranza']
+    output["Sobrepago"] = cobranza['nsobrepago']
 
     return output
 
@@ -2057,6 +2195,8 @@ def GeneraListaFacturasJSON(request, desde = None, hasta= None):
 
 def GeneraListaFacturasJSONSalida(transaccion):
     output = {}
+    op = None
+
     output['id'] = transaccion.id
     output["Cliente"] = transaccion.cliente.cxcliente.ctnombre
     output["Registro"] = transaccion.dregistro.strftime("%Y-%m-%d")
@@ -2077,6 +2217,8 @@ def GeneraListaFacturasJSONSalida(transaccion):
         op = Ampliaciones_plazo_cabecera.objects.filter(pk = id_origen).first()
     elif transaccion.cxtipooperacion == 'VF':
         op = Operacion.objects.filter(pk = id_origen).first()
+    elif transaccion.cxtipooperacion == 'CP':
+        op = Factura_cuota.objects.filter(pk = id_origen).first()
     if op:
         output["Operacion"] = op.__str__()
     
@@ -2264,4 +2406,14 @@ def DesbloqueoDeMes(request, año, mes):
         .format(año, mes, nusuario, id_empresa.empresa.id))
     
     return HttpResponse(resultado)
+
+@login_required(login_url='/login/')
+@permission_required('contabilidad.view_cuentas_especiales', login_url='bases:sin_permisos')
+def BuscarCuentasReestructuracion(request):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    pk = Cuentas_reestructuracion.objects.filter(empresa = id_empresa.empresa).first()
+    if pk:
+        return redirect("contabilidad:asignarcuentascontablesreestructuracion_editar", pk=pk.id)
+    else:
+        return redirect("contabilidad:asignarcuentascontablesreestructuracion_nueva")
 

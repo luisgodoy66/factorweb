@@ -55,7 +55,7 @@ class Documentos(ClaseModelo):
         , on_delete=models.CASCADE
     )
     cxcomprador=models.CharField(max_length=13) 
-    ctcomprador = models.CharField(max_length=60)
+    ctcomprador = models.CharField(max_length=100)
     ctserie1=models.CharField(max_length=3, null=True)
     ctserie2=models.CharField(max_length=3, null=True)
     ctdocumento = models.CharField(max_length=9) 

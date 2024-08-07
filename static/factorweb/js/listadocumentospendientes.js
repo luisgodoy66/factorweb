@@ -42,9 +42,9 @@ window.onload=function(){
         }
     )
 
-    $table.on('all.bs.table', function (e, name, args) {
-      console.log(name, args)
-    })
+    // $table.on('all.bs.table', function (e, name, args) {
+    //   console.log(name, args)
+    // })
 
     // acciones ejecutada sobre registros seleccionados
     $cobroconcheque.click(function () {
@@ -122,8 +122,15 @@ function CobroDeDocumentos(forma){
           return Math.round((sum + i + Number.EPSILON) * 100) / 100;
       }, 0)
 
-    url = '/cobranzas/cobrodedocumentos/'+ids+'/'+total_cartera+'/'+forma+'/'
+    // dependiendo si es factoring o pagare cargar la pantalla correspondiente
+    if (tipo_factoring == 'PAGARE'){
+      url = '/cobranzas/cobrodecuotas/'+ids+'/'+total_cartera+'/'+forma+'/'
+      +id_cliente+'/'+por_vencer;
+    }
+    else{
+      url = '/cobranzas/cobrodedocumentos/'+ids+'/'+total_cartera+'/'+forma+'/'
       +id_cliente+'/'+un_solo_comprador+'/'+id_comprador+'/'+tipo_factoring+'/'+por_vencer;
+    }
     
     location.href=url
   }

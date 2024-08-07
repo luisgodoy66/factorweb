@@ -1,7 +1,7 @@
 from django.urls import URLPattern, path
 
 from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
-    DatosOperativos, AsignacionesConsulta, \
+    DatosOperativos, AsignacionesConsulta, PagaresView,\
     AceptarAsignacion, DetalleCargosAsignacion, MaestroMovimientosView, \
     SumaCargos, AceptarDocumentos,MaestroMovimientosView, MaestroMovimientoNew, \
     MaestroMovimientoEdit, CondicionesOperativasView, DatosCondicionesOperativas,\
@@ -17,12 +17,13 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     CondicionesOperativasUpdate, DatosCondicionOperativaNueva, DesembolsosConsulta,\
     GeneraListaDesembolsosJSON, CondicionesOperativasInactivar,\
     ConsultaAnexosActivos, GenerarAnexo, GeneraResumenCarteraNegociadaJSON, \
-    MarcarAnexoGenerado, IngresosGeneradosJSON
+    MarcarAnexoGenerado, IngresosGeneradosJSON, PedirArchivoXML, ImportarOperacion,\
+    ReversaAceptacionPagare
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
-    ImpresionAntiguedadCartera, ImpresionFacturasPendientes,\
-    ImpresionAccesoriosPendientes, ImpresionResumenAsignaciones
+    ImpresionAntiguedadCartera, ImpresionFacturasPendientes, ImpresionPagare,\
+    ImpresionAccesoriosPendientes, ImpresionResumenAsignaciones, ImpresionPagaresPendientes
 
 urlpatterns = [
 # datos operativos
@@ -104,8 +105,6 @@ urlpatterns = [
          , name="asignaciones_json"),
     path('asignacionesregistradasjson/<desde>/<hasta>',GeneraListaAsignacionesRegistradasJSON
         , name="asignacionesregistradas_json"),
-    path('impresioncartera', ImpresionAntiguedadCartera
-         , name='antigüedad_por_cliente'),
     path('impresioncarterapendiente/<clientes>', ImpresionFacturasPendientes
          , name='detalle_facturas_pendientes'),
     path('impresioncarterapendiente/', ImpresionFacturasPendientes
@@ -125,6 +124,8 @@ urlpatterns = [
     path('antigüedadcartera', GeneraResumenAntigüedadCarteraJSON),
     path('carteranegociada/<int:año>', GeneraResumenCarteraNegociadaJSON),
     path('ingresosgenerados/<int:año>', IngresosGeneradosJSON),
+    path('impresioncartera', ImpresionAntiguedadCartera
+         , name='antigüedad_por_cliente'),
 # desembolsos
     path('listaasignacionespendientesdesembolsar/',AsignacionesPendientesDesembolsarView.as_view(), \
         name='listaasignacionespendientesdesembolsar'),
@@ -134,5 +135,13 @@ urlpatterns = [
         , name='consulta_desembolsos'),
     path('desembolsosjson/<desde>/<hasta>',GeneraListaDesembolsosJSON
         , name="desembolsos_json"),
-        
-    ]
+# pagares
+    path('pagares/',PagaresView.as_view(), name="listapagares"),
+    path('reversaraceptacionpagare/<int:pid_asignacion>',ReversaAceptacionPagare),
+    path('importarxml',PedirArchivoXML, name='importar_xml'),
+    path('importaroperacion',ImportarOperacion, name='importar_xml_pagare'),
+    path("reportepagare/<int:pagare_id>",ImpresionPagare, 
+        name='reporte_pagare'),
+    path('impresionpagarespendientes/<clientes>', ImpresionPagaresPendientes
+         , name='detalle_pagares_pendientes'),
+]

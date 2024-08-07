@@ -10,7 +10,8 @@ from bases.models import ClaseModelo
 from empresa.models import Datos_participantes , Tipos_factoring, Cuentas_bancarias
 from clientes import models as Cliente_models
 from operaciones.models import Documentos, ChequesAccesorios\
-    , Cargos_detalle as Operaciones_cargos, Motivos_protesto_maestro
+    , Cargos_detalle as Operaciones_cargos, Motivos_protesto_maestro\
+    , Pagare_detalle as Cuotas    
 from cuentasconjuntas import models as CuentasConjuntasModels
 
 class Cheques(ClaseModelo):
@@ -252,11 +253,43 @@ class Protestos_Manager(models.Manager):
                     ,'cheque__cheque_cobranza__ddeposito'
                     ,'cheque__ctgirador','dprotesto'
                     ,'motivoprotesto__ctmotivoprotesto'
+                    ,'nvalor','nsaldocartera','nvalorcartera', 'cheque__cxparticipante'
+                    )
+        rp = self.filter(nsaldocartera__gt=0
+                         , leliminado = False
+                         , empresa = id_empresa
+                         , cxtipooperacion='R')\
+            .values('id','cheque__cheque_recuperacion'
+                    ,'cheque__cheque_recuperacion__cxcliente__cxcliente__ctnombre'
+                    ,'cheque__cheque_recuperacion__cxrecuperacion'
+                    ,'cheque__cheque_recuperacion__dcobranza'
+                    ,'cheque__cheque_recuperacion__ddeposito'
+                    ,'cheque__ctgirador','dprotesto'
+                    ,'motivoprotesto__ctmotivoprotesto'
+                    ,'nvalor','nsaldocartera','nvalorcartera', 'cheque__cxparticipante'
+                    )
+        print(cp.union(rp))
+        return cp.union(rp)
+        
+    def protestos_pendientes_cliente(self, id_empresa, id_cliente):
+        cp = self.filter(nsaldocartera__gt=0
+                         , leliminado = False
+                         , empresa = id_empresa
+                         , cheque__cheque_cobranza__cxcliente = id_cliente
+                         , cxtipooperacion='C')\
+            .values('id','cheque__cheque_cobranza'
+                    ,'cheque__cheque_cobranza__cxcliente__cxcliente__ctnombre'
+                    ,'cheque__cheque_cobranza__cxcobranza'
+                    ,'cheque__cheque_cobranza__dcobranza'
+                    ,'cheque__cheque_cobranza__ddeposito'
+                    ,'cheque__ctgirador','dprotesto'
+                    ,'motivoprotesto__ctmotivoprotesto'
                     ,'nvalor','nsaldocartera','nvalorcartera'
                     )
         rp = self.filter(nsaldocartera__gt=0
                          , leliminado = False
                          , empresa = id_empresa
+                         , cheque__cheque_recuperacion__cxcliente = id_cliente
                          , cxtipooperacion='R')\
             .values('id','cheque__cheque_recuperacion'
                     ,'cheque__cheque_recuperacion__cxcliente__cxcliente__ctnombre'
@@ -676,3 +709,76 @@ class DebitosCuentasConjuntas(ClaseModelo):
             return x.cxestado =='L'
         else:
             return False
+
+class Pagare_cabecera(ClaseModelo):
+    FORMAS_DE_PAGO = (
+        ('EFE', 'Efectivo'),
+        ('CHE', 'Cheque'),
+        ('MOV', 'Movimiento contable'),
+        ('TRA', 'Transferencia'),
+        ('DEP', 'Deposito de accesorio'),
+    )
+    cxcobranza = models.CharField(max_length=8, )
+    cxcliente=models.ForeignKey(Cliente_models.Datos_generales
+        , on_delete=models.CASCADE
+        , related_name="cliente_cobranza_pagare"
+    )
+    cxformapago = models.CharField(max_length=3, choices=FORMAS_DE_PAGO)
+    dcobranza = models.DateField(auto_created=True) 
+    nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    nsobrepago = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    cxestado = models.CharField(max_length=1, default='A')
+    cxcheque = models.ForeignKey(Cheques, on_delete=models.RESTRICT
+        , null=True, related_name='cheque_cobranza_pagare')
+    cxcuentatransferencia = models.ForeignKey(Cliente_models.Cuentas_bancarias
+        , null=True, on_delete = models.RESTRICT)
+    cxcuentadeposito = models.ForeignKey(Cuentas_bancarias, on_delete=models.RESTRICT
+        , null = True, related_name="banco_deposito_pagare")
+    # ctreferenciadeposito = models.CharField(max_length=15)
+    ddeposito = models.DateTimeField(null=True) 
+    cxaccesorio = models.ForeignKey(ChequesAccesorios
+        , on_delete = models.RESTRICT, null=True)
+    lcontabilizada = models.BooleanField(default=False, null=True)
+    asiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
+                                     , related_name="asiento_cobranza_pagare"
+                                     , null=True)
+
+    def __str__(self):
+        return self.cxcobranza
+
+    def movimiento(self):
+        # si está protestada debe decir "cobranza protestada"
+        if self.cxestado=='P' :
+            x = 'Cobranza protestada'
+        else:
+            x = 'Cobranza'
+        return x
+    
+class Pagare_detalle(ClaseModelo):
+    cobranza =models.ForeignKey(Pagare_cabecera
+        , on_delete=models.CASCADE
+    )
+    cuota=models.ForeignKey(Cuotas
+        , on_delete=models.CASCADE
+    )
+    nvalorcobranza = models.DecimalField(max_digits=10, decimal_places=2)
+    nvaloraplicainteres = models.DecimalField(max_digits=10, decimal_places=2
+                                              , default=0)
+    nsaldoaldia= models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    accesorioquitado = models.ForeignKey(ChequesAccesorios, on_delete=models.RESTRICT
+                                        , null=True)
+
+    def aplicado_a_capital(self):
+        return self.nvalorcobranza - self.nvaloraplicainteres
+    
+class Factura_cuota(ClaseModelo):
+    cuota=models.ForeignKey(Cuotas
+        , on_delete=models.CASCADE)
+    cobranzacuota=models.ForeignKey(Pagare_detalle
+        , on_delete=models.CASCADE)
+    nbaseiva = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    nbasenoiva = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    lfacturagenerada = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.cobranzacuota.cobranza.cxcobranza

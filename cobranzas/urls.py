@@ -20,12 +20,13 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , DetalleCargosAmpliacionPlazo, GeneraDetalleCargosAmpliacionPlazoJSON\
     , SumaCargos, Prorroga, EditarTasasDocumentoAmpliacionDePlazo\
     , AceptarAmpliacionDePlazo,  GeneraListaAmpliacionesJSON, AmpliacionesConsulta\
-    , ModificarCobranza, GeneraListaFacturasPendientesJSON\
+    , ModificarCobranza, GeneraListaFacturasPendientesJSON, CobranzasCuotasView\
+    , DetalleCuotasJSON, AceptarCobranzaCuota
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos\
     , ImpresionProtestosPendientes, ImpresionAmpliacionDePlazo\
-    , ImpresionDetalleCobranzas, ImpresionDetalleRecuperaciones
+    , ImpresionDetalleCobranzas, ImpresionDetalleRecuperaciones, ImpresionCobranzaCuota
 
 urlpatterns = [
     # cobranzas
@@ -49,6 +50,8 @@ urlpatterns = [
     path('detalledocumentos/<ids_documentos>', DetalleDocumentosFacturasPuras
         , name='detalle_documentos'),
     path('datoscobro/<int:id>/<asgn>/<doc>/<sdo>/<cobro>/<retenido>/<baja>'
+        , DatosCobro ,name='datos_cobro'),
+    path('datoscobro/<int:id>/<asgn>/<doc>/<sdo>/<cobro>/<retenido>/<baja>/<retenciones_y_bajas>'
         , DatosCobro ,name='datos_cobro'),
     path('aceptarcobranza/',AceptarCobranza),
     path('reportecobranzacartera/<int:cobranza_id>',ImpresionCobranzaCartera
@@ -132,6 +135,7 @@ urlpatterns = [
         ,ProtestoRecuperacionNew.as_view(), name='protestorecuperacion'),
     path('reversaprotesto/<int:id_cobranza>/<tipo_operacion>/<int:id_protesto>/<cobranza>/<cliente_id>/<factoring_id>'
          ,ReversaProtesto),
+    path('impresionprotestos/<id_cliente>', ImpresionProtestosPendientes, name='protestos_pendientes'),
     path('impresionprotestos', ImpresionProtestosPendientes, name='protestos_pendientes'),
 
     # notas de debito
@@ -178,4 +182,14 @@ urlpatterns = [
         , name="listafacturaspendientes_json"),
     path('cobrodefacturasdeventa/<ids_documentos>/<total_cargos>/<forma_cobro>/<cliente_id>/<tipo_factoring>/<tipo_deuda>', 
         CobranzasCargosView.as_view(), name='cobro_facturasdeventa'),
+    
+    # pagares
+    path('cobrodecuotas/<ids_documentos>/<total_cartera>/<forma_cobro>'\
+         '/<cliente_ruc>/<por_vencer>', 
+        CobranzasCuotasView.as_view(), name='cobro_cuotas'),
+    path('detallecuotas/<ids_cuotas>', DetalleCuotasJSON
+        , name='detalle_cuotas'),
+    path('aceptarcobranzacuota/',AceptarCobranzaCuota),
+    path('reportecobranzacuota/<int:cobranza_id>',ImpresionCobranzaCuota
+        , name='reporte_cobranza_cuota'),
 ]

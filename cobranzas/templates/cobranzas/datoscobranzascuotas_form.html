@@ -1,0 +1,325 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">cobranzas</a></li>
+                    {% if por_vencer == 'Si' %}
+                        <li><a href="{% url 'cobranzas:listadocumentosporvencer' %}">
+                            cartera por vencer</a></li>
+                    {% else %}
+                        <li><a href="{% url 'cobranzas:listadocumentosvencidos' %}">
+                            Cartera vencida
+                        </a>
+                        </li>
+                    {% endif %}
+                    <li class="active">cobro de cuotas</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmCobranza" enctype="multipart/form-data" 
+    class="form-horizontal">
+    <!-- <div class="col-lg-6"> -->
+    <div class="card">
+            {% csrf_token %}
+        <div class="card-header">
+            <strong>Cobro de cuotas</strong> de {{ cliente }}
+        </div>
+        <div hidden>
+            <input id="documentos" name="documentos" value="{{ documentos }}">
+            <input id="total_cartera" name="total_cartera" value="{{ total_cartera }}">
+            <input id="id_cliente" name="id_cliente" value="{{ cliente_id }}">
+            <input id="forma_cobro" value="{{ forma_cobro }}">
+        </div>
+        <div class="card-body card-block">
+            <!-- lista de clientes -->
+            <div class="row form-group">
+                <div class="col-md-1"><label for="id_dcobranza" 
+                    class=" form-control-label">
+                    {{ form.dcobranza.label}}</label>
+                </div>
+                <div class="col-md-2">
+                    {{ form.dcobranza}}
+                </div>
+
+                <div class="col-md-1">
+                    <label for="id_nvalor" class=" form-control-label">
+                    {{ form.nvalor.label}}</label>
+                </div>
+                <div class="col-md-2 animate__animated animate__shakeX">
+                        {{ form.nvalor}}
+                </div>
+               
+                <div class="col-md-1 "><label for="id_nvalor" 
+                    class=" form-control-label">
+                    {{ form.nsobrepago.label}}</label>
+                </div>
+                <div class="col-md-2">
+                    {{ form.nsobrepago}}
+                </div>
+            </div>
+
+            {% if forma_cobro in 'CHE, TRA' %} 
+
+            <div class="dropdown-divider"></div>
+
+            <div class="row form-group ">
+                <div class="col-md-1">
+                    <label for="id_cxbanco" class=" form-control-label">
+                    {{ form_cheque.cxcuentabancaria.label}}</label>
+                </div>
+                <div class="col-md-5">
+
+                    <div id="div_cuentas_cliente" {% if un_solo_comprador == 'Si'%} hidden {% endif %} %}>
+                        <select data-placeholder="Seleccione una cuenta..." 
+                            class="form-control"  tabindex="1" 
+                            id="cuenta_cliente" name="cuenta_cliente"
+                            >
+                            <option value=""></option>
+                            {% for cuenta in cuentas_bancarias_cliente %}
+                            <option value="{{ cuenta.id}}" >{{ cuenta}} </option>
+                            {% endfor %}
+                        </select>
+                        
+                    </div>
+                </div>
+
+                {% if forma_cobro == 'CHE' %}
+
+                <div class="col-md-1"><label for="id_ctgirador" 
+                    class=" form-control-label">
+                    {{ form_cheque.ctgirador.label}}</label>
+                </div>
+                <div class="col-md-2">
+                    {{ form_cheque.ctgirador}}
+                </div>
+                <div class="col-md-1"><label for="id_ctcheque" 
+                    class=" form-control-label">
+                    {{ form_cheque.ctcheque.label}}</label>
+                </div>
+                <div class="col-md-2">
+                    {{ form_cheque.ctcheque}}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %} 
+
+            <!-- parte inferior -->
+            <!-- <h5 class="heading-title mb-1 mt-3 text-secondary">Detalle de documentos</h5> -->
+
+            <div >
+                <small>
+                        
+                    <table id="table"                      
+                        data-show-columns-toggle-all="true"
+                        data-detail-formatter="detailFormatter"
+                        data-minimum-count-columns="2"
+                        data-id-field="id"
+                        data-unique-id="id"
+                        data-show-footer="true"
+                        data-side-pagination="server"
+                        data-url="{% url 'cobranzas:detalle_cuotas' documentos %}"
+                        >
+                        </table>
+
+                </small>
+
+            </div>
+            <!-- datos de deposito -->
+            <div {% if forma_cobro == 'MOV' %} hidden {% endif %} >
+                <h5 class="heading-title mb-1 text-secondary">Datos del depósito</h5>
+
+                <div class="row form-group mt-3">
+                    <div class="col-md-1"><label for="id_cxcuentadeposito" 
+                        class=" form-control-label">
+                       Cuenta</label>
+                    </div>
+                    <div class="col-md-4">
+                        <div id="div_cuentas_empresa">
+                        {{form.cxcuentadeposito}}
+
+                        </div>
+                    </div>
+
+                    <div class="col-md-2"><label for="id_ddeposito" 
+                        class=" form-control-label">
+                        {{form.ddeposito.label}}</label></div>
+                    <div class="col-md-2">
+                        {{form.ddeposito}}
+                    </div>
+                </div>
+            </div>
+
+        </div>    
+          
+        <div class="card-footer">
+            {% if por_vencer == 'Si' %}
+                <a href="{% url 'cobranzas:listadocumentosporvencer' %}" 
+                class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+            {% else %}
+                <a href="{% url 'cobranzas:listadocumentosvencidos' %}" 
+                class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+            {% endif %}
+            <button class="btn btn-primary btn-sm"  type="button" onclick="AceptarCobranza()">  
+                <i class="fa fa-dot-circle-o"></i> Grabar
+            </button>
+        </div>
+    </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<script>
+var $table = jQuery('#table')
+
+window.onload=function(){
+
+    inicializaValor("id_nvalor",capturaValor("total_cartera"))
+
+    jQuery('#id_nvalor').change(function(){
+        calcular_sobrepago();
+    });
+
+    $table.bootstrapTable({locale:"es-EC"});
+
+    // inicializar tabla
+    initTable();
+
+
+    // // cerrar side bar
+    // CerrarSideBar();
+  
+};
+
+window.operateEvents = {
+    'click .cobrar': function (e, value, row, index) {
+        DatosCobro( row.id, row.Asignacion, row.Documento
+          , row.SaldoActual, row.Cobro)
+    }
+  };
+  
+function operateFormatter(value, row, index) {
+    return [
+        '<a class="cobrar" href="javascript:void(0)" title="Cobro">',
+        '<i class="fa fa-edit"></i>',
+        '</a>'
+    ].join('')
+    }
+
+function initTable() {
+    $table.bootstrapTable('destroy').bootstrapTable({
+      locale: "es-EC",
+      columns: [
+        [{  title: 'Ref.', field: 'id', rowspan: 2
+        , align: 'center', valign: 'middle', sortable: true,
+          }, {title: 'Pagaré', field: 'Asignacion'
+          , rowspan: 2, align: 'center', valign: 'middle', sortable: true,
+          }, {title: 'Cuota', field: 'Documento'
+          , rowspan: 2, align: 'center', valign: 'middle', sortable: true,
+          }, {title: 'Fecha', field: 'Vencimiento'
+          , rowspan: 2, align: 'center', valign: 'middle', sortable: true,
+          }, {title: 'Saldo actual', field: 'SaldoActual'
+          , rowspan: 2, align: 'right', valign: 'middle', sortable: true,
+          }, {title: 'Valores cobrados', colspan: 1, align: 'center',
+          }, {title: 'Saldo', field: 'SaldoFinal',rowspan: 2, align: 'center'
+          }, {field: 'operate', title: 'Acción',rowspan: 2
+          , align: 'center', clickToSelect: false, 
+          events: window.operateEvents, formatter: operateFormatter
+          }],
+        [
+          {title: 'Recibido', field: 'Cobro', sortable: true, align: 'right'
+            ,footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+        }]
+      ]
+      
+    })
+
+  }
+
+function DatosCobro(index, asgn, doc, sdo, cobro){
+    AbrirModal('/cobranzas/datoscobro/'+index+'/'+asgn 
+      +'/'+doc +'/'+sdo+'/'+cobro+'/0/0/No' )
+  }
+
+function calcular_sobrepago(){
+  var seleccion=  $table.bootstrapTable('getData')
+  
+  const total_cobrado = seleccion.map(function(row) {
+      return +row.Cobro.substring(0);
+      }).reduce(function (sum, i) {
+          return Math.round((sum + i + Number.EPSILON) * 100) / 100;
+          }, 0)
+          
+  var sobrepago = capturaValor('id_nvalor') - total_cobrado
+
+  inicializaValor('id_nsobrepago',sobrepago);
+
+}
+
+function AceptarCobranza(){
+  const forma_de_cobro = capturaValor("forma_cobro")
+  var cuenta_bancaria = null 
+
+  mp_deposito = new Map()
+  mp_cheque = new Map()
+
+  if (forma_de_cobro !='MOV'){
+    mp_deposito.set("cuenta_deposito",capturaValor("id_cxcuentadeposito"));    
+    mp_deposito.set("fecha_deposito",capturaValor("id_ddeposito"));    
+  }
+
+  if (forma_de_cobro =="CHE"){
+    mp_cheque.set("numero_cheque", capturaValor("id_ctcheque"));
+    mp_cheque.set("girador", capturaValor("id_ctgirador"));
+  }
+
+  var JSONcheque = JSON.stringify(Object.fromEntries(mp_cheque));
+  var JSONdeposito = JSON.stringify(Object.fromEntries(mp_deposito));
+  var JSONdocumentos= JSON.stringify($table.bootstrapTable('getData'));
+
+  if (forma_de_cobro =='CHE' | forma_de_cobro =='TRA'){
+
+        cuenta_bancaria = capturaValor("cuenta_cliente")}
+
+  MensajeConfirmacion("Grabar cobranza del " + capturaValor("id_dcobranza") +"?"
+    ,function(){
+
+    var objeto={
+      "id_cliente":capturaValor("id_cliente"),
+      "forma_cobro":forma_de_cobro,
+      "fecha_cobro":capturaValor("id_dcobranza"),
+      "valor_recibido": capturaValor("id_nvalor"), 
+      "sobrepago":capturaValor("id_nsobrepago"), 
+      "cuenta_bancaria": cuenta_bancaria,
+      "arr_documentos_cobrados": JSONdocumentos,
+      "arr_cheque": JSONcheque,
+      "arr_deposito": JSONdeposito,
+    }
+
+    fetchPostear("/cobranzas/aceptarcobranzacuota/", objeto, function(data){
+        // regresar a la lista de solicitudes
+        window.location.href = "/cobranzas/listadocumentosporvencer";
+        // en una nueva ventana abrir el reporte de cobranza
+        // hay que saber el id de la cobranza
+         url = window.location.origin
+         url = url + "/cobranzas/reportecobranzacuota/"+data;
+         window.open( url);
+      })
+  })
+     
+}
+ 
+
+</script>
+{% endblock %}

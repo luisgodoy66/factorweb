@@ -1,5 +1,7 @@
 {% extends 'bases/home.html' %}
 {% load static %}
+{% load humanize %}
+{% block title %}Estado operativo{% endblock title %}
 {% block breadcrumbs %}
     <div class="col-sm-8">
         <div class="page-header float-right">
@@ -31,117 +33,150 @@
         </div><!-- /# column -->
    </div>
 
-   <div class="col-lg-3 col-md-6">
-        <div class="card">
-            <div class="card-body">
-                <div class="stat-widget-one">
-                    <div class="stat-icon dib"><i class="ti-money text-success border-success"></i></div>
-                    <div class="stat-content dib">
-                        <div class="stat-text">Monto de línea</div>
-                        <div class="stat-digit">{{ valor_linea}}</div>
+   <div class="row">
+    <div class="col-lg-6 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="stat-widget-one">
+                        <div class="stat-icon dib"><i class="ti-money text-success border-success"></i></div>
+                        <div class="stat-content dib">
+                            <div class="stat-text">Monto de línea</div>
+                            <div class="stat-digit">{{ valor_linea|floatformat:2|intcomma}}</div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+        <!-- </div>
 
-    <div class="col-lg-3 col-md-6">
-        <div class="card">
-            <div class="card-body">
-                <div class="stat-widget-one">
-                    <div class="stat-icon dib"><i class="ti-thumb-up text-primary border-primary"></i></div>
-                    <div class="stat-content dib">
-                        <div class="stat-text">% disponible</div>
-                        <div class="stat-digit">{{ porc_disponible }}%</div>
+        <div class="col-lg-6 col-md-6"> -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="stat-widget-one">
+                        <div class="stat-icon dib"><i class="ti-thumb-up text-primary border-primary"></i></div>
+                        <div class="stat-content dib">
+                            <div class="stat-text">% disponible</div>
+                            <div class="stat-digit">{{ porc_disponible }}%</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-        <div class="card">
-            <div class="card-body">
-                <div class="stat-widget-one">
-                    <div class="stat-icon dib"><i class="ti-time text-warning border-warning"></i></div>
-                    <div class="stat-content dib">
-                        <div class="stat-text">Días sin operar</div>
-                        <div class="stat-digit">{{ dias_ultima_operacion }}</div>
+        <div class="col-lg-6 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="stat-widget-one">
+                        <div class="stat-icon dib"><i class="ti-time text-warning border-warning"></i></div>
+                        <div class="stat-content dib">
+                            <div class="stat-text">Días sin operar</div>
+                            <div class="stat-digit">{{ dias_ultima_operacion }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <!-- </div>
+        <div class="col-lg-6 col-md-6"> -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="stat-widget-one">
+                        <div class="stat-icon dib"><i class="ti-user text-info border-info"></i></div>
+                        <div class="stat-content dib">
+                            <div class="stat-text">Clase</div>
+                            <div class="stat-digit">{{clase}}</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-        <div class="card">
-            <div class="card-body">
-                <div class="stat-widget-one">
-                    <div class="stat-icon dib"><i class="ti-user text-info border-info"></i></div>
-                    <div class="stat-content dib">
-                        <div class="stat-text">Clase</div>
-                        <div class="stat-digit">{{clase}}</div>
+   </div>
+
+    <div class="row">
+       <div class="col-md-6 col-lg-6">
+            <div class="card
+            {% if color_estado == 1 %} 
+                bg-flat-color-1
+            {% elif color_estado == 2 %}
+                bg-flat-color-2
+            {% elif color_estado == 3 %}
+                bg-flat-color-3
+            {% elif color_estado == 4 %}
+                bg-flat-color-4
+            {% elif color_estado == 5 %}
+                bg-flat-color-5
+            {% endif %}
+            text-light">
+                <div class="card-body">
+                    <div class="h4 m-0">{{estado}}</div>
+                    <div>Estado</div>
+                </div>
+            </div>
+        <!-- </div>
+        <div class="col-md-3 col-lg-3"> -->
+        {% if total_reestructuracion > 0 %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="clearfix">
+                        <i class="fa fa-dollar bg-flat-color-4 p-3 font-2xl mr-3 float-left text-light"></i>
+                        <div class="h5 text-secondary mb-0 mt-1">{{total_reestructuracion|intcomma}}</div>
+                        <div class="text-muted text-uppercase font-weight-bold font-xs small">
+                            Reestructuración</div>
+                    </div>
+                    <div class="b-b-1 pt-3"></div>
+                    <hr>
+                    <div class="more-info pt-2" style="margin-bottom:-10px;">
+                        <a class="font-weight-bold font-xs btn-block text-muted small" 
+                        href="{% url 'operaciones:detalle_pagares_pendientes' cliente_id %}"  target="cartera">
+                        Detalle de pagarés pendientes
+                        <i class="fa fa-angle-right float-right font-lg"></i></a>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="col-md-3 col-lg-3">
-        <div class="card
-        {% if color_estado == 1 %} 
-            bg-flat-color-1
-        {% elif color_estado == 2 %}
-            bg-flat-color-2
-        {% elif color_estado == 3 %}
-            bg-flat-color-3
-        {% elif color_estado == 4 %}
-            bg-flat-color-4
-        {% elif color_estado == 5 %}
-            bg-flat-color-5
         {% endif %}
-        text-light">
-            <div class="card-body">
-                <div class="h4 m-0">{{estado}}</div>
-                <div>Estado</div>
+        </div>
+        <div class="col-md-6 col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="clearfix">
+                        <i class="fa fa-dollar 
+                        {% if color_estado == 1 %} 
+                            bg-flat-color-1
+                        {% elif color_estado == 2 %}
+                            bg-flat-color-2
+                        {% elif color_estado == 3 %}
+                            bg-flat-color-3
+                        {% elif color_estado == 4 %}
+                            bg-flat-color-4
+                        {% elif color_estado == 5 %}
+                            bg-flat-color-5
+                        {% endif %}                           
+                        p-3 font-2xl mr-3 float-left text-light"></i>
+                        <div class="h5 text-secondary mb-0 mt-1">{{ total_cartera_protestos|floatformat:2|intcomma }}</div>
+                        <div class="text-muted text-uppercase font-weight-bold font-xs small">
+                            Negociaciones y protestos</div>
+                    </div>
+                    <div class="b-b-1 pt-3"></div>
+                    <hr>
+                    <div class="more-info pt-2" style="margin-bottom:-10px;">
+                        <a class="font-weight-bold font-xs btn-block text-muted small" 
+                        href="{% url 'operaciones:detalle_facturas_pendientes' cliente_id %}"  target="cartera">
+                        Detalle de facturas pendientes
+                        <i class="fa fa-angle-right float-right font-lg"></i></a>
+                    </div>
+                    <div class="more-info pt-2" style="margin-bottom:-10px;">
+                        <a class="font-weight-bold font-xs btn-block text-muted small" 
+                        href="{% url 'operaciones:detalle_cheques_pendientes' cliente_id %}"  target="cheques">
+                        Detalle de cheques pendientes
+                        <i class="fa fa-angle-right float-right font-lg"></i></a>
+                    </div>
+                    <div class="more-info pt-2" style="margin-bottom:-10px;">
+                        <a class="font-weight-bold font-xs btn-block text-muted small" 
+                        href="{% url 'cobranzas:protestos_pendientes' cliente_id %}"  target="protestos">
+                        Detalle de protestos
+                        <i class="fa fa-angle-right float-right font-lg"></i></a>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-3 col-lg-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="clearfix">
-                    <i class="fa fa-dollar 
-                    {% if color_estado == 1 %} 
-                        bg-flat-color-1
-                    {% elif color_estado == 2 %}
-                        bg-flat-color-2
-                    {% elif color_estado == 3 %}
-                        bg-flat-color-3
-                    {% elif color_estado == 4 %}
-                        bg-flat-color-4
-                    {% elif color_estado == 5 %}
-                        bg-flat-color-5
-                    {% endif %}                           
-                    p-3 font-2xl mr-3 float-left text-light"></i>
-                    <div class="h5 text-secondary mb-0 mt-1">{{total_cartera_protestos}}</div>
-                    <div class="text-muted text-uppercase font-weight-bold font-xs small">
-                        Cartera y protestos</div>
-                </div>
-                <div class="b-b-1 pt-3"></div>
-                <hr>
-                <div class="more-info pt-2" style="margin-bottom:-10px;">
-                    <a class="font-weight-bold font-xs btn-block text-muted small" 
-                    href="{% url 'operaciones:detalle_facturas_pendientes' cliente_id %}"  target="cartera">
-                    Detalle de facturas pendientes
-                    <i class="fa fa-angle-right float-right font-lg"></i></a>
-                </div>
-                <div class="more-info pt-2" style="margin-bottom:-10px;">
-                    <a class="font-weight-bold font-xs btn-block text-muted small" 
-                    href="{% url 'operaciones:detalle_cheques_pendientes' cliente_id %}"  target="cartera">
-                    Detalle de cheques pendientes
-                    <i class="fa fa-angle-right float-right font-lg"></i></a>
-                </div>
-            </div>
-        </div>
-    </div>
+   </div>
     <div class="col-xl-6">
         <div class="card">
             <div class="card-header">

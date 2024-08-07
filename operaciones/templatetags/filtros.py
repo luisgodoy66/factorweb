@@ -6,6 +6,10 @@ def running_saldo(sales_list):
     return sum(d.get('nsaldo') for d in sales_list)
 
 @register.filter
+def running_saldo2(sales_list):
+    return sum(d.nsaldo for d in sales_list)
+
+@register.filter
 def running_valor(sales_list):
     return sum(d.nvalor for d in sales_list)
 

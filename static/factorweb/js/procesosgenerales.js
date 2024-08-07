@@ -32,6 +32,9 @@ function ImprimirCobranza(cobranza_id, tipo_operacion){
      if (tipo=="L"){
       url = url + "/cobranzas/reporteliquidacion/"+cobranza_id;
      }
+     if (tipo=="P"){
+      url = url + "/cobranzas/reportecobranzacuota/"+cobranza_id;
+     }
   window.open( url);
   
 }
@@ -221,9 +224,23 @@ function antigüedadcartera(url){
           pp60 = data["protestos"]["pporvencer_60"]
           pp90 = data["protestos"]["pporvencer_90"]
           pp90m = data["protestos"]["pporvencer_mas_90"]
-  }
+      }
       else{
           pv90m=0;pv90=0;pv60=0;pv30=0; pp30=0; pp60=0; pp90=0; pp90m=0
+      }
+      
+      if (data["pagares"]){
+          cv90m = data["pagares"]["vencido_mas_90"]
+          cv90 = data["pagares"]["vencido_90"]
+          cv60 = data["pagares"]["vencido_60"]
+          cv30 = data["pagares"]["vencido_30"]
+          cp30 = data["pagares"]["porvencer_30"]
+          cp60 = data["pagares"]["porvencer_60"]
+          cp90 = data["pagares"]["porvencer_90"]
+          cp90m = data["pagares"]["porvencer_mas_90"]
+      }
+      else{
+          cv90m=0;cv90=0;cv60=0;cv30=0; cp30=0; cp60=0; cp90=0; cp90m=0
       }
       
       var myChart = new Chart( ctx, {
@@ -241,16 +258,23 @@ function antigüedadcartera(url){
                   {
                       label: "Accesorios",
                       data: [ av90m, av90, av60, av30, ap30, ap60, ap90, ap90m ],
-                      borderColor: "rgba(0, 123, 255, 0.9)",
+                      borderColor: "rgba(0, 255, 255, 0.5)",
                       borderWidth: "0",
                       backgroundColor: "rgba(0, 255, 255, 0.5)"
                               },
                   {
                       label: "Protestos",
                       data: [ pv90m, pv90, pv60, pv30, pp30, pp60, pp90, pp90m ],
-                      borderColor: "rgba(0, 123, 255, 0.9)",
+                      borderColor: "rgba(255, 0, 0, 0.5)",
                       borderWidth: "0",
                       backgroundColor: "rgba(255, 0, 0, 0.5)"
+                              },
+                  {
+                      label: "Reestructuración",
+                      data: [ cv90m, cv90, cv60, cv30, cp30, cp60, cp90, cp90m ],
+                      borderColor: "rgba(128, 0, 128, 0.5)",
+                      borderWidth: "0",
+                      backgroundColor: "rgba(128, 0, 128, 0.5)"
                               }
                           ]
           },
@@ -650,9 +674,9 @@ function CargaXMLOperacion(xmlFile){
                       case "NOMBRECOMP":
                           objetoDetalle.nombre_comprador = detalle1[j].childNodes[0].nodeValue;
                           break;
-                      case "DOCTIPO":
-                          objetoDetalle.tipo_documento = detalle1[j].childNodes[0].nodeValue;
-                          break;
+                      // case "DOCTIPO":
+                      //     objetoDetalle.tipo_documento = detalle1[j].childNodes[0].nodeValue;
+                      //     break;
                       case "SERIE1":
                           objetoDetalle.serie1 = detalle1[j].childNodes[0].nodeValue;
                           break;
@@ -665,7 +689,7 @@ function CargaXMLOperacion(xmlFile){
                       case "EMISION":
                           objetoDetalle.emision = detalle1[j].childNodes[0].nodeValue;
                           break;
-                      case "ACCTIPO":
+                      case "ACCTIPO" && tipo_operacion == 'A':
                           objetoDetalle.tipo_accesorio = detalle1[j].childNodes[0].nodeValue;
                           break;
                       case "BANCO" && tipo_operacion == 'A':
@@ -725,5 +749,17 @@ function CargaXMLOperacion(xmlFile){
 };
 
 });
+}
+
+function ReversarAceptacionPagare(asignacion_id, codigo_asgn = ''){
+  // este proceso a diferencia de aceptar no se ejecuta desde un
+  // formulario por eso no usa fetchPostear
+
+  MensajeConfirmacion("Reversar pagaré " +  codigo_asgn +"?",function(){
+      fetchProcesar("/operaciones/reversaraceptacionpagare/"+  asignacion_id,  function(){
+          location.reload();
+      })
+  })
+    
 }
 

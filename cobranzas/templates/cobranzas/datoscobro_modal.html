@@ -48,14 +48,14 @@
                                 value = "{{ valor_cobrado }}">
                             </div>
                         </div>
-                        <div class="row form-group">
+                        <div class="row form-group" {% if retenciones_y_bajas != 'Si' %} hidden {% endif %}>
                             <div class="col-md-6"><label for="id_dvencimiento" class=" form-control-label">
                                 Valor retenciones</label></div>
                             <div class="col-md-6">
                                 <input type="number" step="0.01" id = "retenido_id"  value = "{{ valor_retenido}}">
                             </div>
                         </div>
-                        <div class="row form-group">
+                        <div class="row form-group" {% if retenciones_y_bajas != 'Si' %} hidden {% endif %}>
                             <div class="col-md-6"><label for="bajas_id" class=" form-control-label">
                                 Bajas</label></div>
                             <div class="col-md-6">

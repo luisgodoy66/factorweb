@@ -1,4 +1,7 @@
 {% extends 'bases/home.html' %}
+{% load humanize %}
+
+{% block title %}Líneas de factoring de clientes{% endblock %}
 {% block breadcrumbs %}
     <div class="col-sm-8">
         <div class="page-header float-right">
@@ -64,10 +67,10 @@
                             <td>{{ item.cxcliente.cxparticipante }}</td>
                             <td>{{ item }}</td>
                             <td>{{ item.datos_operativos.get.cxclase }}</td>
-                            <td>{{ item.linea_factoring.get.nvalor }}</td>
-                            <td>{{ item.linea_factoring.get.nutilizado }}</td>
+                            <td>{{ item.linea_factoring.get.nvalor |intcomma}}</td>
+                            <td>{{ item.linea_factoring.get.utilizado |intcomma}}</td>
                             <td>{{ item.linea_factoring.get.nvalorexceso }}</td>
-                            <td>{{ item.linea_factoring.get.disponible }}</td>
+                            <td>{{ item.linea_factoring.get.disponible |intcomma}}</td>
                             <td>{{ item.datos_operativos.get.cxestado }}</td>
                             <td>
                                 <button class="btn btn-warning btn-sm"  title="Editar"

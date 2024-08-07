@@ -11,7 +11,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.hashers import make_password
 
 from solicitudes.models import Asignacion
-from operaciones.models import Documentos, Asignacion as Operaciones
+from operaciones.models import Documentos, Asignacion as Operaciones, Pagares
 from cobranzas.models import Cheques_protestados
 from contabilidad.models import Factura_venta
 
@@ -161,6 +161,8 @@ def dashboard(request):
     hasta = date.today() + timedelta(days=1)
     cartera = 0
     protestos = 0
+    pagares = 0
+
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     docs = Documentos.objects.TotalCartera(id_empresa.empresa)
@@ -171,6 +173,10 @@ def dashboard(request):
     if prot['Total']:
         protestos = prot['Total']
 
+    pag = Pagares.objects.TotalPagares(id_empresa.empresa)
+    if pag['Total']:
+        pagares = pag['Total']
+
     sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
                                        empresa = id_empresa.empresa).count()
 
@@ -179,12 +185,12 @@ def dashboard(request):
     total_negociado = Operaciones.objects.total_negociado(id_empresa.empresa)
     ingresos_año = Factura_venta.objects.ingresos_delaño(id_empresa.empresa
                                                         ,ultimo_registro.dnegociacion.year)
-    print(ultimo_registro.dnegociacion, ultimo_registro)
+
     datos = { 'desde':desde
         , 'hasta':hasta
         , 'total_cartera': cartera
         , 'total_protestos':protestos
-        , 'total_cartera_protestos':cartera+protestos
+        , 'total_cartera_protestos':cartera+protestos+pagares
         , 'solicitudes_pendientes':sp
         , 'año':ultimo_registro.dnegociacion.year
         , 'total_negociado': total_negociado['Total']

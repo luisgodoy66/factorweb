@@ -5,7 +5,8 @@ from datetime import date
 from .models import Cuentas_especiales, Plan_cuentas, Cuentas_bancos\
     , Cuentas_tiposfactoring, Cuentas_tasasfactoring, Factura_venta\
     , Comprobante_egreso, Cuentas_diferidos, Cuentas_provisiones\
-    , Diario_cabecera, Transaccion, Cuentas_cargosfactoring
+    , Diario_cabecera, Transaccion, Cuentas_cargosfactoring\
+    , Cuentas_reestructuracion
 from empresa.models import Cuentas_bancarias, Tipos_factoring, Puntos_emision
 from clientes.models import Cuenta_transferencia
 
@@ -371,3 +372,32 @@ class CuentasCargoTiposFactoringForm(forms.ModelForm):
             self.fields['tipofactoring'].queryset = Tipos_factoring.objects\
                 .filter(empresa=empresa, leliminado = False, )
 
+class CuentasReestructuracionForm(forms.ModelForm):
+    class Meta:
+        model=Cuentas_reestructuracion
+        fields=[ 'cuenta', 'cuentaporcobrar', 'cuentainteres'
+        ]
+        labels={ 'cuenta':'Operaciones de reestructuración'
+                , 'cuentaporcobrar':'Cuentas por cobrar'
+                , 'cuentainteres':'Intereses'
+        }
+
+    def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+
+        if empresa:
+            self.fields['cuenta'].queryset = Plan_cuentas.objects\
+                .filter(empresa=empresa, leliminado = False, ldetalle=True)\
+                .order_by('cxcuenta')
+            self.fields['cuentaporcobrar'].queryset = Plan_cuentas.objects\
+                .filter(empresa=empresa, leliminado = False, ldetalle=True)\
+                .order_by('cxcuenta')
+            self.fields['cuentainteres'].queryset = Plan_cuentas.objects\
+                .filter(empresa=empresa, leliminado = False, ldetalle=True)\
+                .order_by('cxcuenta')

@@ -18,10 +18,10 @@ from .views import CuentasView, CuentasEspecialesEdit, BuscarCuentasEspeciales\
     , GeneraListaFacturasJSON, GeneraListaProtestosJSON, ListaProtestosAGenerar\
     , GenerarAsientosProtestos, CuentasCargosFactoringView, CuentaCargoTipoFactoringNew\
     , CuentaCargoTipoFactoringEdit, CuentasCargoTiposFactoringView\
-    , GeneraListaTransferenciasJSON, ListaTransferenciasAGenerar\
+    , GeneraListaTransferenciasJSON, ListaTransferenciasAGenerar, DesbloqueoDeMes\
     , GenerarAsientosTransferencias, GeneraListaRecuperacionesJSON\
     , GenerarAsientosRecuperaciones, ListaRecuperacionesAGenerar, DesbloquearMes\
-    , DesbloqueoDeMes
+    , BuscarCuentasReestructuracion, CuentasReestructuracionNew, CuentasReestructuracionEdit
 
 from .sri import GeneraXMLFactura
 from .reportes import ImpresionDiarioContable, ImpresionComprobanteEgreso\
@@ -167,4 +167,11 @@ urlpatterns = [
     path('generarasientosrecuperaciones/<ids>', GenerarAsientosRecuperaciones),
     path('consultadesbloqueodemes',DesbloquearMes.as_view(), name="desbloqueo_mes"),
     path('desbloqueodemes/<año>/<mes>',DesbloqueoDeMes),
+
+    path('buscarcuentasreestructuracion/',BuscarCuentasReestructuracion
+         , name="buscarcuentasreestructuracion"),
+    path('asignarcuentascontablesreestructuracion/',CuentasReestructuracionNew.as_view()
+         , name="asignarcuentascontablesreestructuracion_nueva"),
+    path('asignarcuentascontablesreestructuracion/<pk>',CuentasReestructuracionEdit.as_view()
+         , name="asignarcuentascontablesreestructuracion_editar"),
 ]

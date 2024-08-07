@@ -50,7 +50,6 @@ class Datos_generales(ClaseModelo):
         help_text='codigo de freelancer que refiere'    )
     cxorigen=models.CharField(max_length=5,null=True,
         help_text='Código de localidad / oficina asignada del cliente'    )
-    # cxestado=models.CharField(max_length=1, default='A'    )
     dprelegal=models.DateTimeField(null=True,
         help_text='fecha que cae en estado de pre legal'    )
     dlegal=models.DateTimeField(null=True,
@@ -156,6 +155,8 @@ class Linea_Factoring(ClaseModelo):
     nvalorexceso=models.DecimalField(max_digits=10, decimal_places=2, default=0,
         help_text='valor de exceso temporal que suma al valor de la línea'    )
     lconrecurso = models.BooleanField(default=True)
+    nreestructuracion=models.DecimalField(max_digits=10, decimal_places=2, default=0,
+        help_text='valor de reestructuracion'    )
 
     def __str__(self):
         return self.cxcliente.ctnombre
@@ -164,10 +165,13 @@ class Linea_Factoring(ClaseModelo):
     #     return self.nvalor + self.nvalorexceso < self.nutilizado
 
     def disponible(self):
-        return self.nvalor - self.nutilizado + self.nvalorexceso
+        return self.nvalor - self.nutilizado + self.nvalorexceso - self.nreestructuracion
     
     def porcentaje_disponible(self):
         return round( self.disponible() / self.nvalor * 100,2)
+
+    def utilizado(self):
+        return self.nutilizado + self.nreestructuracion
    
 class Linea_factoring_hist(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales

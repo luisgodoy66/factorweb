@@ -9,18 +9,22 @@ from django.shortcuts import redirect, render
 from django.db.models import Sum, Count, Q
 from django.utils.dateparse import parse_date
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse, JsonResponse
+
+from django.db import DataError
 
 from .forms import DatosOperativosForm, AsignacionesForm, MaestroMovimientosForm, \
     CondicionesOperativasForm, DetalleCondicionesOperativasForm, \
     TasasDocumentosForm, TasasAccesoriosForm, DesembolsarForm, AnexosForm
 
 from .models import Cargos_detalle, Condiciones_operativas_detalle, Datos_operativos \
-    , Asignacion,  Condiciones_operativas_cabecera, Anexos\
+    , Asignacion,  Condiciones_operativas_cabecera, Anexos, Pagares\
     , Desembolsos, Documentos, ChequesAccesorios, Notas_debito_cabecera\
-    , Cheques_quitados, Ampliaciones_plazo_cabecera, Cheques_canjeados
+    , Cheques_quitados, Ampliaciones_plazo_cabecera, Cheques_canjeados\
+    , Pagare_detalle
 from empresa.models import  Clases_cliente, Datos_participantes, \
     Tasas_factoring, Tipos_factoring, Cuentas_bancarias, Otros_cargos\
-    ,Movimientos_maestro
+    ,Movimientos_maestro, Contador
 from cobranzas.models import Documentos_protestados, Liquidacion_cabecera\
     , Documentos_cabecera, Recuperaciones_cabecera, Cheques_protestados
 from bases.models import Usuario_empresa, Empresas
@@ -170,6 +174,11 @@ class MaestroMovimientoNew(SinPrivilegios, generic.CreateView):
         context['solicitudes_pendientes'] = sp
         return context
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['nuevo'] = True
+        return kwargs
+    
 class MaestroMovimientoEdit(SinPrivilegios, generic.UpdateView):
     model = Movimientos_maestro
     template_name="operaciones/datosmovimiento_form.html"
@@ -191,6 +200,11 @@ class MaestroMovimientoEdit(SinPrivilegios, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['nuevo'] = False
+        return kwargs
+    
 class CondicionesOperativasView(SinPrivilegios, generic.ListView):
     model = Condiciones_operativas_cabecera
     template_name= "operaciones/listacondicionesoperativas.html"
@@ -368,6 +382,26 @@ class DatosOperativosHistoricoView(SinPrivilegios, generic.ListView):
         context = super(DatosOperativosHistoricoView, self).get_context_data(**kwargs)
         context['solicitudes_pendientes'] = sp
         context['cliente'] = cliente
+        return context
+
+class PagaresView(SinPrivilegios, generic.ListView):
+    model = Pagares
+    template_name = "operaciones/listapagares.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="operaciones.view_pagares"
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Pagares.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(PagaresView, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
         return context
 
 @login_required(login_url='/login/')
@@ -749,8 +783,6 @@ def AceptarAsignacion(request, asignacion_id=None):
     }
 
     return render(request, template_name, contexto)
-
-from django.http import HttpResponse, JsonResponse
 
 def DetalleCargosAsignacion(request, asignacion_id = None
                         , fecha_desembolso = None, condicion_id=None):
@@ -1397,17 +1429,16 @@ def GeneraListaAsignacionesJSON(request, desde = None, hasta= None, clientes =No
     arr_clientes = []
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     
-    if clientes != None:
-        ids = clientes.split(',')
-        for id in ids:
-            arr_clientes.append(id)
-
     if clientes == None:
         asignacion = Asignacion.objects\
             .filter(ddesembolso__gte = desde, ddesembolso__lte = hasta
                     , empresa = id_empresa.empresa)\
             .order_by('ddesembolso')
     else:
+        ids = clientes.split(',')
+        for id in ids:
+            arr_clientes.append(id)
+
         asignacion = Asignacion.objects\
             .filter(ddesembolso__gte = desde, ddesembolso__lte = hasta
                     , cxcliente__id__in = arr_clientes
@@ -1485,39 +1516,41 @@ def GeneraResumenAntigüedadCarteraJSON(request):
     acc_quitados =  Cheques_quitados.objects.antigüedad_cartera(id_empresa.empresa)
     cheques = ChequesAccesorios.objects.antigüedad_cartera(id_empresa.empresa)
     protestados = Documentos_protestados.objects.antigüedad_cartera(id_empresa.empresa)
-    fvm90 = documentos["vencido_mas_90"]
-    avm90=acc_quitados["vencido_mas_90"]
-    fv90 = documentos["vencido_90"]
-    av90=acc_quitados["vencido_90"]
-    fv60 = documentos["vencido_60"]
-    av60=acc_quitados["vencido_60"]
-    fv30 = documentos["vencido_30"]
-    av30=acc_quitados["vencido_30"]
-    fx30 = documentos["porvencer_30"]
-    ax30=acc_quitados["porvencer_30"]
-    fx60 = documentos["porvencer_60"]
-    ax60=acc_quitados["porvencer_60"]
-    fx90 = documentos["porvencer_90"]
-    ax90=acc_quitados["porvencer_90"]
-    fxm90 = documentos["porvencer_mas_90"]
-    axm90=acc_quitados["porvencer_mas_90"]
+    pagares = Pagare_detalle.objects.antigüedad_cartera(id_empresa.empresa)
+
+    fvm90 = documentos["vencido_mas_90"] or 0
+    avm90 = acc_quitados["vencido_mas_90"] or 0
+    fv90 = documentos["vencido_90"] or 0
+    av90 = acc_quitados["vencido_90"] or 0
+    fv60 = documentos["vencido_60"] or 0
+    av60 = acc_quitados["vencido_60"] or 0
+    fv30 = documentos["vencido_30"] or 0
+    av30 = acc_quitados["vencido_30"] or 0
+    fx30 = documentos["porvencer_30"] or 0
+    ax30 = acc_quitados["porvencer_30"] or 0
+    fx60 = documentos["porvencer_60"] or 0
+    ax60 = acc_quitados["porvencer_60"] or 0
+    fx90 = documentos["porvencer_90"] or 0
+    ax90 = acc_quitados["porvencer_90"] or 0
+    fxm90 = documentos["porvencer_mas_90"] or 0
+    axm90 = acc_quitados["porvencer_mas_90"] or 0
     cartera={}
-    if not fvm90: fvm90=0
-    if not fv90: fv90=0
-    if not fv60: fv60=0
-    if not fv30: fv30=0
-    if not fx30: fx30=0
-    if not fx60: fx60=0
-    if not fx90: fx90=0
-    if not fxm90: fxm90=0
-    if not avm90: avm90=0
-    if not av90: av90 = 0
-    if not av60: av60 = 0
-    if not av30: av30 = 0
-    if not ax30: ax30 = 0
-    if not ax60: ax60 = 0
-    if not ax90: ax90 = 0
-    if not axm90: axm90 = 0
+    # if not fvm90: fvm90=0
+    # if not fv90: fv90=0
+    # if not fv60: fv60=0
+    # if not fv30: fv30=0
+    # if not fx30: fx30=0
+    # if not fx60: fx60=0
+    # if not fx90: fx90=0
+    # if not fxm90: fxm90=0
+    # if not avm90: avm90=0
+    # if not av90: av90 = 0
+    # if not av60: av60 = 0
+    # if not av30: av30 = 0
+    # if not ax30: ax30 = 0
+    # if not ax60: ax60 = 0
+    # if not ax90: ax90 = 0
+    # if not axm90: axm90 = 0
     cartera["fvencido_mas_90"] = fvm90+avm90
     cartera["fvencido_90"] = fv90+av90
     cartera["fvencido_60"] = fv60+av60
@@ -1529,7 +1562,10 @@ def GeneraResumenAntigüedadCarteraJSON(request):
 
     data = {"facturas":cartera
             , "accesorios":cheques
-            , "protestos":protestados}
+            , "protestos":protestados
+            , "pagares":pagares
+            }
+            
     
     return JsonResponse( data)
 
@@ -1544,6 +1580,7 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
     color_estado = 1
     cartera = 0
     protestos=0
+    restructuracion=0
 
     template_path = 'operaciones/estadooperativo_reporte.html'
 
@@ -1580,6 +1617,7 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
         color_estado = 4
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
     sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
                                        empresa = id_empresa.empresa).count()
 
@@ -1590,6 +1628,10 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
     total_protesto = Cheques_protestados.objects.TotalProtestosCliente(cliente_id)
     if total_protesto['Total']:
         protestos = total_protesto['Total']
+
+    total_reestructuracion = Pagares.objects.TotalPagaresCliente(cliente_id)
+    if total_cartera['Total']:
+        restructuracion = total_reestructuracion['Total']
 
     context={
         'cliente_id':cliente_id,
@@ -1603,6 +1645,7 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
         'color_estado':color_estado,
         'solicitudes_pendientes':sp,
         'total_cartera_protestos': cartera+protestos,
+        'total_reestructuracion':restructuracion,
         }
     return render(request, template_path, context)
 
@@ -1611,6 +1654,7 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
 def AntigüedadCarteraClienteJSON(request, cliente_id):
     
     cheques = None
+    cuotas = None
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
@@ -1647,18 +1691,25 @@ def AntigüedadCarteraClienteJSON(request, cliente_id):
                         , pporvencer_mas_90 = Sum('porvencer_mas_90')
                         , ptotal = Sum('total')
                         )
-
+    # cheques
     accesorios = ChequesAccesorios.objects.antigüedad_por_cliente(id_empresa.empresa)\
         .filter(documento__cxcliente = cliente_id)
-
     if accesorios:
         cheques = accesorios[0]
+
+    # restructuracion
+    pagares = Pagare_detalle.objects.antigüedad_por_cliente(id_empresa.empresa)\
+        .filter(pagare__cxcliente = cliente_id)
+    if pagares:
+        cuotas = pagares[0]
 
     data={
       'facturas':cartera,
       'accesorios':cheques,
       'protestos':protestos,
+      'pagares':cuotas,
         }
+    print(data)
     return JsonResponse( data)
 
 def GeneraListaCarteraClienteJSON(request, cliente_id, fecha_corte = None):
@@ -2100,3 +2151,127 @@ def IngresosGeneradosJSON(request, año):
     data = { "actual":actual,
             "anterior":anterior}
     return JsonResponse(data)
+
+def PedirArchivoXML(request):
+    template_name = "operaciones/importarpagare_modal.html"
+    return render(request, template_name)
+
+def ImportarOperacion(request):
+    objeto=json.loads(request.body.decode("utf-8"))
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    id_cliente=objeto["id_cliente"]
+    nombre_cliente=objeto["nombre_cliente"]
+    numero_documentos=objeto["numero_documentos"]
+    total= Decimal(objeto["total"])
+    documentos=objeto["documentos"]
+    fecha_emision = objeto["emision"]
+    fecha_vencimiento = objeto["vencimiento"]
+    capital = objeto["capital"]
+    interes = objeto["interes"]
+    tasa_interes = objeto["tasa_interes"]
+    plazo = objeto["plazo"]
+
+    with transaction.atomic():
+        try:
+            # OBTENER la secuencia de pagares
+            numero_pagare = Contador.objects\
+                .filter(empresa = id_empresa.empresa, cxtransaccion = 'PAGARE').first()
+            
+            if not numero_pagare:
+                numero_pagare = Contador(
+                    empresa = id_empresa.empresa,
+                    cxtransaccion = 'PAGARE',
+                    nultimonumero = 1,
+                    cxusuariocrea = request.user,
+                )
+                numero_pagare.save()
+            else:
+                numero_pagare.nultimonumero += 1
+                numero_pagare.cxusuariomodifica = request.user.id
+                numero_pagare.save()
+
+            codigo = 'PAG-' + str(numero_pagare.nultimonumero).zfill(4)
+
+            # el cliente
+            cliente = ModeloCliente.Datos_generales.objects\
+                .filter(cxcliente__cxparticipante=id_cliente
+                        , empresa = id_empresa.empresa).first()
+
+            if not cliente:
+                return HttpResponse("El RUC de cliente no existe", status=400)
+            
+            # grabar la asignacion
+            pagare = Pagares(
+                cxpagare = codigo,
+                cxcliente = cliente,
+                demision = fecha_emision,
+                dvencimiento = fecha_vencimiento,
+                ncapital = capital,
+                ncantidadcuotas = numero_documentos,
+                ninteres = interes,
+                ntasainteres = tasa_interes,
+                nplazo = plazo,
+                nsaldo = total,
+                cxusuariocrea = request.user,
+                empresa = id_empresa.empresa,
+            )
+            if pagare:
+                pagare.save()
+                pagare_id = pagare.id
+
+            # actualizar el disponibe de la linea de factoring
+            linea = ModeloCliente.Linea_Factoring.objects\
+                .filter(cxcliente = cliente.id).first()
+            if linea:
+                linea.nreestructuracion += total
+                linea.save()
+
+            # grabar los documentos
+            i = 1
+
+            for doc in documentos:
+                if doc:
+                    capital =doc["capital"]
+
+                    if capital > 0:
+                        interes = doc["interes"]
+                        fechapago =doc["fechapago"]
+
+                        detalle = Pagare_detalle(
+                            pagare=pagare,
+                            ncuota = i,
+                            dfechapago  = fechapago,
+                            ninteres = interes,
+                            ncapital = capital,
+                            nsaldo = capital + interes,
+                            nsaldointeres = interes,
+                            cxusuariocrea = request.user,
+                            empresa = id_empresa.empresa,
+                        )
+
+                        if detalle:
+                            detalle.save()
+                            i += 1
+
+
+        except DataError as e:
+            error_message = str(e)
+            # Captura errores específicos de la base de datos, como el exceso en el largo del dato
+            return HttpResponse( error_message + '. Por favor, verifica y vuelve a intentarlo.', status=400)
+        except Exception as e:
+            error_message = str(e)
+            # Captura otros errores generales
+            return HttpResponse('Ha ocurrido un error inesperado: ' + error_message, status=500)
+
+        return HttpResponse("OK"+str(pagare_id))
+
+@login_required(login_url='/login/')
+@permission_required('operaciones.change_pagares', login_url='bases:sin_permisos')
+def ReversaAceptacionPagare(request, pid_asignacion):
+    # # ejecuta un store procedure 
+    resultado=enviarPost("CALL uspReversaAceptacionPagare( {0},'')"
+    .format(pid_asignacion))
+
+    return HttpResponse(resultado)
+
