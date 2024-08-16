@@ -1503,7 +1503,7 @@ def GeneraListaAsignacionesJSONSalida(asignacion):
     output["Cargos"] = asignacion.ngao + asignacion.ndescuentodecartera
     output["IVA"] = asignacion.niva
     output["Neto"] = neto
-    output["Estado"] = asignacion.cxestado
+    output["Estado"] = asignacion.estado()
     output["Registro"] = asignacion.dregistro
 
     return output

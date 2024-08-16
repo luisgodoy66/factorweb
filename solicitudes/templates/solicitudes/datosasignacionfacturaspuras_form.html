@@ -149,6 +149,8 @@ window.operateEvents = {
   },
     'click .remove': function (e, value, row, index) {
       EliminarDocumentoDeSolicitudAsignacion(asignacion_id, row.id,'F', row.Documento)
+    //   nota: debería actualizar el total negociado y la cantidad de documentos
+    // aunque el proceso si cambió esos valores en la base de datos
     }
 };
 
@@ -166,7 +168,7 @@ return [
 function initTable() {
 
     $table.bootstrapTable('destroy').bootstrapTable({
-      height: 400,
+    //   height: 400,
       locale: "es-EC",
       columns: [
         [{title: 'Ref.', field: 'id', rowspan: 2, align: 'center',

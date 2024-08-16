@@ -28,3 +28,13 @@ def running_aplicado(sales_list):
 @register.filter
 def suma(valor1, valor2):
     return valor1 + valor2
+
+# myapp/templatetags/custom_filters.py
+import datetime
+
+
+@register.filter
+def custom_date_format(value):
+    if isinstance(value, datetime.date):
+        return value.strftime('%d-%b-%Y').replace('Jan', 'Ene').replace('Apr', 'Abr').replace('Aug', 'Ago').replace('Dec', 'Dic')
+    return value

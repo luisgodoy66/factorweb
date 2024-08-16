@@ -61,7 +61,7 @@
                             <td></td>
                             <td></td>
                             <td><h4>Fecha de negociacion:</h4></td>
-                            <td>{{ asignacion.dnegociacion|date:"Y-m-d" }}</td>
+                            <td>{{ asignacion.dnegociacion|custom_date_format }}</td>
                         </tr>
                         <tr>
                             <td><h4>Id:</h4></td>
@@ -69,7 +69,7 @@
                             <td></td>
                             <td></td>
                             <td><h4>Fecha de desembolso:</h4></td>
-                            <td>{{ asignacion.ddesembolso|date:"Y-m-d" }}</td>
+                            <td>{{ asignacion.ddesembolso|custom_date_format }}</td>
                         </tr>
                         <tr>
                             <td><h4>Asignación:</h4></td>
@@ -123,8 +123,8 @@
                                     <tr>
                                         <td>{{ item.id }}</td>
                                         <td width="10%">{{ item.ctdocumento }}</td>
-                                        <td>{{ item.demision|date:"Y-m-d"  }}</td>
-                                        <td class="fecha">{{ item.dvencimiento|date:"Y-m-d"  }}</td>
+                                        <td>{{ item.demision|custom_date_format  }}</td>
+                                        <td class="fecha">{{ item.dvencimiento|custom_date_format  }}</td>
                                         <td class="numero">{{ item.ntotal }}</td>
                                         <td class="numero">{{ item.nplazo }}</td>
                                         <td class="numero">{{ item.nporcentajeanticipo }}</td>

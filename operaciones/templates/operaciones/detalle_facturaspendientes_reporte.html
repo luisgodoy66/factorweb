@@ -78,7 +78,7 @@
                                     <td>{{ item.cxcomprador__cxcomprador__ctnombre }}</td>
                                     <td>{{ item.cxasignacion__cxasignacion }}</td>
                                     <td>{{ item.ctdocumento }}</td>
-                                    <td>{{ item.vencimiento |date:"Y-m-d"}}</td>
+                                    <td>{{ item.vencimiento |custom_date_format}}</td>
                                     <td>{{ item.dias_negociados }}</td>
                                     <td> {% if item.ndiasprorroga > 0 %}<h4>{% endif %}
                                         {{ item.dias_vencidos }}

@@ -80,7 +80,7 @@
                                     <td>{{ item.documento__cxasignacion__cxasignacion }}</td>
                                     <td>{{ item.documento__ctdocumento }}</td>
                                     <td>{{ item.descripcion }}</td>
-                                    <td class="centrado">{{ item.vencimiento |date:"Y-m-d"}}</td>
+                                    <td class="centrado">{{ item.vencimiento |custom_date_format}}</td>
                                     <td>{{ item.dias_negociados }}</td>
                                     <td> {% if item.ndiasprorroga > 0 %}<h4>{% endif %}
                                         {{ item.dias_vencidos }}

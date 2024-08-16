@@ -90,6 +90,9 @@ class Documentos_cabecera(ClaseModelo):
             x = 'Cobranza'
         return x
     
+    def estado(self):
+        return self.get_cxestado_display()
+    
 class Documentos_detalle(ClaseModelo):
     cxcobranza =models.ForeignKey(Documentos_cabecera
         , on_delete=models.CASCADE

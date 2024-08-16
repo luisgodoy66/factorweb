@@ -131,7 +131,10 @@ class Asignacion(ClaseModelo):
                 - self.notroscargos
                 - self.ndescuentodecartera 
                 - self.niva)
-
+    
+    def estado(self):
+        return self.get_cxestado_display()
+    
 class Documentos_Manager(models.Manager):
     def facturas_pendientes(self, fecha_corte, id_empresa):
         fecha = parse_date(fecha_corte)

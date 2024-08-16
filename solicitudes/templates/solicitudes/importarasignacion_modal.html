@@ -32,25 +32,29 @@
                     </div> 
                     <div class="row form-group">
                         <div class="col-md-4">
-                            <label for="id_nvalor" class=" form-control-label">Cantidad de documentos:</label>
+                            <label for="id_nvalor" class=" form-control-label">
+                                Nº de entradas en Datos:</label>
                         </div>
                         <div class="col-md-8" id="Cantidad"></div>
                     </div>  
                     <div class="row form-group">
                         <div class="col-md-4">
-                            <label for="id_nvalor" class=" form-control-label">Total a negociar:</label>
+                            <label for="id_nvalor" class=" form-control-label">
+                                Total a negociar:</label>
                         </div>
                         <div class="col-md-8" id="Negociado"></div>
                     </div>  
                     <div class="row form-group">
                         <div class="col-md-4">
-                            <label for="id_nvalor" class=" form-control-label">Tipo de factoring:</label>
+                            <label for="id_nvalor" class=" form-control-label">
+                                Tipo de factoring:</label>
                         </div>
                         <div class="col-md-8" id="TipoFactoring"></div>
                     </div>  
                     <div class="row form-group">
                         <div class="col-md-4">
-                            <label for="id_nvalor" class=" form-control-label">Tipo de operación:</label>
+                            <label for="id_nvalor" class=" form-control-label">
+                                Tipo de operación:</label>
                         </div>
                         <div class="col-md-8" id="TipoOperacion"></div>
                     </div>  
@@ -78,6 +82,7 @@
 
             CargaXMLOperacion(xmlFile).then((resultado) => {
                 objeto = resultado;
+                console.log(objeto);
                 document.getElementById("Ruc").innerHTML = objeto["id_cliente"];                
                 document.getElementById("Cliente").innerHTML = objeto["nombre_cliente"];                
                 document.getElementById("Cantidad").innerHTML = objeto["numero_documentos"];                

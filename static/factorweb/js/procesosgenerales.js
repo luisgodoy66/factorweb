@@ -5,11 +5,11 @@ function EliminarDocumentoDeSolicitudAsignacion(asignacion_id, documento_id, tip
 
       fetchProcesar("/solicitudes/eliminardetalleasignacion/"
         + asignacion_id + "/" + documento_id+"/"+tipo_asignacion, function(){
-        // $table.bootstrapTable('remove', {
-        //   field: 'id',
-        //   values: [documento_id]
-        // });
-        location.reload();
+        $table.bootstrapTable('remove', {
+          field: 'id',
+          values: [documento_id]
+        });
+        // location.reload();
       })
   })
 }
@@ -656,6 +656,7 @@ function CargaXMLOperacion(xmlFile){
           let documentos = lista[0].children
           
           valorNegociado=0;
+          cantidad =0;
 
           let docs = []; // Paso 1
 
@@ -664,6 +665,7 @@ function CargaXMLOperacion(xmlFile){
               let objetoDetalle = {}; // Paso 2
 
               for (let j in detalle1) {
+                if (detalle1[j].nodeName != undefined && detalle1[j].childNodes.length > 0) {
                   switch (detalle1[j].nodeName) {
                       case "TIPIDCOMP":
                           objetoDetalle.tipo_id_comprador = detalle1[j].childNodes[0].nodeValue;
@@ -722,13 +724,20 @@ function CargaXMLOperacion(xmlFile){
                       case "RETENCIONRENTA":
                           objetoDetalle.retencion_renta = parseFloat((parseFloat(detalle1[j].childNodes[0].nodeValue) * 1).toFixed(3));
                           break;
+                      case "VALORADESCARTAR":
+                          objetoDetalle.descartar = parseFloat((parseFloat(detalle1[j].childNodes[0].nodeValue) * 1).toFixed(3));
+                          break;
                       case "MONTO":
                         objetoDetalle.total = objetoDetalle.valor_antes_iva 
                                           + objetoDetalle.valor_iva 
                                           - objetoDetalle.retencion_iva 
-                                          - objetoDetalle.retencion_renta;
-                        valorNegociado += objetoDetalle.total;
+                                          - objetoDetalle.retencion_renta
+                                          - objetoDetalle.descartar;
+                        objetoDetalle.total = parseFloat(objetoDetalle.total).toFixed(2);
+                        valorNegociado +=  parseFloat(objetoDetalle.total);
+                        cantidad += 1;
                   }
+                }
               }
               if (detalle1 != undefined){
                 docs.push(objetoDetalle); // Paso 5
@@ -740,8 +749,8 @@ function CargaXMLOperacion(xmlFile){
             nombre_cliente: nombre_cliente,
             tipo_factoring : tipo_factoring,
             tipo_operacion: tipo_operacion,
-            numero_documentos: documentos.length,
-            total_negociado : valorNegociado,
+            numero_documentos: cantidad,
+            total_negociado : parseFloat(valorNegociado).toFixed(2),
             documentos: docs,
           }
     }
