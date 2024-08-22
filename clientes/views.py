@@ -594,6 +594,27 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
 
             datoscliente.save()
 
+        # buscar si se creó previamante un registro como solicitante
+        solicitante = Solicitante.objects\
+            .filter(cxcliente = datosparticipante.cxparticipante,
+                    empresa = id_empresa.empresa).first()
+        # si no existe se crea
+        if not solicitante:
+            solicitante = Solicitante(
+                cxcliente = datosparticipante.cxparticipante,
+                ctnombre = datosparticipante.ctnombre,
+                cttelefono1 = datosparticipante.cttelefono1,
+                cttelefono2 = datosparticipante.cttelefono2,
+                ctcelular = datosparticipante.ctcelular,
+                ctemail = datosparticipante.ctemail,
+                ctemail2 = datosparticipante.ctemail2,
+                ctdireccion = datosparticipante.ctdireccion,
+                cxusuariocrea= request.user,
+                empresa = id_empresa.empresa,
+            )
+            if solicitante:
+                solicitante.save()
+
         # bifurcar dependiendo del tipo de cliente: natural o juridico
         if cxtipocliente=="N":
             return redirect("clientes:clientenatural_editar"

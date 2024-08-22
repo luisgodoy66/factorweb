@@ -206,9 +206,11 @@ class CuposCompradoresForm(forms.ModelForm):
 
         if empresa:
             self.fields['cxcliente'].queryset = Datos_generales.objects\
-                .filter(empresa=empresa, leliminado = False)
+                .filter(empresa=empresa, leliminado = False)\
+                .order_by('cxcliente__ctnombre')
             self.fields['cxcomprador'].queryset = Datos_compradores.objects\
-                .filter(empresa=empresa, leliminado = False)
+                .filter(empresa=empresa, leliminado = False)\
+                .order_by('cxcomprador__ctnombre')
 
 class CuentasBancariasForm(forms.ModelForm):
     class Meta:
