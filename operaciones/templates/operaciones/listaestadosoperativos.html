@@ -71,7 +71,7 @@
                             <td>{{ item.linea_factoring.get.utilizado|intcomma }}</td>
                             <td>{{ item.linea_factoring.get.disponible|intcomma }}</td>
                             <td>{{ item.linea_factoring.get.porcentaje_disponible }}</td>
-                            <td>{{ item.datos_operativos.get.cxestado }}</td>
+                            <td>{{ item.datos_operativos.get.estado }}</td>
                             <td>{{ item.datos_operativos.get.dultimanegociacion |date:"Y-m-d"}}</td>
                             <td>
                                 <a href= "{% url 'operaciones:estadooperativocliente' item.id item %}"

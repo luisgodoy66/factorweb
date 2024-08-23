@@ -44,6 +44,9 @@ class Datos_operativos(ClaseModelo):
     def __str__(self):
         return self.cxcliente.cxcliente.ctnombre
   
+    def estado(self):
+        return self.get_cxestado_display()
+    
 class Asignacion_manager(models.Manager):
     def operaciones_negociadas(self, id_empresa, año):
         # en django obtener el año del campo date llamado ddesembolso?

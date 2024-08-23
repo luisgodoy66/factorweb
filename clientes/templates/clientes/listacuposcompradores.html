@@ -71,7 +71,7 @@
                             <td>{{ item.ncupocartera }}</td>
                             <td>{{ item.nutilizadocartera }}</td>
                             <td>{{ item.disponible }}</td>
-                            <td>{{ item.lactivo }}</td>
+                            <td>{{ item.lactivo|yesno:'Si,No' }}</td>
                             <td>{{ item.daprobacion|date:"Y/m/d" }}</td>
                             <td>
                                 <button class="btn btn-warning btn-sm"  title="Editar"

@@ -59,7 +59,7 @@
                             <td>{{ item.cxcliente.cxparticipante }}</td>
                             <td>{{ item }}</td>
                             <td>{{ item.cuenta_cliente.cxcuenta}}</td>
-                            <td>{{ item.cuenta_cliente.cxcuenta.lpropia }}</td>
+                            <td>{{ item.cuenta_cliente.cxcuenta.lpropia|yesno:'Si,No' }}</td>
                             <td>
                                 <a href="{% url 'clientes:listacuentasbancariascliente' item.cxcliente.id %}" 
                                     class="btn btn-warning btn-sm" title="Editar" role="button"><i class="fa fa-edit"></i></a>

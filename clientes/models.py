@@ -20,6 +20,9 @@ class Datos_compradores(ClaseModelo):
     def __str__(self):
         return self.cxcomprador.ctnombre
         
+    def estado(self):
+        return self.get_cxestado_display()
+    
 class Datos_generales(ClaseModelo):
     TIPOS_DE_CLIENTES = (
         ('N', 'Natural'),
@@ -319,3 +322,7 @@ class Datos_operativos_hist(ClaseModelo):
     cxbeneficiariocobranzas = models.CharField(max_length=13, blank=True, null=True)
     ctbeneficiariocobranzas = models.TextField(blank=True, null=True)
     cxestado=models.CharField(max_length=1, default='A', choices=ESTADOS_DE_CLIENTES  )
+
+    def estado(self):
+        return self.get_cxestado_display()
+    
