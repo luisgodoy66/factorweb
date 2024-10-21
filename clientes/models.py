@@ -63,6 +63,11 @@ class Datos_generales(ClaseModelo):
     def __str__(self):
         return self.cxcliente.ctnombre
 
+    class Meta:
+        ordering = [
+            'cxcliente__ctnombre'
+            ]  
+        
 class Cuentas_bancarias(ClaseModelo):
     TIPOS_DE_CUENTAS = (
         ('A', 'Ahorro'),

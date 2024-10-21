@@ -64,7 +64,7 @@
             <small>
 
                 <table id="table"  class="table table-striped table-bordered"
-                    data-url="{% url 'operaciones:asignaciones_json' desde hasta None %}"
+                    data-url="{% url 'operaciones:asignaciones_json' desde hasta  %}"
                     data-filter-control="true"
                     data-show-search-clear-button="true"
                     data-show-refresh="true"
@@ -88,10 +88,14 @@
                         <th data-field="TipoAsignacion" data-filter-control="input"data-sortable="true" >Tipo</th>
                         <th data-field="FechaDesembolso" data-filter-control="input"data-sortable="true" >Desembolso</th>
                         <th data-field="PlazoMayor" data-filter-control="input"data-sortable="true" >Plazo mayor</th>
-                        <th data-field="ValorNegociado" data-filter-control="input"data-sortable="true" >Negociado</th>
-                        <th data-field="Cargos" data-filter-control="input"data-sortable="true" >Cargos</th>
-                        <th data-field="IVA" data-filter-control="input"data-sortable="true" >IVA</th>
-                        <th data-field="Neto" data-filter-control="input"data-sortable="true" >Neto</th>
+                        <th data-field="ValorNegociado" data-filter-control="input"data-sortable="true"
+                            data-formatter="numberFormatter" >Negociado</th>
+                        <th data-field="Cargos" data-filter-control="input"data-sortable="true"
+                            data-formatter="numberFormatter" >Cargos</th>
+                        <th data-field="IVA" data-filter-control="input"data-sortable="true"
+                            data-formatter="numberFormatter" >IVA</th>
+                        <th data-field="Neto" data-filter-control="input"data-sortable="true"
+                            data-formatter="numberFormatter" >Neto</th>
                         <th data-field="Estado" data-filter-control="input"data-sortable="true" >Estado</th>
                         <th data-field="InstruccionDePago" data-filter-control="input"data-sortable="true" >Instrucción de pago</th>
                         <th data-field="operate" data-sortable="true" data-events="window.operateEvents"
@@ -118,4 +122,9 @@
 {% block js_page %}
 <script type="text/javascript" src="{% static 'factorweb/js/consultageneralasignaciones.js' %}"></script>
 <script src="{% static 'factorweb/vendors/chosen/chosen.jquery.min.js' %}"></script>
+<script>
+  function numberFormatter(value) {
+    return Number(value).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+</script>
 {% endblock %}

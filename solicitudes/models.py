@@ -25,6 +25,9 @@ class Clientes(ClaseModelo):
         constraints = [
             models.UniqueConstraint(fields=['cxcliente', 'empresa'], name='cliente_solicitud')
         ]
+        ordering = [
+            'ctnombre'
+            ]  
 
 class Asignacion(ClaseModelo):
     TIPOS_DE_ASIGNACION = (

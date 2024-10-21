@@ -200,7 +200,8 @@ def ImpresionAntiguedadCartera(request, ):
     template_path = 'operaciones/cartera_reporte.html'
 
     context = {
-        "documentos" : facturas.union(accesorios, prot_facturas, prot_accesorios, acc_quitados, pagares),
+        "documentos" : facturas.union(accesorios, prot_facturas, prot_accesorios, acc_quitados, pagares)\
+            .order_by('cxcliente__cxcliente__ctnombre'),
         "totalvm90"  : fvm90+avm90+pvm90+qvm90+cvm90,
         "totalv90"   : fv90+av90+pv90+qv90+cv90,
         "totalv60"   : fv60+av60+pv60+qv60+cv60,
