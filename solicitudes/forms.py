@@ -152,9 +152,9 @@ class ClientesForm(forms.ModelForm):
             )
 
             if not self.instance.pk:
-                raise forms.ValidationError("Identificación ya registrada anteriormente")
+                raise forms.ValidationError("Identificación ya registrada anteriormente.")
             elif self.instance.pk!=sc.pk:
-                raise forms.ValidationError("Cambio No Permitido")
+                raise forms.ValidationError("Cambio No Permitido.")
         except Clientes.DoesNotExist:
             pass
         return self.cleaned_data

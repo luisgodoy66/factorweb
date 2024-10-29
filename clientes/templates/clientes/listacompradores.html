@@ -70,13 +70,17 @@
                             <td>{{ item.dregistro|date:"Y/m/d H:i:s" }}</td>
                             <td>{{ item.estado }}</td>
                             <td>
-                                <a href="{% url 'clientes:comprador_editar' item.cxcomprador.cxparticipante %}" 
+                                <a href="{% url 'clientes:comprador_editar' item.cxcomprador.id %}" 
                                     class="btn btn-warning btn-sm" title="Editar" role="button"><i class="fa fa-edit"></i></a>
                                 <button class="btn btn-success btn-sm"  title="Estado y clase"
                                         onclick="return AbrirModal('{% url 'clientes:estadoclasecomprador_editar' item.id %}')"
                                     role="button">
                                     <i class="fa fa-edit"></i>
                                 </button>
+                                {% if not item.cxcomprador.datos_generales %}
+                                <a href="{% url 'clientes:cliente_editar' item.cxcomprador.id %}"  title="Registrar como cliente"
+                                    class="btn btn-primary btn-sm" role="button"><i class="fa fa-user"></i></a>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}

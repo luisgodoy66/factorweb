@@ -14,8 +14,8 @@ class ClienteForm(forms.ModelForm):
     
     class Meta:
         model=Datos_generales
-        fields=['cxcliente','cxtipocliente', 'cxlocalidad',]
-        labels={'cxcliente':'Identificación','cxtipocliente':'Tipo'
+        fields=['cxtipocliente', 'cxlocalidad',]
+        labels={'cxtipocliente':'Tipo'
             , 'cxlocalidad':'Sucursal de atención'
         }
     def __init__(self, *args, **kwargs):

@@ -402,7 +402,7 @@ class ClientesSolicitudesView(SinPrivilegios, generic.ListView):
 
         return context
 
-class CompradorEdit(SinPrivilegios, generic.UpdateView):
+class EstadoCompradorEdit(SinPrivilegios, generic.UpdateView):
     model=Datos_compradores
     template_name="clientes/datosestadoyclasecomprador_modal.html"
     context_object_name = "consulta"
@@ -419,8 +419,37 @@ class CompradorEdit(SinPrivilegios, generic.UpdateView):
     def get_context_data(self, **kwargs):
         id = self.kwargs.get('pk')
 
-        context = super(CompradorEdit, self).get_context_data(**kwargs)
+        context = super(EstadoCompradorEdit, self).get_context_data(**kwargs)
         context["pk"] = id
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super(EstadoCompradorEdit, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+       
+class CompradorEdit(SinPrivilegios, generic.UpdateView):
+    model=Datos_participantes
+    template_name="clientes/datoscomprador_form.html"
+    context_object_name = "datosparticipante"
+    form_class=ParticipanteForm
+    success_url=reverse_lazy("clientes:listacompradores")
+    success_message="Datos actualizados satisfactoriamente"
+    login_url = 'bases:login'
+    permission_required="clientes.change_datos_compradores"
+
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False, empresa = id_empresa.empresa).count()
+        context = super(CompradorEdit, self).get_context_data(**kwargs)
+        context["solicitudes_pendientes"]=sp
+
         return context
 
     def get_form_kwargs(self):
@@ -429,56 +458,161 @@ class CompradorEdit(SinPrivilegios, generic.UpdateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
        
+class CompradorNew(SinPrivilegios, generic.CreateView):
+    model=Datos_participantes
+    template_name="clientes/datoscomprador_form.html"
+    context_object_name = "datosparticipante"
+    form_class=ParticipanteForm
+    success_url=reverse_lazy("clientes:listacompradores")
+    success_message="Datos actualizados satisfactoriamente"
+    login_url = 'bases:login'
+    permission_required="clientes.change_datos_compradores"
+
+    def form_valid(self, form):
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+
+        form.instance.cxusuariocrea = self.request.user
+        form.instance.empresa = id_empresa.empresa
+
+        # Guardar el nuevo registro en Datos_participantes
+        response = super().form_valid(form)
+
+        # Crear un nuevo registro en Datos_compradores
+        datoscomprador = Datos_compradores(
+            cxcomprador=self.object,  # self.object es el nuevo registro de Datos_participantes
+            cxusuariocrea=self.request.user,
+            empresa=id_empresa.empresa,
+        )
+        datoscomprador.save()
+
+        return response
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        sp = Asignacion.objects.filter(cxestado='P')\
+            .filter(leliminado=False, empresa = id_empresa.empresa).count()
+        context = super(CompradorNew, self).get_context_data(**kwargs)
+        context["solicitudes_pendientes"]=sp
+
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super(CompradorNew, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+       
 @login_required(login_url='/login/')
 @permission_required('clientes.change_datos_generales', login_url='bases:sin_permisos')
-def DatosClientes(request, cliente_id=None, solicitante_id=None):
+def DatosClientes(request, participante_id=None, solicitante_id=None):
     template_name="clientes/datoscliente_form.html"
-    contexto={}
-    idcliente={}
-    datosparticipante={}
-    formulario={}
+    contexto = {}
+    datosparticipante = {}
     form_cliente={}
-    datoscliente={}
-    
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-    
-    if request.method=='GET':
-        datosparticipante = Datos_participantes.objects\
-            .filter(cxparticipante=cliente_id, empresa = id_empresa.empresa).first()
-            
-        if datosparticipante:
-            e={ 
-                'cxtipoid':datosparticipante.cxtipoid,
-                'cxparticipante':datosparticipante.cxparticipante,
-                'ctnombre':datosparticipante.ctnombre,
-                # 'cxzona': datosparticipante.cxzona,
-                # 'cxestado':datosparticipante.cxestado,
-                'ctdireccion':datosparticipante.ctdireccion,
-                'ctemail':datosparticipante.ctemail,
-                'ctemail2':datosparticipante.ctemail2,
-                'cttelefono1':datosparticipante.cttelefono1,
-                'cttelefono2':datosparticipante.cttelefono2,
-                'ctcelular':datosparticipante.ctcelular,
-                'ctgirocomercial':datosparticipante.ctgirocomercial,
-                'actividad':datosparticipante.actividad,
-                'dinicioactividades':date.isoformat(datosparticipante.dinicioactividades),
-            }
-            idcliente=datosparticipante.cxparticipante
-            formulario=ParticipanteForm(e, empresa = id_empresa.empresa)
-            # si encuentra registro de datos participantes buscar en datos de cliente
+    formulario={}
 
+    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+
+    if request.method == 'POST':
+        if participante_id:
+            datosparticipante = Datos_participantes.objects.filter(pk=participante_id).first()
+            formulario = ParticipanteForm(request.POST, instance=datosparticipante, empresa=id_empresa.empresa)
+        else:
+            formulario = ParticipanteForm(request.POST, empresa=id_empresa.empresa)
+        
+        form_cliente = ClienteForm(request.POST, empresa=id_empresa.empresa)
+            
+        form_submitted = True
+
+        if formulario.is_valid():
+
+            datosparticipante = formulario.save(commit=False)
+            if not participante_id:
+                datosparticipante.cxusuariocrea = request.user
+                datosparticipante.empresa = id_empresa.empresa
+            else:
+                datosparticipante.cxusuariomodifica = request.user.id
+
+            datosparticipante.save()
+
+            # datos en tabla clientes
+            datoscliente = Datos_generales.objects\
+                .filter(cxcliente=datosparticipante).first()
+
+            cxtipocliente = request.POST.get("cxtipocliente")
+            cxlocalidad=request.POST.get("cxlocalidad")
+            local = Localidades.objects.filter(pk=cxlocalidad).first()
+
+            if not datoscliente:
+                datoscliente= Datos_generales(
+                    cxcliente = datosparticipante,
+                    cxtipocliente=cxtipocliente,
+                    cxlocalidad=local,
+                    cxusuariocrea = request.user,
+                    empresa = id_empresa.empresa,
+                )
+                if datoscliente:
+                    datoscliente.save()
+            else:
+                datoscliente.cxtipocliente=cxtipocliente
+                datoscliente.cxlocalidad=local
+                datoscliente.cxusuariomodifica = request.user.id
+
+                datoscliente.save()
+
+            # buscar si se creó previamante un registro como solicitante
+            solicitante = Solicitante.objects\
+                .filter(cxcliente = datosparticipante.cxparticipante,
+                        empresa = id_empresa.empresa).first()
+            # si no existe se crea
+            if not solicitante:
+                solicitante = Solicitante(
+                    cxcliente = datosparticipante.cxparticipante,
+                    ctnombre = datosparticipante.ctnombre,
+                    cttelefono1 = datosparticipante.cttelefono1,
+                    cttelefono2 = datosparticipante.cttelefono2,
+                    ctcelular = datosparticipante.ctcelular,
+                    ctemail = datosparticipante.ctemail,
+                    ctemail2 = datosparticipante.ctemail2,
+                    ctdireccion = datosparticipante.ctdireccion,
+                    cxusuariocrea= request.user,
+                    empresa = id_empresa.empresa,
+                )
+                if solicitante:
+                    solicitante.save()
+
+            # bifurcar dependiendo del tipo de cliente: natural o juridico
+            if cxtipocliente=="N":
+                return redirect("clientes:clientenatural_editar"
+                                ,cliente_id=datosparticipante.id)
+            else:
+                return redirect("clientes:clientejuridico_editar"
+                                ,cliente_id=datosparticipante.id)
+
+        else:
+            # contexto['form_participante'] = formulario
+            contexto['form_errors'] = formulario.errors
+            
+    else:
+        form_submitted = False
+        datosparticipante = Datos_participantes.objects.filter(pk=participante_id).first()
+
+        if datosparticipante:
+            formulario = ParticipanteForm(instance=datosparticipante, empresa=id_empresa.empresa)
             datoscliente = Datos_generales.objects\
                 .filter(cxcliente=datosparticipante).first()
             
             if datoscliente:
                 e={
+                    # 'cxcliente':datosparticipante.cxparticipante,
                     'cxtipocliente':datoscliente.cxtipocliente,
-                    'cxcliente':datosparticipante.cxparticipante,
                     'cxlocalidad':datoscliente.cxlocalidad,
                 }
                 form_cliente=ClienteForm(e, empresa = id_empresa.empresa)
+            else:
+                form_cliente=ClienteForm(empresa = id_empresa.empresa)
         else:
-            formulario=ParticipanteForm(empresa = id_empresa.empresa)
+            formulario = ParticipanteForm(empresa=id_empresa.empresa)
             form_cliente=ClienteForm(empresa = id_empresa.empresa)
 
             # si viene desde la opción de arrastre desde solicitud
@@ -500,128 +634,16 @@ def DatosClientes(request, cliente_id=None, solicitante_id=None):
                     }
                     formulario=ParticipanteForm(e,empresa = id_empresa.empresa)
 
-    sp = Asignacion.objects.filter(cxestado='P')\
-            .filter(leliminado=False, empresa = id_empresa.empresa).count()
-    
-    contexto={'datosparticipante':datosparticipante
-            , 'form_participante':formulario
-            , 'form_cliente':form_cliente
-            , 'solicitudes_pendientes':sp
-            }
 
-    if request.method=='POST':
+    sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False, empresa=id_empresa.empresa).count()
 
-        # cxtipoid=request.POST.get("cxtipoid")
-        cxtipoid="R"
-        idcliente=request.POST.get("cxparticipante")
-        ctnombre=request.POST.get("ctnombre")
-        # cxzona=request.POST.get("cxzona")
-        cxlocalidad=request.POST.get("cxlocalidad")
-        ctdireccion=request.POST.get("ctdireccion")
-        cttelefono1=request.POST.get("cttelefono1")
-        cttelefono2=request.POST.get("cttelefono2")
-        ctcelular=request.POST.get("ctcelular")
-        ctemail=request.POST.get("ctemail")
-        ctemail2=request.POST.get("ctemail2")
-        ctgirocomercial=request.POST.get("ctgirocomercial")
-        cxactividad = request.POST.get("actividad")
-        dinicioactividades = request.POST.get("dinicioactividades")
-
-        datosparticipante = Datos_participantes.objects\
-            .filter(cxparticipante=idcliente, empresa = id_empresa.empresa).first()
-        actividad = Actividades.objects.filter(pk = cxactividad).first()
-
-        if not datosparticipante:
-            datosparticipante = Datos_participantes(
-                cxtipoid=cxtipoid,
-                cxparticipante=idcliente,
-                ctnombre=ctnombre,
-                # 'cxzona': datosparticipante.cxzona,
-                ctdireccion=ctdireccion,
-                ctemail=ctemail,
-                ctemail2=ctemail2,
-                cttelefono1=cttelefono1,
-                cttelefono2=cttelefono2,
-                ctcelular=ctcelular,
-                ctgirocomercial=ctgirocomercial,
-                cxusuariocrea= request.user,
-                actividad = actividad,
-                dinicioactividades = dinicioactividades,
-                empresa = id_empresa.empresa,
-            )
-            if datosparticipante:
-                datosparticipante.save()
-        else:
-            datosparticipante.cxtipoid = cxtipoid
-            datosparticipante.cxparticipante=idcliente
-            datosparticipante.ctnombre=ctnombre
-            # datosparticipante.cxzona=cxzona
-            # datosparticipante.cxestado=cxestado
-            datosparticipante.ctdireccion=ctdireccion
-            datosparticipante.ctemail=ctemail
-            datosparticipante.ctemail2=ctemail2
-            datosparticipante.cttelefono1=cttelefono1
-            datosparticipante.cttelefono2=cttelefono2
-            datosparticipante.ctcelular=ctcelular
-            datosparticipante.ctgirocomercial=ctgirocomercial
-            datosparticipante.cxusuariomodifica = request.user.id
-            datosparticipante.actividad = actividad
-            datosparticipante.dinicioactividades = dinicioactividades
-
-            datosparticipante.save()
-        
-        # datos en tabla clientes
-        datoscliente = Datos_generales.objects\
-            .filter(cxcliente=datosparticipante).first()
-
-        cxtipocliente = request.POST.get("cxtipocliente")
-        local = Localidades.objects.filter(pk=cxlocalidad).first()
-
-        if not datoscliente:
-            datoscliente= Datos_generales(
-                cxcliente = datosparticipante,
-                cxtipocliente=cxtipocliente,
-                cxusuariocrea = request.user,
-                cxlocalidad=local,
-                empresa = id_empresa.empresa,
-            )
-            if datoscliente:
-                datoscliente.save()
-        else:
-            datoscliente.cxtipocliente=cxtipocliente
-            datoscliente.cxusuariomodifica = request.user.id
-            datoscliente.cxlocalidad=local
-
-            datoscliente.save()
-
-        # buscar si se creó previamante un registro como solicitante
-        solicitante = Solicitante.objects\
-            .filter(cxcliente = datosparticipante.cxparticipante,
-                    empresa = id_empresa.empresa).first()
-        # si no existe se crea
-        if not solicitante:
-            solicitante = Solicitante(
-                cxcliente = datosparticipante.cxparticipante,
-                ctnombre = datosparticipante.ctnombre,
-                cttelefono1 = datosparticipante.cttelefono1,
-                cttelefono2 = datosparticipante.cttelefono2,
-                ctcelular = datosparticipante.ctcelular,
-                ctemail = datosparticipante.ctemail,
-                ctemail2 = datosparticipante.ctemail2,
-                ctdireccion = datosparticipante.ctdireccion,
-                cxusuariocrea= request.user,
-                empresa = id_empresa.empresa,
-            )
-            if solicitante:
-                solicitante.save()
-
-        # bifurcar dependiendo del tipo de cliente: natural o juridico
-        if cxtipocliente=="N":
-            return redirect("clientes:clientenatural_editar"
-                            ,cliente_id=datosparticipante.id)
-        else:
-            return redirect("clientes:clientejuridico_editar"
-                            ,cliente_id=datosparticipante.id)
+    contexto.update({
+        'datosparticipante': datosparticipante,
+        'form': formulario,
+        'solicitudes_pendientes': sp,
+        'form_submitted': form_submitted,
+        'form_cliente':form_cliente,
+    })
 
     return render(request, template_name, contexto)
 
@@ -996,131 +1018,76 @@ def ActualizarCuentaTransferencia(request, pk, cliente_ruc):
 
     return HttpResponse("OK")
 
+# @login_required(login_url='/login/')
+# @permission_required('clientes.change_datos_compradores', login_url='bases:sin_permisos')
+# def DatosCompradores(request, participante_id=None):
+#     template_name = "clientes/datoscomprador_form.html"
+#     contexto = {}
+#     datosparticipante = {}
+#     id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+
+#     if request.method == 'POST':
+#         if participante_id:
+#             datosparticipante = Datos_participantes.objects.filter(pk=participante_id).first()
+#             formulario = ParticipanteForm(request.POST, instance=datosparticipante, empresa=id_empresa.empresa)
+#         else:
+#             formulario = ParticipanteForm(request.POST, empresa=id_empresa.empresa)
+            
+#         form_submitted = True
+
+#         if formulario.is_valid():
+#             datosparticipante = formulario.save(commit=False)
+#             if not participante_id:
+#                 datosparticipante.cxusuariocrea = request.user
+#             else:
+#                 datosparticipante.cxusuariomodifica = request.user.id
+#             datosparticipante.empresa = id_empresa.empresa
+#             datosparticipante.save()
+
+#             # Crear un nuevo registro en Datos_compradores si es una creación
+#             if not participante_id:
+#                 datoscomprador = Datos_compradores(
+#                     cxcomprador=datosparticipante,
+#                     cxusuariocrea=request.user,
+#                     empresa=id_empresa.empresa,
+#                 )
+#                 datoscomprador.save()
+
+#             return redirect("clientes:listacompradores")
+#         else:
+#             contexto['form_participante'] = formulario
+#             contexto['form_errors'] = formulario.errors
+#     else:
+#         form_submitted = False
+#         datosparticipante = Datos_participantes.objects.filter(pk=participante_id).first()
+
+#         if datosparticipante:
+#             formulario = ParticipanteForm(instance=datosparticipante, empresa=id_empresa.empresa)
+#         else:
+#             formulario = ParticipanteForm(empresa=id_empresa.empresa)
+
+#     sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False, empresa=id_empresa.empresa).count()
+
+#     contexto.update({
+#         'datosparticipante': datosparticipante,
+#         'form': formulario,
+#         'solicitudes_pendientes': sp,
+#         'form_submitted': form_submitted,
+#     })
+
+#     return render(request, template_name, contexto)
+
 @login_required(login_url='/login/')
 @permission_required('clientes.change_datos_compradores', login_url='bases:sin_permisos')
-def DatosCompradores(request, comprador_id=None):
-    template_name="clientes/datoscomprador_form.html"
-    contexto={}
-    idcomprador={}
-    datosparticipante={}
-    formulario={}
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-    
-    if request.method=='GET':
-        datosparticipante = Datos_participantes.objects\
-            .filter(cxparticipante=comprador_id).first()
-            
-        if datosparticipante:
-            e={ 
-                'cxtipoid':datosparticipante.cxtipoid,
-                'cxparticipante':datosparticipante.cxparticipante,
-                'ctnombre':datosparticipante.ctnombre,
-                # 'cxzona': datosparticipante.cxzona,
-                # 'cxestado':datosparticipante.cxestado,
-                'ctdireccion':datosparticipante.ctdireccion,
-                'ctemail':datosparticipante.ctemail,
-                'ctemail2':datosparticipante.ctemail2,
-                'cttelefono1':datosparticipante.cttelefono1,
-                'cttelefono2':datosparticipante.cttelefono2,
-                'ctcelular':datosparticipante.ctcelular,
-                'ctgirocomercial':datosparticipante.ctgirocomercial,
-                'actividad':datosparticipante.actividad,
-            }
-            idcomprador=datosparticipante.cxparticipante
-            formulario=ParticipanteForm(e,empresa = id_empresa.empresa)
+def DeClienteAComprador(request, participante_id=None):
+    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+    datosparticipante = Datos_participantes.objects.filter(pk=participante_id).first()
 
-        else:
-            formulario=ParticipanteForm(empresa = id_empresa.empresa)
-    
-    sp = Asignacion.objects.filter(cxestado='P')\
-            .filter(leliminado=False, empresa = id_empresa.empresa).count()
-            
-    contexto={'datosparticipante':datosparticipante
-            , 'form_participante':formulario
-            , 'solicitudes_pendientes':sp
-            }
+    datoscomprador = Datos_compradores(
+        cxcomprador=datosparticipante,
+        cxusuariocrea=request.user,
+        empresa=id_empresa.empresa,
+    )
+    datoscomprador.save()
 
-    if request.method=='POST':
-
-        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-        
-        # cxtipoid=request.POST.get("cxtipoid")
-        cxtipoid="R"
-        idcomprador=request.POST.get("cxparticipante")
-        ctnombre=request.POST.get("ctnombre")
-        # cxzona=request.POST.get("cxzona")
-        ctdireccion=request.POST.get("ctdireccion")
-        cttelefono1=request.POST.get("cttelefono1")
-        cttelefono2=request.POST.get("cttelefono2")
-        ctcelular=request.POST.get("ctcelular")
-        ctemail=request.POST.get("ctemail")
-        ctemail2=request.POST.get("ctemail2")
-        ctgirocomercial=request.POST.get("ctgirocomercial")
-        cxactividad = request.POST.get("actividad")
-        actividad = Actividades.objects.filter(pk = cxactividad).first()
-
-        if not comprador_id:
-            datosparticipante = Datos_participantes(
-                cxtipoid=cxtipoid,
-                cxparticipante=idcomprador,
-                ctnombre=ctnombre,
-                # 'cxzona': datosparticipante.cxzona,
-                ctdireccion=ctdireccion,
-                ctemail=ctemail,
-                ctemail2=ctemail2,
-                cttelefono1=cttelefono1,
-                cttelefono2=cttelefono2,
-                ctcelular=ctcelular,
-                ctgirocomercial=ctgirocomercial,
-                cxusuariocrea= request.user,
-                actividad = actividad,
-                empresa = id_empresa.empresa,
-            )
-            if datosparticipante:
-                datosparticipante.save()
-        else:
-            datosparticipante = Datos_participantes.objects\
-                .filter(cxparticipante=comprador_id).first()
-
-            if datosparticipante:
-                datosparticipante.cxtipoid = cxtipoid
-                datosparticipante.cxparticipante=idcomprador
-                datosparticipante.ctnombre=ctnombre
-                # datosparticipante.cxzona=cxzona
-                # datosparticipante.cxestado=cxestado
-                datosparticipante.ctdireccion=ctdireccion
-                datosparticipante.ctemail=ctemail
-                datosparticipante.ctemail2=ctemail2
-                datosparticipante.cttelefono1=cttelefono1
-                datosparticipante.cttelefono2=cttelefono2
-                datosparticipante.ctcelular=ctcelular
-                datosparticipante.ctgirocomercial=ctgirocomercial
-                datosparticipante.cxusuariomodifica = request.user.id
-                datosparticipante.actividad=actividad
-
-                datosparticipante.save()
-            
-        # datos en tabla compradores
-            datosparticipante.save()
-        
-        # datos en tabla clientes
-        datoscomprador = Datos_compradores.objects\
-            .filter(cxcomprador=datosparticipante).first()
-
-        if not datoscomprador:
-            datoscomprador= Datos_compradores(
-                cxcomprador = datosparticipante,
-                cxusuariocrea = request.user,
-                empresa = id_empresa.empresa,
-            )
-            if datoscomprador:
-                datoscomprador.save()
-        # else:
-        #     datoscomprador.cxusuariomodifica = request.user.id
-
-        #     datoscomprador.save()
-
-        return redirect("clientes:listacompradores")
-
-    return render(request, template_name, contexto)
-
+    return HttpResponse("OK")

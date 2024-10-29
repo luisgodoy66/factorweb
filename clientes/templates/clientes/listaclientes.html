@@ -68,9 +68,12 @@
                             <!-- <td>{{ item.cxlocalidad }}</td> -->
                             <td>{{ item.dregistro|date:"Y/m/d H:i:s" }}</td>
                             <td>
-                                <a href="{% url 'clientes:cliente_editar' item.cxcliente.cxparticipante %}"  title="Editar"
+                                <a href="{% url 'clientes:cliente_editar' item.cxcliente.id %}"  title="Editar"
                                     class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>
-                                <a href="#" class="btn btn-danger btn-sm" role="button"><i class="fa fa-exclamation"></i></a>
+                                {% if not item.cxcliente.datos_generales_comprador %}
+                                <a href="#" onclick="ClienteEsComprador({{item.cxcliente.id}})" title="Registrar como deudor"
+                                    class="btn btn-primary btn-sm" role="button"><i class="fa fa-shopping-cart"></i></a>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -85,3 +88,18 @@
 
 {% endblock %}
 
+{% block js_page %}
+<script>
+    // $(document).ready(function() {
+    //     $('#bootstrap-data-table-export').DataTable();
+    // });
+    function ClienteEsComprador(cliente_id) {
+        MensajeConfirmacion("Crear un registro de este cliente como deudor ?", function() {
+            const url = "/clientes/declienteacomprador/" + cliente_id;
+            fetchProcesar(url, function() {
+                location.reload();
+            });
+        });
+    }
+</script>
+{% endblock %}

@@ -4,63 +4,68 @@ from django import forms
 from .models import Clases_cliente, Datos_participantes, Tipos_factoring, \
     Tasas_factoring, Cuentas_bancarias, Localidades, Puntos_emision, Otros_cargos
 from pais.models import Bancos, Actividades
-
+from datetime import datetime
 class ParticipanteForm(forms.ModelForm):
     class Meta:
-        model=Datos_participantes
-        
-        fields=['cxtipoid', 'cxparticipante', 'ctnombre'
-            , 'ctdireccion'
-            ,'cttelefono1', 'cttelefono2', 'ctemail'
-            , 'ctemail2', 'ctcelular','ctgirocomercial', 'cxusuariocrea'
-            , 'dinicioactividades', 'actividad']
-        labels={'cxtipoid':'Tipo cliente', 'cxparticipante':'Identificación'
-            ,'ctnombre': 'Nombre completo'
-            , 'ctdireccion':'Dirección', 'cttelefono1': 'Teléfono principal'
-            , 'cttelefono2':'Teléfono secundario', 'ctemail':'Email 1'
-            , 'ctemail2':'Email 2', 'ctcelular':'Celular'
-            ,'ctgirocomercial':'Giro comercial'
-            , 'dinicioactividades':'Inicio de actividades'
-            , 'actividad':'Actividad económica'
-            }        
-        widgets={'ctdireccion': forms.Textarea(attrs={'rows': '2'}),
-            'ctgirocomercial':forms.Textarea(attrs={'rows': '5'}),
+        model = Datos_participantes
+        fields = [
+            'cxtipoid', 'cxparticipante', 'ctnombre', 'ctdireccion',
+            'cttelefono1', 'cttelefono2', 'ctemail', 'ctemail2', 'ctcelular',
+            'ctgirocomercial', 'dinicioactividades', 'actividad'
+        ]
+        labels = {
+            'cxtipoid': 'Tipo de identificación', 'cxparticipante': 'Identificación',
+            'ctnombre': 'Nombre completo', 'ctdireccion': 'Dirección',
+            'cttelefono1': 'Teléfono principal', 'cttelefono2': 'Teléfono secundario',
+            'ctemail': 'Email 1', 'ctemail2': 'Email 2', 'ctcelular': 'Celular',
+            'ctgirocomercial': 'Giro comercial', 
+            'dinicioactividades': 'Inicio de actividades',
+            'actividad': 'Actividad económica'
+        }
+        widgets = {
+            'ctdireccion': forms.Textarea(attrs={'rows': '2'}),
+            'ctgirocomercial': forms.Textarea(attrs={'rows': '5'}),
             'dinicioactividades': forms.DateInput(
                 format=('%Y-%m-%d'),
-                attrs={'class': 'form-control', 
-                    'placeholder': 'Seleccione una fecha',
-                    'type': 'date'
-                    }
-                    ),
+                attrs={'class': 'form-control', 'placeholder': 'Seleccione una fecha', 'type': 'date'}
+            ),
         }
 
     def __init__(self, *args, **kwargs):
-        empresa = kwargs.pop('empresa', None)
+        self.empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         for f in iter(self.fields):
-            self.fields[f].widget.attrs.update({
-                'class':'form-control'
-            })
-        self.fields['cxtipoid'].empty_label="Seleccione tipo de identificación"
-        # self.fields['dinicioactividades'].widget.attrs['readonly']=True
-        if empresa:
-            self.fields['actividad'].queryset = Actividades.objects\
-                .filter(empresa=empresa, leliminado = False, )\
-                .order_by('cxactividad')
+            self.fields[f].widget.attrs.update({'class': 'form-control'})
+        self.fields['cxtipoid'].empty_label = "Seleccione tipo de identificación"
+        if self.empresa:
+            self.fields['actividad'].queryset = Actividades.objects.filter(
+                empresa=self.empresa, leliminado=False
+            ).order_by('cxactividad')
 
-    def clean(self) :
-        try:
-            sc = Datos_participantes.objects.get(
-                cxparticipante = self.cleaned_data['cxparticipante']
-            )
-            if not self.instance.pk:
-                raise forms.ValidationError("Identificación ya existe")
-            elif self.instance.pk != sc.pk:
-                raise forms.ValidationError("Cambio no permitido. Coincide con otro registro")
-        except Datos_participantes.DoesNotExist:
-            pass
-        return self.cleaned_data
+    def clean(self):
+        cleaned_data = super().clean()
+        cxparticipante = cleaned_data.get('cxparticipante')
+        if self.empresa and cxparticipante:
+            try:
+                existing_participant = Datos_participantes.objects.get(
+                    cxparticipante=cxparticipante, empresa=self.empresa
+                )
+                if not self.instance.pk:
+                    # cuando es nuevo y lo encontró
+                    raise forms.ValidationError("Identificación de participante ya registrada como cliente o como deudor.")
+                elif self.instance.pk != existing_participant.pk:
+                    # cuando se está editando y no es el mismo
+                    raise forms.ValidationError("Identificación coincide con otro registro previo de cliente o deudor.")
+                else:
+                    #No existe duplicidad
+                    return cleaned_data
+                
+            except Datos_participantes.DoesNotExist:
+                # No existe la identificacion
+                pass
 
+        return cleaned_data
+    
 class TipoFactoringForm(forms.ModelForm):
     
     class Meta:

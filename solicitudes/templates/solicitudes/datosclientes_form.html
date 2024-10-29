@@ -75,27 +75,6 @@
                             {{form.cttelefono2}}
                             <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
                     </div>
-
-                    <div>
-                        <small class="text-danger">
-
-                        {% if form.errors %}
-                            {% for field in form %}
-                                {% if field.errors %}
-                                    {% for error in field.errors %}
-                                        {{ error|escape }}
-                                    {% endfor %}
-                                {% endif %}
-                            {% endfor %}
-                        
-                            {% if form.non_field_errors%}
-                                {% for error in form.non_field_errors %}
-                                    {{ error|escape }}
-                                {% endfor %}
-                            {% endif %}
-                        {% endif %}
-                        </small>
-                    </div>
                 </div>
                 <!-- columna derecha -->
                 <div class="col-lg-6">
@@ -142,7 +121,37 @@
                     <i class="fa fa-dot-circle-o"></i> Grabar
                 </button>
             </div>
-        </div>
+            <div class="alert alert-danger" role="alert">
+                <ul>
+                    {#% for field, errors in form.errors.items %#}
+                        {#% for error in errors %#}
+                            <!-- <li>{{ field }}: {{ error }}</li> -->
+                        {#% endfor %#}
+                    {#% endfor %#}
+                    {% if form.errors %}
+                    {% for field in form %}
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                {{ error|escape }}
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                
+                    {% if form.non_field_errors%}
+                        {% for error in form.non_field_errors %}
+                            {{ error|escape }}
+                        {% endfor %}
+                    {% endif %}
+                {% endif %}
+                </ul>
+            </div>
+
+            <div>
+                <small class="text-danger">
+
+                </small>
+            </div>
+ </div>
     <!-- </div> -->
 </form>
 {% endblock %}

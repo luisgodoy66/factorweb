@@ -26,8 +26,19 @@ SECRET_KEY = os.environ['SECRET_KEY']
 DEBUG = False
 # ALLOWED_HOSTS = ['factorweb-dev.us-east-2.elasticbeanstalk.com','localhost', '127.0.0.1','*']
 # CSRF_TRUSTED_ORIGINS=['http://factorweb-dev.us-east-2.elasticbeanstalk.com/']
-ALLOWED_HOSTS = ['codigobambu.com','www.codigobambu.com','*']
-CSRF_TRUSTED_ORIGINS=['https://codigobambu.com/','https://www.codigobambu.com/']
+ALLOWED_HOSTS = [
+    'codigobambu.com',
+    'www.codigobambu.com', 
+    'margarita.codigobambu.com', 
+    'www.margarita.codigobambu.com',
+    '*'
+    ]
+CSRF_TRUSTED_ORIGINS=[
+    'https://codigobambu.com/',
+    'https://margarita.codigobambu.com/',
+    'https://www.codigobambu.com/'
+    'https://www.margarita.codigobambu.com/'
+    ]
 
 
 # Application definition
