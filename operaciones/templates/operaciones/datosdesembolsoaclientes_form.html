@@ -74,10 +74,11 @@
                         </div>  
                         <div class="row form-group">
                             <div class="col col-md-5"><label for="id_nvalor" class=" form-control-label">
-                                Destino de transferencia
+                                {{ form.cxcuentadestino.label}}
                             </label></div>
                             <div class="col-md-7">
-                                {{ cuenta_transferencia}}
+                                {{ form.cxcuentadestino}}
+                                <small class="form-text text-muted">La cuenta de transferencia se define en Participantes/Clientes/Cuentas bancarias</small>
                             </div>
                         </div>  
                         <div class="row form-group">
@@ -99,7 +100,6 @@
                         </div>  
                         <div class="row form-group">
                             <div class="col col-md-5">
-                                {{form.cxcuentapago.errors}}
                                 <label for="{{ form.cxcuentapago.id_for_label }}" class=" form-control-label">
                                     {{ form.cxcuentapago.label }}</label>
                             </div>
@@ -122,9 +122,21 @@
                 <button type="submit" class="btn btn-primary btn-sm">
                     <i class="fa fa-dot-circle-o"></i> Desembolso
                 </button>
-                {{error}}
 
             </div>
+           <!-- Sección para mostrar errores del formulario -->
+           {% if form_submitted and form.errors %}
+           <div class="alert alert-danger" role="alert">
+               <ul>
+                   {% for field, errors in form.errors.items %}
+                       {% for error in errors %}
+                           <li>{{ field }}: {{ error }}</li>
+                           <!-- <li>{{ error }}</li> -->
+                       {% endfor %}
+                   {% endfor %}
+               </ul>
+           </div>
+            {% endif %}
         </div>
     </div>
 </form>

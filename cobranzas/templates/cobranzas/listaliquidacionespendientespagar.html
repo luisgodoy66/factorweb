@@ -6,7 +6,7 @@
             <div class="page-title">
                 <ol class="breadcrumb text-right">
                     <li><a href="#">operaciones</a></li>
-                    <li><a href="#">procesos</a></li>
+                    <li><a href="#">desembolsos</a></li>
                     <li class="active">pago de cobranzas</li>
                 </ol>
             </div>
@@ -70,7 +70,7 @@
                                 <a href="{% url 'cobranzas:desembolsarliquidacion' item.id item.cxcliente.id %}" 
                                 class="btn btn-primary btn-sm" role="button" title="Pagar">
                                 <i class="fa fa-money"></i></a>
-                                <button onclick="ReversarLiquidacion( {{item.id}})" 
+                                <button onclick="ReversarLiquidacion( {{item.id}})" title="Reversar liquidación"
                                     class="btn btn-danger btn-sm"
                                     role="button">
                                     <i class="fa fa-rotate-left"></i>

@@ -110,14 +110,18 @@ class AsignacionesForm(forms.ModelForm):
 class DesembolsarForm(forms.ModelForm):
     class Meta:
         model=Desembolsos
-        fields=['cxtipooperacion', 'cxoperacion', 'cxcliente', 'nvalor'
-            ,'cxformapago', 'cxcuentapago', 'cxbeneficiario', 'ctbeneficiario'
+        fields=['cxtipooperacion', 'cxoperacion', 'cxcliente', 
+                'nvalor','cxformapago', 'cxcuentapago', 
+                'cxbeneficiario', 'ctbeneficiario', 'cxcuentadestino'
         ]
-        labels={'cxformapago':'Forma de pago'
-            , 'cxcuentapago':'Cuenta de origen de fondos'
-            , 'nvalor':"Valor a pagar", 'ctbeneficiario':'Beneficiario de cheque'
-            , 'cxcliente':'Id de cliente', 'cxoperacion':'Código de operación'
-            , 'cxbeneficiario':'id de beneficiario'
+        labels={'cxformapago':'Forma de pago', 
+                'cxcuentapago':'Cuenta de origen de fondos', 
+                'nvalor':"Valor a pagar", 
+                'ctbeneficiario':'Beneficiario de cheque', 
+                'cxcliente':'Id de cliente', 
+                'cxoperacion':'Código de operación', 
+                'cxbeneficiario':'id de beneficiario',
+                'cxcuentadestino':'Destino de transferencia'
         }
         widgets={
             'ctbeneficiario':forms.Textarea(attrs={'rows':'1'}, )}
@@ -132,11 +136,42 @@ class DesembolsarForm(forms.ModelForm):
             })
         self.fields['nvalor'].widget.attrs['readonly']=True
         self.fields['ctbeneficiario'].widget.attrs['readonly']=True
+        self.fields['cxcuentadestino'].required = False
+        # Al usar el atributo disabled se muestra el valor en la forma
+        # pero no se carga en el metodo POST, y al volver a mostrar la
+        # forma por algun error, no se muestra el campo nuevamente
+        self.fields['cxcuentadestino'].widget.attrs['disabled']=True
+        # # al usar la propiedad disabled no se envía el valor al servidor
+        # # y no se muestra valor alguno en el campo en el formulario
+        # self.fields['cxcuentadestino'].disabled = True
 
         if empresa:
-            self.fields['cxcuentapago'].queryset = Cuentas_bancarias.objects\
-                .filter(empresa=empresa, leliminado = False, lactiva = True)
+            self.fields['cxcuentapago'].queryset = Cuentas_bancarias\
+                .objects.filter(empresa=empresa, \
+                                leliminado = False, \
+                                lactiva = True)
 
+    def clean(self):
+        cleaned_data = super().clean()
+        cxformapago = cleaned_data.get('cxformapago')
+        cxcuentapago = cleaned_data.get('cxcuentapago')
+        cxcuentadestino = cleaned_data.get('cxcuentadestino')
+        ctbeneficiario = cleaned_data.get('ctbeneficiario')
+
+        if cxformapago in ['TRA'] and not cxcuentadestino:
+            self.add_error('cxcuentadestino', 
+                           'Debe marcar una cuenta del cliente para transferencias en Participantes/Clientes/Cuentas bancarias.')
+
+        if cxformapago in ['CHE'] and not ctbeneficiario:
+            self.add_error('ctbeneficiario', 
+                           'Debe registrar un beneficiario en los datos operativos del cliente.')
+
+        if cxformapago in ['TRA', 'CHE'] and not cxcuentapago:
+            self.add_error('cxcuentapago', 
+                           'Debe seleccionar una cuenta de origen de fondos si la forma de pago es cheque o transferencia.')
+
+        return cleaned_data
+    
 class MaestroMovimientosForm(forms.ModelForm):
     class Meta:
         model=Movimientos_maestro

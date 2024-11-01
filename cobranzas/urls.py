@@ -21,7 +21,7 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , SumaCargos, Prorroga, EditarTasasDocumentoAmpliacionDePlazo\
     , AceptarAmpliacionDePlazo,  GeneraListaAmpliacionesJSON, AmpliacionesConsulta\
     , ModificarCobranza, GeneraListaFacturasPendientesJSON, CobranzasCuotasView\
-    , DetalleCuotasJSON, AceptarCobranzaCuota
+    , DetalleCuotasJSON, AceptarCobranzaCuota, ReversoDesembolsoLiquidacion
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos\
@@ -88,8 +88,6 @@ urlpatterns = [
         ,ReversaConfirmacionCobranza),
     path('listacobranzaspendientesliquidar/',CobranzasPendientesLiquidarView.as_view()
         , name="listacobranzaspendientesliquidar"),
-    path('listaliquidacionespendientespagar/',LiquidacionesPendientesPagarView.as_view()
-        , name="listaliquidacionespendientespagar"),
     path('listacobranzaspendientesliquidarjson/',GeneraListaCobranzasPendientesProcesarJSON\
         , name="listacobranzaspendientesliquidar_json"),
     path('cobranzaporcondonar/<int:pk>/<tipo_operacion>',CobranzaPorCondonar
@@ -100,13 +98,18 @@ urlpatterns = [
         ,DatosDiasACondonar, name="datos_diascondonar"),
     path('liquidarcobranzas/<ids_cobranzas>/<tipo_operacion>/', LiquidarCobranzas),
     path('liquidacion/<tipo_operacion>', Liquidacion),
-    path('desembolsarliquidaciones/<int:pk>/<cliente_ruc>',DesembolsarCobranzas, \
-        name='desembolsarliquidacion'),
     path('reporteliquidacion/<int:liquidacion_id>',ImpresionLiquidacion
         , name='reporte_liquidacion'),
     path('reversarliquidacion/<int:pid_liquidacion>/',ReversaLiquidacion),
     path('liquidacionesregistradasjson/<desde>/<hasta>',GeneraListaLiquidacionesRegistradasJSON
         , name="liquidacionesregistradas_json"),
+    # desembolsos
+    path('listaliquidacionespendientespagar/',LiquidacionesPendientesPagarView.as_view()
+        , name="listaliquidacionespendientespagar"),
+    path('desembolsarliquidaciones/<int:pk>/<cliente_ruc>',
+         DesembolsarCobranzas, name='desembolsarliquidacion'),
+    path('reversardesembolsoliquidacion/<int:desembolso_id>',
+         ReversoDesembolsoLiquidacion),
 
     # protestos
     path('listamotivosprotesto/',MotivosProtestoView.as_view()

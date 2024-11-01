@@ -18,7 +18,7 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     GeneraListaDesembolsosJSON, CondicionesOperativasInactivar,\
     ConsultaAnexosActivos, GenerarAnexo, GeneraResumenCarteraNegociadaJSON, \
     MarcarAnexoGenerado, IngresosGeneradosJSON, PedirArchivoXML, ImportarOperacion,\
-    ReversaAceptacionPagare
+    ReversaAceptacionPagare, ReversoDesembolsoAsignacion
 
 
 from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
@@ -135,6 +135,8 @@ urlpatterns = [
         , name='consulta_desembolsos'),
     path('desembolsosjson/<desde>/<hasta>',GeneraListaDesembolsosJSON
         , name="desembolsos_json"),
+    path('reversardesembolsoasignacion/<int:desembolso_id>'
+         ,ReversoDesembolsoAsignacion,),
 # pagares
     path('pagares/',PagaresView.as_view(), name="listapagares"),
     path('reversaraceptacionpagare/<int:pid_asignacion>',ReversaAceptacionPagare),

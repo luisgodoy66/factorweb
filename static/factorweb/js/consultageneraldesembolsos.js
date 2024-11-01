@@ -28,13 +28,16 @@ window.onload=function(){
 
 window.operateEvents = {
     'click .revertir': function (e, value, row, index) {
-      ReversarCobranza(row.id, row.TipoOperacion, row.Cliente)
+        ReversarDesembolso(row.id, 
+            row.TipoOperacion, 
+            row.Operacion,
+            row.Asiento)
       },
     };
       
 function operateFormatter(value, row, index) {
     return [
-        '<a class="revertir" href="javascript:void(0)" title="Reverso de cobranza">',
+        '<a class="revertir" href="javascript:void(0)" title="Reverso de desembolso">',
         '<i class="fa fa-rotate-left"></i>',
         '</a>  ',
       ].join('')

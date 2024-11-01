@@ -410,14 +410,15 @@ def DesembolsarAsignacion(request, pk, cliente_id):
     template_name = "operaciones/datosdesembolsoaclientes_form.html"
     contexto = {}
     formulario={}
-    error = ''
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
 
     cliente = ModeloCliente.Datos_generales.objects\
         .filter(id=cliente_id).first()
 
-    datosoperativos = Datos_operativos.objects.filter(cxcliente = cliente_id).first()
+    datosoperativos = Datos_operativos.objects\
+        .filter(cxcliente = cliente_id).first()
     
     cuenta_transferencia = ModeloCliente.Cuenta_transferencia\
             .objects.cuenta_default(cliente_id).first()
@@ -425,109 +426,71 @@ def DesembolsarAsignacion(request, pk, cliente_id):
     asignacion = Asignacion.objects.filter(pk=pk).first()
 
     if request.method=="GET":
+        form_submitted = False
 
-        e={'cxtipooperacion':'A'
-            , 'cxoperacion':asignacion.id
-            , 'cxcliente':cliente_id
-            , 'nvalor': asignacion.neto()
-            , 'cxbeneficiario':datosoperativos.cxbeneficiarioasignacion
-            , 'ctbeneficiario':datosoperativos.ctbeneficiarioasignacion
+        e={'cxtipooperacion':'A', 
+           'cxoperacion':asignacion.id, 
+           'cxcliente':cliente_id, 
+           'nvalor': asignacion.neto(), 
+           'cxbeneficiario':datosoperativos.cxbeneficiarioasignacion, 
+           'ctbeneficiario':datosoperativos.ctbeneficiarioasignacion,
+           'cxcuentadestino':cuenta_transferencia,
             }
         formulario = DesembolsarForm(e, empresa = id_empresa.empresa)
 
     if request.method=="POST":
+        post_data = request.POST.copy()
+        # Asignar el valor de cuenta_transferencia al campo cxcuentadestino
+        # porque en el formulario no se puede seleccionar la cuenta 
+        # de transferencia por estar disabled
+        post_data['cxcuentadestino'] = cuenta_transferencia
 
-        formulario = DesembolsarForm(request.POST)
+        formulario = DesembolsarForm(post_data, 
+                                     empresa=id_empresa.empresa)
+        form_submitted = True
 
         if formulario.is_valid():
 
-            operacion = formulario.cleaned_data["cxoperacion"]
             forma_pago = formulario.cleaned_data["cxformapago"]
 
-            if forma_pago =="MOV" or forma_pago =='EFE':
-                cuenta_pago = None
-            else:
-                # esta linea muestra el __str__
-                # x = formulario.cleaned_data["cxcuentapago"]
-                # esta línea muestra id
-                x = request.POST.get("cxcuentapago")                
-                
-                if x == None:
-                    error='Falta cuenta de pago'
-                cuenta_pago = Cuentas_bancarias.objects.filter(pk = x).first()
+            with transaction.atomic():
+                # 1. Actualizar el estado de la ASIGNACION
+                asignacion.cxestado = 'P'
+                asignacion.save()
 
-            if forma_pago=="CHE":
-                id_beneficiario = datosoperativos.cxbeneficiarioasignacion
-                beneficiario = datosoperativos.ctbeneficiarioasignacion
-            else:
-                id_beneficiario=None
-                beneficiario=None
+                desembolso = formulario.save(commit=False)
+                desembolso.cxusuariocrea = request.user
+                desembolso.empresa = id_empresa.empresa
 
-            if forma_pago =="TRA":
-                cuenta_destino = cuenta_transferencia
-            else:
-                cuenta_destino = None
+                # Modificar los datos del objeto desembolso según el valor de cxformapago
+                if forma_pago != "CHE":
+                    desembolso.cxbeneficiario = None
+                    desembolso.ctbeneficiario = None
 
-            if error =='':
-                with transaction.atomic():
-                    # 1. Actualizar el estado de la ASIGNACION
-                    # Cambiar L por P(agada)
-                    # asignacion.cxestado = 'L'
-                    asignacion.cxestado = 'P'
-                    asignacion.save()
+                if forma_pago != "TRA":
+                    desembolso.cxcuentadestino = None
 
-                    # 2. Cobrar los cargos generados por la negociación
-                    # (Se generaron en la aceptacion)
-
-                    valor = asignacion.nanticipo
-
-                    cargos = Cargos_detalle.objects\
-                        .filter(cxasignacion=asignacion\
-                            , cxcliente_id=cliente_id).all()
-
-                    for cargo in cargos:
-                        if valor >= cargo.nsaldo:
-                            cargo.nsaldo = 0
-                            cargo.save()
-                            valor = valor - cargo.nsaldo
-                        else:
-                            cargo.nsaldo = cargo.nsaldo - valor
-                            cargo.save()
-                            valor = 0
-
-                    # 3. grabar el desembolso
-                    liquidacion = Desembolsos(cxtipooperacion='A'
-                        , cxoperacion = operacion
-                        , cxcliente = cliente
-                        , nvalor = asignacion.neto()
-                        , cxformapago = forma_pago
-                        , cxcuentapago = cuenta_pago
-                        , cxbeneficiario =id_beneficiario
-                        , ctbeneficiario = beneficiario
-                        , cxcuentadestino = cuenta_destino
-                        , cxusuariocrea = request.user,
-                        empresa = id_empresa.empresa,
-                        )
+                if forma_pago in ["EFE", "MOV"]:
+                    desembolso.cxcuentapago = None
                     
-                    liquidacion.save()
+                desembolso.save()
 
-                return redirect("operaciones:listaasignacionespendientesdesembolsar")
+            return redirect("operaciones:listaasignacionespendientesdesembolsar")
+        else:
+            contexto['form_errors'] = formulario.errors
 
     sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
                                     empresa = id_empresa.empresa).count()
 
-    contexto={'liquidacion':asignacion.dnegociacion
+    contexto.update({'liquidacion':asignacion.dnegociacion
         , 'instruccion_de_pago':asignacion.ctinstrucciondepago
-        , "cuenta_transferencia":cuenta_transferencia
-        # , 'id_beneficiario': datosoperativos.cxbeneficiarioasignacion
-        # , 'beneficiario': datosoperativos.ctbeneficiarioasignacion
-        , "form":formulario
         , 'cliente':cliente
         , 'tipo_operacion':'A'
         , 'operacion':asignacion.cxasignacion
         , 'solicitudes_pendientes':sp
-        , 'error':error
-    }
+        , "form":formulario
+        , 'form_submitted': form_submitted
+    })
 
     return render(request, template_name, contexto)
 
@@ -1385,13 +1348,11 @@ def CondicionesOperativasADictionario(det):
 @permission_required('operaciones.change_condiciones_operativas_detalle'
     , login_url='bases:sin_permisos')
 def EliminarDetalleCondicionOperativa(request, detalle_id):
-    # la eliminacion es lógica
-    # debe devolver: 1 si esta bien, 0 si esta mal
 
     doc = Condiciones_operativas_detalle.objects.filter(pk=detalle_id).first()
 
     if not doc:
-        return HttpResponse(0)
+        return HttpResponse("No se encontró el detalle de la condición operativa")
 
     if request.method=="GET":
         # marcar como eliminado
@@ -1961,7 +1922,8 @@ def GeneraListaDesembolsosJSON(request, desde = None, hasta= None):
 
     if desde == 'None':
         movimiento = Desembolsos.objects\
-            .filter(empresa = id_empresa.empresa)\
+            .filter(empresa = id_empresa.empresa,
+                    leliminado = False)\
             .order_by('dregistro')
         
     else:
@@ -1973,6 +1935,7 @@ def GeneraListaDesembolsosJSON(request, desde = None, hasta= None):
         movimiento = Desembolsos.objects\
             .filter(dregistro__gte = desde
                     , empresa = id_empresa.empresa
+                    , leliminado = False
                     , dregistro__lt = hasta)\
             .order_by('dregistro')
                 
@@ -1994,7 +1957,6 @@ def GeneraListaDesembolsosJSONSalida(transaccion):
     output['id'] = transaccion.id
     output["Cliente"] = transaccion.cxcliente.cxcliente.ctnombre
     output["Registro"] = transaccion.dregistro.strftime("%Y-%m-%d")
-    # output["Estado"] = transaccion['cxestado']
     output["Valor"] =  transaccion.nvalor
     output["FormaPago"] = transaccion.cxformapago
     output["OrigenPago"] = transaccion.cxcuentapago.__str__()
@@ -2003,6 +1965,8 @@ def GeneraListaDesembolsosJSONSalida(transaccion):
         output["Detalle"] = transaccion.ctbeneficiario
     elif transaccion.cxformapago =="TRA":
         output["Detalle"] = transaccion.cxcuentadestino.__str__()
+
+    output["TipoOperacion"] =transaccion.cxtipooperacion
 
     if transaccion.cxtipooperacion =='C':
         output["Movimiento"] = 'Liquidación de cobranza'
@@ -2029,12 +1993,14 @@ def GeneraListaDesembolsosJSONSalida(transaccion):
 @permission_required("operaciones.change_condiciones_operativas_cabecera",login_url="/login/")
 def CondicionesOperativasInactivar(request,id):
     condicion = Condiciones_operativas_cabecera.objects.filter(pk=id).first()
+
+    if not condicion:
+        return HttpResponse("No se encontró la condición operativa")
+    
     if request.method=="POST":
-        if condicion:
-            condicion.lactiva = not condicion.lactiva
-            condicion.save()
-            return HttpResponse("OK")
-        return HttpResponse("FAIL")
+        condicion.lactiva = not condicion.lactiva
+        condicion.save()
+        return HttpResponse("OK")
     
     return HttpResponse("FAIL")
 
@@ -2110,15 +2076,15 @@ def GenerarAnexo(request, asignacion_id, anexo_id):
             'cargorepresentantelegal': rl_cargo,
             }
         plantilla.render(context)
-        return bajararchivo(request,plantilla,archivo)
+        x = bajararchivo(request,plantilla,archivo)
 
+        # marcar la asignación como generados los anexos
+        asignacion.lanexosimpresos = True
+        asignacion.save()
+        
+        return x
     except TypeError as err:
         return HttpResponse("Se ha producido en error en la generación del anexo.{}".format(err))
-
-    # marcar la asignación como generados los anexos
-    asignacion.lanexosimpresos = True
-    asignacion.save()
-    
 
 def GeneraResumenCarteraNegociadaJSON(request, año):
 
@@ -2275,3 +2241,31 @@ def ReversaAceptacionPagare(request, pid_asignacion):
 
     return HttpResponse(resultado)
 
+@login_required(login_url='/login/')
+@permission_required('operaciones.change_desembolsos', login_url='bases:sin_permisos')
+def ReversoDesembolsoAsignacion(request, desembolso_id):
+
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
+    
+    desembolso = Desembolsos.objects\
+        .filter(pk=desembolso_id, empresa = id_empresa.empresa).first()
+    
+    asignacion = Asignacion.objects\
+        .filter(pk=desembolso.cxoperacion).first()
+
+    try:
+        with transaction.atomic():
+            # 1. Actualizar el estado de la ASIGNACION
+            asignacion.cxestado = 'L'
+            asignacion.save()
+
+            desembolso.cxusuarioelimina = request.user.id
+            desembolso.leliminado = True
+            desembolso.save()
+
+        return HttpResponse("OK")
+    
+    except Exception as e:
+        return HttpResponse( "Error al intentar guardar el registro. {}".format(e))
+        

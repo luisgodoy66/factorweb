@@ -772,3 +772,27 @@ function ReversarAceptacionPagare(asignacion_id, codigo_asgn = ''){
     
 }
 
+function ReversarDesembolso(desembolso_id, tipo_operacion, operacion, asiento){
+  // este proceso a diferencia de aceptar no se ejecuta desde un
+  // formulario por eso no usa fetchPostear
+
+  if (asiento ){
+    MensajeError("Desembolso tiene asiento contable. No se puede reversar.")
+  }
+  else{
+    MensajeConfirmacion("Reversar el desembolso de la operación " +  operacion +"?",function(){
+      if (tipo_operacion == 'A'){
+        fetchProcesar("/operaciones/reversardesembolsoasignacion/"+ desembolso_id, function(){
+            location.reload();
+        })
+      }
+      if (tipo_operacion == 'C'){
+        fetchProcesar("/cobranzas/reversardesembolsoliquidacion/"+ desembolso_id, function(){
+            location.reload();
+        })
+      }
+    })  
+  }
+    
+}
+

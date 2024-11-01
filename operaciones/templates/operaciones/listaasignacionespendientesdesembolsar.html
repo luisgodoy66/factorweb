@@ -6,7 +6,7 @@
             <div class="page-title">
                 <ol class="breadcrumb text-right">
                     <li><a href="#">operaciones</a></li>
-                    <li><a href="#">procesos</a></li>
+                    <li><a href="#">desembolsos</a></li>
                     <li class="active">pago de negociación</li>
                 </ol>
             </div>
@@ -69,9 +69,9 @@
                             <td>
                                 <button onclick="generaAnexos( {{item.id}}, '{{item.cxcliente.cxtipocliente}}')" 
                                     {% if item.lanexosimpresos %}
-                                    class="btn btn-secondary btn-sm" 
+                                        class="btn btn-secondary btn-sm" 
                                     {% else %}
-                                    class="btn btn-primary btn-sm" 
+                                        class="btn btn-success btn-sm" 
                                     {% endif %}
                                     title="Anexos" role="button">
                                     <i class="fa fa-paperclip"></i></a>
