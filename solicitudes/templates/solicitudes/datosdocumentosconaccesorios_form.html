@@ -29,26 +29,8 @@
     <div class="card">
         {% csrf_token %}
         <div class="card-header">
-            <strong>Detalle de factura</strong> 
-        </div>
-        <div class="col-6 col-md-6" hidden>
-            <input type="text" 
-                id="asignacion_id" 
-                name="asignacion_id" 
-                value="{{ asignacion_id }}"
-                class="form-control">
-            <input type="text" 
-                id="id_cliente" 
-                name="id_cliente" 
-                value="{{ cliente }}"
-                class="form-control">
-            <input type="text" 
-                id="id_tipofactoring" 
-                name="id_tipofactoring" 
-                value="{{ tipo_factoring }}"
-                class="form-control">
-        </div>
-        
+            <strong>Detalle de factura</strong> de {{cliente_nombre}}
+        </div>        
         <div class="card-body">
             <!-- datos de factura texto y fecha -->
             <div class="col-md-6 col-sm-6">
@@ -210,6 +192,8 @@
 <script>
     var enviando = false; //Obligaremos a entrar el if en el primer submit
     const xmlFile = document.getElementById('xmlFile');
+    const Cliente_nombre = "{{cliente_nombre}}";
+    
 window.onload=function(){
 
     // configuar cambios en los campos de valores

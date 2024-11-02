@@ -8,12 +8,6 @@
                 action="{% url 'solicitudes:editarchequeaccesorio' tipo_factoring %}"
             {% endif %}
             onsubmit="return checkSubmit();">
-            <!-- <div class="col-md-12"> -->
-            <div hidden>
-                <input type="text" value={{cheque}} id="id_cheque">
-                <input type="text" name = "asignacion_id" value = "{{ asignacion}}">
-                <input type="text" id = "id_valor" value = "{{ valor }}">
-            </div>
                 <div class="card">
 
                     {% csrf_token %}
@@ -110,18 +104,39 @@
 
     </div>
 
-    {% block js_page %}
     <script>
-        // objeto_fechas("#id_dvencimiento");
-        // este modal viene desde nuevo registro o edicion de cheque. Si es nuevo
-        // (no hay cheque), inicializar los valores del comprador y total
-        var enviando = false; //Obligaremos a entrar el if en el primer submit
-        if ( capturaValor("id_cheque") == 'None')
-        {
-            inicializaValor("id_ctgirador",capturaValor("id_ctcomprador"))
-            inicializaValor("cheque_nvalor",capturaValor("id_ntotal"))
+    var enviando = false; //Obligaremos a entrar el if en el primer submit
+    const cheque = "{{ cheque }}";
+    const selectElement = document.getElementById('id_cxpropietariocuenta');
+    selectElement.addEventListener('change', evaluarSeleccion);
+
+    // este modal viene desde nuevo registro o edicion de cheque. Si es nuevo
+    // (no hay cheque), inicializar los valores del comprador y total
+    if ( cheque  === null || cheque === 'None')
+    {
+        // Agregar un evento change al objeto select para evaluar la selección cuando cambie
+
+        evaluarSeleccion( );
+        inicializaValor("cheque_nvalor",capturaValor("id_ntotal"))
+    };
+
+    // Función para evaluar la selección del objeto select y asignar el valor correspondiente
+    function evaluarSeleccion() {
+        // la constante Cliente_nombre se encuentra definida en el formulario anterior
+        const selectElement = document.getElementById('id_cxpropietariocuenta'); 
+        const selectedValue = selectElement.value;
+
+        // si es edicion de cheque no hay id_ctcomprador que se define en forma de factura
+        if ( cheque  === null || cheque === 'None'){
+            if (selectedValue === 'D') {
+                const Comprador_nombre = capturaValor("id_ctcomprador");
+            inicializaValor("id_ctgirador", Comprador_nombre)
+            } else if (selectedValue === 'C') {
+                inicializaValor("id_ctgirador", Cliente_nombre)
+            }
+            
         }
+    }
         
     </script>
-    {% endblock %}
 </div>    

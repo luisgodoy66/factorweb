@@ -27,11 +27,6 @@
             {% if asignacion.id %} de  {{ asignacion.cxcliente }}  
             {% else %}  nueva {% endif %} 
         </div>
-        <div class="col-6 col-md-6" hidden>
-            <input id="asignacion_id" name="asignacion_id" value="{{ asignacion.id }}">
-            <input id="id_cliente" name="id_cliente" value="{{ asignacion.cxcliente_id }}">
-            <input id="id_tipofactoring" name="id_tipofactoring" value="{{ asignacion.cxtipofactoring_id }}">
-        </div>
         <div class="card-body card-block">
                 <!-- lista de clientes -->
             <div class="row form-group">
@@ -134,8 +129,7 @@
 var enviando = false; //Obligaremos a entrar el if en el primer submit
 var $table = jQuery('#table')
 var selections = []
-var cliente_id = capturaValor("id_cliente")
-var asignacion_id = capturaValor("asignacion_id")
+const asignacion_id = "{{ asignacion.id }}"
 
 window.onload=function(){
     initTable();
@@ -202,21 +196,27 @@ function initTable() {
 }
 
 function NuevaAsignacion(){
-  cliente_id=capturaValor("id_cxcliente");
-  tipo_factoring=capturaValor("id_cxtipofactoring");
-  
-  if (cliente_id == "" || tipo_factoring==""){
-    alert("debe especificar cliente y tipo de factoring")
-  }
-  else{
-    url = '/solicitudes/nuevodocumentoconaccesorios/'
-    +cliente_id+'/'+tipo_factoring;
-    
-    location.href=url
-  }
-  return false
-}
+    var cliente_id=capturaValor("id_cxcliente");
+    var tipo_factoring=capturaValor("id_cxtipofactoring");
+    var textoSeleccionado = obtenerTextoSeleccionado('id_cxcliente');
 
+    if (cliente_id == "" || tipo_factoring==""){
+        alert("debe especificar cliente y tipo de factoring")
+    }
+    else{
+        url = '/solicitudes/nuevodocumentoconaccesorios/'
+        +cliente_id+'/'+tipo_factoring+'/'+textoSeleccionado;
+
+        location.href=url
+    }
+    return false
+}
+function obtenerTextoSeleccionado(selectId) {
+            var selectElement = document.getElementById(selectId);
+            var selectedText = selectElement.options[selectElement.selectedIndex].text;
+            return selectedText;
+        }
+        
 function EditarDocumento( doc_id){
   tipo_factoring=capturaValor("id_cxtipofactoring");
   AbrirModal('/solicitudes/editarchequeaccesorio/'+doc_id+'/'+tipo_factoring )

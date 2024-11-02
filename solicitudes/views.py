@@ -540,7 +540,7 @@ def DetalleSolicitudConAccesoriosOuput(doc):
 @login_required(login_url='/login/')
 @permission_required('solicitudes.change_chequesaccesorios', login_url='bases:sin_permisos')
 def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=None
-    , asignacion_id=None):
+    , asignacion_id=None, cliente_nombre=None):
     template_name="solicitudes/datosdocumentosconaccesorios_form.html"
     formulario = {}
     asignacion = {}
@@ -560,6 +560,8 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
                 'ncantidaddocumentos':asignacion.ncantidaddocumentos
             }
             formulario = AsignacionesForm(e)
+
+            cliente_nombre = asignacion.cxcliente.ctnombre
         else:
             formulario=AsignacionesForm()
             asignacion=None
@@ -572,24 +574,21 @@ def DatosAsignacionConAccesorios(request, cliente_id=None, tipo_factoring_id=Non
 
     contexto={'form_asignacion':formulario,
         'form_documento':DocumentosForm,
-        # 'form_cheque': ChequesForm(),
         'asignacion' : asignacion,
         'asignacion_id': asignacion_id,
         'cliente': cliente_id,
         'tipo_factoring': tipo_factoring_id,
-        'solicitudes_pendientes':sp
+        'solicitudes_pendientes':sp,
+        'cliente_nombre':cliente_nombre,
        }
 
     if request.method=='POST':
-
-        idcliente = request.POST.get("id_cliente")
-        tipo_factoring = request.POST.get("id_tipofactoring")
         tipoasignacion = FACTURAS_CON_ACCESORIOS
 
-        cliente = Clientes.objects.get(pk=idcliente)
+        cliente = Clientes.objects.get(pk=cliente_id)
 
         tipoFactoring = Tipos_factoring.objects\
-            .filter(pk=tipo_factoring).first()
+            .get(pk=tipo_factoring_id)
 
         # inicio de transaccion
         with transaction.atomic():

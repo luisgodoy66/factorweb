@@ -28,7 +28,7 @@ urlpatterns=[
         DatosFacturasPuras, name='facturaspuras_editar'),
     path('editardocumentoconaccesorios/<int:asignacion_id>/<int:cliente_id>/<tipo_factoring_id>',\
         DatosAsignacionConAccesorios, name='documentoconaccesorios_editar'),
-    path('nuevodocumentoconaccesorios/<int:cliente_id>/<tipo_factoring_id>',\
+    path('nuevodocumentoconaccesorios/<int:cliente_id>/<tipo_factoring_id>/<cliente_nombre>',\
         DatosAsignacionConAccesorios),
     path('detallesolicitud/<int:asignacion_id>',DetalleSolicitudFacturasPuras, \
         name='detallesolicitudfacturaspuras'),
