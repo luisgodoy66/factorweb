@@ -9,7 +9,7 @@
             {% endif %}
             onsubmit="return checkSubmit();">
             <!-- <div class="col-xl-12 col-md-12 mb-12"> -->
-                <div class="card">
+            <div class="card">
 
                 {% csrf_token %}
                 <div class="card-header">
@@ -85,10 +85,7 @@
                             </label>
                         </div>
                     </div>
-                <!-- </div> -->
-                    <!-- {{ form.as_p}} -->
                 </div>    
-                {{ errors}}
                 <div class="card-footer">
                     <button type="button" class="btn btn-danger btn-sm" onclick="return CerrarModal()">
                         <i class="fa fa-ban"></i> Cerrar
@@ -97,7 +94,21 @@
                         <i class="fa fa-dot-circle-o"></i> Grabar
                     </button>
                 </div>
+                <!-- Sección para mostrar errores del formulario -->
+                {% if form_submitted and form.errors %}
+                {#% if  form.errors %#}
+                <div class="alert alert-danger" role="alert">
+                    <ul>
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ field }}: {{ error }}</li>
+                                <!-- <li>{{ error }}</li> -->
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
                 </div>
+                {% endif %}
+            </div>
             <!-- </div> -->
         </form>
 

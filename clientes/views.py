@@ -334,27 +334,75 @@ class CuposCompradoresView(SinPrivilegios, generic.ListView):
         return context
 
 class CuposCompradoresNew(SinPrivilegios, generic.CreateView):
-    model=Cupos_compradores
-    template_name="clientes/datoscupo_modal.html"
+    model = Cupos_compradores
+    template_name = "clientes/datoscupo_modal.html"
     context_object_name = "consulta"
-    form_class=CuposCompradoresForm
-    success_url=reverse_lazy("clientes:listacupos")
-    success_message="Cupo actualizado satisfactoriamente"
+    form_class = CuposCompradoresForm
+    success_url = reverse_lazy("clientes:listacupos")
+    success_message = "Cupo actualizado satisfactoriamente"
     login_url = 'bases:login'
-    permission_required="clientes.add_cupos_compradores"
+    permission_required = "clientes.add_cupos_compradores"
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
     def get_form_kwargs(self):
         kwargs = super(CuposCompradoresNew, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
-       
+
+    # def form_invalid(self, form):
+    #     response = super().form_invalid(form)
+    #     if self.request.is_ajax():
+    #         return JsonResponse(form.errors, status=400)
+    #     else:
+    #         return response
+
+    def form_invalid(self, form):
+        # if self.request.is_ajax():
+            errors = form.errors.as_json()
+            return JsonResponse({'errors': errors}, status=400)
+        # else:
+            # return super().form_invalid(form)
+            
+@login_required(login_url='/login/')
+@permission_required('clientes.add_cupos_compradores', login_url='bases:sin_permisos')
+def DatosCuposCompradorNuevo(request, ):
+    template_name = "clientes/datoscupo_modal.html"
+    contexto = {}
+    formulario = {}
+    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+    form_submitted = False
+
+    if request.method == 'POST':
+        formulario = CuposCompradoresForm(request.POST, empresa=id_empresa.empresa)
+            
+        form_submitted = True
+
+        if formulario.is_valid():
+            datosparticipante = formulario.save(commit=False)
+            datosparticipante.cxusuariocrea = request.user
+            datosparticipante.empresa = id_empresa.empresa
+            datosparticipante.save()
+
+            return redirect("clientes:listacupos")
+        else:
+            contexto['form_errors'] = formulario.errors
+            return HttpResponse(str(formulario.errors))
+    else:
+        formulario = CuposCompradoresForm(empresa=id_empresa.empresa)
+
+    contexto.update({
+        'form': formulario,
+        'form_submitted': form_submitted,
+    })
+
+    return render(request, template_name, contexto)
+        
 class CuposCompradoresEdit(SinPrivilegios, generic.UpdateView):
     model=Cupos_compradores
     template_name="clientes/datoscupo_modal.html"
@@ -1018,65 +1066,6 @@ def ActualizarCuentaTransferencia(request, pk, cliente_ruc):
 
     return HttpResponse("OK")
 
-# @login_required(login_url='/login/')
-# @permission_required('clientes.change_datos_compradores', login_url='bases:sin_permisos')
-# def DatosCompradores(request, participante_id=None):
-#     template_name = "clientes/datoscomprador_form.html"
-#     contexto = {}
-#     datosparticipante = {}
-#     id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
-
-#     if request.method == 'POST':
-#         if participante_id:
-#             datosparticipante = Datos_participantes.objects.filter(pk=participante_id).first()
-#             formulario = ParticipanteForm(request.POST, instance=datosparticipante, empresa=id_empresa.empresa)
-#         else:
-#             formulario = ParticipanteForm(request.POST, empresa=id_empresa.empresa)
-            
-#         form_submitted = True
-
-#         if formulario.is_valid():
-#             datosparticipante = formulario.save(commit=False)
-#             if not participante_id:
-#                 datosparticipante.cxusuariocrea = request.user
-#             else:
-#                 datosparticipante.cxusuariomodifica = request.user.id
-#             datosparticipante.empresa = id_empresa.empresa
-#             datosparticipante.save()
-
-#             # Crear un nuevo registro en Datos_compradores si es una creación
-#             if not participante_id:
-#                 datoscomprador = Datos_compradores(
-#                     cxcomprador=datosparticipante,
-#                     cxusuariocrea=request.user,
-#                     empresa=id_empresa.empresa,
-#                 )
-#                 datoscomprador.save()
-
-#             return redirect("clientes:listacompradores")
-#         else:
-#             contexto['form_participante'] = formulario
-#             contexto['form_errors'] = formulario.errors
-#     else:
-#         form_submitted = False
-#         datosparticipante = Datos_participantes.objects.filter(pk=participante_id).first()
-
-#         if datosparticipante:
-#             formulario = ParticipanteForm(instance=datosparticipante, empresa=id_empresa.empresa)
-#         else:
-#             formulario = ParticipanteForm(empresa=id_empresa.empresa)
-
-#     sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False, empresa=id_empresa.empresa).count()
-
-#     contexto.update({
-#         'datosparticipante': datosparticipante,
-#         'form': formulario,
-#         'solicitudes_pendientes': sp,
-#         'form_submitted': form_submitted,
-#     })
-
-#     return render(request, template_name, contexto)
-
 @login_required(login_url='/login/')
 @permission_required('clientes.change_datos_compradores', login_url='bases:sin_permisos')
 def DeClienteAComprador(request, participante_id=None):
@@ -1089,5 +1078,25 @@ def DeClienteAComprador(request, participante_id=None):
         empresa=id_empresa.empresa,
     )
     datoscomprador.save()
+
+    return HttpResponse("OK")
+
+@login_required(login_url='/login/')
+@permission_required('clientes.change_cupos_compradores', login_url='bases:sin_permisos')
+def EliminarCupoComprador(request, pk):
+    # la eliminacion es lógica
+
+    cupo = Cupos_compradores.objects.filter(pk=pk).first()
+
+    if not cupo:
+        return HttpResponse("Cuenta no encontrada")
+
+    # if request.method=="GET":
+
+    # marcar como eliminado
+    cupo.leliminado = True
+    cupo.cxusuarioelimina = request.user.id
+    cupo.save()
+
 
     return HttpResponse("OK")

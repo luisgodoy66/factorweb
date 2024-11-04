@@ -1,5 +1,6 @@
 # from dataclasses import fields
 from django import forms
+from django.core.exceptions import ValidationError
 
 from .models import  Cuentas_bancarias, Datos_generales, Linea_Factoring\
     , Personas_juridicas , Personas_naturales, Cupos_compradores\
@@ -211,7 +212,19 @@ class CuposCompradoresForm(forms.ModelForm):
             self.fields['cxcomprador'].queryset = Datos_compradores.objects\
                 .filter(empresa=empresa, leliminado = False)\
                 .order_by('cxcomprador__ctnombre')
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        cxcliente = cleaned_data.get('cxcliente')
+        cxcomprador = cleaned_data.get('cxcomprador')
 
+        if Cupos_compradores.objects\
+            .filter(cxcliente=cxcliente, cxcomprador=cxcomprador, leliminado = False)\
+            .exclude(pk=self.instance.pk).exists():
+            raise ValidationError("Ya existe un registro con este cliente y comprador.")
+
+        return cleaned_data
+    
 class CuentasBancariasForm(forms.ModelForm):
     class Meta:
         model=Cuentas_bancarias

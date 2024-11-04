@@ -66,7 +66,7 @@
                         {% for item in consulta %}
                         <tr>
                             <td>{{ item.cxcomprador.cxcomprador.cxparticipante }}</td>
-                            <td>{{ item }}</td>
+                            <td>{{ item.cxcomprador }}</td>
                             <td>{{ item.cxcliente }}</td>
                             <td>{{ item.ncupocartera }}</td>
                             <td>{{ item.nutilizadocartera }}</td>
@@ -79,7 +79,10 @@
                                     role="button">
                                     <i class="fa fa-edit"></i>
                                 </button>
-                                <a href="#" class="btn btn-danger btn-sm" role="button"><i class="fa fa-exclamation"></i></a>
+                                <a href="#" onclick="return EliminarCupo({{item.id}}, {{item.nutilizadocartera}}, 
+                                    '{{item.cxcomprador}}')" title="Eliminar"
+                                    class="btn btn-danger btn-sm" role="button"><i class="fa fa-trash"></i>
+                                </a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -94,3 +97,23 @@
 
 {% endblock %}
 
+{% block js_page %}
+<script>
+    function EliminarCupo( documento_id, utilizado, comprador){
+        if (utilizado > 0){
+            MensajeError("No se puede eliminar un cupo con saldo utilizado");
+            return;
+        }
+        MensajeConfirmacion("Eliminar cupo de " + comprador + "?",function(){
+
+            fetchProcesar("/clientes/eliminarcupo/"+ documento_id, function(){
+            // $table.bootstrapTable('remove', {
+            //   field: 'id',
+            //   values: [documento_id]
+            // });
+            location.reload();
+            })
+        })
+    }
+</script>
+{% endblock %}

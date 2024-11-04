@@ -17,6 +17,11 @@ class Datos_compradores(ClaseModelo):
     cxclase =models.ForeignKey(Clases_cliente, on_delete=models.DO_NOTHING 
                                ,null=True,)
 
+    class Meta:
+        ordering = [
+            'cxcomprador__ctnombre'
+            ]  
+
     def __str__(self):
         return self.cxcomprador.ctnombre
         
@@ -140,6 +145,12 @@ class Cupos_compradores(ClaseModelo):
     # cxmodalidadcobranza=models.CharField(max_length=3, null=False)
     lactivo=models.BooleanField(default=True)
     lsenotifica=models.BooleanField(default=False)
+
+    class Meta:
+        ordering = [
+            'cxcomprador__cxcomprador__ctnombre',
+            'cxcliente__cxcliente__ctnombre'
+            ]  
 
     def __str__(self):
         return self.cxcomprador.cxcomprador.ctnombre
