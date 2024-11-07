@@ -28,7 +28,7 @@ window.onload=function(){
 
 window.operateEvents = {
     'click .revertir': function (e, value, row, index) {
-      ReversarAmpliacionPlazo(row.id, row.TipoOperacion, row.Cliente)
+      ReversarAmpliacionPlazo(row.id, row.Operacion)
       },
       'click .imprimir': function (e, value, row, index) {
         ImprimirAmpliacionPlazo( row.id)

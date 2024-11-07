@@ -94,7 +94,8 @@
                         <th data-field="Fecha" data-filter-control="input"data-sortable="true" >Fecha</th>
                         <th data-field="Deposito" data-filter-control="input"data-sortable="true" >Depósito</th>
                         <th data-field="TipoFactoring" data-filter-control="input"data-sortable="true" >Factoring</th>
-                        <th data-field="Valor" data-filter-control="input"data-sortable="true" >Valor</th>
+                        <th data-field="Valor" data-filter-control="input"data-sortable="true" 
+                            data-formatter="numberFormatter" >Valor</th>
                         <th data-field="FormaCobro" data-filter-control="input"data-sortable="true" >F. de cobro</th>
                         <th data-field="Detalle" data-filter-control="input"data-sortable="true" >Detalle</th>
                         <th data-field="Estado" data-filter-control="input"data-sortable="true" >Estado</th>
@@ -123,4 +124,9 @@
 {% block js_page %}
 <script type="text/javascript" src="{% static 'factorweb/js/consultageneralcobranzas.js' %}"></script>
 <script src="{% static 'factorweb/vendors/chosen/chosen.jquery.min.js' %}"></script>
+<script>
+    function numberFormatter(value) {
+      return Number(value).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+</script>
 {% endblock %}

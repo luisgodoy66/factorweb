@@ -3037,7 +3037,7 @@ def ObtenerOtrosCargosDeDocumento(id_documento, listaotroscargos):
     return total_cargos
 
 @login_required(login_url='/login/')
-@permission_required('operaciones.add_cheques_canjeados', login_url='bases:sin_permisos')
+@permission_required('operaciones.change_cheques_protestados', login_url='bases:sin_permisos')
 def ReversaProtesto(request, id_cobranza,tipo_operacion,id_protesto, cobranza
                     , cliente_id, factoring_id):
     # # ejecuta un store procedure 
@@ -3050,6 +3050,8 @@ def ReversaProtesto(request, id_cobranza,tipo_operacion,id_protesto, cobranza
 
     return HttpResponse(resultado)
 
+@login_required(login_url='/login/')
+@permission_required('operaciones.add_cheques_canjeados', login_url='bases:sin_permisos')
 def CanjeDeCheque(request, cheque_id, cliente_id, deudor_id):
     template_path = 'cobranzas/datoscanjecheque_modal.html'
 
@@ -3727,7 +3729,8 @@ def GeneraListaAmpliacionesJSON(request, desde = None, hasta= None):
                         ,'notadebito__cxtipofactoring__ctabreviacion'
                         ,'ncomision','ndescuentodecartera', 'niva'
                         ,'nvalor', 'dampliacionhasta'
-                        ,'notadebito__nsaldo')
+                        ,'notadebito__nsaldo')\
+                .order_by('notadebito__dnotadebito')
         
     else:
 
@@ -3735,15 +3738,17 @@ def GeneraListaAmpliacionesJSON(request, desde = None, hasta= None):
             .filter(notadebito__dnotadebito__gte = desde
                     , empresa = id_empresa.empresa
                     , notadebito__dnotadebito__lte = hasta)\
-                .values('cxcliente__cxcliente__ctnombre', 'notadebito__id'
+                .values('cxcliente__cxcliente__ctnombre'
+                        ,'notadebito__id'
                         ,'notadebito__cxnotadebito'
                         ,'dregistro'
                         ,'notadebito__dnotadebito'
-                        , 'notadebito__cxestado'
+                        ,'notadebito__cxestado'
                         ,'notadebito__cxtipofactoring__ctabreviacion'
                         ,'ncomision','ndescuentodecartera', 'niva'
                         ,'nvalor', 'dampliacionhasta'
-                        ,'notadebito__nsaldo')
+                        ,'notadebito__nsaldo')\
+                .order_by('notadebito__dnotadebito')
                 
     tempBlogs = []
     for i in range(len(movimiento)):
@@ -4002,3 +4007,14 @@ def ReversoDesembolsoLiquidacion(request, desembolso_id):
     except Exception as e:
         return HttpResponse( "Error al intentar guardar el registro. {}".format(e))
         
+@login_required(login_url='/login/')
+@permission_required('operaciones.change_ampliaciones_plazo_cabecera', login_url='bases:sin_permisos')
+def ReversaAmpliacion(request, id_nd):
+    # # ejecuta un store procedure 
+    nusuario = request.user.id
+
+    resultado=enviarPost("CALL uspReversarAmpliacionDePlazo( {0},{1},'')"
+    .format(id_nd, nusuario))
+
+    return HttpResponse(resultado)
+

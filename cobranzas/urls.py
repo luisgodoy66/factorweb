@@ -21,7 +21,8 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , SumaCargos, Prorroga, EditarTasasDocumentoAmpliacionDePlazo\
     , AceptarAmpliacionDePlazo,  GeneraListaAmpliacionesJSON, AmpliacionesConsulta\
     , ModificarCobranza, GeneraListaFacturasPendientesJSON, CobranzasCuotasView\
-    , DetalleCuotasJSON, AceptarCobranzaCuota, ReversoDesembolsoLiquidacion
+    , DetalleCuotasJSON, AceptarCobranzaCuota, ReversoDesembolsoLiquidacion\
+    , ReversaAmpliacion
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos\
@@ -179,6 +180,7 @@ urlpatterns = [
         , name='consulta_ampliaciones'),
     path('ampliacionesplazojson/<desde>/<hasta>',GeneraListaAmpliacionesJSON
         , name="ampliacionesplazo_json"),
+    path('reversarampliaciondeplazo/<int:id_nd>',ReversaAmpliacion),
     
     # facturas
     path('listafacturaspendientesjson/',GeneraListaFacturasPendientesJSON\

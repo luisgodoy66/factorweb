@@ -145,7 +145,8 @@ class Documentos_Manager(models.Manager):
                 , leliminado = False, nsaldo__gt = 0
                 , empresa = id_empresa
                 , cxasignacion__in = Asignacion.objects
-                    .filter(cxtipo = "F", cxestado = "P", leliminado = False))
+                    .filter(cxtipo = "F", cxestado = "P", leliminado = False))\
+                    .order_by('dvencimiento')
 
     def antigüedad_cartera(self, id_empresa):
         # grafico de antigüedad de cartera 
