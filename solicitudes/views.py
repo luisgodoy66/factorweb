@@ -892,19 +892,24 @@ def ImportarOperacion(request):
             # grabar los documentos
             for doc in documentos:
                 if doc:
-                    id_comprador=doc["ruc_comprador"]
-                    nombre_comprador=doc["nombre_comprador"]
-                    emision =doc["emision"]
-                    serie1=doc["serie1"]
-                    serie2=doc["serie2"]
-                    documento=doc["numero_documento"]
-                    vencimiento =doc["vencimiento"]
-                    valor_antes_de_iva =doc["valor_antes_iva"]
-                    iva =doc["valor_iva"]
-                    retencion_iva =doc["retencion_iva"]
-                    retencion_renta =doc["retencion_renta"]
-                    total = doc["total"]
-                    no_negociado = doc["descartar"]
+                    id_comprador = doc.get("ruc_comprador", None)
+                    nombre_comprador = doc.get("nombre_comprador", None)
+                    emision = doc.get("emision", None)
+                    serie1 = doc.get("serie1", "")
+                    serie2 = doc.get("serie2", "")
+                    documento = doc.get("numero_documento", "")
+                    vencimiento = doc.get("vencimiento", None)
+                    valor_antes_de_iva = doc.get("valor_antes_iva", 0)
+                    iva = doc.get("valor_iva", 0)
+                    retencion_iva = doc.get("retencion_iva", 0)
+                    retencion_renta = doc.get("retencion_renta", 0)
+                    total = doc.get("total", 0)
+                    no_negociado = doc.get("descartar", 0)
+
+                    # si el id del comprador no existe, descartar el documento
+                    if not id_comprador or not nombre_comprador or not emision \
+                        or not vencimiento or total == 0:
+                        continue
 
                     # segun tipo de factoring no acepte vencimientos en feriados
                     # cambiar la fecha de vencimiento
