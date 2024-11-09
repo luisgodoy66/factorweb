@@ -13,15 +13,16 @@ from django.http import HttpResponse, JsonResponse
 
 from django.db import DataError
 
-from .forms import DatosOperativosForm, AsignacionesForm, MaestroMovimientosForm, \
-    CondicionesOperativasForm, DetalleCondicionesOperativasForm, \
-    TasasDocumentosForm, TasasAccesoriosForm, DesembolsarForm, AnexosForm
+from .forms import DatosOperativosForm, AsignacionesForm, \
+    MaestroMovimientosForm, CondicionesOperativasForm, \
+    DetalleCondicionesOperativasForm, TasasDocumentosForm, \
+    TasasAccesoriosForm, DesembolsarForm, AnexosForm, CuotasForm
 
-from .models import Cargos_detalle, Condiciones_operativas_detalle, Datos_operativos \
-    , Asignacion,  Condiciones_operativas_cabecera, Anexos, Pagares\
-    , Desembolsos, Documentos, ChequesAccesorios, Notas_debito_cabecera\
-    , Cheques_quitados, Ampliaciones_plazo_cabecera, Cheques_canjeados\
-    , Pagare_detalle
+from .models import Cargos_detalle, Condiciones_operativas_detalle, \
+    Datos_operativos, Asignacion,  Condiciones_operativas_cabecera, \
+    Anexos, Pagares, Desembolsos, Documentos, ChequesAccesorios, \
+    Notas_debito_cabecera, Cheques_quitados, \
+    Ampliaciones_plazo_cabecera, Cheques_canjeados, Pagare_detalle
 from empresa.models import  Clases_cliente, Datos_participantes, \
     Tasas_factoring, Tipos_factoring, Cuentas_bancarias, Otros_cargos\
     ,Movimientos_maestro, Contador
@@ -401,6 +402,27 @@ class PagaresView(SinPrivilegios, generic.ListView):
         context = super(PagaresView, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
                                        empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class PagareDatos(SinPrivilegios, generic.TemplateView):
+    # model = Desembolsos
+    template_name = "operaciones/datospagare_form.html"
+    # context_object_name='pagare'
+    login_url = 'bases:login'
+    permission_required="operaciones.change_pagares"
+
+    def get_context_data(self, **kwargs):
+        context = super(PagareDatos, self).get_context_data(**kwargs)
+        context["pagare"] = Pagares.objects\
+            .filter(pk = self.kwargs.get('pk')).first()
+
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
+        
+        sp = ModelosSolicitud.Asignacion.objects\
+            .filter(cxestado='P', leliminado=False,
+                    empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -2269,3 +2291,74 @@ def ReversoDesembolsoAsignacion(request, desembolso_id):
     except Exception as e:
         return HttpResponse( "Error al intentar guardar el registro. {}".format(e))
         
+def GeneraListaCuotasPagareJSON(request, pagare_id):
+    # Es invocado desde la url de una tabla bt
+
+    documentos = Pagare_detalle.objects\
+        .filter(pagare = pagare_id)
+
+    tempBlogs = []
+    for i in range(len(documentos)):
+        tempBlogs.append(GeneraListaCuotasPagareJSONSalida(documentos[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    return HttpResponse(JsonResponse( data))
+
+def GeneraListaCuotasPagareJSONSalida(acc):
+    output = {}
+
+    output["id"] = acc.id
+    output["Cuota"] = acc.ncuota
+    output["Fecha"] = acc.dfechapago
+    output["Capital"] = acc.ncapital
+    output["Interes"] = acc.ninteres
+    output["Valor"] = acc.valor_cuota()
+    output["Saldo"] = acc.nsaldo
+
+    return output
+
+@login_required(login_url='/login/')
+@permission_required('operaciones.change_pagare_detalle', login_url='bases:sin_permisos')
+def ModificarCuota(request,cuota_id):
+    template_name = "operaciones/datoscuota_modal.html"
+    fecha_cuota={}
+    estado ={}
+    form_cobranza={}
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
+    cuota=Pagare_detalle.objects.get(pk=cuota_id)
+    fecha_cuota = cuota.dfechapago
+    estado = cuota.cxestado
+
+    e = {'dfechapago':fecha_cuota,
+            }
+    form_cobranza=CuotasForm(e, empresa = id_empresa.empresa)
+
+    contexto={
+        "id": cuota_id,
+        "estado":estado,
+        "form" : form_cobranza,
+    }
+
+    if request.method == 'POST':
+        # # ACTUALIZAR los campos
+        # if cobranza.lcontabilizada:
+        #     return HttpResponse("Cobranza ha sido contabilizada. No se puede modificar.")
+        
+        fecha = request.POST.get("dfechapago")
+
+        cuota.dfechapago = fecha
+        cuota.cxusuariomodifica = request.user.id
+        cuota.save()
+        
+        return HttpResponse("OK")
+    
+    return render(request, template_name, contexto)
+

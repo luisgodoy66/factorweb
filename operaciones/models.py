@@ -973,3 +973,9 @@ class Pagare_detalle(ClaseModelo):
     def dias_vencidos(self):
         return (date.today() - self.dfechapago)/timedelta(days=1)
 
+    class Meta:
+        ordering = [
+            'ncuota'
+            ]  
+
+    

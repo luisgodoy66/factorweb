@@ -5,7 +5,7 @@ from django import forms
 
 from .models import Condiciones_operativas_detalle, Datos_operativos, \
     Asignacion, Condiciones_operativas_cabecera, Anexos\
-        , Desembolsos, Documentos, ChequesAccesorios
+    , Desembolsos, Documentos, ChequesAccesorios, Pagare_detalle
 from solicitudes import models as ModelosSolicitudes
 from empresa.models import Clases_cliente, Tipos_factoring, Cuentas_bancarias\
     ,Movimientos_maestro
@@ -352,3 +352,30 @@ class TasasAPDocumentoForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
+
+class CuotasForm(forms.ModelForm):
+
+    class Meta:
+        model=Pagare_detalle
+        fields=['dfechapago', ]
+        labels={'dfechapago':'Fecha de pago',
+        }
+        widgets = {
+            'dfechapago': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 
+                    'placeholder': 'Select a date',
+                    'type': 'date'
+                    }
+                    ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+        # self.fields['ddeposito'].widget.attrs['value']=date.today

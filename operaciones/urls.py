@@ -1,29 +1,34 @@
 from django.urls import URLPattern, path
 
 from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
-    DatosOperativos, AsignacionesConsulta, PagaresView,\
-    AceptarAsignacion, DetalleCargosAsignacion, MaestroMovimientosView, \
-    SumaCargos, AceptarDocumentos,MaestroMovimientosView, MaestroMovimientoNew, \
-    MaestroMovimientoEdit, CondicionesOperativasView, DatosCondicionesOperativas,\
-    DetalleCondicionOperativa, EliminarDetalleCondicionOperativa, AnexosView, \
-    EditarTasasDocumentoSolicitud, GeneraDetalleParaTabla1, AnexosEdit,\
-    AsignacionesPendientesDesembolsarView, DesembolsarAsignacion, \
+    DatosOperativos, AsignacionesConsulta, PagaresView,SumaCargos, \
+    DetalleCargosAsignacion, GeneraResumenCarteraNegociadaJSON, \
+    AceptarDocumentos,MaestroMovimientosView, AnexosEdit, \
+    CondicionesOperativasView, DatosCondicionesOperativas,\
+    DetalleCondicionOperativa, EliminarDetalleCondicionOperativa, \
+    EditarTasasDocumentoSolicitud, DesembolsarAsignacion, \
+    GeneraDetalleParaTabla1, AsignacionesPendientesDesembolsarView, \
     ReversaAceptacionAsignacion, GeneraListaAsignacionesJSON, \
-    GeneraListaAsignacionesRegistradasJSON, GeneraResumenAntigüedadCarteraJSON,\
-    EstadosOperativosView, EstadoOperativoCliente, AntigüedadCarteraClienteJSON,\
-    GeneraListaCarteraClienteJSON, GeneraListaChequesADepositarClienteJSON,\
-    GeneraListaCargosPendientesClienteJSON, GeneraListaChequesQuitadosClienteJSON,\
-    GeneraListaProtestosPendientesClienteJSON, GeneraListaCanjesClienteJSON,\
-    CondicionesOperativasUpdate, DatosCondicionOperativaNueva, DesembolsosConsulta,\
-    GeneraListaDesembolsosJSON, CondicionesOperativasInactivar,\
-    ConsultaAnexosActivos, GenerarAnexo, GeneraResumenCarteraNegociadaJSON, \
-    MarcarAnexoGenerado, IngresosGeneradosJSON, PedirArchivoXML, ImportarOperacion,\
-    ReversaAceptacionPagare, ReversoDesembolsoAsignacion
+    GeneraListaAsignacionesRegistradasJSON, EstadoOperativoCliente, \
+    GeneraResumenAntigüedadCarteraJSON, EstadosOperativosView, \
+    AntigüedadCarteraClienteJSON, GeneraListaCarteraClienteJSON, \
+    GeneraListaChequesADepositarClienteJSON, AnexosView, PagareDatos,\
+    GeneraListaCargosPendientesClienteJSON, MaestroMovimientoNew, \
+    GeneraListaChequesQuitadosClienteJSON, MaestroMovimientoEdit, \
+    GeneraListaProtestosPendientesClienteJSON, DesembolsosConsulta,\
+    GeneraListaCanjesClienteJSON, CondicionesOperativasUpdate, \
+    DatosCondicionOperativaNueva, GeneraListaDesembolsosJSON, \
+    CondicionesOperativasInactivar, ConsultaAnexosActivos, \
+    GenerarAnexo, \
+    MarcarAnexoGenerado, IngresosGeneradosJSON, PedirArchivoXML, \
+    ImportarOperacion, ReversaAceptacionPagare, AceptarAsignacion, \
+    ReversoDesembolsoAsignacion, MaestroMovimientosView, \
+    GeneraListaCuotasPagareJSON, ModificarCuota
 
-
-from .reportes import ImpresionAsignacion, ImpresionAsignacionDesdeSolicitud,\
-    ImpresionAntiguedadCartera, ImpresionFacturasPendientes, ImpresionPagare,\
-    ImpresionAccesoriosPendientes, ImpresionResumenAsignaciones, ImpresionPagaresPendientes
+from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
+    ImpresionAsignacionDesdeSolicitud, ImpresionFacturasPendientes, \
+    ImpresionPagare, ImpresionAccesoriosPendientes, \
+    ImpresionResumenAsignaciones, ImpresionPagaresPendientes
 
 urlpatterns = [
 # datos operativos
@@ -39,7 +44,8 @@ urlpatterns = [
     path('carteraclientejson/<cliente_id>/<fecha_corte>',GeneraListaCarteraClienteJSON, 
         name="carteracliente_json"),
     path('chequesadepositarclientejson/<cliente_id>/<fecha_corte>'
-         ,GeneraListaChequesADepositarClienteJSON, name="chequesadepositarcliente_json"),
+         ,GeneraListaChequesADepositarClienteJSON
+         , name="chequesadepositarcliente_json"),
     path('listacargospendientesclientejson/<cliente_id>',\
          GeneraListaCargosPendientesClienteJSON, name="listacargospendientescliente_json"),
     path('protestospendientesjson/<cliente_id>',GeneraListaProtestosPendientesClienteJSON, 
@@ -142,8 +148,14 @@ urlpatterns = [
     path('reversaraceptacionpagare/<int:pid_asignacion>',ReversaAceptacionPagare),
     path('importarxml',PedirArchivoXML, name='importar_xml'),
     path('importaroperacion',ImportarOperacion, name='importar_xml_pagare'),
-    path("reportepagare/<int:pagare_id>",ImpresionPagare, 
-        name='reporte_pagare'),
+    path("reportepagare/<int:pagare_id>",ImpresionPagare
+         , name='reporte_pagare'),
     path('impresionpagarespendientes/<clientes>', ImpresionPagaresPendientes
          , name='detalle_pagares_pendientes'),
+    path('editarpagare/<int:pk>', PagareDatos.as_view()
+         , name='pagare_editar'),
+    path('detallepagarejson/<pagare_id>', GeneraListaCuotasPagareJSON
+         , name="detallepagare_json"),
+    path('editarcuota/<int:cuota_id>', ModificarCuota
+         , name='modificar_cuota'),
 ]

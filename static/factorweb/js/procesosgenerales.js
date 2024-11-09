@@ -129,6 +129,10 @@ function AmpliacionDePlazo(tipo_asignacion){
     // si está en el data con que se carga la bt
     if (tipo_factoring==''){
       tipo_factoring=row.IdTipoFactoring
+      // preguntar si el dato es numerico
+      if (isNaN(tipo_factoring)){
+        error = true
+      }
     }
     else{ if (tipo_factoring != row.IdTipoFactoring){
         error = true

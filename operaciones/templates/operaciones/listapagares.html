@@ -75,6 +75,10 @@
                                     class="btn btn-success btn-sm" role="button" target="reporte"
                                     title="Imprimir"><i class="fa fa-print"></i>
                                 </a>
+                                <a href="{% url 'operaciones:pagare_editar' item.id %}" 
+                                    class="btn btn-primary btn-sm" role="button" 
+                                    title="Edición"><i class="fa fa-edit"></i>
+                                </a>
                                 <button onclick="ReversarAceptacionPagare( {{item.id}})" 
                                     class="btn btn-danger btn-sm"  title="Reversar" role="button">
                                     <i class="fa fa-rotate-left"></i>
