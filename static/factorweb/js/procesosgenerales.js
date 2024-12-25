@@ -803,7 +803,14 @@ function ReversarDesembolso(desembolso_id, tipo_operacion, operacion, asiento){
 function ReversarAmpliacionPlazo(nd_id, ampliacion){
   MensajeConfirmacion("Reversar ampliación " +  ampliacion +"?",function(){
     fetchProcesar("/cobranzas/reversarampliaciondeplazo/"+nd_id, function(){
-        location.reload();
+        // location.reload();
+        $table.bootstrapTable('updateByUniqueId', {
+          id: nd_id,
+          row: {
+              Estado: 'E'
+          }
+      });
+
     })
 })
 }
