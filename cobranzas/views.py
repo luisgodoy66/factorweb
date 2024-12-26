@@ -2091,7 +2091,6 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
     total_sobrepagos=0
     base_iva=0
     base_noiva=0
-    porcentaje_iva = 15
     listacargos = []
     lista_otroscargos_no_operativos = []
     listacobranzas =[]
@@ -2100,6 +2099,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
     otros_cargos = None
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    porcentaje_iva = id_empresa.empresa.nporcentajeiva
 
     if request.method =="GET":
 
@@ -2262,7 +2262,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                                             * documento.nporcentajeanticipo 
                                             * documento.ntasadescuento / 10000)
                     else:
-                        descuento_cartera_vencido = (documento_cobrado.aplicado	 
+                        descuento_cartera_vencido = (documento_cobrado.aplicado()
                                             * documento.ntasadescuento / 100)
 
                     if not dc.lflat:
@@ -3248,7 +3248,7 @@ def AmpliacionDePlazo(request, ids, tipo_factoring, tipo_asignacion, id_cliente)
         'tipo_asignacion':tipo_asignacion,
         'gaoa': dic_gaoa,
         'dc' : dic_dc,
-        'porcentaje_iva':15,
+        'porcentaje_iva':id_empresa.empresa.nporcentajeiva,
         'id_cliente': id_cliente, 
         'cliente': cliente.cxcliente.ctnombre,
         'tipo_factoring': tipo_factoring.id,
@@ -3452,11 +3452,15 @@ def GeneraDetalleCargosAmpliacionPlazoOutput(doc, tipo_asignacion):
 
     return output
 
-def SumaCargos(request,ids, tipo_asignacion, gaoa_carga_iva, dc_carga_iva
-               , porcentaje_iva=15):
+def SumaCargos(request, ids, tipo_asignacion, gaoa_carga_iva, dc_carga_iva
+               , porcentaje_iva=None):
     # lee los datos de la tabla solicutid documentos
     arr_acc = []    # estos dos arreglos son
     arr_fac = []    # usados para separar facturas de accesorio quitados
+
+    if not porcentaje_iva:
+        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+        porcentaje_iva = id_empresa.empresa.nporcentajeiva
 
     g=Decimal(0); d=Decimal(0); 
     iva=0.0; total=0.0

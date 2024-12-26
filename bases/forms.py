@@ -9,12 +9,16 @@ class EmpresaForm(forms.ModelForm):
         model = Empresas
         fields = ('ctruccompania', 'ctnombre', 'ctgerente', 'ctdireccion'
                   , 'ctcontribuyenteespecial', 'lregimenrimpe', 'ctciudad'
-                  , 'ambientesri')
+                  , 'ambientesri', 'ilogolargo', 'ilogocorto', 'nporcentajeiva'
+                  )
         labels = {'ctruccompania':'RUC', 'ctnombre':'Nombre'
                   , 'ctgerente':'Gerente', 'ctdireccion':'Dirección'
                   , 'ctcontribuyenteespecial':'Número de contribuyente especial'
                   , 'lregimenrimpe': 'Régimen RIMPE', 'ctciudad':'Ciudad de domicilio'
-                  , 'ambientesri':'Ambiente SRI'}
+                  , 'ambientesri':'Ambiente SRI'
+                  , 'ilogolargo':'Logo largo', 'ilogocorto':'Logo corto'
+                  , 'nporcentajeiva':'Porcentaje de IVA'
+                  }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

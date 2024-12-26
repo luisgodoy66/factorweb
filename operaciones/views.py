@@ -758,7 +758,7 @@ def AceptarAsignacion(request, asignacion_id=None):
         'dc' : dic_dc,
         'usa_linea_factoring':tipo_factoring.lmanejalineafactoring,
         'condicion_operativa': condicion_operativa,
-        'porcentaje_iva':15,
+        'porcentaje_iva':id_empresa.empresa.nporcentajeiva,
         'tipo_asignacion':asignacion.cxtipo,
         "cuenta_transferencia":cuenta_transferencia,
         "beneficiario": beneficiario,
@@ -1109,7 +1109,7 @@ def SumaCargos(request,asignacion_id, gao_carga_iva, dc_carga_iva, carga_gao
         base_noiva += d
 
     # iva
-    iva = round( base_iva * porcentaje_iva / 100,2)
+    iva = round( base_iva * Decimal(porcentaje_iva) / 100,2)
     # redondear a 2 decimales?
     # neto
     neto =   a -g - d - iva

@@ -85,7 +85,7 @@ urlpatterns = [
         name='consulta_asignaciones'),
     path('aceptarasignacion/<int:asignacion_id>',AceptarAsignacion, \
         name='aceptarasignacion'),
-    path('sumacargos/<int:asignacion_id>/<gao_carga_iva>/<dc_carga_iva>/<carga_gao>/<carga_dc>/<int:porcentaje_iva>',\
+    path('sumacargos/<int:asignacion_id>/<gao_carga_iva>/<dc_carga_iva>/<carga_gao>/<carga_dc>/<porcentaje_iva>',\
         SumaCargos),
     path('detallecargosasignacion/<int:asignacion_id>/<fecha_desembolso>/',
         DetalleCargosAsignacion, name='detallecargosasignacion'),
