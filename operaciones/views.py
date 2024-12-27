@@ -755,14 +755,14 @@ def AceptarAsignacion(request, asignacion_id=None):
 
     sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
                                        empresa = id_empresa.empresa).count()
-
+    
     contexto={'form_asignacion':formulario,
         'asignacion': asignacion,
         'gao': dic_gao,
         'dc' : dic_dc,
         'usa_linea_factoring':tipo_factoring.lmanejalineafactoring,
         'condicion_operativa': condicion_operativa,
-        'porcentaje_iva':id_empresa.empresa.nporcentajeiva,
+        'porcentaje_iva':int(id_empresa.empresa.nporcentajeiva),
         'tipo_asignacion':asignacion.cxtipo,
         "cuenta_transferencia":cuenta_transferencia,
         "beneficiario": beneficiario,

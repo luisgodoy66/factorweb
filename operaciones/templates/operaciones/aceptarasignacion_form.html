@@ -216,7 +216,8 @@ const asignacion_id = capturaValor("asignacion_id")
 const carga_gao = capturaValor("carga_gao")
 const carga_dc = capturaValor("carga_dc")
 const tipo_asignacion = capturaValor("tipo_asignacion")
-const porcentaje_iva = capturaValor("porcentaje_iva")
+// const porcentaje_iva = capturaValor("porcentaje_iva")
+const porcentaje_iva = "{{porcentaje_iva}}"
 const aplica_otros_cargos = "{{usa_otros_cargos}}"
 // var iniciales_dc = capturaValor("iniciales_dc")
 // var iniciales_gao = capturaValor("iniciales_gao")
@@ -328,6 +329,7 @@ function RefrescarTabla(asgn){
     url: "/operaciones/refrescadetallesolicitud/" + asgn 
   });
   Suma_Cargos(asgn, iva_gao, iva_dc, carga_gao, carga_dc, porcentaje_iva )
+  console.log('refrescar tabla',porcentaje_iva)
 }
 
 function Suma_Cargos(asgn, iva_gao, iva_dc, carga_gao, carga_dc, porcentaje_iva){
