@@ -30,9 +30,9 @@ class Empresas(models.Model):
     dfinpruebas = models.DateField(null=True)
     ltipofactoringconfigurado= models.BooleanField(default=False)
     ltasasfactoringconfiguradas= models.BooleanField(default=False)
-    ilogolargo = models.ImageField(null=True, upload_to='factorweb/images/logo/'
+    ilogolargo = models.ImageField(null=True, upload_to='anexos/'
         , blank=True, default='logo1.png')
-    ilogocorto = models.ImageField(null=True, upload_to='factorweb/images/logo/'
+    ilogocorto = models.ImageField(null=True, upload_to='factorweb/images/'
         , blank=True, default='logo2.png')
     nporcentajeiva = models.DecimalField(max_digits=5, decimal_places=2, default=15)
     def __str__(self):

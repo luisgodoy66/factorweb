@@ -68,10 +68,10 @@ def ImpresionCobranzaCartera(request, cobranza_id):
     if not cobranza:
         return HttpResponse("no encontró cobranza ")
 
-    # cuando la forma de pago es DEP es deposito de accesorios y de ahí debe
-    # tomar la fecha de vencimiento
+    # obtener el detalle de la cobranza ordenado por comprador
     detalle = Documentos_detalle.objects\
-        .filter(cxcobranza = cobranza_id, leliminado = False)
+        .filter(cxcobranza = cobranza_id, leliminado = False)\
+        .order_by('cxdocumento__cxcomprador')
 
     codigo_forma = cobranza.cxformapago
 
@@ -127,10 +127,11 @@ def ImpresionCobranzaCartera(request, cobranza_id):
                 nd_protesto = protesto.notadedebito.nvalor
             else:
                 nd_protesto = None
-
+    print(detalle,detalle.count())
     context = {
         "cobranza" : cobranza,
         "detalle" : detalle,
+        "x":detalle.count(),
         "datos_forma_cobro" : forma_cobro,
         "datos_deposito" : datos_deposito,
         "forma_cobro": codigo_forma,

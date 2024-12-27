@@ -97,7 +97,8 @@
                         </thead>
                         <tbody>
                             <tr></tr>
-                            {% regroup detalle|dictsort:"cxdocumento.cxcomprador" by cxdocumento.cxcomprador as documentos_list %}
+                            {#% regroup detalle|dictsort:"cxdocumento.cxcomprador" by cxdocumento.cxcomprador as documentos_list %#}
+                            {% regroup detalle by cxdocumento.cxcomprador as documentos_list %}
                             {% for comprador in documentos_list %}
                             <tr>
                                 <td colspan=9><strong>{{ comprador.grouper }}</strong></td>

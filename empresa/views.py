@@ -443,10 +443,17 @@ class DatosEmpresaEdit(SinPrivilegios, generic.UpdateView):
     login_url = 'bases:login'
     permission_required="empresa.change_empresas"
 
+    # def form_valid(self, form):
+    #     form.instance.cxusuariomodifica = self.request.user.id
+    #     return super().form_valid(form)
     def form_valid(self, form):
-        form.instance.cxusuariomodifica = self.request.user.id
-        return super().form_valid(form)
-    
+        try:
+            form.instance.cxusuariomodifica = self.request.user.id
+            return super().form_valid(form)
+        except Exception as e:
+            form.add_error(None, str(e))
+            return self.form_invalid(form)
+
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(DatosEmpresaEdit, self).get_context_data(**kwargs)
