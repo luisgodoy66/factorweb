@@ -189,12 +189,18 @@ class LineaFactoringForm(forms.ModelForm):
 class CuposCompradoresForm(forms.ModelForm):
     class Meta:
         model=Cupos_compradores
+
         fields=['cxcliente', 'cxcomprador','cxmoneda', 'ncupocartera'
             , 'lactivo', 'lsenotifica']
+
         labels={'cxcliente':'Cliente', 'cxcomprador':'Deudor'
             ,'cxmoneda': 'Moneda', 'ncupocartera':'Cupo de cartera'
             # , 'cxmodalidadcobranza':'Modalidad de cobranza'
             , 'lactivo': 'Activo', 'lsenotifica':'Se notifica de operación al deudor', }        
+
+        widgets = {
+            'ncupocartera': forms.NumberInput(attrs={'step': 10}),
+        }
 
     def __init__(self, *args, **kwargs):
         empresa = kwargs.pop('empresa', None)

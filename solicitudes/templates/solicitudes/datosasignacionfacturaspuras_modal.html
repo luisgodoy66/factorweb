@@ -1,7 +1,7 @@
 <div class="modal-dialog modal-lg">
     <div class="modal-content">
 
-        <form  method="POST" id="frmSolicitud" enctype="multipart/form-data" 
+        <form  method="post" id="frmDocumento" enctype="multipart/form-data" 
             class="form-horizontal" name="form"
             {% if not asignacion_id %}
                 action="{% url 'solicitudes:facturaspuras_nueva' cliente tipo_factoring %}"
@@ -13,8 +13,8 @@
                 {% endif %}
             {% endif %}
             onsubmit="return checkSubmit();">
+            {% csrf_token %}
             <div class="card">
-                {% csrf_token %}
                 <div class="card-header">
                     <strong>Detalle de factura</strong> 
                 </div>
@@ -82,10 +82,10 @@
                         </div>  
                         <div class="row form-group">
                             <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
-                                {{ form_documento.dvencimiento.label}}</label>
+                                {{ form_documento.cxautorizacion_ec.label}}</label>
                             </div>
                             <div class="col-md-8">
-                                {{ form_documento.dvencimiento}}
+                                {{ form_documento.cxautorizacion_ec}}
                             </div>
                         </div>  
     
@@ -98,50 +98,46 @@
                         </div>
 
                         <div class="row form-group">
-                            <div class="col-md-7"><label for="id_cxtipocliente" class=" form-control-label">
-                                {{ form_documento.nvalorantesiva.label}}</label>
-                            </div>
-                            <div class="col-md-5">
-                                {{ form_documento.nvalorantesiva}}
-                            </div>
+                            <div class="col col-md-6">{{ form_documento.dvencimiento.label}}</div>
+                            <div class="col-md-6">{{ form_documento.dvencimiento}}</div>
                         </div>  
                         <div class="row form-group">
-                            <div class="col-md-7"><label for="id_cxtipocliente" class=" form-control-label">
-                                {{ form_documento.niva.label}}</label>
-                            </div>
-                            <div class="col-md-5">
-                                {{ form_documento.niva}}
-                            </div>
+                            <div class="col-md-6">{{ form_documento.nvalorantesiva.label}}</div>
+                            <div class="col-md-6">{{ form_documento.nvalorantesiva}}</div>
                         </div>  
                         <div class="row form-group">
-                            <div class="col-md-7"><label for="id_nretencioniva" class=" form-control-label">
+                            <div class="col-md-6">{{ form_documento.niva.label}}</div>
+                            <div class="col-md-6">{{ form_documento.niva}}</div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="id_nretencioniva" class=" form-control-label">
                                 {{ form_documento.nretencioniva.label}}</label>
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-md-6">
                                 {{ form_documento.nretencioniva}}
                             </div>
                         </div>  
                         <div class="row form-group">
-                            <div class="col-md-7"><label for="id_nretencionrenta" class=" form-control-label">
+                            <div class="col-md-6"><label for="id_nretencionrenta" class=" form-control-label">
                                 {{ form_documento.nretencionrenta.label}}</label>
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-md-6">
                                 {{ form_documento.nretencionrenta}}
                             </div>
                         </div>  
                         <div class="row form-group">
-                            <div class="col-md-7"><label for="id_nvalornonegociado" class=" form-control-label">
+                            <div class="col-md-6"><label for="id_nvalornonegociado" class=" form-control-label">
                                 {{ form_documento.nvalornonegociado.label}}</label>
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-md-6">
                                 {{ form_documento.nvalornonegociado}}
                             </div>
                         </div>  
                         <div class="row form-group">
-                            <div class="col-md-7"><label for="id_ntotal" class=" form-control-label">
+                            <div class="col-md-6"><label for="id_ntotal" class=" form-control-label">
                                 {{ form_documento.ntotal.label}}</label>
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-md-6">
                                 {{ form_documento.ntotal}}
             
                             </div>
@@ -162,64 +158,107 @@
                     <button type="submit" class="btn btn-primary btn-sm ">
                         <i class="fa fa-dot-circle-o"></i> Grabar
                     </button>
-
+                    <!-- Sección para mostrar errores del formulario -->
+                    <div id="form-errors" class="alert alert-danger" style="display:none;"></div>
+                    
                 </div>
             </div>
-                <!-- </div> -->
         </form>
     </div>
-    <script>
-        var enviando = false; //Obligaremos a entrar el if en el primer submit
-
-        const xmlFile = document.getElementById('xmlFile');
-        xmlFile.addEventListener('change', function() {
-            CargaXMLfactura(xmlFile);
-        });
-
+</div>
+<script>
+    var enviando = false; //Obligaremos a entrar el if en el primer submit
+    jQuery(document).ready(function() {
         // configuar cambios en ls campos de valores
         jQuery('#id_nvalorantesiva, #id_niva, #id_nretencioniva, #id_nretencionrenta, #id_nvalornonegociado')
             .change(function(){
                 calcular_factura();
             });
 
-        function calcular_factura()
-        {
-            var antes_de_iva,iva,retencion_iva, retencion_renta,stotal,total;
-            
-            antes_de_iva = jQuery("#id_nvalorantesiva").val();
-            antes_de_iva = antes_de_iva==="" ? 0 : +antes_de_iva;
-            antes_de_iva = antes_de_iva<0 ? 0 : antes_de_iva;
+        const xmlFile = document.getElementById('xmlFile');
+        xmlFile.addEventListener('change', function() {
+            CargaXMLfactura(xmlFile);
+        });
+
+        jQuery("#frmDocumento").on("submit", function(event) {
+            event.preventDefault();
+            var $form = jQuery(this);
+            var url = $form.attr("action");
+            var method = $form.attr("method");
+            var data = new FormData($form[0]);
+
+            jQuery.ajax({
+                url: url,
+                method: method,
+                data: data,
+                processData: false,
+                contentType: false,
+                error: function(xhr) {
+                    var errors = xhr.responseJSON;
+                    var errorHtml = '<ul>';
+                    for (var key in errors) {
+                        if (errors.hasOwnProperty(key)) {
+                            errorHtml += '<li>' + errors[key] + '</li>';
+                        }
+                    }
+                    errorHtml += '</ul>';
+                    jQuery("#form-errors").html(errorHtml).show();
+                    enviando = false;
+                }
+            })
+            .done(function(r,textStatus,xhr){
+                if(xhr.status=200){
+                    // aquí es necesario, en caso que sea nueva asignación, 
+                    // rescatar el número de la asignación
+                    // para enviarlo para edición.
+                    jQuery("#popup").modal('hide');
+                    location.href="/solicitudes/editarsolicitud/"+xhr.responseText;
+                }
+                //   else{
+                //     MensajeError(textStatus);
+                //   }
+            });
+        });
+    });
 
 
-            iva =jQuery('#id_niva').val();
-            iva = iva==="" ? 0 : +iva;
-            iva = iva<0 ? 0 : iva;
-
-            // nota: si iva es 0 no debe pedir retencion de iva
-            retencion_iva = jQuery('#id_nretencioniva').val();
-            retencion_iva = retencion_iva==="" ? 0 : +retencion_iva;
-            retencion_iva = retencion_iva<0 ? 0 : retencion_iva;
-
-            retencion_renta = jQuery('#id_nretencionrenta').val();
-            retencion_renta = retencion_renta==="" ? 0 : +retencion_renta;
-            retencion_renta = retencion_renta<0 ? 0 : retencion_renta;
-
-            valor_nonegociado = jQuery('#id_nvalornonegociado').val();
-            valor_nonegociado = valor_nonegociado===""? 0 : +valor_nonegociado;
-            valor_nonegociado = valor_nonegociado<0 ? 0 : valor_nonegociado
-
-            stotal = antes_de_iva + iva;
-
-            total  = stotal - retencion_iva - retencion_renta - valor_nonegociado;
-            total = total.toFixed(2)
-
-            jQuery('#id_nvalorantesiva').val(antes_de_iva);
-            jQuery('#id_niva').val(iva);
-            jQuery('#id_nretencioniva').val(retencion_iva);
-            jQuery('#id_nretencionrenta').val(retencion_renta);
-            jQuery('#id_ntotal').val(total);
-            jQuery('#id_nvalornonegociado').val(valor_nonegociado);
-        };
+    function calcular_factura()
+    {
+        var antes_de_iva,iva,retencion_iva, retencion_renta,stotal,total;
         
-    </script>
-</div>
+        antes_de_iva = jQuery("#id_nvalorantesiva").val();
+        antes_de_iva = antes_de_iva==="" ? 0 : +antes_de_iva;
+        antes_de_iva = antes_de_iva<0 ? 0 : antes_de_iva;
+
+
+        iva =jQuery('#id_niva').val();
+        iva = iva==="" ? 0 : +iva;
+        iva = iva<0 ? 0 : iva;
+
+        // nota: si iva es 0 no debe pedir retencion de iva
+        retencion_iva = jQuery('#id_nretencioniva').val();
+        retencion_iva = retencion_iva==="" ? 0 : +retencion_iva;
+        retencion_iva = retencion_iva<0 ? 0 : retencion_iva;
+
+        retencion_renta = jQuery('#id_nretencionrenta').val();
+        retencion_renta = retencion_renta==="" ? 0 : +retencion_renta;
+        retencion_renta = retencion_renta<0 ? 0 : retencion_renta;
+
+        valor_nonegociado = jQuery('#id_nvalornonegociado').val();
+        valor_nonegociado = valor_nonegociado===""? 0 : +valor_nonegociado;
+        valor_nonegociado = valor_nonegociado<0 ? 0 : valor_nonegociado
+
+        stotal = antes_de_iva + iva;
+
+        total  = stotal - retencion_iva - retencion_renta - valor_nonegociado;
+        total = total.toFixed(2)
+
+        jQuery('#id_nvalorantesiva').val(antes_de_iva);
+        jQuery('#id_niva').val(iva);
+        jQuery('#id_nretencioniva').val(retencion_iva);
+        jQuery('#id_nretencionrenta').val(retencion_renta);
+        jQuery('#id_ntotal').val(total);
+        jQuery('#id_nvalornonegociado').val(valor_nonegociado);
+    };
+    
+</script>

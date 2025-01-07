@@ -13,6 +13,12 @@
             </div>
         </div>
     </div>
+    <style>
+        .row-eliminado {
+            background-color: #f8d7da; /* Color de fondo rojo claro */
+            color: #721c24; /* Color de texto rojo oscuro */
+        }
+    </style>
 {% endblock breadcrumbs %}
 {% block content %}
 
@@ -141,24 +147,30 @@ window.operateEvents = {
   },
     'click .remove': function (e, value, row, index) {
       EliminarDocumentoDeSolicitudAsignacion(asignacion_id, row.id,'A', row.Documento)
+  },
+    'click .recuperar': function (e, value, row, index) {
+      RecuperarDocumentoDeSolicitudAsignacion(asignacion_id, row.id,'A', row.Documento)
     }
   };
 
 function operateFormatter(value, row, index) {
-return [
-  '<a class="editar" href="javascript:void(0)" title="Editar cheque">',
-  '<i class="fa fa-edit"></i>',
-  '</a>',
-  '<a class="remove" href="javascript:void(0)" title="Eliminar">',
-  '<i class="fa fa-trash"></i>',
-  '</a>'
-].join('')
+    var eliminarClass = row.Eliminado ? 'recuperar' : 'remove';
+    var eliminarTitle = row.Eliminado ? 'Recuperar' : 'Eliminar';
+    var eliminarIcon = row.Eliminado ? 'fa fa-undo' : 'fa fa-trash';
+    return [
+        '<a class="editar" href="javascript:void(0)" title="Editar cheque">',
+        '<i class="fa fa-edit"></i>',
+        '</a>',
+        '<a class="' + eliminarClass + '" href="javascript:void(0)" title="' + eliminarTitle + '">',
+        '<i class="' + eliminarIcon + '"></i>',
+        '</a>'
+    ].join('');
 }
 
 function initTable() {
 
     $table.bootstrapTable('destroy').bootstrapTable({
-      height: 400,
+    //   height: 400,
       locale: "es-EC",
       columns: [
         [{title: 'Ref.', field: 'id', rowspan: 2, align: 'center',
@@ -191,7 +203,15 @@ function initTable() {
             field: 'Total', title: 'Total', sortable: true,
             align: 'center', footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
           }]
-      ]
+          ],
+        rowStyle: function(row, index) {
+            if (row.Eliminado) {
+                return {
+                    classes: 'row-eliminado'
+                };
+            }
+            return {};
+        }
     })
 }
 
@@ -211,6 +231,7 @@ function NuevaAsignacion(){
     }
     return false
 }
+
 function obtenerTextoSeleccionado(selectId) {
             var selectElement = document.getElementById(selectId);
             var selectedText = selectElement.options[selectElement.selectedIndex].text;

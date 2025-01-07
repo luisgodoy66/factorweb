@@ -77,6 +77,7 @@ class Documentos(ClaseModelo):
     ngao = models.DecimalField(max_digits=10,decimal_places= 2, default=0)
     ndescuentocartera = models.DecimalField(max_digits=10,decimal_places= 2, default=0)
     nplazo = models.IntegerField(default=0)
+    cxautorizacion_ec = models.CharField(max_length=49, null=True)
 
     def total_negociado(self):
         return self.ntotal - self.nvalornonegociado

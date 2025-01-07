@@ -1,7 +1,7 @@
 from django.urls import URLPattern, path
 from solicitudes.views import SolicitudesView, DetalleSolicitudFacturasPuras , \
     DetalleSolicitudConAccesorios, EliminarDocumento, EliminarAsignacion, \
-    DatosAsignacionConAccesorios,  DatosFacturasPuras, \
+    DatosAsignacionConAccesorios,  DatosFacturasPuras, RecuperarDocumento,\
     AsignacionFacturasPurasView, DatosAsignacionFacturasPurasNueva, \
     DatosAsignacionConAccesoriosNueva, AsignacionConAccesoriosView, \
     ClienteCrearView, DatosAccesorioEditar, ImportarOperacion, PedirArchivoXML
@@ -41,6 +41,8 @@ urlpatterns=[
         , name="editarchequeaccesorio"),
     path('eliminardetalleasignacion/<int:asignacion_id>/<int:documento_id>/<tipo_asignacion>'
         ,EliminarDocumento),
+    path('recuperardetalleasignacion/<int:asignacion_id>/<int:documento_id>/<tipo_asignacion>'
+        ,RecuperarDocumento),
     path('importarxml',PedirArchivoXML, name='importar_xml'),
     path('importaroperacion',ImportarOperacion, name='importar_xml_facturaspuras'),
 

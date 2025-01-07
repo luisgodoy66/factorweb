@@ -355,17 +355,9 @@ class CuposCompradoresNew(SinPrivilegios, generic.CreateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
-    # def form_invalid(self, form):
-    #     response = super().form_invalid(form)
-    #     if self.request.is_ajax():
-    #         return JsonResponse(form.errors, status=400)
-    #     else:
-    #         return response
-
     def form_invalid(self, form):
         # if self.request.is_ajax():
-            errors = form.errors.as_json()
-            return JsonResponse({'errors': errors}, status=400)
+            return JsonResponse(form.errors, status=400)
         # else:
             # return super().form_invalid(form)
             
@@ -375,7 +367,8 @@ def DatosCuposCompradorNuevo(request, ):
     template_name = "clientes/datoscupo_modal.html"
     contexto = {}
     formulario = {}
-    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+    id_empresa = Usuario_empresa.objects\
+        .filter(user=request.user).first()
     form_submitted = False
 
     if request.method == 'POST':
@@ -392,7 +385,7 @@ def DatosCuposCompradorNuevo(request, ):
             return redirect("clientes:listacupos")
         else:
             contexto['form_errors'] = formulario.errors
-            return HttpResponse(str(formulario.errors))
+            # return HttpResponse(str(formulario.errors))
     else:
         formulario = CuposCompradoresForm(empresa=id_empresa.empresa)
 

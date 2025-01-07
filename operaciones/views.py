@@ -1136,6 +1136,7 @@ def EditarTasasDocumentoSolicitud(request, documento_id, fecha_desembolso, asign
     contexto={}
     formulario={}
     numero_documento=""
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     # si son facturas puras los documentos son las facturas
     # si son accesorios los documentos son los cheques
     asignacion = ModelosSolicitud.Asignacion.objects.get(pk=asignacion_id) 
@@ -1184,8 +1185,14 @@ def EditarTasasDocumentoSolicitud(request, documento_id, fecha_desembolso, asign
         
         # calcular y grabar los valores para cada tasa y grabarlos en el registro del documento
         # datos de tasa gao/dc
-        gao = Tasas_factoring.objects.filter(cxtasa="GAO").first()
-        dc = Tasas_factoring.objects.filter(cxtasa="DCAR").first()
+        gao = Tasas_factoring.objects.filter(cxtasa="GAO", 
+                                             empresa = id_empresa.empresa,
+                                             leliminado = False)\
+                                        .first()
+        dc = Tasas_factoring.objects.filter(cxtasa="DCAR", 
+                                            empresa = id_empresa.empresa,
+                                            leliminado = False)\
+                                        .first()
         fecha_desembolso = parse_date(fecha_desembolso)
             
         # cuando edita no necesita enviar clase de cliente ni codigo de condicion operativa

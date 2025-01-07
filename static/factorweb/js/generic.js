@@ -19,18 +19,25 @@ function LineaTotalEnPieDePaginaDeTabla(data) {
 }
     
 function LineaCantidadEnPieDePaginaDeTabla(data) {
-return data.length
+    return data.filter(function (row) {
+        return !row.Eliminado; // Filtrar registros que no están eliminados
+    }).length;
 }
 
 function LineaTotalValoresEnPieDepaginaDeTabla(data) {
-    var field = this.field
-    return '$' + data.map(function (row) {
-        return +row[field].substring(0)
-    }).reduce(function (sum, i) {
-        return Math.round((sum + i + Number.EPSILON) * 100) / 100;
-    }, 0)
-}
-    
+    var field = this.field;
+    return '$' + data
+        .filter(function (row) {
+            return !row.Eliminado; // Filtrar registros que no están eliminados
+        })
+        .map(function (row) {
+            return +row[field].substring(0);
+        })
+        .reduce(function (sum, i) {
+            return Math.round((sum + i + Number.EPSILON) * 100) / 100;
+        }, 0);
+}    
+
 function detailFormatter(index, row) {
     var html = []
     $.each(row, function (key, value) {

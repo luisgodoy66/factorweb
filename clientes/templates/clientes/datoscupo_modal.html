@@ -1,17 +1,17 @@
 <div class="modal-dialog modal-md">
     <div class="modal-content">
 
-        <form  method="POST" rol="form" id="frmCupo" class="form-horizontal"
+        <form  method="post" rol="form" id="frmCupo" class="form-horizontal"
             {% if consulta.pk %}
                 action="{% url 'clientes:cupo_editar' consulta.pk  %}"
             {% else %}
                 action="{% url 'clientes:cupo_nuevo' %}"
             {% endif %}
-            onsubmit="return checkSubmit();">
+            enctype="multipart/form-data" onsubmit="return checkSubmit();">
+            {% csrf_token %}
             <!-- <div class="col-xl-12 col-md-12 mb-12"> -->
             <div class="card">
 
-                {% csrf_token %}
                 <div class="card-header">
                     <strong>Cupo </strong> 
                     {% if consulta.pk %}
@@ -95,19 +95,7 @@
                     </button>
                 </div>
                 <!-- Sección para mostrar errores del formulario -->
-                {% if form_submitted and form.errors %}
-                {#% if  form.errors %#}
-                <div class="alert alert-danger" role="alert">
-                    <ul>
-                        {% for field, errors in form.errors.items %}
-                            {% for error in errors %}
-                                <li>{{ field }}: {{ error }}</li>
-                                <!-- <li>{{ error }}</li> -->
-                            {% endfor %}
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% endif %}
+                <div id="form-errors" class="alert alert-danger" style="display:none;"></div>
             </div>
             <!-- </div> -->
         </form>
@@ -115,9 +103,40 @@
     </div>
 </div>
 
-{% block js_page %}
 <script>
-     enviando = false; //Obligaremos a entrar el if en el primer submit
-     
+ enviando = false; //Obligaremos a entrar el if en el primer submit
+jQuery(document).ready(function() {
+    jQuery("#frmCupo").on("submit", function(event) {
+        event.preventDefault();
+        var $form = jQuery(this);
+        var url = $form.attr("action");
+        var method = $form.attr("method");
+        var data = new FormData($form[0]);
+
+        jQuery.ajax({
+            url: url,
+            method: method,
+            data: data,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                // Handle success (e.g., close modal, show success message, etc.)
+                jQuery("#popup").modal('hide');
+                location.reload(); // Reload the page to reflect changes
+            },
+            error: function(xhr) {
+                var errors = xhr.responseJSON;
+                console.log(errors);
+                var errorHtml = '<ul>';
+                for (var key in errors) {
+                    if (errors.hasOwnProperty(key)) {
+                        errorHtml += '<li>' + errors[key] + '</li>';
+                    }
+                }
+                errorHtml += '</ul>';
+                jQuery("#form-errors").html(errorHtml).show();
+            }
+        });
+    });
+});     
 </script>
-{% endblock %}

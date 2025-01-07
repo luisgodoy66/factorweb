@@ -40,8 +40,8 @@ urlpatterns = [
         , name='lineafactoring_editar'),
     # cupos
     path('listacupos/',CuposCompradoresView.as_view(), name='listacupos'),
-    # path('cuponuevo/',CuposCompradoresNew.as_view(), name='cupo_nuevo'),
-    path('cuponuevo/',DatosCuposCompradorNuevo, name='cupo_nuevo'),
+    path('cuponuevo/',CuposCompradoresNew.as_view(), name='cupo_nuevo'),
+    # path('cuponuevo/',DatosCuposCompradorNuevo, name='cupo_nuevo'),
     path('editcupo/<int:pk>',CuposCompradoresEdit.as_view(), name='cupo_editar'),
     path('eliminarcupo/<int:pk>',EliminarCupoComprador
         , name='cupo_eliminar'),

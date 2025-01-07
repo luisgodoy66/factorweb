@@ -1,14 +1,27 @@
 // funciones operativas
 function EliminarDocumentoDeSolicitudAsignacion(asignacion_id, documento_id, tipo_asignacion, documento){
-    MensajeConfirmacion("Eliminar documento " + documento
+    MensajeConfirmacion("Eliminar el documento " + documento
         + " con referencia " + documento_id +"?",function(){
 
       fetchProcesar("/solicitudes/eliminardetalleasignacion/"
         + asignacion_id + "/" + documento_id+"/"+tipo_asignacion, function(){
-        $table.bootstrapTable('remove', {
-          field: 'id',
-          values: [documento_id]
-        });
+        // $table.bootstrapTable('remove', {
+        //   field: 'id',
+        //   values: [documento_id]
+        // });
+        $table.bootstrapTable('refresh');
+        // location.reload();
+      })
+  })
+}
+
+function RecuperarDocumentoDeSolicitudAsignacion(asignacion_id, documento_id, tipo_asignacion, documento){
+    MensajeConfirmacion("Recuperar el documento " + documento
+        + " con referencia " + documento_id +"?",function(){
+
+      fetchProcesar("/solicitudes/recuperardetalleasignacion/"
+        + asignacion_id + "/" + documento_id+"/"+tipo_asignacion, function(){
+        $table.bootstrapTable('refresh');
         // location.reload();
       })
   })
@@ -347,41 +360,57 @@ function CargaXMLfactura(xmlFile){
           alert('No corresponde')
       }
       else{
-          let estado=xmlDoc.getElementsByTagName("estado")[0].childNodes[0].nodeValue ;
+          let estado=xmlDoc.getElementsByTagName("estado")[0]
+            .childNodes[0].nodeValue ;
 
           if (estado != 'AUTORIZADO'){
               alert('Documento no tiene estado de autorizado')
           }
           else{
-              comprobante = xmlDoc.getElementsByTagName("comprobante")[0].childNodes[0].nodeValue
+              comprobante = xmlDoc.getElementsByTagName("comprobante")[0]
+                .childNodes[0].nodeValue
 
               xmlFactura = parser.parseFromString(comprobante,"text/xml")
 
-              let infoTributaria=xmlFactura.getElementsByTagName("infoTributaria")[0].childNodes ;
+              let infoTributaria=xmlFactura.getElementsByTagName("infoTributaria")[0]
+                .childNodes ;
 
-              for (let i in infoTributaria ){
-                  switch (infoTributaria[i].nodeName ){
+              for (let i in infoTributaria) {
+                  switch (infoTributaria[i].nodeName) {
                       case "estab":
-                      inicializaValor("id_ctserie1",infoTributaria[i].childNodes[0].nodeValue)
+                          inicializaValor("id_ctserie1", infoTributaria[i]
+                            .childNodes[0].nodeValue);
+                          break;
                       case "ptoEmi":
-                      inicializaValor("id_ctserie2",infoTributaria[i].childNodes[0].nodeValue)
+                          inicializaValor("id_ctserie2", infoTributaria[i]
+                            .childNodes[0].nodeValue);
+                          break;
                       case "secuencial":
-                      inicializaValor("id_ctdocumento",infoTributaria[i].childNodes[0].nodeValue)
+                          inicializaValor("id_ctdocumento", infoTributaria[i]
+                            .childNodes[0].nodeValue);
+                          break;
+                      case "claveAcceso":
+                          inicializaValor("id_cxautorizacion_ec", infoTributaria[i]
+                            .childNodes[0].nodeValue);
+                          break;
                   }
               }
-
-              let infoFactura=xmlFactura.getElementsByTagName("infoFactura")[0].childNodes ;
+              let infoFactura=xmlFactura.getElementsByTagName("infoFactura")[0]
+                .childNodes ;
               
               for (let i in infoFactura ){
                   switch (infoFactura[i].nodeName){
                       case "razonSocialComprador":
-                          inicializaValor("id_ctcomprador",infoFactura[i].childNodes[0].nodeValue);
+                          inicializaValor("id_ctcomprador",infoFactura[i]
+                            .childNodes[0].nodeValue);
                           break;
                       case "identificacionComprador":
-                          inicializaValor("id_cxcomprador",infoFactura[i].childNodes[0].nodeValue);
+                          inicializaValor("id_cxcomprador",infoFactura[i]
+                            .childNodes[0].nodeValue);
                           break;
                       case "totalSinImpuestos":
-                          inicializaValor("id_nvalorantesiva",infoFactura[i].childNodes[0].nodeValue);
+                          inicializaValor("id_nvalorantesiva",infoFactura[i]
+                            .childNodes[0].nodeValue);
                           break;
                       case "fechaEmision":
                           var fechaEmision = infoFactura[i].childNodes[0].nodeValue
@@ -402,7 +431,8 @@ function CargaXMLfactura(xmlFile){
                   
               }
               let detalles =xmlFactura.getElementsByTagName("detalles")[0].childNodes ;
-              valorIva=0;
+              let valorIva=0;
+              let detalle1, impuesto1, nodo, iva_imp;
 
               for (let i in detalles ){
                   detalle1=detalles[i].childNodes

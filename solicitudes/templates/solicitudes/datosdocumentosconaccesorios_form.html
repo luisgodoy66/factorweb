@@ -35,11 +35,7 @@
             <!-- datos de factura texto y fecha -->
             <div class="col-md-6 col-sm-6">
                 <div class="row form-group">
-                    <input type="file" id="xmlFile" accept=".xml">
-
-                </div>
-                <div class="row form-group">
-                    <div class="col col-md-5">
+                    <div class="col col-md-4">
                         <select name="cxtipoid" class="form-control" required id="cxtipoid">
                             <option value="" >---------</option>                                            
                             <option value="R" selected>RUC</option>                                            
@@ -48,49 +44,61 @@
                             <option value="O">OTRO</option>                                            
                         </select>
                     </div>
-                    <div class="col-md-7">
+                    <div class="col-md-8">
                         {{ form_documento.cxcomprador}}
                     </div>
                 </div>  
                 <div class="row form-group">
-                    <div class="col col-md-5"><label for="id_cxtipocliente" class=" form-control-label">
+                    <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
                         {{ form_documento.ctcomprador.label}}</label></div>
-                    <div class="col-md-7">
+                    <div class="col-md-8">
                         {{ form_documento.ctcomprador}}
                     </div>
                 </div>  
                 <div class="row form-group">
-                    <div class="col-md-5"><label for="id_cxtipocliente" class=" form-control-label">
+                    <div class="col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
                         {{form_documento.ctserie1.label}}</label></div>
                     <div class="col-md-3">
                         {{ form_documento.ctserie1}}
                     </div>
                 </div>  
                 <div class="row form-group">
-                    <div class="col-md-5"><label for="id_cxtipocliente" class=" form-control-label">
+                    <div class="col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
                         {{form_documento.ctserie2.label}}</label></div>
                     <div class="col-md-3">
                         {{ form_documento.ctserie2}}
                     </div>
                 </div> 
                 <div class="row form-group">
-                    <div class="col col-md-5"><label for="id_cxtipocliente" class=" form-control-label">
+                    <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
                         {{ form_documento.ctdocumento.label}}</label></div>
-                    <div class="col-md-7">
+                    <div class="col-md-8">
                         {{ form_documento.ctdocumento}}
                     </div>
                 </div>  
                 <div class="row form-group">
-                    <div class="col col-md-5"><label for="id_cxtipocliente" class=" form-control-label">
+                    <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
                         {{ form_documento.demision.label}}</label></div>
-                    <div class="col-md-7">
+                    <div class="col-md-8">
                         {{ form_documento.demision}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{ form_documento.cxautorizacion_ec.label}}</label>
+                    </div>
+                    <div class="col-md-8">
+                        {{ form_documento.cxautorizacion_ec}}
                     </div>
                 </div>  
 
             </div>
             <!-- datos de factura valores -->
             <div class="col-md-6">
+                <div class="row form-group">
+                    <input type="file" id="xmlFile" accept=".xml">
+
+                </div>
                 <div class="row form-group">
                     <div class="col-md-7 col-xs-6"><label for="id_nvalorantesdeiva" class=" form-control-label">
                         {{ form_documento.nvalorantesiva.label}}</label></div>
@@ -180,7 +188,9 @@
             <button type="submit" class="btn btn-primary btn-sm">
                 <i class="fa fa-dot-circle-o"></i> Agregar
             </button>
-            
+            <!-- Sección para mostrar errores del formulario -->
+            <div id="form-errors" class="alert alert-danger" style="display:none;"></div>
+
         </div>
     </div>
 </div>
@@ -220,6 +230,8 @@ window.onload=function(){
         alert("El formulario ya se esta enviando");
         return false;
     }
+
+      jQuery("#form-errors").hide();
 
       jQuery("#body_cheques tr").each(function (i,row) {
             var valor = row.children[6].innerText
@@ -274,7 +286,19 @@ window.onload=function(){
       jQuery.ajax({
         method:"POST",
         headers: {'X-CSRFToken': token },
-        data: formData
+        data: formData,
+        error: function(xhr) {
+                    var errors = xhr.responseJSON;
+                    var errorHtml = '<ul>';
+                    for (var key in errors) {
+                        if (errors.hasOwnProperty(key)) {
+                            errorHtml += '<li>' + errors[key] + '</li>';
+                        }
+                    }
+                    errorHtml += '</ul>';
+                    jQuery("#form-errors").html(errorHtml).show();
+                    enviando = false;
+                },
       })
       .done(function(r,textStatus,xhr){
           if(xhr.status=200){
@@ -283,12 +307,13 @@ window.onload=function(){
             // para enviarlo para edición.
             location.href="/solicitudes/editarsolicitudconaccesorios/"+xhr.responseText;
           }
-          else{
-            MensajeError(textStatus);
-          }
-      }).fail(function (error) {
-          MensajeError(error.responseText);
-      });
+        //   else{
+        //     MensajeError(textStatus);
+        //   }
+      })
+    //   .fail(function (error) {
+    //       MensajeError(error.responseText);
+    //   });
 
       return false;
 
