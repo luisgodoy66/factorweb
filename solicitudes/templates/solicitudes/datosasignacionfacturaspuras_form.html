@@ -13,6 +13,12 @@
             </div>
         </div>
     </div>
+    <style>
+        .row-eliminado {
+            background-color: #f8d7da; /* Color de fondo rojo claro */
+            color: #721c24; /* Color de texto rojo oscuro */
+        }
+    </style>
 {% endblock breadcrumbs %}
 {% block content %}
 
@@ -151,18 +157,24 @@ window.operateEvents = {
       EliminarDocumentoDeSolicitudAsignacion(asignacion_id, row.id,'F', row.Documento)
     //   nota: debería actualizar el total negociado y la cantidad de documentos
     // aunque el proceso si cambió esos valores en la base de datos
+  },
+    'click .recuperar': function (e, value, row, index) {
+      RecuperarDocumentoDeSolicitudAsignacion(asignacion_id, row.id,'F', row.Documento)
     }
 };
 
 function operateFormatter(value, row, index) {
-return [
-  '<a class="editar" href="javascript:void(0)" title="Editar">',
-  '<i class="fa fa-edit"></i>',
-  '</a>',
-  '<a class="remove" href="javascript:void(0)" title="Eliminar">',
-  '<i class="fa fa-trash"></i>',
-  '</a>'
-].join('')
+    var eliminarClass = row.Eliminado ? 'recuperar' : 'remove';
+    var eliminarTitle = row.Eliminado ? 'Recuperar' : 'Eliminar';
+    var eliminarIcon = row.Eliminado ? 'fa fa-undo' : 'fa fa-trash';
+    return [
+        '<a class="editar" href="javascript:void(0)" title="Editar cheque">',
+        '<i class="fa fa-edit"></i>',
+        '</a>',
+        '<a class="' + eliminarClass + '" href="javascript:void(0)" title="' + eliminarTitle + '">',
+        '<i class="' + eliminarIcon + '"></i>',
+        '</a>'
+    ].join('');
 }
 
 function initTable() {
@@ -207,7 +219,16 @@ function initTable() {
             field: 'Total', title: 'Negociado', sortable: true,
             align: 'center', footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
           }]
-      ]
+      ],
+      rowStyle: function(row, index) {
+            if (row.Eliminado) {
+                return {
+                    classes: 'row-eliminado'
+                };
+            }
+            return {};
+        }
+
     })
 }
 

@@ -4,7 +4,7 @@ from django.views import generic
 from django.urls import reverse_lazy
 from django.db.models import Q, FilteredRelation, Max
 from django.db.models.functions import Concat
-from django.db.models.expressions import RawSQL 
+from django.db.models.expressions import RawSQL , F
 from django.http import JsonResponse
 from django.db import transaction
 from django.views import generic
@@ -816,7 +816,8 @@ class PendientesGenerarFacturaView(SinPrivilegios, generic.ListView):
             .values('cxcliente__cxcliente__ctnombre', 'cxasignacion'
                     , 'ddesembolso', 'id')\
             .annotate(tipo_operacion = RawSQL("select 'Asignación'",'')
-                      , tipo = RawSQL("select 'LA'",''))\
+                      , tipo = RawSQL("select 'LA'",'')
+                      , facturar = F('ngao')+ F('ndescuentodecartera')+F('notroscargos'))\
             .order_by('dregistro')
         
         cobr=Liquidacion_cabecera.objects\
@@ -825,7 +826,13 @@ class PendientesGenerarFacturaView(SinPrivilegios, generic.ListView):
             .values('cxcliente__cxcliente__ctnombre', 'cxliquidacion'
                     , 'ddesembolso', 'id')\
             .annotate(tipo_operacion = RawSQL("select 'Liquidación de cobranza'",'')
-                      , tipo = RawSQL("select 'LC'",''))\
+                      , tipo = RawSQL("select 'LC'",'')
+                      , facturar = F('ngaoa')
+                        + F('ngao')
+                        + F('ndescuentodecartera') 
+                        + F('ndescuentodecarteravencido')
+                        + F('notroscargos'))\
+            .filter(facturar__gt=0)\
             .order_by('dregistro')
         
         ampl=Ampliaciones_plazo_cabecera.objects\
@@ -834,7 +841,8 @@ class PendientesGenerarFacturaView(SinPrivilegios, generic.ListView):
             .values('cxcliente__cxcliente__ctnombre', 'notadebito__cxnotadebito'
                     , 'dregistro', 'id')\
             .annotate(tipo_operacion = RawSQL("select 'Ampliación de plazo'",'')
-                      , tipo = RawSQL("select 'AP'",''))\
+                      , tipo = RawSQL("select 'AP'",'')
+                      , facturar = F('nvalor'))\
             .order_by('dregistro')
         
         paga=Factura_cuota.objects\
@@ -843,7 +851,8 @@ class PendientesGenerarFacturaView(SinPrivilegios, generic.ListView):
             .values('cuota__pagare__cxcliente__cxcliente__ctnombre', 'cobranzacuota__cobranza__cxcobranza'
                     , 'dregistro', 'id')\
             .annotate(tipo_operacion = RawSQL("select 'Cobro de pagaré'",'')
-                      , tipo = RawSQL("select 'CP'",''))\
+                      , tipo = RawSQL("select 'CP'",'')
+                      , facturar = F('nbaseiva') + F('nbasenoiva'))\
             .order_by('dregistro')
 
         return asgn.union(cobr,ampl, paga)
@@ -1561,14 +1570,16 @@ def GenerarComprobanteEgreso(request, pk, forma_pago, operacion):
             id_factura = factura.id
 
     else:
-        factura = Factura_venta.objects\
-            .filter(cxtipooperacion = 'LC'
-                    , operacion = desembolso.cxoperacion).first()
+        # si es liquidación de cobranza, podría no haber factura si los cargos se cobran en la negociación
+        if documento_origen.facturar() > 0:
+            factura = Factura_venta.objects\
+                .filter(cxtipooperacion = 'LC'
+                        , operacion = desembolso.cxoperacion).first()
 
-        if not factura:
-            return HttpResponse("Factura no encontrada o generada para esta liquidación. Genere primero la factura.")
+            if not factura:
+                return HttpResponse("Factura no encontrada o generada para esta liquidación. Genere primero la factura.")
 
-        id_factura = factura.id
+            id_factura = factura.id
 
     if request.method=='GET':
 

@@ -437,26 +437,11 @@ def EliminarAsignacion(request, asignacion_id):
 from django.http import JsonResponse
 from . import models
 
-def DetalleSolicitudFacturasPurasOutput(doc):
-    output = {}
-    output['id'] = doc.id
-    output["Comprador"] = doc.ctcomprador
-    output["Documento"] = doc.ctdocumento
-    output["Emision"] = doc.demision.strftime("%Y-%m-%d")
-    output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
-    output["ValorAntesDeIVA"] = doc.nvalorantesiva
-    output["IVA"] = doc.niva
-    output["Retenciones"] = doc.nretencioniva +doc.nretencionrenta
-    output["NoNegociado"] = doc.nvalornonegociado
-    output["Total"] = doc.ntotal
-
-    return output
-
 def DetalleSolicitudFacturasPuras(request, asignacion_id = None):
     
     documentos = models.Documentos.objects\
         .filter(cxasignacion=asignacion_id)\
-            .filter( leliminado = False)
+            # .filter( leliminado = False)
     
     tempBlogs = []
 
@@ -472,6 +457,22 @@ def DetalleSolicitudFacturasPuras(request, asignacion_id = None):
         }
 
     return HttpResponse(JsonResponse( data))
+
+def DetalleSolicitudFacturasPurasOutput(doc):
+    output = {}
+    output['id'] = doc.id
+    output["Comprador"] = doc.ctcomprador
+    output["Documento"] = doc.ctdocumento
+    output["Emision"] = doc.demision.strftime("%Y-%m-%d")
+    output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
+    output["ValorAntesDeIVA"] = doc.nvalorantesiva
+    output["IVA"] = doc.niva
+    output["Retenciones"] = doc.nretencioniva +doc.nretencionrenta
+    output["NoNegociado"] = doc.nvalornonegociado
+    output["Total"] = doc.ntotal
+    output["Eliminado"] = doc.leliminado
+
+    return output
 
 def DetalleSolicitudConAccesorios(request, asignacion_id = None):
     # mostrar incluso los documentos eliminados

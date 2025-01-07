@@ -209,6 +209,13 @@ class Liquidacion_cabecera(ClaseModelo):
                 + self.notros
                 + self.notroscargos)
 
+    def facturar(self):
+        return (self.ngao 
+                + self.ngaoa
+                + self.ndescuentodecartera 
+                + self.ndescuentodecarteravencido
+                + self.notroscargos)
+
     def neto(self):
         return (self.nvuelto
                 + self.nsobrepago 

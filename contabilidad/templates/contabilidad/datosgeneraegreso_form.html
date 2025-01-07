@@ -23,11 +23,6 @@
             <div class="card-header">
                 <strong>Generar comprobante de egreso</strong> 
             </div>
-            <div hidden>
-                <input id="forma_pago" value="{{forma_pago}}">
-                <input id="id_desembolso" value="{{id_desembolso}}">
-                <input id="id_factura" value="{{id_factura}}">
-            </div>
             <div class="card-body card-block">
                 <!-- columna izquierda -->
                 <div class="col-lg-6">
@@ -124,7 +119,86 @@
 </form>
 {% endblock %}
 {% block js_page %}
-<script type="text/javascript" 
-    src="{% static 'factorweb/js/datosgeneraegreso.js' %}">
+<!-- <script type="text/javascript" src="{% static 'factorweb/js/datosgeneraegreso.js' %}"></script> -->
+<script>
+    const id_factura = "{{id_factura}}";
+    const id_desembolso = "{{id_desembolso}}";
+    const forma_pago = "{{forma_pago}}";
+
+window.onload=function(){
+
+jQuery("#frmGenera").submit(function(e){
+    e.preventDefault();
+    var formData = jQuery("form").serializeArray();
+    var token = jQuery("[name=csrfmiddlewaretoken]").val();
+    // console.log(formData);
+    jQuery.ajax({
+        method:"POST",
+        headers: {'X-CSRFToken': token },
+        data: formData
+    })
+    .done(function(r,textStatus,xhr){
+        if(xhr.status=200){
+            location.href = "/contabilidad/listadesembolsospendientes";
+            window.open('/contabilidad/imprimircomprobanteegreso/'+xhr.responseText);
+        }
+        else{
+            alert(textStatus);
+        }
+    }).fail(function (error) {
+        MensajeError(error.responseText);
+    });
+});
+
+}
+
+function GenerarEgreso(){
+cuenta_pago = 'null'
+numero_cheque = 'null'
+cuenta_destino = 'null'
+
+if (forma_pago == 'CHE') {
+    numero_cheque = capturaValor("id_ctcheque")
+}
+if (forma_pago == 'TRA') {
+    cuenta_destino=capturaValor("id_cxcuentadestino")
+    if (cuenta_destino==''){
+        alert('Se especificó transferencia pero no se ha determinado cuenta de destino')
+        return false;
+    }
+}
+if (forma_pago != 'EFE') {
+    cuenta_pago = capturaValor("id_cxcuentapago")
+}
+
+MensajeConfirmacion("Aceptar generación de egreso ?",function(){
+
+var objeto={
+    "pscxbeneficiario" :capturaValor("id_cxbeneficiario"),
+    "psrecibidopor" :capturaValor("id_ctrecibidopor"),
+    "pid_cuentapago": cuenta_pago,
+    "pscheque": numero_cheque,
+    "pid_cuentadestino": cuenta_destino,
+    "concepto" : capturaValor("concepto"), 
+    "pdemision" :capturaValor("id_demision"),
+    "pnvalor" :capturaValor("id_nvalor"),
+    "pid_factura" :id_factura,
+    "pid_desembolso" :id_desembolso,
+    "psforma_pago": forma_pago,
+        }
+        
+fetchPostear("/contabilidad/generaregresodiario/", objeto, function(data){
+    // regresar a la lista de generar factura
+    window.location.href = "/contabilidad/listadesembolsospendientes";
+    // en una nueva ventana abrir el reporte de asiento
+    url = window.location.origin
+    url = url + "/contabilidad/imprimircomprobanteegreso/"+data;
+    window.open( url);
+    
+  })
+})
+
+}
+
 </script>
 {% endblock %}
