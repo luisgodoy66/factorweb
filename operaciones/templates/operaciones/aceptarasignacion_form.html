@@ -454,33 +454,6 @@ function AceptarAsignacion(){
     
 }
 
-// function CargaCargos() {
-// 		// Crea una matriz dinámica de fechas para habitaciones.
-// 		fetchRecuperar("{% url 'empresa:listaotroscargos_json' %}", function(data){
-// 			var contenido=""
-
-//             for (const objeto of data){
-//                 contenido+=`<!--begin::Card-->
-//                 <div class="row form-group" >
-//                     <div class="col-md-1"></div>
-//                     <div class="col col-xs-3">
-//                         <label for="id_ndescuentodecartera" class=" form-control-label">${objeto.ctabreviacion}</label>
-//                     </div>
-//                     <div class="col-6 col-md-6">
-//                         <input type="number" class="form-control" class="otros_cargos" value="${objeto.nvalor}" >
-//                     </div>
-//                 </div>
-//                 `
-//             }
-//             // Devuelve la matriz dinámica de fechas para habitaciones.
-//             // contenido+="</div>"
-//             console.log(contenido)
-// 			inicializarInner("divOtrosCargos",contenido)
-
-// 		})
-
-// 	};
-
 function obtenerAcumuladoBaseIVAOtrosCargos() {
     const inputs = document.querySelectorAll('.otros_cargos'); // Selecciona todos los inputs con la clase 'otros_cargos'
     let acumulado = 0;

@@ -19,11 +19,11 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     GeneraListaCanjesClienteJSON, CondicionesOperativasUpdate, \
     DatosCondicionOperativaNueva, GeneraListaDesembolsosJSON, \
     CondicionesOperativasInactivar, ConsultaAnexosActivos, \
-    GenerarAnexo, \
-    MarcarAnexoGenerado, IngresosGeneradosJSON, PedirArchivoXML, \
-    ImportarOperacion, ReversaAceptacionPagare, AceptarAsignacion, \
-    ReversoDesembolsoAsignacion, MaestroMovimientosView, \
-    GeneraListaCuotasPagareJSON, ModificarCuota
+    GenerarAnexo, MarcarAnexoGenerado, IngresosGeneradosJSON, \
+    PedirArchivoXML, ImportarOperacion, ReversaAceptacionPagare, \
+    AceptarAsignacion, ReversoDesembolsoAsignacion, \
+    MaestroMovimientosView, GeneraListaCuotasPagareJSON, \
+    ModificarCuota, GeneraResumenNegociadPorActividadJSON
 
 from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
     ImpresionAsignacionDesdeSolicitud, ImpresionFacturasPendientes, \
@@ -132,6 +132,7 @@ urlpatterns = [
     path('ingresosgenerados/<int:año>', IngresosGeneradosJSON),
     path('impresioncartera', ImpresionAntiguedadCartera
          , name='antigüedad_por_cliente'),
+    path('negociadoporactividad', GeneraResumenNegociadPorActividadJSON),
 # desembolsos
     path('listaasignacionespendientesdesembolsar/',AsignacionesPendientesDesembolsarView.as_view(), \
         name='listaasignacionespendientesdesembolsar'),

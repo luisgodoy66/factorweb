@@ -138,7 +138,7 @@ function fetchRecuperar(url,callback){
     .then(res=>{
         callback(res)
     })
-
+    .catch(error => console.error('Error fetching data:', error));
 }
 
 function fetchPostear(url, objeto, callback){

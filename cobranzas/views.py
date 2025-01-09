@@ -1398,20 +1398,26 @@ def GeneraListaCobranzasJSONSalida(transaccion):
     output["Estado"] = transaccion['cxestado']
     output["Valor"] =  transaccion['nvalor']
     output["TipoFactoring"] = transaccion['cxtipofactoring__ctabreviacion']
-    output["Registro"] = transaccion["dregistro"]
+    output["Registro"] = transaccion["dregistro"]\
+        .strftime("%Y-%b-%d %H:%M")
 
     if 'protestada' in transaccion['tipo'] or transaccion['tipo']=='L':
         output["Detalle"] = transaccion['cxformapago']
     else:
-        if transaccion['cxformapago'] =="CHE" or transaccion['cxformapago'] =="DEP":
-            cheque = Cheques.objects.filter(pk = transaccion['cxcheque']).first()
+        if transaccion['cxformapago'] =="CHE" \
+            or transaccion['cxformapago'] =="DEP":
+            cheque = Cheques.objects\
+                .filter(pk = transaccion['cxcheque']).first()
             output["Detalle"] = cheque.__str__()
+
         elif transaccion['cxformapago'] =="TRA":
             cuenta = Cuentas_bancarias.objects\
-                .filter(pk = transaccion['cxcuentatransferencia']).first()
+                .filter(pk = transaccion['cxcuentatransferencia'])\
+                    .first()
             output["Detalle"] = cuenta.__str__()
 
         output["FormaCobro"] = transaccion['cxformapago']
+
         if transaccion['ddeposito']:
             output["Deposito"] = transaccion['ddeposito'].strftime("%Y-%m-%d")
         output["Sobrepago"] = transaccion['nsobrepago']
@@ -2895,7 +2901,8 @@ def GeneraListaLiquidacionesJSONSalida(transaccion):
     output["Estado"] = transaccion['cxestado']
     output["Valor"] =  transaccion['nneto']
     output["TipoFactoring"] = transaccion['cxtipofactoring__ctabreviacion']
-    output["Registro"] = transaccion["dregistro"]
+    output["Registro"] = transaccion["dregistro"]\
+        .strftime("%Y-%b-%d %H:%M")
 
     output["TipoOperacion"] = transaccion["cxtipooperacion"]
 
@@ -2950,7 +2957,8 @@ def GeneraListaCobranzasCargosJSONSalida(transaccion):
     output["Estado"] = transaccion['cxestado']
     output["Valor"] =  transaccion['nvalor']
     output["TipoFactoring"] = transaccion['cxtipofactoring__ctabreviacion']
-    output["Registro"] = transaccion["dregistro"]
+    output["Registro"] = transaccion["dregistro"]\
+        .strftime("%Y-%b-%d %H:%M")
 
     # if 'protestada' in transaccion['tipo']:
     #     output["Detalle"] = transaccion['cxformapago']

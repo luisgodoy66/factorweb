@@ -69,11 +69,18 @@ class Asignacion_manager(models.Manager):
                        )
     
     def total_negociado(self, id_empresa):
-        return self.filter(
-            cxestado = "P"
-            , leliminado = False
-            , empresa = id_empresa)\
+        return self.filter(cxestado = "P"
+                           , leliminado = False
+                           , empresa = id_empresa)\
             .aggregate(Total = Sum('nvalor'))
+
+    def total_por_actividad(self, id_empresa):
+        return self.filter(cxestado="P",
+                           leliminado=False,
+                           empresa=id_empresa)\
+            .values('cxcliente__cxcliente__actividad__ctactividad')\
+            .annotate(total=Sum('nvalor'))\
+            .order_by('cxcliente__cxcliente__actividad__ctactividad')
 
 class Asignacion(ClaseModelo):
     TIPOS_DE_ASIGNACION = (
@@ -307,6 +314,7 @@ class Documentos(ClaseModelo):
                                               , default=0, null=True)
     ncontadorprorrogas = models.SmallIntegerField(default=0)
     lfacturagenerada = models.BooleanField(default=False)
+    cxautorizacion_ec = models.CharField(max_length=49, null=True)
 
     objects= Documentos_Manager()
 

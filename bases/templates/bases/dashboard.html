@@ -4,9 +4,9 @@
 {% block content %}
 <div class="content mt-3">
     <!-- totales -->
-    <div class="col-md-6 col-lg-6">
+    <div class="col-md-12 col-lg-12">
         <!-- total cartera y protestos -->
-        <div class="col-lg-6">
+        <div class="col-md-3">
             <div class="card">
                 <div class="card-body">
                     <div class="clearfix">
@@ -27,7 +27,7 @@
             </div>
         </div>
         <!-- total de protestos -->
-        <div class="col-lg-6">
+        <div class="col-md-3">
             <div class="card">
                 <div class="card-body">
                     <div class="clearfix">
@@ -49,7 +49,7 @@
            
         </div>
         <!-- total negociado -->
-        <div class="col-lg-6 col-md-6">
+        <div class="col-md-3">
             <div class="card">
                 <div class="card-body">
                     <div class="stat-widget-one">
@@ -63,7 +63,7 @@
             </div>
         </div>
         <!-- total ingresos año -->
-        <div class="col-lg-6 col-md-6">
+        <div class="col-md-3">
             <div class="card">
                 <div class="card-body">
                     <div class="stat-widget-one">
@@ -77,17 +77,17 @@
             </div>
         </div>
     </div>
-    <!-- grafico cartera negociada -->
-    <div class="col-lg-6">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="mb-3">Cartera negociada </h4>
-                <canvas id="lineChart"></canvas>
+    <!-- <div class="animated fadeIn"> -->
+    <div class="row">
+        <!-- grafico cartera negociada -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-3">Cartera negociada </h4>
+                    <canvas id="lineChart"></canvas>
+                </div>
             </div>
         </div>
-    </div>
-    <!-- <div class="animated fadeIn"> -->
-    <!-- <div class="row"> -->
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-body">
@@ -96,6 +96,8 @@
                 </div>
             </div>
         </div><!-- /# column -->
+    </div>
+    <div class="row">
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-body">
@@ -104,8 +106,16 @@
                 </div>
             </div>
         </div><!-- /# column -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-3">Negociado por sector </h4>
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+        </div><!-- /# column -->
 
-    <!-- </div> -->
+    </div>
 
     <!-- cobranzas de cartera -->
     <div class="col-xl-6">
@@ -262,8 +272,9 @@
     $tb_cobcar.bootstrapTable({locale:"es-EC"});
 
     antigüedadcartera("/operaciones/antigüedadcartera");
-    carteranegociada("/operaciones/carteranegociada/{{año}}")
-    ingresosGenerados("/operaciones/ingresosgenerados/{{año}}")
+    carteranegociada("/operaciones/carteranegociada/{{año}}");
+    ingresosGenerados("/operaciones/ingresosgenerados/{{año}}");
+    NegociadoPorActividad("/operaciones/negociadoporactividad");
     }
 
     window.operateEvents = {

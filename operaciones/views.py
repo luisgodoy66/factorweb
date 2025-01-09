@@ -18,7 +18,7 @@ from .forms import DatosOperativosForm, AsignacionesForm, \
     DetalleCondicionesOperativasForm, TasasDocumentosForm, \
     TasasAccesoriosForm, DesembolsarForm, AnexosForm, CuotasForm
 
-from .models import Cargos_detalle, Condiciones_operativas_detalle, \
+from .models import Condiciones_operativas_detalle, \
     Datos_operativos, Asignacion,  Condiciones_operativas_cabecera, \
     Anexos, Pagares, Desembolsos, Documentos, ChequesAccesorios, \
     Notas_debito_cabecera, Cheques_quitados, \
@@ -1498,7 +1498,7 @@ def GeneraListaAsignacionesJSONSalida(asignacion):
     output["IVA"] = asignacion.niva
     output["Neto"] = neto
     output["Estado"] = asignacion.estado()
-    output["Registro"] = asignacion.dregistro
+    output["Registro"] = asignacion.dregistro.strftime("%Y-%b-%d %H:%M")
 
     return output
 
@@ -2372,4 +2372,14 @@ def ModificarCuota(request,cuota_id):
         return HttpResponse("OK")
     
     return render(request, template_name, contexto)
+
+def GeneraResumenNegociadPorActividadJSON(request):
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    total_por_actividad = Asignacion.objects.total_por_actividad(id_empresa.empresa)
+    
+    data = list(total_por_actividad)
+    
+    return JsonResponse( data, safe=False)
 

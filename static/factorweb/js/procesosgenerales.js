@@ -275,21 +275,21 @@ function antigüedadcartera(url){
                   {
                       label: "Accesorios",
                       data: [ av90m, av90, av60, av30, ap30, ap60, ap90, ap90m ],
-                      borderColor: "rgba(0, 255, 255, 0.5)",
+                      borderColor: "rgba(0, 255, 255, 0.9)",
                       borderWidth: "0",
                       backgroundColor: "rgba(0, 255, 255, 0.5)"
                               },
                   {
                       label: "Protestos",
                       data: [ pv90m, pv90, pv60, pv30, pp30, pp60, pp90, pp90m ],
-                      borderColor: "rgba(255, 0, 0, 0.5)",
+                      borderColor: "rgba(255, 0, 0, 0.9)",
                       borderWidth: "0",
                       backgroundColor: "rgba(255, 0, 0, 0.5)"
                               },
                   {
                       label: "Reestructuración",
                       data: [ cv90m, cv90, cv60, cv30, cp30, cp60, cp90, cp90m ],
-                      borderColor: "rgba(128, 0, 128, 0.5)",
+                      borderColor: "rgba(128, 0, 128, 0.9)",
                       borderWidth: "0",
                       backgroundColor: "rgba(128, 0, 128, 0.5)"
                               }
@@ -844,3 +844,80 @@ function ReversarAmpliacionPlazo(nd_id, ampliacion){
     })
 })
 }
+
+function NegociadoPorActividad(url){
+
+    //line chart
+  fetchRecuperar(url,function(data){
+    //pie chart
+
+    // Ordenar los datos en orden descendente por el campo 'total'
+    data.sort((a, b) => b.total - a.total);
+
+    // Initialize empty arrays for actividad and total
+    let actividades = [];
+    let totales = [];
+
+    // Iterate over the data to populate the arrays
+    data.forEach(item => {
+        actividades.push(item.cxcliente__cxcliente__actividad__ctactividad);
+        totales.push(item.total);
+    });
+    
+      var ctx = document.getElementById( "pieChart" );
+      ctx.height = 300;
+      var myChart = new Chart( ctx, {
+          type: 'pie',
+          data: {
+              datasets: [ {
+                  data: totales,
+                  backgroundColor: [
+                    "rgba(0, 123, 255,0.5)",
+                    "rgba(0, 255, 255, 0.5)",
+                    "rgba(255, 0, 0, 0.5)",
+                    "rgba(128, 0, 128, 0.5)",
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)',
+                    "rgba(0,0,0,0.07)",
+                ],
+                hoverBackgroundColor: [
+                  "rgba(0, 123, 255,0.9)",
+                  "rgba(0, 255, 255, 0.9)",
+                  "rgba(255, 0, 0, 0.9)",
+                  "rgba(128, 0, 128, 0.9)",
+                  'rgba(255, 99, 132, 0.5)',
+                  'rgba(54, 162, 235, 0.5)',
+                  'rgba(255, 206, 86, 0.5)',
+                  'rgba(75, 192, 192, 0.5)',
+                  'rgba(153, 102, 255, 0.5)',
+                  'rgba(255, 159, 64, 0.5)',
+                  "rgba(0,0,0,0.09)",
+              ],
+                borderWidth: 1
+                      } ],
+              labels: actividades,
+          },
+          options: {
+              responsive: true
+          }
+      } );
+    })
+  }
+
+//   backgroundColor: [
+//     "rgba(0, 123, 255,0.9)",
+//     "rgba(0, 123, 255,0.7)",
+//     "rgba(0, 123, 255,0.5)",
+//     "rgba(0,0,0,0.07)"
+// ],
+// hoverBackgroundColor: [
+//     "rgba(0, 123, 255,0.9)",
+//     "rgba(0, 123, 255,0.7)",
+//     "rgba(0, 123, 255,0.5)",
+//     "rgba(0,0,0,0.07)"
+// ]
+
