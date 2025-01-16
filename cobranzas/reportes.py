@@ -17,38 +17,39 @@ from bases.models import Usuario_empresa
 from empresa.models import Tasas_factoring
 from contabilidad.models import Factura_venta
 
-from xhtml2pdf import pisa
+# from xhtml2pdf import pisa
+from weasyprint import HTML, CSS
 
-def link_callback(uri, rel):
-        """
-        Convert HTML URIs to absolute system paths so xhtml2pdf can access those
-        resources
-        """
-        result = finders.find(uri)
-        if result:
-                if not isinstance(result, (list, tuple)):
-                        result = [result]
-                result = list(os.path.realpath(path) for path in result)
-                path=result[0]
-        else:
-                sUrl = settings.STATIC_URL        # Typically /static/
-                sRoot = settings.STATIC_ROOT      # Typically /home/userX/project_static/
-                mUrl = settings.MEDIA_URL         # Typically /media/
-                mRoot = settings.MEDIA_ROOT       # Typically /home/userX/project_static/media/
+# def link_callback(uri, rel):
+#         """
+#         Convert HTML URIs to absolute system paths so xhtml2pdf can access those
+#         resources
+#         """
+#         result = finders.find(uri)
+#         if result:
+#                 if not isinstance(result, (list, tuple)):
+#                         result = [result]
+#                 result = list(os.path.realpath(path) for path in result)
+#                 path=result[0]
+#         else:
+#                 sUrl = settings.STATIC_URL        # Typically /static/
+#                 sRoot = settings.STATIC_ROOT      # Typically /home/userX/project_static/
+#                 mUrl = settings.MEDIA_URL         # Typically /media/
+#                 mRoot = settings.MEDIA_ROOT       # Typically /home/userX/project_static/media/
 
-                if uri.startswith(mUrl):
-                        path = os.path.join(mRoot, uri.replace(mUrl, ""))
-                elif uri.startswith(sUrl):
-                        path = os.path.join(sRoot, uri.replace(sUrl, ""))
-                else:
-                        return uri
+#                 if uri.startswith(mUrl):
+#                         path = os.path.join(mRoot, uri.replace(mUrl, ""))
+#                 elif uri.startswith(sUrl):
+#                         path = os.path.join(sRoot, uri.replace(sUrl, ""))
+#                 else:
+#                         return uri
 
-        # make sure that file exists
-        if not os.path.isfile(path):
-                raise Exception(
-                        'media URI must start with %s or %s' % (sUrl, mUrl)
-                )
-        return path
+#         # make sure that file exists
+#         if not os.path.isfile(path):
+#                 raise Exception(
+#                         'media URI must start with %s or %s' % (sUrl, mUrl)
+#                 )
+#         return path
 
 def ImpresionCobranzaCartera(request, cobranza_id):
     detalle = {}
@@ -142,20 +143,34 @@ def ImpresionCobranzaCartera(request, cobranza_id):
         'empresa': id_empresa.empresa
     }
 
-    # Create a Django response object, and specify content_type as pdf
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="cobranza "' \
-        + str(cobranza.cxcobranza) + ".pdf"
+    # # Create a Django response object, and specify content_type as pdf
+    # response = HttpResponse(content_type='application/pdf')
+    # response['Content-Disposition'] = 'inline; filename="cobranza "' \
+    #     + str(cobranza.cxcobranza) + ".pdf"
     # find the template and render it.
     template = get_template(template_path)
     html = template.render(context)
 
-    # create a pdf
-    pisa_status = pisa.CreatePDF(
-       html, dest=response, link_callback=link_callback)
-    # if error then show some funny view
-    if pisa_status.err:
-       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    # # create a pdf
+    # pisa_status = pisa.CreatePDF(
+    #    html, dest=response, link_callback=link_callback)
+    # # if error then show some funny view
+    # if pisa_status.err:
+    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    # return response
+
+    # Construir la ruta completa a la hoja de estilos
+    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+
+    # Generar el archivo PDF
+    pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
+        stylesheets=[CSS(stylesheet_path)]
+    )
+
+    # Crear la respuesta HTTP con el archivo PDF
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="cobranza "' \
+        + str(cobranza.cxcobranza) + ".pdf"
     return response
 
 def ImpresionLiquidacion(request, liquidacion_id):
@@ -272,19 +287,33 @@ def ImpresionLiquidacion(request, liquidacion_id):
         'empresa': id_empresa.empresa,
     }
 
-    # Create a Django response object, and specify content_type as pdf
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="liquidacion "' + str(liquidacion.cxliquidacion) + ".pdf"
+    # # Create a Django response object, and specify content_type as pdf
+    # response = HttpResponse(content_type='application/pdf')
+    # response['Content-Disposition'] = 'inline; filename="liquidacion "' + str(liquidacion.cxliquidacion) + ".pdf"
     # find the template and render it.
     template = get_template(template_name)
     html = template.render(contexto)
 
-    # create a pdf
-    pisa_status = pisa.CreatePDF(
-       html, dest=response, link_callback=link_callback)
-    # if error then show some funny view
-    if pisa_status.err:
-       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    # # create a pdf
+    # pisa_status = pisa.CreatePDF(
+    #    html, dest=response, link_callback=link_callback)
+    # # if error then show some funny view
+    # if pisa_status.err:
+    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    # return response
+
+    # Construir la ruta completa a la hoja de estilos
+    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+
+    # Generar el archivo PDF
+    pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
+        stylesheets=[CSS(stylesheet_path)]
+    )
+
+    # Crear la respuesta HTTP con el archivo PDF
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="liquidacion "' \
+        + str(liquidacion.cxliquidacion) + ".pdf"
     return response
 
 def ImpresionRecuperacionProtesto(request, cobranza_id):
@@ -444,21 +473,35 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
         'empresa': id_empresa.empresa
     }
 
-    # Create a Django response object, and specify content_type as pdf
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="cobranza "'\
-          + str(recuperacion.cxrecuperacion) + ".pdf"
+    # # Create a Django response object, and specify content_type as pdf
+    # response = HttpResponse(content_type='application/pdf')
+    # response['Content-Disposition'] = 'inline; filename="cobranza "'\
+    #       + str(recuperacion.cxrecuperacion) + ".pdf"
     # find the template and render it.
     template = get_template(template_path)
     html = template.render(context)
 
-    # create a pdf
-    pisa_status = pisa.CreatePDF(
-       html, dest=response, link_callback=link_callback)
-    # if error then show some funny view
-    if pisa_status.err:
-       return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    return response
+    # # create a pdf
+    # pisa_status = pisa.CreatePDF(
+    #    html, dest=response, link_callback=link_callback)
+    # # if error then show some funny view
+    # if pisa_status.err:
+    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    # return response
+
+    # Construir la ruta completa a la hoja de estilos
+    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+
+    # Generar el archivo PDF
+    pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
+        stylesheets=[CSS(stylesheet_path)]
+    )
+
+    # Crear la respuesta HTTP con el archivo PDF
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="recuperacion "'\
+          + str(recuperacion.cxrecuperacion) + ".pdf"
+    return response    
 
 def ImpresionCobranzaCargos(request, cobranza_id):
     detalle = {}
@@ -518,19 +561,33 @@ def ImpresionCobranzaCargos(request, cobranza_id):
         'empresa': id_empresa.empresa
     }
 
-    # Create a Django response object, and specify content_type as pdf
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="cobranza "' + str(cobranza.cxcobranza) + ".pdf"
+    # # Create a Django response object, and specify content_type as pdf
+    # response = HttpResponse(content_type='application/pdf')
+    # response['Content-Disposition'] = 'inline; filename="cobranza "' + str(cobranza.cxcobranza) + ".pdf"
     # find the template and render it.
     template = get_template(template_path)
     html = template.render(context)
 
-    # create a pdf
-    pisa_status = pisa.CreatePDF(
-       html, dest=response, link_callback=link_callback)
-    # if error then show some funny view
-    if pisa_status.err:
-       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    # # create a pdf
+    # pisa_status = pisa.CreatePDF(
+    #    html, dest=response, link_callback=link_callback)
+    # # if error then show some funny view
+    # if pisa_status.err:
+    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    # return response
+
+    # Construir la ruta completa a la hoja de estilos
+    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+
+    # Generar el archivo PDF
+    pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
+        stylesheets=[CSS(stylesheet_path)]
+    )
+
+    # Crear la respuesta HTTP con el archivo PDF
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="cobranza "' \
+        + str(cobranza.cxcobranza) + ".pdf"
     return response
 
 def ImpresionProtestosPendientes(request, id_cliente = None):
@@ -565,19 +622,32 @@ def ImpresionProtestosPendientes(request, id_cliente = None):
         'empresa': id_empresa.empresa,
     }
 
-    # Create a Django response object, and specify content_type as pdf
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="protestos_pendientes.pdf"'
+    # # Create a Django response object, and specify content_type as pdf
+    # response = HttpResponse(content_type='application/pdf')
+    # response['Content-Disposition'] = 'inline; filename="protestos_pendientes.pdf"'
     # find the template and render it.
     template = get_template(template_path)
     html = template.render(context)
 
-    # create a pdf
-    pisa_status = pisa.CreatePDF(
-       html, dest=response, link_callback=link_callback)
-    # if error then show some funny view
-    if pisa_status.err:
-       return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    # # create a pdf
+    # pisa_status = pisa.CreatePDF(
+    #    html, dest=response, link_callback=link_callback)
+    # # if error then show some funny view
+    # if pisa_status.err:
+    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    # return response
+
+    # Construir la ruta completa a la hoja de estilos
+    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+
+    # Generar el archivo PDF
+    pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
+        stylesheets=[CSS(stylesheet_path)]
+    )
+
+    # Crear la respuesta HTTP con el archivo PDF
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="protestos_pendientes.pdf"'
     return response
 
 from operaciones.models import Ampliaciones_plazo_cabecera, Ampliaciones_plazo_detalle \
@@ -698,21 +768,35 @@ def ImpresionAmpliacionDePlazo(request, ampliacion_id):
         "hay_accesorios" : hay_accesorios,
         'empresa': id_empresa.empresa
     }
-    # return render(request, template_name, contexto)
-    # Create a Django response object, and specify content_type as pdf
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="ampliacion "' + str(ampliacion.cxnotadebito) + ".pdf"
+
+    # # Create a Django response object, and specify content_type as pdf
+    # response = HttpResponse(content_type='application/pdf')
+    # response['Content-Disposition'] = 'inline; filename="ampliacion "' + str(ampliacion.cxnotadebito) + ".pdf"
     # find the template and render it.
     template = get_template(template_name)
     html = template.render(contexto)
 
-    # create a pdf
-    pisa_status = pisa.CreatePDF(
-       html, dest=response, link_callback=link_callback)
-    # if error then show some funny view
-    if pisa_status.err:
-       return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    return response
+    # # create a pdf
+    # pisa_status = pisa.CreatePDF(
+    #    html, dest=response, link_callback=link_callback)
+    # # if error then show some funny view
+    # if pisa_status.err:
+    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    # return response
+
+    # Construir la ruta completa a la hoja de estilos
+    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+
+    # Generar el archivo PDF
+    pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
+        stylesheets=[CSS(stylesheet_path)]
+    )
+
+    # Crear la respuesta HTTP con el archivo PDF
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="ampliacion "' \
+        + str(ampliacion.cxnotadebito) + ".pdf"
+    return response    
 
 def ImpresionDetalleCobranzas(request, desde, hasta, clientes = None):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
@@ -771,20 +855,33 @@ def ImpresionDetalleCobranzas(request, desde, hasta, clientes = None):
         'total_general':totales['cobrado']+totales['baja']+totales['retenciones'],
         'empresa': id_empresa.empresa,
     }
-        # Create a Django response object, and specify content_type as pdf
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
+    #     # Create a Django response object, and specify content_type as pdf
+    # response = HttpResponse(content_type='application/pdf')
+    # response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
     # find the template and render it.
     template = get_template(template_path)
     html = template.render(context)
 
-    # create a pdf
-    pisa_status = pisa.CreatePDF(
-       html, dest=response, link_callback=link_callback)
-    # if error then show some funny view
-    if pisa_status.err:
-       return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    return response
+    # # create a pdf
+    # pisa_status = pisa.CreatePDF(
+    #    html, dest=response, link_callback=link_callback)
+    # # if error then show some funny view
+    # if pisa_status.err:
+    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    # return response
+
+    # Construir la ruta completa a la hoja de estilos
+    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+
+    # Generar el archivo PDF
+    pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
+        stylesheets=[CSS(stylesheet_path)]
+    )
+
+    # Crear la respuesta HTTP con el archivo PDF
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="detalle_cobranzas.pdf"'
+    return response    
 
 def ImpresionDetalleRecuperaciones(request, desde, hasta, clientes = None):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
@@ -843,20 +940,33 @@ def ImpresionDetalleRecuperaciones(request, desde, hasta, clientes = None):
         'total_general':totales['cobrado']+totales['baja']+totales["bajacobranza"],
         'empresa': id_empresa.empresa,
     }
-        # Create a Django response object, and specify content_type as pdf
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
+    #     # Create a Django response object, and specify content_type as pdf
+    # response = HttpResponse(content_type='application/pdf')
+    # response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
     # find the template and render it.
     template = get_template(template_path)
     html = template.render(context)
 
-    # create a pdf
-    pisa_status = pisa.CreatePDF(
-       html, dest=response, link_callback=link_callback)
-    # if error then show some funny view
-    if pisa_status.err:
-       return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    return response
+    # # create a pdf
+    # pisa_status = pisa.CreatePDF(
+    #    html, dest=response, link_callback=link_callback)
+    # # if error then show some funny view
+    # if pisa_status.err:
+    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    # return response
+
+    # Construir la ruta completa a la hoja de estilos
+    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+
+    # Generar el archivo PDF
+    pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
+        stylesheets=[CSS(stylesheet_path)]
+    )
+
+    # Crear la respuesta HTTP con el archivo PDF
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="detalle_recuperaciones.pdf"'
+    return response    
 
 def ImpresionCobranzaCuota(request, cobranza_id):
     detalle = {}
@@ -936,19 +1046,32 @@ def ImpresionCobranzaCuota(request, cobranza_id):
         'empresa': id_empresa.empresa
     }
 
-    # Create a Django response object, and specify content_type as pdf
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="cobranza "' \
-        + str(cobranza.cxcobranza) + ".pdf"
-    # find the template and render it.
+    # # Create a Django response object, and specify content_type as pdf
+    # response = HttpResponse(content_type='application/pdf')
+    # response['Content-Disposition'] = 'inline; filename="cobranza "' \
+    #     + str(cobranza.cxcobranza) + ".pdf"
+    # # find the template and render it.
     template = get_template(template_path)
     html = template.render(context)
 
-    # create a pdf
-    pisa_status = pisa.CreatePDF(
-       html, dest=response, link_callback=link_callback)
-    # if error then show some funny view
-    if pisa_status.err:
-       return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    return response
+    # # create a pdf
+    # pisa_status = pisa.CreatePDF(
+    #    html, dest=response, link_callback=link_callback)
+    # # if error then show some funny view
+    # if pisa_status.err:
+    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    # return response
 
+    # Construir la ruta completa a la hoja de estilos
+    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+
+    # Generar el archivo PDF
+    pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
+        stylesheets=[CSS(stylesheet_path)]
+    )
+
+    # Crear la respuesta HTTP con el archivo PDF
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="cobranza "' \
+        + str(cobranza.cxcobranza) + ".pdf"
+    return response
