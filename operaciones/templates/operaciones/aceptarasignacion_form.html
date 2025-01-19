@@ -1,0 +1,501 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">Negociación</a></li>
+                    <li><a href="{% url 'solicitudes:listasolicitudes' %}" >solicitudes</a></li>
+                    <li class="active">Aceptar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal">
+    <!-- <div class="col-lg-6"> -->
+    <div class="card">
+            {% csrf_token %}
+        <div class="card-header">
+            <strong>Solicitud de factoring</strong> 
+            {% if asignacion.id %} de  {{ asignacion.cxcliente }}  {% else %}  nueva{% endif %} 
+        </div>
+        <div class="col-6 col-md-6" hidden>
+            <input id="asignacion_id" name="asignacion_id" value="{{ asignacion.id }}" >
+            <input id="id_cliente" name="id_cliente" value="{{ asignacion.cxcliente_id }}">
+            <!-- <input id="iva_gao" name="iva_gao" value="{{ gao.carga_iva }}" > -->
+            <input id="carga_gao" name="carga_gao" value="{{ gao.generar }}" >
+            <!-- <input id="iniciales_gao" name="iniciales_gao" value="{{ gao.iniciales }}"> -->
+            <!-- <input id="iva_dc" name="iva_dc" value="{{ dc.carga_iva }}"> -->
+            <input id="carga_dc" name="carga_dc" value="{{ dc.generar }}">
+            <!-- <input id="iniciales_dc" name="iniciales_dc" value="{{ dc.iniciales }}"> -->
+            <input id="usa_linea_factoring" name="usa_linea_factoring" value="{{ usa_linea_factoring }}">
+            <input id="tipo_asignacion" name="tipo_asignacion" value="{{ tipo_asignacion }}">
+        </div>
+            <div class="card-body card-block">
+                <!-- columna izquierda -->
+                <div class="col-7">
+                        <!-- fechas -->
+                    <div class="row form-group">
+                        <div class="col-md-2"><label for="id_dnegociacion" class=" form-control-label">
+                            {{ form_asignacion.dnegociacion.label}}
+                        </label></div>
+                        <div class="col-md-3">
+                            {{ form_asignacion.dnegociacion}}
+                        </div>
+                        <div class="col-md-2"><label for="id_ddesembolso" class=" form-control-label">
+                            {{ form_asignacion.ddesembolso.label}}
+                        </label></div>
+                        <div class="col-md-5">
+                            {{ form_asignacion.ddesembolso}}
+                        </div>
+                    </div>  
+                       
+                    <div class="row form-group">
+                        <div class="col-md-2"><label for="id_nvalor" class=" form-control-label">
+                            {{ form_asignacion.nvalor.label }}
+                        </label></div>
+                        <div class="col-md-3">
+                            {{ form_asignacion.nvalor}}
+                        </div>
+                        <div class="col col-md-2"{% if not condicion_operativa %} hidden {% endif %}>
+                            <label for="id_nvalor" class=" form-control-label">
+                            Condición operativa
+                        </label></div>
+                        <div class="col col-md-5"{% if not condicion_operativa %} hidden {% endif %}>
+                            <select data-placeholder="Seleccione una condición operativa..." class="form-control" tabindex="1" 
+                            id="condicion_id" name="condicion_id"
+                            >
+                            {% for cond in condicion_operativa %}
+                            <option value="{{ cond.id}}" >{{ cond.ctcondicion}} </option>
+                            {% endfor %}
+                            </select>
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-2"><label for="id_ctinstrucciondepago" class=" form-control-label">
+                            {{ form_asignacion.ctinstrucciondepago.label}}</label></div>
+                        <div class="col-md-10">
+                            {{ form_asignacion.ctinstrucciondepago}}
+                        </div>
+                    </div>  
+                    <!-- datos de cliente -->
+                    <div class="dropdown-divider"></div>
+                    <h5 class="heading-title mb-1 text-secondary">Datos del cliente</h5>
+                    <div class="row form-group">
+                        <div class="col-md-2"><label for="id_nvalor" class=" form-control-label">
+                            Beneficiario de cheque:
+                        </label></div>
+                        <div class="col-md-4">
+                            {{ beneficiario}}
+                        </div>
+                        <div class="col-md-2"><label for="id_nvalor" class=" form-control-label">
+                            Cuenta de transferencia:
+                        </label></div>
+                        <div class="col-md-4">
+                            {{ cuenta_transferencia}}
+                        </div>
+                    </div>  
+                </div>
+                <!-- columna derecha -->
+                <div class="col-5">
+                    <h5 class="heading-title mb-1 text-secondary">Liquidación de asignación</h5>
+                    <div class="row form-group">
+                        <div class="col col-xs-9">
+                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
+                            {{ form_asignacion.nanticipo.label }}</h5></div>
+                        <!-- <div class="col"><label for="id_nanticipo" class=" form-control-label">
+                            {{ form_asignacion.nanticipo.label }}
+                        </label></div> -->
+                        <div class="col-md-6">
+                            {{ form_asignacion.nanticipo}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col col-xs-9">
+                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
+                            - Cargos</h5></div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-1"></div>
+                        <div class="col col-xs-3">
+                            <label for="id_ngao" class=" form-control-label">{{gao.descripcion}}</label></div>
+                        <div class="col-6 col-md-6">
+                            {{ form_asignacion.ngao}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-1"></div>
+                        <div class="col col-xs-3">
+                            <label for="id_ndescuentodecartera" class=" form-control-label">{{dc.descripcion}}</label></div>
+                        <div class="col-6 col-md-6">
+                            {{ form_asignacion.ndescuentodecartera}}
+                        </div>
+                    </div>  
+                    <!-- cargar los otros cargos -->
+                    <!-- <div id="divOtrosCargos"></div> -->
+                     {% for item in otros_cargos %}
+                    <div class="row form-group">
+                        <div class="col-md-1"></div>
+                        <div class="col col-xs-3">
+                            <label for="id_notroscargos" class=" form-control-label">{{item}}</label></div>
+                        <div class="col-6 col-md-6">
+                            <input type="number" step="1" class="otros_cargos form-control " value="{{item.nvalor}}" 
+                                data-cargo="{{item}}"
+                                data-cargaiva = {{item.lcargaiva}} min="0" data-idmovimiento="{{item.movimiento.id}}">
+                        </div>
+                    </div>  
+                    {% endfor %}
+                    <div class="row form-group">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-1">
+                            <label for="id_niva" class=" form-control-label">
+                            {{ form_asignacion.niva.label}}
+                        </label></div>
+                        <div class="col-md-3">
+                            <input type="number" step="0.01" class="form-control" 
+                            readonly id="porcentaje_iva" value="{{ porcentaje_iva }}">
+                        </div>
+                        <div class="col-md-1"></div>
+                        <div class="col-6 col-md-6">
+                            {{ form_asignacion.niva}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col col-xs-3">
+                            <h5 for="id_nvalor" class=" form-control-label">
+                            = Neto a recibir
+                            </h5></div>
+                        <div class="col-6 col-md-6">
+                            <input type="number" name="neto" class="form-control" readonly id="neto">
+                        </div>
+                    </div>  
+                </div>
+                <!-- parte inferior -->
+                <div class="row form-group">
+
+                    <div class="col-md-12">
+                    <small>
+                          
+                        <table id="table"                      
+                            data-show-export="true"
+                            data-detail-formatter="detailFormatter"
+                            data-minimum-count-columns="2"
+                            data-pagination="false"
+                            data-id-field="id"
+                            data-show-footer="true"
+                            data-side-pagination="server"
+                            >
+                        </table>
+                    </small>
+
+                    </div>
+
+               </div>
+            </div>    
+        <div class="card-footer">
+            <a href="{% url 'solicitudes:listasolicitudes' %}" class="btn btn-danger btn-sm ">
+                <i class="fa fa-ban"></i> Cancelar
+            </a>
+            <button type="button" onclick="AceptarAsignacion()" class="btn btn-primary btn-sm ">
+                <i class="fa fa-dot-circle-o"></i> Aceptar
+            </button>
+        </div>
+    </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<!-- <script type="text/javascript" src="{% static 'factorweb/js/aceptarasignacion.js' %}"></script> -->
+<script>
+const $table = jQuery('#table')
+const asignacion_id = capturaValor("asignacion_id")
+const carga_gao = capturaValor("carga_gao")
+const carga_dc = capturaValor("carga_dc")
+const tipo_asignacion = capturaValor("tipo_asignacion")
+// const porcentaje_iva = capturaValor("porcentaje_iva")
+const porcentaje_iva = "{{porcentaje_iva}}"
+const aplica_otros_cargos = "{{usa_otros_cargos}}"
+// var iniciales_dc = capturaValor("iniciales_dc")
+// var iniciales_gao = capturaValor("iniciales_gao")
+var iniciales_gao = "{{ gao.iniciales }}"
+var iniciales_dc = "{{ dc.iniciales }}"
+var selections = []
+// var iva_gao = capturaValor("iva_gao")
+// var iva_dc = capturaValor("iva_dc")
+var iva_gao = "{{ gao.carga_iva }}"
+var iva_dc = "{{ dc.carga_iva }}"
+var base_iva_tasas = 0
+var base_noiva_tasas = 0
+var base_iva_otros = 0
+var base_noiva_otros = 0
+
+window.onload=function(){
+  //  // cerrar side bar
+    CerrarSideBar();
+ 
+    // configuar cambios en los campos de fecha y valores y select
+    jQuery('#condicion_id')
+        .change(function(){
+          RecalcularCargos(asignacion_id
+            ,capturaValor("id_ddesembolso")
+            ,capturaValor("condicion_id"));
+        });
+          
+    jQuery('#id_ddesembolso')
+        .change(function(){
+          RecalcularCargos(asignacion_id,capturaValor("id_ddesembolso")
+            , capturaValor("condicion_id"));
+        });
+
+    // inicializar tabla
+    if (iniciales_dc==''){iniciales_dc='DCAR'}
+    if (iniciales_gao==''){iniciales_gao='GAO'}
+
+    initTable(iniciales_gao,iniciales_dc);
+    // if (aplica_otros_cargos==='True')
+    // {
+    //     CargaCargos();
+    // }
+
+    // mostrar valores
+    RecalcularCargos(asignacion_id, capturaValor("id_ddesembolso")
+      , capturaValor("condicion_id"));
+ 
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Selecciona todos los inputs con la clase 'otros_cargos'
+    const inputs = document.querySelectorAll('.otros_cargos');
+
+    // Función que se ejecutará cuando el valor de un input cambie
+    function onInputChange(event) {
+        console.log('Nuevo valor:', event.target.value);
+        // Aquí puedes agregar más lógica para manejar el cambio de valor
+        agregaOtrosCargos(capturaValor('id_nanticipo')
+            , capturaValor('id_ngao')
+            , capturaValor('id_ndescuentodecartera')
+            )
+    }
+
+    // Agrega el controlador de eventos 'change' a cada input
+    inputs.forEach(input => {
+        input.addEventListener('change', onInputChange);
+    });
+});
+
+window.operateEvents = {
+  'click .like': function (e, value, row, index) {
+    CambiarTasasDocumento(row.id,capturaValor("id_ddesembolso"),function(){
+    })
+  },
+  'click .remove': function (e, value, row, index) {
+  EliminarDocumentoDeSolicitudAsignacion(asignacion_id, row.id, tipo_asignacion
+    , row.Documento)
+  }
+};
+
+function operateFormatter(value, row, index) {
+  return [
+    '<a class="like" href="javascript:void(0)" title="Configurar tasas">',
+    '<i class="fa fa-cog"></i>',
+    '</a>  ',
+    '<a class="remove" href="javascript:void(0)" title="Eliminar">',
+      '<i class="fa fa-trash"></i>',
+      '</a>'
+  ].join('')
+}
+  
+function RecalcularCargos(asgn,fecha_desembolso, cond){
+  // el formato usado es yyyy-mm-dd. Esta validación necesaria pues al digitar la fecha
+  // su pueden tener meses y dias como '00'
+  var isValid = fecha_desembolso.match(/^\d{4}(\-)(((0)[0-9])|((1)[0-2]))(\-)([0-2][0-9]|(3)[0-1])$/);
+
+  if (isValid) {
+    fetchProcesar("/operaciones/detallecargosasignacion/" + asgn + "/" 
+        + fecha_desembolso + "/" + cond, function(){
+            RefrescarTabla(asgn)
+        }) 
+  } 
+
+}
+
+function RefrescarTabla(asgn){
+  // se invoca desde modal de cambio de tasa
+  $table.bootstrapTable('refresh', {
+    url: "/operaciones/refrescadetallesolicitud/" + asgn 
+  });
+  Suma_Cargos(asgn, iva_gao, iva_dc, carga_gao, carga_dc, porcentaje_iva )
+  console.log('refrescar tabla',porcentaje_iva)
+}
+
+function Suma_Cargos(asgn, iva_gao, iva_dc, carga_gao, carga_dc, porcentaje_iva){
+  fetchRecuperar("/operaciones/sumacargos/"+asgn+"/"+iva_gao+"/"+iva_dc
+              +"/"+carga_gao+"/"+carga_dc+"/"+porcentaje_iva
+    , function(data){
+    if (data){
+        jQuery("#id_nanticipo").val(data['anticipo'])    
+        jQuery("#id_ngao").val(data['gao'])    
+        jQuery("#id_ndescuentodecartera").val(data['dc'])
+        jQuery("#id_niva").val(data['iva'])    
+        jQuery("#neto").val(data['neto'])
+
+        base_iva_tasas = parseFloat(data['base_iva'])
+        base_noiva_tasas = parseFloat(data['base_noiva'])
+    //   agregar los otros cargos para calcular el neto
+        if (aplica_otros_cargos){
+            agregaOtrosCargos(data['anticipo'], data['gao'], data['dc']);
+        }
+
+        jQuery("#id_nvalor").val(data['negociado'])    
+    }
+  })
+}
+
+function agregaOtrosCargos(anticipo, gao, dc){
+    const nanticipo = parseFloat(anticipo)
+    const ngao = parseFloat(gao)
+    const ndc = parseFloat(dc)
+    base_iva_otros = obtenerAcumuladoBaseIVAOtrosCargos()
+    base_noiva_otros = obtenerAcumuladoBaseNoIVAOtrosCargos()
+    var ivaotroscargos = 0
+    var niva = 0
+    var final = 0
+
+    niva = parseFloat(((base_iva_tasas + base_iva_otros) * porcentaje_iva / 100).toFixed(2));
+    console.log('base_iva_tasa:', base_iva_tasas )
+    console.log('base_iva:', base_iva_tasas + base_iva_otros)
+    console.log('niva:', niva)
+    jQuery("#id_niva").val(niva)    
+    
+    final = (nanticipo -ngao - ndc - base_iva_otros - base_noiva_otros - niva).toFixed(2)
+    jQuery("#neto").val(final)
+    
+}
+
+function initTable(iniciales_GAO, iniciales_DC) {
+
+    $table.bootstrapTable('destroy').bootstrapTable({
+      locale: "es-EC",
+      columns: [
+        [{title: 'Ref.', field: 'id', rowspan: 2, align: 'center', valign: 'middle', 
+          sortable: true, footerFormatter: LineaTotalEnPieDePaginaDeTabla
+          }, {title: 'Deudor', field: 'Comprador', rowspan: 2, align: 'center', 
+          valign: 'middle', sortable: true, footerFormatter: LineaCantidadEnPieDePaginaDeTabla
+          }, {title: 'Documento', field: 'Documento', rowspan: 2, align: 'center', 
+          valign: 'middle', sortable: true,
+          }, {title: 'Emisión', field: 'Emision', rowspan: 2, align: 'center', 
+          valign: 'middle', sortable: true,
+          }, {title: 'Vencimiento', field: 'Vencimiento', rowspan: 2, align: 'center', 
+          valign: 'middle', sortable: true,
+          }, {title: 'Negociado', field: 'Total', rowspan: 2, align: 'center', valign: 'middle', 
+          sortable: true, footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+          }, {title: 'Plazo', field: 'Plazo', rowspan: 2, align: 'center', valign: 'middle', 
+          sortable: true, 
+          }, {title: 'Anticipo', colspan: 2, align: 'center'
+          }, {title: iniciales_GAO, colspan: 2, align: 'center'
+          }, {title: iniciales_DC, colspan: 2, align: 'center'
+          
+          }, {field: 'operate', title: 'Acción',rowspan: 2, align: 'center', valign: 'middle'
+          , clickToSelect: false, events: window.operateEvents, formatter: operateFormatter
+          }],
+        [{field: 'Porc_anticipo', title: '%', sortable: true
+          }, {field: 'Valor_anticipo', title: 'valor', sortable: true, align: 'center', 
+          footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+          }, {field: 'Porc_GAO', title: '%', sortable: true, align: 'center'
+          }, {field: 'Valor_GAO', title: 'valor', sortable: true, align: 'center', 
+          footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+          }, {field: 'Porc_DC', title: '%', sortable: true, align: 'center'
+          }, {field: 'Valor_DC', title: 'valor', sortable: true, align: 'center', 
+          footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+        }]
+      ],
+      
+    })
+}
+
+function CambiarTasasDocumento(doc_id, fecha_desembolso, callback){
+  AbrirModal("/operaciones/editartasasdocumento/"+ doc_id+"/"+fecha_desembolso+"/"
+    +asignacion_id)
+  
+}
+
+function AceptarAsignacion(){
+  MensajeConfirmacion("Aceptar solicitud con desembolso el " 
+    + capturaValor("id_ddesembolso") +"?",function(){
+    var cargos = JSON.stringify(obtenerArregloCargos())
+    var objeto={
+        "id_asignacion":asignacion_id,
+        "dnegociacion":capturaValor("id_dnegociacion"),
+        "ddesembolso": capturaValor("id_ddesembolso"), 
+        "nanticipo":capturaValor("id_nanticipo"),
+        "ngao":capturaValor("id_ngao"), 
+        "ndescuentocartera": capturaValor("id_ndescuentodecartera"),
+        "niva": capturaValor("id_niva"),
+        "sinstruccionpago": capturaValor("id_ctinstrucciondepago"),
+        "porcentaje_iva": porcentaje_iva,
+        "arr_otros_cargos": cargos,
+        "base_iva" : base_iva_tasas + base_iva_otros,
+        "base_noiva" : base_noiva_tasas + base_noiva_otros,
+      }
+    fetchPostear("/operaciones/aceptardocumentos/", objeto, function(){
+        // regresar a la lista de solicitudes
+        window.location.href = "/solicitudes/listasolicitudes";
+        
+        // en una nueva ventana abrir el reporte de asignación
+        url = window.location.origin
+        url = url + "/operaciones/reporteasignaciondesdesolicitud/"+asignacion_id;
+        window.open( url);
+      })
+  })
+    
+}
+
+function obtenerAcumuladoBaseIVAOtrosCargos() {
+    const inputs = document.querySelectorAll('.otros_cargos'); // Selecciona todos los inputs con la clase 'otros_cargos'
+    let acumulado = 0;
+    inputs.forEach(input => {
+        // Verifica si data-cargaiva es 'True'
+        if (input.getAttribute('data-cargaiva') === 'True') {
+            const valor = parseFloat(input.value) || 0; // Convierte el valor a número, asume 0 si no es numérico
+            acumulado += valor; // Suma al acumulado
+        }
+    });
+    console.log('Acumulado con carga IVA:', acumulado); // Muestra el acumulado en la consola
+    return acumulado; // Retorna el valor acumulado por si necesitas usarlo
+}
+
+function obtenerAcumuladoBaseNoIVAOtrosCargos() {
+    const inputs = document.querySelectorAll('.otros_cargos'); // Selecciona todos los inputs con la clase 'otros_cargos'
+    let acumulado = 0;
+    inputs.forEach(input => {
+        // Verifica si data-cargaiva es 'True'
+        if (input.getAttribute('data-cargaiva') != 'True') {
+            const valor = parseFloat(input.value) || 0; // Convierte el valor a número, asume 0 si no es numérico
+            acumulado += valor; // Suma al acumulado
+        }
+    });
+    console.log('Acumulado con carga no IVA:', acumulado); // Muestra el acumulado en la consola
+    return acumulado; // Retorna el valor acumulado por si necesitas usarlo
+}
+
+function obtenerArregloCargos() {
+    const inputs = document.querySelectorAll('.otros_cargos'); // Selecciona todos los inputs con la clase 'otros_cargos'
+    let arreglo = [];
+    inputs.forEach(input => {
+        // Verifica si data-cargaiva es 'True'
+            const Id = input.getAttribute('data-idmovimiento');
+            const Cargo = input.getAttribute('data-cargo');
+            const Valor = parseFloat(input.value) || 0; // Convierte el valor a número, asume 0 si no es numérico
+            const CargaIVA = input.getAttribute('data-cargaiva');
+            arreglo.push({Id, Cargo, Valor, CargaIVA}); 
+    });
+    console.log('arreglo de cargos:', arreglo); // Muestra el acumulado en la consola
+    return arreglo; 
+}
+
+</script>
+{% endblock %}

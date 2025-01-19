@@ -1,0 +1,111 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" id="frmSolicitud" name="form" rol="form"
+            action="{% url 'solicitudes:importar_xml' %}"
+            class="form-horizontal" onsubmit="return checkSubmit();">
+            <div class="card">
+                {% csrf_token %}
+                <div class="card-header">
+                    <strong>Seleccionar archivo de carga</strong> 
+                </div>
+                <div class="card-body">
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                        <div class="row form-group">
+                            <input type="file" id="xmlFile" accept=".xml">
+
+                        </div>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_nvalor" class=" form-control-label">
+                            RUC de cliente:
+                        </label></div>
+                        <div class="col-md-8" id="Ruc"></div>
+                    </div> 
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_nvalor" class=" form-control-label">
+                            Cliente:
+                        </label></div>
+                        <div class="col-md-8" id="Cliente"></div>
+                    </div> 
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">
+                                Nº de entradas en Datos:</label>
+                        </div>
+                        <div class="col-md-8" id="Cantidad"></div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">
+                                Total a negociar:</label>
+                        </div>
+                        <div class="col-md-8" id="Negociado"></div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">
+                                Tipo de factoring:</label>
+                        </div>
+                        <div class="col-md-8" id="TipoFactoring"></div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">
+                                Tipo de operación:</label>
+                        </div>
+                        <div class="col-md-8" id="TipoOperacion"></div>
+                    </div>  
+                </div>
+                <div class="card-footer">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="return CerrarModal()">
+                        <i class="fa fa-dot-circle-o"></i> Cerrar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm ">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+
+                </div>
+            </div>
+                <!-- </div> -->
+        </form>
+    </div>
+    <script>
+        var enviando = false; //Obligaremos a entrar el if en el primer submit
+        var tf ;
+        var objeto = {};
+
+        const xmlFile = document.getElementById('xmlFile');
+        xmlFile.addEventListener('change', function() {
+
+            CargaXMLOperacion(xmlFile).then((resultado) => {
+                objeto = resultado;
+                console.log(objeto);
+                document.getElementById("Ruc").innerHTML = objeto["id_cliente"];                
+                document.getElementById("Cliente").innerHTML = objeto["nombre_cliente"];                
+                document.getElementById("Cantidad").innerHTML = objeto["numero_documentos"];                
+                document.getElementById("Negociado").innerHTML = objeto["total_negociado"];                
+                document.getElementById("TipoFactoring").innerHTML = objeto["tipo_factoring"];                
+                document.getElementById("TipoOperacion").innerHTML = objeto["tipo_operacion"];                
+            });
+
+        });
+
+        jQuery("form").submit(function(e){
+            e.preventDefault();
+            if (objeto["tipo_operacion"] == 'F'){
+                fetchPostear("{% url 'solicitudes:importar_xml_facturaspuras' %}", objeto, function(asignacion_id){
+                    // editar la asignacion creada
+                    window.location.href = "/solicitudes/editarsolicitud/"+asignacion_id;
+                });
+            }
+            else{
+                MensajeError("Tipo de operación no permitido");
+            }
+            CerrarModal();
+        });
+
+    </script>
+</div>

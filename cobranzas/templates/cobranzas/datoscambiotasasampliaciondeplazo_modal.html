@@ -1,0 +1,78 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" rol="form"  class="form-horizontal" name="form"
+                action="{% url 'cobranzas:editartasasdocumento' documento_id fecha_ampliacion tipo_asignacion %}"
+            >
+            <div class="card">
+
+                {% csrf_token %}
+                <div class="card-header">
+                    <strong>Tasas </strong> 
+                        de documento {{ documento }}. Referencia {{ documento_id}}
+                </div>
+
+                <div class="card-body card-block">
+                <!-- <div class="col-lg-6"> -->
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="ntasacomision" class=" form-control-label">
+                            {{form.ntasacomisionap.label}}</label></div>
+                        <div class="col-md-6">
+                            {{form.ntasacomisionap}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="ntasadescuento" class=" form-control-label">
+                            {{form.ntasadescuentoap.label}}</label></div>
+                        <div class="col-md-6">
+                            {{form.ntasadescuentoap}}
+                        </div>
+                    </div>
+                {{ errors}}
+                <div class="card-footer">
+                    <button type="button" class="btn btn-danger btn-sm" 
+                        onclick="return CerrarModal()">
+                        <i class="fa fa-dot-circle-o"></i> Cerrar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+    {% block js_page %}
+    <script>
+        var url = jQuery("[name=form]").attr("action");
+        var token = jQuery("[name=csrfmiddlewaretoken]").val();
+
+        jQuery("form").submit(function(e){
+            e.preventDefault();
+           var formData = jQuery("form").serializeArray();
+            jQuery.ajax({
+                url:url,
+                method:"POST",
+                headers: {'X-CSRFToken': token },
+                data: formData
+            })
+            .done(function(r,textStatus,xhr){
+                if(xhr.status=200){
+                    jQuery("#popup").modal('hide');
+                    // refrescar la tabla
+                    // las variables ids y tipo_asignacion son inputs 
+                    // del html anterior, no se definen en el script
+                    RefrescarTabla(ids, tipo_asignacion);
+                }
+                else{
+                    alert(textStatus);
+                }
+            }).fail(function (error) {
+                MensajeError(error.responseText);
+            });
+        });
+    </script>
+    {% endblock %}
+    
+</div>

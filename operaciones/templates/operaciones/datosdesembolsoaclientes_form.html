@@ -1,0 +1,145 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">pagos a clientes</a></li>
+                    {% if tipo_operacion == 'A' %}
+                        <li><a href="#">negociaciones</a></li>
+                    {% else %}
+                        <li><a href="#">cobranzas</a></li>
+                    {% endif %}
+                    <li class="active">pagar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal">
+    <div class="col-lg-8">
+        <div class="card">
+                {% csrf_token %}
+            <div class="card-header">
+                <strong>Operación</strong> 
+                de {{ cliente }}
+            </div>
+            <div hidden>
+                <input type="text" value="{{ id_beneficiario }}" name="id_beneficiario">
+            </div>
+            <div class="card-body card-block">
+                    <!-- columna izquierda -->
+                    <!-- <div class="col-6"> -->
+                            <!-- fechas -->
+                        <div class="row form-group">
+                            <div class="col-md-5"><label for="id_ddesembolso" class=" form-control-label">
+                                {{ form.cxoperacion.label}}
+                            </label></div>
+                                <div class="col-md-3">
+                                    {{ operacion}}
+                                </div>
+                                <div hidden>
+                                    {{ form.cxtipooperacion}}
+                                    {{ form.cxcliente}}
+                                    {{ form.cxoperacion}}
+                                    {{ form.cxbeneficiario}}
+                                </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col-md-5"><label for="id_ddesembolso" class=" form-control-label">
+                                Liquidación
+                            </label></div>
+                            <div class="col-md-7">
+                                {{ liquidacion|date:"Y-m-d" }}
+                            </div>
+                        </div>  
+                        
+                        <div class="row form-group">
+                            <div class="col col-md-5"><label for="id_ctinstrucciondepago" class=" form-control-label">
+                                Instrucción de pago</label></div>
+                            <div class="col-md-7">
+                                {{ instruccion_de_pago}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-5"><label for="id_nvalor" class=" form-control-label">
+                                {{ form.nvalor.label}}
+                            </label></div>
+                            <div class="col-md-7">
+                                {{ form.nvalor}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-5"><label for="id_nvalor" class=" form-control-label">
+                                {{ form.cxcuentadestino.label}}
+                            </label></div>
+                            <div class="col-md-7">
+                                {{ form.cxcuentadestino}}
+                                <small class="form-text text-muted">La cuenta de transferencia se define en Participantes/Clientes/Cuentas bancarias</small>
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-5"><label for="id_nvalor" class=" form-control-label">
+                                {{ form.ctbeneficiario.label }}
+                            </label></div>
+                            <div class="col-md-7">
+                                {{ form.ctbeneficiario }}
+                            </div>
+                        </div>  
+                        <div class="dropdown-divider"></div>
+                        <div class="row form-group">
+                            <div class="col col-md-5"><label for="id_nvalor" class=" form-control-label">
+                                {{ form.cxformapago.label}}
+                            </label></div>
+                            <div class="col-md-7">
+                                {{ form.cxformapago }}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-5">
+                                <label for="{{ form.cxcuentapago.id_for_label }}" class=" form-control-label">
+                                    {{ form.cxcuentapago.label }}</label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ form.cxcuentapago }}
+                            </div>
+                        </div>  
+                <!-- </div> -->
+            </div>    
+            <div class="card-footer">
+                {% if tipo_operacion == 'A' %}
+                <a href="{% url 'operaciones:listaasignacionespendientesdesembolsar' %}" class="btn btn-danger btn-sm ">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                {% else %}
+                <a href="{% url 'cobranzas:listaliquidacionespendientespagar' %}" class="btn btn-danger btn-sm ">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                {% endif %}
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Desembolso
+                </button>
+
+            </div>
+           <!-- Sección para mostrar errores del formulario -->
+           {% if form_submitted and form.errors %}
+           <div class="alert alert-danger" role="alert">
+               <ul>
+                   {% for field, errors in form.errors.items %}
+                       {% for error in errors %}
+                           <li>{{ field }}: {{ error }}</li>
+                           <!-- <li>{{ error }}</li> -->
+                       {% endfor %}
+                   {% endfor %}
+               </ul>
+           </div>
+            {% endif %}
+        </div>
+    </div>
+</form>
+{% endblock %}
+{% block js_page %}
+{% endblock %}

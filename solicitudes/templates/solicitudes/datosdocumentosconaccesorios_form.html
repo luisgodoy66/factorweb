@@ -1,0 +1,414 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">Negociación</a></li>
+                    <li><a href="{% url 'solicitudes:listasolicitudes' %}">solicitudes</a></li>
+                    <li><a 
+                        {% if asignacion_id %}
+                            href="{% url 'solicitudes:asignacionconaccesorios_editar' asignacion_id %}" 
+                        {% else %}
+                            href="{% url 'solicitudes:asignacionconaccesorios_nueva' %}" 
+                        {% endif %}
+                        >facturas con accesorio</a></li>
+                    <li class="active">Agregar factura</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal"
+    >
+<div class="col-md-9">
+    <div class="card">
+        {% csrf_token %}
+        <div class="card-header">
+            <strong>Detalle de factura</strong> de {{cliente_nombre}}
+        </div>        
+        <div class="card-body">
+            <!-- datos de factura texto y fecha -->
+            <div class="col-md-6 col-sm-6">
+                <div class="row form-group">
+                    <div class="col col-md-4">
+                        <select name="cxtipoid" class="form-control" required id="cxtipoid">
+                            <option value="" >---------</option>                                            
+                            <option value="R" selected>RUC</option>                                            
+                            <option value="C">CEDULA</option>                                            
+                            <option value="P">PASAPORTE</option>                                            
+                            <option value="O">OTRO</option>                                            
+                        </select>
+                    </div>
+                    <div class="col-md-8">
+                        {{ form_documento.cxcomprador}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{ form_documento.ctcomprador.label}}</label></div>
+                    <div class="col-md-8">
+                        {{ form_documento.ctcomprador}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{form_documento.ctserie1.label}}</label></div>
+                    <div class="col-md-3">
+                        {{ form_documento.ctserie1}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{form_documento.ctserie2.label}}</label></div>
+                    <div class="col-md-3">
+                        {{ form_documento.ctserie2}}
+                    </div>
+                </div> 
+                <div class="row form-group">
+                    <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{ form_documento.ctdocumento.label}}</label></div>
+                    <div class="col-md-8">
+                        {{ form_documento.ctdocumento}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{ form_documento.demision.label}}</label></div>
+                    <div class="col-md-8">
+                        {{ form_documento.demision}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{ form_documento.cxautorizacion_ec.label}}</label>
+                    </div>
+                    <div class="col-md-8">
+                        {{ form_documento.cxautorizacion_ec}}
+                    </div>
+                </div>  
+
+            </div>
+            <!-- datos de factura valores -->
+            <div class="col-md-6">
+                <div class="row form-group">
+                    <input type="file" id="xmlFile" accept=".xml">
+
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-7 col-xs-6"><label for="id_nvalorantesdeiva" class=" form-control-label">
+                        {{ form_documento.nvalorantesiva.label}}</label></div>
+                    <div class="col-md-5">
+                        {{ form_documento.nvalorantesiva}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col col-md-7"><label for="id_niva" class=" form-control-label">
+                        {{ form_documento.niva.label}}</label></div>
+                    <div class="col-md-5">
+                        {{ form_documento.niva}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col col-md-7"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{ form_documento.nretencioniva.label}}</label></div>
+                    <div class="col-md-5">
+                        {{ form_documento.nretencioniva}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col col-md-7"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{ form_documento.nretencionrenta.label}}</label></div>
+                    <div class="col-md-5">
+                        {{ form_documento.nretencionrenta}}
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col col-md-7"><label for="id_nvalornonegociado" class=" form-control-label">
+                        {{ form_documento.nvalornonegociado.label}}</label></div>
+                    <div class="col-md-5">
+                        {{ form_documento.nvalornonegociado}}
+    
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col-md-7"><label for="id_cxtipocliente" class=" form-control-label">
+                        {{ form_documento.ntotal.label}}</label></div>
+                    <div class="col-md-5">
+                        {{ form_documento.ntotal}}
+    
+                    </div>
+                </div>  
+                <div class="row form-group">
+                    <div class="col-md-12">
+                    <button type="button" class="btn btn-success btn-sm float-right" 
+                        onclick="AbrirModal('/solicitudes/editarchequeaccesorio/{{tipo_factoring}}')">                                        
+                        <i class="fa fa-dot-circle-o"></i> Agregar cheque accesorio
+                    </button>
+                    </div>
+                </div>  
+            </div>
+            <div class="dropdown-divider"></div>
+            <small>
+
+            <div class="container mt-3">
+                <div id="divTabla">
+                    <table class="table table-striped table-bordered" id="tabla_cheques" data-propiedadId="Id">
+                        <thead>
+                            <tr>
+                                <td data-cabecera="cxbanco">Id. Banco</td>
+                                <td data-cabecera="banco">Banco</td>
+                                <td data-cabecera="ctcuenta">Cuenta</td>
+                                <td data-cabecera="cxcheque">Cheque</td>
+                                <td data-cabecera="ctgirador">Girador</td>
+                                <td data-cabecera="dvencimiento">Vencimiento</td>
+                                <td data-cabecera="nvalor">Valor</td>
+                                <td data-cabecera="cxpropietariocuenta">Propietario</td>
+                                <td data-cabecera="Acciones"class="all">Acciones</td>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            </small>
+        </div>
+        <div class="card-footer">
+            <a class="btn btn-danger btn-sm "
+            {% if asignacion_id %}
+                href="{% url 'solicitudes:asignacionconaccesorios_editar' asignacion_id %}" 
+            {% else %}
+                href="{% url 'solicitudes:asignacionconaccesorios_nueva' %}" 
+            {% endif %}
+            ><i class="fa fa-ban"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa fa-dot-circle-o"></i> Agregar
+            </button>
+            <!-- Sección para mostrar errores del formulario -->
+            <div id="form-errors" class="alert alert-danger" style="display:none;"></div>
+
+        </div>
+    </div>
+</div>
+
+</form>
+{% endblock %}
+{% block js_page %}
+<!-- <script type="text/javascript" src="{% static 'factorweb/js/datosdocumentosconaccesorios.js' %}"></script> -->
+<script>
+    var enviando = false; //Obligaremos a entrar el if en el primer submit
+    const xmlFile = document.getElementById('xmlFile');
+    const Cliente_nombre = "{{cliente_nombre}}";
+    
+window.onload=function(){
+
+    // configuar cambios en los campos de valores
+    jQuery('#id_nvalorantesiva, #id_niva, #id_nretencioniva, #id_nretencionrenta,  #id_nvalornonegociado')
+        .change(function(){
+            calcular_factura();
+        });
+
+    xmlFile.addEventListener('change', function() {
+          CargaXMLfactura(xmlFile)
+        })
+
+
+    // validar antes de enviar
+    jQuery("#frmSolicitud").submit(function(e){
+
+      var total_cheques = 0
+      e.preventDefault();
+
+      // 04-oct-23    l.g.    agregado para no repetir submit
+      if (!enviando) { enviando= true;} 
+      else {
+        //Si llega hasta aca significa que pulsaron 2 veces el boton submit
+        alert("El formulario ya se esta enviando");
+        return false;
+    }
+
+      jQuery("#form-errors").hide();
+
+      jQuery("#body_cheques tr").each(function (i,row) {
+            var valor = row.children[6].innerText
+            total_cheques += parseFloat( valor)
+      });
+    
+      if (total_cheques != capturaValor("id_ntotal")){
+          alert("Valor de cheques "
+          +total_cheques 
+          +", no coincide con el neto a negociar: "
+          +capturaValor("id_ntotal"))
+          return false;
+      };
+
+      // convertir la tabla de cheques en un dicconario para pasarlo en el contexto
+      DicCheques = new Array();
+
+      jQuery("#body_cheques tr").each(function (i,row) {
+
+        var banco = row.children[0].innerText
+        // 1 es el nombre del banco
+        var cuenta = row.children[2].innerText
+        var cheque = row.children[3].innerText
+        var girador = row.children[4].innerText
+        var vencimiento = row.children[5].innerText
+        var valor = row.children[6].innerText
+        var propietariocuenta = row.children[7].innerText
+
+        DicCheques.push({          
+          banco: banco,
+          cuenta: cuenta,
+          cheque: cheque,
+          girador: girador,
+          vencimiento: vencimiento,
+          valor: valor,        
+          propietariocuenta :propietariocuenta,
+        });
+
+      });
+
+      var token = jQuery("[name=csrfmiddlewaretoken]").val();
+      var formData = jQuery("form").serializeArray();
+
+      // para agregar los cheques al contexto estos se deben agregar a
+      // la data usando la siguiente formula
+      formData.push({name:"Cheques",value:JSON.stringify(DicCheques)});
+
+      // no se está poniendo el parametro url, pero sí se ejecuta 
+      // la vista correcta
+      // cuando puse la url , se unió con la inicial y se duplicó.
+
+      jQuery.ajax({
+        method:"POST",
+        headers: {'X-CSRFToken': token },
+        data: formData,
+        error: function(xhr) {
+                    var errors = xhr.responseJSON;
+                    var errorHtml = '<ul>';
+                    for (var key in errors) {
+                        if (errors.hasOwnProperty(key)) {
+                            errorHtml += '<li>' + errors[key] + '</li>';
+                        }
+                    }
+                    errorHtml += '</ul>';
+                    jQuery("#form-errors").html(errorHtml).show();
+                    enviando = false;
+                },
+      })
+      .done(function(r,textStatus,xhr){
+          if(xhr.status=200){
+            // aquí es necesario, en caso que sea nueva asignación, 
+            // rescatar el número de la asignación
+            // para enviarlo para edición.
+            location.href="/solicitudes/editarsolicitudconaccesorios/"+xhr.responseText;
+          }
+        //   else{
+        //     MensajeError(textStatus);
+        //   }
+      })
+    //   .fail(function (error) {
+    //       MensajeError(error.responseText);
+    //   });
+
+      return false;
+
+    });
+
+};
+
+function calcular_factura()
+{
+    var antes_de_iva,iva,retencion_iva, retencion_renta,stotal,total;
+    
+    antes_de_iva = jQuery("#id_nvalorantesiva").val();
+    antes_de_iva = antes_de_iva==="" ? 0 : +antes_de_iva;
+    antes_de_iva = antes_de_iva<0 ? 0 : antes_de_iva;
+
+    iva =jQuery('#id_niva').val();
+    iva = iva==="" ? 0 : +iva;
+    iva = iva<0 ? 0 : iva;
+
+    // nota: si iva es 0 no debe pedir retencion de iva
+    retencion_iva = jQuery('#id_nretencioniva').val();
+    retencion_iva = retencion_iva==="" ? 0 : +retencion_iva;
+    retencion_iva = retencion_iva<0 ? 0 : retencion_iva;
+
+    retencion_renta = jQuery('#id_nretencionrenta').val();
+    retencion_renta = retencion_renta==="" ? 0 : +retencion_renta;
+    retencion_renta = retencion_renta<0 ? 0 : retencion_renta;
+
+    valor_nonegociado = jQuery('#id_nvalornonegociado').val();
+    valor_nonegociado = valor_nonegociado===""? 0 : +valor_nonegociado;
+    valor_nonegociado = valor_nonegociado<0 ? 0 : valor_nonegociado
+
+    stotal = antes_de_iva + iva;
+    stotal = +(Math.round(stotal + "e+2")  + "e-2");
+
+    total  = stotal - retencion_iva - retencion_renta - valor_nonegociado;
+    total = +(Math.round(total + "e+2")  + "e-2");
+
+    jQuery('#id_nvalorantesiva').val(antes_de_iva);
+    jQuery('#id_niva').val(iva);
+    jQuery('#id_nretencioniva').val(retencion_iva);
+    jQuery('#id_nretencionrenta').val(retencion_renta);
+    jQuery('#id_ntotal').val(total);
+    jQuery('#id_nvalornonegociado').val(valor_nonegociado);
+
+};
+
+function AgregarFilaCheque( ){
+  var tabla=document.getElementById('tabla_cheques')
+  var tbody = tabla.children[1]
+  var nuevafila=""
+  var banco = capturaValor("id_cxbanco")
+  var cuenta = capturaValor("id_ctcuenta")
+  var cheque = capturaValor("id_ctcheque")
+  var girador = capturaValor("id_ctgirador")
+  var vencimiento = capturaValor("id_dvencimiento")
+  var valor = capturaValor("cheque_nvalor")
+  var select = document.getElementById('id_cxbanco');
+  var nombre_banco = select.options[select.selectedIndex].text;
+  var propietariocuenta = capturaValor("id_cxpropietariocuenta")
+  
+  if (banco=="" || cuenta=="" || cheque=="" || girador=="")
+    return false;
+
+  if (! tbody){
+      tbody = document.createElement("tbody")
+      tbody.setAttribute("id",'body_cheques')
+      tbody.setAttribute("name",'body_cheques')
+      tabla.appendChild(tbody);
+  }
+
+  //<pintar la fila>
+  nuevafila+="<tr>"
+
+  nuevafila+="<td>" + banco +"</td>"
+  nuevafila+="<td>" + nombre_banco +"</td>"
+  nuevafila+="<td>" + cuenta +"</td>"
+  nuevafila+="<td>" + cheque +"</td>"
+  nuevafila+="<td>" + girador +"</td>"
+  nuevafila+="<td>" + vencimiento +"</td>"
+  nuevafila+="<td>" + valor +"</td>"
+  nuevafila+="<td>" + propietariocuenta +"</td>"
+
+  nuevafila+= `<td><a class="remove" onclick='eliminarFila(this)'"
+              title="Eliminar"><i class="fa fa-trash"></i></a></td>`
+
+  nuevafila+="</tr>"
+
+  tbody.insertAdjacentHTML("beforeend",nuevafila)
+  
+  CerrarModal();
+}
+
+
+
+</script>   
+{% endblock %}
+

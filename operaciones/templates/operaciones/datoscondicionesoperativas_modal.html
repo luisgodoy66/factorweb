@@ -1,0 +1,113 @@
+<div class="modal-dialog modal-md">
+    <div class="modal-content">
+
+        <form  method="POST" id="frmCondicion" enctype="multipart/form-data" 
+            class="form-horizontal" name="form"
+            {% if not condicion_id %}
+                action="{% url 'operaciones:condicionoperativa_nueva' tipo_factoring %}"
+            {% else %}
+                {% if doc_id %}
+                    action="{% url 'solicitudes:facturaspuras_editar' asignacion_id cliente tipo_factoring doc_id %}"
+                {% else %}
+                    action="{% url 'operaciones:condicionoperativa_editar' condicion_id tipo_factoring %}"
+                {% endif %}
+            {% endif %}
+            >
+            <div class="card">
+                    {% csrf_token %}
+                <div class="card-header">
+                    <strong>Detalle de la condición operativa</strong> 
+                </div>
+                <div hidden>
+                    <input id="nombre_condicion" name = "nombre_condicion">
+                    <input id="para_facturas_puras" name = "para_facturas_puras">
+                    <input id="para_accesorios" name = "para_accesorios">
+                </div>
+                <div class="card-body card-block">
+                    <!-- file intermedia -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="row form-group">
+                                <div class="col-md-6"><label for="id_cxclasecliente" class=" form-control-label">  
+                                    {{ form_detalle.cxclasecliente.label}}</label></div>
+                                <div class="col-md-6">
+                                    {{ form_detalle.cxclasecliente}}
+                                </div>
+                            </div>  
+                            <div class="row form-group">
+                                <div class="col-md-6"><label for="id_cxclasecomprador" class=" form-control-label">  
+                                    {{ form_detalle.cxclasecomprador.label}}</label></div>
+                                <div class="col-md-6">
+                                    {{ form_detalle.cxclasecomprador}}
+                                </div>
+                            </div>  
+                        </div>
+
+                        <div class="col-12">
+                            <div class="row form-group">
+                                <div class="col-md-2"><label for="id_nplazodesde" class=" form-control-label">  
+                                    {{ form_detalle.nplazodesde.label}}</label></div>
+                                <div class="col-md-4">
+                                    {{ form_detalle.nplazodesde}}
+                                </div>
+                                <div class="col-md-2"><label for="id_nplazohasta" class=" form-control-label">  
+                                    {{ form_detalle.nplazohasta.label}}</label></div>
+                                <div class="col-md-4">
+                                    {{ form_detalle.nplazohasta}}
+                                </div>
+                            </div>  
+                        </div>
+
+                        <div class="dropdown-divider"></div>
+
+                        <div class="col-12">
+                            <div class="row form-group">
+                                <div class="col-md-6"><label for="id_nporcentajeanticipo" class=" form-control-label">  
+                                    {{ form_detalle.nporcentajeanticipo.label}}</label></div>
+                                <div class="col-md-6">
+                                    {{ form_detalle.nporcentajeanticipo}}
+                                </div>
+                            </div>  
+                            <div class="row form-group">
+                                <div class="col-md-6"><label for="id_ntasagao" class=" form-control-label">  
+                                    {{ form_detalle.ntasagao.label}}</label></div>
+                                <div class="col-md-6">
+                                    {{ form_detalle.ntasagao}}
+                                </div>
+                            </div>  
+
+                            <div class="row form-group">
+                                <div class="col-md-6"><label for="id_ntasadescuento" class=" form-control-label">  
+                                    {{ form_detalle.ntasadescuento.label}}</label></div>
+                                <div class="col-md-6">
+                                    {{ form_detalle.ntasadescuento}}
+                                </div>
+                            </div>  
+                        </div>
+                    </div>
+                    
+                </div>    
+                <div class="card-footer">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="return CerrarModal()">
+                        <i class="fa fa-dot-circle-o"></i> Cerrar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm ">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+
+                </div>
+                
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    let switchAccesorios = document.querySelector('#id_laplicaaaccesorios');
+    let switchFacturasPuras = document.querySelector('#id_laplicaafacturaspuras');
+    // let switchValue = switchAccesorios.checked;
+
+    jQuery("#nombre_condicion").val(jQuery("#id_ctcondicion").val())
+    jQuery("#para_facturas_puras").val(switchFacturasPuras.checked)
+    jQuery("#para_accesorios").val(switchAccesorios.checked)
+
+</script>

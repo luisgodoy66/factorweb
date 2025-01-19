@@ -1,0 +1,75 @@
+{% extends 'bases/home.html' %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Configuración</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li><a href="#">cuentas bancarias</a></li>
+                    <li class="active">editar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post"  class="form-horizontal">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <strong>Datos</strong> 
+                de {% if cuentabancaria %}  {{ cuentabancaria }} {% else %}  nueva cuenta bancaria {% endif %} 
+            </div>
+                {% csrf_token %}
+            <div class="card-body card-block">
+
+                    <div class="row form-group">
+                        <div class="col-12 col-md-6">
+                            {{ form.cxbanco.label}}
+                        </div>
+                        <div class="col col-md-6">
+                            {{ form.cxbanco}}
+                        </div>
+                    </div>  
+
+                    <div class="row form-group">
+                        <div class="col col-md-6">
+                            {{ form.cxcuenta.label}}
+                        </div>
+                        <div class="col">
+                            {{ form.cxcuenta}}
+                            <small class="form-text text-muted">Máximo 20 caracteres</small>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-6">
+                            {{ form.lactiva.label}}
+                        </div>
+                        <div class="col ">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  cuentabancaria.lactiva %} checked {% endif %} 
+                                id = "id_lactiva" name = "lactiva"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+            </div>    
+
+            <div class="card-footer">
+                    <a href="{% url 'empresa:listacuentasbancarias' %}" class="btn btn-danger btn-sm">
+                        <i class="fa fa-ban"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <span class="fa fa-dot-circle-o"></span> Grabar
+                    </button>
+                    {{ form.errors}}
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+{% block js_page %}{% endblock %}

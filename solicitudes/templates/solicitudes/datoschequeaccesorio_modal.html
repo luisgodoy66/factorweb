@@ -1,0 +1,142 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" rol="form"  class="form-horizontal" name="form"
+            {% if cheque %}
+                action="{% url 'solicitudes:editarchequeaccesorio' cheque tipo_factoring %}"
+            {% else %}
+                action="{% url 'solicitudes:editarchequeaccesorio' tipo_factoring %}"
+            {% endif %}
+            onsubmit="return checkSubmit();">
+                <div class="card">
+
+                    {% csrf_token %}
+                    <div class="card-header">
+                        <strong>Datos de cheque </strong> 
+                    </div>
+                    
+                    <div class="card-body card-block">
+                    <!-- <div class="col-lg-6"> -->
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="id_cxbanco" class=" form-control-label">
+                                {{ form_cheque.cxpropietariocuenta.label}}</label></div>
+                            <div class="col-md-6">
+                                {{ form_cheque.cxpropietariocuenta}}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="id_cxbanco" class=" form-control-label">
+                                {{ form_cheque.cxbanco.label}}</label></div>
+                            <div class="col-md-6">
+                                {{ form_cheque.cxbanco}}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="id_ctcuenta" class=" form-control-label">
+                                {{ form_cheque.ctcuenta.label}}</label></div>
+                            <div class="col-md-6">
+                                {{ form_cheque.ctcuenta}}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="id_ctcheque" class=" form-control-label">
+                                {{ form_cheque.ctcheque.label}}</label></div>
+                            <div class="col-md-6">
+                                {{ form_cheque.ctcheque}}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="id_ctgirador" class=" form-control-label">
+                                {{ form_cheque.ctgirador.label}}</label></div>
+                            <div class="col-md-6">
+                                {{ form_cheque.ctgirador}}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="id_dvencimiento" class=" form-control-label">
+                                {{ form_cheque.dvencimiento.label}}</label></div>
+                            <div class="col-md-6">
+                                {{ form_cheque.dvencimiento}}
+                            </div>
+                        </div>
+                        {% if not cheque %}
+                        <!-- en edición no permitir cambiar el valor del cheque -->
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="cheque_nvalor" class=" form-control-label">
+                                {{ form_cheque.ntotal.label}}</label>
+                            </div>
+                            <div class="col-md-6">
+                                <!-- como hay un html abajo y tiene un campo ntotal que es de la asignacion 
+                                hay que usar otro nombre para este campo-->
+                                <input type="number" id="cheque_nvalor" name="cheque_nvalor">
+                                <!-- {{ form_cheque.nvtotal}} -->
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if not vencimiento_en_feriado %}
+                        <div class="col-md-12">
+                            <div class="alert alert-info" role="alert">
+                                Este tipo de factoring no acepta vencimiento en sábados, domingos y feriados registrados. La fecha se trasladará al siguiente día hábil
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>    
+                    {{ errors}}
+                    <div class="card-footer">
+                        <button type="buttom" class="btn btn-danger btn-sm" 
+                            onclick="return CerrarModal()">
+                            <i class="fa fa-ban"></i> Cerrar
+                        </button>
+                        {% if cheque %}
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fa fa-dot-circle-o"></i> Grabar
+                            </button>
+                        {% else %}
+                            <button type="button" class="btn btn-primary btn-sm"
+                                onclick="AgregarFilaCheque()" >
+                                <i class="fa fa-dot-circle-o"></i> Grabar
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            <!-- </div> -->
+        </form>
+
+    </div>
+
+    <script>
+    var enviando = false; //Obligaremos a entrar el if en el primer submit
+    const cheque = "{{ cheque }}";
+    const selectElement = document.getElementById('id_cxpropietariocuenta');
+    selectElement.addEventListener('change', evaluarSeleccion);
+
+    // este modal viene desde nuevo registro o edicion de cheque. Si es nuevo
+    // (no hay cheque), inicializar los valores del comprador y total
+    if ( cheque  === null || cheque === 'None')
+    {
+        // Agregar un evento change al objeto select para evaluar la selección cuando cambie
+
+        evaluarSeleccion( );
+        inicializaValor("cheque_nvalor",capturaValor("id_ntotal"))
+    };
+
+    // Función para evaluar la selección del objeto select y asignar el valor correspondiente
+    function evaluarSeleccion() {
+        // la constante Cliente_nombre se encuentra definida en el formulario anterior
+        const selectElement = document.getElementById('id_cxpropietariocuenta'); 
+        const selectedValue = selectElement.value;
+
+        // si es edicion de cheque no hay id_ctcomprador que se define en forma de factura
+        if ( cheque  === null || cheque === 'None'){
+            if (selectedValue === 'D') {
+                const Comprador_nombre = capturaValor("id_ctcomprador");
+            inicializaValor("id_ctgirador", Comprador_nombre)
+            } else if (selectedValue === 'C') {
+                inicializaValor("id_ctgirador", Cliente_nombre)
+            }
+            
+        }
+    }
+        
+    </script>
+</div>    

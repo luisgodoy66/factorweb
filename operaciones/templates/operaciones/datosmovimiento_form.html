@@ -1,0 +1,140 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Configuración</a></li>
+                    <li><a href="#">tablas</a></li>
+                    <li><a href="{% url 'operaciones:listamaestromovimientos' %}">movimientos</a></li>
+                    <li class="active">editar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal">
+    <div class="col-lg-12">
+        <div class="card">
+            {% csrf_token %}
+            <div class="card-header">
+                <strong>Movimiento</strong> 
+            </div>
+            <div class="card-body card-block">
+                <!-- columna izquierda -->
+                <div class="col-md-6">
+                    
+                    <div class="row form-group">
+                        <div class="col col-md-5">
+                            <label for="id_cxparticipante" class=" form-control-label">{{form.cxmovimiento.label}}</label></div>
+                        <div class="col-12 col-md-7">
+                            {{form.cxmovimiento}}
+                            <!-- <small class="form-text text-muted">Máximo 13 caracteres</small> -->
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-5">
+                            <label for="id_ctnombre" class=" form-control-label">{{form.ctmovimiento.label}}</label></div>
+                        <div class="col-12 col-md-7">
+                            {{form.ctmovimiento}}
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-5">
+                            <label for="id_lcolateral" class=" form-control-label">
+                                {{form.lcolateral.label}}</label>
+                        </div>
+                        <!-- <div class="col-12 col-md-7">
+                            {{form.lcolateral}}
+                        </div> -->
+                        <div class="col col-md-7">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  movimiento.lcolateral %} checked {% endif %} 
+                                id = "id_lcolateral" name = "lcolateral"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-5">
+                            <label for="id_cxlocalidad" class=" form-control-label">{{form.cxsigno.label}}</label></div>
+                        <div class="col-12 col-md-7">
+                            {{form.cxsigno}}
+                            <small class="form-text text-muted">Signo en que afecta a la cartera.</small>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-5"><label for="id_litemfactura" class=" form-control-label">
+                                {{form.litemfactura.label}}</label>
+                        </div>
+                        <div class="col col-md-7">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  movimiento.litemfactura %} checked {% endif %} 
+                                id = "id_litemfactura" name = "litemfactura"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-5"><label for="id_lcargo" class=" form-control-label">
+                                {{form.lcargo.label}}</label>
+                        </div>
+                        <div class="col col-md-7">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  movimiento.lcargo %} checked {% endif %} 
+                                id = "id_lcargo" name = "lcargo"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-5">
+                            <label for="id_cttelefono2" class=" form-control-label">{{form.cxmovimientopadre.label}}</label></div>
+                        <div class="col-12 col-md-7">
+                            {{form.cxmovimientopadre}}
+                            <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
+                        </div>
+                    </div>
+                </div>  
+                <div class="col-md-6">
+                    <div class="alert alert-info" role="alert">
+                        Un movimiento que afecta a cartera no debe marcarse como ítem de factura o cargo y; 
+                        afectará a la cartera con un signo, ejemplo "Cobranza"
+                        Un movimiento que no afecta a la cartera no importa que signo tenga y 
+                        podría ser ítem de factura o cargo o ninguno de los dos, como las liquidaciones.
+                        Un movimiento que es ítem de factura no debe ser cargo (no ítem factura),
+                        ejemplo el GAO.
+                        Un movimiento que es cargo no debe ser ítem de factura. Los cargos son los valores
+                        que se descuentan en una liquidación pero no son ítems de factura, como las "Bajas"
+
+                    </div>
+                </div>
+            </div>    
+            
+            <div class="card-footer">
+                <a href="{% url 'operaciones:listamaestromovimientos' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Grabar
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+

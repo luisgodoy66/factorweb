@@ -1,0 +1,103 @@
+{% extends 'bases/home.html' %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">configuración</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li><a href="{% url 'operaciones:listaanexos' %}">Anexos</a></li>
+                    <li class="active">editar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post"  class="form-horizontal" enctype="multipart/form-data"
+    onsubmit="return checkSubmit();">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <strong>Datos</strong> 
+                de {% if anexo  %}  {{ anexo }} {% else %}  nuevo anexo {% endif %} 
+            </div>
+            {% csrf_token %}
+            <div class="card-body card-block">
+                <div class="col-md-7">
+
+                    <div class="row form-group">
+                        <div class="col-md-3">
+                            {{ form.ctnombre.label }}
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.ctnombre }}
+                            <!-- <small class="form-text text-muted">Máximo 3 caracteres</small> -->
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-3">
+                            {{ form.fanexo.label }}
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.fanexo }}
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-3">
+                            {{ form.cxtipocliente.label }}
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.cxtipocliente }}
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-3">
+                            {{ form.lactivo.label}}
+                        </div>
+                        <div class="col-md-9 ">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  anexo.lactivo %} checked {% endif %} 
+                                id = "id_lactivo" name = "lactivo"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-md-5">
+                    <div class="alert alert-info" role="alert">
+                        La plantilla del anexo es un archivo en Word. En el texto del anexo incluya campos encerrados en doble llave pegadas
+                        sin dejar espacios entre las llaves y el campo.
+                        Los nombres de los campos que puede usar son: 
+                            empresafactor, rucfactor, direccionfactor, ciudadfactor, idcliente, nombrecliente, direccioncliente, idrepresentantelegal
+                            , nombrerepresentantelegal, cargorepresentantelegal, fechanegociacion, fechalarganegociacion, maximoplazonegociacion, totalanticipo, totalanticipoenletras.
+                        Ejemplo: donde quiera que aparezca el nombre del cliente escriba: { {nombrecliente} }
+                    </div>
+                </div>
+            </div>    
+
+            <div class="card-footer">
+                <a href="{% url 'operaciones:listaanexos' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <span class="fa fa-dot-circle-o"></span> Grabar
+                </button>
+                    {{ form.errors}}
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block js_page %}
+<script>
+    enviando = false; //Obligaremos a entrar el if en el primer submit
+</script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'bases/home.html' %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">configuración</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li><a href="{% url 'empresa:listalocalidades' %}">localidades</a></li>
+                    <li class="active">editar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post"  class="form-horizontal"
+    onsubmit="return checkSubmit();">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <strong>Datos</strong> 
+                de {% if localidad %}  {{ localidad }} {% else %}  nueva localidad {% endif %} 
+            </div>
+                {% csrf_token %}
+            <div class="card-body card-block">
+
+                    <div class="row form-group">
+                        <div class="col-12 col-md-6"><label for="id_cxtipoid" class=" form-control-label">
+                            {{ form.ctlocalidad.label}}
+                        </label></div>
+                        <div class="col col-md-6">
+                            {{ form.ctlocalidad}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-12 col-md-6"><label for="id_cxtipoid" class=" form-control-label">
+                            {{ form.lactiva.label}}
+                        </label></div>
+                        <div class="col col-md-6">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  localidad.lactiva %} checked {% endif %} 
+                                id = "id_lactiva" name = "lactiva"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>  
+
+            </div>    
+
+            <div class="card-footer">
+                <a href="{% url 'empresa:listalocalidades' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <span class="fa fa-dot-circle-o"></span> Grabar
+                </button>
+                    {{ form.errors}}
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+{% block js_page %}
+<script>
+    enviando = false; //Obligaremos a entrar el if en el primer submit
+</script>
+{% endblock %}

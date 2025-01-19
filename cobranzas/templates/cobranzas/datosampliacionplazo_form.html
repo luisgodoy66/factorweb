@@ -1,0 +1,179 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">cobranzas</a></li>
+                    {% if tipo_asignacion == 'A'%}
+                    <li><a href="{% url 'cobranzas:listachequesadepositar' %}">
+                        depósito de cheques</a></li>
+                    {% else %}
+                    <li><a href="{% url 'cobranzas:listadocumentosvencidos' %}">
+                        cartera vencida</a></li>
+                    {% endif %}
+                    <li class="active">ampliación de plazo</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal">
+    <!-- <div class="col-lg-6"> -->
+    <div class="card">
+            {% csrf_token %}
+        <div class="card-header">
+            <strong>Ampliación de plazo</strong> 
+            de  {{ cliente }} 
+        </div>
+        <div class="col-6 col-md-6" hidden>
+            <input id="acumula_gao" name="acumula_gao" value="{{ gaoa.acumula_gao }}" >
+            <input id="carga_dc" name="carga_dc" value="{{ dc.generar }}" >
+            <input id="tipo_asignacion" name="tipo_asignacion" value="{{ tipo_asignacion }}" >
+            <input id="iva_gaoa" name="iva_gaoa" value="{{ gaoa.carga_iva }}" >
+            <input id="iva_dc" name="iva_dc" value="{{ dc.carga_iva }}" >
+            <input id="ids" name="ids" value="{{ ids }}" >              
+            <input id="id_cliente" name="id_cliente" value="{{ id_cliente }}" >
+            <input id="tipo_factoring" name="tipo_factoring" value="{{ tipo_factoring }}" >
+            <input id="iniciales_dc" name="iniciales_dc" value="{{ dc.iniciales }}" >
+            <input id="iniciales_gaoa" name="iniciales_gaoa" value="{{ gaoa.iniciales }}" >
+        </div>
+            <div class="card-body card-block">
+                <!-- columna izquierda -->
+                <div class="col-5">
+                        <!-- fechas -->
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="fechacorte" class=" form-control-label">
+                            Ampliar hasta:
+                        </label></div>
+                        <div class="col-md-6">
+                            <input type="date" class="form-control" name="fechacorte"  
+                            id="fechacorte" placeholder="Ingrese fecha de corte" 
+                            value="{% now 'Y-m-d' %}">
+                        </div>
+                    </div>  
+                       
+                    <div class="row form-group">
+                        <div class="col-md-6"><label for="fechacorte" class=" form-control-label">
+                            Emisión de nota de débito:
+                        </label></div>
+                        <div class="col-md-6">
+                            <input type="date" class="form-control" name="emision_nd"  
+                            id="emision_nd" readonly
+                            value="{% now 'Y-m-d' %}">
+                        </div>
+                    </div>  
+
+                    <div class="col-md-12">
+                        <div class="alert alert-info" role="alert">
+                            La ampliación de plazo genera una nota de débito que debe convertirse en factura.
+                            Para el cobro vaya a la opción 
+                            OPERACIONES / Cobranzas / Cargos pendientes.
+                        </div>
+                     </div>
+                       
+                </div>
+                <!-- columna derecha -->
+                <div class="col-7">
+                    <h5 class="heading-title mb-1 text-secondary">Valores por ampliación</h5>
+                    <div class="row form-group">
+                        <div class="col col-md-12">
+                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
+                            Cargos</h5></div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-1"></div>
+                        <div class="col col-xs-3">
+                            <label for="id_ngao" class=" form-control-label">
+                                {{gaoa.descripcion}}</label></div>
+                        <div class="col-6 col-md-6">
+                            <input type="text" id="id_ngaoa" name="id_ngaoa" readonly
+                            class="form-control">                                        
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-1"></div>
+                        <div class="col col-xs-3">
+                            <label for="id_ndescuentodecartera" class=" form-control-label">
+                                {{dc.descripcion}}</label></div>
+                        <div class="col-6 col-md-6">
+                            <input type="text" id="id_ndescuentodecartera" name="id_ndescuentodecartera" 
+                            class="form-control" readonly>      
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-1">
+                            <label for="id_niva" class=" form-control-label">
+                            IVA
+                        </label></div>
+                        <div class="col-md-3">
+                            <input type="number" name="neto" step="0.01" class="form-control" 
+                            readonly id="porcentaje_iva" value="{{ porcentaje_iva }}">
+                        </div>
+                        <div class="col-md-1"></div>
+                        <div class="col-6 col-md-6">
+                            <input type="text" id="id_niva" name="id_niva" readonly
+                            class="form-control">      
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <!-- <div class="col col-xs-3"><label for="id_cxtipocliente" 
+                            class=" form-control-label">= Neto</label></div> -->
+                        <div class="col col-md-6">
+                            <h5 for="id_nvalor" class=" form-control-label">
+                            Total
+                            </h5></div>
+                        <div class="col-6 col-md-6">
+                            <input type="number" name="total" step="0.01" 
+                            class="form-control" readonly id="total">
+                        </div>
+                    </div>  
+                </div>
+                <!-- parte inferior -->
+                <div class="row form-group">
+                    <!-- <small> -->
+
+                    <div class="col-md-12">
+                          
+                        <table id="table"                      
+                            data-show-columns-toggle-all="true"
+                            data-show-export="true"
+                            data-detail-formatter="detailFormatter"
+                            data-minimum-count-columns="2"
+                            data-pagination="false"
+                            data-id-field="id"
+                            data-page-list="[10, 50, all]"
+                            data-show-footer="true"
+                            data-side-pagination="server"
+                            data-search="true"
+                            >
+                        </table>
+
+                    </div>
+
+                    <!-- </small> -->
+               </div>
+            </div>    
+        <div class="card-footer">
+            <a 
+            {% if tipo_asignacion == 'A' %}
+               href="{% url 'cobranzas:listachequesadepositar' %}" 
+            {% else %}
+                href="{% url 'cobranzas:listadocumentosvencidos' %}" 
+            {% endif %}
+                class="btn btn-danger btn-sm "><i class="fa fa-ban"></i> Cancelar
+            </a>
+            <button type="button" onclick="AceptarAmpliacionPlazo()" class="btn btn-primary btn-sm ">
+                <i class="fa fa-dot-circle-o"></i> Aceptar
+            </button>
+        </div>
+    </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<script type="text/javascript" src="{% static 'factorweb/js/datosampliacionplazo.js' %}"></script>
+{% endblock %}

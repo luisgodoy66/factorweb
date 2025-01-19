@@ -1,0 +1,115 @@
+{% load filtros %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Cobrazas realizadas</title>
+
+    <style type="text/css">
+        @page { 
+            size: A4;
+            margin: 1cm;
+            size:  landscape;
+        }
+        .table thead th {
+                vertical-align:  top ;
+                border-bottom: 1px solid #000;
+        }
+        .table td.numero{
+            text-align: right;
+        }
+        .table td.centrado{
+            text-align: center;
+        }
+        .table td.subrayado{
+            border-bottom: 1px solid black;
+        }
+        .alerta { 
+        font-family: sans-serif; 
+        font-size: 11px; 
+        font-weight: 400; 
+        color: #eb1111; 
+        }        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <table >
+                    <tbody>
+                        <tr>
+                            <td colspan="2"><h2>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h2></td>
+                            <td></td>
+                            <td colspan="2"><h1>Listado de recuperaciones realizadas </h1></td>
+                            <td></td>
+                            <td>Impresión: {% now "Y-m-d" %}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col">
+                    <table class="table table-striped table-hover nowrap" style="width:100%">
+                        <thead>
+                            <th>Cliente/Cobranza</th>        
+                            <th>Fecha</th>        
+                            <th>Girador</th>        
+                            <th>Forma</th>        
+                            <th>Protesto</th>        
+                            <th>Motivo</th>
+                            <th>Cheque protestado</th>
+                            <th>Demora sobre documento</th>
+                            <th>Valor cobrado</th>
+                            <th>Bajas</th>
+                            <th>Estado</th>
+                            <th>Total aplicado</th>
+                        </thead>
+                        <tbody>
+                            <tr></tr>
+                            {% regroup detalle by recuperacion.cxcliente as cobranzas_list %}
+                            {% for cliente in cobranzas_list %}
+                            <tr>
+                                <td class="subrayado" colspan="11"><h3>{{ cliente.grouper }}</h3></td>
+                                <td class="subrayado numero"><h3> {{cliente.list|running_aplicado|intcomma }}</h3></td>
+                            </tr>
+                                {% for item in cliente.list %}
+                                <tr></tr>
+                                <tr>
+                                    <td>{{ item.recuperacion }}</td>
+                                    <td>{{ item.recuperacion.dcobranza|date:"Y-m-d" }}</td>
+                                    <td>{{ item.chequeprotestado.cheque.ctgirador }}</td>
+                                    <td>{{ item.recuperacion.cxformacobro }}</td>
+                                    <td>{{ item.chequeprotestado.dprotesto |date:"Y-m-d"}}</td>
+                                    <td>{{ item.chequeprotestado.motivoprotesto }}</td>
+                                    <td width="20%">{{ item.chequeprotestado.cheque }}</td>
+                                    <td>{{ item.demoradepago }}</td>
+                                    <td class="numero">{{ item.nvalorrecuperacion }}</td>
+                                    <td class="numero">{{ item.bajas }}</td>
+                                    <td class="numero">{{ item.recuperacion.cxestado }}</td>
+                                    <td class="numero">{{ item.aplicado|intcomma }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr></tr>
+                            {% endfor %}
+                            <tr></tr>
+                            <tr>
+                                <td colspan="9" class="numero"><h4>{{ total_cobrado|intcomma }}</h4></td>
+                                <td class="numero"><h4>{{ total_baja|intcomma }}</h4></td>
+                                <td></td>
+                                <td class="numero"><h4>{{ total_general|intcomma }}</h4></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

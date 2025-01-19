@@ -1,0 +1,145 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">Negociación</a></li>
+                    <li><a href="{% url 'operaciones:listapagares' %}" >Reestructuraciones</a></li>
+                    <li class="active">Edición</li>                  
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal"
+    onsubmit="return checkSubmit();">
+    <!-- <div class="col-lg-6"> -->
+    <div class="card">
+            {% csrf_token %}
+        <div class="card-header">
+            <strong>Pagaré {{pagare.cxpagare}} de </strong> {{ pagare.cxcliente }}  
+        </div>
+        <div class="card-body card-block">
+            <!-- numero de documentos -->
+            <div class="row form-group">
+                <div class="col-md-12">
+                    <div class="alert alert-danger" role="alert">
+                        La modificación de las fechas de cobro de una cuota, en esta página, no recalculará el interés para la cuota.
+                    </div>
+                </div>
+            </div>
+            <!-- parte inferior -->
+            <small>
+            <div class="row">
+
+                <div class="col col-xs-12">
+                        
+                    <table id="table" class="table table-striped table-bordered"
+                        data-url="{% url 'operaciones:detallepagare_json' pagare.id %}"
+                        data-show-columns-toggle-all="true"
+                        data-show-export="true"
+                        data-detail-formatter="detailFormatter"
+                        data-minimum-count-columns="2"
+                        data-pagination="false"
+                        data-id-field="id"
+                        data-page-list="[10, 50, all]"
+                        data-show-footer="true"
+                        data-side-pagination="server"
+                        data-unique-id="id"
+                        >
+                        </table>
+
+                </div>
+
+            </div>
+            </small>
+        </div>    
+        <div class="card-footer">
+            <div class="col-md-6">
+                <a href="{% url 'operaciones:listapagares' %}" 
+                class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Salir
+                </a>
+
+            </div>
+        </div>
+    </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<!-- <script type="text/javascript" src="{% static 'factorweb/js/datosasignacionfacturaspuras.js' %}"></script> -->
+<script>
+var enviando = false; //Obligaremos a entrar el if en el primer submit
+var $table = jQuery('#table')
+var selections = []
+
+window.onload=function(){
+
+    // inicializar tabla
+    initTable();
+    // // cerrar side bar
+    // CerrarSideBar();
+  
+};
+
+window.operateEvents = {
+  'click .editar': function (e, value, row, index) {
+    EditarDocumento( row.id)
+  },
+};
+
+function operateFormatter(value, row, index) {
+return [
+  '<a class="editar" href="javascript:void(0)" title="Editar">',
+  '<i class="fa fa-edit"></i>',
+  '</a>',
+].join('')
+}
+
+function initTable() {
+
+    $table.bootstrapTable('destroy').bootstrapTable({
+    //   height: 400,
+      locale: "es-EC",
+      columns: [
+        [ {title: 'Cuota', field: 'Cuota', rowspan: 2,
+            align: 'center', valign: 'middle', sortable: true,
+            footerFormatter: LineaCantidadEnPieDePaginaDeTabla
+          }, {title: 'Fecha', field: 'Fecha', rowspan: 2,
+            align: 'center', valign: 'middle', sortable: true,
+          }, {title: 'Valores', colspan: 4, align: 'center'
+        }, {
+            field: 'operate', title: 'Acción', align: 'center',rowspan: 2,
+          clickToSelect: false, events: window.operateEvents,valign: 'middle',
+          formatter: operateFormatter
+        }],
+        [{field: 'Capital', title: 'Capital',
+          sortable: true, footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla,
+          align: 'center'
+        }, {
+          field: 'Interes', title: 'Interes', sortable: true,
+          align: 'center', footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+        }, {
+            field: 'Valor', title: 'Valor de cuota',
+            sortable: true, align: 'center',
+            footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+        }, {
+            field: 'Saldo', title: 'Saldo de la cuota',
+            sortable: true, align: 'center',
+            footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+          }]
+      ]
+    })
+}
+
+function EditarDocumento( doc_id){
+  AbrirModal('/operaciones/editarcuota/'+ doc_id )
+}    
+</script>
+{% endblock %}

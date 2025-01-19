@@ -1,0 +1,104 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">operaciones</a></li>
+                    <li><a href="#">cuentas compartidas</a></li>
+                    <li class="active">transferencias</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div class="card-body">
+            <div class="dropdown float-right">
+                <button class="btn bg-transparent dropdown-toggle theme-toggle " 
+                    type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <div class="dropdown-menu-content">
+                        <a class="dropdown-item" 
+                        href="{% url 'cuentasconjuntas:transferencia_nueva' %}">Nueva</a>
+                        <a class="dropdown-item" href="#">Imprimir</a>
+                    </div>
+                </div>
+            </div>
+            <h4 class="mb-0">
+                <span class="count">{{ consulta.count }}</span>
+            </h4>
+
+            {% if not consulta %}
+            <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                <span class="badge badge-pill badge-danger">Sin registros</span>
+                {% if error %}
+                    {{ error }}
+                {% else %}
+                 No hay transferencias registradas.
+               {% endif %}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            {% endif %}
+
+            <!-- <div class="content"> -->
+
+                <table class="table table-striped table-bordered" id="bootstrap-data-table-export">
+                    <thead>
+                        <th>Id</th>
+                        <th>Cliente</th>
+                        <th>Fecha</th>
+                        <th>Cuenta origen</th>
+                        <th>Cuenta destino</th>
+                        <!-- <th>Código</th> -->
+                        <th>Valor</th>
+                        <th class="all">Acciones</th>
+                    </thead>
+                    <tbody>
+                        {% for item in consulta %}
+                        <tr>
+                            <td>{{ item.id }}</td>
+                            <td>{{ item.cuentaorigen.cxcliente.cxcliente.ctnombre }}</td>
+                            <td>{{ item.dmovimiento|date:'Y-m-d' }}</td>
+                            <td>{{ item.cuentaorigen }}</td>
+                            <td>{{ item.cuentadestino }}</td>
+                            <!-- <td>{{ item.cxtransferencia }}</td> -->
+                            <td>{{ item.nvalor }}</td>
+                            <td>
+                                {% if not item.lcontabilizada %}
+                                    <a href="{% url 'cuentasconjuntas:transferencia_editar' item.id %}"
+                                    class="btn btn-warning btn-sm"  title="Editar"
+                                    >
+                                    <i class="fa fa-edit"></i>
+                                    </a>
+                                {% endif %}
+                                <button class="btn btn-danger btn-sm"  title="Eliminar"
+                                        onclick="EliminarTransferencia({{item.id}})"
+                                    role="button">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            <!-- </div> -->
+
+        </div>
+
+    </div>
+ 
+
+{% endblock %}
+
+{% block js_page %}
+<script type="text/javascript" 
+    src="{% static 'factorweb/js/listatransferencias.js' %}">
+</script>
+{% endblock %}

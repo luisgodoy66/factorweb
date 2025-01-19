@@ -1,0 +1,152 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">configuración</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li class="active">datos de la empresa</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmConfirmacion" enctype="multipart/form-data" class="form-horizontal">
+    <div class="card bg-flat-color-0">
+        {% csrf_token %}
+        <div class="card-header">
+            <strong>Datos de la empresa</strong> 
+        </div>
+        <div class="card-body">
+            <!-- cargos -->
+            <div class="col-lg-12">
+                    <div class="row form-group">
+                        <div class="col-md-2"><label for="id_ctruccompania" 
+                            class=" form-control-label">
+                            {{ form.ctruccompania.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.ctruccompania}}
+                        </div>
+        
+                        <div class="col-md-2">
+                            <label for="id_ctnombre" class=" form-control-label">
+                            {{ form.ctnombre.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.ctnombre}}
+                        </div>
+                            
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-2">
+                            <label for="id_ctciudad" class=" form-control-label">
+                            {{ form.ctciudad.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.ctciudad}}
+                        </div>                        
+        
+                        <div class="col-md-2">
+                            <label for="id_ctdireccion" class=" form-control-label">
+                            {{ form.ctdireccion.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.ctdireccion}}
+                        </div>                        
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-2">
+                            <label for="id_ctcontribuyenteespecial" class=" form-control-label">
+                            {{ form.ctcontribuyenteespecial.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.ctcontribuyenteespecial}}
+                        </div>                        
+                        <div class="col-md-2">
+                            <label for="id_ctgerente" class=" form-control-label">
+                            {{ form.ctgerente.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.ctgerente}}
+                        </div>
+                            
+                    </div>
+                    <div class="row form-group">
+        
+                        <div class="col-md-2">
+                            <label for="id_ctcontribuyenteespecial" class=" form-control-label">
+                            {{ form.ambientesri.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.ambientesri}}
+                        </div>                        
+        
+                        <div class="col-md-2">
+                            <label for="id_ctcontribuyenteespecial" class=" form-control-label">
+                            {{ form.nporcentajeiva.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.nporcentajeiva}}
+                        </div>                        
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-2">
+                            <label for="id_logo1" class="form-control-label">{{ form.ilogolargo.label }}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.ilogolargo }}
+                        </div>
+                        <div class="col-md-2">
+                            <label for="id_logo2" class="form-control-label">{{ form.ilogocorto.label }}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.ilogocorto }}
+                        </div>
+                    </div>
+                
+                    <div class="row form-group">
+        
+                        <div class="col-md-2">
+                            <label for="id_lregimenrimpe" class=" form-control-label">
+                            {{ form.lregimenrimpe.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            <!-- {{ form.lregimenrimpe}} -->
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  empresa.lregimenrimpe %} checked {% endif %} 
+                                id = "id_lregimenrimpe" name = "lregimenrimpe"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>                        
+                    </div>
+
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <a href="{% url 'bases:home' %}" 
+                class="btn btn-danger btn-sm">
+                <i class="fa fa-ban"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa fa-dot-circle-o"></i> Grabar
+            </button>
+            {{ form.errors }}
+        </div>
+
+
+    </div>
+ 
+</form>
+{% endblock %}

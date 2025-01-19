@@ -1,0 +1,96 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Extras</a></li>
+                    <li><a href="#">cuentas compartidas</a></li>
+                    <li><a href="{% url 'cuentasconjuntas:listacargospendientes' %}">débitos pendientes</a></li>
+                    <li class="active">editar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmDebito" enctype="multipart/form-data" class="form-horizontal" name="form"    >
+    <div class="card bg-flat-color-0">
+        {% csrf_token %}
+        <div class="card-header">
+            <strong>Datos de nota de débito</strong> 
+            {% if notadedebito %}
+            {{notadedebito}} de {{cliente}} en {{cuentaconjunta}} 
+            {% endif %}
+        </div>
+        <div hidden>
+            <input type="text" name="id_nd" value={{id_notadedebito}}>
+            <input type="text" name="nd" value={{notadedebito}}>
+        </div>
+        <div class="card-body">
+            <!-- cargos -->
+            <div class="col-lg-12">
+                <div id="div_datos_cargo">
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_cuentabancaria" 
+                            class=" form-control-label">
+                            {{ form.cuentabancaria.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.cuentabancaria}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_dmovimiento" 
+                            class=" form-control-label">
+                            {{ form.dmovimiento.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.dmovimiento}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+        
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.nvalor.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.nvalor}}
+                        </div>
+                            
+                    </div>
+                    <div class="row form-group">
+        
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.ctmotivo.label}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.ctmotivo}}
+                        </div>
+                            
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <a href="{% url 'cuentasconjuntas:listacargospendientes' %}" 
+                class="btn btn-danger btn-sm">
+                <i class="fa fa-ban"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa fa-dot-circle-o"></i> Grabar
+            </button>
+
+        </div>
+
+    </div>
+ </form>
+{% endblock %}
+
+{% block js_page %}
+{% endblock %}

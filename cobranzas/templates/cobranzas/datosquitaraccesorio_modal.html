@@ -1,0 +1,76 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" rol="form"  class="form-horizontal" name="form"
+                action="{% url 'cobranzas:quitarchequeaccesorio' cheque cliente_ruc %}"
+            >
+            <!-- <div class="col-md-12"> -->
+            <div hidden>
+                <input type="text" value={{cheque}} id="id_cheque">
+            </div>
+            <div class="card">
+
+                {% csrf_token %}
+                <div class="card-header">
+                    <strong>Quitar accesorio </strong> 
+                </div>
+                
+                <div class="card-body card-block">
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_ctmotivo" 
+                            class=" form-control-label">
+                            Motivo</label></div>
+                        <div class="col-md-8">
+                            <input type="text" name="motivo" maxlength="60" 
+                            class="form-control" required id="motivo">
+                        </div>
+                    </div>
+                </div>    
+                {{ errors}}
+                <div class="card-footer">
+                    <button type="buttom" class="btn btn-danger btn-sm" 
+                        onclick="return CerrarModal()">
+                        <i class="fa fa-dot-circle-o"></i> Cerrar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+                </div>
+            </div>
+            <!-- </div> -->
+        </form>
+
+    </div>
+
+    {% block js_page %}
+    <script>
+        var url = jQuery("[name=form]").attr("action");
+        var token = jQuery("[name=csrfmiddlewaretoken]").val();
+
+        jQuery("form").submit(function(e){
+            e.preventDefault();
+           var formData = jQuery("form").serializeArray();
+            // console.log(formData);
+            jQuery.ajax({
+                url:url,
+                method:"POST",
+                headers: {'X-CSRFToken': token },
+                data: formData
+            })
+            .done(function(r,textStatus,xhr){
+                if(xhr.status=200){
+                    jQuery("#popup").modal('hide');
+                    location.reload()
+                }
+                else{
+                    alert(textStatus);
+                }
+            }).fail(function (error) {
+                MensajeError(error.responseText);
+            });
+        });
+
+        
+    </script>
+    {% endblock %}
+</div>    

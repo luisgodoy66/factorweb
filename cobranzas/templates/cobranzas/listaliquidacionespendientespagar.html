@@ -1,0 +1,96 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">operaciones</a></li>
+                    <li><a href="#">desembolsos</a></li>
+                    <li class="active">pago de cobranzas</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div class="card-body">
+            <div class="dropdown float-right">
+                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <div class="dropdown-menu-content">
+                        <!-- <a class="dropdown-item" href="{% url 'operaciones:listadatosoperativos' %}">Nuevo</a> -->
+                        <a class="dropdown-item" href="#">Imprimir</a>
+                    </div>
+                </div>
+            </div>
+            <h4 class="mb-0">
+                <span class="count">{{ consulta.count }}</span>
+            </h4>
+
+            {% if not consulta %}
+            <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                <span class="badge badge-pill badge-danger">Sin registros</span>
+                {% if error %}
+                    {{ error }}
+                {% else %}
+                 No hay cobranzas pendientes hasta la fecha.
+               {% endif %}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            {% endif %}
+
+            <!-- <div class="content"> -->
+
+                <table class="table table-striped table-bordered" id="bootstrap-data-table-export">
+                    <thead>
+                        <th>Nombre de cliente</th>
+                        <th>Liquidación</th>
+                        <th>Tipo de factoring</th>
+                        <th>Instrucción de pago</th>
+                        <th>Desembolso</th>
+                        <th>Valor neto</th>
+                        <th class="all">Acciones</th>
+                    </thead>
+                    <tbody>
+                        {% for item in consulta %}
+                        <tr>
+                            <td>{{ item.cxcliente.cxcliente.ctnombre }}</td>
+                            <td>{{ item.cxliquidacion }}</td>
+                            <td>{{ item.cxtipofactoring }}</td>
+                            <td>{{ item.ctinstrucciondepago }} </td>
+                            <td>{{ item.ddesembolso|date:"Y/m/d" }}</td>
+                            <td>{{ item.neto }}</td>
+                            <td>
+                                <a href="{% url 'cobranzas:desembolsarliquidacion' item.id item.cxcliente.id %}" 
+                                class="btn btn-primary btn-sm" role="button" title="Pagar">
+                                <i class="fa fa-money"></i></a>
+                                <button onclick="ReversarLiquidacion( {{item.id}})" title="Reversar liquidación"
+                                    class="btn btn-danger btn-sm"
+                                    role="button">
+                                    <i class="fa fa-rotate-left"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            <!-- </div> -->
+
+        </div>
+
+    </div>
+ 
+
+{% endblock %}
+
+{% block js_page %}
+<script type="text/javascript" 
+    src="{% static 'factorweb/js/listaliquidacionespendientespagar.js' %}">
+</script>
+{% endblock %}

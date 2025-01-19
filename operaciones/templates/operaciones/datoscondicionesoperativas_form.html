@@ -1,0 +1,215 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">configuración</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li><a href="{% url 'operaciones:listacondicionesoperativas' %}">condiciones operativas</a></li>
+                    <li class="active">editar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmCondicion" enctype="multipart/form-data" class="form-horizontal"
+    onsubmit="return checkSubmit();">
+    <!-- <div class="col-lg-6"> -->
+    <div class="card">
+            {% csrf_token %}
+        <div class="card-header">
+            <strong>Condición operativa</strong> 
+            {% if condicion.id %} de  {{ condicion.ctcondicion }}  {% else %}  nueva{% endif %} 
+        </div>
+        <div class="card-body card-block">
+            <!-- columna superior -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="row form-group">
+                        <div class="col-md-2"><label for="id_ctcondicion" class=" form-control-label">
+                            {{ form.ctcondicion.label}}</label></div>
+                        <div class="col-md-5">
+                            {{ form.ctcondicion}}
+                        </div>
+                        <div class="col-md-2"><label for="id_cxtipofactoring" class=" form-control-label"> 
+                            {{ form.cxtipofactoring.label}}</label></div>
+                        <div class="col-md-3">
+                            {{ form.cxtipofactoring}}
+                        </div>
+                    </div>  
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="row form-group">
+                        <div class="col col-md-2"><label for="id_laplicaafacturaspuras" class=" form-control-label">
+                            {{ form.laplicaafacturaspuras.label}}</label>
+                        </div>
+                        <div class="col col-md-1">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  condicion.laplicaafacturaspuras %} checked {% endif %} 
+                                id = "id_laplicaafacturaspuras" name = "laplicaafacturaspuras"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+
+                        <div class="col col-md-3"><label for="id_laplicaaaccesorios" class=" form-control-label">
+                            {{ form.laplicaaaccesorios.label}}</label></div>
+                        <div class="col col-md-1">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  condicion.laplicaaaccesorios %} checked {% endif %} 
+                                id = "id_laplicaaaccesorios" name = "laplicaaaccesorios"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                        <div class="col-md-5">
+                            {% if condicion %}
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fa fa-dot-circle-o"></i> Actualizar descripción, aplicación y tipo de factoring
+                                </button>
+                            {% endif %}
+                        </div>
+        
+                    </div>  
+                </div>
+            </div>
+            
+            <!-- parte inferior -->
+            <div class="row form-group">
+                <div class="col-md-12">
+                        
+                    <table id="table"                      
+                        data-show-columns-toggle-all="true"
+                        data-show-export="true"
+                        data-detail-formatter="detailFormatter"
+                        data-minimum-count-columns="2"
+                        data-pagination="true"
+                        data-id-field="id"
+                        data-page-list="[10, 50, all]"
+                        data-show-footer="false"
+                        data-side-pagination="server"
+                        {% if condicion.id %} 
+                        data-url="{% url 'operaciones:detallecondicionoperativa' condicion.id %}"
+                        {% endif %} 
+                        >
+                    </table>
+
+                </div>
+
+            </div>
+        </div>    
+        <div class="card-footer">
+            <a href="{% url 'operaciones:listacondicionesoperativas' %}" class="btn btn-danger btn-sm">
+                <i class="fa fa-ban"></i> Salir
+            </a>
+            <button class="btn btn-success btn-sm"  role="button"
+                {% if condicion.id %}
+                    onclick="return AbrirModal('{% url 'operaciones:condicionoperativa_editar' condicion.id condicion.cxtipofactoring_id %}')"
+                {% else %}
+                    onclick="return NuevaCondicionOperativa()"
+                {% endif %} 
+                >  
+                <i class="fa fa-plus-circle"></i> Agregar condición
+            </button>
+
+        </div>
+          
+    </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<!-- <script type="text/javascript" src="{% static 'factorweb/js/datoscondicionesoperativas.js' %}"></script> -->
+<script>
+var enviando = false; //Obligaremos a entrar el if en el primer submit
+var $table = jQuery('#table')
+var selections = []
+
+window.onload=function(){
+    // inicializar tabla
+    initTable();
+    // // cerrar side bar
+    // CerrarSideBar();
+  
+};
+
+window.operateEvents = {
+    'click .remove': function (e, value, row, index) {
+        EliminarDetalleDeCondicion( row.id)
+    }
+  };
+  
+function operateFormatter(value, row, index) {
+    return [
+        '<a class="remove" href="javascript:void(0)" title="Remove">',
+        '<i class="fa fa-trash"></i>',
+        '</a>'
+    ].join('')
+    }
+    
+function initTable() {
+    $table.bootstrapTable('destroy').bootstrapTable({
+      height: 400,
+      locale: "es-EC",
+      columns: [
+        [{  title: 'Ref.', field: 'id', rowspan: 2
+        , align: 'center', valign: 'middle', sortable: true,
+          }, {title: 'Clase de cliente', field: 'ClaseCliente'
+          , rowspan: 2
+          , align: 'center', valign: 'middle', sortable: true
+          }, {title: 'Clase de comprador', field: 'ClaseComprador'
+          , rowspan: 2, align: 'center', valign: 'middle', sortable: true,
+        }, 
+        {title: 'Plazo', colspan: 2, align: 'center'
+          }, {title: 'Porcentajes', colspan: 3, align: 'center'
+          }, {field: 'operate', title: 'Acción'
+          ,rowspan: 2
+          , align: 'center', clickToSelect: false, 
+          events: window.operateEvents, formatter: operateFormatter
+          }],
+        [
+          {field: 'Desde', title: 'Desde', sortable: true
+          }, {field: 'Hasta', title: 'Hasta', sortable: true, align: 'center', 
+          }, {field: 'Porc_Anticipo', title: 'Anticipo', sortable: true, align: 'center'
+          }, {field: 'Porc_GAO', title: 'Comisión', sortable: true, align: 'center'
+          }, {field: 'Porc_DC', title: 'Descuento', sortable: true, align: 'center'
+        }]
+      ]
+      
+    })
+
+  }
+
+function EliminarDetalleDeCondicion( detalle_id){
+    MensajeConfirmacion("Eliminar detalle " + detalle_id  +"?",function(){
+      fetchProcesar("/operaciones/eliminardetallecondicionoperativa/"+detalle_id, function(){
+        // $table.bootstrapTable('remove', {
+        //   field: 'id',
+        //   values: [documento_id]
+        // });
+        location.reload();
+      })
+  })
+  }
+
+function NuevaCondicionOperativa(){
+    condicion_nombre=capturaValor("id_ctcondicion");
+    tipo_factoring=capturaValor("id_cxtipofactoring");
+  
+    if (condicion_nombre == "" || tipo_factoring==""){
+      alert("debe especificar nombre y tipo de factoring")
+    }
+    else{
+      return AbrirModal('/operaciones/nuevacondicionoperativa/'+tipo_factoring);
+    }
+  }
+  
+</script>
+{% endblock %}

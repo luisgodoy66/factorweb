@@ -1,0 +1,197 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">operaciones</a></li>
+                    <li><a href="#">facturas de venta</a></li>
+                    <li><a href="{% url 'contabilidad:listapendientesgenerarfactura' %}">generar factura</a></li>
+                    <li class="active">{{operacion}}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmGenera" enctype="multipart/form-data" class="form-horizontal">
+    <!-- <div class="col-lg-6"> -->
+        <div class="card">
+            {% csrf_token %}
+            <div class="card-header">
+                <strong>Generar factura</strong> 
+            </div>
+            <div hidden>
+               {{form.cliente}}
+               {{form.nporcentajeiva}}
+               <!-- <input id="tipo_operacion" value="{{cxtipooperacion}}"> -->
+               <!-- <input id="id_operacion" value="{{id_operacion}}"> -->
+               <!-- <input id="valor_gao" value='{{valor_gao|floatformat:"2u"}}'  > -->
+               <!-- <input id="valor_dc" value='{{valor_dc |floatformat:"2u"}}'> -->
+               <!-- <input id="valor_dcv" value='{{valor_dcv |floatformat:"2u"}}'> -->
+               <!-- <input id="valor_gaoa" value='{{valor_gaoa |floatformat:"2u"}}'> -->
+               <!-- <input id="ambiente" value='{{ambiente}}'> -->
+            </div>
+            <div class="card-body card-block">
+                <!-- columna izquierda -->
+                <div class="col-lg-6">
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            <label for="id_puntoemision" class=" form-control-label">
+                               {{form.puntoemision.label}}</label></div>
+                        <div class="col-md-6">{{form.puntoemision}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            <label for="id_cxnumerofactura" class=" form-control-label">
+                               {{form.cxnumerofactura.label}}</label></div>
+                        <div class="col-md-6">{{form.cxnumerofactura}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            <label for="id_demision" class=" form-control-label">
+                               {{form.demision.label}}</label></div>
+                        <div class="col-md-6">{{form.demision}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            <label for="id_ctconcepto" class=" form-control-label">
+                               Concepto de diario</label></div>
+                        <div class="col-md-6">
+                            <textarea type="text" class="form-control" 
+                            required id="concepto" rows="3" 
+                            name="concepto">{{concepto}}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            <label for="id_nvalor" class=" form-control-label">
+                               {{form.nbaseiva.label}}</label></div>
+                        <div class="col-md-6">{{form.nbaseiva}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            <label for="id_nvalor" class=" form-control-label">
+                               {{form.nbasenoiva.label}}</label></div>
+                        <div class="col-md-6">{{form.nbasenoiva}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            <label for="id_nvalor" class=" form-control-label">
+                               {{form.niva.label}}</label></div>
+                        <div class="col-md-6">{{form.niva}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                            <label for="id_nvalor" class=" form-control-label">
+                               {{form.nvalor.label}}</label></div>
+                        <div class="col-md-6">{{form.nvalor}}</div>
+                    </div>
+
+
+                </div>
+                <!-- <div class="col-lg-6">
+                    <div class="alert alert-info" role="alert">
+                        Si está marcada la generación del XML de la factura para el punto de emisión, al confirmar la aceptación, el sistema creará un archivo XML con los datos de la factura
+                        para su firma y autorización y lo guardará en la carpeta Descargas con el nombre 
+                        correspondiente al número de autorización.
+                    </div>
+
+                </div> -->
+            </div>    
+            
+            <div class="card-footer">
+                <a href="{% url 'contabilidad:listapendientesgenerarfactura' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="button" onclick="GenerarFactura()" class="btn btn-primary btn-sm ">
+                    <i class="fa fa-dot-circle-o"></i> Aceptar
+                </button>
+                </div>
+        </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<!-- <script type="text/javascript" 
+    src="{% static 'factorweb/js/datosgenerafactura.js' %}">
+</script> -->
+<script>
+// se cambia la generacion del xml a la ventana de conbsultas , por ahora. debe
+// haber una lista de facturas pendientes por generar XML
+const ambiente = '{{ambiente}}';
+
+window.onload=function(){
+    jQuery('#id_puntoemision')
+        .change(function(){
+        SecuenciaPorPuntoEmision( capturaValor("id_puntoemision"));
+        });
+
+    }  
+
+function SecuenciaPorPuntoEmision( punto_emision){
+    // bucar la secuencia de factura del punto de emisión seleccionado
+    jQuery.ajax({
+        type: "GET",
+        url: "/contabilidad/obtenersecuenciafactura/"+punto_emision,
+        data: { punto_emision: punto_emision, },
+        success: function (data) {
+            if (data.success) {
+                jQuery("#id_cxnumerofactura").val(data.secuencia);
+
+            } else {
+                    jQuery("#id_cxnumerofactura").val("Error");
+                }
+            },
+        error: function(xhr, status, error) {
+            // this function is called if there is an error with the request
+            console.log(error);
+        }
+        });
+}
+
+function GenerarFactura(){
+  MensajeConfirmacion("Aceptar generación de factura " 
+    + capturaValor("id_cxnumerofactura") +"?",function(){
+    
+    var objeto={
+        "tipo_operacion": "{{cxtipooperacion}}",
+        "id_operacion": "{{id_operacion}}",
+        "ngao" : '{{valor_gao|floatformat:"2u"}}' ,
+        "ndescuentocartera" : '{{valor_dc |floatformat:"2u"}}',
+        "ngaoa" : '{{valor_gaoa |floatformat:"2u"}}',
+        "ndescuentocarteravencido" : '{{valor_dcv |floatformat:"2u"}}',
+        "porcentaje_iva" : capturaValor("id_nporcentajeiva"),
+        "id_puntoemision": capturaValor("id_puntoemision"),
+        "id_cliente": capturaValor("id_cliente"),
+        "base_iva" : capturaValor("id_nbaseiva"), 
+        "base_noiva" : capturaValor("id_nbasenoiva"), 
+        "concepto" : capturaValor("concepto"), 
+        "emision" : capturaValor("id_demision"),
+        "niva" : capturaValor("id_niva"),
+        "secuencia" : capturaValor("id_cxnumerofactura"),
+        }
+
+    fetchPostear("/contabilidad/generarfacturadiario/", objeto, function(factura){
+        // regresar a la lista de generar factura
+        window.location.href = "/contabilidad/listapendientesgenerarfactura";
+
+        url = window.location.origin
+        // url = url + "/contabilidad/imprimirdiariocontable/"+asiento;
+        url = url + "/contabilidad/generarxmlfactura/"+factura+"/" + ambiente;
+        window.open( url);
+          })
+  })    
+}
+
+</script>
+{% endblock %}

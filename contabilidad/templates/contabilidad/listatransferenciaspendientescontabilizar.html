@@ -1,0 +1,114 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">contabilidad</a></li>
+                    <li><a href="#">procesos</a></li>
+                    <li class="active">generar transferencias</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div class="card-body">
+            <div class="row form-group ">
+                <div class="col-md-3">
+                    <label for="fechacorte">Desde :</label>
+                </div>
+                <div class="col-md-2">
+                    <input type="date" class="form-control" name="desde"  
+                    id="desde" placeholder="Ingrese fecha de corte" 
+                    aria-label="Ingrese fecha de corte" value="{{ desde|date:'Y-m-d'}}">
+                </div>
+                <div class="col-md-3">
+                    <label for="fechacorte">Hasta :</label>
+                </div>
+                <div class="col-md-2">
+                    <input type="date" class="form-control" name="hasta"  
+                    id="hasta" placeholder="Ingrese fecha de corte" 
+                    aria-label="Ingrese fecha de corte" value="{{ hasta|date:'Y-m-d'}}">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-success btn-sm"  role="button" id="btnFiltrar">  
+                        <i class="fa fa-filter"></i> Filtrar
+                    </button>
+                </div>
+            </div>
+            <!-- <div class="dropdown float-right">
+                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" 
+                    id="dropdownMenuButton1" data-toggle="dropdown">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <div class="dropdown-menu-content">
+                        <a class="dropdown-item" href="{% url 'operaciones:detalle_facturas_pendientes' %}" 
+                        target="facturas pendientes">Detalle de facturas pendientes</a>
+                    </div>
+                </div>
+            </div> -->
+
+            <div>
+                <!-- <h5 class="heading-title mb-1 text-secondary">Formas de cobro</h5> -->
+        
+                <div id="toolbar" >
+                    <button id="generar" class="btn btn-danger" disabled>
+                        <i class="fa fa-money"></i> Generar asientos
+                    </button>
+    
+                </div>
+            </div>        
+            <div>
+                <small>
+
+                <table id="table"  class="table table-striped table-bordered"
+                    data-url="{% url 'contabilidad:transferenciaspendientes_json' desde hasta %}"
+                    data-filter-control="true"
+                    data-show-search-clear-button="true"
+                    data-show-refresh="true"
+                    data-show-fullscreen="true"
+                    data-show-columns="true"
+                    data-show-columns-toggle-all="true"
+                    data-show-export="true"
+                    data-detail-formatter="detailFormatter"
+                    data-show-pagination-switch="true"
+                    data-pagination="true"
+                    data-page-list="[10, 25, 50, 100, all]"
+                    data-toolbar="#toolbar"
+                    data-id-field="id"
+                    data-click-to-select="true"
+                    >
+                    <thead>
+                        <tr>
+                        <th data-field="state" data-checkbox="true"></th>
+                        <th data-field="Fecha" data-filter-control="input" 
+                        data-sortable="true" >Fecha</th>
+                        <th data-field="Cliente" data-filter-control="input"
+                        data-sortable="true" >Cliente</th>
+                        <th data-field="CuentaOrigen" data-filter-control="input"
+                        data-sortable="true" >Cuenta origen</th>
+                        <th data-field="CuentaDestino" data-filter-control="input"
+                        data-sortable="true" >Cuenta destino</th>
+                        <th data-field="Valor" data-sortable="true" >Valor</th>
+                        </tr>
+                    </thead>
+                </table>
+                </small>
+            </div>
+
+        </div>
+
+    </div>
+ 
+
+{% endblock %}
+
+{% block js_page %}
+<script type="text/javascript" src="{% static 'factorweb/js/listatransferenciaspendientescontabilizar.js' %}">
+</script>
+
+{% endblock %}

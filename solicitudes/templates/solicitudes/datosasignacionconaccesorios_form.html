@@ -1,0 +1,246 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">Negociación</a></li>
+                    <li><a href="{% url 'solicitudes:listasolicitudes' %}">solicitudes</a></li>
+                    <li class="active">facturas con accesorio</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <style>
+        .row-eliminado {
+            background-color: #f8d7da; /* Color de fondo rojo claro */
+            color: #721c24; /* Color de texto rojo oscuro */
+        }
+    </style>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="POST" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal"
+    onsubmit="return checkSubmit();">
+
+    <!-- <div class="col-lg-6"> -->
+    <div class="card">
+            {% csrf_token %}
+        <div class="card-header">
+            <strong>Solicitud con accesorios de factoring</strong> 
+            {% if asignacion.id %} de  {{ asignacion.cxcliente }}  
+            {% else %}  nueva {% endif %} 
+        </div>
+        <div class="card-body card-block">
+                <!-- lista de clientes -->
+            <div class="row form-group">
+                <!-- cliente -->
+                <div class="col-md-2">
+                    <label for="id_cxtipocliente" 
+                        class=" form-control-label">
+                    {{ form.cxcliente.label}}</label>
+                </div>
+                <div class="col-md-5">
+                    {{ form.cxcliente}}
+                </div>
+                <div class="col-md-2">
+                    <label for="id_cxtipocliente" 
+                        class=" form-control-label">
+                    {{ form.cxtipofactoring.label}}</label>
+                </div>
+                <div class="col-md-3">
+                    {{ form.cxtipofactoring}}
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-md-2">
+                    <label for="id_cxactividad" 
+                        class=" form-control-label">
+                    {{form.ncantidaddocumentos.label}}</label>
+                </div>
+                <div class="col-md-1">
+                    {{form.ncantidaddocumentos}}
+                </div>
+                <div class="col-md-2">
+                    <label for="id_cxactividad" class=" form-control-label">
+                    {{form.nvalor.label}}</label>
+                </div>
+                <div class="col-md-2">
+                    {{form.nvalor}}
+                </div>
+                <div class="col-md-5">
+                    {% if asignacion.id %}
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fa fa-dot-circle-o"></i> Actualizar cliente y tipo de factoring
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- parte inferior -->
+            <div class="row">
+                <div class="col ">
+                    <small>
+                    <table id="table"                      
+                        data-show-columns-toggle-all="true"
+                        data-show-export="true"
+                        data-detail-formatter="detailFormatter"
+                        data-minimum-count-columns="2"
+                        data-pagination="false"
+                        data-id-field="id"
+                        data-page-list="[10, 50, all]"
+                        data-show-footer="true"
+                        data-side-pagination="server"
+                        {% if asignacion.id %} 
+                        data-url="{% url 'solicitudes:detallesolicitudconaccesorios' asignacion.id %}"
+                        {% endif %} 
+                        >
+                    </table>
+                    </small>
+
+                </div>
+
+            </div>
+        </div>    
+        <div class="card-footer">
+            <div class="col-md-6">
+                <a href="{% url 'solicitudes:listasolicitudes' %}" 
+                    class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Salir
+                </a>
+                {% if asignacion.id %}
+                    <a href="{% url 'solicitudes:documentoconaccesorios_editar' asignacion.id asignacion.cxcliente_id asignacion.cxtipofactoring_id %}"
+                    class="btn btn-success btn-sm">
+                        <i class="fa fa-plus-circle"></i> Agregar factura
+                    </a>
+                {% else %}
+                    <button class="btn btn-success btn-sm"  role="button"
+                        onclick="return NuevaAsignacion()">  
+                        <i class="fa fa-plus-circle"></i> Agregar factura
+                    </button>
+                {% endif %}
+
+            </div>
+        
+        </div>
+    </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<!-- <script src="{% static 'factorweb/vendors/chosen/chosen.jquery.min.js' %}"></script> -->
+<!-- <script type="text/javascript" src="{% static 'factorweb/js/datosasignacionconaccesorios.js' %}"></script> -->
+<script>
+var enviando = false; //Obligaremos a entrar el if en el primer submit
+var $table = jQuery('#table')
+var selections = []
+const asignacion_id = "{{ asignacion.id }}"
+
+window.onload=function(){
+    initTable();
+};
+
+window.operateEvents = {
+  'click .editar': function (e, value, row, index) {
+    EditarDocumento( row.id)
+  },
+    'click .remove': function (e, value, row, index) {
+      EliminarDocumentoDeSolicitudAsignacion(asignacion_id, row.id,'A', row.Documento)
+  },
+    'click .recuperar': function (e, value, row, index) {
+      RecuperarDocumentoDeSolicitudAsignacion(asignacion_id, row.id,'A', row.Documento)
+    }
+  };
+
+function operateFormatter(value, row, index) {
+    var eliminarClass = row.Eliminado ? 'recuperar' : 'remove';
+    var eliminarTitle = row.Eliminado ? 'Recuperar' : 'Eliminar';
+    var eliminarIcon = row.Eliminado ? 'fa fa-undo' : 'fa fa-trash';
+    return [
+        '<a class="editar" href="javascript:void(0)" title="Editar cheque">',
+        '<i class="fa fa-edit"></i>',
+        '</a>',
+        '<a class="' + eliminarClass + '" href="javascript:void(0)" title="' + eliminarTitle + '">',
+        '<i class="' + eliminarIcon + '"></i>',
+        '</a>'
+    ].join('');
+}
+
+function initTable() {
+
+    $table.bootstrapTable('destroy').bootstrapTable({
+    //   height: 400,
+      locale: "es-EC",
+      columns: [
+        [{title: 'Ref.', field: 'id', rowspan: 2, align: 'center',
+          valign: 'middle', sortable: true,
+          footerFormatter: LineaTotalEnPieDePaginaDeTabla
+        }, {title: 'Deudor', field: 'Comprador', rowspan: 2,
+            align: 'center', valign: 'middle', sortable: true,
+          }, {title: 'Documento', field: 'Documento', rowspan: 2,
+            align: 'center', valign: 'middle', sortable: true,
+          }, {title: 'Emisión', field: 'Emision', rowspan: 2,
+            align: 'center', valign: 'middle', sortable: true,
+          }, {title: 'Cheques', colspan:5, align: 'center'
+        }, {
+            field: 'operate', title: 'Acción', align: 'center',
+          clickToSelect: false, rowspan: 2, events: window.operateEvents
+          ,align: 'center', valign: 'middle', formatter: operateFormatter
+        }],
+        [{field: 'Banco', title: 'Banco',
+          sortable: true, align: 'center'
+        }, {
+          field: 'Cuenta', title: 'Cuenta', sortable: true,
+          align: 'center'
+        }, {
+            field: 'Cheque', title: 'Cheque',
+            sortable: true, align: 'center',
+            footerFormatter: LineaCantidadEnPieDePaginaDeTabla
+          }, {title: 'Vencimiento', field: 'Vencimiento', 
+          align: 'center', valign: 'middle', sortable: true,
+        }, {
+            field: 'Total', title: 'Total', sortable: true,
+            align: 'center', footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+          }]
+          ],
+        rowStyle: function(row, index) {
+            if (row.Eliminado) {
+                return {
+                    classes: 'row-eliminado'
+                };
+            }
+            return {};
+        }
+    })
+}
+
+function NuevaAsignacion(){
+    var cliente_id=capturaValor("id_cxcliente");
+    var tipo_factoring=capturaValor("id_cxtipofactoring");
+    var textoSeleccionado = obtenerTextoSeleccionado('id_cxcliente');
+
+    if (cliente_id == "" || tipo_factoring==""){
+        alert("debe especificar cliente y tipo de factoring")
+    }
+    else{
+        url = '/solicitudes/nuevodocumentoconaccesorios/'
+        +cliente_id+'/'+tipo_factoring+'/'+textoSeleccionado;
+
+        location.href=url
+    }
+    return false
+}
+
+function obtenerTextoSeleccionado(selectId) {
+            var selectElement = document.getElementById(selectId);
+            var selectedText = selectElement.options[selectElement.selectedIndex].text;
+            return selectedText;
+        }
+        
+function EditarDocumento( doc_id){
+  tipo_factoring=capturaValor("id_cxtipofactoring");
+  AbrirModal('/solicitudes/editarchequeaccesorio/'+doc_id+'/'+tipo_factoring )
+}    
+</script>
+{% endblock %}

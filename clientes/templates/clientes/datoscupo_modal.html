@@ -1,0 +1,142 @@
+<div class="modal-dialog modal-md">
+    <div class="modal-content">
+
+        <form  method="post" rol="form" id="frmCupo" class="form-horizontal"
+            {% if consulta.pk %}
+                action="{% url 'clientes:cupo_editar' consulta.pk  %}"
+            {% else %}
+                action="{% url 'clientes:cupo_nuevo' %}"
+            {% endif %}
+            enctype="multipart/form-data" onsubmit="return checkSubmit();">
+            {% csrf_token %}
+            <!-- <div class="col-xl-12 col-md-12 mb-12"> -->
+            <div class="card">
+
+                <div class="card-header">
+                    <strong>Cupo </strong> 
+                    {% if consulta.pk %}
+                        de {{ consulta.cxcomprador }} en {{ consulta.cxcliente }}
+                    {% else %}
+                        Nuevo
+                    {% endif %}
+                </div>
+                
+                <div class="card-body card-block">
+                <!-- <div class="col-lg-6"> -->
+                    <div class="row form-group" {% if consulta.cxcomprador %} hidden {% endif %}>
+                        <div class="col-md-4"><label for="id_cxcomprador" class=" form-control-label"> 
+                            {{ form.cxcomprador.label}}</label></div>
+                        <div class="col-md-8">
+                            {{ form.cxcomprador}}
+                        </div>
+                    </div>
+                    <div class="row form-group" {% if consulta.cxcomprador %} hidden {% endif %}>
+                        <div class="col-md-4"><label for="id_cxcliente" class=" form-control-label"> 
+                            {{ form.cxcliente.label}}</label></div>
+                        <div class="col-md-8">
+                            {{ form.cxcliente}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_cxmoneda" class=" form-control-label">
+                            {{ form.cxmoneda.label}}</label></div>
+                        <div class="col-md-8">
+                            {{ form.cxmoneda}}
+                            <small class="form-text text-muted">Máximo 3 caracteres</small>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_ncupocartera" class=" form-control-label">
+                            {{ form.ncupocartera.label}}</label></div>
+                        <div class="col-md-8">
+                            {{ form.ncupocartera}}
+                        </div>
+                    </div>
+                    <!-- <div class="row form-group">
+                        <div class="col-md-6"><label for="id_cxmodalidadcobranza" class=" form-control-label">
+                            {{ form.cxmodalidadcobranza.label}}</label></div>
+                        <div class="col-md-6">
+                            {{ form.cxmodalidadcobranza}}
+                        </div>
+                    </div> -->
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_lsenotifica" class=" form-control-label"> 
+                            {{ form.lsenotifica.label}}</label></div>
+                        <div class="col-md-8 ">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  consulta.lsenotifica %} checked {% endif %} 
+                                id = "id_lsenotifica" name = "lsenotifica"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_lactivo" class=" form-control-label">
+                            {{ form.lactivo.label}}</label></div>
+                        <div class="col-md-8 ">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  consulta.lactivo %} checked {% endif %} 
+                                id = "id_lactivo" name = "lactivo"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>    
+                <div class="card-footer">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="return CerrarModal()">
+                        <i class="fa fa-ban"></i> Cerrar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+                </div>
+                <!-- Sección para mostrar errores del formulario -->
+                <div id="form-errors" class="alert alert-danger" style="display:none;"></div>
+            </div>
+            <!-- </div> -->
+        </form>
+
+    </div>
+</div>
+
+<script>
+ enviando = false; //Obligaremos a entrar el if en el primer submit
+jQuery(document).ready(function() {
+    jQuery("#frmCupo").on("submit", function(event) {
+        event.preventDefault();
+        var $form = jQuery(this);
+        var url = $form.attr("action");
+        var method = $form.attr("method");
+        var data = new FormData($form[0]);
+
+        jQuery.ajax({
+            url: url,
+            method: method,
+            data: data,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                // Handle success (e.g., close modal, show success message, etc.)
+                jQuery("#popup").modal('hide');
+                location.reload(); // Reload the page to reflect changes
+            },
+            error: function(xhr) {
+                var errors = xhr.responseJSON;
+                console.log(errors);
+                var errorHtml = '<ul>';
+                for (var key in errors) {
+                    if (errors.hasOwnProperty(key)) {
+                        errorHtml += '<li>' + errors[key] + '</li>';
+                    }
+                }
+                errorHtml += '</ul>';
+                jQuery("#form-errors").html(errorHtml).show();
+            }
+        });
+    });
+});     
+</script>

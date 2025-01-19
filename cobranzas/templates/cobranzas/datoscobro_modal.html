@@ -1,0 +1,155 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" rol="form"  class="form-horizontal" name="form"
+                action="{% url 'cobranzas:datos_cobro' id asignacion documento saldo valor_cobrado valor_retenido baja %}"
+            >
+            <!-- <div class="col-md-12"> -->
+                <div class="card">
+
+                    {% csrf_token %}
+                    <div class="card-header">
+                        <strong>Datos del cobro </strong> 
+                    </div>
+                    
+                    <input type="text" id = "id_id"  hidden  value = "{{ id}}" >
+
+                    <div class="card-body card-block">
+                    <!-- <div class="col-lg-6"> -->
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="id_cxbanco" class=" form-control-label">
+                                Asignación</label></div>
+                            <div class="col-md-6">
+                                <input type="text" name = "asignacion_id"  
+                                value = "{{ asignacion}}" disabled>
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="documento_id" class=" form-control-label">
+                                Documento</label></div>
+                            <div class="col-md-6">
+                                <input type="text" name = "documento_id"  
+                                value = "{{ documento}}" disabled>
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-6"><label  class=" form-control-label">
+                                Saldo actual</label></div>
+                            <div class="col-md-6">
+                                <input type="text" id = "saldo_actual_id"  
+                                value = "{{ saldo}}" disabled>
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="id_ctgirador" class=" form-control-label">
+                                Valor recibido</label></div>
+                            <div class="col-md-6">
+                                <input type="number" step="0.01" name = "cobro_id"  id="cobro_id"
+                                value = "{{ valor_cobrado }}">
+                            </div>
+                        </div>
+                        <div class="row form-group" {% if retenciones_y_bajas != 'Si' %} hidden {% endif %}>
+                            <div class="col-md-6"><label for="id_dvencimiento" class=" form-control-label">
+                                Valor retenciones</label></div>
+                            <div class="col-md-6">
+                                <input type="number" step="0.01" id = "retenido_id"  value = "{{ valor_retenido}}">
+                            </div>
+                        </div>
+                        <div class="row form-group" {% if retenciones_y_bajas != 'Si' %} hidden {% endif %}>
+                            <div class="col-md-6"><label for="bajas_id" class=" form-control-label">
+                                Bajas</label></div>
+                            <div class="col-md-6">
+                                <input type="number" step="0.01" id="bajas_id" name="bajas_id" value="{{ baja }}">
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-6"><label for="cheque_nvalor" class=" form-control-label">
+                                Saldo</label></div>
+                            <div class="col-md-6">
+                                <input type="number" id="saldo_id" name="saldo_id" disabled value="0">
+                            </div>
+                        </div>
+                    </div>    
+                    <div class="card-footer">
+                        <button type="buttom" class="btn btn-danger btn-sm" 
+                            onclick="return CerrarModal()">
+                            <i class="fa fa-dot-circle-o"></i> Cerrar
+                        </button>
+                        <button id="btnCobrar" class="btn btn-primary btn-sm">
+                            <i class="fa fa-dot-circle-o"></i> Grabar
+                        </button>
+                        <!-- <button id="button" class="btn btn-secondary">updateCell</button> -->
+                    </div>
+                </div>
+            <!-- </div> -->
+        </form>
+
+    </div>
+
+    <script>
+        var $table = jQuery('#table')
+        var i, saldo_actual , cobro,retenciones,bajas, saldo;
+
+        // configuar cambios en ls campos de valores
+        jQuery('#cobro_id, #retenido_id, #bajas_id')
+            .change(function(){
+                calcular_saldo();
+            });
+
+        // antes de cerrar modal...
+        jQuery("form").submit(function(e){
+
+            // actualizar la tabla con los valores del modal
+            e.preventDefault();
+            
+            i = capturaValor('id_id');
+            cobro = jQuery("#cobro_id").val();
+            retenciones =jQuery('#retenido_id').val();
+            bajas = jQuery('#bajas_id').val();
+            saldo = jQuery('#saldo_id').val();
+
+            $table.bootstrapTable('updateByUniqueId', {
+                id: i,
+                row: {
+                    Cobro: cobro,
+                    Retenido: retenciones,
+                    Bajas: bajas,
+                    SaldoFinal: saldo,
+                }
+            });
+            CerrarModal();
+
+            calcular_sobrepago();
+        });
+
+        function calcular_saldo(){
+            
+            saldo_actual = capturaValor('saldo_actual_id')
+
+            cobro = jQuery("#cobro_id").val();
+            cobro = cobro==="" ? 0 : +cobro;
+            cobro = cobro<0 ? 0 : cobro;
+
+            retenciones =jQuery('#retenido_id').val();
+            retenciones = retenciones==="" ? 0 : +retenciones;
+            retenciones = retenciones<0 ? 0 : retenciones;
+
+            bajas = jQuery('#bajas_id').val();
+            bajas = bajas==="" ? 0 : +bajas;
+            bajas = bajas<0 ? 0 : bajas;
+
+            saldo = saldo_actual - cobro - bajas - retenciones;
+            saldo = Math.round((saldo + Number.EPSILON) * 100) / 100;
+            // nota: si saldo es  negativo dejar en cero afectando
+            // alguna columna
+            
+            jQuery('#cobro_id').val(cobro);
+            jQuery('#retenido_id').val(retenciones);
+            jQuery('#bajas_id').val(bajas);
+            jQuery('#saldo_id').val(saldo);
+
+        };
+        
+        
+    </script>
+</div>

@@ -1,0 +1,123 @@
+{% extends 'bases/home.html' %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">configuración</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li><a href="{% url 'empresa:listapuntosemision' %}">puntos de emisión</a></li>
+                    <li class="active">editar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post"  class="form-horizontal"
+    onsubmit="return checkSubmit();">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <strong>Datos</strong> 
+                de {% if puntoemision %}  {{ puntoemision }} {% else %}  nuevo punto de emisión {% endif %} 
+            </div>
+                {% csrf_token %}
+            <div class="card-body card-block">
+
+                    <div class="row form-group">
+                        <div class="col-12 col-md-6"><label for="id_cxtipoid" class=" form-control-label">
+                            {{ form.cxestablecimiento.label}}
+                        </label></div>
+                        <div class="col col-md-6">
+                            {{ form.cxestablecimiento}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-12 col-md-6"><label for="id_cxtipoid" class=" form-control-label">
+                            {{ form.cxpuntoemision.label}}
+                        </label></div>
+                        <div class="col col-md-6">
+                            {{ form.cxpuntoemision}}
+                        </div>
+                    </div>  
+
+                    <div class="row form-group">
+                        <div class="col-12 col-md-6"><label for="id_cxtipoid" class=" form-control-label">
+                            {{ form.ctdescripcion.label}}
+                        </label></div>
+                        <div class="col col-md-6">
+                            {{ form.ctdescripcion}}
+                        </div>
+                    </div>  
+
+                    <div class="row form-group">
+                        <div class="col-12 col-md-6"><label for="id_ctdireccion" class=" form-control-label">
+                            {{ form.ctdireccion.label}}
+                        </label></div>
+                        <div class="col col-md-6">
+                            {{ form.ctdireccion}}
+                        </div>
+                    </div>  
+
+                    <div class="row form-group">
+                        <div class="col-12 col-md-6"><label for="id_ctdireccion" class=" form-control-label">
+                            {{ form.nultimasecuencia.label}}
+                        </label></div>
+                        <div class="col col-md-6">
+                            {{ form.nultimasecuencia}}
+                        </div>
+                    </div>  
+
+                    <div class="row form-group">
+                        <div class="col-12 col-md-6"><label for="id_lgeneracionxmldocumentoelectronico" class=" form-control-label">
+                            {{ form.lgeneracionxmldocumentoelectronico.label}}
+                        </label></div>
+                        <div class="col col-md-6">
+                            <!-- {{ form.lgeneracionxmldocumentoelectronico}} -->
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  puntoemision.lgeneracionxmldocumentoelectronico %} checked {% endif %} 
+                                id = "id_lgeneracionxmldocumentoelectronico" name = "lgeneracionxmldocumentoelectronico"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>  
+
+                    <div class="row form-group">
+                        <div class="col-12 col-md-6"><label for="id_lactiva" class=" form-control-label">
+                            {{ form.lactiva.label}}
+                        </label></div>
+                        <div class="col col-md-6">
+                            <!-- {{ form.lactiva}} -->
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  puntoemision.lactiva %} checked {% endif %} 
+                                id = "id_lactiva" name = "lactiva"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>  
+
+            </div>    
+
+            <div class="card-footer">
+                <a href="{% url 'empresa:listapuntosemision' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <span class="fa fa-dot-circle-o"></span> Grabar
+                </button>
+                    {{ form.errors}}
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+{% block js_page %}
+<script>
+    enviando = false; //Obligaremos a entrar el if en el primer submit
+</script>
+{% endblock %}

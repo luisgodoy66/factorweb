@@ -1,0 +1,516 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">cobranzas</a></li>
+                    <li><a href="{% url 'cobranzas:listacobranzaspendientesliquidar' %}">por liquidar</a></li>
+                    <li class="active">Liquidación</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal">
+    <div class="col-md-12">
+        <div hidden>
+            <!-- para que dato numerico de contexto no se cambia a coma decimal, usar el filtro floatformt:u-->
+            <!-- <input id='tipo_factoring_id' value="{{ tipo_factoring }}"> -->
+            <!-- <input id="cliente_id" value="{{ cliente }}"> -->
+            <!-- <input id="porcentaje_iva_id" value='{{ porcentaje_iva|floatformat:"2u" }}'> -->
+            <!-- <input id='base_iva_id' value='{{ base_iva|floatformat:"2u" }}'> -->
+            <!-- <input id="iva_id" value='{{ total_iva|floatformat:"2u" }}'> -->
+            <!-- <input id="neto_id" value='{{ neto|floatformat:"2u" }}' name="neto_id"> -->
+            <!-- <input id="vuelto_id" value='{{ total_vuelto|floatformat:"2u" }}' > -->
+            <!-- <input id="sobrepago_id" value='{{ total_sobrepagos|floatformat:"2u" }}'> -->
+            <!-- <input id="gao_id" value='{{ total_gao|floatformat:"2u" }}' > -->
+            <!-- <input id="gaoa_id" value='{{ total_gaoa|floatformat:"2u" }}'> -->
+            <!-- <input id="dc_id" value='{{ total_dc|floatformat:"2u" }}'> -->
+            <!-- <input id="retenciones_id" value='{{ total_cargoretenciones|floatformat:"2u" }}'> -->
+            <!-- <input id="bajas_id" value='{{ total_cargobajas|floatformat:"2u" }}'> -->
+            <!-- <input id="otros_id" value='{{ total_otros_cargos|floatformat:"2u" }}'> -->
+            <!-- <input id="dcv_id" value='{{ total_dcv|floatformat:"2u" }}'> -->
+            <input id="data_cobranzas" value="{{ cobranzas }}">
+            <!-- <input id="tipo_operacion" value="{{ tipo_operacion }}"> -->
+        </div>
+        <div class="card">
+                {% csrf_token %}
+            <div class="card-header">
+                <strong>Liquidación </strong> 
+                de {{ nombredecliente }}
+            </div>
+            <div class="card-body card-block">
+                <div class="col-md-5 ">
+
+                    <div class="row form-group">
+                        <div class="col col-xs-9">
+                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
+                            Vuelto</h5></div>
+                        <div class="col col-md-3 text-right">
+                            {{ total_vuelto }}
+                        </div>
+                    </div>
+                    {% if total_sobrepagos > 0 %}
+                    <div class="row form-group">
+                        <div class="col col-xs-9">
+                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
+                            + Sobrepagos</h5></div>
+                        <div class="col col-md-3 text-right">
+                            {{ total_sobrepagos }}
+                        </div>
+                    </div>  
+                    {% endif %}
+                    <div class="row form-group">
+                        <div class="col col-xs-9">
+                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
+                            - Cargos</h5></div>
+                        <div class="col col-md-3 text-right" id="divCargos">
+                            {{ total_cargos }}
+                        </div>
+                    </div>  
+                    {% if total_dc != 0 %}
+                    <div class="row form-group">
+                        <div class="col-md-1"></div>
+                        <div class="col col-md-6"><label for="id_nvalor" class=" form-control-label">
+                            {{ nombre_dc }}
+                        </label></div>
+                        <div class="col col-md-3 text-right">
+                            {{ total_dc }}
+                        </div>
+                    </div>  
+                    {% endif %}
+                    {% if total_dcv > 0 %}
+                    <div class="row form-group">
+                        <div class="col-md-1"></div>
+                        <div class="col col-md-6"><label for="id_nvalor" class=" form-control-label">
+                            {{ nombre_dc }} vencido
+                        </label></div>
+                        <div class="col col-md-3 text-right">
+                            {{ total_dcv }}
+                        </div>
+                    </div>  
+                    {% endif %}
+                    {% if total_gao != 0 %}
+                    <div class="row form-group">
+                        <div class="col-md-1"></div>
+                        <div class="col col-md-6"><label for="id_nvalor" class=" form-control-label">
+                            {{ nombre_gao }}
+                        </label></div>
+                        <div class="col col-md-3 text-right">
+                            {{ total_gao }}
+                        </div>
+                    </div>  
+                    {% endif %}
+                    {% if total_gaoa > 0 %}
+                    <div class="row form-group">
+                        <div class="col-md-1"></div>
+                        <div class="col col-md-6"><label for="id_nvalor" class=" form-control-label">
+                            {{ nombre_gaoa }}
+                        </label></div>
+                        <div class="col col-md-3 text-right">
+                            {{ total_gaoa }}
+                        </div>
+                    </div>  
+                    {% endif %}
+                    {% if total_cargobajas > 0%}
+                    <div class="row form-group">
+                        <div class="col-md-1"></div>
+                        <div class="col col-md-6"><label for="id_nvalor" class=" form-control-label">
+                            Baja de documentos
+                        </label></div>
+                        <div class="col col-md-3 text-right">
+                            {{ total_cargobajas }}
+                        </div>
+                    </div>  
+                    {% endif %}
+                    {% if total_cargoretenciones > 0%}
+                    <div class="row form-group">
+                        <div class="col-md-1"></div>
+                        <div class="col col-md-6"><label for="id_nvalor" class=" form-control-label">
+                            Retenciones en cobranzas
+                        </label></div>
+                        <div class="col col-md-3 text-right">
+                            {{ total_cargoretenciones }}
+                        </div>
+                    </div>  
+                    {% endif %}
+                    {% for item in otros_cargos %}
+                    <div class="row form-group">
+                        <div class="col-md-1"></div>
+                        <div class="col col-md-6">
+                            <label for="id_notroscargos" class=" form-control-label">{{item}}</label></div>
+                        <div class="col-3 col-md-3">
+                            <input type="number" step="1" class="otros_cargos form-control " value="{{item.nvalor}}" 
+                                data-cargo="{{item}}"
+                                data-cargaiva = {{item.lcargaiva}} min="0" data-idmovimiento="{{item.movimiento.id}}">
+                        </div>
+                    </div>  
+                    {% endfor %}
+
+                    {% if total_iva != 0%}
+                    <!-- <div class="row form-group">
+                        <div class="col-md-1"></div>
+                        <div class="col col-md-6"><label for="id_total_iva" class=" form-control-label">
+                            IVA
+                        </label></div>
+                        <div class="col col-md-3 text-right">
+                            {{ total_iva }}
+                        </div>
+                    </div>   -->
+                    <div class="row form-group">
+                        <div class="col col-xs-9">
+                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
+                            - IVA</h5></div>
+                        <div class="col col-md-3 text-right" id = "divIVA">
+                            {{ total_iva|floatformat:"2u" }}
+                        </div>
+                    </div>  
+                    {% endif %}
+                    {% if total_otros_cargos > 0%}
+                    <div class="row form-group">
+                        <div class="col col-xs-9">
+                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
+                            - Cargos no operativos</h5></div>
+                        <div class="col col-md-3 text-right">
+                            {{ total_otros_cargos }}
+                        </div>
+                    </div>  
+                    {% endif %}
+                    <div class="row form-group">
+                        <div class="col col-md-9">
+                            <h5 for="id_nvalor" class=" form-control-label">
+                            = {{form.nneto.label}}
+                            </h5></div>
+                        <div class="col col-md-3 text-right" id="divNeto">
+                            {{ neto }}
+                        </div>
+                    </div>  
+                    <div class="dropdown-divider"></div>
+                    <h5 class="heading-title mb-1 text-secondary">Datos del cliente</h5>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_nvalor" class=" form-control-label">
+                            Cuenta de transferencia
+                        </label></div>
+                        <div class="col-md-6">
+                            {{ cuenta_transferencia}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col col-md-4"><label for="id_nvalor" class=" form-control-label">
+                            Beneficiario de cheque
+                        </label></div>
+                        <div class="col-md-6">
+                            {{ beneficiario}}
+                        </div>
+                    </div>  
+                </div>
+                <div class="col-md-7">
+                    <h5 class="heading-title mb-1 text-secondary">Detale de cargos</h5>
+
+                    <small>
+
+                    <input type="text" hidden id="data_cargos" value="{{ data }}">
+                    <table id="table"  class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                          <th data-field="cobranza">Cobranza</th>
+                          <th data-field="asignacion">Asignación</th>
+                          <th data-field="documento">Documento</th>
+                          <th data-field="dias_vencidos">Días vencidos</th>
+                          <th data-field="dias_negociados">Días negociados</th>
+                          <th data-field="valor_cobrado">Aplicado a cartera</th>
+                          <th data-field="tasa_dc">Tasa DC %</th>
+                          {% if total_dc > 0 %}
+                          <th data-field="dc">{{nombre_dc}} negociado</th>
+                          {% endif %}
+                          {% if total_dcv > 0 %}
+                          <th data-field="dcv">{{nombre_dc}} vencido</th>
+                          {% endif %}
+                          {% if total_gao > 0 %}
+                          <th data-field="tasa_gao">Tasa GAO</th>
+                          <th data-field="gao">{{ nombre_gao }}</th>
+                          {% endif %}
+                          {% if total_gaoa > 0 %}
+                          <th data-field="tasa_gaoa">Tasa GAOA</th>
+                          <th data-field="gaoa">{{nombre_gaoa}}</th>
+                          {% endif %}
+                          {% if total_cargoretenciones > 0 %}
+                          <th data-field="retenciones">Retenciones</th>
+                          {% endif %}
+                          {% if total_cargobajas > 0 %}
+                          <th data-field="bajas">Bajas</th>
+                          {% endif %}
+                        </tr>
+                      </thead>
+                    </table>
+
+                    </small>
+                    
+                    <div {%  if total_otros_cargos == 0 %} hidden {% endif %}>
+                        <br>
+                        <h5 class="heading-title mb-1 text-secondary">Detalle de cargos no operativos</h5>
+                        <small>
+                            <input type="text" hidden id="data_otros_cargos" value="{{ cargos_no_operativos }}">
+                            <table id="table_otros"  class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                <th data-field="descripcion">Cargo</th>
+                                <th data-field="codigo_cobranza">Operación</th>
+                                <th data-field="fecha">Fecha</th>
+                                <th data-field="valor">Valor</th>
+                                </tr>
+                            </thead>
+                            </table>
+                        </small>
+                    </div>
+
+                    <div class="dropdown-divider"></div>
+                    <h5 class="heading-title mb-1 text-secondary">Datos para el pago</h5>
+                    <div class="row form-group">
+                        <div class="col col-md-2"><label for="id_ctinstrucciondepago" class=" form-control-label">
+                            {{ form.ctinstrucciondepago.label}}</label></div>
+                        <div class="col-9 col-md-10">
+                            {{ form.ctinstrucciondepago}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-2"><label for="id_dliquidacion" class=" form-control-label">
+                        {{ form.dliquidacion.label}}
+                        </label></div>
+                        <div class="col-md-4">
+                            {{ form.dliquidacion}}
+                        </div>
+                        <div class="col-md-2"><label for="id_ddesembolso" class=" form-control-label">
+                        {{ form.ddesembolso.label}}
+                        </label></div>
+                        <div class="col-md-4">
+                            {{ form.ddesembolso}}
+                        </div>
+                    </div>
+                </div>
+            </div>    
+            <div class="card-footer">
+                <a href="{% url 'cobranzas:listacobranzaspendientesliquidar' %}" class="btn btn-danger btn-sm ">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="button" onclick="LiquidarCobranza()" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Aceptar
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+{% block js_page %}
+<!-- <script type="text/javascript" src="{% static 'factorweb/js/datosliquidacioncobranzas.js' %}"></script> -->
+<script>
+var $table = jQuery('#table')
+// data_cargos y data_cargos se cargan desde elementos tipo json.dumps que vienen 
+// en el contexto
+const cobranzastxt =capturaValor("data_cobranzas")
+const cargostxt =capturaValor("data_cargos")
+const otroscargostxt =capturaValor("data_otros_cargos")
+const tipo_operacion = "{{ tipo_operacion }}"
+const vuelto = "{{ total_vuelto|floatformat:'2u' }}"
+const sobrepago = "{{ total_sobrepagos|floatformat:'2u' }}"
+const gao = '{{ total_gao|floatformat:"2u" }}'
+const gaoa = '{{ total_gaoa|floatformat:"2u" }}'
+const dc = '{{ total_dc|floatformat:"2u" }}'
+const retenciones = '{{ total_cargoretenciones|floatformat:"2u" }}'
+const bajas = '{{ total_cargobajas|floatformat:"2u" }}'
+const total_cargos_no_operativos = '{{ total_otros_cargos|floatformat:"2u" }}'
+const dcv = '{{ total_dcv|floatformat:"2u" }}'
+const base_iva_tasas = parseFloat('{{ base_iva|floatformat:"2u" }}')
+const base_noiva_tasas = parseFloat('{{ base_noiva|floatformat:"2u" }}')
+const porcentaje_iva = '{{ porcentaje_iva|floatformat:"2u" }}'
+const cliente = "{{ cliente }}"
+const tipo_factoring = "{{ tipo_factoring }}"
+const total_cargos_operativos = '{{ total_cargos|floatformat:"2u" }}'
+var neto = '{{ neto|floatformat:"2u" }}'
+var iva = '{{ total_iva|floatformat:"2u" }}'
+var base_iva_otros = 0
+var base_noiva_otros = 0
+
+var $tableotros = jQuery('#table_otros')
+
+window.onload= function(){
+
+    // para cargar la data en la tabla se necesita convertir, se usa JSON.parse
+    data = JSON.parse(cargostxt)
+
+    $table.bootstrapTable('destroy').bootstrapTable({
+        data: data,
+        fixedColumns: true,
+        fixedNumber: 3
+    })
+    // para cargar la data en la tabla se necesita convertir, se usa JSON.parse
+    otros = JSON.parse(otroscargostxt)
+
+    $tableotros.bootstrapTable('destroy').bootstrapTable({
+        data: otros,
+    })
+    // calcular con los valores iniciales de otros cargos
+    agregaOtrosCargos(vuelto
+            , sobrepago
+            , total_cargos_operativos
+            , total_cargos_no_operativos
+        )
+
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Selecciona todos los inputs con la clase 'otros_cargos'
+    const inputs = document.querySelectorAll('.otros_cargos');
+
+    // Función que se ejecutará cuando el valor de un input cambie
+    function onInputChange(event) {
+        console.log('Nuevo valor:', event.target.value);
+        // Aquí puedes agregar más lógica para manejar el cambio de valor
+        agregaOtrosCargos(vuelto
+            , sobrepago
+            , total_cargos_operativos
+            , total_cargos_no_operativos
+        )
+    }
+
+    // Agrega el controlador de eventos 'change' a cada input
+    inputs.forEach(input => {
+        input.addEventListener('change', onInputChange);
+    });
+});
+
+function agregaOtrosCargos(vuelto, sobrepago, cargos_operativos, cargos_no_operativos) {
+    const nvuelto = parseFloat(vuelto)
+    const nsobrepago = parseFloat(sobrepago)
+    const ncargos_operativos = parseFloat(cargos_operativos)
+    const ncargos_no_operativos = parseFloat(cargos_no_operativos)
+    base_iva_otros = obtenerAcumuladoBaseIVAOtrosCargos()
+    base_noiva_otros = obtenerAcumuladoBaseNoIVAOtrosCargos()
+    var ivaotroscargos = 0
+    var total_cargos_operativos = parseFloat(ncargos_operativos + base_iva_otros + base_noiva_otros).toFixed(2)
+    inicializarInner("divCargos",total_cargos_operativos)
+    
+    iva = parseFloat(((base_iva_tasas + base_iva_otros) * porcentaje_iva / 100)).toFixed(2);
+
+    inicializarInner("divIVA",iva)
+
+    neto = (nvuelto 
+        + nsobrepago 
+        - ncargos_operativos 
+        - ncargos_no_operativos
+        - base_iva_otros 
+        - base_noiva_otros 
+        - iva).toFixed(2)
+
+    inicializarInner("divNeto",neto)    
+}
+
+function obtenerAcumuladoBaseIVAOtrosCargos() {
+    const inputs = document.querySelectorAll('.otros_cargos'); // Selecciona todos los inputs con la clase 'otros_cargos'
+    let acumulado = 0;
+    inputs.forEach(input => {
+        // Verifica si data-cargaiva es 'True'
+        if (input.getAttribute('data-cargaiva') === 'True') {
+            const valor = parseFloat(input.value) || 0; // Convierte el valor a número, asume 0 si no es numérico
+            acumulado += valor; // Suma al acumulado
+        }
+    });
+    console.log('Acumulado con carga IVA:', acumulado); // Muestra el acumulado en la consola
+    return acumulado; // Retorna el valor acumulado por si necesitas usarlo
+}
+
+function obtenerAcumuladoBaseNoIVAOtrosCargos() {
+    const inputs = document.querySelectorAll('.otros_cargos'); // Selecciona todos los inputs con la clase 'otros_cargos'
+    let acumulado = 0;
+    inputs.forEach(input => {
+        // Verifica si data-cargaiva es 'True'
+        if (input.getAttribute('data-cargaiva') != 'True') {
+            const valor = parseFloat(input.value) || 0; // Convierte el valor a número, asume 0 si no es numérico
+            acumulado += valor; // Suma al acumulado
+        }
+    });
+    console.log('Acumulado con carga no IVA:', acumulado); // Muestra el acumulado en la consola
+    return acumulado; // Retorna el valor acumulado por si necesitas usarlo
+}
+
+function obtenerArregloCargos() {
+    const inputs = document.querySelectorAll('.otros_cargos'); // Selecciona todos los inputs con la clase 'otros_cargos'
+    let arreglo = [];
+    inputs.forEach(input => {
+        // Verifica si data-cargaiva es 'True'
+            const Id = input.getAttribute('data-idmovimiento');
+            const Cargo = input.getAttribute('data-cargo');
+            const Valor = parseFloat(input.value) || 0; // Convierte el valor a número, asume 0 si no es numérico
+            const CargaIVA = input.getAttribute('data-cargaiva');
+            arreglo.push({Id, Cargo, Valor, CargaIVA}); 
+    });
+    console.log('arreglo de cargos:', arreglo); // Muestra el acumulado en la consola
+    return arreglo; 
+}
+
+function LiquidarCobranza(){
+    MensajeConfirmacion("Aceptar liquidación con desembolso el " 
+      + capturaValor("id_ddesembolso") +"?",function(){
+
+        var cargos = JSON.stringify(obtenerArregloCargos())
+        //para pasar el detalle al stored procedure se envia como llegó (json.dumps)
+        var objeto={
+            "fecha_liquidacion":capturaValor("id_dliquidacion"),
+            "ddesembolso": capturaValor("id_ddesembolso"), 
+            "sinstruccionpago": capturaValor("id_ctinstrucciondepago"),
+        //   "id_cliente":capturaValor("cliente_id"),
+            "id_cliente":cliente,
+        //   "tipo_factoring":capturaValor("tipo_factoring_id"), 
+            "tipo_factoring":tipo_factoring, 
+        //   "base_iva": capturaValor("base_iva_id"),
+            // "base_iva": base_iva,
+        //   "porcentaje_iva": capturaValor("porcentaje_iva_id"),
+            "porcentaje_iva": porcentaje_iva,
+        //   "niva": capturaValor("iva_id"),
+            "niva": iva,
+            "documentos": cargostxt,
+        //   "vuelto":capturaValor("vuelto_id"),
+            "vuelto":vuelto,
+        //   "sobrepago":capturaValor("sobrepago_id"),
+            "sobrepago":sobrepago,
+        //   "gao":capturaValor("gao_id"),
+            "gao":gao,
+        //   "gaoa":capturaValor("gaoa_id"),
+            "gaoa":gaoa,
+        //   "descuentodecartera":capturaValor("dc_id"),
+            "descuentodecartera":dc,
+        //   "descuentodecarteravencido":capturaValor("dcv_id"),
+            "descuentodecarteravencido":dcv,
+        //   "retenciones":capturaValor("retenciones_id"),
+            "retenciones":retenciones,
+        //   "bajas":capturaValor("bajas_id"),
+            "bajas":bajas,
+        //   "otros":capturaValor("otros_id"),
+            "otros":total_cargos_no_operativos,
+        //   "neto":capturaValor("neto_id"),
+            "neto":neto,
+            "cobranzas" : cobranzastxt,
+            "otros_cargos_no_operativos":otroscargostxt,
+            "arr_otros_cargos": cargos,
+            "base_iva" : base_iva_tasas + base_iva_otros,
+            "base_noiva" : base_noiva_tasas + base_noiva_otros,
+        }
+
+        fetchPostear("/cobranzas/liquidacion/"+tipo_operacion, objeto, function(data){
+          // regresar a la lista de solicitudes
+          window.location.href = "/cobranzas/listacobranzaspendientesliquidar";
+          // en una nueva ventana abrir el reporte de asignación
+          url = window.location.origin
+          url = url + "/cobranzas/reporteliquidacion/"+data;
+          window.open( url);
+        })
+    })
+      
+  }
+      
+</script>
+{% endblock %}

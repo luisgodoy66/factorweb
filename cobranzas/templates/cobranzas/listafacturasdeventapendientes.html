@@ -1,0 +1,112 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">operaciones</a></li>
+                    <li><a href="#">facturas de venta</a></li>
+                    <li class="active">facturas pendientes</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div class="card-body">
+            <div class="dropdown float-right">
+                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <div class="dropdown-menu-content">
+                        <!-- <a class="dropdown-item" href="{% url 'operaciones:listadatosoperativos' %}">Nuevo</a> -->
+                        <a class="dropdown-item" href="#">Imprimir</a>
+                    </div>
+                </div>
+            </div>
+            <h4 class="mb-0">
+                <span class="count">{{ consulta.count }}</span>
+            </h4>
+
+            {% if not consulta %}
+            <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                <span class="badge badge-pill badge-danger">Sin registros</span>
+                {% if error %}
+                    {{ error }}
+                {% else %}
+                 No hay notas de débito por ampliaciones de plazo pendientes hasta la fecha.
+               {% endif %}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            {% endif %}
+            <div>
+                <h5 class="heading-title mb-1 text-secondary">Formas de cobro</h5>
+        
+                <div id="toolbar" >
+                    <button id="cobroconefectivo" class="btn btn-danger" disabled>
+                        <i class="fa fa-money"></i> Efectivo
+                    </button>
+                    <button id="cobroconcheque" class="btn btn-danger" disabled>
+                        <i class="fa fa-money"></i> cheque
+                    </button>
+                    <button id="cobrocontransferencia" class="btn btn-danger" disabled>
+                        <i class="fa fa-money"></i> Transferencia
+                    </button>
+                    <button id="cobroconmovimiento" class="btn btn-danger" disabled>
+                        <i class="fa fa-retweet"></i> Movimiento contable
+                    </button>
+    
+                </div>
+            </div>        
+            <div >
+                <table id="table"  class="table table-striped table-bordered"
+                    data-url="{% url 'cobranzas:listafacturaspendientes_json' %}"
+                    data-filter-control="false"
+                    data-show-search-clear-button="true"
+                    data-show-refresh="true"
+                    data-show-fullscreen="true"
+                    data-show-columns="true"
+                    data-show-columns-toggle-all="true"
+                    data-show-export="true"
+                    data-detail-formatter="detailFormatter"
+                    data-show-pagination-switch="true"
+                    data-pagination="true"
+                    data-page-list="[10, 25, 50, 100, all]"
+                    data-toolbar="#toolbar"
+                    data-id-field="id"
+                    data-search="true"
+                    data-click-to-select="true"
+                    >
+                    <thead>
+                        <tr>
+                        <th data-field="state" data-checkbox="true"></th>
+                        <th data-field="Cliente" data-sortable="true" >Cliente</th>
+                        <th data-field="Numero" data-sortable="true" >Número</th>
+                        <th data-field="Fecha" data-sortable="true" >Fecha</th>
+                        <th data-field="Operacion" data-sortable="true" >Asignación</th>
+                        <th data-field="TipoFactoring" data-sortable="true" >Tipo de factoring</th>
+                        <th data-field="Valor" data-sortable="true" >Valor</th>
+                        <th data-field="Saldo" data-sortable="true" >Saldo</th>
+                        <th data-field="operate" data-sortable="true" data-events="window.operateEvents"
+                            data-formatter="operateFormatter" data-click-to-select="false">Acción</th>
+                        </tr>
+                    </thead>
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+ 
+
+{% endblock %}
+
+{% block js_page %}
+<script type="text/javascript" src="{% static 'factorweb/js/listafacturasdeventapendientes.js' %}"></script>
+{% endblock %}

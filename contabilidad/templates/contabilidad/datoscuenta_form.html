@@ -1,0 +1,97 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">contabilidad</a></li>
+                    <li><a href="{% url 'contabilidad:listacuentascontables' %}">cuentas</a></li>
+                    <li class="active">nueva</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmConfirmacion" enctype="multipart/form-data" class="form-horizontal">
+    <div class="col-lg-6">
+        <div class="card ">
+        {% csrf_token %}
+        <div class="card-header">
+            <strong>Datos de la cuenta</strong> 
+        </div>
+        <div class="card-body">
+            <!-- cargos -->
+            <div class="col-lg-12">
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.cxcuenta.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.cxcuenta}}
+                        </div>
+                            
+                    </div>
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.ctcuenta.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.ctcuenta}}
+                        </div>
+                            
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.nnivel.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.nnivel}}
+                        </div>                        
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.ldetalle.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            <!-- {{ form.ldetalle}} -->
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  cuentas.ldetalle %} checked {% endif %} 
+                                id = "id_ldetalle" name = "ldetalle"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>                        
+                    </div>
+
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <a href="{% url 'contabilidad:listacuentascontables' %}" 
+                class="btn btn-danger btn-sm">
+                <i class="fa fa-ban"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa fa-dot-circle-o"></i> Grabar
+            </button>
+
+        </div>
+
+    </div>
+    </div>
+ 
+</form>
+{% endblock %}

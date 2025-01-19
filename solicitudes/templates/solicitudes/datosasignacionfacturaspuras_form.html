@@ -1,0 +1,253 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">Negociación</a></li>
+                    <li><a href="{% url 'solicitudes:listasolicitudes' %}" >solicitudes</a></li>
+                    <li class="active">facturas puras</li>                  
+                </ol>
+            </div>
+        </div>
+    </div>
+    <style>
+        .row-eliminado {
+            background-color: #f8d7da; /* Color de fondo rojo claro */
+            color: #721c24; /* Color de texto rojo oscuro */
+        }
+    </style>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal"
+    onsubmit="return checkSubmit();">
+    <!-- <div class="col-lg-6"> -->
+    <div class="card">
+            {% csrf_token %}
+        <div class="card-header">
+            <strong>Solicitud de factoring</strong> 
+            {% if asignacion.id %} de  {{ asignacion.cxcliente }}  
+            {% else %}  nueva {% endif %} 
+        </div>
+        <div class="col-6 col-md-6" hidden>
+            <input id="asignacion_id" name="asignacion_id" value="{{ asignacion.id }}">
+            <input id="id_cliente" name="id_cliente" value="{{ asignacion.cxcliente_id }}">
+        </div>
+        <div class="card-body card-block">
+            <!-- lista de clientes -->
+            <div class="row form-group">
+                <!-- cliente -->
+                <div class="col-md-2">
+                    <label for="id_cxtipocliente" 
+                        class=" form-control-label">
+                    {{ form.cxcliente.label}}</label>
+                </div>
+                <div class="col-md-5">
+                    {{ form.cxcliente}}
+                </div>
+                <!-- tipo de factoring -->
+                <div class="col-md-2"><label for="id_cxtipofactoring" 
+                    class=" form-control-label">
+                    {{ form.cxtipofactoring.label}}</label>
+                </div>
+                <div class="col-md-3">
+                    {{ form.cxtipofactoring}}
+                </div>
+            </div>
+            <!-- numero de documentos -->
+            <div class="row form-group">
+                <div class="col-md-2"><label for="id_ncantidaddocumentos" 
+                    class=" form-control-label">
+                    {{form.ncantidaddocumentos.label}}</label>
+                </div>
+                <div class="col-md-1">
+                    {{form.ncantidaddocumentos}}
+                </div>
+                <div class="col-md-2"><label for="id_nvalor" 
+                    class=" form-control-label">
+                    {{form.nvalor.label}}</label>
+                </div>
+                <div class="col-md-2">
+                    {{form.nvalor}}
+                </div>
+                <div class="col-md-5">
+                    {% if asignacion.id %}
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fa fa-dot-circle-o"></i> Actualizar cliente y tipo de factoring
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- parte inferior -->
+            <small>
+            <div class="row">
+
+                <div class="col col-xs-12">
+                        
+                    <table id="table"                      
+                        data-show-columns-toggle-all="true"
+                        data-show-export="true"
+                        data-detail-formatter="detailFormatter"
+                        data-minimum-count-columns="2"
+                        data-pagination="false"
+                        data-id-field="id"
+                        data-page-list="[10, 50, all]"
+                        data-show-footer="true"
+                        data-side-pagination="server"
+                        {% if asignacion.id %} 
+                        data-url="{% url 'solicitudes:detallesolicitudfacturaspuras' asignacion.id %}"
+                        {% endif %} 
+                        >
+                    </table>
+
+                </div>
+
+            </div>
+            </small>
+        </div>    
+        <div class="card-footer">
+            <div class="col-md-6">
+                <a href="{% url 'solicitudes:listasolicitudes' %}" 
+                class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Salir
+                </a>
+                <button class="btn btn-success btn-sm"  role="button"
+                    {% if asignacion.id %}
+                        onclick="return AbrirModal(
+                            '{% url 'solicitudes:facturaspuras_editar' asignacion.id asignacion.cxcliente_id asignacion.cxtipofactoring_id %}')"
+                    {% else %}
+                        onclick="return NuevaAsignacion()"
+                    {% endif %} 
+                    >  
+                    <i class="fa fa-plus-circle"></i> Agregar factura
+                </button>
+
+            </div>
+        </div>
+    </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<!-- <script type="text/javascript" src="{% static 'factorweb/js/datosasignacionfacturaspuras.js' %}"></script> -->
+<script>
+var enviando = false; //Obligaremos a entrar el if en el primer submit
+var $table = jQuery('#table')
+var selections = []
+var cliente_id = capturaValor("id_cliente")
+var asignacion_id = capturaValor("asignacion_id")
+
+window.onload=function(){
+
+    // inicializar tabla
+    initTable();
+    // // cerrar side bar
+    // CerrarSideBar();
+  
+};
+
+window.operateEvents = {
+  'click .editar': function (e, value, row, index) {
+    EditarDocumento(asignacion_id,cliente_id,capturaValor("id_cxtipofactoring"), row.id)
+  },
+    'click .remove': function (e, value, row, index) {
+      EliminarDocumentoDeSolicitudAsignacion(asignacion_id, row.id,'F', row.Documento)
+    //   nota: debería actualizar el total negociado y la cantidad de documentos
+    // aunque el proceso si cambió esos valores en la base de datos
+  },
+    'click .recuperar': function (e, value, row, index) {
+      RecuperarDocumentoDeSolicitudAsignacion(asignacion_id, row.id,'F', row.Documento)
+    }
+};
+
+function operateFormatter(value, row, index) {
+    var eliminarClass = row.Eliminado ? 'recuperar' : 'remove';
+    var eliminarTitle = row.Eliminado ? 'Recuperar' : 'Eliminar';
+    var eliminarIcon = row.Eliminado ? 'fa fa-undo' : 'fa fa-trash';
+    return [
+        '<a class="editar" href="javascript:void(0)" title="Editar cheque">',
+        '<i class="fa fa-edit"></i>',
+        '</a>',
+        '<a class="' + eliminarClass + '" href="javascript:void(0)" title="' + eliminarTitle + '">',
+        '<i class="' + eliminarIcon + '"></i>',
+        '</a>'
+    ].join('');
+}
+
+function initTable() {
+
+    $table.bootstrapTable('destroy').bootstrapTable({
+    //   height: 400,
+      locale: "es-EC",
+      columns: [
+        [{title: 'Ref.', field: 'id', rowspan: 2, align: 'center',
+          valign: 'middle', sortable: true,
+          footerFormatter: LineaTotalEnPieDePaginaDeTabla
+        }, {title: 'Deudor', field: 'Comprador', rowspan: 2,
+            align: 'center', valign: 'middle', sortable: true,
+            footerFormatter: LineaCantidadEnPieDePaginaDeTabla
+          }, {title: 'Documento', field: 'Documento', rowspan: 2,
+            align: 'center', valign: 'middle', sortable: true,
+          }, {title: 'Emisión', field: 'Emision', rowspan: 2,
+            align: 'center', valign: 'middle', sortable: true,
+          }, {title: 'Vencimiento', field: 'Vencimiento', rowspan: 2,
+            align: 'center', valign: 'middle', sortable: true,
+          }, {title: 'Valores', colspan: 5, align: 'center'
+        }, {
+            field: 'operate', title: 'Acción', align: 'center',rowspan: 2,
+          clickToSelect: false, events: window.operateEvents,valign: 'middle',
+          formatter: operateFormatter
+        }],
+        [{field: 'ValorAntesDeIVA', title: 'Antes de IVA',
+          sortable: true, footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla,
+          align: 'center'
+        }, {
+          field: 'IVA', title: 'IVA', sortable: true,
+          align: 'center', footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+        }, {
+            field: 'Retenciones', title: 'Retenciones',
+            sortable: true, align: 'center',
+            footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+        }, {
+            field: 'NoNegociado', title: 'Descartado',
+            sortable: true, align: 'center',
+            footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+          }, {
+            field: 'Total', title: 'Negociado', sortable: true,
+            align: 'center', footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+          }]
+      ],
+      rowStyle: function(row, index) {
+            if (row.Eliminado) {
+                return {
+                    classes: 'row-eliminado'
+                };
+            }
+            return {};
+        }
+
+    })
+}
+
+function NuevaAsignacion(){
+  cliente_id=capturaValor("id_cxcliente");
+  tipo_factoring=capturaValor("id_cxtipofactoring");
+
+  if (cliente_id == "" || tipo_factoring==""){
+    alert("debe especificar cliente y tipo de factoring")
+  }
+  else{
+    return AbrirModal('/solicitudes/nuevasolicitudfacturaspuras/'+cliente_id
+    +'/'+tipo_factoring);
+  }
+}
+
+function EditarDocumento(asignacion_id, cliente_id, tipofactoring_id, doc_id){
+  AbrirModal('/solicitudes/editardocumentofacturaspuras/'+asignacion_id 
+    +'/'+cliente_id +'/'+tipofactoring_id+'/'+doc_id )
+}    
+</script>
+{% endblock %}

@@ -1,0 +1,178 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">contabilidad</a></li>
+                    <li><a href="#">cuentas</a></li>
+                    <li class="active">cuentas operativas</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmConfirmacion" enctype="multipart/form-data" class="form-horizontal">
+    <div class="card bg-flat-color-0">
+        {% csrf_token %}
+        <div class="card-header">
+            <strong>Asignar cuentas operativas</strong> 
+        </div>
+        <div class="card-body">
+            <!-- cargos -->
+            <div class="col-lg-12">
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.pagoconcajachica.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.pagoconcajachica}}
+                        </div>
+                            
+                    </div>
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.sobrepago.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.sobrepago}}
+                        </div>
+                            
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.cuentaconjunta.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.cuentaconjunta}}
+                        </div>                        
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.protesto.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.protesto}}
+                        </div>                        
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.comisionchequesprotestados.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.comisionchequesprotestados}}
+                        </div>                        
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.cuentaivaganado.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.cuentaivaganado}}
+                        </div>                        
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.ivadiferido.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.ivadiferido}}
+                        </div>                        
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.liquidacionennegativo.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.liquidacionennegativo}}
+                        </div>                        
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.cuentagananciaejercicio.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.cuentagananciaejercicio}}
+                        </div>                        
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.cuentaperdidaejercicio.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.cuentaperdidaejercicio}}
+                        </div>                        
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.cuentagananciaejercicioanterior.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.cuentagananciaejercicioanterior}}
+                        </div>                        
+                    </div>
+
+                    <div class="row form-group">
+        
+                        <div class="col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">
+                            {{ form.cuentaperdidaejercicioanterior.label}}</label>
+                        </div>
+                        <div class="col-md-9">
+                            {{ form.cuentaperdidaejercicioanterior}}
+                        </div>                        
+                    </div>
+
+
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <a href="{% url 'bases:dashboard' %}" 
+                class="btn btn-danger btn-sm">
+                <i class="fa fa-ban"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa fa-dot-circle-o"></i> Grabar
+            </button>
+
+        </div>
+
+
+    </div>
+ 
+</form>
+{% endblock %}

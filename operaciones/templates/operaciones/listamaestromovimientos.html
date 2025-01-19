@@ -1,0 +1,85 @@
+{% extends 'bases/home.html' %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">configuración</a></li>
+                    <li><a href="#">Tablas</a></li>
+                    <li class="active">Movimientos</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div class="card-body">
+            <div class="dropdown float-right">
+                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <div class="dropdown-menu-content">
+                        <a class="dropdown-item" href="{% url 'operaciones:movimiento_nuevo' %}">Nuevo</a>
+                        <a class="dropdown-item" href="#">Imprimir</a>
+                    </div>
+                </div>
+            </div>
+            <h4 class="mb-0">
+                <span class="count">{{ consulta.count }}</span>
+            </h4>
+
+            {% if not consulta %}
+            <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                <span class="badge badge-pill badge-danger">Sin registros</span>
+                {% if error %}
+                    {{ error }}
+                {% else %}
+                 No hay movimientos.
+               {% endif %}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            {% endif %}
+
+            <!-- <div class="content"> -->
+
+                <table class="table table-striped table-bordered" id="bootstrap-data-table-export">
+                    <thead>
+                        <th>Código</th>
+                        <th>Descripción</th>
+                        <th>Afecta a cartera</th>
+                        <th>Signo</th>
+                        <th>Es item de factura</th>
+                        <th>Es cargo (No ítem factura)</th>
+                        <th class="all">Acciones</th>
+                    </thead>
+                    <tbody>
+                        {% for item in consulta %}
+                        <tr>
+                            <td>{{ item.cxmovimiento }}</td>
+                            <td>{{ item.ctmovimiento }}</td>
+                            <td>{{ item.lcolateral|yesno:'Si,No' }}</td>
+                            <td>{{ item.cxsigno }}</td>
+                            <td>{{ item.litemfactura|yesno:'Si,No' }}</td>
+                            <td>{{ item.lcargo|yesno:'Si,No' }}</td>
+                            <td>
+                                <a href="{% url 'operaciones:movimiento_editar' item.id %}"  title="Editar"
+                                    class="btn btn-warning btn-sm" role="button"><i class="fa fa-edit"></i></a>
+                                <a href="#" class="btn btn-danger btn-sm" role="button"><i class="fa fa-exclamation"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            <!-- </div> -->
+
+        </div>
+
+    </div>
+ 
+
+{% endblock %}
+

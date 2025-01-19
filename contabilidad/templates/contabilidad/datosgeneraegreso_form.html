@@ -1,0 +1,204 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">contabilidad</a></li>
+                    <li><a href="#">procesos</a></li>
+                    <li><a href="{% url 'contabilidad:listadesembolsospendientes' %}">generar egresos</a></li>
+                    <li class="active">{{operacion}}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmGenera" enctype="multipart/form-data" class="form-horizontal">
+    <!-- <div class="col-lg-6"> -->
+        <div class="card">
+            {% csrf_token %}
+            <div class="card-header">
+                <strong>Generar comprobante de egreso</strong> 
+            </div>
+            <div class="card-body card-block">
+                <!-- columna izquierda -->
+                <div class="col-lg-6">
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="id_puntoemision" class=" form-control-label">
+                               {{form.cxbeneficiario.label}}</label></div>
+                        <div class="col-md-8">{{form.cxbeneficiario}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="id_cxnumerofactura" class=" form-control-label">
+                               {{form.ctrecibidopor.label}}</label></div>
+                        <div class="col-md-8">{{form.ctrecibidopor}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="id_demision" class=" form-control-label">
+                               {{form.demision.label}}</label></div>
+                        <div class="col-md-8">{{form.demision}}</div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="id_ctconcepto" class=" form-control-label">
+                               Concepto de diario</label></div>
+                        <div class="col-md-8">
+                            <textarea type="text" class="form-control" 
+                            required id="concepto" rows="3" name="concepto">{{concepto}}
+                            </textarea>
+                        </div>
+                    </div>
+
+                    {% if forma_pago != 'EFE' %}
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">
+                               {{form.cxcuentapago.label}}</label></div>
+                        <div class="col-md-8">{{form.cxcuentapago}}</div>
+                    </div>
+                    {% endif %}
+                    {% if forma_pago == 'CHE' %}
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">
+                               {{form.ctcheque.label}}</label></div>
+                        <div class="col-md-8">{{form.ctcheque}}</div>
+                    </div>
+                    {% endif %}
+                    {% if forma_pago == 'TRA' %}
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">
+                               {{form.cxcuentadestino.label}}</label></div>
+                        <div class="col-md-8">{{form.cxcuentadestino}}</div>
+                    </div>
+                    {% endif %}
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">
+                               {{form.nvalor.label}}</label></div>
+                        <div class="col-md-8">{{form.nvalor}}</div>
+                    </div>
+
+
+                </div>
+                <div class="col-lg-6">
+                    {% if forma_pago == 'TRA' %}
+                    <div class="col-md-12">
+                        <div class="alert alert-info" role="alert">
+                            Para registrar nuevas cuentas bancarias del cliente use <a href="{% url 'clientes:listacuentasbancarias' %}"
+                             class="alert-link">este link</a>.
+                        </div>
+                    </div>
+                    {% endif %}
+    
+                </div>  
+            </div>    
+            
+            <div class="card-footer">
+                <a href="{% url 'contabilidad:listadesembolsospendientes' %}" 
+                class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="button" onclick="GenerarEgreso()" 
+                class="btn btn-primary btn-sm ">
+                    <i class="fa fa-dot-circle-o"></i> Aceptar
+                </button>
+            </div>
+        </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<!-- <script type="text/javascript" src="{% static 'factorweb/js/datosgeneraegreso.js' %}"></script> -->
+<script>
+    const id_factura = "{{id_factura}}";
+    const id_desembolso = "{{id_desembolso}}";
+    const forma_pago = "{{forma_pago}}";
+
+window.onload=function(){
+
+jQuery("#frmGenera").submit(function(e){
+    e.preventDefault();
+    var formData = jQuery("form").serializeArray();
+    var token = jQuery("[name=csrfmiddlewaretoken]").val();
+    // console.log(formData);
+    jQuery.ajax({
+        method:"POST",
+        headers: {'X-CSRFToken': token },
+        data: formData
+    })
+    .done(function(r,textStatus,xhr){
+        if(xhr.status=200){
+            location.href = "/contabilidad/listadesembolsospendientes";
+            window.open('/contabilidad/imprimircomprobanteegreso/'+xhr.responseText);
+        }
+        else{
+            alert(textStatus);
+        }
+    }).fail(function (error) {
+        MensajeError(error.responseText);
+    });
+});
+
+}
+
+function GenerarEgreso(){
+cuenta_pago = 'null'
+numero_cheque = 'null'
+cuenta_destino = 'null'
+
+if (forma_pago == 'CHE') {
+    numero_cheque = capturaValor("id_ctcheque")
+}
+if (forma_pago == 'TRA') {
+    cuenta_destino=capturaValor("id_cxcuentadestino")
+    if (cuenta_destino==''){
+        alert('Se especificó transferencia pero no se ha determinado cuenta de destino')
+        return false;
+    }
+}
+if (forma_pago != 'EFE') {
+    cuenta_pago = capturaValor("id_cxcuentapago")
+}
+
+MensajeConfirmacion("Aceptar generación de egreso ?",function(){
+
+var objeto={
+    "pscxbeneficiario" :capturaValor("id_cxbeneficiario"),
+    "psrecibidopor" :capturaValor("id_ctrecibidopor"),
+    "pid_cuentapago": cuenta_pago,
+    "pscheque": numero_cheque,
+    "pid_cuentadestino": cuenta_destino,
+    "concepto" : capturaValor("concepto"), 
+    "pdemision" :capturaValor("id_demision"),
+    "pnvalor" :capturaValor("id_nvalor"),
+    "pid_factura" :id_factura,
+    "pid_desembolso" :id_desembolso,
+    "psforma_pago": forma_pago,
+        }
+        
+fetchPostear("/contabilidad/generaregresodiario/", objeto, function(data){
+    // regresar a la lista de generar factura
+    window.location.href = "/contabilidad/listadesembolsospendientes";
+    // en una nueva ventana abrir el reporte de asiento
+    url = window.location.origin
+    url = url + "/contabilidad/imprimircomprobanteegreso/"+data;
+    window.open( url);
+    
+  })
+})
+
+}
+
+</script>
+{% endblock %}

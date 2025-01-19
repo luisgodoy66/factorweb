@@ -1,0 +1,295 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Participantes</a></li>
+                    <li><a href="#">Clientes</a></li>
+                    <li><a href="{% url 'clientes:listaclientes' %}">ficha general</a></li>
+                    <li class="active">editar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal"
+    onsubmit="return checkSubmit();">
+<!-- <div class="col-lg-6"> -->
+    <div class="card">
+        {% csrf_token %}
+        <div class="card-header">
+            <strong>Ficha general</strong> 
+            de  {{ nombrecliente }}
+        </div>
+        <div class="card-body card-block">
+            <!-- columna izquierda -->
+            <div class="col-lg-5">
+                
+                <div class="row form-group">
+                    <div class="col-md-5">
+                        {{ form.ctnombrecorto.label}}
+                    </div>
+                    <div class="col-md-7">
+                        {{ form.ctnombrecorto}}
+                        <small class="form-text text-muted">Nombre de fantasía</small>
+                    </div>
+                </div>  
+
+                <div class="row form-group">
+                    <div class="col-md-5">
+                        {{form.cxtipoempresa.label}}
+                    </div>
+                    <div class="col-md-7">
+                        {{form.cxtipoempresa}}
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-5">
+                        {{form.ctcontacto.label}}
+                    </div>
+                    <div class="col-md-7">
+                        {{form.ctcontacto}}
+                        <small class="form-text text-muted">Persona de contacto</small>
+                    </div>
+                </div>
+
+                <div class="row form-group">
+                    <div class="col-md-5">
+                        {{form.ladministrasocios.label}}
+                    </div>
+                    <div class="col-md-7">
+                        <!-- {{form.ladministrasocios}} -->
+                        <label class="switch switch-3d switch-success mr-3">
+                            <input type="checkbox" class="switch-input" 
+                            {% if  datoscliente.ladministrasocios %} checked {% endif %} 
+                            id = "id_ladministrasocios" name = "ladministrasocios"> 
+                            <span class="switch-label"></span> 
+                            <span class="switch-handle"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="row form-group">
+                    <div class="col-md-5">
+                        {{form.ladministraindividual.label}}
+                    </div>
+                    <div class="col-md-7">
+                        <!-- {{form.ladministraindividual}} -->
+                        <label class="switch switch-3d switch-success mr-3">
+                            <input type="checkbox" class="switch-input" 
+                            {% if  datoscliente.ladministraindividual %} checked {% endif %} 
+                            id = "id_ladministraindividual" name = "ladministraindividual"> 
+                            <span class="switch-label"></span> 
+                            <span class="switch-handle"></span>
+                        </label>
+                </div>
+                </div>
+
+                <div class="row form-group">
+                    <div class="col-md-5">
+                        {{form.ctobjetosocial.label}}
+                    </div>
+                    <div class="col-md-7">
+                        {{form.ctobjetosocial}}
+                    </div>
+                </div> 
+            </div>
+            <!-- columna derecha -->
+            <div class="col-lg-7">
+                <div class="default-tab">
+                    <nav>
+                        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                            <a class="nav-item nav-link active" id="nav-home-tab" 
+                                data-toggle="tab" href="#nav-home" role="tab" 
+                                aria-controls="nav-home" aria-selected="true">Representante legal 1</a>
+                            <a class="nav-item nav-link" id="nav-profile-tab" 
+                            data-toggle="tab" href="#nav-profile" role="tab" 
+                            aria-controls="nav-profile" aria-selected="false">Representante legal 2</a>
+                            <a class="nav-item nav-link" id="nav-contact-tab" 
+                            data-toggle="tab" href="#nav-contact" role="tab" 
+                            aria-controls="nav-contact" aria-selected="false">Representante legal 3</a>
+                        </div>
+                    </nav>
+                    <div class="tab-content pl-3 pt-2" id="nav-tabContent">
+                        <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                                <div class="row form-group">
+                                    <div class="col-md-6">
+                                        {{form.cxrepresentante1.label}}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{form.cxrepresentante1}}
+                                        <!-- <small class="form-text text-muted">Máximo 100 caracteres</small> -->
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col-md-6">
+                                        {{form.ctrepresentante1.label}}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{form.ctrepresentante1}}
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col-md-6">
+                                        {{form.ctcargorepresentante1.label}}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{form.ctcargorepresentante1}}
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col-md-6">
+                                        {{form.dvencimientocargorepresentante1.label}}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{form.dvencimientocargorepresentante1}}
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col-md-6">
+                                        {{form.cxestadocivilrepresentante1.label}}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{form.cxestadocivilrepresentante1}}
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col-md-6">
+                                        {{form.cttelefonorepresentante1.label}}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{form.cttelefonorepresentante1}}
+                                    </div>
+                                </div>
+
+                        </div>
+                        <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                            <div class="row form-group">
+                                <div class="col-md-6">
+                                    {{form.cxrepresentante2.label}}
+                                </div>
+                                <div class="col-md-6">
+                                    {{form.cxrepresentante2}}
+                                    <!-- <small class="form-text text-muted">Máximo 100 caracteres</small> -->
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-6">
+                                    {{form.ctrepresentante2.label}}
+                                </div>
+                                <div class="col-md-6">
+                                    {{form.ctrepresentante2}}
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-6">
+                                    {{form.ctcargorepresentante2.label}}
+                                </div>
+                                <div class="col-md-6">
+                                    {{form.ctcargorepresentante2}}
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-6">
+                                    {{form.dvencimientocargorepresentante2.label}}
+                                </div>
+                                <div class="col-md-6">
+                                    {{form.dvencimientocargorepresentante2}}
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-6">
+                                    {{form.cxestadocivilrepresentante2.label}}
+                                </div>
+                                <div class="col-md-6">
+                                    {{form.cxestadocivilrepresentante2}}
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-6">
+                                    {{form.cttelefonorepresentante2.label}}
+                                </div>
+                                <div class="col-md-6">
+                                    {{form.cttelefonorepresentante2}}
+                                </div>
+                            </div>
+                    </div>
+                        <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+                            <div class="row form-group">
+                                <div class="col-md-6">
+                                    {{form.cxrepresentante3.label}}
+                                </div>
+                                <div class="col-md-6">
+                                    {{form.cxrepresentante3}}
+                                    <!-- <small class="form-text text-muted">Máximo 100 caracteres</small> -->
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-6">
+                                    {{form.ctrepresentante3.label}}
+                                </div>
+                                <div class="col-md-6">
+                                    {{form.ctrepresentante3}}
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-6">
+                                    {{form.ctcargorepresentante3.label}}
+                                </div>
+                                <div class="col-md-6">
+                                    {{form.ctcargorepresentante3}}
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-6">
+                                    {{form.dvencimientocargorepresentante3.label}}
+                                </div>
+                                <div class="col-md-6">
+                                    {{form.dvencimientocargorepresentante3}}
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-6">
+                                    {{form.cxestadocivilrepresentante3.label}}
+                                </div>
+                                <div class="col-md-6">
+                                    {{form.cxestadocivilrepresentante3}}
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-6">
+                                    {{form.cttelefonorepresentante3.label}}
+                                </div>
+                                <div class="col-md-6">
+                                    {{form.cttelefonorepresentante3}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                
+            </div>
+        </div>    
+        
+        <div class="card-footer">
+            <a href="{% url 'clientes:listaclientes' %}" class="btn btn-danger btn-sm">
+                <i class="fa fa-ban"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa fa-dot-circle-o"></i> Grabar y continuar
+            </button>
+        </div>
+    </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<script>
+    enviando = false; //Obligaremos a entrar el if en el primer submit
+</script>
+{% endblock %}

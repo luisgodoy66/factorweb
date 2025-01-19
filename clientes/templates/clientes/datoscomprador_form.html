@@ -1,0 +1,180 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Participantes</a></li>
+                    <li><a href="#">deudores</a></li>
+                    <li><a href="{% url 'clientes:listacompradores' %}">Ficha general</a></li>
+                    <li class="active">editar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal"
+    onsubmit="return checkSubmit();">
+    <!-- <div class="col-lg-6"> -->
+        <div class="card">
+            {% csrf_token %}
+            <div class="card-header">
+                <strong>Ficha general</strong> 
+                de {% if datosparticipante %} {{ datosparticipante }} {% else %}  nuevo comprador {% endif %} 
+            </div>
+            <div class="card-body card-block">
+                <!-- columna izquierda -->
+                <div class="col-lg-6">
+                    
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cxtipoid" class=" form-control-label">
+                            {{form.cxtipoid.label}}
+                        </label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.cxtipoid}}
+                            <!-- <small class="form-text text-muted">Máximo 13 caracteres</small> -->
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cxparticipante" class=" form-control-label">
+                            {{form.cxparticipante.label}}
+                        </label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.cxparticipante}}
+                            <small class="form-text text-mut ed">Máximo 13 caracteres</small>
+                        </div>                            
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_ctnombre" class=" form-control-label">
+                            {{form.ctnombre.label}}
+                        </label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.ctnombre}}
+                            <small class="form-text text-muted">Máximo 100 caracteres</small></div>
+                    </div>
+                    <!-- <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cxlocalidad" class=" form-control-label">Localidad</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.cxlocalidad}}
+                        </div>
+                    </div> -->
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_ctdireccion" class=" form-control-label">
+                            {{form.ctdireccion.label}}
+                        </label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.ctdireccion}}
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cttelefono1" class=" form-control-label">
+                            {{form.cttelefono1.label}}
+                        </label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.cttelefono1}}
+                            <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cttelefono2" class=" form-control-label">
+                            {{form.cttelefono2.label}}
+                        </label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.cttelefono2}}
+                            <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
+                    </div>
+
+                </div>
+                <!-- columna derecha -->
+                <div class="col-lg-6">
+
+                     <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_ctcelular" class=" form-control-label">
+                            {{form.ctcelular.label}}
+                        </label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.ctcelular}}
+                            <small class="form-text text-muted">Máximo 30 caracteres. Incluya el código de país</small></div>
+                    </div>
+                   <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_ctemail" class=" form-control-label">
+                            {{form.ctemail.label}}
+                        </label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.ctemail}}
+                            <small class="text-muted form-text">Ingrese el email principal</small></div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_ctemail2" class=" form-control-label">
+                            {{form.ctemail2.label}}
+                        </label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.ctemail2}}
+                            <small class="text-muted form-text">Ingrese el email secundario</small></div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_ctgirocomercial" class=" form-control-label">
+                            {{form.ctgirocomercial.label}}
+                        </label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.ctgirocomercial}}
+                        </div>
+                    </div> 
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cxactividad" class=" form-control-label">
+                            {{form.actividad.label}}
+                        </label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.actividad}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_dinicioactividades" class=" form-control-label">
+                            {{form.dinicioactividades.label}}
+                        </label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.dinicioactividades}}
+                        </div>
+                    </div>
+                            
+                </div>
+            </div>    
+            
+            <div class="card-footer">
+                <a href="{% url 'clientes:listacompradores' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Grabar
+                </button>
+            </div>
+           <!-- Sección para mostrar errores del formulario -->
+           {#% if form_submitted and form.errors %#}
+           {% if form.errors %}
+           <div class="alert alert-danger" role="alert">
+               <ul>
+                   {% for field, errors in form.errors.items %}
+                       {% for error in errors %}
+                           <!-- <li>{{ field }}: {{ error }}</li> -->
+                           <li>{{ error }}</li>
+                       {% endfor %}
+                   {% endfor %}
+               </ul>
+           </div>
+       {% endif %}
+        </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<script>
+    enviando = false; //Obligaremos a entrar el if en el primer submit
+    
+</script>
+{% endblock %}
