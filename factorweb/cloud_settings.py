@@ -28,8 +28,15 @@ DEBUG = True
 # CSRF_TRUSTED_ORIGINS=['http://factorweb-dev2.us-east-2.elasticbeanstalk.com/']
 # # ALLOWED_HOSTS = ['factorweb-dev.us-east-2.elasticbeanstalk.com','localhost', '127.0.0.1','*']
 # # CSRF_TRUSTED_ORIGINS=['http://factorweb-dev.us-east-2.elasticbeanstalk.com/']
-ALLOWED_HOSTS = ['codigobambu.com','www.codigobambu.com','*']
-CSRF_TRUSTED_ORIGINS=['https://codigobambu.com/','https://www.codigobambu.com/']
+ALLOWED_HOSTS = [
+    'margarita.codigobambu.com', 
+    'www.margarita.codigobambu.com',
+    '*'
+    ]
+CSRF_TRUSTED_ORIGINS=[
+    'https://margarita.codigobambu.com/',
+    'https://www.margarita.codigobambu.com/'
+    ]
 
 
 # Application definition
@@ -133,16 +140,8 @@ USE_I18N = True
 
 USE_TZ = False
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.0/howto/static-files/
-
-STATIC_URL = 'static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = (os.path.join(BASE_DIR,'static'),)
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL='/'
@@ -156,11 +155,17 @@ AWS_SECRET_ACCESS_KEY=os.getenv("AWS_SECRET_ACCESS_KEY")
 # AWS_SECRET_ACCESS_KEY=os.environ["AWS_SECRET_ACCESS_KEY"]
 
 AWS_STORAGE_BUCKET_NAME="factorweb-bucket"
+AWS_S3_CUSTOM_DOMAIN="%s.s3.amazonaws.com" % AWS_STORAGE_BUCKET_NAME
+AWS_S3_FILE_OVERWRITE = False
+ADMIN_MEDIA_PREFIX = '/static/admin/'
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/4.0/howto/static-files/
+STATIC_URL = 'static/'
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = (os.path.join(BASE_DIR,'static'),)
 
 DEFAULT_FILE_STORAGE="storages.backends.s3boto3.S3Boto3Storage"
 STATICFILES_STORAGE="storages.backends.s3boto3.S3Boto3Storage"
 # STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
-AWS_S3_CUSTOM_DOMAIN="%s.s3.amazonaws.com" % AWS_STORAGE_BUCKET_NAME
-AWS_S3_FILE_OVERWRITE = False
-ADMIN_MEDIA_PREFIX = '/static/admin/'
