@@ -34,7 +34,7 @@ urlpatterns = [
          , name="cuentacontable_nueva"),
     path('cuentacontableneditar/<int:pk>',CuentasEdit.as_view()
          , name="cuentacontable_editar"),
-    path('imprimirplandecuentas/>',ImpresionPlanDeCuentas
+    path('imprimirplandecuentas/',ImpresionPlanDeCuentas
          , name="imprimirplandecuentas"),
     path('buscarcuentasespeciales/',BuscarCuentasEspeciales
          , name="buscarcuentasespeciales"),

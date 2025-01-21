@@ -37,7 +37,7 @@ class SRIConsultationService:
 # Ejemplo de uso
 if __name__ == "__main__":
     wsdl_url = "https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl"
-    access_key = "2211202401099337376100120060010000123590001235917"  # Reemplazar con clave de acceso real
+    access_key = "0701202501179143070000120010020000060524117597515"  # Reemplazar con clave de acceso real
 
     service = SRIConsultationService(wsdl_url)
     result = service.consult_document_status(access_key)

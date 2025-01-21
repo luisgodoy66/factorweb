@@ -4,6 +4,8 @@ from django.http import HttpResponse
 from django.template.loader import get_template
 # from xhtml2pdf import pisa
 from django.contrib.staticfiles import finders
+from django.templatetags.static import static
+
 from .models import Asignacion, Documentos, ChequesAccesorios, Cheques_quitados,\
     Pagares, Pagare_detalle
 from cobranzas.models import Documentos_protestados
@@ -14,6 +16,15 @@ from solicitudes import models as SolicitudModels
 from bases.models import Usuario_empresa
 from weasyprint import HTML, CSS
 FACTURAS_PURAS = 'F'
+  # Construir las rutas completas a las hojas de estilos
+stylesheet_paths = [
+    # static('factorweb/vendors/bootstrap/dist/css/bootstrap.min.css'),
+    static('factorweb/vendors/font-awesome/css/font-awesome.min.css'),
+    static('factorweb/vendors/datatables.net-bs4/css/dataTables.bootstrap4.min.css'),
+    static('factorweb/vendors/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css'),
+    static('factorweb/assets/css/style.css'),
+]
+
 
 # def link_callback(uri, rel):
 #         """
@@ -141,7 +152,8 @@ def ImpresionAsignacion(request, asignacion_id):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -229,6 +241,7 @@ def ImpresionAntiguedadCartera(request, ):
                 +cvm90+cv90+cv60+cv30+cx30+cx60+cx90+cxm90,
         'empresa': id_empresa.empresa,
                 }
+    # return render(request, template_path, context)
 
     # # Create a Django response object, and specify content_type as pdf
     # response = HttpResponse(content_type='application/pdf')
@@ -245,13 +258,12 @@ def ImpresionAntiguedadCartera(request, ):
     #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
     # return response
 
-    # Construir la ruta completa a la hoja de estilos
-    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+    stylesheets = [CSS(path) for path in stylesheet_paths]
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
-    )
+        stylesheets=stylesheet_paths
+        )
 
     # Crear la respuesta HTTP con el archivo PDF
     response = HttpResponse(pdf_file, content_type='application/pdf')
@@ -354,7 +366,8 @@ def ImpresionFacturasPendientes(request, clientes = None):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -406,7 +419,8 @@ def ImpresionAccesoriosPendientes(request, id_cliente=None):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -469,7 +483,8 @@ def ImpresionResumenAsignaciones(request, desde, hasta, clientes=None):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -517,7 +532,8 @@ def ImpresionPagare(request, pagare_id):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -575,7 +591,8 @@ def ImpresionPagaresPendientes(request, clientes=None):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF

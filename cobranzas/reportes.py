@@ -7,6 +7,7 @@ from django.template.loader import get_template
 from django.shortcuts import render
 from django.db.models import Sum, Case, When, FloatField, DecimalField, Q
 from django.contrib.staticfiles import finders
+from django.templatetags.static import static
 
 from .models import  Documentos_cabecera, Documentos_detalle, Liquidacion_cabecera\
         , Liquidacion_detalle, Recuperaciones_cabecera, Recuperaciones_detalle\
@@ -20,6 +21,14 @@ from contabilidad.models import Factura_venta
 # from xhtml2pdf import pisa
 from weasyprint import HTML, CSS
 
+  # Construir las rutas completas a las hojas de estilos
+stylesheet_paths = [
+    # static('factorweb/vendors/bootstrap/dist/css/bootstrap.min.css'),
+    static('factorweb/vendors/font-awesome/css/font-awesome.min.css'),
+    static('factorweb/vendors/datatables.net-bs4/css/dataTables.bootstrap4.min.css'),
+    static('factorweb/vendors/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css'),
+    static('factorweb/assets/css/style.css'),
+]
 # def link_callback(uri, rel):
 #         """
 #         Convert HTML URIs to absolute system paths so xhtml2pdf can access those
@@ -164,7 +173,8 @@ def ImpresionCobranzaCartera(request, cobranza_id):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -307,7 +317,8 @@ def ImpresionLiquidacion(request, liquidacion_id):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -494,7 +505,8 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -581,7 +593,8 @@ def ImpresionCobranzaCargos(request, cobranza_id):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -642,7 +655,8 @@ def ImpresionProtestosPendientes(request, id_cliente = None):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -789,7 +803,8 @@ def ImpresionAmpliacionDePlazo(request, ampliacion_id):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -875,7 +890,8 @@ def ImpresionDetalleCobranzas(request, desde, hasta, clientes = None):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -960,7 +976,8 @@ def ImpresionDetalleRecuperaciones(request, desde, hasta, clientes = None):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -1067,7 +1084,8 @@ def ImpresionCobranzaCuota(request, cobranza_id):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF

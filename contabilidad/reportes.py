@@ -9,6 +9,7 @@ from django.template.loader import get_template
 from django.shortcuts import render
 from django.db.models import Sum, Count
 from django.contrib.staticfiles import finders
+from django.templatetags.static import static
 
 from .models import  Diario_cabecera, Transaccion, Plan_cuentas, Control_meses
 
@@ -19,6 +20,14 @@ from weasyprint import HTML, CSS
 
 from bases.views import enviarPost, enviarConsulta
 
+  # Construir las rutas completas a las hojas de estilos
+stylesheet_paths = [
+    # static('factorweb/vendors/bootstrap/dist/css/bootstrap.min.css'),
+    static('factorweb/vendors/font-awesome/css/font-awesome.min.css'),
+    static('factorweb/vendors/datatables.net-bs4/css/dataTables.bootstrap4.min.css'),
+    static('factorweb/vendors/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css'),
+    static('factorweb/assets/css/style.css'),
+]
 # def link_callback(uri, rel):
 #         """
 #         Convert HTML URIs to absolute system paths so xhtml2pdf can access those
@@ -104,7 +113,8 @@ def ImpresionDiarioContable(request, diario_id):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -169,7 +179,8 @@ def ImpresionComprobanteEgreso(request, diario_id):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -211,7 +222,8 @@ def ImpresionPlanDeCuentas(request):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -273,7 +285,8 @@ def ImpresionBalanceGeneral(request, año, mes):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
@@ -332,7 +345,8 @@ def ImpresionPerdidasyGanancias(request, año, mes,):
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=[CSS(stylesheet_path)]
+        # stylesheets=[CSS(stylesheet_path)]
+        stylesheets=stylesheet_paths
     )
 
     # Crear la respuesta HTTP con el archivo PDF
