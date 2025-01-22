@@ -168,8 +168,8 @@ def ImpresionCobranzaCartera(request, cobranza_id):
     #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
     # return response
 
-    # Construir la ruta completa a la hoja de estilos
-    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+    # # Construir la ruta completa a la hoja de estilos
+    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
@@ -312,8 +312,8 @@ def ImpresionLiquidacion(request, liquidacion_id):
     #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
     # return response
 
-    # Construir la ruta completa a la hoja de estilos
-    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+    # # Construir la ruta completa a la hoja de estilos
+    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
@@ -500,8 +500,8 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
     #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
     # return response
 
-    # Construir la ruta completa a la hoja de estilos
-    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+    # # Construir la ruta completa a la hoja de estilos
+    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
@@ -588,8 +588,8 @@ def ImpresionCobranzaCargos(request, cobranza_id):
     #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
     # return response
 
-    # Construir la ruta completa a la hoja de estilos
-    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+    # # Construir la ruta completa a la hoja de estilos
+    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
@@ -650,8 +650,8 @@ def ImpresionProtestosPendientes(request, id_cliente = None):
     #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
     # return response
 
-    # Construir la ruta completa a la hoja de estilos
-    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+    # # Construir la ruta completa a la hoja de estilos
+    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
@@ -798,8 +798,8 @@ def ImpresionAmpliacionDePlazo(request, ampliacion_id):
     #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
     # return response
 
-    # Construir la ruta completa a la hoja de estilos
-    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+    # # Construir la ruta completa a la hoja de estilos
+    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
@@ -885,8 +885,8 @@ def ImpresionDetalleCobranzas(request, desde, hasta, clientes = None):
     #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
     # return response
 
-    # Construir la ruta completa a la hoja de estilos
-    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+    # # Construir la ruta completa a la hoja de estilos
+    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
@@ -971,8 +971,8 @@ def ImpresionDetalleRecuperaciones(request, desde, hasta, clientes = None):
     #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
     # return response
 
-    # Construir la ruta completa a la hoja de estilos
-    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+    # # Construir la ruta completa a la hoja de estilos
+    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
@@ -1079,8 +1079,8 @@ def ImpresionCobranzaCuota(request, cobranza_id):
     #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
     # return response
 
-    # Construir la ruta completa a la hoja de estilos
-    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+    # # Construir la ruta completa a la hoja de estilos
+    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(

@@ -108,8 +108,8 @@ def ImpresionDiarioContable(request, diario_id):
     #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
     # return response
 
-    # Construir la ruta completa a la hoja de estilos
-    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+    # # Construir la ruta completa a la hoja de estilos
+    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
@@ -174,8 +174,8 @@ def ImpresionComprobanteEgreso(request, diario_id):
     #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
     # return response
 
-    # Construir la ruta completa a la hoja de estilos
-    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+    # # Construir la ruta completa a la hoja de estilos
+    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
@@ -217,8 +217,8 @@ def ImpresionPlanDeCuentas(request):
     #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
     # return response
 
-    # Construir la ruta completa a la hoja de estilos
-    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+    # # Construir la ruta completa a la hoja de estilos
+    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
@@ -280,8 +280,8 @@ def ImpresionBalanceGeneral(request, año, mes):
     #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
     # return response
 
-    # Construir la ruta completa a la hoja de estilos
-    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+    # # Construir la ruta completa a la hoja de estilos
+    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
@@ -340,8 +340,8 @@ def ImpresionPerdidasyGanancias(request, año, mes,):
     #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
     # return response
 
-    # Construir la ruta completa a la hoja de estilos
-    stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
+    # # Construir la ruta completa a la hoja de estilos
+    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
 
     # Generar el archivo PDF
     pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
