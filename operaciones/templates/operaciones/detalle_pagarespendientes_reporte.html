@@ -11,7 +11,7 @@
     <style type="text/css">
         @page { 
             size: A4;
-            margin: 1cm;
+            margin: 0cm;
             size:  portrait;
         }
         .table thead th {
@@ -39,14 +39,12 @@
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <table >
+                <table class="table" style="width:100%">
                     <tbody>
                         <tr>
-                            <td colspan="2"><h2>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h2></td>
-                            <td></td>
-                            <td colspan="2"><h1>Listado de pagarés pendientes </h1></td>
-                            <td></td>
-                            <td>Impresión: {% now "Y-m-d" %}</td>
+                            <td colspan="2"><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
+                            <td class="centrado" colspan="2"><h3>LISTADO DE PAGARÉS PENDIENTES</h3></td>
+                            <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -68,8 +66,8 @@
                             {% regroup detalle by pagare.cxcliente as cartera_list %}
                             {% for cliente in cartera_list %}
                             <tr>
-                                <td class="subrayado" colspan="5"><h3>{{ cliente.grouper }}</h3></td>
-                                <td class="subrayado numero"><h3> {{cliente.list|running_saldo2|intcomma }}</h3></td>
+                                <td class="subrayado" colspan="5"><strong>{{ cliente.grouper }}</strong></td>
+                                <td class="subrayado numero"><strong> {{cliente.list|running_saldo2|intcomma }}</strong></td>
                             </tr>
                                 {% for item in cliente.list %}
                                 <tr></tr>

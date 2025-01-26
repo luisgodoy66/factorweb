@@ -2,7 +2,8 @@ from random import choices
 from django.db import models
 from django.forms import BooleanField
 from django.db.models import Sum, Q, F, ExpressionWrapper, DateField, CharField\
-    , Value
+    , Value, DurationField, IntegerField
+from django.db.models.functions import Cast, ExtractDay
 from django.db.models.functions import Concat
 from django.utils.dateparse import parse_date
 
@@ -241,9 +242,14 @@ class Documentos_Manager(models.Manager):
                             , "nsaldo")\
                     .annotate(vencimiento = ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
                                                               , output_field=DateField()),
-                              dias_vencidos = (date.today() - F('dvencimiento')),
-                              dias_negociados = F('dvencimiento')-F('cxasignacion__ddesembolso'),
-                              )\
+                            dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
+                                                                            , output_field=DateField()))
+                                                , IntegerField()),
+                            dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('dvencimiento')
+                                                                          -F('cxasignacion__ddesembolso')
+                                                                          , output_field=DateField()))
+                                                , IntegerField()),
+                            )\
                     .order_by('cxcliente__cxcliente__ctnombre')
     
     def TotalCarteraCliente(self, id_cliente):
@@ -436,9 +442,14 @@ class ChequesAccesorios_Manager(models.Manager):
                         , "chequequitado__nsaldo")\
                 .annotate(vencimiento =ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
                                                          , output_field = DateField() ),
-                          dias_vencidos = date.today() - F('dvencimiento'),
-                          dias_negociados = F('dvencimiento')-F('documento__cxasignacion__ddesembolso'),
-                          )\
+                        dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
+                                                                            , output_field=DateField()))
+                                                , IntegerField()),
+                        dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('dvencimiento')
+                                                                          -F('documento__cxasignacion__ddesembolso')
+                                                                          , output_field=DateField()))
+                                                , IntegerField()),
+                        )\
                 .order_by('documento__cxcliente__cxcliente__ctnombre')
 
     def cheques_pendientes(self, id_empresa):
@@ -456,9 +467,14 @@ class ChequesAccesorios_Manager(models.Manager):
                         , "ntotal")\
                 .annotate(vencimiento =ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
                                                          , output_field = DateField() ),
-                          dias_vencidos = date.today() - F('dvencimiento'),
-                          dias_negociados = F('dvencimiento')-F('documento__cxasignacion__ddesembolso'),
-                          descripcion =  Concat('cxbanco__ctbanco'
+                        dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
+                                                                            , output_field=DateField()))
+                                                , IntegerField()),
+                        dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('dvencimiento')
+                                                                          -F('documento__cxasignacion__ddesembolso')
+                                                                          , output_field=DateField()))
+                                                , IntegerField()),
+                        descripcion =  Concat('cxbanco__ctbanco'
                                                 , Value(' CTA.') 
                                                 , 'ctcuenta'
                                                 , Value(' CH/')
@@ -481,9 +497,14 @@ class ChequesAccesorios_Manager(models.Manager):
                         , "ntotal")\
                 .annotate(vencimiento =ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
                                                          , output_field = DateField() ),
-                          dias_vencidos = date.today() - F('dvencimiento'),
-                          dias_negociados = F('dvencimiento')-F('documento__cxasignacion__ddesembolso'),
-                          descripcion =  Concat('cxbanco__ctbanco'
+                        dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
+                                                                            , output_field=DateField()))
+                                                , IntegerField()),
+                        dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('dvencimiento')
+                                                                          -F('documento__cxasignacion__ddesembolso')
+                                                                          , output_field=DateField()))
+                                                , IntegerField()),
+                        descripcion =  Concat('cxbanco__ctbanco'
                                                 , Value(' CTA.') 
                                                 , 'ctcuenta'
                                                 , Value(' CH/')
@@ -890,6 +911,9 @@ class Pagares(ClaseModelo):
 
     def valor_total(self):
         return self.ncapital + self.ninteres
+    
+    def tasa_porciento(self):
+        return self.ntasainteres*100
     
 class Cuotas_pagare_Manager(models.Manager):
     

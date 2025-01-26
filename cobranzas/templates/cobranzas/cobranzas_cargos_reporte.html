@@ -1,3 +1,4 @@
+{% load filtros %}
 {% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
@@ -10,7 +11,7 @@
     <style type="text/css">
         @page {
             size: A4;
-            margin: 1cm;
+            margin: 0cm;
             size:  portrait;
         }
         .table thead th {
@@ -19,6 +20,9 @@
         }
         .table td.numero{
             text-align: right;
+        }
+        .table td.centrado{
+            text-align: center;
         }
         .alerta { 
         font-family: sans-serif; 
@@ -32,14 +36,12 @@
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <table >
+                <table class="table" style="width:100%">
                     <tbody>
                         <tr>
-                            <td colspan="2"><h2>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h2></td>
-                            <td></td>
-                            <td colspan="2" class="center"><h1>Cobranza de cargos</h1></td>
-                            <td></td>
-                            <td>Impresión: {% now "Y-m-d" %}</td>
+                            <td colspan="2"><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
+                            <td class="centrado" colspan="2"><h3>COBRANZA DE CARGOS</h3></td>
+                            <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -49,28 +51,28 @@
                 <table >
                     <tbody>
                         <tr>
-                            <td><h4>Cliente:</h4></td>
-                            <td colspan="3">{{ cobranza.cxcliente.cxcliente.ctnombre }}</td>
-                            <td><h4>Fecha de cobranza:</h4></td>
-                            <td>{{ cobranza.dcobranza|date:"Y/m/d" }}</td>
+                            <td style="width: 20%; "><strong>Cliente:</strong></td>
+                            <td style="width: 40%; ">{{ cobranza.cxcliente.cxcliente.ctnombre }}</td>
+                            <td style="width: 20%; "><strong>Fecha de cobranza:</strong></td>
+                            <td style="width: 20%; ">{{ cobranza.dcobranza|custom_date_format }}</td>
                         </tr>
                         <tr>
-                            <td><h4>Id:</h4></td>
-                            <td colspan="3">{{cobranza.cxcliente.cxcliente.cxparticipante}}</td>
-                            <td><h4>tipo de factoring:</h4></td>
-                            <td>{{ cobranza.cxtipofactoring }}</td>
+                            <td style="width: 20%; "><strong>Id:</strong></td>
+                            <td style="width: 40%; ">{{cobranza.cxcliente.cxcliente.cxparticipante}}</td>
+                            <td style="width: 20%; "><strong>Tipo de factoring:</strong></td>
+                            <td style="width: 20%; ">{{ cobranza.cxtipofactoring }}</td>
                         </tr>
                         <tr>
-                            <td><h4>Cobranza:</h4></td>
-                            <td colspan="3">{{ cobranza.cxcobranza }}</td>
-                            <td><h4>Total:</h4></td>
-                            <td>{{ cobranza.nvalor|intcomma }}</td>
+                            <td style="width: 20%; "><strong>Cobranza:</strong></td>
+                            <td style="width: 40%; ">{{ cobranza.cxcobranza }}</td>
+                            <td style="width: 20%; "><strong>Total:</strong></td>
+                            <td style="width: 20%; ">{{ cobranza.nvalor|intcomma}}</td>
                         </tr>
                         <tr>
-                            <td><h4>Forma de cobro:</h4></td>
-                            <td colspan="3">{{ datos_forma_cobro }}</td>
-                            <td><h4>Sobrepago:</h4></td>
-                            <td colspan="1">{{ cobranza.nsobrepago|intcomma }}</td>                           
+                            <td style="width: 20%; "><strong>Forma de cobro:</strong></td>
+                            <td style="width: 40%; ">{{ datos_forma_cobro }}</td>
+                            <td style="width: 20%; "><strong>Sobrepago:</strong></td>
+                            <td style="width: 20%; ">{{ cobranza.nsobrepago|intcomma}}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -121,16 +123,16 @@
                 <tbody>
                     <tr></tr>
                     <tr>
-                        <td><h4>Depositado el:</h4></td>
+                        <td><strong>Depositado el:</strong></td>
                         <td colspan="5">{{ datos_deposito }}</td>
                         {% if cobranza.cxestado == 'E' %}
-                            <td class="alerta"><h4>Reversada</h4></td>
+                            <td class="alerta"><strong>Reversada</strong></td>
                         {% endif %}
                     </tr>
                     <tr>
                     </tr>
                     <tr>
-                        <td><h4>Realizado por:</h4></td>
+                        <td><strong>Realizado por:</strong></td>
                         <td colspan="5">{{cobranza.cxusuariocrea}}</td>
                     </tr>
                 </tbody>

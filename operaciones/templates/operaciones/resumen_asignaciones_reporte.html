@@ -11,7 +11,7 @@
     <style type="text/css">
         @page { 
             size: A4;
-            margin: 1cm;
+            margin: 0cm;
             size:  landscape;
         }
         .table thead th {
@@ -39,14 +39,12 @@
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <table >
+                <table class="table" style="width:100%">
                     <tbody>
                         <tr>
-                            <td colspan="2"><h2>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h2></td>
-                            <td></td>
-                            <td colspan="2"><h1>Listado de operaciones negociadas </h1></td>
-                            <td></td>
-                            <td>Impresión: {% now "Y-m-d" %}</td>
+                            <td colspan="2"><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
+                            <td class="centrado" colspan="2"><h3>LISTADO DE OPERACIONES NEGOCIADAS</h3></td>
+                            <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -70,12 +68,12 @@
                         </thead>
                         <tbody>
                             <tr></tr>
-                            {% regroup detalle by cxtipofactoring as asignaciones_list %}
+                            {% regroup detalle by cxtipofactoring.cttipofactoring as asignaciones_list %}
                             {% for factoring in asignaciones_list %}
                             <tr></tr>
                             <tr>
-                                <td class="subrayado" colspan="5"><h3>{{ factoring.grouper }}</h3></td>
-                                <td class="subrayado numero"><h3> {{factoring.list|running_valor|intcomma }}</h3></td>
+                                <td class="subrayado" colspan="5"><strong>{{ factoring.grouper }}</strong></td>
+                                <td class="subrayado numero"><strong> {{factoring.list|running_valor|intcomma }}</strong></td>
                                 <td class="subrayado" colspan="5"></td>
                             </tr>
                                 {% for item in factoring.list %}
@@ -85,7 +83,7 @@
                                     <td>{{ item.cxasignacion }}</td>
                                     <td>{{ item.cxtipo }}</td>
                                     <td>{{ item.ddesembolso|custom_date_format }}</td>
-                                    <td>{{ item.nmayorplazonegociacion }}</td>
+                                    <td class="numero">{{ item.nmayorplazonegociacion }}</td>
                                     <td class="numero">{{ item.nvalor }}</td>
                                     <td class="numero">{{ item.cargos }}</td>
                                     <td class="numero">{{ item.niva }}</td>

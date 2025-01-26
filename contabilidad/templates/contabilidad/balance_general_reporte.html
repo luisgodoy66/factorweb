@@ -10,7 +10,7 @@
     <style type="text/css">
         @page {
             size: A4;
-            margin: 1cm;
+            margin: 0cm;
             size: portrait;
         }
         .table thead th {
@@ -32,14 +32,12 @@
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <table >
+                <table class="table" style="width:100%">
                     <tbody>
                         <tr>
-                            <td colspan="2"><h2>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h2></td>
-                            <td></td>
-                            <td colspan="2" class="centrado"><h1>BALANCE GENERAL </h1></td>
-                            <td></td>
-                            <td>Impresión: {% now "Y-m-d" %}</td>
+                            <td colspan="2"><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
+                            <td class="centrado" colspan="2"><h3>BALANCE GENERAL </h3></td>
+                            <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
                         </tr>
                         <tr>
                             <td colspan="3"></td>
@@ -57,25 +55,23 @@
                             {% regroup activo by nivel1 as nivel1_list %}
                             {% for item_nivel1 in nivel1_list %}
                                 <tr>
-                                    <td class="centrado" colspan="3"><h1>{{ item_nivel1.grouper }}</h1></td>
+                                    <td class="centrado" colspan="3"><h2>{{ item_nivel1.grouper }}</h2></td>
                                 </tr>
                                 {% regroup item_nivel1.list by nivel2 as nivel2_list %}
                                 {% for item_nivel2 in nivel2_list %}
                                     <tr>
-                                        <td colspan="3"><h2>{{ item_nivel2.grouper }}</h2></td>
+                                        <td colspan="3"><h3>{{ item_nivel2.grouper }}</h3></td>
                                     </tr>
                                     {% regroup item_nivel2.list by nivel3 as nivel3_list %}
                                    {% for item_nivel3 in nivel3_list %}
-                                        <tr></tr>
                                         <tr>
-                                            <td class="subrayado" colspan="2"><h3>{{ item_nivel3.grouper }}</h3></td>
-                                            <td class="subrayado numero"><h3> {{ item_nivel3.list.0.total_n3|intcomma }}</h3></td>
+                                            <td class="subrayado" colspan="2"><h4>{{ item_nivel3.grouper }}</h4></td>
+                                            <td class="subrayado numero"><h4> {{ item_nivel3.list.0.total_n3|intcomma }}</h4></td>
                                         </tr>
-                                        <tr></tr>
                                         {% regroup item_nivel3.list by nivel4 as nivel4_list %}
                                         {% for item_nivel4 in nivel4_list %}
                                             <tr>
-                                                <td colspan="2"><h4>{{ item_nivel4.grouper }}</h4></td>
+                                                <td colspan="2"><strong>{{ item_nivel4.grouper }}</strong></td>
                                                 <td class="numero"> {{ item_nivel4.list.0.total_n4|intcomma }}</td>
                                             </tr>
                                             {% for item in item_nivel4.list %}
@@ -89,22 +85,22 @@
                                     {% endfor %}
                                     <tr></tr>
                                     <tr>
-                                        <td class="numero" colspan="2"><h2>TOTAL {{ item_nivel2.grouper }}</h2></td>
-                                        <td class="numero"><h2>{{ item_nivel2.list.0.total_n2|intcomma }}</h2></td>
+                                        <td class="numero" colspan="2"><h3>TOTAL {{ item_nivel2.grouper }}</h3></td>
+                                        <td class="numero"><h3>{{ item_nivel2.list.0.total_n2|intcomma }}</h3></td>
                                     </tr>
 
                                 {% endfor %}
                                 <tr></tr>
                                 <tr>
-                                    <td class="numero" colspan="2"><h2>{{ item_nivel1.grouper }}</h2></td>
-                                    <td class="numero"><h2>{{ item_nivel1.list.0.total_n1|intcomma }}</h2></td>
+                                    <td class="numero" colspan="2"><h3>{{ item_nivel1.grouper }}</h3></td>
+                                    <td class="numero"><h3>{{ item_nivel1.list.0.total_n1|intcomma }}</h3></td>
                                 </tr>
                                 
                             {% endfor %}
                             <tr></tr>
                             <tr>
-                                <td class="numero" colspan="2"><h2>TOTAL PASIVO Y PATRIMONIO</h2></td>
-                                <td class="numero"><h2>{{ pasivo_patrimonio|intcomma }}</h2></td>
+                                <td class="numero" colspan="2"><h3>TOTAL PASIVO Y PATRIMONIO</h3></td>
+                                <td class="numero"><h3>{{ pasivo_patrimonio|intcomma }}</h3></td>
                             </tr>
                     </tbody>
                     </table>

@@ -11,7 +11,7 @@
     <style type="text/css">
         @page { 
             size: A4;
-            margin: 1cm;
+            margin: 0cm;
             size:  portrait;
         }
         .table thead th {
@@ -33,20 +33,24 @@
         font-weight: 400; 
         color: #eb1111; 
         }        
+        body{margin-right: 20px;}
+        .container{
+            margin: 0 auto;
+            padding: 0;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <table >
+                <table class="table" style="width:100%">
                     <tbody>
                         <tr>
-                            <td colspan="2"><h2>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h2></td>
-                            <td></td>
-                            <td colspan="2"><h1>Listado de facturas pendientes </h1></td>
-                            <td></td>
-                            <td>Impresión: {% now "Y-m-d" %}</td>
+                            <td colspan="2"><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
+                            <td class="centrado" colspan="2"><h3>LISTADO DE FACTURAS PENDIENTES</h3></td>
+                            <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -68,9 +72,10 @@
                             <tr></tr>
                             {% regroup detalle by cxcliente__cxcliente__ctnombre as cartera_list %}
                             {% for cliente in cartera_list %}
+                            <tr></tr>
                             <tr>
-                                <td class="subrayado" colspan="6"><h3>{{ cliente.grouper }}</h3></td>
-                                <td class="subrayado numero"><h3> {{cliente.list|running_saldo|intcomma }}</h3></td>
+                                <td class="subrayado" colspan="6"><strong>{{ cliente.grouper }}</strong></td>
+                                <td class="subrayado numero"><strong> {{cliente.list|running_saldo|intcomma }}</strong></td>
                             </tr>
                                 {% for item in cliente.list %}
                                 <tr></tr>
@@ -79,10 +84,10 @@
                                     <td>{{ item.cxasignacion__cxasignacion }}</td>
                                     <td>{{ item.ctdocumento }}</td>
                                     <td>{{ item.vencimiento |custom_date_format}}</td>
-                                    <td>{{ item.dias_negociados }}</td>
-                                    <td> {% if item.ndiasprorroga > 0 %}<h4>{% endif %}
+                                    <td class="numero">{{ item.dias_negociados }}</td>
+                                    <td class="numero"> {% if item.ndiasprorroga > 0 %}<strong>{% endif %}
                                         {{ item.dias_vencidos }}
-                                        {% if item.ndiasprorroga > 0 %}</h4>{% endif %}
+                                        {% if item.ndiasprorroga > 0 %}</strong>{% endif %}
                                     </td>
                                     <td class="numero">{{ item.nsaldo|intcomma }}</td>
                                 </tr>

@@ -3517,7 +3517,7 @@ def SumaCargos(request, ids, tipo_asignacion, gaoa_carga_iva, dc_carga_iva
         base += g
     if dc_carga_iva=="Si":
         base += d
-    iva = round( base * porcentaje_iva / 100,2)
+    iva = round( base * Decimal(porcentaje_iva) / 100,2)
     # redondear a 2 decimales?
     # neto
     total =   g + d + iva

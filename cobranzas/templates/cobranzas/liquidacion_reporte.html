@@ -1,4 +1,5 @@
 {% load filtros %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -10,7 +11,7 @@
     <style type="text/css">
         @page {
             size: A4;
-            margin: 1cm;
+            margin: 0cm;
             size:  portrait;
         }
         .table thead th {
@@ -37,51 +38,48 @@
         color: #eb1111; 
         }        
     </style>
-    <!-- <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.1/dist/bootstrap-table.min.css">    -->
 </head>
 <body>
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <table >
+                <table class="table" style="width:100%">
                     <tbody>
                         <tr>
-                            <td colspan="2"><h2>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h2></td>
-                            <td></td>
-                            <td colspan="2"><h1>Liquidación de cobranza </h1></td>
-                            <td></td>
-                            <td>Impresión: {% now "Y-m-d" %}</td>
+                            <td colspan="2"><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
+                            <td class="centrado" colspan="2"><h3>LIQUIDACIÓN DE COBRANZA</h3></td>
+                            <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
             <br>
             <div class="list-group">
-                <table >
+                <table class="table" style="width:100%">
                     <tbody>
                         <tr>
-                            <td><h4>Cliente:</h4></td>
-                            <td colspan="3">{{ liquidacion.cxcliente.cxcliente.ctnombre }}</td>
-                            <td><h4>Fecha de liquidación:</h4></td>
-                            <td>{{ liquidacion.dliquidacion|date:"Y-m-d" }}</td>
+                            <td style="width: 20%; "><strong>Cliente:</strong></td>
+                            <td style="width: 40%; ">{{ liquidacion.cxcliente.cxcliente.ctnombre }}</td>
+                            <td style="width: 20%; "><strong>Fecha de liquidación:</strong></td>
+                            <td style="width: 20%; ">{{ liquidacion.dliquidacion|custom_date_format }}</td>
                         </tr>
                         <tr>
-                            <td><h4>Id:</h4></td>
-                            <td colspan="3">{{liquidacion.cxcliente.cxcliente.cxparticipante}}</td>
-                            <td><h4>Tipo de factoring:</h4></td>
-                            <td>{{ liquidacion.cxtipofactoring }}</td>
+                            <td style="width: 20%; "><strong>Id:</strong></td>
+                            <td style="width: 40%; ">{{liquidacion.cxcliente.cxcliente.cxparticipante}}</td>
+                            <td style="width: 20%; "><strong>Tipo de factoring:</strong></td>
+                            <td style="width: 20%; ">{{ liquidacion.cxtipofactoring }}</td>
                         </tr>
                         <tr>
-                            <td><h4>Liquidación:</h4></td>
-                            <td colspan="3">{{ liquidacion.cxliquidacion }}</td>
-                            <td><h4>Total:</h4></td>
-                            <td>{{ liquidacion.neto}}</td>
+                            <td style="width: 20%; "><strong>Liquidación:</strong></td>
+                            <td style="width: 40%; ">{{ liquidacion.cxliquidacion }}</td>
+                            <td style="width: 20%; "><strong>Total:</strong></td>
+                            <td style="width: 20%; ">{{ liquidacion.neto|intcomma}}</td>
                         </tr>
                         <tr>
-                            <td><h4>Instrucción de pago:</h4></td>
-                            <td colspan="3">{{ liquidacion.ctinstrucciondepago }}</td>
-                            <td><h4>Fecha de desembolso:</h4></td>
-                            <td>{{ liquidacion.ddesembolso|date:"Y-m-d"}}</td>                           
+                            <td style="width: 20%; "><strong>Instrucción de pago:</strong></td>
+                            <td style="width: 40%; ">{{ liquidacion.ctinstrucciondepago }}</td>
+                            <td style="width: 20%; "><strong>Fecha de desembolso:</strong></td>
+                            <td style="width: 20%; ">{{ liquidacion.ddesembolso|custom_date_format}}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -90,11 +88,11 @@
             <!-- <hr> -->
             <!-- vueltos y sobrepagos -->
             <div class="caja">
-                <td><h2>Vueltos y sobrepagos:</h2></td>                
+                <h4>Vueltos y sobrepagos:</h4>
             </div>
             <div class="row">
-                <table id="table"  class="table">
-                <thead>
+                <table class="table table-striped table-hover nowrap" style="width:100%">
+                    <thead>
                     <tr>
                       <th >Cobranza</th>
                       <th >Fecha de cobro</th>
@@ -110,7 +108,7 @@
                     <tr>
                         <td> {{c.cobranza}} </td>
                         <td> {{c.fecha_cobranza}} </td>
-                        <td class="numero"> {{c.valor_cobrado}} </td>
+                        <td class="numero"> {{c.valor_cobrado|intcomma}} </td>
                         <td class="numero"> {{c.vuelto|floatformat:2}} </td>
                         <td class="numero"> {{c.sobrepago|floatformat:2}} </td>
                         <td class="numero"> {{c.total|floatformat:2}} </td>
@@ -122,13 +120,13 @@
             </div>
             <!-- aqui debe haber una linea en blano por lo menos -->
             <div class="caja">
-                <td><h2>Cargos:</h2></td>                
+                <h4>Cargos:</h4>
             </div>
             <div class="row">
                 <!-- <div class="col"> -->
                     <table class="table table-striped table-hover nowrap" style="width:100%">
                         <thead>
-                            <th>Asignación.</th>        
+                            <th>Asignación</th>        
                             <th>Documento negociado</th>
                             <th>Fecha de desembolso</th>
                             <th>Cobranza / Operación</th>
@@ -141,28 +139,28 @@
                         <tbody>
                             <!-- <tr></tr> -->
                             {% for cargo in detalle %}
-                            <tr></tr>
-                            <tr>
-                            <td colspan="8"><h3> {{ cargo.nombre }}</h3></td>
-                            <td class="numero"><h3> {{ cargo.valor }}</h3></td>
-                            </tr>
-                            {% for item in cargo.detalle %}
-                            <tr>
-                                {% if item.asignacion == 'N/A' %}
-                                    <td colspan="3">{{ item.documento }}</td>
-                                {% else %}
-                                    <td>{{ item.asignacion }}</td>
-                                    <td>{{ item.documento }}</td>
-                                    <td class="centrado">{{ item.desembolso|date:"Y-m-d" }}</td>
-                                {% endif %}
-                                <td class="centrado">{{ item.cobranza }}</td>
-                                <td class="numero">{{ item.valor_base|floatformat:2 }}</td>
-                                <td class="numero">{{ item.tasa_calculo }}</td>
-                                <td class="numero">{{ item.dias_calculo }}</td>
-                                <td class="numero">{{ item.valor }}</td>
-                                <td></td>
-                            </tr>
-                            {% endfor %}
+                                <tr></tr>
+                                <tr>
+                                    <td colspan="8"><strong> {{ cargo.nombre }}</strong></td>
+                                    <td class="numero"><strong> {{ cargo.valor }}</strong></td>
+                                </tr>
+                                {% for item in cargo.detalle %}
+                                    <tr>
+                                        {% if item.asignacion == 'N/A' %}
+                                            <td colspan="3">{{ item.documento }}</td>
+                                        {% else %}
+                                            <td>{{ item.asignacion }}</td>
+                                            <td>{{ item.documento }}</td>
+                                            <td class="centrado">{{ item.desembolso|custom_date_format }}</td>
+                                        {% endif %}
+                                        <td class="centrado">{{ item.cobranza }}</td>
+                                        <td class="numero">{{ item.valor_base|floatformat:2 }}</td>
+                                        <td class="numero">{{ item.tasa_calculo }}</td>
+                                        <td class="numero">{{ item.dias_calculo }}</td>
+                                        <td class="numero">{{ item.valor }}</td>
+                                        <td></td>
+                                    </tr>
+                                {% endfor %}
                             {% endfor %}
                             <!-- totales -->
                         </tbody>
@@ -172,10 +170,10 @@
             </div>
             <!-- Resumen -->
             <div class="caja">
-                <td><h2>Resumen:</h2></td>                
+                <h4>Resumen:</h4>
             </div>
             <div class="row">
-                <table id="table"  class="table">
+                <table class="table table-striped table-hover nowrap" style="width:100%">
                     <thead>
                         <tr>
                             <th></th>
@@ -236,37 +234,22 @@
                         </tr>
                     </tbody>
                 </table>
-
             </div>
             <br><br>
-            <br><br>
-            <!-- <table >
-                <tbody>
-                    <tr></tr>
-                    <tr>
-                        <td><h4>Realizado por:</h4></td>
-                        <td colspan="5">{{ liquidacion.cxusuariocrea}}</td>
-                        {% if liquidacion.cxestado == 'E' %}
-                            <td class="alerta"><h4>Reversada</h4></td>
-                        {% endif %}
-                    </tr>
-                </tbody>
-            </table> -->
             <div class="row ">
-                <table >
+                <table class="table table-striped table-hover nowrap" style="width:100%">
                     <tbody>
                         <tr>
-                            <td></td>
-                            <td>Elaborado por: {{ liquidacion.cxusuariocrea}}</td>
-                            <td>Revisado por:</td>
-                            <td>Recibido por:</td>
+                            <td><strong>Elaborado por: </strong>{{ liquidacion.cxusuariocrea}}</td>
+                            <td><strong>Revisado por:</strong></td>
+                            <td><strong>Recibido por:</strong></td>
                             {% if liquidacion.cxestado == 'E' %}
-                            <td class="alerta"><h4>Reversada</h4></td>
+                            <td class="alerta"><strong>Reversada</strong></td>
                             {% endif %}
                         </tr>
                     </tbody>
                 </table>
-                </div>
+            </div>
     
         </div>
         {% if empresa.lgratis %}

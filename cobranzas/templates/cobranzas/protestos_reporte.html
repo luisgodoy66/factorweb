@@ -1,3 +1,4 @@
+{% load filtros %}
 {% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
@@ -10,7 +11,7 @@
     <style type="text/css">
         @page {
             size: A4;
-            margin: 1cm;
+            margin: 0cm;
             size: landscape;
         }
         .table thead th {
@@ -20,7 +21,7 @@
         .table td.numero{
             text-align: right;
         }
-        .table td.fecha{
+        .table td.centrado{
             text-align: center;
         }
     </style>
@@ -29,14 +30,12 @@
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <table >
+                <table class="table" style="width:100%">
                     <tbody>
                         <tr>
-                            <td colspan="2"><h2>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h2></td>
-                            <td></td>
-                            <td colspan="2"><h1>Lista de cheques protestados </h1></td>
-                            <td></td>
-                            <td>Impresión: {% now "Y-m-d" %}</td>
+                            <td colspan="2"><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
+                            <td class="centrado" colspan="2"><h3>LISTA DE CHEQUES PROTESTADOS</h3></td>
+                            <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -65,7 +64,7 @@
                                 <td class="numero">{{ item.cheque__cheque_cobranza__cxcobranza}}</td>
                                 <td class="numero">{{ item.cheque__cheque_cobranza__ddeposito|date:"Y-m-d"}}</td>
                                 <td class="numero">{{ item.cheque__ctgirador }}</td>
-                                <td class="numero">{{ item.dprotesto|date:"Y-m-d"}}</td>
+                                <td class="numero">{{ item.dprotesto|custom_date_format}}</td>
                                 <td class="numero">{{ item.motivoprotesto__ctmotivoprotesto}}</td>
                                 <td class="numero">{{ item.nvalor|intcomma}}</td>
                                 <td class="numero">{{ item.nvalorcartera|intcomma}}</td>

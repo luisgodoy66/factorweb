@@ -169,7 +169,7 @@ urlpatterns = [
          ,DetalleCargosAmpliacionPlazo),
     path('refrescadetallecargosampliacionplazo/<ids>/<tipo_asignacion>'
          ,GeneraDetalleCargosAmpliacionPlazoJSON),
-    path('sumacargos/<ids>/<tipo_asignacion>/<gaoa_carga_iva>/<dc_carga_iva>/<int:porcentaje_iva>',\
+    path('sumacargos/<ids>/<tipo_asignacion>/<gaoa_carga_iva>/<dc_carga_iva>/<porcentaje_iva>',\
         SumaCargos),
     path('editartasasdocumento/<int:documento_id>/<fecha_ampliacion>/<tipo_asignacion>'\
         , EditarTasasDocumentoAmpliacionDePlazo, name="editartasasdocumento"),

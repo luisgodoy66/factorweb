@@ -10,7 +10,7 @@
     <style type="text/css">
         @page {
             size: A4;
-            margin: 1cm;
+            margin: 0cm;
             size:  portrait;
         }
         .table thead th {
@@ -35,14 +35,12 @@
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <table >
+                <table class="table" style="width:100%">
                     <tbody>
                         <tr>
-                            <td colspan="2"><h2>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h2></td>
-                            <td></td>
-                            <td colspan="2"><h1>PAGARÉ </h1></td>
-                            <td></td>
-                            <td>Impresión: {% now "Y-m-d" %}</td>
+                            <td colspan="2"><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
+                            <td class="centrado" colspan="2"><h3>PAGARÉ</h3></td>
+                            <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -52,27 +50,27 @@
                 <table >
                     <tbody>
                         <tr>
-                            <td><h4>Cliente:</h4></td>
+                            <td><strong>Cliente:</strong></td>
                             <td colspan="3">{{ pagare.cxcliente.cxcliente.ctnombre }}</td>
-                            <td><h4>Fecha de emisión:</h4></td>
+                            <td><strong>Fecha de emisión:</strong></td>
                             <td>{{ pagare.demision|date:"Y-m-d" }}</td>
                         </tr>
                         <tr>
-                            <td><h4>Id:</h4></td>
+                            <td><strong>Id:</strong></td>
                             <td colspan="3">{{pagare.cxcliente.cxcliente.cxparticipante}}</td>
-                            <td><h4>Fecha de vencimiento:</h4></td>
+                            <td><strong>Fecha de vencimiento:</strong></td>
                             <td>{{ pagare.dvencimiento|date:"Y-m-d" }}</td>
                         </tr>
                         <tr>
-                            <td><h4>Pagare:</h4></td>
+                            <td><strong>Pagare:</strong></td>
                             <td colspan="3" >{{ pagare.cxpagare }}</td>
-                            <td><h4>Capital:</h4></td>
+                            <td><strong>Capital:</strong></td>
                             <td class="numero">{{ pagare.ncapital|intcomma}}</td>
                         </tr>
                         <tr>
-                            <td><h4>Tasa de interés:</h4></td>
-                            <td colspan="3">{{ pagare.ntasainteres }}</td>
-                            <td><h4>Interés:</h4></td>
+                            <td><strong>Tasa de interés:</strong></td>
+                            <td colspan="3">{{ pagare.tasa_porciento|floatformat:2 }}%</td>
+                            <td><strong>Interés:</strong></td>
                             <td colspan="1" class="numero">{{ pagare.ninteres|intcomma}}</td>                           
                         </tr>
                     </tbody>

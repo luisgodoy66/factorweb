@@ -1,3 +1,4 @@
+{% load filtros %}
 {% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
@@ -10,7 +11,7 @@
     <style type="text/css">
         @page {
             size: A4;
-            margin: 1cm;
+            margin: 0cm;
             size:  portrait;
         }
         .table thead th {
@@ -35,14 +36,12 @@
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <table >
+                <table class="table" style="width:100%">
                     <tbody>
                         <tr>
-                            <td colspan="2"><h2>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h2></td>
-                            <td></td>
-                            <td colspan="2"><h1>Diario contable</h1></td>
-                            <td></td>
-                            <td>Impresión: {% now "Y-m-d" %}</td>
+                            <td colspan="2"><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
+                            <td class="centrado" colspan="2"><h3>DIARIO CONTABLE </h3></td>
+                            <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -52,16 +51,16 @@
                 <table >
                     <tbody>
                         <tr>
-                            <td><h4>Diario:</h4></td>
-                            <td colspan="3">{{ diario.cxtransaccion }}</td>
-                            <td><h4>Fecha :</h4></td>
-                            <td>{{ diario.dcontabilizado|date:"Y-m-d" }}</td>
+                            <td style="width: 10%; "><strong>Diario:</strong></td>
+                            <td style="width: 65%; ">{{ diario.cxtransaccion }}</td>
+                            <td style="width: 10%; "><strong>Fecha:</strong></td>
+                            <td style="width: 15%; ">{{ diario.dcontabilizado|custom_date_format }}</td>
                         </tr>
                         <tr>
-                            <td><h4>Concepto:</h4></td>
-                            <td colspan="3">{{ diario.ctconcepto }}</td>
-                            <td><h4>Total:</h4></td>
-                            <td>{{ diario.nvalor}}</td>
+                            <td style="width: 10%; "><strong>Concepto:</strong></td>
+                            <td style="width: 65%; ">{{ diario.ctconcepto }}</td>
+                            <td style="width: 10%; "><strong>Total:</strong></td>
+                            <td style="width: 15%; ">{{ diario.nvalor }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -113,11 +112,11 @@
                     <tr></tr>
                     <tr>
                         {% if diario.cxestado == 'E' %}
-                            <td class="alerta"><h4>Reversado</h4></td>
+                            <td class="alerta"><strong>Reversado</strong></td>
                         {% endif %}
                     </tr>
                     <tr>
-                        <td><h4>Realizado por:</h4></td>
+                        <td><strong>Realizado por:</strong></td>
                         <td colspan="5">{{diario.cxusuariocrea}}</td>
                     </tr>
                 </tbody>

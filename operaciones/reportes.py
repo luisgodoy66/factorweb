@@ -2,60 +2,36 @@ import os
 from django.conf import settings
 from django.http import HttpResponse
 from django.template.loader import get_template
-# from xhtml2pdf import pisa
 from django.contrib.staticfiles import finders
 from django.templatetags.static import static
+from django_weasyprint import WeasyTemplateResponse
+from django.db.models.functions import Cast, ExtractDay
+from django.shortcuts import render
+from django.db.models import Sum, IntegerField, F, ExpressionWrapper, DateField
+from datetime import datetime, timedelta, date
+# from xhtml2pdf import pisa
 
 from .models import Asignacion, Documentos, ChequesAccesorios, Cheques_quitados,\
     Pagares, Pagare_detalle
 from cobranzas.models import Documentos_protestados
-from django.shortcuts import render
 from empresa.models import Tasas_factoring
-from django.db.models import Sum, Count
 from solicitudes import models as SolicitudModels
 from bases.models import Usuario_empresa
-from weasyprint import HTML, CSS
+# from weasyprint import HTML, CSS
+
 FACTURAS_PURAS = 'F'
-  # Construir las rutas completas a las hojas de estilos
-stylesheet_paths = [
-    # static('factorweb/vendors/bootstrap/dist/css/bootstrap.min.css'),
-    static('factorweb/vendors/font-awesome/css/font-awesome.min.css'),
-    static('factorweb/vendors/datatables.net-bs4/css/dataTables.bootstrap4.min.css'),
-    static('factorweb/vendors/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css'),
-    static('factorweb/assets/css/style.css'),
-]
-
-
-# def link_callback(uri, rel):
-#         """
-#         Convert HTML URIs to absolute system paths so xhtml2pdf can access those
-#         resources
-#         """
-#         result = finders.find(uri)
-#         if result:
-#                 if not isinstance(result, (list, tuple)):
-#                         result = [result]
-#                 result = list(os.path.realpath(path) for path in result)
-#                 path=result[0]
-#         else:
-#                 sUrl = settings.STATIC_URL        # Typically /static/
-#                 sRoot = settings.STATIC_ROOT      # Typically /home/userX/project_static/
-#                 mUrl = settings.MEDIA_URL         # Typically /media/
-#                 mRoot = settings.MEDIA_ROOT       # Typically /home/userX/project_static/media/
-
-#                 if uri.startswith(mUrl):
-#                         path = os.path.join(mRoot, uri.replace(mUrl, ""))
-#                 elif uri.startswith(sUrl):
-#                         path = os.path.join(sRoot, uri.replace(sUrl, ""))
-#                 else:
-#                         return uri
-
-#         # make sure that file exists
-#         if not os.path.isfile(path):
-#                 raise Exception(
-#                         'media URI must start with %s or %s' % (sUrl, mUrl)
-#                 )
-#         return path
+# css_files = [
+#     'factorweb\\vendors\\bootstrap\\dist\\css\\bootstrap.min.css',
+#     'factorweb\\vendors\\font-awesome\\css\\font-awesome.min.css',
+#     'factorweb\\vendors\\datatables.net-bs4\\css\\dataTables.bootstrap4.min.css',
+#     'factorweb\\vendors\\datatables.net-buttons-bs4\\css\\buttons.bootstrap4.min.css',
+#     'factorweb\\assets\\css\\style.css',
+# ]
+# # Construct the full paths to the CSS files using STATICFILES_DIRS
+# # css_files = ['style1.css', 'style2.css']
+# stylesheet_paths = [os.path.join(settings.STATICFILES_DIRS[0], 
+#                                     css_file) for css_file 
+#                                     in css_files]
 
 def ImpresionAsignacionDesdeSolicitud(request, asignacion_id):
 
@@ -132,37 +108,19 @@ def ImpresionAsignacion(request, asignacion_id):
         'otros_cargos': otros_cargos,
     }
 
-    # # Create a Django response object, and specify content_type as pdf
-    # response = HttpResponse(content_type='application/pdf')
-    # response['Content-Disposition'] = 'inline; filename="asgn"' + str(asignacion_id) + ".pdf"
-    # find the template and render it.
-    template = get_template(template_path)
-    html = template.render(context)
-
-    # # create a pdf
-    # pisa_status = pisa.CreatePDF(
-    #    html, dest=response, link_callback=link_callback)
-    # # if error then show some funny view
-    # if pisa_status.err:
-    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    # return response
-
-    # # Construir la ruta completa a la hoja de estilos
-    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
-
-    # Generar el archivo PDF
-    pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        # stylesheets=[CSS(stylesheet_path)]
-        stylesheets=stylesheet_paths
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
     )
-
-    # Crear la respuesta HTTP con el archivo PDF
-    response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="asgn' + str(asignacion_id) + '.pdf"'
     return response
 
-def ImpresionAntiguedadCartera(request, ):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+def ImpresionAntiguedadCartera(request):
+    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
 
     facturas = Documentos.objects.antigüedad_por_cliente(id_empresa.empresa)
     accesorios = ChequesAccesorios.objects.antigüedad_por_cliente(id_empresa.empresa)
@@ -204,7 +162,7 @@ def ImpresionAntiguedadCartera(request, ):
     px90 = total_protestos['pporvencer_90'] or 0
     pxm90 = total_protestos['pporvencer_mas_90'] or 0
 
-    qvm90 = total_quitados['vencido_mas_90']  or 0
+    qvm90 = total_quitados['vencido_mas_90'] or 0
     qv90 = total_quitados['vencido_90'] or 0
     qv60 = total_quitados['vencido_60'] or 0
     qv30 = total_quitados['vencido_30'] or 0
@@ -213,7 +171,7 @@ def ImpresionAntiguedadCartera(request, ):
     qx90 = total_quitados['porvencer_90'] or 0
     qxm90 = total_quitados['porvencer_mas_90'] or 0
 
-    cvm90 = total_pagares['vencido_mas_90']  or 0
+    cvm90 = total_pagares['vencido_mas_90'] or 0
     cv90 = total_pagares['vencido_90'] or 0
     cv60 = total_pagares['vencido_60'] or 0
     cv30 = total_pagares['vencido_30'] or 0
@@ -225,53 +183,33 @@ def ImpresionAntiguedadCartera(request, ):
     template_path = 'operaciones/cartera_reporte.html'
 
     context = {
-        "documentos" : facturas.union(accesorios, prot_facturas, prot_accesorios, acc_quitados, pagares)\
+        "documentos": facturas.union(accesorios, prot_facturas, prot_accesorios, acc_quitados, pagares)
             .order_by('cxcliente__cxcliente__ctnombre'),
-        "totalvm90"  : fvm90+avm90+pvm90+qvm90+cvm90,
-        "totalv90"   : fv90+av90+pv90+qv90+cv90,
-        "totalv60"   : fv60+av60+pv60+qv60+cv60,
-        "totalv30"   : fv30+av30+pv30+qv30+cv30,
-        "totalx30"   : fx30+ax30+px30+qx30+cx30,
-        "totalx60"   : fx60+ax60+px60+qx60+cx60,
-        "totalx90"   : fx90+ax90+px90+qx90+cx90,
-        "totalxm90"  : fxm90+axm90+pxm90+qxm90+cxm90,
-        "total" : fvm90+fv90+fv60+fv30+avm90+av90+av60+av30+pvm90+pv90+pv60+pv30
-                +fxm90+fx90+fx60+fx30+axm90+ax90+ax60+ax30+pxm90+px90+px60+px30
-                +qvm90+qv90+qv60+qv30+qx30+qx60+ax90+qxm90
-                +cvm90+cv90+cv60+cv30+cx30+cx60+cx90+cxm90,
+        "totalvm90": fvm90 + avm90 + pvm90 + qvm90 + cvm90,
+        "totalv90": fv90 + av90 + pv90 + qv90 + cv90,
+        "totalv60": fv60 + av60 + pv60 + qv60 + cv60,
+        "totalv30": fv30 + av30 + pv30 + qv30 + cv30,
+        "totalx30": fx30 + ax30 + px30 + qx30 + cx30,
+        "totalx60": fx60 + ax60 + px60 + qx60 + cx60,
+        "totalx90": fx90 + ax90 + px90 + qx90 + cx90,
+        "totalxm90": fxm90 + axm90 + pxm90 + qxm90 + cxm90,
+        "total": fvm90 + fv90 + fv60 + fv30 + avm90 + av90 + av60 + av30 + pvm90 + pv90 + pv60 + pv30
+                + fxm90 + fx90 + fx60 + fx30 + axm90 + ax90 + ax60 + ax30 + pxm90 + px90 + px60 + px30
+                + qvm90 + qv90 + qv60 + qv30 + qx30 + qx60 + ax90 + qxm90
+                + cvm90 + cv90 + cv60 + cv30 + cx30 + cx60 + cx90 + cxm90,
         'empresa': id_empresa.empresa,
-                }
-    # return render(request, template_path, context)
+    }
 
-    # # Create a Django response object, and specify content_type as pdf
-    # response = HttpResponse(content_type='application/pdf')
-    # response['Content-Disposition'] = 'inline; filename="cartera.pdf"'
-    # find the template and render it.
-    template = get_template(template_path)
-    html = template.render(context)
-
-    # # create a pdf
-    # pisa_status = pisa.CreatePDF(
-    #    html, dest=response, link_callback=link_callback)
-    # # if error then show some funny view
-    # if pisa_status.err:
-    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    # return response
-
-    stylesheets = [CSS(path) for path in stylesheet_paths]
-
-    # Generar el archivo PDF
-    pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        stylesheets=stylesheet_paths
-        )
-
-    # Crear la respuesta HTTP con el archivo PDF
-    response = HttpResponse(pdf_file, content_type='application/pdf')
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
+    )
     response['Content-Disposition'] = 'inline; filename="cartera.pdf"'
     return response
-
-from django.db.models import Sum, Q, F, ExpressionWrapper, DateField
-from datetime import datetime, timedelta, date
 
 def ImpresionFacturasPendientes(request, clientes = None):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
@@ -306,8 +244,13 @@ def ImpresionFacturasPendientes(request, clientes = None):
                         , "nsaldo")\
                 .annotate(vencimiento = ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
                                                         , output_field=DateField()),
-                        dias_vencidos = (date.today() - F('dvencimiento')),
-                        dias_negociados = (F('dvencimiento')-F('cxasignacion__ddesembolso')),
+                        dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
+                                                                            , output_field=DateField()))
+                                                , IntegerField()),
+                        dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('dvencimiento')
+                                                                          -F('cxasignacion__ddesembolso')
+                                                                          , output_field=DateField()))
+                                                , IntegerField()),
                         )\
                 .order_by('cxcliente__cxcliente__ctnombre')
           
@@ -327,8 +270,13 @@ def ImpresionFacturasPendientes(request, clientes = None):
                         , "chequequitado__nsaldo")\
                 .annotate(vencimiento =ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
                                                          , output_field = DateField() ),
-                          dias_vencidos = date.today() - F('dvencimiento'),
-                          dias_negociados = F('dvencimiento')-F('documento__cxasignacion__ddesembolso'),
+                        dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
+                                                                            , output_field=DateField()))
+                                                , IntegerField()),
+                        dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('dvencimiento')
+                                                                          -F('documento__cxasignacion__ddesembolso')
+                                                                          , output_field=DateField()))
+                                                , IntegerField()),
                           )\
                 .order_by('documento__cxcliente__cxcliente__ctnombre')
 
@@ -346,33 +294,15 @@ def ImpresionFacturasPendientes(request, clientes = None):
         'empresa': id_empresa.empresa,
         'total' : totalfacturas['total'] + totalquitados['total'],
     }
-    # # Create a Django response object, and specify content_type as pdf
-    # response = HttpResponse(content_type='application/pdf')
-    # response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
-    # find the template and render it.
-    template = get_template(template_path)
-    html = template.render(context)
-
-    # # create a pdf
-    # pisa_status = pisa.CreatePDF(
-    #    html, dest=response, link_callback=link_callback)
-    # # if error then show some funny view
-    # if pisa_status.err:
-    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    # return response
-
-    # # Construir la ruta completa a la hoja de estilos
-    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
-
-    # Generar el archivo PDF
-    pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        # stylesheets=[CSS(stylesheet_path)]
-        stylesheets=stylesheet_paths
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
     )
-
-    # Crear la respuesta HTTP con el archivo PDF
-    response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
+    response['Content-Disposition'] = 'inline; filename="factueas pendientes.pdf"'
     return response
 
 def ImpresionAccesoriosPendientes(request, id_cliente=None):
@@ -399,32 +329,14 @@ def ImpresionAccesoriosPendientes(request, id_cliente=None):
         'empresa': id_empresa.empresa,
         'total': total['total']
     }
-    # # Create a Django response object, and specify content_type as pdf
-    # response = HttpResponse(content_type='application/pdf')
-    # response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
-    # find the template and render it.
-    template = get_template(template_path)
-    html = template.render(context)
-
-    # # create a pdf
-    # pisa_status = pisa.CreatePDF(
-    #    html, dest=response, link_callback=link_callback)
-    # # if error then show some funny view
-    # if pisa_status.err:
-    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    # return response
-
-    # # Construir la ruta completa a la hoja de estilos
-    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
-
-    # Generar el archivo PDF
-    pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        # stylesheets=[CSS(stylesheet_path)]
-        stylesheets=stylesheet_paths
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
     )
-
-    # Crear la respuesta HTTP con el archivo PDF
-    response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
     return response
 
@@ -446,7 +358,7 @@ def ImpresionResumenAsignaciones(request, desde, hasta, clientes=None):
                     ddesembolso__lte = hasta,
                     empresa = id_empresa.empresa,
                     leliminado = False)\
-            .order_by('cxtipofactoring')
+            .order_by('cxtipofactoring', 'ddesembolso')
     else:
         cartera = Asignacion.objects\
             .filter(ddesembolso__gte = desde,
@@ -454,7 +366,7 @@ def ImpresionResumenAsignaciones(request, desde, hasta, clientes=None):
                     cxcliente__in = arr_clientes,
                     empresa = id_empresa.empresa,
                     leliminado = False)\
-            .order_by('cxtipofactoring')
+            .order_by('cxtipofactoring', 'ddesembolso')
 
     total = cartera.aggregate(total = Sum('nvalor'))
 
@@ -463,32 +375,14 @@ def ImpresionResumenAsignaciones(request, desde, hasta, clientes=None):
         'empresa': id_empresa.empresa,
         'total': total['total']
     }
-    # # Create a Django response object, and specify content_type as pdf
-    # response = HttpResponse(content_type='application/pdf')
-    # response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
-    # find the template and render it.
-    template = get_template(template_path)
-    html = template.render(context)
-
-    # # create a pdf
-    # pisa_status = pisa.CreatePDF(
-    #    html, dest=response, link_callback=link_callback)
-    # # if error then show some funny view
-    # if pisa_status.err:
-    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    # return response
-
-    # # Construir la ruta completa a la hoja de estilos
-    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
-
-    # Generar el archivo PDF
-    pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        # stylesheets=[CSS(stylesheet_path)]
-        stylesheets=stylesheet_paths
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
     )
-
-    # Crear la respuesta HTTP con el archivo PDF
-    response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="resumen_asignaciones.pdf"'
     return response
 
@@ -512,32 +406,14 @@ def ImpresionPagare(request, pagare_id):
         'empresa': id_empresa.empresa,
     }
 
-    # # Create a Django response object, and specify content_type as pdf
-    # response = HttpResponse(content_type='application/pdf')
-    # response['Content-Disposition'] = 'inline; filename="asgn"' + str(pagare_id) + ".pdf"
-    # find the template and render it.
-    template = get_template(template_path)
-    html = template.render(context)
-
-    # # create a pdf
-    # pisa_status = pisa.CreatePDF(
-    #    html, dest=response, link_callback=link_callback)
-    # # if error then show some funny view
-    # if pisa_status.err:
-    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    # return response
-
-    # # Construir la ruta completa a la hoja de estilos
-    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
-
-    # Generar el archivo PDF
-    pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        # stylesheets=[CSS(stylesheet_path)]
-        stylesheets=stylesheet_paths
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
     )
-
-    # Crear la respuesta HTTP con el archivo PDF
-    response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="pagare "' + str(pagare_id) + ".pdf"
     return response
 
@@ -571,31 +447,13 @@ def ImpresionPagaresPendientes(request, clientes=None):
         'empresa': id_empresa.empresa,
         'total': total['total']
     }
-    # # Create a Django response object, and specify content_type as pdf
-    # response = HttpResponse(content_type='application/pdf')
-    # response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
-    # find the template and render it.
-    template = get_template(template_path)
-    html = template.render(context)
-
-    # # create a pdf
-    # pisa_status = pisa.CreatePDF(
-    #    html, dest=response, link_callback=link_callback)
-    # # if error then show some funny view
-    # if pisa_status.err:
-    #    return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    # return response
-
-    # # Construir la ruta completa a la hoja de estilos
-    # stylesheet_path = settings.STATICFILES_DIRS[0] + '/factorweb/assets/css/style.css'
-
-    # Generar el archivo PDF
-    pdf_file = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-        # stylesheets=[CSS(stylesheet_path)]
-        stylesheets=stylesheet_paths
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
     )
-
-    # Crear la respuesta HTTP con el archivo PDF
-    response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="pagares_pendientes.pdf"'
     return response

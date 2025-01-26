@@ -11,7 +11,7 @@
     <style type="text/css">
         @page {
             size: A4;
-            margin: 1cm;
+            margin: 0cm;
             size: landscape;
         }
         .table thead th {
@@ -21,7 +21,7 @@
         .table td.numero{
             text-align: right;
         }
-        .table td.fecha{
+        .table td.centrado{
             text-align: center;
         }
         .table td.subrayado{
@@ -33,49 +33,52 @@
         font-weight: 400; 
         color: #eb1111; 
         }        
+        body{margin-right: 20px;}
+        .container{
+            margin: 0 auto;
+            padding: 0;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <table >
+                <table class="table" style="width:100%">
                     <tbody>
                         <tr>
-                            <td colspan="2"><h2>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h2></td>
-                            <td></td>
-                            <td colspan="2"><h1>Liquidación de asignación </h1></td>
-                            <td></td>
-                            <td>Impresión: {% now "Y-m-d" %}</td>
+                            <td colspan="2"><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
+                            <td class="centrado" colspan="2"><h3>LIQUIDACIÓN DE ASIGNACIÓN </h3></td>
+                            <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <div class="list-group">
-                <table >
+            <div class="row">
+                <table class="table " style="width:100%; ">
                     <tbody>
                         <tr>
-                            <td><h4>Cliente:</h4></td>
-                            <td>{{ asignacion.cxcliente }}</td>
-                            <td></td>
-                            <td></td>
-                            <td><h4>Fecha de negociacion:</h4></td>
-                            <td>{{ asignacion.dnegociacion|custom_date_format }}</td>
+                            <td style="width: 10%; "><strong>Cliente:</strong></td>
+                            <td style="width: 30%; ">{{ asignacion.cxcliente }}</td>
+                            <td style="width: 20%; "></td>
+                            <td style="width: 15%; "><strong>Fecha de negociacion:</strong></td>
+                            <td style="width: 25%; ">{{ asignacion.dnegociacion|custom_date_format }}</td>
                         </tr>
                         <tr>
-                            <td><h4>Id:</h4></td>
-                            <td>{{asignacion.cxcliente.cxcliente.cxparticipante}}</td>
-                            <td></td>
-                            <td></td>
-                            <td><h4>Fecha de desembolso:</h4></td>
-                            <td>{{ asignacion.ddesembolso|custom_date_format }}</td>
+                            <td style="width: 10%; "><strong>Id:</strong></td>
+                            <td style="width: 30%; ">{{asignacion.cxcliente.cxcliente.cxparticipante}}</td>
+                            <td style="width: 20%; "></td>
+                            <td style="width: 15%; "><strong>Fecha de desembolso:</strong></td>
+                            <td style="width: 25%; ">{{ asignacion.ddesembolso|custom_date_format }}</td>
                         </tr>
                         <tr>
-                            <td><h4>Asignación:</h4></td>
-                            <td colspan="3">{{ asignacion.cxasignacion }}</td>
-                            <td><h4>Tipo de factoring:</h4></td>
-                            <td>{{ asignacion.cxtipofactoring.cttipofactoring}}</td>
+                            <td style="width: 10%; "><strong>Asignación:</strong></td>
+                            <td style="width: 30%; ">{{ asignacion.cxasignacion }}</td>
+                            <td style="width: 20%; "></td>
+                            <td style="width: 15%; "><strong>Tipo de factoring:</strong></td>
+                            <td style="width: 25%; ">{{ asignacion.cxtipofactoring.cttipofactoring}}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -101,30 +104,27 @@
                             <th>Total cargos</th>
                         </thead>
                         <tbody>
-                            <tr></tr>
                             {% regroup documentos|dictsort:"cxcomprador.cxcomprador.ctnombre" by cxcomprador as documentos_list %}
                             {% for comprador in documentos_list %}
+                                <tr></tr>
                                 <tr>
-                                    <td class="subrayado" colspan="4"><h3>{{ comprador.grouper }}</h3></td>
-                                    <td class="subrayado numero"><h3> {{comprador.list|running_total2|intcomma }}</h3></td>
-                                    <td class="subrayado numero" colspan="3"><h3></h3></td>
+                                    <td class="subrayado" colspan="4"><strong>{{ comprador.grouper }}</strong></td>
+                                    <td class="subrayado numero"><strong> {{comprador.list|running_total2|intcomma }}</strong></td>
+                                    <td class="subrayado" colspan="6"></td>
                                     {% if gao.imprimir %}
                                         <td class="subrayado"></td>
                                     {% endif %}
-                                    <td class="subrayado"></td>
                                     {% if dc.imprimir %}
                                         <td class="subrayado"></td>
                                     {% endif %}
-                                    <td class="subrayado"></td>
-                                    <td class="subrayado"></td>
                                 </tr>
                                 {% for item in comprador.list %}
                                     <tr></tr>
                                     <tr>
-                                        <td>{{ item.id }}</td>
+                                        <td width="5%">{{ item.id }}</td>
                                         <td width="10%">{{ item.ctdocumento }}</td>
                                         <td>{{ item.demision|custom_date_format  }}</td>
-                                        <td class="fecha">{{ item.dvencimiento|custom_date_format  }}</td>
+                                        <td class="centrado">{{ item.dvencimiento|custom_date_format  }}</td>
                                         <td class="numero">{{ item.ntotal }}</td>
                                         <td class="numero">{{ item.nplazo }}</td>
                                         <td class="numero">{{ item.nporcentajeanticipo }}</td>
@@ -146,21 +146,6 @@
                             <tr>
                                 <td></td>
                                 <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                {% if gao.imprimir %}<td></td>{% endif %}
-                                <td></td>
-                                {% if dc.imprimir %}<td></td>{% endif %}
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td></td>
                                 <td colspan="2"><h4>Totales a liquidar:</h4></td>
                                 <td class="numero"><h4>{{ asignacion.nvalor|intcomma }}</h4></td>
                                 <td></td>
@@ -172,7 +157,6 @@
                                 <td class="numero"><h4>{{ asignacion.ndescuentodecartera|intcomma }}</h4></td>
                                 <td class="numero"><h4>{{cargos_negociacion|intcomma}}</h4></td>
                             </tr>
-                            <tr></tr>
                             <tr>
                                 <td></td>
                                 <td></td>
@@ -181,9 +165,10 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
+                                <td></td>
                                 {% if gao.imprimir %}<td></td>{% endif %}
-                                <td colspan="2"><h4>Anticipo menos cargos</h4></td>
-                                <td class="numero"><h4>{{ subtotal|intcomma}}</h4></td>
+                                <td colspan="2"><strong>Anticipo menos cargos</strong></td>
+                                <td class="numero">{{ subtotal|intcomma}}</td>
                             </tr>
                             {% if asignacion.notroscargos > 0 %}
                             {% for item in otros_cargos %}
@@ -195,9 +180,11 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
+                                <td></td>
+                                <td></td>
                                 {% if gao.imprimir %}<td></td>{% endif %}
-                                <td colspan="2"><h4>{{item.Cargo}}</h4></td>
-                                <td class="numero"><h4>{{ item.Valor|floatformat:"2u"}}</h4></td>
+                                <td colspan="2"><strong>{{item.Cargo}}</strong></td>
+                                <td class="numero">{{ item.Valor|floatformat:"2u"}}</td>
                         </tr>
                             {% endfor %}
                         {% endif %}
@@ -209,9 +196,10 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
+                                <td></td>
                                 {% if gao.imprimir %}<td></td>{% endif %}
-                                <td colspan="2"><h4>I.V.A.</h4></td>
-                                <td class="numero"><h4>{{ asignacion.niva|intcomma}}</h4></td>
+                                <td colspan="2"><strong>I.V.A.</strong></td>
+                                <td class="numero">{{ asignacion.niva|intcomma}}</td>
                             </tr>
                             <tr>
                                 <td></td>
@@ -221,9 +209,10 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
+                                <td></td>
                                 {% if gao.imprimir %}<td></td>{% endif %}
-                                <td colspan="2"><h4>Neto a recibir</h4></td>
-                                <td class="numero"><h4>{{ neto|intcomma}}</h4></td>
+                                <td colspan="2"><strong>Neto a recibir</strong></td>
+                                <td class="numero">{{ neto|intcomma}}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -233,24 +222,23 @@
             </div>
             <div class="row">
                 <p>
-                <h4>instrucción de pago:</h4>{{ asignacion.ctinstrucciondepago}}
+                <strong>Instrucción de pago: </strong>{{ asignacion.ctinstrucciondepago}}
                 </p>
             </div>
-            <div class="row ">
-            <table >
-                <tbody>
-                    <tr>
-                        <td></td>
-                        <td>                        Elaborado por: {{ asignacion.cxusuariocrea}}</td>
-                        <td>                        Revisado por:                        </td>
-                        <td>                        Recibido por:                        </td>
-                        {% if asignacion.cxestado == 'E' %}
-                            <td class="alerta"><h4>Reversada</h4></td>
-                        {% endif %}
-                    </tr>
-                </tbody>
-            </table>
-            </div>
+            <!-- <div class="row "> -->
+                <table style="width: 100%;">
+                    <tbody>
+                        <tr>
+                            <td><strong>Elaborado por: </strong>{{ asignacion.cxusuariocrea}}</td>
+                            <td><strong>Revisado por:</strong></td>
+                            <td><strong>Recibido por:</strong></td>
+                            {% if asignacion.cxestado == 'E' %}
+                                <td class="alerta"><strong>Reversada</strong></td>
+                            {% endif %}
+                        </tr>
+                    </tbody>
+                </table>
+            <!-- </div> -->
 
 
         </div>
