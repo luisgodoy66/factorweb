@@ -432,13 +432,13 @@ def ImpresionPagaresPendientes(request, clientes=None):
         cartera = Pagare_detalle.objects\
             .filter(empresa = id_empresa.empresa
                     , leliminado = False, nsaldo__gt = 0)\
-            .order_by('pagare_cxcliente__cxcliente__ctnombre')
+            .order_by('pagare_cxcliente__cxcliente__ctnombre', 'dfechapago')
     else:
         cartera = Pagare_detalle.objects\
             .filter(empresa = id_empresa.empresa
                     , leliminado = False, nsaldo__gt = 0
                     , pagare__cxcliente__in = arr_clientes)\
-            .order_by('pagare__cxcliente__cxcliente__ctnombre')
+            .order_by('pagare__cxcliente__cxcliente__ctnombre', 'dfechapago')
 
     total = cartera.aggregate(total = Sum('nsaldo'))
     

@@ -33,11 +33,16 @@
         font-weight: 400; 
         color: #eb1111; 
         }        
-        body{margin-right: 20px;}
         .container{
             margin: 0 auto;
             padding: 0;
             width: 100%;
+        }
+        body {
+            font-family: sans-serif;
+            font-size: 09px;
+            font-weight: 400;
+            color: #000;
         }
     </style>
 </head>
@@ -124,9 +129,9 @@
                                     <tr>
                                         <!-- <td>{{ item.id }}</td> -->
                                         <td width="10%">{{ item.documento.ctdocumento }}</td>
-                                        <td>{{ item.documento.demision|date:"Y-m-d"  }}</td>
+                                        <td>{{ item.documento.demision|custom_date_format  }}</td>
                                         <td width="20%">{{ item }}</td>
-                                        <td class="centrado">{{ item.dvencimiento|date:"Y-m-d"  }}</td>
+                                        <td class="centrado">{{ item.dvencimiento|custom_date_format  }}</td>
                                         <td class="numero">{{ item.ntotal }}</td>
                                         <td class="numero">{{ item.nplazo }}</td>
                                         <td class="numero">{{ item.nporcentajeanticipo }}</td>

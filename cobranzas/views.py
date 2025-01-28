@@ -3525,7 +3525,9 @@ def SumaCargos(request, ids, tipo_asignacion, gaoa_carga_iva, dc_carga_iva
     data={'gaoa':str(g)
         , 'dc':str(d)
         , 'iva': str(iva)
-        , 'total':str(total)}
+        , 'total':str(total)
+        , 'base_iva': str(base)
+        }
     
     return HttpResponse(json.dumps(data), content_type = "application/json")
 
@@ -3663,14 +3665,22 @@ def AceptarAmpliacionDePlazo(request):
     valor=objeto["valor_ampliacion"]
     porcentaje_iva=objeto["porcentaje_iva"]
     documentos=objeto["arr_documentos_ampliados"]
+    base_iva = objeto["base_iva"]
     nusuario = request.user.id
 
+    # resultado=enviarPost("CALL uspAmpliacionDePlazo( {0},{1}, '{2}'\
+    #     ,'{3}',{4},{5}, {6}\
+    #     ,{7},{8},{9},'{10}','',0)"
+    #     .format(id_cliente, id_factoring, fecha_emision
+    #             , fecha_ampliacion, valor, pngao, pndescuentocartera
+    #             , porcentaje_iva, pniva, nusuario, documentos))
+    # 26-ene-2025   l.g.    enviar la base iva para que se grabe en la tabla de cargos
     resultado=enviarPost("CALL uspAmpliacionDePlazo( {0},{1}, '{2}'\
         ,'{3}',{4},{5}, {6}\
         ,{7},{8},{9},'{10}','',0)"
         .format(id_cliente, id_factoring, fecha_emision
                 , fecha_ampliacion, valor, pngao, pndescuentocartera
-                , porcentaje_iva, pniva, nusuario, documentos))
+                , porcentaje_iva, base_iva, nusuario, documentos))
 
     return HttpResponse(resultado)
 

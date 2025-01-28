@@ -1616,16 +1616,13 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
                                        empresa = id_empresa.empresa).count()
 
     total_cartera = Documentos.objects.TotalCarteraCliente(cliente_id)
-    if total_cartera['Total']:
-        cartera = total_cartera['Total']
+    cartera = total_cartera['Total'] or 0
 
     total_protesto = Cheques_protestados.objects.TotalProtestosCliente(cliente_id)
-    if total_protesto['Total']:
-        protestos = total_protesto['Total']
+    protestos = total_protesto['Total'] or 0
 
     total_reestructuracion = Pagares.objects.TotalPagaresCliente(cliente_id)
-    if total_cartera['Total']:
-        restructuracion = total_reestructuracion['Total']
+    restructuracion = total_reestructuracion['Total'] or 0
 
     context={
         'cliente_id':cliente_id,
@@ -1638,7 +1635,7 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
         'clase':clase_cliente,
         'color_estado':color_estado,
         'solicitudes_pendientes':sp,
-        'total_cartera_protestos': cartera+protestos,
+        'total_cartera_protestos': cartera + protestos,
         'total_reestructuracion':restructuracion,
         }
     return render(request, template_path, context)
@@ -2058,6 +2055,7 @@ def GenerarAnexo(request, asignacion_id, anexo_id):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     asignacion = Asignacion.objects.filter(pk=asignacion_id).first()
+    documentos = Documentos.objects.filter(cxasignacion = asignacion_id).all()
     
     anexo = Anexos.objects.filter(pk=anexo_id).first()
 
@@ -2107,6 +2105,7 @@ def GenerarAnexo(request, asignacion_id, anexo_id):
             'direccionfactor':factor.ctdireccion,
             'ciudadfactor': factor.ctciudad,
             'cargorepresentantelegal': rl_cargo,
+            'detalle': documentos,
             }
         plantilla.render(context)
         x = bajararchivo(request,plantilla,archivo)

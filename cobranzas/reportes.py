@@ -16,6 +16,7 @@ from bases.models import Usuario_empresa
 from empresa.models import Tasas_factoring
 from contabilidad.models import Factura_venta
 
+from datetime import datetime
 # # from xhtml2pdf import pisa
 # from weasyprint import HTML, CSS
 
@@ -537,17 +538,21 @@ from operaciones.models import Ampliaciones_plazo_cabecera, Ampliaciones_plazo_d
 def ImpresionAmpliacionDePlazo(request, ampliacion_id):
     template_path = 'cobranzas/ampliacion_de_plazo_reporte.html'
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
      
-    ampliacion = Notas_debito_cabecera.objects.filter(pk = ampliacion_id).first()
+    ampliacion = Notas_debito_cabecera.objects\
+        .filter(pk = ampliacion_id).first()
 
-    ap = Ampliaciones_plazo_cabecera.objects.filter(pk = ampliacion.operacion).first()
+    ap = Ampliaciones_plazo_cabecera.objects\
+        .filter(pk = ampliacion.operacion).first()
 
     detalle_ampliacion = Ampliaciones_plazo_detalle.objects\
         .filter(ampliacion = ampliacion.operacion)
 
-    detalle_cargos = Notas_debito_detalle.objects.filter(notadebito = ampliacion)\
-        .order_by('cargo__cxmovimiento')
+    detalle_cargos = Notas_debito_detalle.objects\
+        .filter(notadebito = ampliacion)\
+        .order_by('cargo__cxmovimiento__ctmovimiento')
 
     listadocumentos = []
     documento=""
@@ -708,16 +713,17 @@ def ImpresionDetalleCobranzas(request, desde, hasta, clientes = None):
                         ),
                     )
 
-    if not totales['cobrado']: totales['cobrado']=0
-    if not totales['baja']: totales['baja']=0
-    if not totales['retenciones']: totales['retenciones']=0
+    # if not totales['baja']: totales['baja']=0
+    # if not totales['retenciones']: totales['retenciones']=0
     
     context={
         'detalle':detalle,
-        'total_cobrado' :totales['cobrado'],
-        'total_retencionesybaja':totales['baja']+totales['retenciones'],
-        'total_general':totales['cobrado']+totales['baja']+totales['retenciones'],
+        'total_cobrado' :totales['cobrado'] or 0,
+        'total_retencionesybaja':totales['baja'] or 0 +totales['retenciones'] or 0,
+        'total_general':totales['cobrado'] or 0 +totales['baja'] or 0 +totales['retenciones'] or 0,
         'empresa': id_empresa.empresa,
+        'desde': datetime.strptime(desde, '%Y-%m-%d').date(),
+        'hasta': datetime.strptime(hasta, '%Y-%m-%d').date(),
     }
     # Generar el archivo PDF usando WeasyTemplateResponse
     response = WeasyTemplateResponse(
