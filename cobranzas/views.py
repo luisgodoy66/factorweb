@@ -3256,7 +3256,7 @@ def AmpliacionDePlazo(request, ids, tipo_factoring, tipo_asignacion, id_cliente)
         'tipo_asignacion':tipo_asignacion,
         'gaoa': dic_gaoa,
         'dc' : dic_dc,
-        'porcentaje_iva':id_empresa.empresa.nporcentajeiva,
+        'porcentaje_iva':int(id_empresa.empresa.nporcentajeiva),
         'id_cliente': id_cliente, 
         'cliente': cliente.cxcliente.ctnombre,
         'tipo_factoring': tipo_factoring.id,
