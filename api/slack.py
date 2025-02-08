@@ -68,8 +68,9 @@ def manejar_interactividad(request):
     #     return JsonResponse({"status": f"Firma inválida {slack_signing_secret}"}, status=403)
 
     # Procesar la carga útil de Slack
-    print(request.POST)
-    payload = json.loads(request.POST["payload"])
+    print('manejar interactiviadad',request.POST) 
+    jsontext = request.POST.get("payload")
+    payload = json.loads(jsontext)
     user_id = payload["user"]["id"]
     action_value = json.loads(payload["actions"][0]["value"])
 
