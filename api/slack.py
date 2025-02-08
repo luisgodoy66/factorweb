@@ -62,28 +62,62 @@ slack_signing_secret = os.environ.get("SLACK_SIGNING_SECRET")
 
 @csrf_exempt
 def manejar_interactividad(request):
+    if request.method == "POST":
     # # Verificar la firma de la solicitud
-    # verifier = SignatureVerifier(slack_signing_secret)
-    # if not verifier.is_valid_request(request.body, request.headers):
-    #     return JsonResponse({"status": f"Firma inválida {slack_signing_secret}"}, status=403)
+        # verifier = SignatureVerifier(slack_signing_secret)
+        # if not verifier.is_valid_request(request.body, request.headers):
+        #     return JsonResponse({"status": f"Firma inválida {slack_signing_secret}"}, status=403)
 
-    # Procesar la carga útil de Slack
-    print('manejar interactiviadad',request.POST) 
-    jsontext = request.POST.get("payload")
-    payload = json.loads(jsontext)
-    user_id = payload["user"]["id"]
-    action_value = json.loads(payload["actions"][0]["value"])
+        # Procesar la carga útil de Slack
+        print('manejar interactiviadad',request.POST) 
+        jsontext = request.POST.get("payload")
+        payload = json.loads(jsontext)
+        user_id = payload["user"]["id"]
+        response_url = payload["response_url"]  # URL para enviar respuestas adicionales
+        action_value = json.loads(payload["actions"][0]["value"])
 
-    action = action_value["action"]
-    cliente = action_value["cliente"]
-    operacion = action_value["operacion"]
-    valor = action_value["valor"]
+        action = action_value["action"]
+        cliente = action_value["cliente"]
+        operacion = action_value["operacion"]
+        valor = action_value["valor"]
 
-    if action == "aprobar":
-        # Lógica para aprobar la operación
-        return JsonResponse({"status": "Operación aprobada", "cliente": cliente, "operacion": operacion, "valor": valor})
-    elif action == "rechazar":
-        # Lógica para rechazar la operación
-        return JsonResponse({"status": "Operación rechazada", "cliente": cliente, "operacion": operacion, "valor": valor})
-    else:
-        return JsonResponse({"status": "Acción no reconocida"}, status=400)
+        if action == "aprobar":
+            # Lógica para aprobar la operación
+            return JsonResponse({"status": "Operación aprobada ✅", "cliente": cliente, "operacion": operacion, "valor": valor})
+        elif action == "rechazar":
+            # Lógica para rechazar la operación
+            return JsonResponse({"status": "Operación rechazada ❌", "cliente": cliente, "operacion": operacion, "valor": valor})
+        else:
+            return JsonResponse({"status": "Acción no reconocida"}, status=400)
+    
+
+# @csrf_exempt
+# def manejar_interactividad(request):
+#     if request.method == "POST":
+#         # Verificar la firma de la solicitud (para asegurarte de que proviene de Slack)
+#         verifier = SignatureVerifier(slack_signing_secret)
+        
+#         # Obtener la firma y el timestamp de los headers
+#         slack_signature = request.headers.get("X-Slack-Signature")
+#         slack_timestamp = request.headers.get("X-Slack-Request-Timestamp")
+        
+#         # Verificar la firma
+#         if not verifier.is_valid_request(request.body, slack_signature, slack_timestamp):
+#             return JsonResponse({"status": "Firma inválida"}, status=403)
+        
+#         # Procesar la carga útil (payload)
+#         payload = json.loads(request.POST["payload"])
+        
+#         # Extraer información relevante del payload
+#         user_id = payload["user"]["id"]  # ID del usuario que interactuó
+#         action_value = payload["actions"][0]["value"]  # Valor del botón o menú
+#         response_url = payload["response_url"]  # URL para enviar respuestas adicionales
+        
+#         # Lógica para manejar la interacción
+#         if action_value == "aprobar":
+#             # Realizar acciones para aprobar la operación
+#             return JsonResponse({"text": "Operación aprobada ✅"})
+#         else:
+#             return JsonResponse({"text": "Acción no reconocida ❌"}, status=400)
+    
+#     return JsonResponse({"status": "Método no permitido"}, status=405)    
