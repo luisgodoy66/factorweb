@@ -4,8 +4,8 @@ from solicitudes.views import SolicitudesView, DetalleSolicitudFacturasPuras , \
     DatosAsignacionConAccesorios,  DatosFacturasPuras, RecuperarDocumento,\
     AsignacionFacturasPurasView, DatosAsignacionFacturasPurasNueva, \
     DatosAsignacionConAccesoriosNueva, AsignacionConAccesoriosView, \
-    ClienteCrearView, DatosAccesorioEditar, ImportarOperacion, PedirArchivoXML
-# ,DatosChequeAccesorio
+    ClienteCrearView, DatosAccesorioEditar, ImportarOperacion, PedirArchivoXML,\
+    GeneraListaSolicitudesRegistradasJSON
 
 urlpatterns=[
     path('listasolicitudes/',SolicitudesView.as_view(), \
@@ -45,5 +45,7 @@ urlpatterns=[
         ,RecuperarDocumento),
     path('importarxml',PedirArchivoXML, name='importar_xml'),
     path('importaroperacion',ImportarOperacion, name='importar_xml_facturaspuras'),
+    path('asignacionesregistradasjson/<desde>/<hasta>',GeneraListaSolicitudesRegistradasJSON
+        , name="asignacionesregistradas_json"),
 
 ]

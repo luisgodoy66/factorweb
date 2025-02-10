@@ -155,12 +155,12 @@
     <div class="col-xl-6">
         <div class="card">
             <div class="card-header">
-                <strong>Asignaciones aceptadas de hoy y ayer</strong>
+                <strong>Asignaciones liquidadas y aceptadas de hoy y ayer</strong>
             </div>
             <small>
                 <div >
                     <table id="tb_asgn"  class="table table-striped table-bordered"
-                    data-url="{% url 'operaciones:asignacionesregistradas_json' desde hasta %}"
+                    data-url="{% url 'solicitudes:asignacionesregistradas_json' desde hasta %}"
                     data-detail-formatter="detailFormatter"
                     data-id-field="id"
                     >
@@ -305,7 +305,7 @@
         ReversarAceptacionAsignacion(row.id,row.Asignacion )
     },
     'click .imprimir': function (e, value, row, index) {
-        ImprimirAsignacion( row.id, )
+        ImprimirLiquidacion( row.id, )
     },
     };
 
@@ -360,5 +360,12 @@
     ].join('')
     }
 
+    function ImprimirLiquidacion(id, ){
+    // en una nueva ventana abrir el reporte de asignación
+    url = window.location.origin
+    url = url + "/operaciones/reporteliquidacion/"+id;
+    window.open( url);
+    }
+    
 </script>    
 {% endblock %}

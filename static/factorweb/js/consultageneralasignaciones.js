@@ -37,9 +37,9 @@ window.onload=function(){
   
 };
 window.operateEvents = {
-    'click .revertir': function (e, value, row, index) {
-        ReversarAceptacionAsignacion(row.id, row.Asignacion)
-      },
+    // 'click .revertir': function (e, value, row, index) {
+    //     ReversarAceptacionAsignacion(row.id, row.Asignacion)
+    //   },
       'click .imprimir': function (e, value, row, index) {
         ImprimirAsignacion( row.id)
       },
@@ -47,9 +47,9 @@ window.operateEvents = {
       
 function operateFormatter(value, row, index) {
     return [
-        '<a class="revertir" href="javascript:void(0)" title="Reverso de asignación">',
-        '<i class="fa fa-rotate-left"></i>',
-        '</a>  ',
+        // '<a class="revertir" href="javascript:void(0)" title="Reverso de asignación">',
+        // '<i class="fa fa-rotate-left"></i>',
+        // '</a>  ',
         '<a class="imprimir" href="javascript:void(0)" title="Imprimir asignación">',
         '<i class="fa fa-print"></i>',
         '</a>  ',

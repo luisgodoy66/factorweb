@@ -20,18 +20,6 @@ from bases.models import Usuario_empresa
 # from weasyprint import HTML, CSS
 
 FACTURAS_PURAS = 'F'
-# css_files = [
-#     'factorweb\\vendors\\bootstrap\\dist\\css\\bootstrap.min.css',
-#     'factorweb\\vendors\\font-awesome\\css\\font-awesome.min.css',
-#     'factorweb\\vendors\\datatables.net-bs4\\css\\dataTables.bootstrap4.min.css',
-#     'factorweb\\vendors\\datatables.net-buttons-bs4\\css\\buttons.bootstrap4.min.css',
-#     'factorweb\\assets\\css\\style.css',
-# ]
-# # Construct the full paths to the CSS files using STATICFILES_DIRS
-# # css_files = ['style1.css', 'style2.css']
-# stylesheet_paths = [os.path.join(settings.STATICFILES_DIRS[0], 
-#                                     css_file) for css_file 
-#                                     in css_files]
 
 def ImpresionAsignacionDesdeSolicitud(request, asignacion_id):
 
@@ -95,7 +83,6 @@ def ImpresionAsignacion(request, asignacion_id):
 #     neto = subtotal - asignacion.niva
 #  el neto de la asignacion ya incluye los otros cargos
     otros_cargos = asignacion.jotroscargos
-    print("otros cargos: ", otros_cargos)
     context = {
         "asignacion" : asignacion,
         "documentos" : documentos,
@@ -106,6 +93,7 @@ def ImpresionAsignacion(request, asignacion_id):
         'neto': asignacion.neto(),
         'empresa': id_empresa.empresa,
         'otros_cargos': otros_cargos,
+        'fuente': 'operacion'
     }
 
     # Generar el archivo PDF usando WeasyTemplateResponse
@@ -117,6 +105,83 @@ def ImpresionAsignacion(request, asignacion_id):
         # stylesheets=stylesheet_paths
     )
     response['Content-Disposition'] = 'inline; filename="asgn' + str(asignacion_id) + '.pdf"'
+    return response
+
+def ImpresionLiquidacion(request, solicitud_id):
+    asignacion = SolicitudModels.Asignacion.objects\
+        .filter(id = solicitud_id).first()
+    documentos = {}
+
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
+
+    if asignacion.cxtipo==FACTURAS_PURAS:
+
+        template_path = 'operaciones/asignacion_facturas_puras_reporte.html'
+
+        documentos = SolicitudModels.Documentos.objects\
+            .filter(cxasignacion = asignacion)\
+                .filter(leliminado = False)\
+                .order_by('ctcomprador')
+    else:
+        template_path = 'operaciones/asignacion_facturas_accesorios_reporte.html'
+
+        documentos = SolicitudModels.ChequesAccesorios.objects\
+            .filter(leliminado = False
+                    , ncanjeadopor = None
+                    , documento__in=Documentos.objects\
+                        .filter(cxasignacion=solicitud_id))\
+                .order_by('documento__ctcomprador')
+                
+    # datos de tasa gao/dc
+    gao = Tasas_factoring.objects\
+        .filter(cxtasa="GAO", empresa = id_empresa.empresa).first()
+    if not gao:
+        return HttpResponse("no encontró tasa de gao en el sistema."
+                +" Registre el cargo con código GAO")
+
+    dc = Tasas_factoring.objects\
+        .filter(cxtasa="DCAR", empresa = id_empresa.empresa).first()
+    if not dc:
+        return HttpResponse("no encontró tasa de descuento de "
+                +"catera en el sistema.Registre el cargo con código DCAR")
+
+    dic_gao  = {'imprimir':gao.limprimeenreporte
+        , 'descripcion': gao.ctdescripcionenreporte
+        , 'iniciales': gao.ctinicialesentablas}
+        
+    dic_dc = {'imprimir':dc.limprimeenreporte
+        , 'descripcion': dc.ctdescripcionenreporte
+        , 'iniciales': dc.ctinicialesentablas}
+    
+    subtotal = asignacion.nanticipo - asignacion.ngao - asignacion.ndescuentodecartera
+    cargos_negociacion = asignacion.ngao + asignacion.ndescuentodecartera
+#     neto = subtotal - asignacion.niva
+#  el neto de la asignacion ya incluye los otros cargos
+    otros_cargos = asignacion.jotroscargos
+
+    context = {
+        "asignacion" : asignacion,
+        "documentos" : documentos,
+        'gao': dic_gao,
+        'dc' : dic_dc,
+        'subtotal': subtotal,
+        'cargos_negociacion': cargos_negociacion,
+        'neto': asignacion.neto(),
+        'empresa': id_empresa.empresa,
+        'otros_cargos': otros_cargos,
+        'fuente': 'solicitud'
+    }
+
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
+    )
+    response['Content-Disposition'] = 'inline; filename="asgn' + str(solicitud_id) + '.pdf"'
     return response
 
 def ImpresionAntiguedadCartera(request):

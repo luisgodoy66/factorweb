@@ -939,3 +939,55 @@ def ImportarOperacion(request):
 
         return HttpResponse("OK"+str(asignacion_id))
 
+def GeneraListaSolicitudesRegistradasJSON(request, desde = None, hasta= None):
+    # Es invocado desde la url de una tabla bt
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    if desde == 'None':
+        asignacion = Asignacion.objects\
+            .filter(empresa = id_empresa.empresa, cxestado__in = 'L,A')\
+                .order_by("dregistro")
+    else:
+        asignacion = Asignacion.objects\
+            .filter(dregistro__gte = desde
+                    , dregistro__lte = hasta
+                    , cxestado__in = 'L,A'
+                    , empresa = id_empresa.empresa)\
+        
+    tempBlogs = []
+    for i in range(len(asignacion)):
+        tempBlogs.append(GeneraListaSolicitudesJSONSalida(asignacion[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": asignacion.count(),
+        "totalNotFiltered": asignacion.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaSolicitudesJSONSalida(asignacion):
+    output = {}
+
+    neto = asignacion.nanticipo - asignacion.ngao - asignacion.ndescuentodecartera - asignacion.niva
+    output["id"] = asignacion.id
+    output["Cliente"] = asignacion.cxcliente.ctnombre
+    output["Asignacion"] = asignacion.cxasignacion
+    output["TipoFactoring"] = asignacion.cxtipofactoring.cttipofactoring
+    if asignacion.cxtipo =='F':
+        output["TipoAsignacion"] = "Facturas puras"
+    else:
+        output["TipoAsignacion"] = "Con accesorios"
+    output["InstruccionDePago"] = asignacion.ctinstrucciondepago
+    output["FechaDesembolso"] = asignacion.ddesembolso.strftime("%Y-%m-%d")
+    output["ValorNegociado"] =  asignacion.nvalor
+    # output["PlazoMayor"] = asignacion.nmayorplazonegociacion
+    output["Cargos"] = asignacion.ngao + asignacion.ndescuentodecartera
+    output["IVA"] = asignacion.niva
+    output["Neto"] = neto
+    output["Estado"] = asignacion.estado()
+    output["Registro"] = asignacion.dregistro.strftime("%Y-%b-%d %H:%M")
+
+    return output

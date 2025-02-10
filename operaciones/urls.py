@@ -28,7 +28,8 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
 from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
     ImpresionAsignacionDesdeSolicitud, ImpresionFacturasPendientes, \
     ImpresionPagare, ImpresionAccesoriosPendientes, \
-    ImpresionResumenAsignaciones, ImpresionPagaresPendientes
+    ImpresionResumenAsignaciones, ImpresionPagaresPendientes, \
+    ImpresionLiquidacion
 
 urlpatterns = [
 # datos operativos
@@ -98,13 +99,18 @@ urlpatterns = [
         , EditarTasasDocumentoSolicitud, name="editartasasdocumento"),
     path("reporteasignacion/<int:asignacion_id>",ImpresionAsignacion, 
         name='reporteasignacion'),
+    path("reporteliquidacion/<int:solicitud_id>",ImpresionLiquidacion, 
+        name='reporteliquidacion'),
     path("reporteasignaciondesdesolicitud/<int:asignacion_id>",
         ImpresionAsignacionDesdeSolicitud ),
     # path("generaranexos/<int:asignacion_id>", GenerarAnexos, name="generaranexos"),
     path('listaanexos/',AnexosView.as_view(), name='listaanexos'),
     path('nuevoanexo/',AnexosNew.as_view(), name='anexo_nuevo'),
     path('editaranexo/<int:pk>',AnexosEdit.as_view(), name='anexo_editar'),
-    path('reversaraceptacionasignacion/<int:pid_asignacion>',ReversaAceptacionAsignacion),
+    path('reversaraceptacionasignacion/<int:pid_asignacion>/<desde_desembolso>',ReversaAceptacionAsignacion
+         , name='reversar_liquidacion_asignacion'),
+    path('reversaraceptacionasignacion/<int:pid_asignacion>',ReversaAceptacionAsignacion
+         , name='reversar_liquidacion_asignacion'),
     path('asignacionesjson/<desde>/<hasta>/<clientes>',GeneraListaAsignacionesJSON
          , name="asignaciones_json"),
     path('asignacionesjson/<desde>/<hasta>/',GeneraListaAsignacionesJSON

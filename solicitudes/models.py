@@ -3,6 +3,7 @@ from django.db import models
 from bases.models import ClaseModelo
 from empresa.models import Tipos_factoring
 from pais.models import Bancos
+from clientes.models import Datos_generales as Datos_generales_cliente\
 
 class Clientes(ClaseModelo):
     cxcliente = models.CharField(max_length=13)
@@ -37,7 +38,8 @@ class Asignacion(ClaseModelo):
     TIPOS_DE_ESTADO = (
         ('A', 'Aceptada'),
         ('R', 'Rechazada'),
-        ('P', 'Pendiente')
+        ('P', 'Pendiente'),
+        ('L', 'Liquidada'),
     )
     cxcliente=models.ForeignKey(Clientes, on_delete=models.CASCADE
         , related_name="cliente_asignacion")
@@ -52,6 +54,37 @@ class Asignacion(ClaseModelo):
     datencion = models.DateTimeField(null=True)
     cxusuarioatencion = models.IntegerField(null=True)
     asignacion = models.BigIntegerField(null=True)
+    cxlocalidad = models.CharField(max_length=4, blank=True) 
+    lrequiereaceptacion = models.BooleanField(default=False)
+    cxasignacion = models.CharField(max_length=8 , null=True) 
+    dnegociacion = models.DateTimeField(auto_created=True, null=True) 
+    ddesembolso= models.DateField(auto_created=True, null=True) 
+    nanticipo = models.DecimalField(max_digits=10, decimal_places= 2, default=0)
+    ngao = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
+    ndescuentodecartera = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
+    notroscargos = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
+    nbaseiva = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
+    nbasenoiva = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
+    niva = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
+    jotroscargos = models.JSONField(blank=True, null=True)
+    ctinstrucciondepago = models.TextField(blank=True)
+    nporcentajeiva = models.DecimalField(max_digits=5, decimal_places=2, default=12)
+    cliente=models.ForeignKey(Datos_generales_cliente, null=True, default=None
+        , on_delete=models.CASCADE
+    )
+    def cargos(self):
+        return self.ngao + self.ndescuentodecartera + self.notroscargos
+
+    def neto(self):
+        return (self.nanticipo 
+                - self.ngao 
+                - self.notroscargos
+                - self.ndescuentodecartera 
+                - self.niva)
+    
+    def estado(self):
+        return self.get_cxestado_display()
+    
     
 class Documentos(ClaseModelo):
     cxasignacion=models.ForeignKey(Asignacion
@@ -81,6 +114,12 @@ class Documentos(ClaseModelo):
 
     def total_negociado(self):
         return self.ntotal - self.nvalornonegociado
+
+    def __str__(self):
+        return self.ctdocumento
+
+    def total_cargos(self):
+        return self.ngao + self.ndescuentocartera
         
 class ChequesAccesorios(ClaseModelo):
     PROPIETARIO = (
@@ -108,3 +147,15 @@ class ChequesAccesorios(ClaseModelo):
 
     def __str__(self):
         return '{} CTA.{} CH/{}'.format(self.cxbanco,self.ctcuenta, self.ctcheque)
+
+class Solicitud_aceptacion(ClaseModelo):
+    ESTADO = (
+        ('P', 'Pendiente'),
+        ('A', 'Aceptada'),
+        ('R', 'Rechazada'),
+    )
+    asignacion = models.ForeignKey(Asignacion, on_delete=models.CASCADE)
+    cxestado = models.CharField(max_length=1, default='P')
+    dsolicitud = models.DateTimeField(auto_created=True)
+    ctusuariorespuesta = models.CharField(max_length=15, null=True)
+    drespuesta = models.DateTimeField(null=True)

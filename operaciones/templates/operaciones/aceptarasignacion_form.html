@@ -447,7 +447,9 @@ function AceptarAsignacion(){
         
         // en una nueva ventana abrir el reporte de asignación
         url = window.location.origin
-        url = url + "/operaciones/reporteasignaciondesdesolicitud/"+asignacion_id;
+        // 08-feb-25    l.g.    mantener la solicitud como liquidada
+        // url = url + "/operaciones/reporteasignaciondesdesolicitud/"+asignacion_id;
+        url = url + "/operaciones/reporteliquidacion/"+asignacion_id;
         window.open( url);
       })
   })

@@ -110,7 +110,7 @@ class AsignacionesConsulta(SinPrivilegios, generic.ListView):
         return context
 
 class AsignacionesPendientesDesembolsarView(SinPrivilegios, generic.ListView):
-    model = Asignacion
+    model = ModelosSolicitud.Asignacion
     template_name = "operaciones/listaasignacionespendientesdesembolsar.html"
     context_object_name='consulta'
     login_url = 'bases:login'
@@ -118,7 +118,8 @@ class AsignacionesPendientesDesembolsarView(SinPrivilegios, generic.ListView):
 
     def get_queryset(self):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        return Asignacion.objects.filter(cxestado='L'
+        # 8-FEB-25  L.G.    Mantener las solicitudes pendientes de desembolsar
+        return ModelosSolicitud.Asignacion.objects.filter(cxestado='L'
                                          , empresa = id_empresa.empresa
                                          , leliminado = False
                                          , ddesembolso__lte = date.today())
@@ -449,7 +450,7 @@ def DesembolsarAsignacion(request, pk, cliente_id):
     cuenta_transferencia = ModeloCliente.Cuenta_transferencia\
             .objects.cuenta_default(cliente_id).first()
     
-    asignacion = Asignacion.objects.filter(pk=pk).first()
+    asignacion = ModelosSolicitud.Asignacion.objects.filter(pk=pk).first()
 
     if request.method=="GET":
         form_submitted = False
@@ -478,30 +479,56 @@ def DesembolsarAsignacion(request, pk, cliente_id):
         if formulario.is_valid():
 
             forma_pago = formulario.cleaned_data["cxformapago"]
+            # Modificar los datos del objeto desembolso según el valor de cxformapago
+            id_beneficiario = 'null'
+            beneficiario = 'null'
+            cuenta_pago = 'null'
+            if forma_pago == "CHE":
+                id_beneficiario = formulario.cleaned_data["cxbeneficiario"]
+                beneficiario = formulario.cleaned_data["ctbeneficiario"]
 
-            with transaction.atomic():
-                # 1. Actualizar el estado de la ASIGNACION
-                asignacion.cxestado = 'P'
-                asignacion.save()
+            if forma_pago != "TRA":
+                # cuenta_transferencia = formulario.cleaned_data["cxcuentadestino"]
+                cuenta_transferencia = 'null'
 
-                desembolso = formulario.save(commit=False)
-                desembolso.cxusuariocrea = request.user
-                desembolso.empresa = id_empresa.empresa
+            if forma_pago in ["CHE", "TRA"]:
+                # cuenta_pago = formulario.cleaned_data["cxcuentapago"]
+                cuenta_pago = request.POST.get("cxcuentapago")
 
-                # Modificar los datos del objeto desembolso según el valor de cxformapago
-                if forma_pago != "CHE":
-                    desembolso.cxbeneficiario = None
-                    desembolso.ctbeneficiario = None
+            # with transaction.atomic():
+            #     # 1. Actualizar el estado de la ASIGNACION
+            #     asignacion.cxestado = 'P'
+            #     asignacion.save()
 
-                if forma_pago != "TRA":
-                    desembolso.cxcuentadestino = None
+            #     desembolso = formulario.save(commit=False)
+            #     desembolso.cxusuariocrea = request.user
+            #     desembolso.empresa = id_empresa.empresa
 
-                if forma_pago in ["EFE", "MOV"]:
-                    desembolso.cxcuentapago = None
+            #     # Modificar los datos del objeto desembolso según el valor de cxformapago
+            #     if forma_pago != "CHE":
+            #         desembolso.cxbeneficiario = None
+            #         desembolso.ctbeneficiario = None
+
+            #     if forma_pago != "TRA":
+            #         desembolso.cxcuentadestino = None
+
+            #     if forma_pago in ["EFE", "MOV"]:
+            #         desembolso.cxcuentapago = None
                     
-                desembolso.save()
+            #     desembolso.save()
 
-            return redirect("operaciones:listaasignacionespendientesdesembolsar")
+            resultado=enviarPost("CALL uspdesembolsarasignacion( {0},'{1}', '{2}','{3}'\
+                                 ,{4},{5},{6},{7}\
+                                 ,{8},'')"
+                .format(
+                    	asignacion.id, forma_pago, id_beneficiario, beneficiario
+                        , cliente_id, cuenta_transferencia.id , cuenta_pago, request.user.id
+                        , id_empresa.empresa.id ))
+                        
+            if resultado[0] == "OK"  :
+                return redirect("operaciones:listaasignacionespendientesdesembolsar")
+            else:
+                formulario.add_error(None, resultado)
         else:
             contexto['form_errors'] = formulario.errors
 
@@ -1227,7 +1254,7 @@ def AceptarDocumentos(request):
     base_iva = objeto["base_iva"]
     base_noiva = objeto["base_noiva"]
 
-    resultado=enviarPost("CALL uspAceptarAsignacion( {0},'{1}', '{2}',{3},{4}\
+    resultado=enviarPost("CALL uspLiquidarAsignacion( {0},'{1}', '{2}',{3},{4}\
         ,{5},{6},'{7}',{8},'{9}'\
         ,{10}, '{11}',{12},{13},'')"
         .format(pid_asignacion,pdnegociacion,pddesembolso,pnanticipo,pngao\
@@ -1408,15 +1435,30 @@ def bajararchivo(request,plantilla, nombrearchivo):
     response["Content-Encoding"] = "UTF-8"
     return response                
 
+# @login_required(login_url='/login/')
+# @permission_required('operaciones.change_asignacion', login_url='bases:sin_permisos')
+# def ReversaAceptacionAsignacion(request, pid_asignacion):
+#     # # ejecuta un store procedure 
+#     resultado=enviarPost("CALL uspReversaAceptacionAsignacion( {0},'')"
+#     .format(pid_asignacion))
+
+#     return HttpResponse(resultado)
+
 @login_required(login_url='/login/')
-@permission_required('operaciones.change_asignacion', login_url='bases:sin_permisos')
-def ReversaAceptacionAsignacion(request, pid_asignacion):
-    # # ejecuta un store procedure 
-    resultado=enviarPost("CALL uspReversaAceptacionAsignacion( {0},'')"
-    .format(pid_asignacion))
+@permission_required('solicitudes.change_asignacion', login_url='bases:sin_permisos')
+def ReversaAceptacionAsignacion(request, pid_asignacion, desde_desembolso = 'No'):
 
-    return HttpResponse(resultado)
-
+    resultado=enviarPost("CALL uspreversaliquidacionasignacion( {0},'')"
+        .format( pid_asignacion,  ))
+                
+    if resultado[0] == "OK"  :
+        if desde_desembolso == 'Si':
+            return redirect("operaciones:listaasignacionespendientesdesembolsar")
+        else:
+            return HttpResponse("OK")
+    else:
+        return HttpResponse( "Error al intentar. {}".format(resultado))
+    
 def GeneraListaAsignacionesJSON(request, desde = None, hasta= None, clientes =None):
     # Es invocado desde la url de una tabla bt
 
@@ -2273,34 +2315,43 @@ def ReversaAceptacionPagare(request, pid_asignacion):
 
     return HttpResponse(resultado)
 
+# @login_required(login_url='/login/')
+# @permission_required('operaciones.change_desembolsos', login_url='bases:sin_permisos')
+# def ReversoDesembolsoAsignacion(request, desembolso_id):
+
+#     id_empresa = Usuario_empresa.objects\
+#         .filter(user = request.user).first()
+    
+#     desembolso = Desembolsos.objects\
+#         .filter(pk=desembolso_id, empresa = id_empresa.empresa).first()
+    
+#     asignacion = Asignacion.objects\
+#         .filter(pk=desembolso.cxoperacion).first()
+
+#     try:
+#         with transaction.atomic():
+#             # 1. Actualizar el estado de la ASIGNACION
+#             asignacion.cxestado = 'L'
+#             asignacion.save()
+
+#             desembolso.cxusuarioelimina = request.user.id
+#             desembolso.leliminado = True
+#             desembolso.save()
+
+#         return HttpResponse("OK")
+    
+#     except Exception as e:
+#         return HttpResponse( "Error al intentar guardar el registro. {}".format(e))
+        
 @login_required(login_url='/login/')
 @permission_required('operaciones.change_desembolsos', login_url='bases:sin_permisos')
 def ReversoDesembolsoAsignacion(request, desembolso_id):
+    # # ejecuta un store procedure 
+    resultado=enviarPost("CALL uspReversaDesembolsoAsignacion( {0},'')"
+    .format(desembolso_id))
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
-    
-    desembolso = Desembolsos.objects\
-        .filter(pk=desembolso_id, empresa = id_empresa.empresa).first()
-    
-    asignacion = Asignacion.objects\
-        .filter(pk=desembolso.cxoperacion).first()
+    return HttpResponse(resultado)
 
-    try:
-        with transaction.atomic():
-            # 1. Actualizar el estado de la ASIGNACION
-            asignacion.cxestado = 'L'
-            asignacion.save()
-
-            desembolso.cxusuarioelimina = request.user.id
-            desembolso.leliminado = True
-            desembolso.save()
-
-        return HttpResponse("OK")
-    
-    except Exception as e:
-        return HttpResponse( "Error al intentar guardar el registro. {}".format(e))
-        
 def GeneraListaCuotasPagareJSON(request, pagare_id):
     # Es invocado desde la url de una tabla bt
 

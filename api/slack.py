@@ -63,13 +63,12 @@ slack_signing_secret = os.environ.get("SLACK_SIGNING_SECRET")
 @csrf_exempt
 def manejar_interactividad(request):
     if request.method == "POST":
-    # # Verificar la firma de la solicitud
-        # verifier = SignatureVerifier(slack_signing_secret)
-        # if not verifier.is_valid_request(request.body, request.headers):
-        #     return JsonResponse({"status": f"Firma inválida {slack_signing_secret}"}, status=403)
+    # Verificar la firma de la solicitud
+        verifier = SignatureVerifier(slack_signing_secret)
+        if not verifier.is_valid_request(request.body, request.headers):
+            return JsonResponse({"status": f"Firma inválida {slack_signing_secret}"}, status=403)
 
         # Procesar la carga útil de Slack
-        print('manejar interactiviadad',request.POST) 
         jsontext = request.POST.get("payload")
         payload = json.loads(jsontext)
         user_id = payload["user"]["id"]
@@ -83,41 +82,21 @@ def manejar_interactividad(request):
 
         if action == "aprobar":
             # Lógica para aprobar la operación
+            enviar_respuesta_asincrona(response_url, f"Operación aprobada por <@{user_id}>")
             return JsonResponse({"status": "Operación aprobada ✅", "cliente": cliente, "operacion": operacion, "valor": valor})
         elif action == "rechazar":
             # Lógica para rechazar la operación
+            enviar_respuesta_asincrona(response_url, f"Operación rechazada por <@{user_id}>")
             return JsonResponse({"status": "Operación rechazada ❌", "cliente": cliente, "operacion": operacion, "valor": valor})
         else:
             return JsonResponse({"status": "Acción no reconocida"}, status=400)
     
 
-# @csrf_exempt
-# def manejar_interactividad(request):
-#     if request.method == "POST":
-#         # Verificar la firma de la solicitud (para asegurarte de que proviene de Slack)
-#         verifier = SignatureVerifier(slack_signing_secret)
-        
-#         # Obtener la firma y el timestamp de los headers
-#         slack_signature = request.headers.get("X-Slack-Signature")
-#         slack_timestamp = request.headers.get("X-Slack-Request-Timestamp")
-        
-#         # Verificar la firma
-#         if not verifier.is_valid_request(request.body, slack_signature, slack_timestamp):
-#             return JsonResponse({"status": "Firma inválida"}, status=403)
-        
-#         # Procesar la carga útil (payload)
-#         payload = json.loads(request.POST["payload"])
-        
-#         # Extraer información relevante del payload
-#         user_id = payload["user"]["id"]  # ID del usuario que interactuó
-#         action_value = payload["actions"][0]["value"]  # Valor del botón o menú
-#         response_url = payload["response_url"]  # URL para enviar respuestas adicionales
-        
-#         # Lógica para manejar la interacción
-#         if action_value == "aprobar":
-#             # Realizar acciones para aprobar la operación
-#             return JsonResponse({"text": "Operación aprobada ✅"})
-#         else:
-#             return JsonResponse({"text": "Acción no reconocida ❌"}, status=400)
-    
-#     return JsonResponse({"status": "Método no permitido"}, status=405)    
+import requests
+
+def enviar_respuesta_asincrona(response_url, mensaje):
+    data = {
+        "text": mensaje,
+        "response_type": "in_channel"  # Opcional: muestra la respuesta en el canal
+    }
+    requests.post(response_url, json=data)

@@ -76,9 +76,12 @@
                                     title="Anexos" role="button">
                                     <i class="fa fa-paperclip"></i></a>
                                 </button>
-                                <a href="{% url 'operaciones:desembolsarasignacion' item.id item.cxcliente.id %}" 
-                                    class="btn btn-primary btn-sm" role="button"  title="pagar">
+                                <a href="{% url 'operaciones:desembolsarasignacion' item.id item.cliente.id %}" 
+                                    class="btn btn-primary btn-sm" role="button"  title="Pagar">
                                     <i class="fa fa-money"></i></a>
+                                <a href="{% url 'operaciones:reversar_liquidacion_asignacion' item.id 'Si' %}" 
+                                    class="btn btn-danger btn-sm" role="button"  title="Reversar solicitud">
+                                    <i class="fa fa-rotate-left"></i></a>
                             </td>
                         </tr>
                         {% endfor %}
