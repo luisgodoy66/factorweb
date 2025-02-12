@@ -34,16 +34,19 @@ def ImpresionAsignacionDesdeSolicitud(request, asignacion_id):
                 return HttpResponse("no encontró asignación ")
 
 def ImpresionAsignacion(request, asignacion_id):
-    asignacion = Asignacion.objects.filter(id = asignacion_id).first()
+    asignacion = Asignacion.objects\
+        .filter(id = asignacion_id).first()
     documentos = {}
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
 
     if asignacion.cxtipo==FACTURAS_PURAS:
 
         template_path = 'operaciones/asignacion_facturas_puras_reporte.html'
 
-        documentos = Documentos.objects.filter(cxasignacion = asignacion)\
+        documentos = Documentos.objects\
+            .filter(cxasignacion = asignacion)\
                 .filter(leliminado = False)\
                 .order_by('cxcomprador__cxcomprador__ctnombre')
     else:
@@ -56,7 +59,6 @@ def ImpresionAsignacion(request, asignacion_id):
                         .filter(cxasignacion=asignacion_id))\
                 .order_by('documento__cxcomprador__cxcomprador__ctnombre')
                 
-
     # datos de tasa gao/dc
     gao = Tasas_factoring.objects\
         .filter(cxtasa="GAO", empresa = id_empresa.empresa).first()
@@ -122,16 +124,16 @@ def ImpresionLiquidacion(request, solicitud_id):
         documentos = SolicitudModels.Documentos.objects\
             .filter(cxasignacion = asignacion)\
                 .filter(leliminado = False)\
-                .order_by('ctcomprador')
+                .order_by('comprador__cxcomprador__ctnombre')
     else:
         template_path = 'operaciones/asignacion_facturas_accesorios_reporte.html'
 
         documentos = SolicitudModels.ChequesAccesorios.objects\
             .filter(leliminado = False
-                    , ncanjeadopor = None
-                    , documento__in=Documentos.objects\
-                        .filter(cxasignacion=solicitud_id))\
-                .order_by('documento__ctcomprador')
+                    # , ncanjeadopor = None
+                    , documento__in=SolicitudModels.Documentos.objects\
+                        .filter(cxasignacion=asignacion))\
+                .order_by('documento__comprador__cxcomprador__ctnombre')
                 
     # datos de tasa gao/dc
     gao = Tasas_factoring.objects\

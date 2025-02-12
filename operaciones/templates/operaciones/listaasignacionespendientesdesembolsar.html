@@ -65,9 +65,9 @@
                             <td>{{ item.cxtipofactoring }}</td>
                             <td>{{ item.ctinstrucciondepago }} </td>
                             <td>{{ item.ddesembolso|date:"Y/m/d" }}</td>
-                            <td>{{ item.neto }}</td>
+                            <td>{{ item.neto |floatformat:"2g"}}</td>
                             <td>
-                                <button onclick="generaAnexos( {{item.id}}, '{{item.cxcliente.cxtipocliente}}')" 
+                                <button onclick="generaAnexos( {{item.id}}, '{{item.cliente.cxtipocliente}}')" 
                                     {% if item.lanexosimpresos %}
                                         class="btn btn-secondary btn-sm" 
                                     {% else %}
@@ -76,12 +76,30 @@
                                     title="Anexos" role="button">
                                     <i class="fa fa-paperclip"></i></a>
                                 </button>
-                                <a href="{% url 'operaciones:desembolsarasignacion' item.id item.cliente.id %}" 
+                                {% if not item.lrequiereaprobacion or item.solicitudaprobacion.aprobada %}
+                                    <a href="{% url 'operaciones:desembolsarasignacion' item.id item.cliente.id %}" 
                                     class="btn btn-primary btn-sm" role="button"  title="Pagar">
-                                    <i class="fa fa-money"></i></a>
-                                <a href="{% url 'operaciones:reversar_liquidacion_asignacion' item.id 'Si' %}" 
-                                    class="btn btn-danger btn-sm" role="button"  title="Reversar solicitud">
-                                    <i class="fa fa-rotate-left"></i></a>
+                                    <i class="fa fa-check"></i></a>
+                                {% else %}
+                                    {% if item.solicitudaprobacion.pendiente %}
+                                    <button onclick="reenviarSolicitudAprobacion( {{item.id}})" role="button"
+                                            class="btn btn-warning btn-sm" title="Reenviar aprobación" >
+                                        <i class="fa fa-rotate-right"></i></a>
+                                    </button>
+                                    {% else %}
+                                    <button onclick="enviarSolicitudAprobacion( {{item.id}})" role="button"
+                                            class="btn btn-info btn-sm" title="Solicitar aprobación" >
+                                        <i class="fa fa-envelope"></i></a>
+                                    </button>
+                                    {% endif %}
+                                {% endif %}
+                                <!-- <a href="{% url 'operaciones:reversar_liquidacion_asignacion' item.id 'Si' %}" 
+                                    class="btn btn-danger btn-sm" role="button"  title="Reversar liquidación">
+                                    <i class="fa fa-rotate-left"></i></a> -->
+                                <button onclick="ReversarAceptacionAsignacion( {{item.id}})" 
+                                    class="btn btn-danger btn-sm"  title="Reversar" role="button">
+                                    <i class="fa fa-rotate-left"></i>
+                                </button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -97,4 +115,26 @@
 {% endblock %}
 
 {% block js_page %}
+<script>
+    function enviarSolicitudAprobacion(id) {
+
+        MensajeConfirmacion("¿Está seguro de enviar la solicitud de aprobación?", function(){
+            fetchProcesar("/api/slack/enviar-solicitud-aprobacion/" + id, function(){
+                MensajeOk("Solicitud enviada correctamente")
+                location.reload()
+            })
+        })
+
+    }
+    function reenviarSolicitudAprobacion(id) {
+
+        MensajeConfirmacion("¿Está seguro de reenviar la solicitud de aprobación?", function(){
+            fetchProcesar("/api/slack/reenviar-solicitud-aprobacion/" + id, function(){
+                MensajeOk("Solicitud enviada correctamente")
+                location.reload()
+            })
+        })
+
+    }
+</script>
 {% endblock %}

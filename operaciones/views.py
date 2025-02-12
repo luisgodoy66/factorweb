@@ -63,15 +63,19 @@ class DatosOperativosView(SinPrivilegios, generic.ListView):
         return context
 
 class AsignacionesView(SinPrivilegios, generic.ListView):
-    model = Asignacion
+    model = ModelosSolicitud.Asignacion
     template_name = "operaciones/listaasignaciones.html"
     context_object_name='consulta'
     login_url = 'bases:login'
     permission_required="operaciones.view_asignacion"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        qs=Asignacion.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
+        qs=ModelosSolicitud.Asignacion.objects\
+            .filter(leliminado = False
+                    , cxestado='L'
+                    , empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self, **kwargs):
@@ -1435,30 +1439,17 @@ def bajararchivo(request,plantilla, nombrearchivo):
     response["Content-Encoding"] = "UTF-8"
     return response                
 
-# @login_required(login_url='/login/')
-# @permission_required('operaciones.change_asignacion', login_url='bases:sin_permisos')
-# def ReversaAceptacionAsignacion(request, pid_asignacion):
-#     # # ejecuta un store procedure 
-#     resultado=enviarPost("CALL uspReversaAceptacionAsignacion( {0},'')"
-#     .format(pid_asignacion))
-
-#     return HttpResponse(resultado)
-
 @login_required(login_url='/login/')
-@permission_required('solicitudes.change_asignacion', login_url='bases:sin_permisos')
-def ReversaAceptacionAsignacion(request, pid_asignacion, desde_desembolso = 'No'):
-
+@permission_required('operaciones.change_asignacion', login_url='bases:sin_permisos')
+def ReversaAceptacionAsignacion(request, pid_asignacion):
+    # # ejecuta un store procedure 
+    # resultado=enviarPost("CALL uspReversaAceptacionAsignacion( {0},'')"
+    # .format(pid_asignacion))
     resultado=enviarPost("CALL uspreversaliquidacionasignacion( {0},'')"
         .format( pid_asignacion,  ))
-                
-    if resultado[0] == "OK"  :
-        if desde_desembolso == 'Si':
-            return redirect("operaciones:listaasignacionespendientesdesembolsar")
-        else:
-            return HttpResponse("OK")
-    else:
-        return HttpResponse( "Error al intentar. {}".format(resultado))
-    
+
+    return HttpResponse(resultado)
+  
 def GeneraListaAsignacionesJSON(request, desde = None, hasta= None, clientes =None):
     # Es invocado desde la url de una tabla bt
 
@@ -1501,11 +1492,13 @@ def GeneraListaAsignacionesRegistradasJSON(request, desde = None, hasta= None):
 
     if desde == 'None':
         asignacion = Asignacion.objects\
-            .filter(empresa = id_empresa.empresa).order_by("dregistro")
+            .filter(empresa = id_empresa.empresa)\
+                .order_by("dregistro")
     else:
         asignacion = Asignacion.objects\
-            .filter(dregistro__gte = desde, dregistro__lte = hasta
-                    , empresa = id_empresa.empresa)\
+            .filter(dregistro__gte = desde
+                    , dregistro__lte = hasta
+                    , empresa = id_empresa.empresa)
         
     tempBlogs = []
     for i in range(len(asignacion)):
@@ -2096,23 +2089,23 @@ def ConsultaAnexosActivos(request, tipo_cliente):
 def GenerarAnexo(request, asignacion_id, anexo_id):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    asignacion = Asignacion.objects.filter(pk=asignacion_id).first()
-    documentos = Documentos.objects.filter(cxasignacion = asignacion_id).all()
+    asignacion = ModelosSolicitud.Asignacion.objects.filter(pk=asignacion_id).first()
+    documentos = ModelosSolicitud.Documentos.objects.filter(cxasignacion = asignacion_id).all()
     
     anexo = Anexos.objects.filter(pk=anexo_id).first()
 
     # datos del cliente
-    if asignacion.cxcliente.cxtipocliente =="J":
+    if asignacion.cliente.cxtipocliente =="J":
 
         datos = ModeloCliente.Personas_juridicas.objects\
-            .filter(cxcliente = asignacion.cxcliente.cxcliente.id).first()
+            .filter(cxcliente = asignacion.cliente.cxcliente.id).first()
         if datos:
             rl_id = datos.cxrepresentante1
             rl_cargo = datos.ctcargorepresentante1
             rl_nombre = datos.ctrepresentante1
     else:
-        rl_id = asignacion.cxcliente.cxcliente.cxparticipante
-        rl_nombre = asignacion.cxcliente.cxcliente.ctnombre
+        rl_id = asignacion.cliente.cxcliente.cxparticipante
+        rl_nombre = asignacion.cliente.cxcliente.ctnombre
         rl_cargo = ''
         
     # datos del factor
@@ -2121,24 +2114,34 @@ def GenerarAnexo(request, asignacion_id, anexo_id):
     # ruta_anexo_generado = anexo.ctrutageneracion
     ruta_plantilla = anexo.fanexo
     
+    cuenta_transferencia = ModeloCliente.Cuenta_transferencia\
+            .objects.cuenta_default(asignacion.cliente.id).first()
+    
+    if not cuenta_transferencia:
+        banco_cuenta = ''
+        cuenta_bancaria = ''
+    else:
+        banco_cuenta = cuenta_transferencia.cxcuenta.cxbanco.ctbanco
+        cuenta_bancaria = cuenta_transferencia.cxcuenta.cuenta()
     try:
         
         plantilla = DocxTemplate(ruta_plantilla)
         
         archivo = anexo.ctnombre + ' DE ' \
-            + asignacion.cxcliente.cxcliente.ctnombre +"-" \
+            + asignacion.cliente.cxcliente.ctnombre +"-" \
             + asignacion.cxasignacion+".docx"
 
         fecha_negociacion = asignacion.dnegociacion
+        fecha_vencimiento = asignacion.ddesembolso + timedelta(days=asignacion.nmayorplazonegociacion)
 
         context = { 
-            'direccioncliente' : asignacion.cxcliente.cxcliente.ctdireccion ,
-            'fechanegociacion': fecha_negociacion.strftime("%Y-%B-%d"),
+            'direccioncliente' : asignacion.cliente.cxcliente.ctdireccion ,
+            'fechanegociacion': fecha_negociacion.strftime("%d-%B-%Y"),
             'fechalarganegociacion': fecha_negociacion.strftime("%d de %B de %Y"),
-            'idcliente': asignacion.cxcliente.cxcliente.cxparticipante,
+            'idcliente': asignacion.cliente.cxcliente.cxparticipante,
             'idrepresentantelegal':rl_id,
             'maximoplazonegociacion':asignacion.nmayorplazonegociacion,
-            'nombrecliente':asignacion.cxcliente.cxcliente.ctnombre,
+            'nombrecliente':asignacion.cliente.cxcliente.ctnombre,
             'nombrerepresentantelegal':rl_nombre,
             'totalanticipo': asignacion.nanticipo,
             'totalanticipoenletras': numero_a_letras(asignacion.nanticipo),
@@ -2148,13 +2151,19 @@ def GenerarAnexo(request, asignacion_id, anexo_id):
             'ciudadfactor': factor.ctciudad,
             'cargorepresentantelegal': rl_cargo,
             'detalle': documentos,
+            'bancotransferencias': banco_cuenta,
+            'cuentabancariatransferencias': cuenta_bancaria,
+            'direccionemailcliente': asignacion.cliente.cxcliente.ctemail,
+            'netoarecibir': asignacion.neto(),
+            'telefonocliente': asignacion.cliente.cxcliente.cttelefono1,
+            'vencimiento': fecha_vencimiento.strftime("%d-%B-%Y"),
             }
         plantilla.render(context)
         x = bajararchivo(request,plantilla,archivo)
 
-        # marcar la asignación como generados los anexos
-        asignacion.lanexosimpresos = True
-        asignacion.save()
+        # # marcar la asignación como generados los anexos
+        # asignacion.lanexosimpresos = True
+        # asignacion.save()
         
         return x
     except TypeError as err:

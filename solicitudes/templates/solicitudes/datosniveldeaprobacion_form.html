@@ -1,0 +1,72 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Configuración</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li><a href="{% url 'api:lista_configuraciones_slack' %}">filtros de aprobación</a></li>
+                    <li class="active">editar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal">
+    <div class="col-lg-12">
+        <div class="card">
+            {% csrf_token %}
+            <div class="card-header">
+                <strong>Nivel de aprobación</strong> 
+            </div>
+            <div class="card-body card-block">
+                    
+                    <div class="row form-group">
+                        <div class="col col-md-3">
+                            <label for="id_cxparticipante" class=" form-control-label">{{form.nmontominimo.label}}</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.nmontominimo}}
+                            <!-- <small class="form-text text-muted">Máximo 13 caracteres</small> -->
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3">
+                            <label for="id_ctnombre" class=" form-control-label">{{form.naprobadores.label}}</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.naprobadores}}
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3">
+                            <label for="id_cttelefono2" class=" form-control-label">{{form.nhorasrespuestamaxima.label}}</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.nhorasrespuestamaxima}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3">
+                            <label for="id_cttelefono2" class=" form-control-label">{{form.configuracionslack.label}}</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.configuracionslack}}
+                        </div>
+                    </div>
+            </div>    
+            
+            <div class="card-footer">
+                <a href="{% url 'solicitudes:listanivelesaprobacion' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Grabar
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+

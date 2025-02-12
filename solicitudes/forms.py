@@ -1,8 +1,12 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Asignacion, Documentos, ChequesAccesorios, Clientes
+
+from .models import Asignacion, Documentos, ChequesAccesorios, \
+    Clientes, Niveles_aprobacion
 from empresa.models import Tipos_factoring
 from pais.models import Bancos
+from api.models import Configuracion_slack
+
 from datetime import date
 from api.sri import SRIConsultationService
 
@@ -208,3 +212,32 @@ class ClientesForm(forms.ModelForm):
         except Clientes.DoesNotExist:
             pass
         return self.cleaned_data
+
+class NivelesAprobacionForm(forms.ModelForm):
+    
+    class Meta:
+        model = Niveles_aprobacion
+        fields=['nmontominimo', 'naprobadores', 'nhorasrespuestamaxima'
+                , 'configuracionslack'
+            ]
+        labels={
+            'nmontominimo':'Desde'
+            , 'naprobadores':'Cantidad de aprobadores'
+            , 'nhorasrespuestamaxima':'Horas para responder'
+            , 'configuracionslack':'Configuración Slack'
+        }
+
+    def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+        
+        if empresa:
+            self.fields['configuracionslack'].queryset = Configuracion_slack.objects\
+                .filter(empresa=empresa
+                        , leliminado = False, lactivo = True)
+

@@ -442,16 +442,23 @@ function AceptarAsignacion(){
         "base_noiva" : base_noiva_tasas + base_noiva_otros,
       }
     fetchPostear("/operaciones/aceptardocumentos/", objeto, function(){
-        // regresar a la lista de solicitudes
-        window.location.href = "/solicitudes/listasolicitudes";
-        
         // en una nueva ventana abrir el reporte de asignación
         url = window.location.origin
         // 08-feb-25    l.g.    mantener la solicitud como liquidada
         // url = url + "/operaciones/reporteasignaciondesdesolicitud/"+asignacion_id;
         url = url + "/operaciones/reporteliquidacion/"+asignacion_id;
         window.open( url);
-      })
+        // regresar a la lista de solicitudes
+        window.location.href = "/solicitudes/listasolicitudes";
+        
+								// // abrir la factura en una nueva ventana
+								// window.open("/facturar/" + reserva_id + "/" + filtro, '_blank');
+								// // refrescar la página actual después de un pequeño retraso
+								// setTimeout(function() {
+								// 	window.location.reload();
+								// }, 1000); // 1 segundo de retraso
+
+    })
   })
     
 }

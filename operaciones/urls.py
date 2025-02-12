@@ -103,7 +103,6 @@ urlpatterns = [
         name='reporteliquidacion'),
     path("reporteasignaciondesdesolicitud/<int:asignacion_id>",
         ImpresionAsignacionDesdeSolicitud ),
-    # path("generaranexos/<int:asignacion_id>", GenerarAnexos, name="generaranexos"),
     path('listaanexos/',AnexosView.as_view(), name='listaanexos'),
     path('nuevoanexo/',AnexosNew.as_view(), name='anexo_nuevo'),
     path('editaranexo/<int:pk>',AnexosEdit.as_view(), name='anexo_editar'),

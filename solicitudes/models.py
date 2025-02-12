@@ -1,9 +1,12 @@
 # from re import T
 from django.db import models
+
 from bases.models import ClaseModelo
 from empresa.models import Tipos_factoring
 from pais.models import Bancos
-from clientes.models import Datos_generales as Datos_generales_cliente\
+from clientes.models import Datos_generales as Datos_generales_cliente
+from clientes.models import Datos_compradores 
+from api.models import Configuracion_slack
 
 class Clientes(ClaseModelo):
     cxcliente = models.CharField(max_length=13)
@@ -30,6 +33,37 @@ class Clientes(ClaseModelo):
             'ctnombre'
             ]  
 
+class Niveles_aprobacion(ClaseModelo):
+    nmontominimo = models.DecimalField(max_digits=15, decimal_places=2)
+    # roles_requeridos = models.JSONField()
+    naprobadores = models.SmallIntegerField(default=1)
+    nhorasrespuestamaxima = models.SmallIntegerField(default=0)
+    configuracionslack = models.ForeignKey(Configuracion_slack, on_delete=models.RESTRICT
+                                    , related_name="canal_slack")
+
+class Solicitud_aprobacion(ClaseModelo):
+    ESTADO = (
+        ('P', 'Pendiente'),
+        ('A', 'Aprobada'),
+        ('R', 'Rechazada'),
+        ('X', 'Cancelada'),
+    )
+    asignacion = models.BigIntegerField()
+    nivel = models.ForeignKey(Niveles_aprobacion, on_delete=models.CASCADE
+                                , related_name="nivel_aprobacion")
+    cxestado = models.CharField(max_length=1, choices=ESTADO, default='P')
+    naprobaciones = models.SmallIntegerField(default=0)
+    jnotificaciones = models.JSONField(null=True)
+
+    def estado(self):
+        return self.get_cxestado_display()
+    
+    def aprobada(self):
+        return self.cxestado == 'A'
+    
+    def pendiente(self):
+        return self.cxestado == 'P'
+    
 class Asignacion(ClaseModelo):
     TIPOS_DE_ASIGNACION = (
         ('A', 'Con accesorios'),
@@ -55,7 +89,7 @@ class Asignacion(ClaseModelo):
     cxusuarioatencion = models.IntegerField(null=True)
     asignacion = models.BigIntegerField(null=True)
     cxlocalidad = models.CharField(max_length=4, blank=True) 
-    lrequiereaceptacion = models.BooleanField(default=False)
+    lrequiereaprobacion = models.BooleanField(default=False)
     cxasignacion = models.CharField(max_length=8 , null=True) 
     dnegociacion = models.DateTimeField(auto_created=True, null=True) 
     ddesembolso= models.DateField(auto_created=True, null=True) 
@@ -72,6 +106,11 @@ class Asignacion(ClaseModelo):
     cliente=models.ForeignKey(Datos_generales_cliente, null=True, default=None
         , on_delete=models.CASCADE
     )
+    solicitudaprobacion = models.ForeignKey(Solicitud_aprobacion, null=True, default=None
+                                            , related_name="asignacion_solicitud"
+                                            , on_delete=models.CASCADE)
+    nmayorplazonegociacion = models.SmallIntegerField(default=0, null=True)
+
     def cargos(self):
         return self.ngao + self.ndescuentodecartera + self.notroscargos
 
@@ -84,7 +123,6 @@ class Asignacion(ClaseModelo):
     
     def estado(self):
         return self.get_cxestado_display()
-    
     
 class Documentos(ClaseModelo):
     cxasignacion=models.ForeignKey(Asignacion
@@ -111,6 +149,10 @@ class Documentos(ClaseModelo):
     ndescuentocartera = models.DecimalField(max_digits=10,decimal_places= 2, default=0)
     nplazo = models.IntegerField(default=0)
     cxautorizacion_ec = models.CharField(max_length=49, null=True)
+    comprador=models.ForeignKey(Datos_compradores, null=True
+        , on_delete=models.CASCADE
+        , related_name="solicitud_comprador"
+    )
 
     def total_negociado(self):
         return self.ntotal - self.nvalornonegociado
@@ -148,14 +190,23 @@ class ChequesAccesorios(ClaseModelo):
     def __str__(self):
         return '{} CTA.{} CH/{}'.format(self.cxbanco,self.ctcuenta, self.ctcheque)
 
-class Solicitud_aceptacion(ClaseModelo):
-    ESTADO = (
-        ('P', 'Pendiente'),
-        ('A', 'Aceptada'),
+    def total_cargos(self):
+        return self.ngao + self.ndescuentocartera
+    
+class Respuesta_aprobacion(ClaseModelo):
+    RESPUESTA=(
+        ('A', 'Aprobada'),
         ('R', 'Rechazada'),
     )
-    asignacion = models.ForeignKey(Asignacion, on_delete=models.CASCADE)
-    cxestado = models.CharField(max_length=1, default='P')
-    dsolicitud = models.DateTimeField(auto_created=True)
-    ctusuariorespuesta = models.CharField(max_length=15, null=True)
-    drespuesta = models.DateTimeField(null=True)
+    solicitud = models.ForeignKey(Solicitud_aprobacion, on_delete=models.CASCADE
+                                 , related_name="asignacion_aprobacion")
+    cxusuariorespuesta = models.CharField(max_length=50)
+    cxcanal = models.CharField(max_length=50 )
+    cxmensaje = models.CharField(max_length=50, )
+    cxrespuesta = models.CharField(max_length=1, choices=RESPUESTA)
+
+    def __str__(self):
+        return self.get_cxrespuesta_display()
+    
+    def respuesta(self):
+        return self.get_cxrespuesta_display()

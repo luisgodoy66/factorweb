@@ -73,7 +73,11 @@
                         </tr>
                         <tr>
                             <td style="width: 10%; "><strong>Id:</strong></td>
-                            <td style="width: 30%; ">{{asignacion.cxcliente.cxcliente.cxparticipante}}</td>
+                            {% if fuente == 'operacion' %}
+                                <td style="width: 30%; ">{{asignacion.cxcliente.cxcliente.cxparticipante}}</td>
+                            {% else %}
+                                <td style="width: 30%; ">{{asignacion.cxcliente.cxcliente}}</td>
+                            {% endif %}
                             <td style="width: 20%; "></td>
                             <td style="width: 15%; "><strong>Fecha de desembolso:</strong></td>
                             <td style="width: 25%; ">{{ asignacion.ddesembolso|custom_date_format }}</td>
@@ -110,7 +114,11 @@
                             <th>Total cargos</th>
                         </thead>
                         <tbody>
-                            {% regroup documentos|dictsort:"documento.cxcomprador.cxcomprador.ctnombre" by documento.cxcomprador as documentos_list %}
+                            {% if fuente == 'operacion' %}
+                                {% regroup documentos|dictsort:"documento.cxcomprador.cxcomprador.ctnombre" by documento.cxcomprador as documentos_list %}
+                            {% else %}                                
+                                {% regroup documentos by documento.comprador.cxcomprador.ctnombre as documentos_list %}
+                            {% endif %}
                             {% for comprador in documentos_list %}
                                 <tr></tr>
                                 <tr>
@@ -179,7 +187,6 @@
                             {% if asignacion.notroscargos > 0 %}
                                 {% for item in otros_cargos %}
                                 <tr>
-                                    <td></td>
                                     <td></td>
                                     <td></td>
                                     <td></td>

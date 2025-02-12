@@ -1,0 +1,79 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Configuración</a></li>
+                    <li><a href="#">integraciones</a></li>
+                    <li><a href="{% url 'api:lista_configuraciones_slack' %}">slack</a></li>
+                    <li class="active">editar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal">
+    <div class="col-lg-12">
+        <div class="card">
+            {% csrf_token %}
+            <div class="card-header">
+                <strong>Slack</strong> 
+            </div>
+            <div class="card-body card-block">
+                    
+                    <div class="row form-group">
+                        <div class="col col-md-3">
+                            <label for="id_cxparticipante" class=" form-control-label">{{form.ctdescripcion.label}}</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.ctdescripcion}}
+                            <!-- <small class="form-text text-muted">Máximo 13 caracteres</small> -->
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3">
+                            <label for="id_ctnombre" class=" form-control-label">{{form.ctslackbottoken.label}}</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.ctslackbottoken}}
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3">
+                            <label for="id_cttelefono2" class=" form-control-label">{{form.ctslackchannelname.label}}</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.ctslackchannelname}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3">
+                            <label for="id_cttelefono2" class=" form-control-label">{{form.ctslacksigningsecret.label}}</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.ctslacksigningsecret}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3">
+                            <label for="id_cttelefono2" class=" form-control-label">{{form.lactivo.label}}</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.lactivo}}
+                        </div>
+                    </div>
+            </div>    
+            
+            <div class="card-footer">
+                <a href="{% url 'api:lista_configuraciones_slack' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Grabar
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+

@@ -58,7 +58,8 @@ INSTALLED_APPS = [
     'cobranzas.apps.CobranzasConfig',
     'storages',
     'cuentasconjuntas.apps.CuentasconjuntasConfig',
-    'contabilidad.apps.ContabilidadConfig'
+    'contabilidad.apps.ContabilidadConfig',
+    'api.apps.ApiConfig',
 ]
 
 MIDDLEWARE = [

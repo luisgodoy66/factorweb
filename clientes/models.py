@@ -105,6 +105,12 @@ class Cuentas_bancarias(ClaseModelo):
     def __str__(self):
         return '{} C.{}. N°{}'.format(self.cxbanco, self.cxtipocuenta,self.cxcuenta)
 
+    def tipo_cuenta(self):
+        return self.get_cxtipocuenta_display()
+    
+    def cuenta(self):
+        return 'Cuenta {} Nº{}'.format(self.tipo_cuenta(),self.cxcuenta)
+    
 class Cuenta_transferencia_Manager(models.Manager):
     def cuenta_default(self, id_cliente):
         return self.filter(leliminado = False, cxcliente = id_cliente)

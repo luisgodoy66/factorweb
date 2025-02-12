@@ -116,7 +116,7 @@
                             {% if fuente == 'operacion' %}
                                 {% regroup documentos|dictsort:"cxcomprador.cxcomprador.ctnombre" by cxcomprador as documentos_list %}
                             {% else %}                                
-                                {% regroup documentos by ctcomprador as documentos_list %}
+                                {% regroup documentos by comprador.cxcomprador.ctnombre as documentos_list %}
                             {% endif %}
                             {% for comprador in documentos_list %}
                                 <tr></tr>
@@ -186,7 +186,6 @@
                             {% if asignacion.notroscargos > 0 %}
                             {% for item in otros_cargos %}
                             <tr>
-                            <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>

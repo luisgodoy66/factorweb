@@ -13,10 +13,12 @@ from django.urls import reverse_lazy
 from datetime import datetime, timedelta
 
 from .forms import AsignacionesForm, ChequesForm, DocumentosForm\
-    , ClientesForm
+    , ClientesForm, NivelesAprobacionForm
 
-from empresa.models import Tipos_factoring, Datos_participantes
-from .models import Asignacion, ChequesAccesorios, Documentos, Clientes
+from empresa.models import Tipos_factoring, Datos_participantes, \
+    Contador
+from .models import Asignacion, ChequesAccesorios, Documentos, \
+    Clientes, Niveles_aprobacion
 from clientes.models import Datos_compradores
 from pais.models import Bancos, Feriados
 from bases.models import Usuario_empresa, Empresas
@@ -29,6 +31,7 @@ import json
 FACTURAS_PURAS = 'F'
 FACTURAS_CON_ACCESORIOS = 'A'
 DIAS_PRUEBA_SISTEMA =30
+INICIAL_SOLICITUD = 'sol'
 # Create your views here.
 class SolicitudesView(SinPrivilegios, generic.ListView):
     model = Asignacion
@@ -130,6 +133,74 @@ class ClienteCrearView(SinPrivilegios, generic.CreateView):
         context['solicitudes_pendientes'] = sp
         return context
 
+class NivelesAprobacionView(SinPrivilegios, generic.ListView):
+    model = Niveles_aprobacion
+    template_name = "solicitudes/listanivelesaprobacion.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="solicitudes.view_niveles_aprobacion"
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Niveles_aprobacion.objects.filter(leliminado = False
+                                     , empresa = id_empresa.empresa)\
+                                     .order_by("dregistro")
+        return qs
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(NivelesAprobacionView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class NivelAprobacionCrearView(SinPrivilegios, generic.CreateView):
+    model = Niveles_aprobacion
+    template_name="solicitudes/datosniveldeaprobacion_form.html"
+    context_object_name="nivel_aprobacion"
+    login_url = "bases:login"
+    form_class = NivelesAprobacionForm
+    success_url= reverse_lazy("solicitudes:listanivelesaprobacion")
+    permission_required="solicitudes.add_niveles_aprobacion"
+
+    def form_valid(self, form):
+
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
+        form.instance.cxusuariocrea = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(NivelAprobacionCrearView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class NivelAprobacionEditarView(SinPrivilegios, generic.UpdateView):
+    model = Niveles_aprobacion
+    template_name="solicitudes/datosniveldeaprobacion_form.html"
+    context_object_name="nivel_aprobacion"
+    login_url = "bases:login"
+    form_class = NivelesAprobacionForm
+    success_url= reverse_lazy("solicitudes:listanivelesaprobacion")
+    permission_required="solicitudes.change_niveles_aprobacion"
+
+    def form_valid(self, form):
+
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(NivelAprobacionEditarView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
 @login_required(login_url='/login/')
 @permission_required('solicitudes.change_asignacion', login_url='bases:sin_permisos')
 def DatosAsignacionFacturasPurasNueva(request):
@@ -202,6 +273,22 @@ def DatosFacturasPuras(request, cliente_id, tipo_factoring_id
 
                 # crear la asignacion
                 if not asignacion_id:
+                    # 11-feb-25: se incorporar el contador de solicitudes SOL0001
+                    secuencia = Contador.objects.filter(empresa = id_empresa.empresa,
+                                                    cxtransaccion = INICIAL_SOLICITUD+ruc).first()
+                    if not secuencia:
+                        secuencia = Contador(
+                            empresa = id_empresa.empresa,
+                            cxusuariocrea = request.user,
+                            cxtransaccion = INICIAL_SOLICITUD+ruc,
+                            nultimonumero = 1
+                        )
+                        secuencia.save()
+                    else:
+                        secuencia.nultimonumero += 1
+                        secuencia.save()
+
+                    numero_solicitud = INICIAL_SOLICITUD+str(secuencia.nultimonumero).zfill(5)
 
                     asignacion = Asignacion(
                         cxcliente = cliente,
@@ -211,6 +298,7 @@ def DatosFacturasPuras(request, cliente_id, tipo_factoring_id
                         ncantidaddocumentos = 0,
                         cxusuariocrea = request.user,
                         empresa = id_empresa.empresa,
+                        cxasignacion = numero_solicitud
                     )
                     if asignacion:
                         asignacion.save()
@@ -286,16 +374,21 @@ def DatosFacturasPuras(request, cliente_id, tipo_factoring_id
                         datosparticipante.save()
 
                 comprador = Datos_compradores.objects\
-                    .filter(cxcomprador = datosparticipante.id).first()
+                    .filter(cxcomprador = datosparticipante.id)\
+                        .first()
 
                 if not comprador:
-                    datoscomprador=Datos_compradores(
+                    comprador=Datos_compradores(
                         cxcomprador = datosparticipante,
                         cxusuariocrea = request.user,
                         empresa = id_empresa.empresa
                     )
-                    if datoscomprador:
-                        datoscomprador.save()
+                    if comprador:
+                        comprador.save()
+
+                # grabar el código del comprador en la factura
+                detalle.comprador = comprador
+                detalle.save()
 
                 # grabar fecha de inicio de operaciones
                 # factor = Empresas.objects.filter(pk = id_empresa.empresa.id).first()
@@ -556,12 +649,30 @@ def DatosAsignacionConAccesorios(request, cliente_id,
                 # crear la asignacion
                 if not asignacion_id:
 
+                    # 11-feb-25: se incorporar el contador de solicitudes SOL0001
+                    secuencia = Contador.objects.filter(empresa = id_empresa.empresa,
+                                                    cxtransaccion = INICIAL_SOLICITUD+ruc).first()
+                    if not secuencia:
+                        secuencia = Contador(
+                            empresa = id_empresa.empresa,
+                            cxusuariocrea = request.user,
+                            cxtransaccion = INICIAL_SOLICITUD+ruc,
+                            nultimonumero = 1
+                        )
+                        secuencia.save()
+                    else:
+                        secuencia.nultimonumero += 1
+                        secuencia.save()
+
+                    numero_solicitud = INICIAL_SOLICITUD+str(secuencia.nultimonumero).zfill(5)
+
                     asignacion = Asignacion(
                         cxcliente = cliente,
                         cxtipofactoring = tipoFactoring,
                         cxtipo = tipoasignacion,
                         cxusuariocrea = request.user,
                         empresa = id_empresa.empresa,
+                        cxasignacion = numero_solicitud
                     )
                     if asignacion:
                         asignacion.save()
@@ -622,13 +733,17 @@ def DatosAsignacionConAccesorios(request, cliente_id,
                     .filter(cxcomprador = datosparticipante.id).first()
 
                 if not comprador:
-                    datoscomprador=Datos_compradores(
+                    comprador=Datos_compradores(
                         cxcomprador = datosparticipante,
                         cxusuariocrea = request.user,
                         empresa = id_empresa.empresa,
                     )
-                    if datoscomprador:
-                        datoscomprador.save()
+                    if comprador:
+                        comprador.save()
+
+                # grabar el código del comprador en la factura
+                det.comprador = comprador
+                det.save()
 
                 # grabar detalle de cheques
 
@@ -950,8 +1065,8 @@ def GeneraListaSolicitudesRegistradasJSON(request, desde = None, hasta= None):
                 .order_by("dregistro")
     else:
         asignacion = Asignacion.objects\
-            .filter(dregistro__gte = desde
-                    , dregistro__lte = hasta
+            .filter(dmodificacion__gte = desde
+                    , dmodificacion__lte = hasta
                     , cxestado__in = 'L,A'
                     , empresa = id_empresa.empresa)\
         

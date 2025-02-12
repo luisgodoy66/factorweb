@@ -5,7 +5,8 @@ from solicitudes.views import SolicitudesView, DetalleSolicitudFacturasPuras , \
     AsignacionFacturasPurasView, DatosAsignacionFacturasPurasNueva, \
     DatosAsignacionConAccesoriosNueva, AsignacionConAccesoriosView, \
     ClienteCrearView, DatosAccesorioEditar, ImportarOperacion, PedirArchivoXML,\
-    GeneraListaSolicitudesRegistradasJSON
+    GeneraListaSolicitudesRegistradasJSON, NivelesAprobacionView, \
+    NivelAprobacionCrearView, NivelAprobacionEditarView
 
 urlpatterns=[
     path('listasolicitudes/',SolicitudesView.as_view(), \
@@ -47,5 +48,8 @@ urlpatterns=[
     path('importaroperacion',ImportarOperacion, name='importar_xml_facturaspuras'),
     path('asignacionesregistradasjson/<desde>/<hasta>',GeneraListaSolicitudesRegistradasJSON
         , name="asignacionesregistradas_json"),
-
+    path('listanivelesaprobacion/',NivelesAprobacionView.as_view()
+         , name='listanivelesaprobacion'),
+    path('nivelaprobacionnuevo/',NivelAprobacionCrearView.as_view(), name='nivelaprobacion_nuevo'),
+    path('nivelaprobacioneditar/<int:pk>',NivelAprobacionEditarView.as_view(), name='nivelaprobacion_editar'),
 ]

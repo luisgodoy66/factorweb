@@ -85,8 +85,10 @@ window.open( url);
 function ReversarAceptacionAsignacion(asignacion_id, codigo_asgn = ''){
   // este proceso a diferencia de aceptar no se ejecuta desde un
   // formulario por eso no usa fetchPostear
+  // 12-feb-25  l.g.  lo que se va a reversar no es en la tabla de asignaciones
+  // sino en la tabla de solicitudes
 
-  MensajeConfirmacion("Reversar aceptación " +  codigo_asgn +"?",function(){
+  MensajeConfirmacion("Reversar liquidación " +  codigo_asgn +"?",function(){
       fetchProcesar("/operaciones/reversaraceptacionasignacion/"+  asignacion_id,  function(){
           location.reload();
       })

@@ -10,13 +10,95 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .serializers import EstadoOperativoClienteSerializer
+
 from datetime import date, timedelta
+
 from operaciones.models import Datos_operativos, Documentos, Pagares
-from clientes import models as ModeloCliente
 from cobranzas.models import Cheques_protestados
+from bases.models import Usuario_empresa, Empresas
+from solicitudes import models as ModelosSolicitud
+from clientes import models as ModeloCliente
+from .models import Configuracion_slack
 
 from django.http import JsonResponse
+from django.urls import reverse_lazy
+from django.views import generic
 
+from bases.views import SinPrivilegios
+
+from .forms import SlackForm
+
+class ConfiguracionesSlackView(SinPrivilegios, generic.ListView):
+    model = Configuracion_slack
+    template_name = "slack/listaconfiguracionesslack.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="api.view_configuracion_slack"
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Configuracion_slack.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(ConfiguracionesSlackView, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class ConfiguracionSlackNew(SinPrivilegios, generic.CreateView):
+    model = Configuracion_slack
+    template_name="slack/datosconfiguracionslack_form.html"
+    context_object_name = "configuracion"
+    login_url = 'bases:login'
+    form_class=SlackForm
+    success_url=reverse_lazy("api:lista_configuraciones_slack")
+    success_message="Configuración creada satisfactoriamente"
+    permission_required="api.add_configuracion_slack"
+
+    def form_valid(self, form):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
+        form.instance.cxusuariocrea = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(ConfiguracionSlackNew, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+    
+class ConfiguracionSlackEdit(SinPrivilegios, generic.UpdateView):
+    model = Configuracion_slack
+    template_name="slack/datosconfiguracionslack_form.html"
+    context_object_name = "configuracion"
+    form_class=SlackForm
+    success_url=reverse_lazy("api:lista_configuraciones_slack")
+    success_message="Configuración actualizada satisfactoriamente"
+    permission_required="api.change_configuracion_slack"
+
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(ConfiguracionSlackEdit, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+    # def get_form_kwargs(self):
+    #     kwargs = super().get_form_kwargs()
+    #     kwargs['nuevo'] = False
+    #     return kwargs
+    
 @api_view(['GET'])
 # @permission_classes([IsAuthenticated])
 def estado_operativo_cliente_api(request, cliente_id):
