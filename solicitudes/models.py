@@ -199,9 +199,9 @@ class ChequesAccesorios(ClaseModelo):
 class Respuesta_aprobacion(ClaseModelo):
     solicitud = models.ForeignKey(Solicitud_aprobacion, on_delete=models.CASCADE
                                  , related_name="asignacion_aprobacion")
-    cxusuariorespuesta = models.CharField(max_length=50)
-    cxcanal = models.CharField(max_length=50 )
-    cxmensaje = models.CharField(max_length=50, )
+    cxusuariorespuesta = models.CharField(max_length=50, null=True)
+    cxcanal = models.CharField(max_length=50, null=True)
+    cxmensaje = models.CharField(max_length=50, null=True)
     ctrespuesta = models.CharField(max_length=15,blank=True)
 
     def __str__(self):
