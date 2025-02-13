@@ -197,19 +197,12 @@ class ChequesAccesorios(ClaseModelo):
         return self.ngao + self.ndescuentocartera
     
 class Respuesta_aprobacion(ClaseModelo):
-    RESPUESTA=(
-        ('A', 'Aprobada'),
-        ('R', 'Rechazada'),
-    )
     solicitud = models.ForeignKey(Solicitud_aprobacion, on_delete=models.CASCADE
                                  , related_name="asignacion_aprobacion")
     cxusuariorespuesta = models.CharField(max_length=50)
     cxcanal = models.CharField(max_length=50 )
     cxmensaje = models.CharField(max_length=50, )
-    cxrespuesta = models.CharField(max_length=1, choices=RESPUESTA)
+    ctrespuesta = models.CharField(max_length=15,blank=True)
 
     def __str__(self):
-        return self.get_cxrespuesta_display()
-    
-    def respuesta(self):
-        return self.get_cxrespuesta_display()
+        return self.ctrespuesta

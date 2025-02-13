@@ -146,24 +146,28 @@ def manejar_interactividad(request):
 
         action = action_value["action"]
         operacion = action_value["operacion"]
+
         asignacion = Asignacion.objects.get(pk=operacion)
+        valor = "{:,.2f}".format(asignacion.neto())  # Convertir a cadena de texto con formato
+        solicitud = asignacion.cxasignacion
+        cliente = asignacion.cxcliente.ctnombre
 
         if asignacion.solicitudaprobacion.cxestado != 'P':
             enviar_respuesta_asincrona(response_url, "Operación ya no está pendiente de aprobación")
             return HttpResponse("Operación ya no está pendiente de aprobación", status=200)
         
-        # # grabar el registro de la respuesta
-        # id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-        # sa = Solicitud_aprobacion.objects.get(pk=asignacion.solicitudaprobacion.id)
-        # Respuesta_aprobacion.objects.create(
-        #     solicitud=sa,
-        #     cxusuariorespuesta=user_id,
-        #     cxcanal=canal,
-        #     cxmensaje=mensaje,
-        #     cxrespuesta=action,
-        #     cxusuariocrea = request.user,
-        #     empresa = id_empresa.empresa,
-        # )
+        # grabar el registro de la respuesta
+        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+        sa = Solicitud_aprobacion.objects.get(pk=asignacion.solicitudaprobacion.id)
+        Respuesta_aprobacion.objects.create(
+            solicitud=sa,
+            cxusuariorespuesta=user_id,
+            cxcanal=canal,
+            cxmensaje=mensaje,
+            ctrespuesta=action,
+            cxusuariocrea = request.user,
+            empresa = id_empresa.empresa,
+        )
 
         if action == "aprobar":
             # Lógica para aprobar la operación
@@ -174,7 +178,7 @@ def manejar_interactividad(request):
             
             asignacion.solicitudaprobacion.save()
 
-            enviar_respuesta_asincrona(response_url, f"Operación aprobada por <@{user_id}>")
+            enviar_respuesta_asincrona(response_url, f"Operación de {cliente} por {valor} aprobada por <@{user_id}>")
 
             return JsonResponse({"status": "Operación aprobada ✅"
                                  , "cliente": asignacion.cxcliente.ctnombre
@@ -192,7 +196,7 @@ def manejar_interactividad(request):
                 asignacion.solicitudaprobacion.cxestado = "R"
                 asignacion.solicitudaprobacion.save()
 
-                enviar_respuesta_asincrona(response_url, f"Operación rechazada por <@{user_id}>")
+                enviar_respuesta_asincrona(response_url, f"Operación de {cliente} por {valor} rechazada por <@{user_id}>")
                 return JsonResponse({"status": "Operación rechazada ❌"
                                     , "cliente": asignacion.cxcliente.ctnombre
                                     , "operacion": asignacion.cxasignacion
