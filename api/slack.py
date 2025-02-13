@@ -4,7 +4,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from solicitudes.models import Asignacion, Niveles_aprobacion, \
-    Solicitud_aprobacion
+    Solicitud_aprobacion, Respuesta_aprobacion
 from bases.models import Usuario_empresa
 
 from bases.views import enviarPost
@@ -139,13 +139,31 @@ def manejar_interactividad(request):
         jsontext = request.POST.get("payload")
         payload = json.loads(jsontext)
         user_id = payload["user"]["id"]
-        user_name = payload["user"]["username"]
+        canal = payload["channel"]["name"]
+        mensaje = payload["message"]["ts"]
         response_url = payload["response_url"]  # URL para enviar respuestas adicionales
         action_value = json.loads(payload["actions"][0]["value"])
 
         action = action_value["action"]
         operacion = action_value["operacion"]
         asignacion = Asignacion.objects.get(pk=operacion)
+
+        if asignacion.solicitudaprobacion.aprobada():
+            enviar_respuesta_asincrona(response_url, f"Operación {operacion} ya fue previamente aprobada")
+            return JsonResponse({"status": "Operación ya fue aprobada anteriormente"}, status=400)
+        
+        # grabar el registro de la respuesta
+        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+        Respuesta_aprobacion.objects.create(
+            solicitud=asignacion.solicitudaprobacion,
+            cxusuariorespuesta=user_id,
+            cxcanal=canal,
+            cxmensaje=mensaje,
+            cxrespuesta=action,
+            cxusuariocrea = request.user,
+            empresa = id_empresa.empresa,
+        )
 
         if action == "aprobar":
             # Lógica para aprobar la operación
@@ -154,12 +172,9 @@ def manejar_interactividad(request):
             if asignacion.solicitudaprobacion.naprobaciones >= asignacion.solicitudaprobacion.nivel.naprobadores:
                 asignacion.solicitudaprobacion.cxestado = "A"
             
-                asignacion.cxestado = "A"
-                asignacion.save()
-
             asignacion.solicitudaprobacion.save()
 
-            enviar_respuesta_asincrona(response_url, f"Operación aprobada por {user_name} <@{user_id}>")
+            enviar_respuesta_asincrona(response_url, f"Operación aprobada por <@{user_id}>")
 
             return JsonResponse({"status": "Operación aprobada ✅"
                                  , "cliente": asignacion.cxcliente.ctnombre
@@ -183,7 +198,7 @@ def manejar_interactividad(request):
                                     , "operacion": asignacion.cxasignacion
                                     , "valor": asignacion.neto()})
             else:
-                return HttpResponse( "Error al intentar. {}".format(resultado))
+                return JsonResponse({"status": "Error al intentar. {}".format(resultado)})
         else:
             return JsonResponse({"status": "Acción no reconocida"}, status=400)
     
@@ -205,7 +220,8 @@ def enviar_respuesta_asincrona(response_url, mensaje):
     #                 ,"team":{"id":"T08B5E6FVPH","domain":"codigobambu"},"enterprise":null,"is_enterprise_install":false
     #                 ,"channel":{"id":"C08BH5ASCUD","name":"todo-codigobambu"}
     #                 ,"message":{"user":"U08BYAP187Q"
-    #                             ,"type":"message","ts":"1739031460.946129","bot_id":"B08BQDAEBD5","app_id":"A08C4PJLPS5"
+    #                             ,"type":"message"
+    #                             ,"ts":"1739031460.946129","bot_id":"B08BQDAEBD5","app_id":"A08C4PJLPS5"
     #                             ,"text":"\\u00bfAprobar\\u00edas esta operaci\\u00f3n? Cliente: LUIS GODOY Operaci\\u00f3n: A00001 Valor: 50000","team":"T08B5E6FVPH"
     #                             ,"blocks":[{"type":"section","block_id":"jJ0Hm"
     #                                         ,"text":{"type":"mrkdwn","text":"\\u00bfAprobar\\u00edas esta operaci\\u00f3n?\\nCliente: LUIS GODOY\\nOperaci\\u00f3n: A00001\\nValor: 50000","verbatim":false}
