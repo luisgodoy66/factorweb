@@ -124,6 +124,9 @@ class Asignacion(ClaseModelo):
     def estado(self):
         return self.get_cxestado_display()
     
+    def __str__(self):
+        return self.cxasignacion
+    
 class Documentos(ClaseModelo):
     cxasignacion=models.ForeignKey(Asignacion
         , on_delete=models.CASCADE

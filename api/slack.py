@@ -149,8 +149,8 @@ def manejar_interactividad(request):
         asignacion = Asignacion.objects.get(pk=operacion)
 
         if asignacion.solicitudaprobacion.cxestado != 'P':
-            enviar_respuesta_asincrona(response_url, f"Operación {operacion} ya no está pendiente de aprobación")
-            return JsonResponse({"status": "Operación ya fue aprobada anteriormente"}, status=400)
+            enviar_respuesta_asincrona(response_url, f"Operación {asignacion} ya no está pendiente de aprobación")
+            return HttpResponse("Operación ya no está pendiente de aprobación", status=200)
         
         # # grabar el registro de la respuesta
         # id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
