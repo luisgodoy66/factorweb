@@ -148,22 +148,22 @@ def manejar_interactividad(request):
         operacion = action_value["operacion"]
         asignacion = Asignacion.objects.get(pk=operacion)
 
-        if asignacion.solicitudaprobacion.aprobada():
-            enviar_respuesta_asincrona(response_url, f"Operación {operacion} ya fue previamente aprobada")
+        if asignacion.solicitudaprobacion.cxestado != 'P':
+            enviar_respuesta_asincrona(response_url, f"Operación {operacion} ya no está pendiente de aprobación")
             return JsonResponse({"status": "Operación ya fue aprobada anteriormente"}, status=400)
         
-        # # grabar el registro de la respuesta
-        # id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+        # grabar el registro de la respuesta
+        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-        # Respuesta_aprobacion.objects.create(
-        #     solicitud=asignacion.solicitudaprobacion,
-        #     cxusuariorespuesta=user_id,
-        #     cxcanal=canal,
-        #     cxmensaje=mensaje,
-        #     cxrespuesta=action,
-        #     cxusuariocrea = request.user,
-        #     empresa = id_empresa.empresa,
-        # )
+        Respuesta_aprobacion.objects.create(
+            solicitud=asignacion.solicitudaprobacion,
+            cxusuariorespuesta=user_id,
+            cxcanal=canal,
+            cxmensaje=mensaje,
+            cxrespuesta=action,
+            cxusuariocrea = request.user,
+            empresa = id_empresa.empresa,
+        )
 
         if action == "aprobar":
             # Lógica para aprobar la operación
