@@ -154,7 +154,7 @@ def manejar_interactividad(request):
         
         # grabar el registro de la respuesta
         id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-        sa = Solicitud_aprobacion.objects.get(asignacion=operacion)
+        sa = Solicitud_aprobacion.objects.get(pk=asignacion.solicitudaprobacion.id)
         Respuesta_aprobacion.objects.create(
             solicitud=sa,
             cxusuariorespuesta=user_id,
