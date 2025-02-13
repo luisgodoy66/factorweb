@@ -152,18 +152,18 @@ def manejar_interactividad(request):
             enviar_respuesta_asincrona(response_url, f"Operación {operacion} ya fue previamente aprobada")
             return JsonResponse({"status": "Operación ya fue aprobada anteriormente"}, status=400)
         
-        # grabar el registro de la respuesta
-        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+        # # grabar el registro de la respuesta
+        # id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-        Respuesta_aprobacion.objects.create(
-            solicitud=asignacion.solicitudaprobacion,
-            cxusuariorespuesta=user_id,
-            cxcanal=canal,
-            cxmensaje=mensaje,
-            cxrespuesta=action,
-            cxusuariocrea = request.user,
-            empresa = id_empresa.empresa,
-        )
+        # Respuesta_aprobacion.objects.create(
+        #     solicitud=asignacion.solicitudaprobacion,
+        #     cxusuariorespuesta=user_id,
+        #     cxcanal=canal,
+        #     cxmensaje=mensaje,
+        #     cxrespuesta=action,
+        #     cxusuariocrea = request.user,
+        #     empresa = id_empresa.empresa,
+        # )
 
         if action == "aprobar":
             # Lógica para aprobar la operación
@@ -186,7 +186,7 @@ def manejar_interactividad(request):
         elif action == "rechazar":
             # Lógica para rechazar la operación
             resultado=enviarPost("CALL uspreversaliquidacionasignacion( {0},'')"
-                .format( asignacion,  ))
+                .format( operacion,  ))
                         
             if resultado[0] == "OK"  :
                 asignacion.solicitudaprobacion.cxestado = "R"
