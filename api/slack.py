@@ -161,10 +161,10 @@ def manejar_interactividad(request):
         sa = Solicitud_aprobacion.objects.get(pk=asignacion.solicitudaprobacion.id)
         Respuesta_aprobacion.objects.create(
             solicitud=sa,
-            # cxusuariorespuesta=user_id,
+            cxusuariorespuesta=user_id,
             # cxcanal=canal,
             # cxmensaje=mensaje,
-            ctrespuesta=action,
+            # ctrespuesta=action,
             cxusuariocrea = request.user,
             empresa = id_empresa.empresa,
         )
