@@ -185,5 +185,35 @@
 {% block js_page %}
 <script>
     enviando = false; //Obligaremos a entrar el if en el primer submit
+   // Función para obtener datos del contribuyente
+   function obtener_datos_contribuyente(ruc) {
+        // var url = `/api/sri/obtener-datos-contribuyente/${ruc}`;
+        var url = '/api/sri/obtener-datos-contribuyente/'+ruc;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    console.log(data);
+                    document.getElementById("id_ctnombre").value = data.razonSocial;
+                    if (!document.getElementById("id_ctgirocomercial").value) {
+                        document.getElementById("id_ctgirocomercial").value = data.actividadEconomicaPrincipal;
+                    }
+                    // Extraer solo la fecha (sin hora y minutos)
+                    var fechaInicioActividades = data.informacionFechasContribuyente.fechaInicioActividades.split(" ")[0];
+                    document.getElementById("id_dinicioactividades").value = fechaInicioActividades;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    // Agregar evento change al campo cxcliente
+    document.getElementById("id_cxparticipante").addEventListener("change", function() {
+        var ruc = this.value;
+        obtener_datos_contribuyente(ruc);
+    });
 </script>
 {% endblock %}

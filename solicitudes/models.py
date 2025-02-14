@@ -21,6 +21,8 @@ class Clientes(ClaseModelo):
     cttelefono2 =models.CharField(max_length=30,null=True, blank=True)
     ctcelular =models.CharField(max_length=30,null=True, blank=True)
     ctgirocomercial =models.TextField(null=True)
+    dinicioactividades=models.DateField(null=True,
+        help_text='fecha de inicio de actividades')
 
     def __str__(self):
         return self.ctnombre

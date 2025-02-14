@@ -672,6 +672,7 @@ def DatosClientes(request, participante_id=None, solicitante_id=None):
                         'cttelefono2':solicitante.cttelefono2,
                         'ctcelular':solicitante.ctcelular,
                         'ctgirocomercial':solicitante.ctgirocomercial,
+                        'dinicioactividades':solicitante.dinicioactividades,
                     }
                     formulario=ParticipanteForm(e,empresa = id_empresa.empresa)
 

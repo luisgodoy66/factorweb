@@ -177,7 +177,7 @@ class ClientesForm(forms.ModelForm):
         model = Clientes
         fields=['cxcliente', 'ctnombre', 'ctdireccion', 'cttelefono1'
             , 'cttelefono2', 'ctemail', 'ctemail2', 'ctcelular'
-            , 'ctgirocomercial', 'empresa']
+            , 'ctgirocomercial', 'dinicioactividades', 'empresa']
         labels={
             'cxcliente':'Id. cliente', 'ctnombre':'Nombre de cliente'
             , 'ctdireccion':'Dirección', 'cttelefono1':'Teléfono'
@@ -185,11 +185,17 @@ class ClientesForm(forms.ModelForm):
             , 'ctemail2':'Dirección email', 'ctcelular':'Celular'
             , 'ctgirocomercial':'Giro comercial'
             , 'empresa':'Empresa'
+            , 'dinicioactividades': 'Inicio de actividades'
         }
 
-        widgets={'ctdireccion': forms.Textarea(attrs={'rows': '3'}),
-                'ctgirocomercial':forms.Textarea(attrs={'rows': '5'}),
-                }
+        widgets={
+            'ctdireccion': forms.Textarea(attrs={'rows': '3'}),
+            'ctgirocomercial':forms.Textarea(attrs={'rows': '5'}),
+            'dinicioactividades': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 'placeholder': 'Seleccione una fecha', 'type': 'date'}
+            ),
+        }
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

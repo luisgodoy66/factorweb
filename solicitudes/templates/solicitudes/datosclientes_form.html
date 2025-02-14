@@ -16,143 +16,137 @@
 {% endblock breadcrumbs %}
 {% block content %}
 
-<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal"
-    onsubmit="return checkSubmit();">
-<!-- <div class="col-lg-6"> -->
-        <div class="card">
-            {% csrf_token %}
-            <div class="card-header">
-                <strong>Ficha general</strong> 
-                de {% if datosparticipante %} {{ datosparticipante }} {% else %}  nuevo cliente {% endif %} 
-            </div>
-            <div class="card-body card-block">
-                <!-- columna izquierda -->
-                <div class="col-lg-6">
-                    <div hidden>
-                        {{form.empresa}}
-                    </div>
-                    
-                    <div class="row form-group">
-                        <div class="col col-md-3">
-                            <label for="id_cxcliente" class=" form-control-label">{{form.cxcliente.label}}</label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.cxcliente}}
-                            <small class="form-text text-muted">Máximo 13 caracteres</small></div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3">
-                            <label for="id_ctnombre" class=" form-control-label">{{form.ctnombre.label}}</label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.ctnombre}}
-                            <small class="form-text text-muted">Máximo 100 caracteres</small></div>
-                    </div>
-                    <!-- <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cxlocalidad" class=" form-control-label">Localidad</label></div>
-                        <div class="col-12 col-md-9">
-                            {{form_participante.cxlocalidad}}
-                        </div>
-                    </div> -->
-                    <div class="row form-group">
-                        <div class="col col-md-3">
-                            <label for="id_ctdireccion" class=" form-control-label">{{form.ctdireccion.label}}</label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.ctdireccion}}
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3">
-                            <label for="id_cttelefono1" class=" form-control-label">{{form.cttelefono1.label}}</label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.cttelefono1}}
-                            <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
-                    </div>
-                    <div class="row form-group">
-                        <div class="col col-md-3">
-                            <label for="id_cttelefono2" class=" form-control-label">{{form.cttelefono2.label}}</label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.cttelefono2}}
-                            <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
-                    </div>
+<form method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal" onsubmit="return checkSubmit();">
+    <div class="card">
+        {% csrf_token %}
+        <div class="card-header">
+            <strong>Ficha general</strong> 
+            de {% if datosparticipante %} {{ datosparticipante }} {% else %}  nuevo cliente {% endif %} 
+        </div>
+        <div class="card-body card-block">
+            <!-- columna izquierda -->
+            <div class="col-lg-6">
+                <div hidden>
+                    {{form.empresa}}
                 </div>
-                <!-- columna derecha -->
-                <div class="col-lg-6">
-                    <div class="row form-group">
-                        <div class="col col-md-3">
-                            <label for="id_ctcelular" class=" form-control-label">{{form.ctcelular.label}}</label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.ctcelular}}
-                            <small class="form-text text-muted">Máximo 30 caracteres. Incluya el código de país</small></div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3">
-                            <label for="id_ctemail" class=" form-control-label">{{form.ctemail.label}}</label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.ctemail}}
-                            <small class="text-muted form-text">Ingrese el email principal</small></div>
-                    </div>
-                    <div class="row form-group">
-                        <div class="col col-md-3">
-                            <label for="id_ctemail2" class=" form-control-label">{{form.ctemail2.label}}</label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.ctemail2}}
-                            <small class="text-muted form-text">Ingrese el email secundario</small></div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3">
-                            <label for="id_ctgirocomercial" class=" form-control-label">{{form.ctgirocomercial.label}}</label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.ctgirocomercial}}
-                        </div>
-                    </div> 
-                            
-                </div>
-            </div>    
-            <div class="card-footer">
-                <!-- mostrar los errores del formulario ? -->
-     
-                <a href="{% url 'solicitudes:listasolicitudes' %}" class="btn btn-danger btn-sm">
-                    <i class="fa fa-ban"></i> Cancelar
-                </a>
-                <button type="submit" class="btn btn-primary btn-sm">
-                    <i class="fa fa-dot-circle-o"></i> Grabar
-                </button>
-            </div>
-            <div class="alert alert-danger" role="alert">
-                <ul>
-                    {#% for field, errors in form.errors.items %#}
-                        {#% for error in errors %#}
-                            <!-- <li>{{ field }}: {{ error }}</li> -->
-                        {#% endfor %#}
-                    {#% endfor %#}
-                    {% if form.errors %}
-                    {% for field in form %}
-                        {% if field.errors %}
-                            {% for error in field.errors %}
-                                {{ error|escape }}
-                            {% endfor %}
-                        {% endif %}
-                    {% endfor %}
                 
-                    {% if form.non_field_errors%}
-                        {% for error in form.non_field_errors %}
+                <div class="row form-group">
+                    <div class="col col-md-3">
+                        <label for="id_cxcliente" class="form-control-label">{{form.cxcliente.label}}</label></div>
+                    <div class="col-12 col-md-9">
+                        {{form.cxcliente}}
+                        <small class="form-text text-muted">Máximo 13 caracteres</small></div>
+                </div>
+
+                <div class="row form-group">
+                    <div class="col col-md-3">
+                        <label for="id_ctnombre" class="form-control-label">{{form.ctnombre.label}}</label></div>
+                    <div class="col-12 col-md-9">
+                        {{form.ctnombre}}
+                        <small class="form-text text-muted">Máximo 100 caracteres</small></div>
+                </div>
+                <div class="row form-group">
+                    <div class="col col-md-3">
+                        <label for="id_ctdireccion" class="form-control-label">{{form.ctdireccion.label}}</label></div>
+                    <div class="col-12 col-md-9">
+                        {{form.ctdireccion}}
+                    </div>
+                </div>
+
+                <div class="row form-group">
+                    <div class="col col-md-3">
+                        <label for="id_cttelefono1" class="form-control-label">{{form.cttelefono1.label}}</label></div>
+                    <div class="col-12 col-md-9">
+                        {{form.cttelefono1}}
+                        <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
+                </div>
+                <div class="row form-group">
+                    <div class="col col-md-3">
+                        <label for="id_cttelefono2" class="form-control-label">{{form.cttelefono2.label}}</label></div>
+                    <div class="col-12 col-md-9">
+                        {{form.cttelefono2}}
+                        <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
+                </div>
+            </div>
+            <!-- columna derecha -->
+            <div class="col-lg-6">
+                <div class="row form-group">
+                    <div class="col col-md-3">
+                        <label for="id_ctcelular" class="form-control-label">{{form.ctcelular.label}}</label></div>
+                    <div class="col-12 col-md-9">
+                        {{form.ctcelular}}
+                        <small class="form-text text-muted">Máximo 30 caracteres. Incluya el código de país</small></div>
+                </div>
+
+                <div class="row form-group">
+                    <div class="col col-md-3">
+                        <label for="id_ctemail" class="form-control-label">{{form.ctemail.label}}</label></div>
+                    <div class="col-12 col-md-9">
+                        {{form.ctemail}}
+                        <small class="text-muted form-text">Ingrese el email principal</small></div>
+                </div>
+                <div class="row form-group">
+                    <div class="col col-md-3">
+                        <label for="id_ctemail2" class="form-control-label">{{form.ctemail2.label}}</label></div>
+                    <div class="col-12 col-md-9">
+                        {{form.ctemail2}}
+                        <small class="text-muted form-text">Ingrese el email secundario</small></div>
+                </div>
+
+                <div class="row form-group">
+                    <div class="col col-md-3">
+                        <label for="id_ctgirocomercial" class="form-control-label">{{form.ctgirocomercial.label}}</label></div>
+                    <div class="col-12 col-md-9">
+                        {{form.ctgirocomercial}}
+                    </div>
+                </div> 
+                <div class="row form-group">
+                    <div class="col col-md-3"><label for="id_dinicioactividades" class=" form-control-label">
+                        {{form.dinicioactividades.label}}
+                    </label></div>
+                    <div class="col-12 col-md-9">
+                        {{form.dinicioactividades}}
+                    </div>
+                </div>
+                    
+            </div>
+        </div>    
+        <div class="card-footer">
+            <!-- mostrar los errores del formulario ? -->
+ 
+            <a href="{% url 'solicitudes:listasolicitudes' %}" class="btn btn-danger btn-sm">
+                <i class="fa fa-ban"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa fa-dot-circle-o"></i> Grabar
+            </button>
+        </div>
+        {% if form.errors %}
+        <div class="alert alert-danger" role="alert">
+            <ul>
+                {% for field in form %}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
                             {{ error|escape }}
                         {% endfor %}
                     {% endif %}
+                {% endfor %}
+            
+                {% if form.non_field_errors%}
+                    {% for error in form.non_field_errors %}
+                        {{ error|escape }}
+                    {% endfor %}
                 {% endif %}
-                </ul>
-            </div>
+            </ul>
+        </div>
+        {% endif %}
 
-            <div>
-                <small class="text-danger">
+        <div>
+            <small class="text-danger">
 
-                </small>
-            </div>
- </div>
-    <!-- </div> -->
+            </small>
+        </div>
+    </div>
 </form>
 {% endblock %}
 {% block js_page %}
@@ -160,5 +154,36 @@
     var enviando = false; //Obligaremos a entrar el if en el primer submit
     var x = capturaValor("empresa_id")
     inicializaValor("id_empresa", x)
+
+    // Función para obtener datos del contribuyente
+    function obtener_datos_contribuyente(ruc) {
+        // var url = `/api/sri/obtener-datos-contribuyente/${ruc}`;
+        var url = '/api/sri/obtener-datos-contribuyente/'+ruc;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    console.log(data);
+                    document.getElementById("id_ctnombre").value = data.razonSocial;
+                    if (!document.getElementById("id_ctgirocomercial").value) {
+                        document.getElementById("id_ctgirocomercial").value = data.actividadEconomicaPrincipal;
+                    }
+                    // Extraer solo la fecha (sin hora y minutos)
+                    var fechaInicioActividades = data.informacionFechasContribuyente.fechaInicioActividades.split(" ")[0];
+                    document.getElementById("id_dinicioactividades").value = fechaInicioActividades;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    // Agregar evento change al campo cxcliente
+    document.getElementById("id_cxcliente").addEventListener("change", function() {
+        var ruc = this.value;
+        obtener_datos_contribuyente(ruc);
+    });
 </script>
 {% endblock %}
