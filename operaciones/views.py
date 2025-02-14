@@ -524,13 +524,15 @@ def DesembolsarAsignacion(request, pk, cliente_id):
             id_beneficiario = 'null'
             beneficiario = 'null'
             cuenta_pago = 'null'
+            transferencia_a = 'null'
+            
             if forma_pago == "CHE":
                 id_beneficiario = formulario.cleaned_data["cxbeneficiario"]
                 beneficiario = formulario.cleaned_data["ctbeneficiario"]
 
-            if forma_pago != "TRA":
+            if forma_pago == "TRA":
                 # cuenta_transferencia = formulario.cleaned_data["cxcuentadestino"]
-                cuenta_transferencia = 'null'
+                transferencia_a = cuenta_transferencia.id
 
             if forma_pago in ["CHE", "TRA"]:
                 # cuenta_pago = formulario.cleaned_data["cxcuentapago"]
@@ -563,7 +565,7 @@ def DesembolsarAsignacion(request, pk, cliente_id):
                                  ,{8},'')"
                 .format(
                     	asignacion.id, forma_pago, id_beneficiario, beneficiario
-                        , cliente_id, cuenta_transferencia.id , cuenta_pago, request.user.id
+                        , cliente_id, transferencia_a , cuenta_pago, request.user.id
                         , id_empresa.empresa.id ))
                         
             if resultado[0] == "OK"  :
