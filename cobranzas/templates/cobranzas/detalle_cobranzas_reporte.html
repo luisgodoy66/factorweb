@@ -1,5 +1,5 @@
 {% load filtros %}
-{% load humanize %}
+{#% load humanize %#}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -83,7 +83,7 @@
                             {% for cliente in cobranzas_list %}
                             <tr>
                                 <td class="subrayado" colspan="11"><strong>{{ cliente.grouper }}</strong></td>
-                                <td class="subrayado numero"><strong> {{cliente.list|running_aplicado|intcomma }}</strong></td>
+                                <td class="subrayado numero"><strong> {{cliente.list|running_aplicado|floatformat:"2g" }}</strong></td>
                             </tr>
                                 {% for item in cliente.list %}
                                 <tr></tr>
@@ -99,17 +99,17 @@
                                     <td class="numero">{{ item.nvalorcobranza }}</td>
                                     <td class="numero">{{ item.retencionesybajas }}</td>
                                     <td class="numero">{{ item.cxcobranza.cxestado }}</td>
-                                    <td class="numero">{{ item.aplicado|intcomma }}</td>
+                                    <td class="numero">{{ item.aplicado|floatformat:"2g" }}</td>
                                 </tr>
                                 {% endfor %}
                                 <tr></tr>
                             {% endfor %}
                             <tr></tr>
                             <tr>
-                                <td colspan="9" class="numero"><h4>{{ total_cobrado|intcomma }}</h4></td>
-                                <td class="numero"><h4>{{ total_retencionesybaja|intcomma }}</h4></td>
+                                <td colspan="9" class="numero"><h4>{{ total_cobrado|floatformat:"2g" }}</h4></td>
+                                <td class="numero"><h4>{{ total_retencionesybaja|floatformat:"2g" }}</h4></td>
                                 <td></td>
-                                <td class="numero"><h4>{{ total_general|intcomma }}</h4></td>
+                                <td class="numero"><h4>{{ total_general|floatformat:"2g" }}</h4></td>
                             </tr>
                         </tbody>
                     </table>

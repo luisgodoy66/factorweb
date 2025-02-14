@@ -124,20 +124,15 @@ function AceptarCobranza(){
     }
 
     fetchPostear("/cobranzas/aceptarcobranzanotasdebito/", objeto, function(data){
-        // // // regresar a la lista de NOTAS DE DEBITO o AMPLIACIONES
-        // if (capturaValor("tipo_deuda") == 'ND'){
-          window.location.href = "/cobranzas/listaliquidacionesennegativopendientes";
-        // }
-        // else{
-        //   window.location.href = "/cobranzas/listafacturaspendientespagar";
-        // }
-
-
         // en una nueva ventana abrir el reporte de cobranza
         // hay que saber el id de la cobranza
          url = window.location.origin
          url = url + "/cobranzas/reportecobranzacargos/"+data;
          window.open( url);
+        // // // regresar a la lista de NOTAS DE DEBITO o AMPLIACIONES
+          window.location.href = "/cobranzas/listaliquidacionesennegativopendientes";
+
+
       })
   })
      

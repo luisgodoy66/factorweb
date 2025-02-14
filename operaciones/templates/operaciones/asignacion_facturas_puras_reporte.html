@@ -1,5 +1,5 @@
 {% load filtros %}
-{% load humanize %}
+{#% load humanize %#}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -122,7 +122,7 @@
                                 <tr></tr>
                                 <tr>
                                     <td class="subrayado" colspan="4"><strong>{{ comprador.grouper }}</strong></td>
-                                    <td class="subrayado numero"><strong> {{comprador.list|running_total2|intcomma }}</strong></td>
+                                    <td class="subrayado numero"><strong> {{comprador.list|running_total2|floatformat:"2g" }}</strong></td>
                                     <td class="subrayado" colspan="6"></td>
                                     {% if gao.imprimir %}
                                         <td class="subrayado"></td>
@@ -138,10 +138,10 @@
                                         <td width="10%">{{ item.ctdocumento }}</td>
                                         <td>{{ item.demision|custom_date_format  }}</td>
                                         <td class="centrado">{{ item.dvencimiento|custom_date_format  }}</td>
-                                        <td class="numero">{{ item.ntotal }}</td>
+                                        <td class="numero">{{ item.ntotal|floatformat:"2g" }}</td>
                                         <td class="numero">{{ item.nplazo }}</td>
                                         <td class="numero">{{ item.nporcentajeanticipo }}</td>
-                                        <td class="numero">{{ item.nanticipo }}</td>
+                                        <td class="numero">{{ item.nanticipo|floatformat:"2g" }}</td>
                                         {% if gao.imprimir %}
                                             <td class="numero">{{ item.ntasacomision|floatformat:2 }}</td>
                                         {% endif %}
@@ -160,15 +160,15 @@
                                 <td></td>
                                 <td></td>
                                 <td colspan="2"><h4>Totales a liquidar:</h4></td>
-                                <td class="numero"><h4>{{ asignacion.nvalor|intcomma }}</h4></td>
+                                <td class="numero"><h4>{{ asignacion.nvalor|floatformat:"2g" }}</h4></td>
                                 <td></td>
                                 <td></td>
-                                <td class="numero"><h4>{{ asignacion.nanticipo|intcomma }}</h4></td>
+                                <td class="numero"><h4>{{ asignacion.nanticipo|floatformat:"2g" }}</h4></td>
                                 {% if gao.imprimir %}<td></td>{% endif %}
-                                <td class="numero"><h4>{{ asignacion.ngao|intcomma }}</h4></td>
+                                <td class="numero"><h4>{{ asignacion.ngao|floatformat:"2g" }}</h4></td>
                                 {% if dc.imprimir %}<td></td>{% endif %}
-                                <td class="numero"><h4>{{ asignacion.ndescuentodecartera|intcomma }}</h4></td>
-                                <td class="numero"><h4>{{cargos_negociacion|intcomma}}</h4></td>
+                                <td class="numero"><h4>{{ asignacion.ndescuentodecartera|floatformat:"2g" }}</h4></td>
+                                <td class="numero"><h4>{{cargos_negociacion|floatformat:"2g"}}</h4></td>
                             </tr>
                             <tr>
                                 <td></td>
@@ -181,7 +181,7 @@
                                 <td></td>
                                 {% if gao.imprimir %}<td></td>{% endif %}
                                 <td colspan="2"><strong>Anticipo menos cargos</strong></td>
-                                <td class="numero">{{ subtotal|intcomma}}</td>
+                                <td class="numero">{{ subtotal|floatformat:"2g"}}</td>
                             </tr>
                             {% if asignacion.notroscargos > 0 %}
                             {% for item in otros_cargos %}
@@ -211,7 +211,7 @@
                                 <td></td>
                                 {% if gao.imprimir %}<td></td>{% endif %}
                                 <td colspan="2"><strong>I.V.A.</strong></td>
-                                <td class="numero">{{ asignacion.niva|intcomma}}</td>
+                                <td class="numero">{{ asignacion.niva|floatformat:"2g"}}</td>
                             </tr>
                             <tr>
                                 <td></td>
@@ -224,7 +224,7 @@
                                 <td></td>
                                 {% if gao.imprimir %}<td></td>{% endif %}
                                 <td colspan="2"><strong>Neto a recibir</strong></td>
-                                <td class="numero">{{ neto|intcomma}}</td>
+                                <td class="numero">{{ neto|floatformat:"2g"}}</td>
                             </tr>
                         </tbody>
                     </table>

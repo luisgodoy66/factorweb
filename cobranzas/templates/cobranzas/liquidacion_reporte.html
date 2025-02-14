@@ -1,5 +1,5 @@
 {% load filtros %}
-{% load humanize %}
+{#% load humanize %#}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -79,7 +79,7 @@
                             <td style="width: 20%; "><strong>Liquidación:</strong></td>
                             <td style="width: 40%; ">{{ liquidacion.cxliquidacion }}</td>
                             <td style="width: 20%; "><strong>Total:</strong></td>
-                            <td style="width: 20%; ">{{ liquidacion.neto|intcomma}}</td>
+                            <td style="width: 20%; ">{{ liquidacion.neto|floatformat:"2g"}}</td>
                         </tr>
                         <tr>
                             <td style="width: 20%; "><strong>Instrucción de pago:</strong></td>
@@ -114,7 +114,7 @@
                     <tr>
                         <td> {{c.cobranza}} </td>
                         <td> {{c.fecha_cobranza}} </td>
-                        <td class="numero"> {{c.valor_cobrado|intcomma}} </td>
+                        <td class="numero"> {{c.valor_cobrado|floatformat:"2g"}} </td>
                         <td class="numero"> {{c.vuelto|floatformat:2}} </td>
                         <td class="numero"> {{c.sobrepago|floatformat:2}} </td>
                         <td class="numero"> {{c.total|floatformat:2}} </td>
@@ -213,30 +213,30 @@
                         <tr></tr>
                         <tr>
                             <td><h3>Totales:</h3></td>
-                            <td class="numero"> {{liquidacion.nvuelto}} </td>
+                            <td class="numero"> {{liquidacion.nvuelto|floatformat:"2g"}} </td>
                             {% if liquidacion.nsobrepago %}
-                            <td class="numero"> {{liquidacion.nsobrepago}} </td>
+                            <td class="numero"> {{liquidacion.nsobrepago|floatformat:"2g"}} </td>
                             {% endif %}
-                            <td class="numero"> {{liquidacion.ndescuentodecartera|suma:liquidacion.ndescuentodecarteravencido}} </td>
+                            <td class="numero"> {{liquidacion.ndescuentodecartera|suma:liquidacion.ndescuentodecarteravencido|floatformat:"2g"}} </td>
                             {% if liquidacion.ngao %}
-                            <td class="numero"> {{liquidacion.ngao}} </td>
+                            <td class="numero"> {{liquidacion.ngao|floatformat:"2g"}} </td>
                             {% endif %}
                             {% if liquidacion.ngaoa %}
-                            <td class="numero"> {{liquidacion.ngaoa}} </td>
+                            <td class="numero"> {{liquidacion.ngaoa|floatformat:"2g"}} </td>
                             {% endif %}
                             {% if liquidacion.niva %}
-                            <td class="numero"> {{liquidacion.niva}} </td>
+                            <td class="numero"> {{liquidacion.niva|floatformat:"2g"}} </td>
                             {% endif %}
                             {% if liquidacion.nretenciones %}
-                            <td class="numero"> {{liquidacion.nretenciones}} </td>
+                            <td class="numero"> {{liquidacion.nretenciones|floatformat:"2g"}} </td>
                             {% endif %}
                             {% if liquidacion.nbajas %}
-                            <td class="numero"> {{liquidacion.nbajas}} </td>
+                            <td class="numero"> {{liquidacion.nbajas|floatformat:"2g"}} </td>
                             {% endif %}
                             {% if liquidacion.otros_cargos %}
-                            <td class="numero"> {{liquidacion.otros_cargos}} </td>
+                            <td class="numero"> {{liquidacion.otros_cargos|floatformat:"2g"}} </td>
                             {% endif %}
-                            <td class="numero"> {{liquidacion.neto}} </td>
+                            <td class="numero"> {{liquidacion.neto|floatformat:"2g"}} </td>
                         </tr>
                     </tbody>
                 </table>

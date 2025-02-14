@@ -185,13 +185,13 @@ function AceptarCobranza(){
     }
 
     fetchPostear("/cobranzas/aceptarcobranza/", objeto, function(data){
-        // regresar a la lista de solicitudes
-        window.location.href = "/cobranzas/listadocumentosporvencer";
         // en una nueva ventana abrir el reporte de cobranza
         // hay que saber el id de la cobranza
          url = window.location.origin
          url = url + "/cobranzas/reportecobranzacartera/"+data;
          window.open( url);
+        // regresar a la lista de solicitudes
+        window.location.href = "/cobranzas/listadocumentosporvencer";
       })
   })
      

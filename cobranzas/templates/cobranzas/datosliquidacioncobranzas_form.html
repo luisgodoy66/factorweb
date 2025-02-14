@@ -501,12 +501,12 @@ function LiquidarCobranza(){
         }
 
         fetchPostear("/cobranzas/liquidacion/"+tipo_operacion, objeto, function(data){
-          // regresar a la lista de solicitudes
-          window.location.href = "/cobranzas/listacobranzaspendientesliquidar";
           // en una nueva ventana abrir el reporte de asignación
           url = window.location.origin
           url = url + "/cobranzas/reporteliquidacion/"+data;
           window.open( url);
+          // regresar a la lista de solicitudes
+          window.location.href = "/cobranzas/listacobranzaspendientesliquidar";
         })
     })
       

@@ -65,11 +65,11 @@
                             <td>{{ item.cxtipofactoring }}</td>
                             <td>{{ item.ctinstrucciondepago }} </td>
                             <td>{{ item.ddesembolso|date:"Y/m/d" }}</td>
-                            <td>{{ item.neto }}</td>
+                            <td>{{ item.neto|floatformat:"2g" }}</td>
                             <td>
                                 <a href="{% url 'cobranzas:desembolsarliquidacion' item.id item.cxcliente.id %}" 
                                 class="btn btn-primary btn-sm" role="button" title="Pagar">
-                                <i class="fa fa-money"></i></a>
+                                <i class="fa fa-check"></i></a>
                                 <button onclick="ReversarLiquidacion( {{item.id}})" title="Reversar liquidación"
                                     class="btn btn-danger btn-sm"
                                     role="button">
