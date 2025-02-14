@@ -435,6 +435,43 @@ class PagareDatos(SinPrivilegios, generic.TemplateView):
         context['solicitudes_pendientes'] = sp
         return context
 
+class AnexosClienteView(SinPrivilegios, generic.ListView):
+    model = Anexos
+    template_name = "operaciones/listaanexoscliente.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="operaciones.view_anexos"
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
+        
+        cliente_id = self.kwargs.get('cliente_id')
+        cliente = ModeloCliente.Datos_generales.objects\
+            .filter(pk=cliente_id).first()
+        qs=Anexos.objects\
+            .filter(leliminado = False
+                    , lactivo= True
+                    , cxtipocliente__in = ('T',cliente.cxtipocliente)
+                    , empresa = id_empresa.empresa)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(AnexosClienteView, self).get_context_data(**kwargs)
+
+        solicitud_id = self.kwargs.get('solicitud_id')
+        cliente_id = self.kwargs.get('cliente_id')
+        cliente = ModeloCliente.Datos_generales.objects\
+            .filter(pk=cliente_id).first()
+
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        context['solicitud_id'] = solicitud_id
+        context['cliente'] = cliente
+        return context
+
 @login_required(login_url='/login/')
 @permission_required('operaciones.add_desembolsos', login_url='bases:sin_permisos')
 def DesembolsarAsignacion(request, pk, cliente_id):

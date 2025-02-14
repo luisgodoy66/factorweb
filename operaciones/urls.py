@@ -23,7 +23,8 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     PedirArchivoXML, ImportarOperacion, ReversaAceptacionPagare, \
     AceptarAsignacion, ReversoDesembolsoAsignacion, \
     MaestroMovimientosView, GeneraListaCuotasPagareJSON, \
-    ModificarCuota, GeneraResumenNegociadPorActividadJSON
+    ModificarCuota, GeneraResumenNegociadPorActividadJSON, \
+    AnexosClienteView
 
 from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
     ImpresionAsignacionDesdeSolicitud, ImpresionFacturasPendientes, \
@@ -129,8 +130,11 @@ urlpatterns = [
     path('impresionresumenasignaciones/<desde>/<hasta>/', ImpresionResumenAsignaciones
          , name='resumen_asignaciones'),
     path("anexosactivos/<tipo_cliente>", ConsultaAnexosActivos),
-    path("generaranexo/<int:asignacion_id>/<anexo_id>", GenerarAnexo),
+    path("generaranexo/<int:asignacion_id>/<anexo_id>", GenerarAnexo,
+         name='generar_anexo'),
     path('marcaanexogenerado/<int:asignacion_id>', MarcarAnexoGenerado),
+    path('anexoscliente/<cliente_id>/<solicitud_id>', AnexosClienteView.as_view()
+         , name='anexos_cliente'),
 # dashboard
     path('antigüedadcartera', GeneraResumenAntigüedadCarteraJSON),
     path('carteranegociada/<int:año>', GeneraResumenCarteraNegociadaJSON),
