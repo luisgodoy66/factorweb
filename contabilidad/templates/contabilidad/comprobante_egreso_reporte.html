@@ -1,5 +1,5 @@
 {% load filtros %}
-{% load humanize %}
+{#% load humanize %#}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -87,7 +87,7 @@
                             <td style="width: 15%; "><strong>Concepto:</strong></td>
                             <td style="width: 40%; ">{{ diario.ctconcepto }}</td>
                             <td style="width: 15%; "><strong>Total:</strong></td>
-                            <td style="width: 30%; ">{{ diario.asiento_egreso.nvalor.nvalor }}</td>
+                            <td style="width: 30%; ">{{ diario.asiento_egreso.nvalor|floatformat:"2g" }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -110,12 +110,12 @@
                                 <td width="60%">{{ item.cxcuenta }}</td>
                                 <td>{{ item.ctreferencia }}</td>
                                 {% if item.cxtipo == 'D' %}
-                                <td class="numero">{{ item.nvalor|intcomma }}</td>
+                                <td class="numero">{{ item.nvalor|floatformat:"2g" }}</td>
                                 {% else %}
                                 <td class="numero"></td>
                                 {% endif %}
                                 {% if item.cxtipo == 'H' %}
-                                <td class="numero">{{ item.nvalor|intcomma }}</td>
+                                <td class="numero">{{ item.nvalor|floatformat:"2g" }}</td>
                                 {% else %}
                                 <td class="numero"></td>
                                 {% endif %}
@@ -126,8 +126,8 @@
                             <tr>
                                 <td></td>
                                 <td></td>
-                                <td class="numero"><h4>{{ totales.debe|intcomma }}</h4></td>
-                                <td class="numero"><h4>{{ totales.haber|intcomma }}</h4></td>
+                                <td class="numero"><h4>{{ totales.debe|floatformat:"2g" }}</h4></td>
+                                <td class="numero"><h4>{{ totales.haber|floatformat:"2g" }}</h4></td>
                             </tr>
                         </tbody>
                     </table>

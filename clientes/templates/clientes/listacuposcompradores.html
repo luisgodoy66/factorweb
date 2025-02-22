@@ -55,9 +55,9 @@
                         <th>Id</th>
                         <th>Deudor</th>
                         <th>Cliente</th>
-                        <th>Cupo</th>
-                        <th>Utilizado</th>
-                        <th>Disponible</th>
+                        <th class="text-right">Cupo</th>
+                        <th class="text-right">Utilizado</th>
+                        <th class="text-right">Disponible</th>
                         <th>Activo</th>
                         <th>Aprobación</th>
                         <th class="all">Acciones</th>
@@ -68,9 +68,9 @@
                             <td>{{ item.cxcomprador.cxcomprador.cxparticipante }}</td>
                             <td>{{ item.cxcomprador }}</td>
                             <td>{{ item.cxcliente }}</td>
-                            <td>{{ item.ncupocartera }}</td>
-                            <td>{{ item.nutilizadocartera }}</td>
-                            <td>{{ item.disponible }}</td>
+                            <td class="text-right">{{ item.ncupocartera |floatformat:"2g"}}</td>
+                            <td class="text-right">{{ item.nutilizadocartera |floatformat:"2g"}}</td>
+                            <td class="text-right">{{ item.disponible |floatformat:"2g"}}</td>
                             <td>{{ item.lactivo|yesno:'Si,No' }}</td>
                             <td>{{ item.daprobacion|date:"Y/m/d" }}</td>
                             <td>

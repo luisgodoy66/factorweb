@@ -1,5 +1,5 @@
 {% load filtros %}
-{% load humanize %}
+{#% load humanize %#}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -72,17 +72,17 @@
                                 <td class="numero">{{ item.cheque__ctgirador }}</td>
                                 <td class="numero">{{ item.dprotesto|custom_date_format}}</td>
                                 <td class="numero">{{ item.motivoprotesto__ctmotivoprotesto}}</td>
-                                <td class="numero">{{ item.nvalor|intcomma}}</td>
-                                <td class="numero">{{ item.nvalorcartera|intcomma}}</td>
-                                <td class="numero">{{ item.nsaldocartera|intcomma}}</td>
+                                <td class="numero">{{ item.nvalor|floatformat:"2g"}}</td>
+                                <td class="numero">{{ item.nvalorcartera|floatformat:"2g"}}</td>
+                                <td class="numero">{{ item.nsaldocartera|floatformat:"2g"}}</td>
                             </tr>
                             {% endfor %}
                             <!-- totales -->
                             <tr></tr>
                             <tr>
                                 <td></td>
-                                <td class="numero" colspan="7"><h4>{{ totales.total_cartera |default:0.00|intcomma}}</h4> </td>
-                                <td class="numero" ><h4>{{ totales.total_saldo |default:0.00|intcomma}}</h4> </td>
+                                <td class="numero" colspan="7"><h4>{{ totales.total_cartera |default:0.00|floatformat:"2g"}}</h4> </td>
+                                <td class="numero" ><h4>{{ totales.total_saldo |default:0.00|floatformat:"2g"}}</h4> </td>
                             </tr>
                         </tbody>
                     </table>

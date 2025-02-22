@@ -65,7 +65,7 @@
                             <td>{{ item.cxtipofactoring__ctabreviacion }}</td>
                             <td>{{ item.cxcobranza }} </td>
                             <td>{{ item.cxformapago }}</td>
-                            <td>{{ item.nvalor}}</td>
+                            <td>{{ item.nvalor | floatformat:"2g"}}</td>
                             {% if item.ldepositoencuentaconjunta %}
                             <td>Cuenta compartida</td>
                             {% else %}

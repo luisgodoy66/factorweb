@@ -116,20 +116,20 @@ class DocumentosForm(forms.ModelForm):
                 })
             else:
                 service = SRIConsultationService("https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl")
-                result = service.consult_document_status(cxautorizacion_ec)
-                if "error" in result:
-                    raise ValidationError({
-                        'cxautorizacion_ec': f"Error al consultar el SRI: {result['error']}"
-                    })
-                elif "mensaje" in result:
-                    raise ValidationError({
-                        'cxautorizacion_ec': f"Error al consultar el SRI: {result['mensaje']} o tiene más de 45 días de antigüedad."
-                    })
-                else:
-                    if result[0]["estado"] != "AUTORIZADO":
-                        raise ValidationError({
-                            'cxautorizacion_ec': f"Documento no autorizado por el SRI o tiene más de 45 días de antigüedad."
-                        })
+                # result = service.consult_document_status(cxautorizacion_ec)
+                # if "error" in result:
+                #     raise ValidationError({
+                #         'cxautorizacion_ec': f"Error al consultar el SRI: {result['error']}"
+                #     })
+                # elif "mensaje" in result:
+                #     raise ValidationError({
+                #         'cxautorizacion_ec': f"Error al consultar el SRI: {result['mensaje']} o tiene más de 45 días de antigüedad."
+                #     })
+                # else:
+                    # if result[0]["estado"] != "AUTORIZADO":
+                    #     raise ValidationError({
+                    #         'cxautorizacion_ec': f"Documento no autorizado por el SRI o tiene más de 45 días de antigüedad."
+                    #     })
 
         return cleaned_data
 

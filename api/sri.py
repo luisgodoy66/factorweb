@@ -33,16 +33,17 @@ class SRIConsultationService:
                     "ambiente": autorizacion.ambiente,
                     # "comprobante": autorizacion.comprobante,
                 } for autorizacion in autorizaciones.autorizacion]
+        print(response)
         return {"mensaje": "No se encontraron autorizaciones."}
 
-# # Ejemplo de uso
-# if __name__ == "__main__":
-#     wsdl_url = "https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl"
-#     access_key = "0701202501179143070000120010020000060524117597515"  # Reemplazar con clave de acceso real
+# Ejemplo de uso
+if __name__ == "__main__":
+    wsdl_url = "https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl"
+    access_key = "2911202401099037901700120010050498822290990379011"  # Reemplazar con clave de acceso real
 
-#     service = SRIConsultationService(wsdl_url)
-#     result = service.consult_document_status(access_key)
-#     print(result)
+    service = SRIConsultationService(wsdl_url)
+    result = service.consult_document_status(access_key)
+    print(result)
 
 import requests
 
@@ -72,23 +73,23 @@ def consulta_contribuyente_sri(ruc):
         return {"error": f"Error de conexión: {str(e)}"}
 
 
-# Ejemplo de uso
-if __name__ == "__main__":
-    # Ejemplo de uso
-    ruc = "0993220167001"  # Reemplaza con el RUC que deseas consultar
-    datos = obtener_datos_contribuyente(None,ruc)
+# # Ejemplo de uso
+# if __name__ == "__main__":
+#     # Ejemplo de uso
+#     ruc = "0993220167001"  # Reemplaza con el RUC que deseas consultar
+#     datos = obtener_datos_contribuyente(None,ruc)
 
-    # Imprimir los datos obtenidos
-    print(datos)
-    datos = [{'numeroRuc': '0993220167001'
-              , 'razonSocial': 'CODIGO BAMBÚ COBAMBUSA S.A.'
-              , 'estadoContribuyenteRuc': 'ACTIVO'
-              , 'actividadEconomicaPrincipal': 'VENTA AL POR MAYOR DE ARTÍCULOS DE LIMPIEZA.'
-              , 'tipoContribuyente': 'SOCIEDAD'
-              , 'regimen': 'GENERAL', 'categoria': None, 'obligadoLlevarContabilidad': 'SI', 'agenteRetencion': 'NO'
-              , 'contribuyenteEspecial': 'NO'
-              , 'informacionFechasContribuyente': {'fechaInicioActividades': '2019-08-21 00:00:00.0', 'fechaCese': ''
-                                                   , 'fechaReinicioActividades': '', 'fechaActualizacion': '2019-08-22 18:37:25.0'}
-              , 'representantesLegales': [{'identificacion': '0910487388', 'nombre': 'GODOY CHOCA LUIS ANTONIO'}]
-              , 'motivoCancelacionSuspension': None, 'contribuyenteFantasma': 'NO', 'transaccionesInexistente': 'NO'}
-              ]
+#     # Imprimir los datos obtenidos
+#     print(datos)
+#     datos = [{'numeroRuc': '0993220167001'
+#               , 'razonSocial': 'CODIGO BAMBÚ COBAMBUSA S.A.'
+#               , 'estadoContribuyenteRuc': 'ACTIVO'
+#               , 'actividadEconomicaPrincipal': 'VENTA AL POR MAYOR DE ARTÍCULOS DE LIMPIEZA.'
+#               , 'tipoContribuyente': 'SOCIEDAD'
+#               , 'regimen': 'GENERAL', 'categoria': None, 'obligadoLlevarContabilidad': 'SI', 'agenteRetencion': 'NO'
+#               , 'contribuyenteEspecial': 'NO'
+#               , 'informacionFechasContribuyente': {'fechaInicioActividades': '2019-08-21 00:00:00.0', 'fechaCese': ''
+#                                                    , 'fechaReinicioActividades': '', 'fechaActualizacion': '2019-08-22 18:37:25.0'}
+#               , 'representantesLegales': [{'identificacion': '0910487388', 'nombre': 'GODOY CHOCA LUIS ANTONIO'}]
+#               , 'motivoCancelacionSuspension': None, 'contribuyenteFantasma': 'NO', 'transaccionesInexistente': 'NO'}
+#               ]
