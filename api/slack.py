@@ -6,12 +6,13 @@ from django.views.decorators.csrf import csrf_exempt
 from solicitudes.models import Asignacion, Niveles_aprobacion, \
     Solicitud_aprobacion, Respuesta_aprobacion
 from bases.models import Usuario_empresa
+from .models import Configuracion_slack
 
 from bases.views import enviarPost
 import json
 import os
 
-slack_signing_secret = os.environ.get("SLACK_SIGNING_SECRET")
+# slack_signing_secret = os.environ.get("SLACK_SIGNING_SECRET")
 
 def enviar_solicitud_aprobacion(request, id_solicitud):
 
@@ -130,20 +131,28 @@ def reenviar_solicitud_aprobacion(request, id_solicitud):
 @csrf_exempt
 def manejar_interactividad(request):
     if request.method == "POST":
-    # Verificar la firma de la solicitud
-        verifier = SignatureVerifier(slack_signing_secret)
-        if not verifier.is_valid_request(request.body, request.headers):
-            return JsonResponse({"status": f"Firma inválida {slack_signing_secret}"}, status=403)
 
         # Procesar la carga útil de Slack
         jsontext = request.POST.get("payload")
         payload = json.loads(jsontext)
+
+        app_id = payload["api_app_id"]
+
+        x = Configuracion_slack.objects\
+            .filter(ctappid = app_id).first()
+        
+        slack_signing_secret = x.ctslacksigningsecret
+
+        # Verificar la firma de la solicitud
+        verifier = SignatureVerifier(slack_signing_secret)
+        if not verifier.is_valid_request(request.body, request.headers):
+            return JsonResponse({"status": f"Firma inválida {slack_signing_secret}"}, status=403)
+
         user_id = payload["user"]["id"]
         canal = payload["channel"]["name"]
         mensaje = payload["message"]["ts"]
         response_url = payload["response_url"]  # URL para enviar respuestas adicionales
         action_value = json.loads(payload["actions"][0]["value"])
-
         action = action_value["action"]
         operacion = action_value["operacion"]
 
@@ -218,7 +227,8 @@ def enviar_respuesta_asincrona(response_url, mensaje):
 
     # x ={'payload': ['{"type":"block_actions"
     #                 ,"user":{"id":"U08C8QE58GG","username":"luisgodoy","name":"luisgodoy","team_id":"T08B5E6FVPH"}
-    #                 ,"api_app_id":"A08C4PJLPS5","token":"99U8wg05TsuGHErXI2YsRNva"
+    #                 ,"api_app_id":"A08C4PJLPS5"
+    #                 ,"token":"99U8wg05TsuGHErXI2YsRNva"
     #                 ,"container":{"type":"message","message_ts":"1739031460.946129","channel_id":"C08BH5ASCUD","is_ephemeral":false}
     #                 ,"trigger_id":"8435169712705.8379482539799.54e1ec0c10ed8e523a3aeb86e1bb4359"
     #                 ,"team":{"id":"T08B5E6FVPH","domain":"codigobambu"},"enterprise":null,"is_enterprise_install":false

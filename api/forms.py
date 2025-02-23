@@ -7,13 +7,14 @@ class SlackForm(forms.ModelForm):
         model = Configuracion_slack
         fields=['ctdescripcion', 'ctslackbottoken'
                 , 'ctslackchannelname', 'ctslacksigningsecret'
-                , 'lactivo'
+                , 'lactivo', 'ctappid'
         ]
         labels={'ctdescripcion':'Descripción'
                 , 'ctslackbottoken':'Token'
                 , 'ctslackchannelname':'Nombre de canal'
                 , 'ctslacksigningsecret':'Firma secreta'
                 , 'lactivo':'Activo'
+                , 'ctappid':'ID de la aplicación'
         }
 
         

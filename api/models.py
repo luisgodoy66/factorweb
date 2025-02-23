@@ -8,6 +8,7 @@ class Configuracion_slack (ClaseModelo):
     ctslackchannelname = models.CharField(max_length=50)
     ctslacksigningsecret = models.CharField(max_length=100)
     lactivo = models.BooleanField(default=True)
+    ctappid = models.CharField(max_length=100, default='')
 
     def __str__(self):
         return self.ctdescripcion
