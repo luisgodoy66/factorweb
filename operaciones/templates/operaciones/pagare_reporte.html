@@ -1,4 +1,3 @@
-{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -71,13 +70,13 @@
                             <td><strong>Pagare:</strong></td>
                             <td colspan="3" >{{ pagare.cxpagare }}</td>
                             <td><strong>Capital:</strong></td>
-                            <td class="numero">{{ pagare.ncapital|intcomma}}</td>
+                            <td class="numero">{{ pagare.ncapital|floatformat:"2g"}}</td>
                         </tr>
                         <tr>
                             <td><strong>Tasa de interés:</strong></td>
                             <td colspan="3">{{ pagare.tasa_porciento|floatformat:2 }}%</td>
                             <td><strong>Interés:</strong></td>
-                            <td colspan="1" class="numero">{{ pagare.ninteres|intcomma}}</td>                           
+                            <td colspan="1" class="numero">{{ pagare.ninteres|floatformat:"2g"}}</td>                           
                         </tr>
                     </tbody>
                 </table>
@@ -100,15 +99,15 @@
                             <tr>
                                 <td class="numero">{{ item.ncuota }}</td>
                                 <td class="centrado">{{ item.dfechapago|date:"Y-m-d" }}</td>
-                                <td class="numero">{{ item.ncapital}}</td>
-                                <td class="numero">{{ item.ninteres }}</td>
-                                <td class="numero">{{ item.valor_cuota }}</td>
+                                <td class="numero">{{ item.ncapital|floatformat:"2g"}}</td>
+                                <td class="numero">{{ item.ninteres|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.valor_cuota|floatformat:"2g" }}</td>
                             </tr>
                             {% endfor %}
                             <!-- totales -->
                             <tr></tr>
                             <tr>
-                                <td colspan="5" class="numero"><h4>{{ total|intcomma }}</h4></td>
+                                <td colspan="5" class="numero"><h4>{{ total|floatformat:"2g" }}</h4></td>
                             </tr>
                         </tbody>
                     </table>

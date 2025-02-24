@@ -1,5 +1,4 @@
 {% load filtros %}
-{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -79,7 +78,7 @@
                             <tr></tr>
                             <tr>
                                 <td class="subrayado" colspan="5"><strong>{{ factoring.grouper }}</strong></td>
-                                <td class="subrayado numero"><strong> {{factoring.list|running_valor|intcomma }}</strong></td>
+                                <td class="subrayado numero"><strong> {{factoring.list|running_valor|floatformat:"2g" }}</strong></td>
                                 <td class="subrayado" colspan="5"></td>
                             </tr>
                                 {% for item in factoring.list %}
@@ -90,10 +89,10 @@
                                     <td>{{ item.cxtipo }}</td>
                                     <td>{{ item.ddesembolso|custom_date_format }}</td>
                                     <td class="numero">{{ item.nmayorplazonegociacion }}</td>
-                                    <td class="numero">{{ item.nvalor }}</td>
-                                    <td class="numero">{{ item.cargos }}</td>
-                                    <td class="numero">{{ item.niva }}</td>
-                                    <td class="numero">{{ item.neto|intcomma }}</td>
+                                    <td class="numero">{{ item.nvalor|floatformat:"2g" }}</td>
+                                    <td class="numero">{{ item.cargos|floatformat:"2g" }}</td>
+                                    <td class="numero">{{ item.niva|floatformat:"2g" }}</td>
+                                    <td class="numero">{{ item.neto|floatformat:"2g" }}</td>
                                     <td class="centrado">{{ item.cxestado }}</td>
                                     <td width="20%">{{ item.ctinstrucciondepago}}</td>
                                 </tr>
@@ -102,9 +101,10 @@
                             {% endfor %}
                             <tr></tr>
                             <tr>
-                                <td colspan="6" class="numero"><h4>{{ total|intcomma }}</h4></td>
-                                <!-- <td class="numero"><h4>{{ total_retencionesybaja|intcomma }}</h4></td>
-                                <td class="numero"><h4>{{ total_general|intcomma }}</h4></td> -->
+                                <td colspan="6" class="numero"><h4>{{ total_negociado|floatformat:"2g" }}</h4></td>
+                                <td class="numero"><h4>{{ total_cargos|floatformat:"2g" }}</h4></td>
+                                <td class="numero"><h4>{{ total_iva|floatformat:"2g" }}</h4></td>
+                                <td class="numero"><h4>{{ total_neto|floatformat:"2g" }}</h4></td>
                             </tr>
                         </tbody>
                     </table>

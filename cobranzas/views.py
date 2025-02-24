@@ -2243,7 +2243,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                 dc = Tasas_factoring.objects\
                     .filter(cxtasa='DCAR', empresa = id_empresa.empresa).first()
                 
-                if not tipo_factoring.lgeneradcenaceptacion:
+                if not tipo_factoring.lgeneradcenaceptacion or fechacobrocalculo > documento.dvencimiento:
 
                     # la tasa esta en el documento o en el accesorio
                     tasa_dc = documento.ntasadescuento
@@ -2253,28 +2253,38 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                     else:
                         base_dc = documento_cobrado.aplicado() 
                                         
-                    descuento_cartera = ( base_dc * tasa_dc / 100)
-
                     if not dc.lflat:
 
-                        descuento_cartera = descuento_cartera \
-                            * dias_negociados / dc.ndiasperiocidad
+                        if not tipo_factoring.lgeneradcenaceptacion:
+                            # dc negociado
+                            descuento_cartera = ( base_dc * tasa_dc / 100) \
+                                * dias_negociados / dc.ndiasperiocidad
+                            
+                        if fechacobrocalculo > documento.dvencimiento:
+                            descuento_cartera_vencido = ( base_dc * tasa_dc / 100) \
+                                * dias_vencidos / dc.ndiasperiocidad
 
-
-                if fechacobrocalculo > documento.dvencimiento:
-
-                    if dc.lsobreanticipo:
-                        descuento_cartera_vencido = (documento_cobrado.aplicado()
-                                            * documento.nporcentajeanticipo 
-                                            * documento.ntasadescuento / 10000)
                     else:
-                        descuento_cartera_vencido = (documento_cobrado.aplicado()
-                                            * documento.ntasadescuento / 100)
+                        # determinar cuantas veces aplicar la tasa según los días de aplicacion
+                        x = math.ceil((dias_vencidos + dias_negociados)/dc.ndiasperiocidad)
+                        tasa_dc = tasa_dc * x
 
-                    if not dc.lflat:
-                        descuento_cartera_vencido = (descuento_cartera_vencido 
-                                                    * dias_vencidos 
-                                                    / dc.ndiasperiocidad)
+                        valor_gaoa = base_dc * tasa_dc /100
+
+                # if fechacobrocalculo > documento.dvencimiento:
+
+                #     if dc.lsobreanticipo:
+                #         descuento_cartera_vencido = (documento_cobrado.aplicado()
+                #                             * documento.nporcentajeanticipo 
+                #                             * documento.ntasadescuento / 10000)
+                #     else:
+                #         descuento_cartera_vencido = (documento_cobrado.aplicado()
+                #                             * documento.ntasadescuento / 100)
+
+                #     if not dc.lflat:
+                #         descuento_cartera_vencido = (descuento_cartera_vencido 
+                #                                     * dias_vencidos 
+                #                                     / dc.ndiasperiocidad)
 
                 # generar crgos colateral
                 cargo_retenciones = base_retenciones * documento.nporcentajeanticipo / 100
@@ -2336,7 +2346,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                 listacargos.append(GeneraCargoJSONSalida(codigo_operacion, cobranza.id
                                 , cobranza.dcobranza, id_asignacion, asignacion, id_documento, numero_documento
                                 , dias_vencidos, dias_negociados, documento_cobrado.aplicado()
-                                , documento.nporcentajeanticipo, base_dc, documento.ntasadescuento
+                                , documento.nporcentajeanticipo, base_dc, tasa_dc
                                 , descuento_cartera, descuento_cartera_vencido, base_gao, tasa_gao
                                 , valor_gao, base_gaoa, tasa_gaoa, valor_gaoa, base_retenciones
                                 , cargo_retenciones, base_bajas, cargo_bajas))

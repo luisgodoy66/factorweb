@@ -1,5 +1,4 @@
 {% load filtros %}
-{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -72,13 +71,13 @@
                             <td style="width: 20%; "><strong>Cobranza:</strong></td>
                             <td style="width: 40%; ">{{ cobranza.cxcobranza }}</td>
                             <td style="width: 20%; "><strong>Total:</strong></td>
-                            <td style="width: 20%; ">{{ cobranza.nvalor|intcomma}}</td>
+                            <td style="width: 20%; ">{{ cobranza.nvalor|floatformat:"2g"}}</td>
                         </tr>
                         <tr>
                             <td style="width: 20%; "><strong>Forma de cobro:</strong></td>
                             <td style="width: 40%; ">{{ datos_forma_cobro }}</td>
                             <td style="width: 20%; "><strong>Sobrepago:</strong></td>
-                            <td style="width: 20%; ">{{ cobranza.nsobrepago|intcomma}}</td>
+                            <td style="width: 20%; ">{{ cobranza.nsobrepago|floatformat:"2g"}}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -112,14 +111,14 @@
                                     <tr>
                                         <td>{{ item.cxdocumento.cxasignacion }}</td>
                                         <td>{{ item.cxdocumento }}</td>
-                                        <td class="numero">{{ item.nsaldoaldia|intcomma }}</td>
+                                        <td class="numero">{{ item.nsaldoaldia|floatformat:"2g" }}</td>
                                         <td class="centrado">{{ item.vencimiento|custom_date_format }}</td>
                                         <td class="numero">{{ item.dias_vencidos}}</td>
-                                        <td class="numero">{{ item.nvalorcobranza|intcomma }}</td>
-                                        <td class="numero">{{ item.nretenciones|intcomma }}</td>
-                                        <td class="numero">{{ item.nvalorbaja|intcomma }}</td>
-                                        <td class="numero">{{ item.aplicado|intcomma }}</td>
-                                        <td class="numero">{{ item.cxdocumento.nsaldo|intcomma }}</td>
+                                        <td class="numero">{{ item.nvalorcobranza|floatformat:"2g" }}</td>
+                                        <td class="numero">{{ item.nretenciones|floatformat:"2g" }}</td>
+                                        <td class="numero">{{ item.nvalorbaja|floatformat:"2g" }}</td>
+                                        <td class="numero">{{ item.aplicado|floatformat:"2g" }}</td>
+                                        <td class="numero">{{ item.cxdocumento.nsaldo|floatformat:"2g" }}</td>
                                     </tr>
                                 {% endfor %}
                                 <tr></tr>
@@ -128,10 +127,10 @@
                             <tr></tr>
                             <tr>
                                 <td colspan="5"></td>
-                                <td class="numero"><h4>{{ totales.cobrado|intcomma }}</h4></td>
-                                <td class="numero"><h4>{{ totales.retenido|intcomma }}</h4></td>
-                                <td class="numero"><h4>{{ totales.bajas|intcomma }}</h4></td>
-                                <td class="numero"><h4>{{ totales.aplicado|intcomma }}</h4></td>
+                                <td class="numero"><h4>{{ totales.cobrado|floatformat:"2g" }}</h4></td>
+                                <td class="numero"><h4>{{ totales.retenido|floatformat:"2g" }}</h4></td>
+                                <td class="numero"><h4>{{ totales.bajas|floatformat:"2g" }}</h4></td>
+                                <td class="numero"><h4>{{ totales.aplicado|floatformat:"2g" }}</h4></td>
                             </tr>
                         </tbody>
                     </table>

@@ -435,12 +435,21 @@ def ImpresionResumenAsignaciones(request, desde, hasta, clientes=None):
                     leliminado = False)\
             .order_by('cxtipofactoring', 'ddesembolso')
 
-    total = cartera.aggregate(total = Sum('nvalor'))
+    total = cartera.aggregate(
+        total = Sum('nvalor'),
+        cargos = Sum('ngao') + Sum('ndescuentodecartera') + Sum('notroscargos'),
+        neto = Sum('nanticipo') - Sum('ngao') - Sum('ndescuentodecartera') 
+            - Sum('notroscargos'),
+        iva = Sum('niva'),
+        )
 
     context={
         "detalle" : cartera,
         'empresa': id_empresa.empresa,
-        'total': total['total']
+        'total_negociado': total['total'],
+        'total_cargos': total['cargos'],
+        'total_neto': total['neto'],
+        'total_iva': total['iva'],
     }
     # Generar el archivo PDF usando WeasyTemplateResponse
     response = WeasyTemplateResponse(
