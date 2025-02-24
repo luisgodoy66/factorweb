@@ -2088,8 +2088,10 @@ def GeneraListaDesembolsosJSONSalida(transaccion):
             output["TipoFactoring"] = operacion.cxtipofactoring.__str__()
     if transaccion.cxasiento:
         output["Asiento"] = transaccion.cxasiento.cxtransaccion
+        output["IdAsiento"] = transaccion.cxasiento.id
     else:
         output["Asiento"] = None
+        output["IdAsiento"] = None
     return output
 
 

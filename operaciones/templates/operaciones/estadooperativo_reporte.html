@@ -41,7 +41,7 @@
                         <div class="stat-icon dib"><i class="ti-money text-success border-success"></i></div>
                         <div class="stat-content dib">
                             <div class="stat-text">Monto de línea</div>
-                            <div class="stat-digit">{{ valor_linea|floatformat:2|intcomma}}</div>
+                            <div class="stat-digit">{{ valor_linea|floatformat:"2g"}}</div>
                         </div>
                     </div>
                 </div>
@@ -116,7 +116,7 @@
                 <div class="card-body">
                     <div class="clearfix">
                         <i class="fa fa-dollar bg-flat-color-4 p-3 font-2xl mr-3 float-left text-light"></i>
-                        <div class="h5 text-secondary mb-0 mt-1">{{total_reestructuracion|intcomma}}</div>
+                        <div class="h5 text-secondary mb-0 mt-1">{{total_reestructuracion|floatformat:"2g"}}</div>
                         <div class="text-muted text-uppercase font-weight-bold font-xs small">
                             Reestructuración</div>
                     </div>
@@ -149,7 +149,7 @@
                             bg-flat-color-5
                         {% endif %}                           
                         p-3 font-2xl mr-3 float-left text-light"></i>
-                        <div class="h5 text-secondary mb-0 mt-1">{{ total_cartera_protestos|floatformat:2|intcomma }}</div>
+                        <div class="h5 text-secondary mb-0 mt-1">{{ total_cartera_protestos|floatformat:"2g" }}</div>
                         <div class="text-muted text-uppercase font-weight-bold font-xs small">
                             Cartera y protestos</div>
                     </div>

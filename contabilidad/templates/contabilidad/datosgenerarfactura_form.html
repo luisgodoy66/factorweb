@@ -26,13 +26,6 @@
             <div hidden>
                {{form.cliente}}
                {{form.nporcentajeiva}}
-               <!-- <input id="tipo_operacion" value="{{cxtipooperacion}}"> -->
-               <!-- <input id="id_operacion" value="{{id_operacion}}"> -->
-               <!-- <input id="valor_gao" value='{{valor_gao|floatformat:"2u"}}'  > -->
-               <!-- <input id="valor_dc" value='{{valor_dc |floatformat:"2u"}}'> -->
-               <!-- <input id="valor_dcv" value='{{valor_dcv |floatformat:"2u"}}'> -->
-               <!-- <input id="valor_gaoa" value='{{valor_gaoa |floatformat:"2u"}}'> -->
-               <!-- <input id="ambiente" value='{{ambiente}}'> -->
             </div>
             <div class="card-body card-block">
                 <!-- columna izquierda -->
@@ -99,14 +92,14 @@
 
 
                 </div>
-                <!-- <div class="col-lg-6">
+                <div class="col-lg-6">
                     <div class="alert alert-info" role="alert">
                         Si está marcada la generación del XML de la factura para el punto de emisión, al confirmar la aceptación, el sistema creará un archivo XML con los datos de la factura
                         para su firma y autorización y lo guardará en la carpeta Descargas con el nombre 
                         correspondiente al número de autorización.
                     </div>
 
-                </div> -->
+                </div>
             </div>    
             
             <div class="card-footer">
@@ -182,13 +175,13 @@ function GenerarFactura(){
         }
 
     fetchPostear("/contabilidad/generarfacturadiario/", objeto, function(factura){
-        // regresar a la lista de generar factura
-        window.location.href = "/contabilidad/listapendientesgenerarfactura";
-
         url = window.location.origin
         // url = url + "/contabilidad/imprimirdiariocontable/"+asiento;
         url = url + "/contabilidad/generarxmlfactura/"+factura+"/" + ambiente;
         window.open( url);
+
+        // regresar a la lista de generar factura
+        window.location.href = "/contabilidad/listapendientesgenerarfactura";
           })
   })    
 }

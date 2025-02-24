@@ -1,5 +1,4 @@
 {% extends 'bases/home.html' %}
-{% load humanize %}
 
 {% block title %}Generar egresos{% endblock %}
 {% block breadcrumbs %}
@@ -62,7 +61,7 @@
                             <td>{{ item.id }}</td>
                             <td>{{ item.cxcliente__cxcliente__ctnombre }}</td>
                             <td>{{ item.operacion }}</td>
-                            <td>{{ item.nvalor|intcomma }}</td>
+                            <td>{{ item.nvalor|floatformat:"2g" }}</td>
                             <td>{{ item.cxformapago }}</td>
                             <td>{{ item.cxcuentapago__cxbanco__ctbanco }}</td>
                             <td>

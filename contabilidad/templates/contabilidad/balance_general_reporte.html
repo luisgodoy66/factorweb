@@ -1,4 +1,3 @@
-{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -72,18 +71,18 @@
                                    {% for item_nivel3 in nivel3_list %}
                                         <tr>
                                             <td class="subrayado" colspan="2"><h4>{{ item_nivel3.grouper }}</h4></td>
-                                            <td class="subrayado numero"><h4> {{ item_nivel3.list.0.total_n3|intcomma }}</h4></td>
+                                            <td class="subrayado numero"><h4> {{ item_nivel3.list.0.total_n3|floatformat:"2g"  }}</h4></td>
                                         </tr>
                                         {% regroup item_nivel3.list by nivel4 as nivel4_list %}
                                         {% for item_nivel4 in nivel4_list %}
                                             <tr>
                                                 <td colspan="2"><strong>{{ item_nivel4.grouper }}</strong></td>
-                                                <td class="numero"> {{ item_nivel4.list.0.total_n4|intcomma }}</td>
+                                                <td class="numero"> {{ item_nivel4.list.0.total_n4|floatformat:"2g"  }}</td>
                                             </tr>
                                             {% for item in item_nivel4.list %}
                                                 <tr>
                                                 <td width="85%">{{item.idcuenta}} {{ item.descripcion }}</td>
-                                                <td class="numero">{{ item.saldoactual|intcomma }}</td>
+                                                <td class="numero">{{ item.saldoactual|floatformat:"2g"  }}</td>
                                                 <td></td>
                                                 </tr>
                                             {% endfor %}
@@ -92,21 +91,21 @@
                                     <tr></tr>
                                     <tr>
                                         <td class="numero" colspan="2"><h3>TOTAL {{ item_nivel2.grouper }}</h3></td>
-                                        <td class="numero"><h3>{{ item_nivel2.list.0.total_n2|intcomma }}</h3></td>
+                                        <td class="numero"><h3>{{ item_nivel2.list.0.total_n2|floatformat:"2g"  }}</h3></td>
                                     </tr>
 
                                 {% endfor %}
                                 <tr></tr>
                                 <tr>
                                     <td class="numero" colspan="2"><h3>{{ item_nivel1.grouper }}</h3></td>
-                                    <td class="numero"><h3>{{ item_nivel1.list.0.total_n1|intcomma }}</h3></td>
+                                    <td class="numero"><h3>{{ item_nivel1.list.0.total_n1|floatformat:"2g"  }}</h3></td>
                                 </tr>
                                 
                             {% endfor %}
                             <tr></tr>
                             <tr>
                                 <td class="numero" colspan="2"><h3>TOTAL PASIVO Y PATRIMONIO</h3></td>
-                                <td class="numero"><h3>{{ pasivo_patrimonio|intcomma }}</h3></td>
+                                <td class="numero"><h3>{{ pasivo_patrimonio|floatformat:"2g"  }}</h3></td>
                             </tr>
                     </tbody>
                     </table>

@@ -18,24 +18,7 @@
 <form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal">
     <div class="col-md-12">
         <div hidden>
-            <!-- para que dato numerico de contexto no se cambia a coma decimal, usar el filtro floatformt:u-->
-            <!-- <input id='tipo_factoring_id' value="{{ tipo_factoring }}"> -->
-            <!-- <input id="cliente_id" value="{{ cliente }}"> -->
-            <!-- <input id="porcentaje_iva_id" value='{{ porcentaje_iva|floatformat:"2u" }}'> -->
-            <!-- <input id='base_iva_id' value='{{ base_iva|floatformat:"2u" }}'> -->
-            <!-- <input id="iva_id" value='{{ total_iva|floatformat:"2u" }}'> -->
-            <!-- <input id="neto_id" value='{{ neto|floatformat:"2u" }}' name="neto_id"> -->
-            <!-- <input id="vuelto_id" value='{{ total_vuelto|floatformat:"2u" }}' > -->
-            <!-- <input id="sobrepago_id" value='{{ total_sobrepagos|floatformat:"2u" }}'> -->
-            <!-- <input id="gao_id" value='{{ total_gao|floatformat:"2u" }}' > -->
-            <!-- <input id="gaoa_id" value='{{ total_gaoa|floatformat:"2u" }}'> -->
-            <!-- <input id="dc_id" value='{{ total_dc|floatformat:"2u" }}'> -->
-            <!-- <input id="retenciones_id" value='{{ total_cargoretenciones|floatformat:"2u" }}'> -->
-            <!-- <input id="bajas_id" value='{{ total_cargobajas|floatformat:"2u" }}'> -->
-            <!-- <input id="otros_id" value='{{ total_otros_cargos|floatformat:"2u" }}'> -->
-            <!-- <input id="dcv_id" value='{{ total_dcv|floatformat:"2u" }}'> -->
             <input id="data_cobranzas" value="{{ cobranzas }}">
-            <!-- <input id="tipo_operacion" value="{{ tipo_operacion }}"> -->
         </div>
         <div class="card">
                 {% csrf_token %}

@@ -73,7 +73,7 @@
                             {% for cliente in cartera_list %}
                             <tr>
                                 <td class="subrayado" colspan="5"><strong>{{ cliente.grouper }}</strong></td>
-                                <td class="subrayado numero"><strong> {{cliente.list|running_saldo2|intcomma }}</strong></td>
+                                <td class="subrayado numero"><strong> {{cliente.list|running_saldo2|floatformat:"2g" }}</strong></td>
                             </tr>
                                 {% for item in cliente.list %}
                                 <tr></tr>
@@ -84,14 +84,14 @@
                                     <td>{{ item.dfechapago |custom_date_format}}</td>
                                     <td> {{ item.dias_vencidos }}
                                     </td>
-                                    <td class="numero">{{ item.nsaldo|intcomma }}</td>
+                                    <td class="numero">{{ item.nsaldo|floatformat:"2g" }}</td>
                                 </tr>
                                 {% endfor %}
                                 <tr></tr>
                             {% endfor %}
                             <tr></tr>
                             <tr>
-                                <td colspan="6" class="numero"><h4>Total: {{ total|intcomma }}</h4></td>
+                                <td colspan="6" class="numero"><h4>Total: {{ total|floatformat:"2g" }}</h4></td>
                             </tr>
                         </tbody>
                     </table>

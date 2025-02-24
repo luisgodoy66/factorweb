@@ -149,12 +149,22 @@ window.operateEvents = {
             row.Operacion,
             row.Asiento)
       },
+      'click .imprimir': function (e, value, row, index) {
+        if (row.IdAsiento == null){
+            alert("No existe asiento contable")
+            return
+        }
+        ImprimirAsientoDiario( row.IdAsiento, 'E')
+      },
     };
       
 function operateFormatter(value, row, index) {
     return [
         '<a class="revertir" href="javascript:void(0)" title="Reverso de desembolso">',
         '<i class="fa fa-rotate-left"></i>',
+        '</a>  ',
+        '<a class="imprimir" href="javascript:void(0)" title="Imprimir asiento">',
+        '<i class="fa fa-print"></i>',
         '</a>  ',
       ].join('')
 }

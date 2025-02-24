@@ -2232,7 +2232,8 @@ def GeneraListaFacturasJSONSalida(transaccion):
         op = Factura_cuota.objects.filter(pk = id_origen).first()
     if op:
         output["Operacion"] = op.__str__()
-    
+    output["Asiento"] = transaccion.asiento.cxtransaccion
+    output["IdAsiento"] = transaccion.asiento.id
     return output
 
 def GeneraListaProtestosJSON(request, desde = None, hasta= None):

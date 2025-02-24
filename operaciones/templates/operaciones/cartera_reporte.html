@@ -55,46 +55,49 @@
                 <!-- <div class="col"> -->
                     <table class="table" style="width:100%">
                         <thead>
-                            <th>Cliente</th>        
-                            <th>Vencido mas 90</th>
-                            <th>Vencido 90</th>
-                            <th>Vencido 60</th>
-                            <th>Vencido 30</th>
-                            <th>Por vencer 30</th>
-                            <th>Por vencer 60</th>
-                            <th>por vencer 90</th>
-                            <th>Por vencer mas 90</th>
-                            <th>Total</th>
+                            <th style="text-align: right;">Cliente</th>        
+                            <th style="text-align: right;">Vencido mas 90</th>
+                            <th style="text-align: right;">Vencido 90</th>
+                            <th style="text-align: right;">Vencido 60</th>
+                            <th style="text-align: right;">Vencido 30</th>
+                            <th style="text-align: right;">Por vencer 30</th>
+                            <th style="text-align: right;">Por vencer 60</th>
+                            <th style="text-align: right;">por vencer 90</th>
+                            <th style="text-align: right;">Por vencer mas 90</th>
+                            <th style="text-align: right;">Total</th>
                         </thead>
                         <tbody>
                             <tr></tr>
                             {% for item in documentos %}
                             <tr>
-                                <td >{{ item.cxcliente__cxcliente__ctnombre }}</td>
-                                <td class="numero">{{ item.vencido_mas_90 |default:''|intcomma}}</td>
-                                <td class="numero">{{ item.vencido_90 |default:''|intcomma}}</td>
-                                <td class="numero">{{ item.vencido_60 |default:''|intcomma}}</td>
-                                <td class="numero">{{ item.vencido_30 |default:''|intcomma}}</td>
-                                <td class="numero">{{ item.porvencer_30 |default:''|intcomma}}</td>
-                                <td class="numero">{{ item.porvencer_60 |default:''|intcomma}}</td>
-                                <td class="numero">{{ item.porvencer_90 |default:''|intcomma}}</td>
-                                <td class="numero">{{ item.porvencer_mas_90 |default:''|intcomma}}</td>
-                                <td class="numero">{{ item.total |default:''|intcomma}}</td>
+                                <td>{{ item.cxcliente__cxcliente__ctnombre }}</td>
+                                <td class="numero">{{ item.vencido_mas_90 |default:''|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.vencido_90 |default:''|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.vencido_60 |default:''|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.vencido_30 |default:''|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.porvencer_30 |default:''|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.porvencer_60 |default:''|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.porvencer_90 |default:''|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.porvencer_mas_90 |default:''|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.total |default:''|floatformat:"2g" }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="10"><hr></td>
                             </tr>
                             {% endfor %}
                             <!-- totales -->
                             <tr></tr>
                             <tr>
                                 <td></td>
-                                <td class="numero"><h4>{{ totalvm90 |default:0.00|intcomma}}</h4> </td>
-                                <td class="numero"><h4>{{ totalv90  |default:0.00|intcomma}} </h4></td>
-                                <td class="numero"><h4>{{ totalv60  |default:0.00|intcomma}}</h4> </td>
-                                <td class="numero"><h4>{{ totalv30  |default:0.00|intcomma}} </h4></td>
-                                <td class="numero"><h4>{{ totalx30  |default:0.00|intcomma}} </h4></td>
-                                <td class="numero"><h4>{{ totalx60  |default:0.00|intcomma}} </h4></td>
-                                <td class="numero"><h4>{{ totalx90  |default:0.00|intcomma}}</h4> </td>
-                                <td class="numero"><h4>{{ totalxm90 |default:0.00|intcomma}}</h4> </td>
-                                <td class="numero"><h4>{{ total |default:0.00|intcomma}}</h4> </td>
+                                <td class="numero"><h4>{{ totalvm90 |default:0.00|floatformat:"2g" }}</h4> </td>
+                                <td class="numero"><h4>{{ totalv90  |default:0.00|floatformat:"2g" }} </h4></td>
+                                <td class="numero"><h4>{{ totalv60  |default:0.00|floatformat:"2g" }}</h4> </td>
+                                <td class="numero"><h4>{{ totalv30  |default:0.00|floatformat:"2g" }} </h4></td>
+                                <td class="numero"><h4>{{ totalx30  |default:0.00|floatformat:"2g" }} </h4></td>
+                                <td class="numero"><h4>{{ totalx60  |default:0.00|floatformat:"2g" }} </h4></td>
+                                <td class="numero"><h4>{{ totalx90  |default:0.00|floatformat:"2g" }}</h4> </td>
+                                <td class="numero"><h4>{{ totalxm90 |default:0.00|floatformat:"2g" }}</h4> </td>
+                                <td class="numero"><h4>{{ total |default:0.00|floatformat:"2g" }}</h4> </td>
                             </tr>
                         </tbody>
                     </table>

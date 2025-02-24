@@ -2399,9 +2399,9 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
 
         # acumula base IVA de cargos
         if dc.lcargaiva: 
-            base_iva += total_dc
+            base_iva += total_dc + total_dcv
         else:
-            base_noiva += total_dc
+            base_noiva += total_dc + total_dcv
 
         if gao.lcargaiva: 
             base_iva += total_gao

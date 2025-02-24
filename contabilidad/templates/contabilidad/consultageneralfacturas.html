@@ -88,6 +88,7 @@
                         <th data-field="Valor" data-filter-control="input"data-sortable="true" >Valor</th>
                         <th data-field="Saldo" data-filter-control="input"data-sortable="true" >Saldo</th>
                         <th data-field="Operacion" data-filter-control="input"data-sortable="true" >Operación origen</th>
+                        <th data-field="Asiento" data-filter-control="input"data-sortable="true" >Asiento</th>
                         <!-- <th data-field="Estado" data-filter-control="input"data-sortable="true" >Estado</th> -->
                         <th data-field="operate" data-sortable="true" data-events="window.operateEvents"
                             data-formatter="operateFormatter" data-click-to-select="false">Acción</th>
@@ -111,5 +112,60 @@
 {% endblock %}
 
 {% block js_page %}
-<script type="text/javascript" src="{% static 'factorweb/js/consultageneralfacturas.js' %}"></script>
+<!-- <script type="text/javascript" src="{% static 'factorweb/js/consultageneralfacturas.js' %}"></script> -->
+<script>
+var $table = jQuery('#table')
+var $btnFiltrar = jQuery('#btnFiltrar')
+const ambiente = capturaValor('ambiente')
+
+window.onload=function(){
+    
+    inicializaValor("fechadesde", capturaValor("id_desde"))
+    inicializaValor("fechahasta", capturaValor("id_hasta"))
+
+    $table.bootstrapTable({locale:"es-EC"});
+
+    // boton de refrescar filtro
+    $btnFiltrar.click(function () {
+
+        desde = capturaValor("fechadesde");
+        hasta = capturaValor("fechahasta");
+
+        $table.bootstrapTable('refreshOptions', {
+            showRefresh: true,
+            url: "/contabilidad/facturasjson/"+desde+"/" + hasta
+        })
+    })
+
+
+    // cerrar side bar
+    CerrarSideBar();
+  
+}
+
+window.operateEvents = {
+    'click .xml': function (e, value, row, index) {
+      generarXMLFactura(row.id, ambiente)
+      },
+      'click .imprimir': function (e, value, row, index) {
+        if (row.IdAsiento == null){
+            alert("No existe asiento contable")
+            return
+        }
+        ImprimirAsientoDiario( row.IdAsiento, 'D')
+      },
+    };
+      
+function operateFormatter(value, row, index) {
+    return [
+        '<a class="xml" href="javascript:void(0)" title="Genera XML ">',
+        '<i class="fa fa-download"></i>',
+        '</a>  ',
+        '<a class="imprimir" href="javascript:void(0)" title="Imprimir asiento">',
+        '<i class="fa fa-print"></i>',
+        '</a>  ',
+      ].join('')
+}
+      
+</script>
 {% endblock %}
