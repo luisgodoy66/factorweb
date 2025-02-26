@@ -94,18 +94,18 @@
             <!-- <hr> -->
             <!-- vueltos y sobrepagos -->
             <div class="caja">
-                <h4>Vueltos y sobrepagos:</h4>
+                <h4>Reservas y sobrepagos:</h4>
             </div>
             <div class="row">
                 <table class="table table-striped table-hover nowrap" style="width:100%">
                     <thead>
                     <tr>
-                      <th >Cobranza</th>
-                      <th >Fecha de cobro</th>
-                      <th >Valor</th>
-                      <th >Vuelto</th>
-                      <th >Sobrepago</th>
-                      <th >Total</th>
+                      <th>Cobranza</th>
+                      <th>Fecha de cobro</th>
+                      <th style="text-align: right;">Valor</th>
+                      <th style="text-align: right;">Reserva</th>
+                      <th style="text-align: right;">Sobrepago</th>
+                      <th style="text-align: right;">Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -183,30 +183,30 @@
                     <thead>
                         <tr>
                             <th></th>
-                        <th >Vuelto</th>
+                        <th style="text-align: right;">Reserva</th>
                         {% if liquidacion.nsobrepago %}
-                        <th >Sobrepago</th>
+                        <th style="text-align: right;">Sobrepago</th>
                         {% endif %}
-                        <th >{{nombre_dc}}</th>
+                        <th style="text-align: right;">{{nombre_dc}}</th>
                         {% if liquidacion.ngao %}
-                        <th >{{nombre_gao}}</th>
+                        <th style="text-align: right;">{{nombre_gao}}</th>
                         {% endif %}
                         {% if liquidacion.ngaoa %}
-                        <th >{{nombre_gaoa}}</th>
+                        <th style="text-align: right;">{{nombre_gaoa}}</th>
                         {% endif %}
                         {% if liquidacion.niva %}
-                        <th >IVA</th>
+                        <th style="text-align: right;">IVA</th>
                         {% endif %}
                         {% if liquidacion.nretenciones %}
-                        <th >Retenciones</th>
+                        <th style="text-align: right;">Retenciones</th>
                         {% endif %}
                         {% if liquidacion.nbajas %}
-                        <th >Bajas</th>
+                        <th style="text-align: right;">Bajas</th>
                         {% endif %}
                         {% if liquidacion.otros_cargos %}
-                        <th >Otros</th>
+                        <th style="text-align: right;">Otros</th>
                         {% endif %}
-                        <th >Neto</th>
+                        <th style="text-align: right;">Neto</th>
                         </tr>
                     </thead>
                     <tbody>

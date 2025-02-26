@@ -622,7 +622,8 @@ def DatosOperativos(request, cliente_id=None):
                 'ctbeneficiarioasignacion':datoscliente.ctbeneficiarioasignacion,
                 'cxbeneficiariocobranzas':datoscliente.cxbeneficiariocobranzas,
                 'ctbeneficiariocobranzas':datoscliente.ctbeneficiariocobranzas,
-                'cxestado':datoscliente.cxestado
+                'cxestado':datoscliente.cxestado,
+                'ntasamora':datoscliente.ntasamora
             }
             formulario=DatosOperativosForm(e, empresa = id_empresa.empresa)
         else:
@@ -649,6 +650,7 @@ def DatosOperativos(request, cliente_id=None):
         id_beneficiario_cobr = request.POST.get("cxbeneficiariocobranzas")
         beneficiario_cobr = request.POST.get("ctbeneficiariocobranzas")
         estado = request.POST.get('cxestado')
+        ntasamora = request.POST.get('ntasamora')
 
         idclase = Clases_cliente.objects.filter(pk = cxclase).first()
 
@@ -671,6 +673,7 @@ def DatosOperativos(request, cliente_id=None):
                 cxusuariocrea = request.user,
                 cxestado = estado,
                 empresa = id_empresa.empresa,
+                ntasamora = ntasamora
             )
             if datoscliente:
                 datoscliente.save()
@@ -688,6 +691,7 @@ def DatosOperativos(request, cliente_id=None):
             datoscliente.ctbeneficiariocobranzas = beneficiario_cobr
             datoscliente.cxusuariomodifica = request.user.id
             datoscliente.cxestado= estado
+            datoscliente.ntasamora = ntasamora
 
             datoscliente.save()
 

@@ -29,18 +29,18 @@
                             class=" form-control-label">{{ form.cxtasa.label}}</label></div>
                         <div class="col col-md-7">
                             {{ form.cxtasa}}
-                            <small class="form-text text-muted">Máximo 4 caracteres</small>
                         </div>
                     </div>  
 
-                    <!-- <div class="row form-group">
+                    <div class="row form-group">
                         <div class="col col-md-5"><label for="id_cxparticipante" 
-                            class=" form-control-label">Descripción</label></div>
-                        <div class="col-md-7">
-                            {{ tasafactoring.movimiento}}
-                            <small class="form-text text-muted">Máximo 60 caracteres</small>
+                            class=" form-control-label"> {{ form.ctinicialesentablas.label}}</label></div>
+                        <div class="col">
+                            {{ form.ctinicialesentablas}}
+                            <small class="form-text text-muted">Máximo 4 caracteres</small>
                         </div>
-                    </div> -->
+                    </div>
+
                     <div class="row form-group">
                         <div class="col col-md-5"><label for="id_cxlocalidad" 
                             class=" form-control-label">{{ form.lflat.label}}</label></div>
@@ -60,7 +60,34 @@
                             class=" form-control-label"> {{ form.ndiasperiocidad.label}}</label></div>
                         <div class="col-md-7">
                             {{ form.ndiasperiocidad}}
-                            <!-- <small class="form-text text-muted">Máximo 30 caracteres</small> -->
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-5 "><label for="id_cxlocalidad" 
+                            class=" form-control-label">{{ form.lsobreanticipo.label}}</label></div>
+                        <div class="col">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  tasafactoring.lsobreanticipo %} checked {% endif %} 
+                                id = "id_lsobreanticipo" name = "lsobreanticipo"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-5 "><label for="id_cxlocalidad" 
+                            class=" form-control-label">{{ form.lcargaiva.label}}</label></div>
+                        <div class="col">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  tasafactoring.lcargaiva %} checked {% endif %} 
+                                id = "id_lcargaiva" name = "lcargaiva"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
                         </div>
                     </div>
 
@@ -83,44 +110,7 @@
                             class=" form-control-label"> {{ form.ctdescripcionenreporte.label}}</label></div>
                         <div class="col">
                             {{ form.ctdescripcionenreporte}}
-                            <!-- <small class="form-text text-muted">Máximo 3 caracteres</small> -->
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-5"><label for="id_cxparticipante" 
-                            class=" form-control-label"> {{ form.ctinicialesentablas.label}}</label></div>
-                        <div class="col">
-                            {{ form.ctinicialesentablas}}
-                            <!-- <small class="form-text text-muted">Máximo 3 caracteres</small> -->
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-5 "><label for="id_cxlocalidad" 
-                            class=" form-control-label">{{ form.lcargaiva.label}}</label></div>
-                        <div class="col">
-                            <label class="switch switch-3d switch-success mr-3">
-                                <input type="checkbox" class="switch-input" 
-                                {% if  tasafactoring.lcargaiva %} checked {% endif %} 
-                                id = "id_lcargaiva" name = "lcargaiva"> 
-                                <span class="switch-label"></span> 
-                                <span class="switch-handle"></span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-5 "><label for="id_cxlocalidad" 
-                            class=" form-control-label">{{ form.lsobreanticipo.label}}</label></div>
-                        <div class="col">
-                            <label class="switch switch-3d switch-success mr-3">
-                                <input type="checkbox" class="switch-input" 
-                                {% if  tasafactoring.lsobreanticipo %} checked {% endif %} 
-                                id = "id_lsobreanticipo" name = "lsobreanticipo"> 
-                                <span class="switch-label"></span> 
-                                <span class="switch-handle"></span>
-                            </label>
+                            <small class="form-text text-muted">Nombre del valor calculado a mostrarse en reportes y pantalla</small>
                         </div>
                     </div>
 

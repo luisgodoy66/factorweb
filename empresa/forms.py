@@ -5,6 +5,7 @@ from .models import Clases_cliente, Datos_participantes, Tipos_factoring, \
     Tasas_factoring, Cuentas_bancarias, Localidades, Puntos_emision, Otros_cargos
 from pais.models import Bancos, Actividades
 from datetime import datetime
+
 class ParticipanteForm(forms.ModelForm):
     class Meta:
         model = Datos_participantes
@@ -73,13 +74,18 @@ class TipoFactoringForm(forms.ModelForm):
 
         fields=[
             'cttipofactoring', 'ctabreviacion','cxmoneda'
-            , 'lmanejalineafactoring', 'lanticipatotalnegociado', 'ndiasgracia', 'lpermitediasferiados'
-            , 'lmanejacondicionesoperativas', 'lcargagaoa', 'lgeneradcenaceptacion', 'lgeneragaoenaceptacion'
-            , 'lesnegociada', 'lcobramorabc', 'ctinicialesliquidacioncobranza'
+            , 'lmanejalineafactoring', 'lanticipatotalnegociado'
+            , 'ndiasgracia', 'lpermitediasferiados'
+            , 'lmanejacondicionesoperativas', 'lcargagaoa'
+            , 'lgeneradcenaceptacion', 'lgeneragaoenaceptacion'
+            , 'lesnegociada', 'lcobramorabc'
+            , 'ctinicialesliquidacioncobranza'
             , 'lacumulagaoaatasagao'
             # , 'lfactoringproveedores'
             , 'ctinicialesasignacion'
-            , 'lcargadcenampliacionplazo','lgenerafacturaenaceptacion', 'laplicaotroscargos'
+            , 'lcargadcenampliacionplazo'
+            ,'lgenerafacturaenaceptacion', 'laplicaotroscargos'
+            , 'lacumulamoraatasadc'
         ]
         labels={
             'cttipofactoring':'Descripción'
@@ -90,17 +96,18 @@ class TipoFactoringForm(forms.ModelForm):
             , 'lpermitediasferiados':'Permite vencimiento en fin de semana y días feriado'
             , 'lmanejacondicionesoperativas':'Maneja condiciones operativas'
             , 'lcargagaoa':'Carga comisión adicional a documentos vencidos'
-            , 'lgeneradcenaceptacion':'Carga descuento en negociación'
+            , 'lgeneradcenaceptacion':'Carga descuento de cartera en negociación'
             , 'lgeneragaoenaceptacion':'Carga comisión en negociación'
             , 'lesnegociada':'Es cartera de otro factor'
             , 'lcobramorabc':'Cobra intereses del banco central'
             , 'ctinicialesliquidacioncobranza': 'Iniciales de liquidación de cobranzas'
-            , 'lacumulagaoaatasagao':'Suma la tasa de comisión adicional a la tasa negociada'
+            , 'lacumulagaoaatasagao':'Para vencidos, suma el % de comisión adicional al % de comisión negociada'
             # , 'lfactoringproveedores':'Factoring proveedores'
             , 'ctinicialesasignacion':'Iniciales de asignaciones aceptadas'
-            , 'lcargadcenampliacionplazo':'Carga descuento en ampliaciones de plazo'
+            , 'lcargadcenampliacionplazo':'Carga descuento de cartera en ampliaciones de plazo'
             , 'lgenerafacturaenaceptacion': 'Requiere generar factura en negociación'
-            , 'laplicaotroscargos': 'Aplica otros cargos'
+            , 'laplicaotroscargos': 'Aplica otros cargos en liquidaciones al cliente'
+            , 'lacumulamoraatasadc': 'Para vencidos, suma la tasa de descuento de cartera a la tasa de mora'
         }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -126,15 +133,17 @@ class TasaFactoringForm(forms.ModelForm):
             'cxtasa':'Código'
             # , 'cttasa':'Descripción'
             , 'lflat':'Cálculo con tasa flat'
-            , 'ndiasperiocidad': 'Días de periocidad'
-            , 'limprimeenreporte':'Se imprime en reportes'
-            , 'ctdescripcionenreporte':'Nombre en reportes'
+            , 'ndiasperiocidad': 'Días de periodicidad'
+            , 'limprimeenreporte':'Tasa se imprime en reportes'
+            , 'ctdescripcionenreporte':'Nombre de valor en reportes'
             , 'lcargaiva':'Carga IVA'
             , 'lsobreanticipo': 'Cálculo sobre el valor anticipado'
-            , 'ctinicialesentablas':'Iniciales a mostrarse en tablas'
+            , 'ctinicialesentablas':'Iniciales de tasa'
         }
-        widgets={'ctdescripcionenreporte': forms.Textarea(attrs={'rows': '1'})
-                }
+        widgets={
+            'ctdescripcionenreporte': forms.Textarea(attrs={'rows': '1'}),
+            'ndiasperiocidad': forms.NumberInput(attrs={'step': '30', 'min': '0'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

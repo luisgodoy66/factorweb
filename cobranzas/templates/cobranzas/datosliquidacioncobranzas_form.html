@@ -32,7 +32,7 @@
                     <div class="row form-group">
                         <div class="col col-xs-9">
                             <h5 for="id_ctinstrucciondepago" class=" form-control-label">
-                            Vuelto</h5></div>
+                            Reserva</h5></div>
                         <div class="col col-md-3 text-right">
                             {{ total_vuelto }}
                         </div>
@@ -206,11 +206,12 @@
                           <th data-field="dias_vencidos">Días vencidos</th>
                           <th data-field="dias_negociados">Días negociados</th>
                           <th data-field="valor_cobrado">Aplicado a cartera</th>
-                          <th data-field="tasa_dc">Tasa DC %</th>
                           {% if total_dc > 0 %}
+                          <th data-field="tasa_dc">Tasa DC %</th>
                           <th data-field="dc">{{nombre_dc}} negociado</th>
                           {% endif %}
                           {% if total_dcv > 0 %}
+                          <th data-field="tasa_dcv">Tasa mora %</th>
                           <th data-field="dcv">{{nombre_dc}} vencido</th>
                           {% endif %}
                           {% if total_gao > 0 %}

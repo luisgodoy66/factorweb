@@ -1679,7 +1679,7 @@ def GeneraCargoJSONSalida(cobranza, id_cobranza, fecha_cobranza, id_asignacion
     , asignacion, id_documento, documento, dias_vencidos, dias_negociados
     , valor_cobrado, porcentaje_anticipo, base_dc, tasa_dc, dc, dcv, base_gao
     , tasa_gao, gao, base_gaoa, tasa_gaoa, gaoa, base_retenciones, retenciones
-    , base_bajas, bajas):
+    , base_bajas, bajas, tasa_dcv):
 
     output = {}
 
@@ -1708,6 +1708,7 @@ def GeneraCargoJSONSalida(cobranza, id_cobranza, fecha_cobranza, id_asignacion
     output["retenciones"] = str(round(retenciones,2))
     output["base_bajas"] = str(round(base_bajas,2))
     output["bajas"] = str(round(bajas,2))
+    output['tasa_dcv']=str(round(tasa_dcv,2))
 
     return output
 
@@ -2151,6 +2152,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                 tasa_dc=0; tasa_gao=0;tasa_gaoa=0
                 base_dc=0; base_gao=0; base_gaoa=0
                 base_bajas=0; base_retenciones=0
+                tasa_dcv=0
 
                 documento_cobrado = detalle_cobranza[i]
 
@@ -2261,7 +2263,14 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                                 * dias_negociados / dc.ndiasperiocidad
                             
                         if fechacobrocalculo > documento.dvencimiento:
-                            descuento_cartera_vencido = ( base_dc * tasa_dc / 100) \
+                            # dc vencido
+                            tasa_dcv = datos_operativos.ntasamora
+
+                            # si la tasa se acumula, sumarla a la tasa del documento
+                            if tipo_factoring.lacumulamoraatasadc:
+                                tasa_dcv += documento.ntasadescuento
+
+                            descuento_cartera_vencido = ( base_dc * tasa_dcv / 100) \
                                 * dias_vencidos / dc.ndiasperiocidad
 
                     else:
@@ -2270,21 +2279,6 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                         tasa_dc = tasa_dc * x
 
                         valor_gaoa = base_dc * tasa_dc /100
-
-                # if fechacobrocalculo > documento.dvencimiento:
-
-                #     if dc.lsobreanticipo:
-                #         descuento_cartera_vencido = (documento_cobrado.aplicado()
-                #                             * documento.nporcentajeanticipo 
-                #                             * documento.ntasadescuento / 10000)
-                #     else:
-                #         descuento_cartera_vencido = (documento_cobrado.aplicado()
-                #                             * documento.ntasadescuento / 100)
-
-                #     if not dc.lflat:
-                #         descuento_cartera_vencido = (descuento_cartera_vencido 
-                #                                     * dias_vencidos 
-                #                                     / dc.ndiasperiocidad)
 
                 # generar crgos colateral
                 cargo_retenciones = base_retenciones * documento.nporcentajeanticipo / 100
@@ -2349,7 +2343,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                                 , documento.nporcentajeanticipo, base_dc, tasa_dc
                                 , descuento_cartera, descuento_cartera_vencido, base_gao, tasa_gao
                                 , valor_gao, base_gaoa, tasa_gaoa, valor_gaoa, base_retenciones
-                                , cargo_retenciones, base_bajas, cargo_bajas))
+                                , cargo_retenciones, base_bajas, cargo_bajas, tasa_dcv))
 
                 # acumula totales
                 total_dc += Decimal(descuento_cartera)

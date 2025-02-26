@@ -41,6 +41,7 @@ class Datos_operativos(ClaseModelo):
     ctbeneficiariocobranzas = models.TextField(blank=True, null=True)
     cxestado=models.CharField(max_length=1, default='A', choices=ESTADOS_DE_CLIENTES  )
     dultimanegociacion = models.DateField(null=True)
+    ntasamora= models.DecimalField(max_digits=11, decimal_places=8, default=0) 
 
     def __str__(self):
         return self.cxcliente.cxcliente.ctnombre

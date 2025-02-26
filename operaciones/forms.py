@@ -21,7 +21,7 @@ class DatosOperativosForm(forms.ModelForm):
             ,'ntasacomision', 'ntasadescuentocartera', 'ntasagaoa'
             , 'cxbeneficiarioasignacion', 'ctbeneficiarioasignacion'
             , 'cxbeneficiariocobranzas', 'ctbeneficiariocobranzas'
-            , 'cxestado'
+            , 'cxestado', 'ntasamora'
         ]
         labels={'cxcliente':'Cliente', 'dalta':'Fecha de alta'
             , 'cxclase':'Clase', 'nporcentajeanticipo':'% Anticipo'
@@ -32,7 +32,7 @@ class DatosOperativosForm(forms.ModelForm):
             , 'ctbeneficiarioasignacion': 'Nombre de beneficiario de cheque'
             , 'cxbeneficiariocobranzas':'Id. de beneficiario de cheque'
             , 'ctbeneficiariocobranzas': 'Nombre de beneficiario de cheque'
-            , 'cxestado':'Estado'
+            , 'cxestado':'Estado', 'ntasamora':'Tasa de mora'
         }
         widgets={'ctbeneficiarioasignacion': forms.Textarea(attrs={'rows': '1'})
             , 'ctbeneficiariocobranzas': forms.Textarea(attrs={'rows': '1'}), 
