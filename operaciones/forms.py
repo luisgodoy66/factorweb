@@ -34,6 +34,21 @@ class DatosOperativosForm(forms.ModelForm):
             , 'ctbeneficiariocobranzas': 'Nombre de beneficiario de cheque'
             , 'cxestado':'Estado', 'ntasamora':'Tasa de mora'
         }
+        help_texts = {
+            'cxcliente': 'Seleccione el cliente.',
+            'dalta': 'Ingrese la fecha de alta en formato AAAA-MM-DD.',
+            'cxclase': 'Seleccione la clase del cliente.',
+            'nporcentajeanticipo': 'Ingrese el porcentaje de anticipo.',
+            'ntasacomision': 'Ingrese la tasa de comisión.',
+            'ntasadescuentocartera': 'Ingrese la tasa de descuento de cartera.',
+            'ntasagaoa': 'Esta tasa se puede sumar a la tasa de comisión negociada del documento para el cálculo de la comisión adicional.',
+            'cxbeneficiarioasignacion': 'Ingrese el ID del beneficiario del cheque.',
+            'ctbeneficiarioasignacion': 'Ingrese el nombre del beneficiario del cheque.',
+            'cxbeneficiariocobranzas': 'Ingrese el ID del beneficiario de cobranzas.',
+            'ctbeneficiariocobranzas': 'Ingrese el nombre del beneficiario de cobranzas.',
+            'cxestado': 'Seleccione el estado.',
+            'ntasamora': 'Esta tasa se puede sumar a la tasa de descuento del documento para el cálculo del descuento de cartera vencido.'
+        }
         widgets={'ctbeneficiarioasignacion': forms.Textarea(attrs={'rows': '1'})
             , 'ctbeneficiariocobranzas': forms.Textarea(attrs={'rows': '1'}), 
             'dalta': forms.DateInput(

@@ -683,14 +683,17 @@ def ImpresionDetalleCobranzas(request, desde, hasta, clientes = None):
             .filter(cxcobranza__dcobranza__gte = desde,
                     cxcobranza__dcobranza__lte = hasta,
                     empresa = id_empresa.empresa,
-                    leliminado = False)
+                    leliminado = False)\
+            .order_by('cxcobranza__cxcliente', 'cxcobranza__dcobranza')
     else:            
         detalle = Documentos_detalle.objects\
             .filter(cxcobranza__dcobranza__gte = desde,
                     cxcobranza__cxcliente__in = arr_clientes,
                     cxcobranza__dcobranza__lte = hasta,
                     empresa = id_empresa.empresa,
-                    leliminado = False)
+                    leliminado = False)\
+            .order_by('cxcobranza__cxcliente', 'cxcobranza__dcobranza')
+                    
     
     totales = detalle\
         .aggregate(cobrado = Sum(Case(
@@ -713,9 +716,6 @@ def ImpresionDetalleCobranzas(request, desde, hasta, clientes = None):
                         ),
                     )
 
-    # if not totales['baja']: totales['baja']=0
-    # if not totales['retenciones']: totales['retenciones']=0
-    
     context={
         'detalle':detalle,
         'total_cobrado' :totales['cobrado'] or 0,
@@ -752,14 +752,16 @@ def ImpresionDetalleRecuperaciones(request, desde, hasta, clientes = None):
             .filter(recuperacion__dcobranza__gte = desde,
                     recuperacion__dcobranza__lte = hasta,
                     empresa = id_empresa.empresa,
-                    leliminado = False)
+                    leliminado = False)\
+            .order_by('recuperacion__cxcliente', 'recuperacion__dcobranza')
     else:            
         detalle = Recuperaciones_detalle.objects\
             .filter(recuperacion__dcobranza__gte = desde,
                     recuperacion__dcobranza__lte = hasta,
                     recuperacion__cxcliente__in = arr_clientes,
                     empresa = id_empresa.empresa,
-                    leliminado = False)
+                    leliminado = False)\
+            .order_by('recuperacion__cxcliente', 'recuperacion__dcobranza')
     
     totales = detalle\
         .aggregate(cobrado = Sum(Case(
