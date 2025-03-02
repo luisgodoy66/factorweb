@@ -538,28 +538,6 @@ def DesembolsarAsignacion(request, pk, cliente_id):
                 # cuenta_pago = formulario.cleaned_data["cxcuentapago"]
                 cuenta_pago = request.POST.get("cxcuentapago")
 
-            # with transaction.atomic():
-            #     # 1. Actualizar el estado de la ASIGNACION
-            #     asignacion.cxestado = 'P'
-            #     asignacion.save()
-
-            #     desembolso = formulario.save(commit=False)
-            #     desembolso.cxusuariocrea = request.user
-            #     desembolso.empresa = id_empresa.empresa
-
-            #     # Modificar los datos del objeto desembolso según el valor de cxformapago
-            #     if forma_pago != "CHE":
-            #         desembolso.cxbeneficiario = None
-            #         desembolso.ctbeneficiario = None
-
-            #     if forma_pago != "TRA":
-            #         desembolso.cxcuentadestino = None
-
-            #     if forma_pago in ["EFE", "MOV"]:
-            #         desembolso.cxcuentapago = None
-                    
-            #     desembolso.save()
-
             resultado=enviarPost("CALL uspdesembolsarasignacion( {0},'{1}', '{2}','{3}'\
                                  ,{4},{5},{6},{7}\
                                  ,{8},'')"
@@ -1307,6 +1285,7 @@ def AceptarDocumentos(request):
         .format(pid_asignacion,pdnegociacion,pddesembolso,pnanticipo,pngao\
             ,pndescuentocartera,pniva,psinstruccionpago,nusuario, pslocalidad
             , porcentaje_iva, otros_cargos, base_iva, base_noiva))
+
 
     return HttpResponse(resultado)
 

@@ -227,7 +227,7 @@ class CuposCompradoresForm(forms.ModelForm):
         if Cupos_compradores.objects\
             .filter(cxcliente=cxcliente, cxcomprador=cxcomprador, leliminado = False)\
             .exclude(pk=self.instance.pk).exists():
-            raise ValidationError("Ya existe un registro con este cliente y comprador.")
+            raise ValidationError("Ya existe un registro con este cliente y deudor.")
 
         return cleaned_data
     

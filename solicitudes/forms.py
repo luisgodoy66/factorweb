@@ -6,6 +6,7 @@ from .models import Asignacion, Documentos, ChequesAccesorios, \
 from empresa.models import Tipos_factoring
 from pais.models import Bancos
 from api.models import Configuracion_slack
+from operaciones.models import Documentos as DocumentosOperaciones
 
 from datetime import date
 from api.sri import SRIConsultationService
@@ -82,6 +83,7 @@ class DocumentosForm(forms.ModelForm):
         }
     def __init__(self, *args, **kwargs):
         self.ruc = kwargs.pop('ruc', None)
+        self.empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
@@ -101,21 +103,23 @@ class DocumentosForm(forms.ModelForm):
         ctdocumento = cleaned_data.get('ctdocumento')
         demision = cleaned_data.get('demision')
         cxautorizacion_ec = cleaned_data.get('cxautorizacion_ec')
-        print(self.ruc)
 
         if ctdocumento:
             ctdocumento = ctdocumento.zfill(9)
             cleaned_data['ctdocumento'] = ctdocumento
 
-        if ctserie1 and ctserie2 and ctdocumento and demision and cxautorizacion_ec and len(cxautorizacion_ec) != 10:
+        if ctserie1 and ctserie2 and ctdocumento and demision \
+            and cxautorizacion_ec and len(cxautorizacion_ec) != 10:
+
             demision_str = demision.strftime('%d%m%Y')
             expected_prefix = f"{demision_str}{tipo_doc}{self.ruc}{ambiente}{ctserie1}{ctserie2}{ctdocumento}"
+
             if not cxautorizacion_ec.startswith(expected_prefix):
                 raise ValidationError({
                     'cxautorizacion_ec': f"La Autorización SRI corresponde a otro emisor, número de documento, fecha de emisión, ambiente o tipo de documento ( '{expected_prefix}...')."
                 })
-            else:
-                service = SRIConsultationService("https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl")
+            # else:
+                # service = SRIConsultationService("https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl")
                 # result = service.consult_document_status(cxautorizacion_ec)
                 # if "error" in result:
                 #     raise ValidationError({
@@ -131,6 +135,31 @@ class DocumentosForm(forms.ModelForm):
                     #         'cxautorizacion_ec': f"Documento no autorizado por el SRI o tiene más de 45 días de antigüedad."
                     #     })
 
+                #  validar que el documento no exista
+        try:
+            sc = DocumentosOperaciones.objects\
+                .get(ctdocumento=ctserie1+'-'+ctserie2+'-'+ctdocumento
+                        , cxasignacion__cxcliente__cxcliente__cxparticipante=self.ruc
+                        , leliminado=False
+                    )
+            
+            if not self.instance.pk:
+                # es nuevo registro
+                if sc.empresa.id == self.empresa:
+                    raise forms.ValidationError(
+                        f"Documento ya negociado anteriormente en operación {sc.cxasignacion}")
+                else:
+                    raise forms.ValidationError("Documento negociado en otro factor.")
+
+            elif self.instance.pk!=sc.pk:
+                # es un registro existente
+                raise forms.ValidationError("Cambio No Permitido.")
+        except DocumentosOperaciones.DoesNotExist:
+            pass
+                
+        except Exception as e:
+            raise forms.ValidationError(e)
+        
         return cleaned_data
 
 class ChequesForm(forms.ModelForm):

@@ -77,16 +77,19 @@ class Asignacion(ClaseModelo):
         ('P', 'Pendiente'),
         ('L', 'Liquidada'),
     )
-    cxcliente=models.ForeignKey(Clientes, on_delete=models.CASCADE
-        , related_name="cliente_asignacion")
+    cxcliente=models.ForeignKey(Clientes
+                                , on_delete=models.CASCADE
+                                , related_name="cliente_asignacion")
     cxtipofactoring = models.ForeignKey(Tipos_factoring
         , on_delete=models.RESTRICT)
-    cxtipo = models.CharField(max_length=1, choices=TIPOS_DE_ASIGNACION) 
+    cxtipo = models.CharField(max_length=1
+                              , choices=TIPOS_DE_ASIGNACION) 
     nvalor = models.DecimalField(max_digits=15, decimal_places =2
         , default=0) 
     ncantidaddocumentos = models.SmallIntegerField(default=0)
-    cxestado = models.CharField(max_length=1, choices=TIPOS_DE_ESTADO
-        , default='P')
+    cxestado = models.CharField(max_length=1
+                                , choices=TIPOS_DE_ESTADO
+                                , default='P')
     datencion = models.DateTimeField(null=True)
     cxusuarioatencion = models.IntegerField(null=True)
     asignacion = models.BigIntegerField(null=True)
@@ -95,23 +98,38 @@ class Asignacion(ClaseModelo):
     cxasignacion = models.CharField(max_length=8 , null=True) 
     dnegociacion = models.DateTimeField(auto_created=True, null=True) 
     ddesembolso= models.DateField(auto_created=True, null=True) 
-    nanticipo = models.DecimalField(max_digits=10, decimal_places= 2, default=0)
-    ngao = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
-    ndescuentodecartera = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
-    notroscargos = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
-    nbaseiva = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
-    nbasenoiva = models.DecimalField(max_digits=10, decimal_places= 2, default= 0)
-    niva = models.DecimalField(max_digits=10,decimal_places= 2, default= 0)
+    nanticipo = models.DecimalField(max_digits=10, decimal_places= 2
+                                    , default=0)
+    ngao = models.DecimalField(max_digits=10,decimal_places= 2
+                               , default= 0)
+    ndescuentodecartera = models.DecimalField(max_digits=10
+                                              , decimal_places= 2
+                                              , default= 0)
+    notroscargos = models.DecimalField(max_digits=10
+                                       , decimal_places= 2
+                                       , default= 0)
+    nbaseiva = models.DecimalField(max_digits=10, decimal_places= 2
+                                   , default= 0)
+    nbasenoiva = models.DecimalField(max_digits=10, decimal_places= 2
+                                     , default= 0)
+    niva = models.DecimalField(max_digits=10,decimal_places= 2
+                               , default= 0)
     jotroscargos = models.JSONField(blank=True, null=True)
     ctinstrucciondepago = models.TextField(blank=True)
-    nporcentajeiva = models.DecimalField(max_digits=5, decimal_places=2, default=12)
-    cliente=models.ForeignKey(Datos_generales_cliente, null=True, default=None
-        , on_delete=models.CASCADE
+    nporcentajeiva = models.DecimalField(max_digits=5
+                                         , decimal_places=2
+                                         , default=12)
+    cliente=models.ForeignKey(Datos_generales_cliente, null=True
+                              , default=None
+                              , on_delete=models.CASCADE
     )
-    solicitudaprobacion = models.ForeignKey(Solicitud_aprobacion, null=True, default=None
+    solicitudaprobacion = models.ForeignKey(Solicitud_aprobacion
+                                            , null=True
+                                            , default=None
                                             , related_name="asignacion_solicitud"
                                             , on_delete=models.CASCADE)
-    nmayorplazonegociacion = models.SmallIntegerField(default=0, null=True)
+    nmayorplazonegociacion = models.SmallIntegerField(default=0
+                                                      , null=True)
 
     def cargos(self):
         return self.ngao + self.ndescuentodecartera + self.notroscargos

@@ -11,14 +11,18 @@ class ParticipanteForm(forms.ModelForm):
         model = Datos_participantes
         fields = [
             'cxtipoid', 'cxparticipante', 'ctnombre', 'ctdireccion',
-            'cttelefono1', 'cttelefono2', 'ctemail', 'ctemail2', 'ctcelular',
+            'cttelefono1', 'cttelefono2', 'ctemail', 'ctemail2', 
+            'ctcelular',
             'ctgirocomercial', 'dinicioactividades', 'actividad'
         ]
         labels = {
-            'cxtipoid': 'Tipo de identificación', 'cxparticipante': 'Identificación',
+            'cxtipoid': 'Tipo de identificación', 
+            'cxparticipante': 'Identificación',
             'ctnombre': 'Nombre completo', 'ctdireccion': 'Dirección',
-            'cttelefono1': 'Teléfono principal', 'cttelefono2': 'Teléfono secundario',
-            'ctemail': 'Email 1', 'ctemail2': 'Email 2', 'ctcelular': 'Celular',
+            'cttelefono1': 'Teléfono principal', 
+            'cttelefono2': 'Teléfono secundario',
+            'ctemail': 'Email 1', 'ctemail2': 'Email 2', 
+            'ctcelular': 'Celular',
             'ctgirocomercial': 'Giro comercial', 
             'dinicioactividades': 'Inicio de actividades',
             'actividad': 'Actividad económica'
@@ -28,7 +32,9 @@ class ParticipanteForm(forms.ModelForm):
             'ctgirocomercial': forms.Textarea(attrs={'rows': '5'}),
             'dinicioactividades': forms.DateInput(
                 format=('%Y-%m-%d'),
-                attrs={'class': 'form-control', 'placeholder': 'Seleccione una fecha', 'type': 'date'}
+                attrs={'class': 'form-control'
+                       , 'placeholder': 'Seleccione una fecha'
+                       , 'type': 'date'}
             ),
         }
 
@@ -37,20 +43,25 @@ class ParticipanteForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({'class': 'form-control'})
+
         self.fields['cxtipoid'].empty_label = "Seleccione tipo de identificación"
+
         if self.empresa:
-            self.fields['actividad'].queryset = Actividades.objects.filter(
-                empresa=self.empresa, leliminado=False
-            ).order_by('cxactividad')
+            self.fields['actividad'].queryset = Actividades.objects\
+                .filter(empresa=self.empresa, leliminado=False)\
+                .order_by('cxactividad')
 
     def clean(self):
         cleaned_data = super().clean()
         cxparticipante = cleaned_data.get('cxparticipante')
         if self.empresa and cxparticipante:
             try:
-                existing_participant = Datos_participantes.objects.get(
-                    cxparticipante=cxparticipante, empresa=self.empresa
-                )
+                # 27-feb-25: considerar el estad de eliminado
+                existing_participant = Datos_participantes.objects\
+                    .get(cxparticipante=cxparticipante
+                         , leliminado=False
+                         , empresa=self.empresa)
+                
                 if not self.instance.pk:
                     # cuando es nuevo y lo encontró
                     raise forms.ValidationError("Identificación de participante ya registrada como cliente o como deudor.")

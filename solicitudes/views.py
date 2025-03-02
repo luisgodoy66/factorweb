@@ -260,13 +260,16 @@ def DatosFacturasPuras(request, cliente_id, tipo_factoring_id
         cliente = Clientes.objects.get(pk=cliente_id)
         ruc = cliente.cxcliente
 
-        form_documento = DocumentosForm(request.POST, instance = detalle, ruc=ruc)
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = request.user).first()
+        
+        form_documento = DocumentosForm(request.POST
+                                        , instance = detalle
+                                        , ruc=ruc
+                                        , empresa = id_empresa.empresa.id)
 
         if form_documento.is_valid():
 
-            id_empresa = Usuario_empresa.objects\
-                .filter(user = request.user).first()
-            
             tipoasignacion = FACTURAS_PURAS
 
             with transaction.atomic():
@@ -641,7 +644,9 @@ def DatosAsignacionConAccesorios(request, cliente_id,
         cliente = Clientes.objects.get(pk=cliente_id)
         ruc = cliente.cxcliente
 
-        form_documento = DocumentosForm(request.POST, ruc=ruc)
+        form_documento = DocumentosForm(request.POST
+                                        , ruc=ruc
+                                        , empresa = id_empresa.empresa.id)
 
         if form_documento.is_valid():
             # inicio de transaccion
