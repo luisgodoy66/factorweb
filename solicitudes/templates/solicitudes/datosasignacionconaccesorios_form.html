@@ -142,6 +142,13 @@ window.onload=function(){
     initTable();
 };
 
+// Llamar a calcularTotales después de que la tabla se haya refrescado
+jQuery(document).ready(function() {
+    jQuery('#table').on('post-body.bs.table', function() {
+        calcularTotalesSolicitud();
+    });
+});
+
 window.operateEvents = {
   'click .editar': function (e, value, row, index) {
     EditarDocumento( row.id)

@@ -5,11 +5,7 @@ function EliminarDocumentoDeSolicitudAsignacion(asignacion_id, documento_id, tip
 
       fetchProcesar("/solicitudes/eliminardetalleasignacion/"
         + asignacion_id + "/" + documento_id+"/"+tipo_asignacion, function(){
-        // $table.bootstrapTable('remove', {
-        //   field: 'id',
-        //   values: [documento_id]
-        // });
-        $table.bootstrapTable('refresh');
+        $table.bootstrapTable('refresh', {silent: true});
         // location.reload();
       })
   })
@@ -25,6 +21,22 @@ function RecuperarDocumentoDeSolicitudAsignacion(asignacion_id, documento_id, ti
         // location.reload();
       })
   })
+}
+
+function calcularTotalesSolicitud() {
+  var totalValor = 0;
+  var cnt = 0;
+  var data = $table.bootstrapTable('getData');
+
+  data.forEach(function(row) {
+    if (! row.Eliminado){
+      cnt += 1;
+      totalValor += parseFloat(row.Total.replace(/,/g, '')) || 0;
+    }
+  });
+  console.log(totalValor);
+  inicializaValor("id_nvalor", totalValor.toFixed(2));
+  inicializaValor("id_ncantidaddocumentos", cnt);
 }
 
 function ImprimirCobranza(cobranza_id, tipo_operacion){

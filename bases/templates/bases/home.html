@@ -239,7 +239,7 @@
                         {% if user.usuario_empresa.get.empresa.dfinpruebas %}
                             El período termina el {{user.usuario_empresa.get.empresa.dfinpruebas }}.
                         {% else %}
-                            Tendrá 60 días para probar el sistema a partir de la primera solicitud.
+                            Tendrá 30 días para probar el sistema a partir de la primera solicitud.
                             Use <a href="{% url 'solicitudes:listasolicitudes' %} "
                              class="alert-link">este link</a> y en el menú de la forma que se mostrará, seleccione Nuevo solicitante y Nueva solicitud de facturas.
                         {% endif %}

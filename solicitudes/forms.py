@@ -158,7 +158,7 @@ class DocumentosForm(forms.ModelForm):
             pass
                 
         except Exception as e:
-            raise forms.ValidationError(e)
+            raise forms.ValidationError(f"Documento ya registrado, {e}")
         
         return cleaned_data
 
