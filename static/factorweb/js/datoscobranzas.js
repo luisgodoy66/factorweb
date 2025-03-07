@@ -110,10 +110,12 @@ function mostrar_cuentas_origen(){
   if (recibido_por.id == "porcliente"){
     div_d.setAttribute('hidden',true);
     div_c.removeAttribute('hidden');
+    inicializaValor("id_ctgirador",nombre_cliente);
     }
   else{
     div_d.removeAttribute('hidden');
     div_c.setAttribute('hidden',true);
+    inicializaValor("id_ctgirador",nombre_deudor);
   }
 }
 
@@ -170,7 +172,8 @@ function AceptarCobranza(){
     ,function(){
 
     var objeto={
-      "id_cliente":capturaValor("id_cliente"),
+      // "id_cliente":capturaValor("id_cliente"),
+      "id_cliente": id_cliente,
       "tipo_factoring":capturaValor("tipo_factoring"),
       "forma_cobro":forma_de_cobro,
       "fecha_cobro":capturaValor("id_dcobranza"),
@@ -181,7 +184,8 @@ function AceptarCobranza(){
       "arr_documentos_cobrados": JSONdocumentos,
       "arr_cheque": JSONcheque,
       "arr_deposito": JSONdeposito,
-      "id_deudor":capturaValor("id_deudor"),
+      // "id_deudor":capturaValor("id_deudor"),
+      "id_deudor":id_deudor,
     }
 
     fetchPostear("/cobranzas/aceptarcobranza/", objeto, function(data){

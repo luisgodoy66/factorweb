@@ -22,46 +22,37 @@
         <input id="porc_disponible" name="porc_disponible" value="{{ porc_disponible }}" >
         <input id="dias_ultima_operacion" name="dias_ultima_operacion" value="{{ dias_ultima_operacion }}" >
     </div>
-    <div class="animated fadeIn">
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="mb-3">Antigüedad de la cartera y protestos</h4>
-                    <canvas id="singelBarChart"></canvas>
-                </div>
-            </div>
-        </div><!-- /# column -->
-   </div>
 
-   <div class="row">
-    <div class="col-lg-6 col-md-6">
+    <div class="col-lg-12 col-md-12">
+        <div class="col-md-3">
             <div class="card">
                 <div class="card-body">
                     <div class="stat-widget-one">
                         <div class="stat-icon dib"><i class="ti-money text-success border-success"></i></div>
                         <div class="stat-content dib">
                             <div class="stat-text">Monto de línea</div>
-                            <div class="stat-digit">{{ valor_linea|floatformat:"2g"}}</div>
+                            <div class="stat-digit">{{ valor_linea|floatformat:"0g"}}</div>
                         </div>
                     </div>
                 </div>
             </div>
-        <!-- </div>
+        </div>
 
-        <div class="col-lg-6 col-md-6"> -->
+        <div class="col-md-3">
             <div class="card">
                 <div class="card-body">
                     <div class="stat-widget-one">
                         <div class="stat-icon dib"><i class="ti-thumb-up text-primary border-primary"></i></div>
                         <div class="stat-content dib">
-                            <div class="stat-text">% disponible</div>
+                            <div class="stat-text">Disponible</div>
                             <div class="stat-digit">{{ porc_disponible }}%</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-6 col-md-6">
+
+        <div class="col-md-3">
             <div class="card">
                 <div class="card-body">
                     <div class="stat-widget-one">
@@ -73,8 +64,9 @@
                     </div>
                 </div>
             </div>
-        <!-- </div>
-        <div class="col-lg-6 col-md-6"> -->
+        </div>
+
+        <div class="col-md-3">
             <div class="card">
                 <div class="card-body">
                     <div class="stat-widget-one">
@@ -90,7 +82,16 @@
    </div>
 
     <div class="row">
-       <div class="col-md-6 col-lg-6">
+        <!-- <div class="animated fadeIn"> -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="mb-3">Antigüedad de la cartera y protestos</h4>
+                        <canvas id="singelBarChart"></canvas>
+                    </div>
+                </div>
+            </div><!-- /# column -->
+       <div class="col-md-3 col-lg-3">
             <div class="card
             {% if color_estado == 1 %} 
                 bg-flat-color-1
@@ -132,7 +133,7 @@
             </div>
         {% endif %}
         </div>
-        <div class="col-md-6 col-lg-6">
+        <div class="col-md-3 col-lg-3">
             <div class="card">
                 <div class="card-body">
                     <div class="clearfix">
@@ -260,8 +261,7 @@
                 </div>
             </small>
         </div>
-    </div>
-    
+    </div>    
     <div class="col-xl-6">
         <div class="card">
             <div class="card-header">
@@ -349,6 +349,31 @@
             </small>
         </div>
     </div>
+    <div class="col-xl-6">
+        <div class="card">
+            <div class="card-header">
+                <strong>Últimos movimientos</strong>
+            </div>
+            <small>
+                <div>
+                    <table id="tbmovimientos"  class="table table-striped table-bordered"
+                        data-url="{% url 'operaciones:movimientoscliente_json' cliente_id 10 %}"
+                        data-id-field="id"
+                        >
+                        <thead>
+                            <tr>
+                            <th data-field="Fecha" data-sortable="true" >Fecha</th>
+                            <th data-field="Operacion" data-sortable="true" >Operación</th>
+                            <th data-field="Movimiento" data-sortable="true" >Movimiento</th>
+                            <th data-field="Valor" data-sortable="true" >Valor</th>
+                            <th data-field="Usuario" data-sortable="true" >Usuario</th>
+                            </tr>
+                        </thead>
+                    </table>             
+                </div>
+            </small>
+        </div>
+    </div>
 </div>
 
 
@@ -357,5 +382,28 @@
 <!-- Chart js -->
 <script src="{% static 'factorweb/vendors/chart.js/dist/Chart.bundle.min.js' %}"></script>
 <script src="{% static 'factorweb/assets/js/widgets.js' %}"></script>
-<script type="text/javascript" src="{% static 'factorweb/js/estadooperativo.js' %}"></script>
+<!-- <script type="text/javascript" src="{% static 'factorweb/js/estadooperativo.js' %}"></script> -->
+<script>
+var $table = jQuery('#table')
+var $tbcheques = jQuery('#tbcheques')
+var $tbcargos = jQuery('#tbcargos')
+var $tbprotestos = jQuery('#tbprotestos')
+var $tbcanjes = jQuery('#tbcanjes')
+var $tbquitados = jQuery('#tbquitados')
+var $tbmovimientos = jQuery('#tbmovimientos')
+const cliente_id = capturaValor("id_cliente")
+
+window.onload=function(){
+
+$table.bootstrapTable({locale:"es-EC"});
+$tbcargos.bootstrapTable({locale:"es-EC"});
+$tbcheques.bootstrapTable({locale:"es-EC"});
+$tbprotestos.bootstrapTable({locale:"es-EC"});
+$tbcanjes.bootstrapTable({locale:"es-EC"});
+$tbquitados.bootstrapTable({locale:"es-EC"});
+$tbmovimientos.bootstrapTable({locale:"es-EC"});
+
+antigüedadcartera("/operaciones/antigüedadcarteracliente/"+cliente_id);
+}    
+</script>
 {% endblock %}

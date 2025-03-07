@@ -905,7 +905,7 @@ def ImportarOperacion(request):
     objeto=json.loads(request.body.decode("utf-8"))
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    id_cliente=objeto["id_cliente"]
+    ruc=objeto["id_cliente"]
     nombre_cliente=objeto["nombre_cliente"]
     tipo_factoring=objeto["tipo_factoring"]
     tipo_operacion=objeto["tipo_operacion"]
@@ -925,16 +925,36 @@ def ImportarOperacion(request):
             # Intenta realizar operaciones de base de datos aquí
             # Por ejemplo, guardar un objeto que podría exceder el largo máximo permitido para un campo
             # grabar el cliente
-            cliente = Clientes.objects.filter(cxcliente=id_cliente).first()
+            cliente = Clientes.objects\
+                .filter(cxcliente=ruc,
+                        empresa = id_empresa.empresa).first()
+            
             if not cliente:
                 cliente = Clientes(
-                    cxcliente = id_cliente,
+                    cxcliente = ruc,
                     ctnombre = nombre_cliente,
                     cxusuariocrea = request.user,
                     empresa = id_empresa.empresa,
                 )
                 if cliente:
                     cliente.save()
+
+            # 6-mar-25  l.g.    se incorpora el contador de solicitudes SOL0001
+            secuencia = Contador.objects.filter(empresa = id_empresa.empresa,
+                                            cxtransaccion = INICIAL_SOLICITUD+ruc).first()
+            if not secuencia:
+                secuencia = Contador(
+                    empresa = id_empresa.empresa,
+                    cxusuariocrea = request.user,
+                    cxtransaccion = INICIAL_SOLICITUD+ruc,
+                    nultimonumero = 1
+                )
+                secuencia.save()
+            else:
+                secuencia.nultimonumero += 1
+                secuencia.save()
+
+            numero_solicitud = INICIAL_SOLICITUD+str(secuencia.nultimonumero).zfill(5)
 
             # grabar la asignacion
             asignacion = Asignacion(
@@ -945,6 +965,7 @@ def ImportarOperacion(request):
                 ncantidaddocumentos = numero_documentos,
                 cxusuariocrea = request.user,
                 empresa = id_empresa.empresa,
+                cxasignacion = numero_solicitud
             )
             if asignacion:
                 asignacion.save()
@@ -987,28 +1008,6 @@ def ImportarOperacion(request):
                             fecha = fecha + datetime.timedelta(days=1)
                             vencimiento = date.isoformat(fecha)
 
-                    detalle = Documentos(
-                        cxasignacion=asignacion,
-                        cxcomprador = id_comprador,
-                        ctcomprador = nombre_comprador,
-                        ctdocumento = documento,
-                        demision  = emision,
-                        dvencimiento  = vencimiento,
-                        nvalorantesiva = valor_antes_de_iva,
-                        niva = iva,
-                        nretencioniva = retencion_iva,
-                        nretencionrenta = retencion_renta,
-                        ntotal = total,
-                        ctserie1 = serie1,
-                        ctserie2 = serie2,
-                        nvalornonegociado = no_negociado,
-                        cxusuariocrea = request.user,
-                        empresa = id_empresa.empresa,
-                    )
-
-                    if detalle:
-                        detalle.save()
-
                     # grabar comprador , si es nuevo
                     datosparticipante = Datos_participantes.objects\
                         .filter(cxparticipante = id_comprador
@@ -1031,13 +1030,36 @@ def ImportarOperacion(request):
                         .filter(cxcomprador = datosparticipante.id).first()
 
                     if not comprador:
-                        datoscomprador=Datos_compradores(
+                        comprador=Datos_compradores(
                             cxcomprador = datosparticipante,
                             cxusuariocrea = request.user,
                             empresa = id_empresa.empresa
                         )
-                        if datoscomprador:
-                            datoscomprador.save()
+                        if comprador:
+                            comprador.save()
+
+                    detalle = Documentos(
+                        cxasignacion=asignacion,
+                        cxcomprador = id_comprador,
+                        ctcomprador = nombre_comprador,
+                        ctdocumento = documento,
+                        demision  = emision,
+                        dvencimiento  = vencimiento,
+                        nvalorantesiva = valor_antes_de_iva,
+                        niva = iva,
+                        nretencioniva = retencion_iva,
+                        nretencionrenta = retencion_renta,
+                        ntotal = total,
+                        ctserie1 = serie1,
+                        ctserie2 = serie2,
+                        nvalornonegociado = no_negociado,
+                        cxusuariocrea = request.user,
+                        empresa = id_empresa.empresa,
+                        comprador = comprador
+                    )
+
+                    if detalle:
+                        detalle.save()
 
             # grabar fecha de inicio de operaciones
             factor = Empresas.objects.filter(pk = id_empresa.empresa.id).first()

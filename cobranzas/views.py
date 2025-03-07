@@ -187,6 +187,7 @@ class CobranzasDocumentosView(SinPrivilegios, generic.FormView):
         context["cuentas_conjuntas"] = cuentas_conjuntas
         context["tipo"]="Cobranza"
         context["por_vencer"]=por_vencer
+        context["deudor"] = comprador if un_solo_deudor == "Si" else None
 
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         sp = Asignacion.objects.filter(cxestado='P', leliminado=False,

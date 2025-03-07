@@ -21,7 +21,7 @@ from .forms import DatosOperativosForm, AsignacionesForm, \
 from .models import Condiciones_operativas_detalle, \
     Datos_operativos, Asignacion,  Condiciones_operativas_cabecera, \
     Anexos, Pagares, Desembolsos, Documentos, ChequesAccesorios, \
-    Notas_debito_cabecera, Cheques_quitados, \
+    Notas_debito_cabecera, Cheques_quitados, Movimientos_clientes,\
     Ampliaciones_plazo_cabecera, Cheques_canjeados, Pagare_detalle
 from empresa.models import  Clases_cliente, Datos_participantes, \
     Tasas_factoring, Tipos_factoring, Cuentas_bancarias, Otros_cargos\
@@ -2465,4 +2465,39 @@ def GeneraResumenNegociadPorActividadJSON(request):
     data = list(total_por_actividad)
     
     return JsonResponse( data, safe=False)
+
+def GeneraListaMovimientosClienteJSON(request, cliente_id, registros = 10):
+    # Es invocado desde la url de una tabla bt
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    documentos = Movimientos_clientes.objects\
+        .filter(cxcliente = cliente_id
+                , leliminado = False
+                , empresa = id_empresa.empresa)\
+        .order_by('-dmovimiento')[:registros]
+        # .order_by('-dregistro')[:registros]
+
+    tempBlogs = []
+    for i in range(len(documentos)):
+        tempBlogs.append(GeneraListaMovimientosClienteJSONSalida(documentos[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaMovimientosClienteJSONSalida(doc):
+    output = {}
+
+    output["Fecha"] = doc.dmovimiento.strftime("%Y-%m-%d")
+    output["Movimiento"] = doc.cxmovimiento.ctmovimiento
+    output["Operacion"] = doc.cxoperacion
+    output["Valor"] = doc.nvalor
+    output["Usuario"] = doc.cxusuariocrea.username
+
+    return output
 

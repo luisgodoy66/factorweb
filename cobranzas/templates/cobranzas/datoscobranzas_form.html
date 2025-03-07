@@ -45,10 +45,12 @@
         <div hidden>
             <input id="documentos" name="documentos" value="{{ documentos }}">
             <input id="total_cartera" name="total_cartera" value="{{ total_cartera }}">
-            <input id="id_cliente" name="id_cliente" value="{{ cliente_id }}">
+            <!-- <input id="id_cliente" name="id_cliente" value="{{ cliente_id }}"> -->
             <input id="forma_cobro" value="{{ forma_cobro }}">
             <input id="tipo_factoring" value="{{ tipo_factoring }}">
-            <input id="id_deudor" value="{{ deudor_id }}">
+            <!-- <input id="id_deudor" value="{{ deudor_id }}"> -->
+             <input id="nombre_cliente" value="{{ cliente }}">
+             <input id="nombre_deudor" value="{{ deudor }}">
         </div>
         <div class="card-body card-block">
             <!-- lista de clientes -->
@@ -152,14 +154,14 @@
                     class=" form-control-label">
                     {{ form_cheque.ctgirador.label}}</label>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     {{ form_cheque.ctgirador}}
                 </div>
                 <div class="col-md-1"><label for="id_ctcheque" 
                     class=" form-control-label">
                     {{ form_cheque.ctcheque.label}}</label>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-1">
                     {{ form_cheque.ctcheque}}
                 </div>
                 {% endif %}
@@ -274,4 +276,17 @@
 {% else %}
 <script type="text/javascript" src="{% static 'factorweb/js/datosrecuperacion.js' %}"></script>
 {% endif %}
+<script>
+    const nombre_cliente = capturaValor("nombre_cliente");
+    const nombre_deudor = capturaValor("nombre_deudor");
+    const un_solo_comprador = "{{ un_solo_comprador }}";
+    const id_cliente = "{{ cliente_id }}";
+    const id_deudor = "{{ deudor_id }}";
+
+    if (un_solo_comprador == "Si") {
+        inicializaValor("id_ctgirador", nombre_deudor);
+    }else{
+        inicializaValor("id_ctgirador", nombre_cliente);
+    }
+</script>
 {% endblock %}

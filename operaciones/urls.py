@@ -24,7 +24,7 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     AceptarAsignacion, ReversoDesembolsoAsignacion, \
     MaestroMovimientosView, GeneraListaCuotasPagareJSON, \
     ModificarCuota, GeneraResumenNegociadPorActividadJSON, \
-    AnexosClienteView
+    AnexosClienteView, GeneraListaMovimientosClienteJSON
 
 from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
     ImpresionAsignacionDesdeSolicitud, ImpresionFacturasPendientes, \
@@ -56,6 +56,8 @@ urlpatterns = [
         name="listacanjescliente_json"),
     path('chequesquitadosclientejson/<cliente_id>',GeneraListaChequesQuitadosClienteJSON, 
         name="listachequesquitadoscliente_json"),
+    path('movimientosclientejson/<cliente_id>/<int:registros>',GeneraListaMovimientosClienteJSON,
+        name='movimientoscliente_json'),
 # movimientos
     path('listamaestromovimientos/',MaestroMovimientosView.as_view(), \
         name='listamaestromovimientos'),

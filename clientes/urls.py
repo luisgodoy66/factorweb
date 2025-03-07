@@ -66,7 +66,7 @@ urlpatterns = [
         , name='cuentabancaria_eliminar'),
     path('actualizarcuentatransferencia/<int:pk>/<cliente_ruc>',ActualizarCuentaTransferencia
         , name='cuentatransferencia_actualizar'),
-    # estado operativo
+    # datos operativo
     path('editestadoclasecomprador/<int:pk>',EstadoCompradorEdit.as_view()
         , name='estadoclasecomprador_editar'),
     path('listadatosoperativoshistorico/<id_cliente>',DatosOperativosHistoricoView.as_view(), \
