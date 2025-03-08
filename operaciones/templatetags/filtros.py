@@ -29,7 +29,25 @@ def running_aplicado(sales_list):
 def suma(valor1, valor2):
     return valor1 + valor2
 
-# myapp/templatetags/custom_filters.py
+import decimal
+@register.filter
+def promedio_ponderado_demora(cliente_list):
+    total_valor = 0
+    total_demora_ponderada = 0
+
+    for item in cliente_list:
+        valor_cobranza = item.aplicado()
+        demora_pago = item.demoradepago()
+
+        total_valor += valor_cobranza
+        total_demora_ponderada += valor_cobranza * decimal.Decimal( demora_pago)
+
+    if total_valor == 0:
+        return 0
+
+    promedio_ponderado = total_demora_ponderada / total_valor
+    return round(promedio_ponderado, 2)
+
 import datetime
 
 

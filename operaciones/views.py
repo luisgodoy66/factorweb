@@ -24,10 +24,11 @@ from .models import Condiciones_operativas_detalle, \
     Notas_debito_cabecera, Cheques_quitados, Movimientos_clientes,\
     Ampliaciones_plazo_cabecera, Cheques_canjeados, Pagare_detalle
 from empresa.models import  Clases_cliente, Datos_participantes, \
-    Tasas_factoring, Tipos_factoring, Cuentas_bancarias, Otros_cargos\
-    ,Movimientos_maestro, Contador
-from cobranzas.models import Documentos_protestados, Liquidacion_cabecera\
-    , Documentos_cabecera, Recuperaciones_cabecera, Cheques_protestados
+    Tasas_factoring, Tipos_factoring, Cuentas_bancarias, \
+    Otros_cargos, Movimientos_maestro, Contador
+from cobranzas.models import Documentos_protestados, \
+    Liquidacion_cabecera, Documentos_cabecera, Documentos_detalle, \
+    Recuperaciones_cabecera, Cheques_protestados
 from bases.models import Usuario_empresa, Empresas
 from solicitudes import models as ModelosSolicitud
 from clientes import models as ModeloCliente
@@ -1585,23 +1586,8 @@ def GeneraResumenAntigüedadCarteraJSON(request):
     ax90 = acc_quitados["porvencer_90"] or 0
     fxm90 = documentos["porvencer_mas_90"] or 0
     axm90 = acc_quitados["porvencer_mas_90"] or 0
+
     cartera={}
-    # if not fvm90: fvm90=0
-    # if not fv90: fv90=0
-    # if not fv60: fv60=0
-    # if not fv30: fv30=0
-    # if not fx30: fx30=0
-    # if not fx60: fx60=0
-    # if not fx90: fx90=0
-    # if not fxm90: fxm90=0
-    # if not avm90: avm90=0
-    # if not av90: av90 = 0
-    # if not av60: av60 = 0
-    # if not av30: av30 = 0
-    # if not ax30: ax30 = 0
-    # if not ax60: ax60 = 0
-    # if not ax90: ax90 = 0
-    # if not axm90: axm90 = 0
     cartera["fvencido_mas_90"] = fvm90+avm90
     cartera["fvencido_90"] = fv90+av90
     cartera["fvencido_60"] = fv60+av60
@@ -1667,19 +1653,27 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
         estado_cliente = 'Bloqueado'
         color_estado = 4
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
     
-    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+    sp = ModelosSolicitud.Asignacion.objects\
+        .filter(cxestado='P', leliminado=False,
+                empresa = id_empresa.empresa).count()
 
-    total_cartera = Documentos.objects.TotalCarteraCliente(cliente_id)
+    total_cartera = Documentos.objects\
+        .TotalCarteraCliente(cliente_id)
     cartera = total_cartera['Total'] or 0
 
-    total_protesto = Cheques_protestados.objects.TotalProtestosCliente(cliente_id)
+    total_protesto = Cheques_protestados.objects\
+        .TotalProtestosCliente(cliente_id)
     protestos = total_protesto['Total'] or 0
 
-    total_reestructuracion = Pagares.objects.TotalPagaresCliente(cliente_id)
+    total_reestructuracion = Pagares.objects\
+        .TotalPagaresCliente(cliente_id)
     restructuracion = total_reestructuracion['Total'] or 0
+
+    ppmp = Documentos_detalle.objects\
+        .promedio_ponderado_demora(cliente_id)
 
     context={
         'cliente_id':cliente_id,
@@ -1694,6 +1688,7 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
         'solicitudes_pendientes':sp,
         'total_cartera_protestos': cartera + protestos,
         'total_reestructuracion':restructuracion,
+        'promedio_ponderado_demora': ppmp,
         }
     return render(request, template_path, context)
 
@@ -1757,7 +1752,6 @@ def AntigüedadCarteraClienteJSON(request, cliente_id):
       'protestos':protestos,
       'pagares':cuotas,
         }
-    print(data)
     return JsonResponse( data)
 
 def GeneraListaCarteraClienteJSON(request, cliente_id, fecha_corte = None):
@@ -2500,4 +2494,19 @@ def GeneraListaMovimientosClienteJSONSalida(doc):
     output["Usuario"] = doc.cxusuariocrea.username
 
     return output
+
+def GeneraListaClientesValoresPendientes(request, porcentaje = 80):
+
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
+
+    # total_por_cliente = Documentos.objects\
+    #     .clientes_con_valores_pendientes(id_empresa.empresa, porcentaje)
+    
+    total_por_cliente = ModeloCliente.Linea_Factoring.objects\
+        .clientes_con_valores_pendientes(id_empresa.empresa, porcentaje)
+    
+    data = list(total_por_cliente)
+    print(data)
+    return JsonResponse( data, safe=False)
 

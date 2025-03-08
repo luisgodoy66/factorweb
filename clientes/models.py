@@ -3,6 +3,7 @@ from django.db import models
 from bases.models import ClaseModelo
 from empresa.models import Datos_participantes, Clases_cliente, Localidades
 from pais.models import Bancos
+from django.db.models import Sum, Q, F, ExpressionWrapper, DateField, CharField\
 
 class Datos_compradores(ClaseModelo):
     ESTADOS_DE_COMPRADORES = (
@@ -164,6 +165,51 @@ class Cupos_compradores(ClaseModelo):
     def disponible(self):
         return self.ncupocartera - self.nutilizadocartera
 
+class Linea_Manager(models.Manager):
+    def clientes_con_valores_pendientes(self, id_empresa, porcentaje=80):
+        # Obtener el total de valores pendientes
+        total_valores_pendientes = self.filter(
+            leliminado=False, nutilizado__gt=0, empresa=id_empresa
+        ).aggregate(total=Sum('nutilizado'))['total']
+
+        if not total_valores_pendientes:
+            return []
+
+        # Calcular el porcentaje del total de valores pendientes
+        total_por_ciento = total_valores_pendientes * porcentaje / 100
+
+        # Obtener la lista de clientes con sus valores pendientes, ordenados en orden descendente
+        clientes_valores_pendientes = self.filter(
+            leliminado=False, nutilizado__gt=0, empresa=id_empresa
+        ).values('cxcliente__cxcliente__ctnombre').annotate(
+            total_pendiente=F('nutilizado')
+        ).order_by('-total_pendiente')
+
+        # Iterar sobre los clientes acumulando sus valores pendientes hasta alcanzar el porcentaje del total
+        acumulado = 0
+        clientes_por_ciento = []
+        otros_total = 0
+        otros_cantidad = 0
+
+        for cliente in clientes_valores_pendientes:
+            if acumulado >= total_por_ciento:
+                otros_total += cliente['total_pendiente']
+                otros_cantidad +=1
+            else:
+                clientes_por_ciento.append(cliente)
+                acumulado += cliente['total_pendiente']
+
+        if otros_total > 0:
+            clientes_por_ciento.append({
+                'cxcliente__cxcliente__ctnombre': 'OTROS CLIENTES ' 
+                    + '(' + str(otros_cantidad) + ') CON EL '
+                    + str(100 - porcentaje) + '% ' 
+                    ,
+                'total_pendiente': otros_total
+            })
+
+        return clientes_por_ciento
+
 class Linea_Factoring(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales
         , on_delete=models.RESTRICT
@@ -182,6 +228,8 @@ class Linea_Factoring(ClaseModelo):
     lconrecurso = models.BooleanField(default=True)
     nreestructuracion=models.DecimalField(max_digits=10, decimal_places=2, default=0,
         help_text='valor de reestructuracion'    )
+
+    objects = Linea_Manager()
 
     def __str__(self):
         return self.cxcliente.ctnombre

@@ -24,7 +24,8 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     AceptarAsignacion, ReversoDesembolsoAsignacion, \
     MaestroMovimientosView, GeneraListaCuotasPagareJSON, \
     ModificarCuota, GeneraResumenNegociadPorActividadJSON, \
-    AnexosClienteView, GeneraListaMovimientosClienteJSON
+    AnexosClienteView, GeneraListaMovimientosClienteJSON, \
+    GeneraListaClientesValoresPendientes
 
 from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
     ImpresionAsignacionDesdeSolicitud, ImpresionFacturasPendientes, \
@@ -144,6 +145,7 @@ urlpatterns = [
     path('impresioncartera', ImpresionAntiguedadCartera
          , name='antigüedad_por_cliente'),
     path('negociadoporactividad', GeneraResumenNegociadPorActividadJSON),
+    path('clientesvalorespendientes/<int:porcentaje>', GeneraListaClientesValoresPendientes),
 # desembolsos
     path('listaasignacionespendientesdesembolsar/',AsignacionesPendientesDesembolsarView.as_view(), \
         name='listaasignacionespendientesdesembolsar'),

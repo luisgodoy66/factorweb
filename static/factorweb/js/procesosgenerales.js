@@ -935,3 +935,45 @@ function NegociadoPorActividad(url){
 //     "rgba(0,0,0,0.07)"
 // ]
 
+function saldoPorCliente(url) {
+    fetchRecuperar(url, function(data) {
+        // Ordenar los datos en orden descendente por el campo 'total'
+        data.sort((a, b) => b.total - a.total);
+
+        // Inicializar arrays vacíos para nombres de clientes y valores pendientes
+        let nombresClientes = [];
+        let valoresPendientes = [];
+
+        // Iterar sobre los datos para poblar los arrays
+        data.forEach(item => {
+            nombresClientes.push(item.cxcliente__cxcliente__ctnombre);
+            valoresPendientes.push(item.total_pendiente );
+        });
+        console.log(nombresClientes, valoresPendientes);
+        var ctx = document.getElementById("horizontalBarChart").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'horizontalBar',
+            data: {
+                labels: nombresClientes,
+                datasets: [{
+                    label: 'Sobre la línea de factoring',
+                    data: valoresPendientes,
+                    backgroundColor:   'rgba(75, 192, 192, 0.5)',
+                    borderColor:   'rgba(75, 192, 192, 0.5)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                },
+                responsive: true,
+                // maintainAspectRatio: false
+            }
+        });
+    });
+}

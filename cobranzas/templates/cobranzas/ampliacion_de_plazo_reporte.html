@@ -109,8 +109,8 @@
                         <th >Accesorio</th>
                         {% endif %}
                         <th >Generación anterior de cargos</th>
-                        <th >Plazo de ampliación</th>
-                        <th >Saldo de cartera en ampliación</th>
+                        <th style="text-align: right;">Plazo de ampliación</th>
+                        <th style="text-align: right;">Saldo de cartera en ampliación</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -140,13 +140,13 @@
                     <table class="table table-striped table-hover nowrap" style="width:100%">
                         <thead>
                             <th>Asignación</th>        
-                            <th>Fecha de desembolso</th>
                             <th>Documento</th>
-                            <th>Base de cálculo</th>
-                            <th>Tasa</th>
-                            <th>Días</th>
-                            <th>Valor</th>
-                            <th>Total</th>
+                            <th>Fecha de desembolso</th>
+                            <th style="text-align: right;">Base de cálculo</th>
+                            <th style="text-align: right;">Tasa</th>
+                            <th style="text-align: right;">Días</th>
+                            <th style="text-align: right;">Valor</th>
+                            <th style="text-align: right;">Total</th>
                         </thead>
                         <tbody>
                             <!-- <tr></tr> -->
@@ -162,8 +162,8 @@
                                     <td colspan="3">{{ item.documento }}</td>
                                     {% else %}
                                     <td>{{ item.asignacion }}</td>
-                                    <td>{{ item.desembolso|custom_date_format }}</td>
                                     <td>{{ item.documento }}</td>
+                                    <td>{{ item.desembolso|custom_date_format }}</td>
                                     {% endif %}
                                     <td class="numero">{{ item.valor_base|floatformat:2 }}</td>
                                     <td class="numero">{{ item.tasa_calculo }}</td>
@@ -188,10 +188,10 @@
                     <thead>
                         <tr>
                             <th></th>
-                        <th >{{nombre_dc}}</th>
-                        <th >{{nombre_gaoa}}</th>
-                        <th >IVA</th>
-                        <th >Total</th>
+                        <th style="text-align: right;">{{nombre_dc}}</th>
+                        <th style="text-align: right;">{{nombre_gaoa}}</th>
+                        <th style="text-align: right;">IVA</th>
+                        <th style="text-align: right;">Total</th>
                         </tr>
                     </thead>
                     <tbody>

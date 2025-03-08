@@ -14,6 +14,7 @@ from operaciones.models import Documentos, ChequesAccesorios\
     , Pagare_detalle as Cuotas    
 from cuentasconjuntas import models as CuentasConjuntasModels
 
+import decimal
 class Cheques(ClaseModelo):
     TIPOS_DE_PARTICIPANTES = (
         ('D', 'Deudor'),
@@ -93,6 +94,35 @@ class Documentos_cabecera(ClaseModelo):
     def estado(self):
         return self.get_cxestado_display()
     
+class Documentos_detalle_Manager(models.Manager):
+    def promedio_ponderado_demora(self, id_cliente):
+        # promedio ponderado de demora de los documentos
+        # de la empresa
+        documentos = self.filter(leliminado=False
+                                 , cxcobranza__cxcliente=id_cliente
+                                 )
+        
+        total = documentos.aggregate(
+            Total=Sum(
+                models.F('nvalorcobranza') 
+                + models.F('nvalorbaja') 
+                + models.F('nretenciones')
+                )
+            )
+        
+        totaldias = 0
+        for documento in documentos:
+            dias_vencidos = decimal.Decimal( documento.dias_vencidos())
+            totaldias += dias_vencidos * (
+                documento.nvalorcobranza 
+                + documento.nvalorbaja 
+                + documento.nretenciones)
+        
+        if total['Total'] and totaldias:
+            return totaldias / total['Total']
+        else:
+            return 0
+
 class Documentos_detalle(ClaseModelo):
     cxcobranza =models.ForeignKey(Documentos_cabecera
         , on_delete=models.CASCADE
@@ -109,6 +139,8 @@ class Documentos_detalle(ClaseModelo):
         related_name="usuariocondona", null= True)
     accesorioquitado = models.ForeignKey(ChequesAccesorios, on_delete=models.RESTRICT
                                         , null=True)
+
+    objects = Documentos_detalle_Manager()
 
     def dias_vencidos(self):
         # si es factura pura, tomo el vencimiento del documento

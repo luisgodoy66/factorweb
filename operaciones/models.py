@@ -259,7 +259,51 @@ class Documentos_Manager(models.Manager):
                            , cxasignacion__cxestado = "P"
                            , cxasignacion__leliminado = False)\
             .aggregate(Total = Sum('nsaldo'))
+    
+    def clientes_con_valores_pendientes(self, id_empresa, porcentaje=80):
+        # Obtener el total de valores pendientes
+        total_valores_pendientes = self.filter(
+            leliminado=False, nsaldo__gt=0, empresa=id_empresa
+        ).aggregate(total=Sum('nsaldo'))['total']
 
+        if not total_valores_pendientes:
+            return []
+
+        # Calcular el porcentaje del total de valores pendientes
+        total_por_ciento = total_valores_pendientes * porcentaje / 100
+
+        # Obtener la lista de clientes con sus valores pendientes, ordenados en orden descendente
+        clientes_valores_pendientes = self.filter(
+            leliminado=False, nsaldo__gt=0, empresa=id_empresa
+        ).values('cxcliente__cxcliente__ctnombre').annotate(
+            total_pendiente=Sum('nsaldo')
+        ).order_by('-total_pendiente')
+
+        # Iterar sobre los clientes acumulando sus valores pendientes hasta alcanzar el porcentaje del total
+        acumulado = 0
+        clientes_por_ciento = []
+        otros_total = 0
+        otros_cantidad = 0
+
+        for cliente in clientes_valores_pendientes:
+            if acumulado >= total_por_ciento:
+                otros_total += cliente['total_pendiente']
+                otros_cantidad +=1
+            else:
+                clientes_por_ciento.append(cliente)
+                acumulado += cliente['total_pendiente']
+
+        if otros_total > 0:
+            clientes_por_ciento.append({
+                'cxcliente__cxcliente__ctnombre': 'OTROS CLIENTES ' 
+                    + '(' + str(otros_cantidad) + ') CON EL '
+                    + str(100 - porcentaje) + '% ' 
+                    ,
+                'total_pendiente': otros_total
+            })
+
+        return clientes_por_ciento
+        
 class Documentos(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
         , on_delete=models.CASCADE

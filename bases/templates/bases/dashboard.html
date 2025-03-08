@@ -101,6 +101,12 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-body">
+                    <h4 class="mb-3">Valores por clientes</h4>
+                    <canvas id="horizontalBarChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
                     <h4 class="mb-3">Ingresos facturados</h4>
                     <canvas id="IngresosGenerados"></canvas>
                 </div>
@@ -275,6 +281,7 @@
     carteranegociada("/operaciones/carteranegociada/{{año}}");
     ingresosGenerados("/operaciones/ingresosgenerados/{{año}}");
     NegociadoPorActividad("/operaciones/negociadoporactividad");
+    saldoPorCliente("/operaciones/clientesvalorespendientes/95");
     }
 
     window.operateEvents = {
@@ -359,13 +366,6 @@
     '</a>  ',
     ].join('')
     }
-
-    // function ImprimirLiquidacion(id, ){
-    // // en una nueva ventana abrir el reporte de asignación
-    // url = window.location.origin
-    // url = url + "/operaciones/reporteliquidacion/"+id;
-    // window.open( url);
-    // }
     
 </script>    
 {% endblock %}

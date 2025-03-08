@@ -82,8 +82,9 @@
                             {% regroup detalle by cxcobranza.cxcliente as cobranzas_list %}
                             {% for cliente in cobranzas_list %}
                             <tr>
-                                <td class="subrayado" colspan="11"><strong>{{ cliente.grouper }}</strong></td>
-                                <td class="subrayado numero"><strong> {{cliente.list|running_aplicado|floatformat:"2g" }}</strong></td>
+                                <td class="subrayado" colspan="7"><strong>{{ cliente.grouper }}</strong></td>
+                                <td class="subrayado numero"><strong> {{cliente.list|promedio_ponderado_demora }}</strong></td>
+                                <td class="subrayado numero" colspan="4"><strong> {{cliente.list|running_aplicado|floatformat:"2g" }}</strong></td>
                             </tr>
                                 {% for item in cliente.list %}
                                 <tr></tr>

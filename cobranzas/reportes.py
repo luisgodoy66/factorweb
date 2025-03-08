@@ -12,6 +12,9 @@ from .models import  Documentos_cabecera, Documentos_detalle, Liquidacion_cabece
         , Cheques, Cheques_protestados, Cargos_cabecera, Cargos_detalle\
         , DebitosCuentasConjuntas, Pagare_cabecera, Pagare_detalle
 from operaciones.models import Notas_debito_cabecera, Notas_debito_detalle
+from operaciones.models import Ampliaciones_plazo_cabecera, Ampliaciones_plazo_detalle \
+, Documentos, ChequesAccesorios
+
 from bases.models import Usuario_empresa
 from empresa.models import Tasas_factoring
 from contabilidad.models import Factura_venta
@@ -531,9 +534,6 @@ def ImpresionProtestosPendientes(request, id_cliente = None):
     )
     response['Content-Disposition'] = 'inline; filename="protestos_pendientes.pdf"'
     return response
-
-from operaciones.models import Ampliaciones_plazo_cabecera, Ampliaciones_plazo_detalle \
-, Documentos, ChequesAccesorios
 
 def ImpresionAmpliacionDePlazo(request, ampliacion_id):
     template_path = 'cobranzas/ampliacion_de_plazo_reporte.html'
