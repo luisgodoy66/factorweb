@@ -2,7 +2,7 @@
 # from statistics import mode
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Value, DecimalField
 
 from datetime import timedelta, datetime, date
 
@@ -491,6 +491,7 @@ class Documentos_protestados_Manager(models.Manager):
         return protestos
     
     def antigüedad_por_cliente_facturas(self, id_empresa):
+        # la fecha de vencimiento está en el documento
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
         vcdo30 = datetime.today()+timedelta(days=-30)
@@ -523,6 +524,7 @@ class Documentos_protestados_Manager(models.Manager):
             .order_by()
     
     def antigüedad_por_cliente_accesorios(self, id_empresa):
+        # la fecha de vencimiento está en el accesorio
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
         vcdo30 = datetime.today()+timedelta(days=-30)
@@ -552,6 +554,28 @@ class Documentos_protestados_Manager(models.Manager):
                 , porvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver90))
                 , total = Sum('nsaldo')
                 )\
+            .order_by()
+    
+    def revision_cartera(self, id_empresa):
+        # si tiene accesorio, la fecha de vencimiento es la del accesorio
+        # si no tiene accesorio, la fecha de vencimiento es la del documento
+        vcdo30 = datetime.today() + timedelta(days=-30)
+        # xver30 = datetime.today() + timedelta(days=30)
+
+        return self.filter(leliminado=False, nsaldo__gt=0, empresa=id_empresa) \
+            .values('documento__cxcliente__cxcliente__ctnombre',
+                    'documento__cxcliente__linea_factoring__nvalor',
+                    'documento__cxcliente__datos_operativos__cxclase__cxclase',
+                    'documento__cxcliente__datos_operativos__cxestado',
+                    'documento__cxcliente',
+                    ) \
+            .annotate(
+                vencido_mas_30=Value(0, output_field=DecimalField()),
+                vencido_30=Value(0, output_field=DecimalField()),
+                por_vencer=Value(0, output_field=DecimalField()),
+                ptotesto=Sum('nsaldo'),
+                total=Sum('nsaldo')
+            ) \
             .order_by()
     
 class Documentos_protestados(ClaseModelo):

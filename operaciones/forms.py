@@ -5,7 +5,8 @@ from django import forms
 
 from .models import Condiciones_operativas_detalle, Datos_operativos, \
     Asignacion, Condiciones_operativas_cabecera, Anexos\
-    , Desembolsos, Documentos, ChequesAccesorios, Pagare_detalle
+    , Desembolsos, Documentos, ChequesAccesorios, Pagare_detalle\
+    , Revision_cartera_detalle
 from solicitudes import models as ModelosSolicitudes
 from empresa.models import Clases_cliente, Tipos_factoring, Cuentas_bancarias\
     ,Movimientos_maestro
@@ -393,4 +394,19 @@ class CuotasForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        # self.fields['ddeposito'].widget.attrs['value']=date.today
+
+class RevisionCarteraClienteForm(forms.ModelForm):
+    class Meta:
+        model=Revision_cartera_detalle
+        fields=['ctcomentario']
+        labels={'ctcomentario':'Comentario'
+
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+

@@ -25,13 +25,15 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     MaestroMovimientosView, GeneraListaCuotasPagareJSON, \
     ModificarCuota, GeneraResumenNegociadPorActividadJSON, \
     AnexosClienteView, GeneraListaMovimientosClienteJSON, \
-    GeneraListaClientesValoresPendientes
+    GeneraListaClientesValoresPendientes, NuevaRevisionCarteraJSON,\
+    RevisionCartera, RevisionCarteraJSON, RevisionCarteraClienteEdit
+    
 
 from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
     ImpresionAsignacionDesdeSolicitud, ImpresionFacturasPendientes, \
     ImpresionPagare, ImpresionAccesoriosPendientes, \
     ImpresionResumenAsignaciones, ImpresionPagaresPendientes, \
-    ImpresionLiquidacion
+    ImpresionLiquidacion, ImpresionRevisionCartera
 
 urlpatterns = [
 # datos operativos
@@ -172,4 +174,16 @@ urlpatterns = [
          , name="detallepagare_json"),
     path('editarcuota/<int:cuota_id>', ModificarCuota
          , name='modificar_cuota'),
+# revision de cartera
+    path('revisioncartera/',RevisionCartera.as_view()
+         , name='revision_cartera'),
+    path('nuevarevisioncarterajson/',NuevaRevisionCarteraJSON
+         , name='nueva_revision_cartera_json'),
+    path('revisioncarterajson/<int:pk>',RevisionCarteraJSON
+         , name='revision_cartera_json'),
+    path('revisioncarteracliente/<int:pk>/<int:revision>/<cliente>',RevisionCarteraClienteEdit.as_view()
+         , name='revision_cartera_cliente'),
+    path('impresionrevisioncartera/<int:revision_id>',ImpresionRevisionCartera
+         , name='impresion_revision_cartera'),
+
 ]

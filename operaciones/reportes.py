@@ -12,7 +12,7 @@ from datetime import datetime, timedelta, date
 # from xhtml2pdf import pisa
 
 from .models import Asignacion, Documentos, ChequesAccesorios, Cheques_quitados,\
-    Pagares, Pagare_detalle
+    Pagares, Pagare_detalle, Revision_cartera_detalle, Revision_cartera
 from cobranzas.models import Documentos_protestados
 from empresa.models import Tasas_factoring
 from solicitudes import models as SolicitudModels
@@ -248,10 +248,37 @@ def ImpresionAntiguedadCartera(request):
     cxm90 = total_pagares['porvencer_mas_90'] or 0
 
     template_path = 'operaciones/cartera_reporte.html'
+    detalle = facturas.union(accesorios, prot_facturas, prot_accesorios, acc_quitados, pagares)\
+            .order_by('cxcliente__cxcliente__ctnombre')
+
+    # Acumular totales por cliente
+    acumulado_por_cliente = {}
+    for doc in detalle:
+        cliente = doc['cxcliente__cxcliente__ctnombre']
+        if cliente not in acumulado_por_cliente:
+            acumulado_por_cliente[cliente] = {
+                'vencido_mas_90': 0,
+                'vencido_90': 0,
+                'vencido_60': 0,
+                'vencido_30': 0,
+                'porvencer_30': 0,
+                'porvencer_60': 0,
+                'porvencer_90': 0,
+                'porvencer_mas_90': 0,
+                'total': 0
+            }
+        acumulado_por_cliente[cliente]['vencido_mas_90'] += doc.get('vencido_mas_90', 0) or 0
+        acumulado_por_cliente[cliente]['vencido_90'] += doc.get('vencido_90', 0) or 0
+        acumulado_por_cliente[cliente]['vencido_60'] += doc.get('vencido_60', 0) or 0
+        acumulado_por_cliente[cliente]['vencido_30'] += doc.get('vencido_30', 0) or 0
+        acumulado_por_cliente[cliente]['porvencer_30'] += doc.get('porvencer_30', 0) or 0
+        acumulado_por_cliente[cliente]['porvencer_60'] += doc.get('porvencer_60', 0) or 0
+        acumulado_por_cliente[cliente]['porvencer_90'] += doc.get('porvencer_90', 0) or 0
+        acumulado_por_cliente[cliente]['porvencer_mas_90'] += doc.get('porvencer_mas_90', 0) or 0
+        acumulado_por_cliente[cliente]['total'] += doc.get('total', 0) or 0
 
     context = {
-        "documentos": facturas.union(accesorios, prot_facturas, prot_accesorios, acc_quitados, pagares)
-            .order_by('cxcliente__cxcliente__ctnombre'),
+        "documentos": acumulado_por_cliente,
         "totalvm90": fvm90 + avm90 + pvm90 + qvm90 + cvm90,
         "totalv90": fv90 + av90 + pv90 + qv90 + cv90,
         "totalv60": fv60 + av60 + pv60 + qv60 + cv60,
@@ -533,3 +560,44 @@ def ImpresionPagaresPendientes(request, clientes=None):
     )
     response['Content-Disposition'] = 'inline; filename="pagares_pendientes.pdf"'
     return response
+
+def ImpresionRevisionCartera(request, revision_id, ):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+     
+    template_path = 'operaciones/revisioncartera_reporte.html'
+
+    revision = Revision_cartera.objects.filter(id = revision_id).first()
+
+    detalle = Revision_cartera_detalle.objects\
+        .filter(revision = revision_id,
+                empresa = id_empresa.empresa,
+                leliminado = False)\
+        .order_by('cxcliente__cxcliente__ctnombre')
+
+    total = detalle.aggregate(
+        vencido_mas_30 = Sum('nvencidomas30'),
+        vencido_30 = Sum('nvencido30'),
+        por_vencer = Sum('nporvencer') ,
+        protesto = Sum('nprotesto'),
+        )
+
+    context={
+        "detalle" : detalle,
+        "revision" : revision,
+        'empresa': id_empresa.empresa,
+        'total_vencido_mas_30': total['vencido_mas_30'],
+        'total_vencido_30': total['vencido_30'],
+        'total_por_vencer': total['por_vencer'],
+        'total_protesto': total['protesto'],
+    }
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
+    )
+    response['Content-Disposition'] = 'inline; filename="resumen_asignaciones.pdf"'
+    return response
+

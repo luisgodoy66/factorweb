@@ -16,13 +16,15 @@ from django.db import DataError
 from .forms import DatosOperativosForm, AsignacionesForm, \
     MaestroMovimientosForm, CondicionesOperativasForm, \
     DetalleCondicionesOperativasForm, TasasDocumentosForm, \
-    TasasAccesoriosForm, DesembolsarForm, AnexosForm, CuotasForm
+    TasasAccesoriosForm, DesembolsarForm, AnexosForm, CuotasForm,\
+    RevisionCarteraClienteForm
 
 from .models import Condiciones_operativas_detalle, \
     Datos_operativos, Asignacion,  Condiciones_operativas_cabecera, \
     Anexos, Pagares, Desembolsos, Documentos, ChequesAccesorios, \
     Notas_debito_cabecera, Cheques_quitados, Movimientos_clientes,\
     Ampliaciones_plazo_cabecera, Cheques_canjeados, Pagare_detalle
+from .models import Revision_cartera, Revision_cartera_detalle
 from empresa.models import  Clases_cliente, Datos_participantes, \
     Tasas_factoring, Tipos_factoring, Cuentas_bancarias, \
     Otros_cargos, Movimientos_maestro, Contador
@@ -472,6 +474,54 @@ class AnexosClienteView(SinPrivilegios, generic.ListView):
         context['solicitud_id'] = solicitud_id
         context['cliente'] = cliente
         return context
+
+class RevisionCartera(SinPrivilegios, generic.TemplateView):
+    template_name = "operaciones/revisioncartera_form.html"
+    login_url = 'bases:login'
+    permission_required="operaciones.view_asignacion"
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+
+        context = super(RevisionCartera, self).get_context_data(**kwargs)
+        context["revisiones"] = Revision_cartera.objects\
+            .filter(empresa = id_empresa.empresa,
+                    leliminado = False)\
+            .order_by('-id')
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class RevisionCarteraClienteEdit(SinPrivilegios, generic.UpdateView):
+    model=Revision_cartera_detalle
+    template_name="operaciones/datoscomentariorevisioncartera_modal.html"
+    context_object_name = "consulta"
+    form_class=RevisionCarteraClienteForm
+    success_url=reverse_lazy("operaciones:revision_cartera")
+    success_message="Línea actualizada satisfactoriamente"
+    login_url = 'bases:login'
+    permission_required="clientes.change_linea_factoring"
+
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        id = self.kwargs.get('pk')
+        revision = self.kwargs.get('revision')
+        nombre_cliente = self.kwargs.get('cliente')
+
+        context = super(RevisionCarteraClienteEdit, self).get_context_data(**kwargs)
+        context["nombre_cliente"] = nombre_cliente
+        context["pk"] = id
+        context["revision"] = revision
+        return context
+
+    # def get_success_url(self):
+    #     id = self.kwargs.get('pk')
+    #     return reverse_lazy("operaciones:revision_cartera_json"
+    #         , kwargs={'pk': id})
 
 @login_required(login_url='/login/')
 @permission_required('operaciones.add_desembolsos', login_url='bases:sin_permisos')
@@ -1699,11 +1749,15 @@ def AntigüedadCarteraClienteJSON(request, cliente_id):
     cheques = None
     cuotas = None
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
 
-    facturas = Documentos.objects.antigüedad_por_cliente(id_empresa.empresa)\
+    facturas = Documentos.objects\
+        .antigüedad_por_cliente(id_empresa.empresa)\
         .filter(cxcliente = cliente_id)
-    acc_quitados = Cheques_quitados.objects.antigüedad_por_cliente(id_empresa.empresa)\
+    
+    acc_quitados = Cheques_quitados.objects\
+        .antigüedad_por_cliente(id_empresa.empresa)\
         .filter(accesorio_quitado__documento__cxcliente = cliente_id)
     
     docs = facturas.union(acc_quitados)
@@ -2507,6 +2561,133 @@ def GeneraListaClientesValoresPendientes(request, porcentaje = 80):
         .clientes_con_valores_pendientes(id_empresa.empresa, porcentaje)
     
     data = list(total_por_cliente)
-    print(data)
     return JsonResponse( data, safe=False)
 
+def NuevaRevisionCarteraJSON(request,):
+    # Es invocado desde la url de una tabla bt
+    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+
+    # crear registro de revision de cartera 
+    revision = Revision_cartera(
+        drevision = datetime.now(),
+        empresa = id_empresa.empresa,
+        cxusuariocrea = request.user,
+    )
+    revision.save()
+    # revision = Revision_cartera.objects.filter(pk=19).first()
+    
+    facturas = Documentos.objects.revision_cartera(id_empresa.empresa)
+    accesorios = ChequesAccesorios.objects.revision_cartera(id_empresa.empresa)
+    pagares = Pagare_detalle.objects.revision_cartera(id_empresa.empresa)
+    protestos = Documentos_protestados.objects.revision_cartera(id_empresa.empresa)
+    acc_quitados = Cheques_quitados.objects.revision_cartera(id_empresa.empresa)
+
+    # nota: falta  cheques quitados
+    detalle = facturas.union(accesorios, pagares, protestos, acc_quitados)\
+            .order_by('cxcliente__cxcliente__ctnombre')
+    
+    # Acumular totales por cliente
+    acumulado_por_cliente = {}
+    for doc in detalle:
+        cliente = doc['cxcliente__cxcliente__ctnombre']
+        if cliente not in acumulado_por_cliente:
+            acumulado_por_cliente[cliente] = {
+                'cxcliente__linea_factoring__nvalor': doc['cxcliente__linea_factoring__nvalor'],
+                'cxcliente__datos_operativos__cxclase__cxclase': doc['cxcliente__datos_operativos__cxclase__cxclase'],
+                'cxcliente__datos_operativos__cxestado': doc['cxcliente__datos_operativos__cxestado'],
+                'vencido_mas_30': 0,
+                'vencido_30': 0,
+                'por_vencer': 0,
+                'protesto': 0,
+                'total': 0,
+                'cxcliente': doc['cxcliente'],
+            }
+        acumulado_por_cliente[cliente]['vencido_mas_30'] += doc.get('vencido_mas_30', 0) or 0
+        acumulado_por_cliente[cliente]['vencido_30'] += doc.get('vencido_30', 0) or 0
+        acumulado_por_cliente[cliente]['por_vencer'] += doc.get('por_vencer', 0) or 0
+        acumulado_por_cliente[cliente]['protesto'] += doc.get('protesto', 0) or 0
+        acumulado_por_cliente[cliente]['total'] += doc.get('total', 0) or 0
+
+    tempBlogs = []
+    for i in acumulado_por_cliente:
+        print (acumulado_por_cliente[i]['total'])
+        tempBlogs.append(GeneraNuevaListarevisionCarteraJSONSalida(
+            acumulado_por_cliente[i], i,
+            revision,
+            request.user
+            )) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": facturas.count(),
+        "totalNotFiltered": facturas.count(),
+        "rows": docjson 
+        }
+    return HttpResponse(JsonResponse( data))
+
+def GeneraNuevaListarevisionCarteraJSONSalida(cartera, cliente, revision, usuario):
+    output = {}
+
+    detalle = Revision_cartera_detalle(
+        revision = revision,
+        cxcliente = ModeloCliente.Datos_generales.objects.get(pk = cartera['cxcliente']),
+        nvencidomas30 = cartera['vencido_mas_30'],
+        nvencido30 = cartera['vencido_30'],
+        nporvencer = cartera['por_vencer'],
+        nprotesto = cartera['protesto'],
+        nlineaactual = cartera['cxcliente__linea_factoring__nvalor'],
+        ctclaseactual = cartera['cxcliente__datos_operativos__cxclase__cxclase'],
+        ctestadoactual = cartera['cxcliente__datos_operativos__cxestado'],
+        cxusuariocrea = usuario,
+        empresa = revision.empresa,
+    )   
+    detalle.save()
+
+    output["id"] = detalle.id
+    output["Cliente"] = cliente
+    output["Vdo+30"] = cartera['vencido_mas_30']
+    output["Vdo30"] = cartera['vencido_30']
+    output["Por_vencer"] = cartera['por_vencer']
+    output["Protesto"] = cartera['protesto']
+    output["Linea_actual"] = cartera['cxcliente__linea_factoring__nvalor']
+    output["Clase_actual"] = cartera['cxcliente__datos_operativos__cxclase__cxclase']
+    output["Estado_actual"] = cartera['cxcliente__datos_operativos__cxestado']
+    output["Comentario"] = ""
+
+    return output
+
+def RevisionCarteraJSON(request,pk):
+    # Es invocado desde la url de una tabla bt
+
+    documentos = Revision_cartera_detalle.objects\
+        .filter(revision = pk, leliminado = False)\
+        .order_by('cxcliente__cxcliente__ctnombre')
+        
+    tempBlogs = []
+    for i in range(len(documentos)):
+        tempBlogs.append(GeneraListarevisionCarteraJSONSalida(documentos[i] )) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    return HttpResponse(JsonResponse( data))
+
+def GeneraListarevisionCarteraJSONSalida(cartera,):
+    output = {}
+    output["id"] = cartera.id
+    output["Cliente"] = cartera.cxcliente.cxcliente.ctnombre
+    output["Vdo+30"] = cartera.nvencidomas30
+    output["Vdo30"] = cartera.nvencido30
+    output["Por_vencer"] = cartera.nporvencer
+    output["Protesto"] = cartera.nprotesto
+    output["Linea_actual"] = cartera.nlineaactual
+    output["Clase_actual"] = cartera.ctclaseactual
+    output["Estado_actual"] = cartera.ctestadoactual
+    output["Comentario"] = cartera.ctcomentario
+
+    return output

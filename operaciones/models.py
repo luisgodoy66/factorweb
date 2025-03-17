@@ -2,7 +2,7 @@ from random import choices
 from django.db import models
 from django.forms import BooleanField
 from django.db.models import Sum, Q, F, ExpressionWrapper, DateField, CharField\
-    , Value, DurationField, IntegerField
+    , Value, DurationField, IntegerField, DecimalField
 from django.db.models.functions import Cast, ExtractDay
 from django.db.models.functions import Concat
 from django.utils.dateparse import parse_date
@@ -13,6 +13,7 @@ from empresa.models import Clases_cliente, Tipos_factoring, Cuentas_bancarias\
 from clientes.models import Datos_generales as Datos_generales_cliente\
     , Cuenta_transferencia, Datos_compradores
 from pais.models import Bancos
+
 from datetime import datetime, timedelta, date
 
 class Datos_operativos(ClaseModelo):
@@ -304,6 +305,30 @@ class Documentos_Manager(models.Manager):
 
         return clientes_por_ciento
         
+    def revision_cartera(self, id_empresa):
+        vcdo30 = datetime.today() + timedelta(days=-30)
+        # xver30 = datetime.today() + timedelta(days=30)
+
+        return self.filter(leliminado=False, nsaldo__gt=0,
+                   cxasignacion__cxtipo="F",
+                   cxasignacion__cxestado="P",
+                   cxasignacion__leliminado=False,
+                   empresa=id_empresa) \
+            .values('cxcliente__cxcliente__ctnombre',
+                'cxcliente__linea_factoring__nvalor',
+                'cxcliente__datos_operativos__cxclase__cxclase',
+                'cxcliente__datos_operativos__cxestado',
+                'cxcliente',
+                ) \
+            .annotate(
+            vencido_mas_30=Sum('nsaldo', filter=Q(dvencimiento__lt=vcdo30)),
+            vencido_30=Sum('nsaldo', filter=Q(dvencimiento__lt=datetime.today(), dvencimiento__gte=vcdo30)),
+            por_vencer=Sum('nsaldo', filter=Q(dvencimiento__gte=datetime.today())),
+            protesto=Value(0, output_field=DecimalField()),
+            total=Sum('nsaldo')
+            ) \
+            .order_by()
+
 class Documentos(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
         , on_delete=models.CASCADE
@@ -557,6 +582,31 @@ class ChequesAccesorios_Manager(models.Manager):
                           )\
                 .order_by('documento__cxcliente__cxcliente__ctnombre')
 
+    def revision_cartera(self, id_empresa):
+        vcdo30 = datetime.today() + timedelta(days=-30)
+        # xver30 = datetime.today() + timedelta(days=30)
+
+        return self.filter(cxestado = 'A'
+                , leliminado = False, lcanjeado  = False, laccesorioquitado = False
+                , documento__cxasignacion__cxestado = "P"
+                , documento__cxasignacion__leliminado = False
+                , empresa = id_empresa)\
+            .values('documento__cxcliente__cxcliente__ctnombre',
+                    'documento__cxcliente__linea_factoring__nvalor',
+                    'documento__cxcliente__datos_operativos__cxclase__cxclase',
+                    'documento__cxcliente__datos_operativos__cxestado',
+                    'documento__cxcliente',
+                    ) \
+            .annotate(
+                vencido_mas_30=Sum('ntotal', filter=Q(dvencimiento__lt=vcdo30)),
+                vencido_30 = Sum('ntotal', filter=Q(dvencimiento__lt = datetime.today()
+                    , dvencimiento__gte = vcdo30)),
+                por_vencer=Sum('ntotal', filter=Q(dvencimiento__gte=datetime.today())),
+                protesto=Value(0, output_field=DecimalField()),
+                total=Sum('ntotal')
+            ) \
+            .order_by()
+
 class Cheques_quitados_Manager(models.Manager):
     def antigüedad_cartera(self, id_empresa):
         # grafico de antigüedad de cartera 
@@ -620,6 +670,31 @@ class Cheques_quitados_Manager(models.Manager):
                 , porvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__gt = xver90) ) 
                 , total = Sum('nsaldo')
                 )
+
+    def revision_cartera(self, id_empresa):
+        vcdo30 = datetime.today() + timedelta(days=-30)
+        # xver30 = datetime.today() + timedelta(days=30)
+
+        return self.filter(cxestado = 'A'
+                , leliminado = False
+                , accesorio_quitado__documento__cxasignacion__cxestado = "P"
+                , accesorio_quitado__documento__cxasignacion__leliminado = False
+                , empresa = id_empresa)\
+            .values('accesorio_quitado__documento__cxcliente__cxcliente__ctnombre',
+                    'accesorio_quitado__documento__cxcliente__linea_factoring__nvalor',
+                    'accesorio_quitado__documento__cxcliente__datos_operativos__cxclase__cxclase',
+                    'accesorio_quitado__documento__cxcliente__datos_operativos__cxestado',
+                    'accesorio_quitado__documento__cxcliente',
+                    ) \
+            .annotate(
+                vencido_mas_30=Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt=vcdo30)),
+                vencido_30 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt = datetime.today()
+                    , accesorio_quitado__dvencimiento__gte = vcdo30)),
+                por_vencer=Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__gte=datetime.today())),
+                protesto=Value(0, output_field=DecimalField()),
+                total=Sum('nsaldo')
+            ) \
+            .order_by()
 
 class Cheques_quitados(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
@@ -1028,6 +1103,29 @@ class Cuotas_pagare_Manager(models.Manager):
                 )\
             .order_by()
 
+    def revision_cartera(self, id_empresa):
+        vcdo30 = datetime.today() + timedelta(days=-30)
+        # xver30 = datetime.today() + timedelta(days=30)
+
+        return self.filter(leliminado = False, nsaldo__gt = 0
+            , pagare__leliminado = False
+            , empresa = id_empresa)\
+            .values('pagare__cxcliente__cxcliente__ctnombre',
+                    'pagare__cxcliente__linea_factoring__nvalor',
+                    'pagare__cxcliente__datos_operativos__cxclase__cxclase',
+                    'pagare__cxcliente__datos_operativos__cxestado',
+                    'pagare__cxcliente',
+                    ) \
+            .annotate(
+                vencido_mas_30=Sum('nsaldo', filter=Q(dfechapago__lt=vcdo30)),
+                vencido_30 = Sum('nsaldo', filter=Q(dfechapago__lt = datetime.today()
+                    , dfechapago__gte = vcdo30)),
+                por_vencer=Sum('nsaldo', filter=Q(dfechapago__gte=datetime.today())),
+                protesto = Value(0, output_field=DecimalField()),
+                total=Sum('nsaldo')
+            ) \
+            .order_by()
+
 class Pagare_detalle(ClaseModelo):
     pagare = models.ForeignKey(Pagares, on_delete=models.CASCADE)
     ncuota = models.SmallIntegerField()
@@ -1055,4 +1153,20 @@ class Pagare_detalle(ClaseModelo):
             'ncuota'
             ]  
 
-    
+class Revision_cartera(ClaseModelo):
+    drevision = models.DateField()
+
+    def __str__(self):
+        return self.dregistro.strftime('%A, %d de %B %H:%M')
+
+class Revision_cartera_detalle(ClaseModelo):
+    revision = models.ForeignKey(Revision_cartera, on_delete=models.CASCADE)
+    cxcliente = models.ForeignKey(Datos_generales_cliente, on_delete=models.RESTRICT)
+    nvencidomas30 = models.DecimalField(max_digits=15, decimal_places=2, default=0, null=True)
+    nvencido30 = models.DecimalField(max_digits=15, decimal_places=2, default=0,null=True)
+    nporvencer = models.DecimalField(max_digits=15, decimal_places=2, default=0,null=True)
+    nprotesto = models.DecimalField(max_digits=15, decimal_places=2, default=0,null=True)
+    nlineaactual = models.DecimalField(max_digits=15, decimal_places=2, default=0,null=True)
+    ctclaseactual = models.CharField(max_length=1)
+    ctestadoactual = models.CharField(max_length=1)
+    ctcomentario = models.TextField()

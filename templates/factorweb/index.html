@@ -115,6 +115,15 @@
                     </li>
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-dollar"></i>Desembolsos</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-file-text"></i><a href="{% url 'operaciones:listaasignacionespendientesdesembolsar' %} ">Pago de negociación</a></li>
+                            <li><i class="menu-icon fa fa-money"></i><a href="{% url 'cobranzas:listaliquidacionespendientespagar' %}">Pago de cobranzas</a></li>
+                            <li><i class="menu-icon fa fa-print"></i><a href="{% url 'operaciones:consulta_desembolsos' %}">Consulta de pagos</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
                             <i class="menu-icon fa fa-tag"></i>Facturas de venta </a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-tag"></i>
@@ -124,15 +133,6 @@
                             <li><i class="menu-icon fa fa-print"></i>
                                 <a href="{% url 'contabilidad:consulta_facturas' %}">Consulta de facturas</a></li>
                             </ul>
-                    </li>
-                    <li class="menu-item-has-children dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
-                            <i class="menu-icon fa fa-dollar"></i>Desembolsos</a>
-                        <ul class="sub-menu children dropdown-menu">
-                            <li><i class="menu-icon fa fa-file-text"></i><a href="{% url 'operaciones:listaasignacionespendientesdesembolsar' %} ">Pago de negociación</a></li>
-                            <li><i class="menu-icon fa fa-money"></i><a href="{% url 'cobranzas:listaliquidacionespendientespagar' %}">Pago de cobranzas</a></li>
-                            <li><i class="menu-icon fa fa-print"></i><a href="{% url 'operaciones:consulta_desembolsos' %}">Consulta de pagos</a></li>
-                        </ul>
                     </li>
 
                     <li class="menu-item-has-children dropdown">
@@ -175,13 +175,15 @@
                         </ul>
                     </li>
 
-                    <!-- <li class="menu-item-has-children dropdown">
+                    <h3 class="menu-title">Análisis</h3><!-- /.menu-title -->
+                    <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
-                            <i class="menu-icon fa fa-truck"></i>Proveedores</a>
+                            <i class="menu-icon fa fa-eye"></i>Cartera</a>
                         <ul class="sub-menu children dropdown-menu">
-                            <li><i class="menu-icon fa fa-info-circle"></i><a href="#">ficha general</a></li>
+                            <li><i class="menu-icon fa fa-pencil"></i><a href="{% url 'operaciones:revision_cartera' %}">Revisión</a></li>
                         </ul>
-                    </li> -->
+                    </li>
+
                     <h3 class="menu-title">Configuración</h3><!-- /.menu-title -->
 
                     <li class="menu-item-has-children dropdown">
@@ -267,7 +269,7 @@
                             <li><i class="menu-icon fa ti-book"></i><a href="{% url 'contabilidad:consultaperdidasyganancias' %}">Estado P&G</a></li>
                         </ul>
                     </li>
-                    <li><a href="#">V.2.5.4</a></li>
+                    <li><a href="#">V.2.6</a></li>
                 </ul>
             </div><!-- /.navbar-collapse -->
         </nav>
