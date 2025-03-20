@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.db import transaction
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import redirect, render
-from django.db.models import Sum, Count, Q
+from django.db.models import Sum, Count, Q, F
 from django.utils.dateparse import parse_date
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, JsonResponse
@@ -724,7 +724,7 @@ def DatosOperativos(request, cliente_id=None):
 
             datoscliente.save()
 
-        # nota: crear un registro historico del cambio realizado
+        # crear un registro historico del cambio realizado
         datoshistorico= ModeloCliente.Datos_operativos_hist(
             cxclase=idclase,
             nporcentajeanticipo=nporcentajeanticipo,
@@ -2582,7 +2582,6 @@ def NuevaRevisionCarteraJSON(request,):
     protestos = Documentos_protestados.objects.revision_cartera(id_empresa.empresa)
     acc_quitados = Cheques_quitados.objects.revision_cartera(id_empresa.empresa)
 
-    # nota: falta  cheques quitados
     detalle = facturas.union(accesorios, pagares, protestos, acc_quitados)\
             .order_by('cxcliente__cxcliente__ctnombre')
     
@@ -2691,3 +2690,72 @@ def GeneraListarevisionCarteraJSONSalida(cartera,):
     output["Comentario"] = cartera.ctcomentario
 
     return output
+
+def proyeccion_cobros(request, dia=None, dias=14):
+    id_empresa = Usuario_empresa.objects.filter(user=request.user).first().empresa
+
+    if dia is None:
+        dia = date.today().strftime('%Y-%m-%d')
+    dia = parse_date(dia)
+    
+    # Obtener las fechas de las dos semanas consecutivas
+    fechas = [dia + timedelta(days=i) for i in range(dias)]
+
+    # Obtener los documentos agrupados por cliente y fecha
+    facturas = Documentos.objects.filter(
+        leliminado=False,
+        nsaldo__gt=0,
+        empresa=id_empresa,
+        dvencimiento__range=[dia, dia + timedelta(days=dias-1)])\
+            .values('cxcliente__cxcliente__ctnombre'
+                    , 'dvencimiento'
+                    , 'cxcliente__npromediodemoradepago')\
+            .annotate(total=Sum(F('nsaldo') * F('nporcentajeanticipo') / 100))\
+            .order_by('cxcliente__cxcliente__ctnombre', 'dvencimiento')
+
+    accesorios = ChequesAccesorios.objects\
+        .filter(
+            Q(laccesorioquitado=False) | Q(laccesorioquitado=True, 
+                                           chequequitado__cxestado='A'),
+            cxestado='A',
+            leliminado=False,
+            lcanjeado=False,
+            empresa=id_empresa,
+            documento__cxasignacion__cxestado="P",
+            documento__cxasignacion__leliminado=False,
+            dvencimiento__range=[dia, dia + timedelta(days=dias-1)]
+        )\
+        .values(
+            'documento__cxcliente__cxcliente__ctnombre',
+            'dvencimiento',
+            'documento__cxcliente__npromediodemoradepago'
+        )\
+        .annotate(total=Sum(F('ntotal') * F('nporcentajeanticipo') / 100))\
+        .order_by('documento__cxcliente__cxcliente__ctnombre', 'dvencimiento')
+
+    documentos = facturas.union(accesorios)
+
+    # NOTA: faltaría agrupar por cliente y fecha
+
+    # Organizar los datos en un diccionario
+    datos_por_cliente = {}
+    totales_por_fecha = {f.strftime('%Y-%m-%d'): 0 for f in fechas}
+    for doc in documentos:
+        cliente = doc['cxcliente__cxcliente__ctnombre']
+        fecha = doc['dvencimiento'].strftime('%Y-%m-%d')
+
+        if cliente not in datos_por_cliente:
+            datos_por_cliente[cliente] = {
+            'promedio_demora': doc['cxcliente__npromediodemoradepago'],
+            'fechas': {f.strftime('%Y-%m-%d'): 0 for f in fechas},
+            }
+        datos_por_cliente[cliente]['fechas'][fecha] = doc['total']
+        totales_por_fecha[fecha] += doc['total']
+
+    context = {
+        'fechas': [f.strftime('%A %B-%d') for f in fechas],
+        'datos_por_cliente': datos_por_cliente,
+        'totales_por_fecha': totales_por_fecha,
+        'desde': dia.strftime('%Y-%m-%d'),
+    }
+    return render(request, 'operaciones/consultaproyeccioncobros.html', context)

@@ -3933,7 +3933,6 @@ def DetalleCuotasJSON(request, ids_cuotas):
 
     # Converting `QuerySet` to a Python Dictionary
     for i in range(len(documentos)):
-        print(documentos[i])
         tempBlogs.append(CuotaJSONSalida(documentos[i])) # Converting `QuerySet` to a Python Dictionary
 
     docjson = tempBlogs

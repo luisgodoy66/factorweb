@@ -26,7 +26,8 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     ModificarCuota, GeneraResumenNegociadPorActividadJSON, \
     AnexosClienteView, GeneraListaMovimientosClienteJSON, \
     GeneraListaClientesValoresPendientes, NuevaRevisionCarteraJSON,\
-    RevisionCartera, RevisionCarteraJSON, RevisionCarteraClienteEdit
+    RevisionCartera, RevisionCarteraJSON, RevisionCarteraClienteEdit,\
+    proyeccion_cobros
     
 
 from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
@@ -159,6 +160,13 @@ urlpatterns = [
         , name="desembolsos_json"),
     path('reversardesembolsoasignacion/<int:desembolso_id>'
          ,ReversoDesembolsoAsignacion,),
+    path('tabla_cruzada_cobros/', proyeccion_cobros
+         , name='flujo_cobros'),
+    path('tabla_cruzada_cobros/<dia>', proyeccion_cobros
+         , name='flujo_cobros'),
+    path('tabla_cruzada_cobros/<dia>/<dias>', proyeccion_cobros
+         , name='flujo_cobros'),
+
 # pagares
     path('pagares/',PagaresView.as_view(), name="listapagares"),
     path('reversaraceptacionpagare/<int:pid_asignacion>',ReversaAceptacionPagare),

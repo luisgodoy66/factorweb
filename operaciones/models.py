@@ -498,11 +498,12 @@ class ChequesAccesorios_Manager(models.Manager):
             .order_by()
 
     def cartera_pendiente(self, id_empresa):
-        return self.filter(laccesorioquitado = True, chequequitado__cxestado = 'A'
-                , leliminado = False, lcanjeado = False
-                , empresa = id_empresa
-                , documento__cxasignacion__cxestado = "P"
-                , documento__cxasignacion__leliminado = False)\
+        return self.filter(laccesorioquitado = True
+                           , chequequitado__cxestado = 'A'
+                           , leliminado = False, lcanjeado = False
+                           , empresa = id_empresa
+                           , documento__cxasignacion__cxestado = "P"
+                           , documento__cxasignacion__leliminado = False)\
                 .values("documento__cxcomprador__cxcomprador__ctnombre"
                         , "documento__cxcliente__cxcliente__ctnombre"
                         , "documento__cxasignacion__cxasignacion"
@@ -523,11 +524,12 @@ class ChequesAccesorios_Manager(models.Manager):
                 .order_by('documento__cxcliente__cxcliente__ctnombre')
 
     def cheques_pendientes(self, id_empresa):
-        return self.filter(laccesorioquitado = False, cxestado='A'
-                , leliminado = False, lcanjeado = False
-                , empresa = id_empresa
-                , documento__cxasignacion__cxestado = "P"
-                , documento__cxasignacion__leliminado = False)\
+        return self.filter(laccesorioquitado = False
+                           , cxestado='A'
+                           , leliminado = False, lcanjeado = False
+                           , empresa = id_empresa
+                           , documento__cxasignacion__cxestado = "P"
+                           , documento__cxasignacion__leliminado = False)\
                 .values("documento__cxcomprador__cxcomprador__ctnombre"
                         , "documento__cxcliente__cxcliente__ctnombre"
                         , "documento__cxasignacion__cxasignacion"
@@ -1167,6 +1169,6 @@ class Revision_cartera_detalle(ClaseModelo):
     nporvencer = models.DecimalField(max_digits=15, decimal_places=2, default=0,null=True)
     nprotesto = models.DecimalField(max_digits=15, decimal_places=2, default=0,null=True)
     nlineaactual = models.DecimalField(max_digits=15, decimal_places=2, default=0,null=True)
-    ctclaseactual = models.CharField(max_length=1)
-    ctestadoactual = models.CharField(max_length=1)
+    ctclaseactual = models.CharField(max_length=1, null=True)
+    ctestadoactual = models.CharField(max_length=1, null=True)
     ctcomentario = models.TextField()

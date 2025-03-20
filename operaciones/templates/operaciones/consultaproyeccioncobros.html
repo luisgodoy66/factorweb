@@ -1,0 +1,120 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">operaciones</a></li>
+                    <li><a href="#">cobranzas</a></li>
+                    <li class="active">Proyección de cobros</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="card bg-flat-color-0">
+    <div class="card-body">
+        <div class="row form-group ">
+            <!-- <div class="col-md-1">Desembolso:</div> -->
+            <div class="col-md-1">Desde:</div>
+            <div class="col-md-2">
+                <input type="date" class="form-control" name="fechadesde" 
+                id="fechadesde" placeholder="Desde" >
+            </div>
+            <div class="col-md-1">
+                <button class="btn btn-success btn-sm"  role="button" id="btnFiltrar">  
+                    <i class="fa fa-filter"></i> Filtrar
+                </button>
+            </div>
+            <div class="col-md-3">
+                <strong>P.D.P.</strong>  = Promedio ponderado de demora de pagos
+            </div>
+            <div class="col-md-4">
+                Los valores mostrados corresponden al anticipo del valor a cobrar
+            </div>
+            <div class="col-md-1">
+
+                <div class="dropdown float-right">
+                    <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        <div class="dropdown-menu-content">
+                            <a class="dropdown-item" href="#" onclick="imprimeProyeccionCobros()">Imprimir</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <small>
+
+            <table id="table"  class="table table-striped table-bordered"
+            >
+                <thead>
+                    <tr>
+                        <th class="cliente">Cliente</th>
+                        {% for fecha in fechas %}
+                        <th>{{ fecha }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cliente, datos in datos_por_cliente.items %}
+                    <tr>
+                        <td class="cliente">
+                            <a class="d-block" href="">
+                                <strong>{{ cliente }}</strong>
+                            </a>
+                            <span href="" style="font-size: smaller;">P.D.P.: {{datos.promedio_demora}}</span>
+                            
+                        </td>
+                        {#% for fecha in fechas %#}
+                        {#% endfor %#}
+                        {% for fecha in datos.fechas.items %}
+                        <td>{% if fecha.1 != 0 %}{{ fecha.1 | floatformat:"2g" }}{% endif %}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td class="cliente"><strong>Total</strong></td>
+                        {% for fecha in totales_por_fecha.items %}
+                        <td><strong>{{ fecha.1 | floatformat:"2g"}}</strong></td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </small>
+    </div>
+</div>
+{% endblock %}
+{% block js_page %}
+<script>
+    var $table = jQuery('#table')
+    var $btnFiltrar = jQuery('#btnFiltrar')
+    var desde = "{{ desde }}"
+
+    window.onload=function(){
+    
+        inicializaValor("fechadesde", desde)
+    
+        // $table.bootstrapTable({locale:"es-EC"});
+    
+        // boton de refrescar filtro
+        $btnFiltrar.click(function () {
+    
+            desde = capturaValor("fechadesde");
+            window.location.href = "/operaciones/tabla_cruzada_cobros/" + desde;
+    
+        })
+    
+    
+        // cerrar side bar
+        CerrarSideBar();
+      
+    };
+
+</script>
+{% endblock %}
