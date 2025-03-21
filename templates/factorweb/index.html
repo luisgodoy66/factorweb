@@ -109,7 +109,7 @@
                                 <a href="{% url 'cobranzas:listaliquidacionesennegativopendientes' %}">Cargos pendientes</a></li>
                             <li><i class="fa fa-print"></i>
                                 <a href="{% url 'cobranzas:consulta_cobranzas' %}">Consulta general</a></li>
-                            <li><i class="menu-icon fa fa-print"></i><a href="{% url 'operaciones:flujo_cobros' %}">Proyección de cobros</a></li>
+                            <li><i class="menu-icon fa fa-print"></i><a href="{% url 'cobranzas:flujo_cobros' %}">Proyección de cobros</a></li>
                             <li><i class="fa fa-print"></i>
                                 <a href="{% url 'cobranzas:consulta_ampliaciones' %}">Listar ampliaciones</a></li>
                         </ul>
@@ -182,6 +182,7 @@
                             <i class="menu-icon fa fa-eye"></i>Cartera</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-pencil"></i><a href="{% url 'operaciones:revision_cartera' %}">Revisión</a></li>
+                            <li><i class="menu-icon fa fa-pencil"></i><a href="{% url 'operaciones:negociaciones_mes' %}">Estadísticas</a></li>
                         </ul>
                     </li>
 

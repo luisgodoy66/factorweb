@@ -2,7 +2,7 @@ from random import choices
 from django.db import models
 from django.forms import BooleanField
 from django.db.models import Sum, Q, F, ExpressionWrapper, DateField, CharField\
-    , Value, DurationField, IntegerField, DecimalField
+    , Value, Count, IntegerField, DecimalField
 from django.db.models.functions import Cast, ExtractDay
 from django.db.models.functions import Concat
 from django.utils.dateparse import parse_date
@@ -84,6 +84,18 @@ class Asignacion_manager(models.Manager):
             .values('cxcliente__cxcliente__actividad__ctactividad')\
             .annotate(total=Sum('nvalor'))\
             .order_by('cxcliente__cxcliente__actividad__ctactividad')
+
+    def negociaciones_por_mes(self, id_empresa, año, mes):
+        return self.filter(
+            ddesembolso__year=año,
+            ddesembolso__month=mes,
+            cxestado="P",
+            leliminado=False,
+            empresa=id_empresa
+        ).values('ddesembolso').annotate(
+            cantidad=Count('id'),
+            total_monto=Sum('nvalor')
+        ).order_by('ddesembolso')
 
 class Asignacion(ClaseModelo):
     TIPOS_DE_ASIGNACION = (

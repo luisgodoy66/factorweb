@@ -11,7 +11,7 @@
                 <div class="card-body">
                     <div class="clearfix">
                         <i class="fa fa-dollar bg-flat-color-5 p-3 font-2xl mr-3 float-left text-light"></i>
-                        <div class="h5 text-secondary mb-0 mt-1">{{total_cartera_protestos|intcomma}}</div>
+                        <div class="h5 text-secondary mb-0 mt-1">{{total_cartera_protestos|floatformat:"2g"}}</div>
                         <div class="text-muted text-uppercase font-weight-bold font-xs small">
                             Cartera y protestos</div>
                     </div>
@@ -32,7 +32,7 @@
                 <div class="card-body">
                     <div class="clearfix">
                         <i class="fa fa-bell bg-danger p-3 font-2xl mr-3 float-left text-light"></i>
-                        <div class="h5 text-secondary mb-0 mt-1">{{total_protestos|intcomma}}</div>
+                        <div class="h5 text-secondary mb-0 mt-1">{{total_protestos|floatformat:"2g"}}</div>
                         <div class="text-muted text-uppercase font-weight-bold font-xs small">
                             Protestos</div>
                     </div>
@@ -56,7 +56,7 @@
                         <div class="stat-icon dib"><i class="ti-file text-success border-success"></i></div>
                         <div class="stat-content dib">
                             <div class="stat-text">Total negociado</div>
-                            <div class="stat-digit">{{ total_negociado|intcomma}}</div>
+                            <div class="stat-digit">{{ total_negociado|floatformat:"2g"}}</div>
                         </div>
                     </div>
                 </div>
@@ -70,7 +70,7 @@
                         <div class="stat-icon dib"><i class="ti-money text-primary border-primary"></i></div>
                         <div class="stat-content dib">
                             <div class="stat-text">Facturado año actual</div>
-                            <div class="stat-digit">{{ ingreso_acumulado|intcomma}}</div>
+                            <div class="stat-digit">{{ ingreso_acumulado|floatformat:"2g"}}</div>
                         </div>
                     </div>
                 </div>

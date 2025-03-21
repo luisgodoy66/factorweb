@@ -3,6 +3,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum, Q, Value, DecimalField
+from django.db.models.functions import TruncDay
 
 from datetime import timedelta, datetime, date
 
@@ -38,6 +39,20 @@ class Cheques(ClaseModelo):
         return '{} CH/{}'.format(self.cxcuentabancaria, self.ctcheque)
 
 from contabilidad.models import Diario_cabecera
+
+class Documentos_cabecera_Manager(models.Manager):
+    def valores_cobrados_por_dia(self, id_empresa, año, mes):
+        return self.filter(
+            empresa = id_empresa,
+            leliminado=False,
+            dcobranza__year=año,
+            dcobranza__month=mes,
+            cxestado='A'  # Asegúrate de filtrar por el estado adecuado si es necesario
+        ).annotate(
+            dia=TruncDay('dcobranza')
+        ).values('dia').annotate(
+            total_valor=Sum('nvalor')
+        ).order_by('dia')
 
 class Documentos_cabecera(ClaseModelo):
     FORMAS_DE_PAGO = (
@@ -80,6 +95,8 @@ class Documentos_cabecera(ClaseModelo):
                                      , related_name="asiento_cobranza"
                                      , null=True)
 
+    objects = Documentos_cabecera_Manager()
+    
     def __str__(self):
         return self.cxcobranza
 

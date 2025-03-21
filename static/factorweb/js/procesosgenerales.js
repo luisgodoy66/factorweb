@@ -949,7 +949,7 @@ function saldoPorCliente(url) {
             nombresClientes.push(item.cxcliente__cxcliente__ctnombre);
             valoresPendientes.push(item.total_pendiente );
         });
-        console.log(nombresClientes, valoresPendientes);
+
         var ctx = document.getElementById("horizontalBarChart").getContext('2d');
         var myChart = new Chart(ctx, {
             type: 'horizontalBar',

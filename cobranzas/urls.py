@@ -22,7 +22,8 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , AceptarAmpliacionDePlazo,  GeneraListaAmpliacionesJSON, AmpliacionesConsulta\
     , ModificarCobranza, GeneraListaFacturasPendientesJSON, CobranzasCuotasView\
     , DetalleCuotasJSON, AceptarCobranzaCuota, ReversoDesembolsoLiquidacion\
-    , ReversaAmpliacion
+    , ReversaAmpliacion, proyeccion_cobros
+
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos\
@@ -82,6 +83,13 @@ urlpatterns = [
         , name='detalle_cobranzas_reporte'),
     path('detallerecuperaciones/<desde>/<hasta>/', ImpresionDetalleRecuperaciones
         , name='detalle_cobranzas_reporte'),
+    path('tabla_cruzada_cobros/<dia>/<dias>', proyeccion_cobros
+         , name='flujo_cobros'),
+    path('tabla_cruzada_cobros/', proyeccion_cobros
+         , name='flujo_cobros'),
+    path('tabla_cruzada_cobros/<dia>', proyeccion_cobros
+         , name='flujo_cobros'),
+
     
     # liquidaciones
     path('confirmarcobranza/<int:cobranza_id>/<tipo_operacion>',ConfirmarCobranza),

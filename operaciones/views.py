@@ -2691,71 +2691,54 @@ def GeneraListarevisionCarteraJSONSalida(cartera,):
 
     return output
 
-def proyeccion_cobros(request, dia=None, dias=14):
+def estadisticas_mes(request, año = None, mes = None):
     id_empresa = Usuario_empresa.objects.filter(user=request.user).first().empresa
 
-    if dia is None:
-        dia = date.today().strftime('%Y-%m-%d')
-    dia = parse_date(dia)
+    if not año:
+        año = datetime.now().year
+    if not mes:
+        mes = datetime.now().month - 1
+    if mes == 0:
+        mes = 12
+        año -= 1
+
+    datos_negociaciones = Asignacion.objects\
+        .negociaciones_por_mes(id_empresa, año, mes)
     
-    # Obtener las fechas de las dos semanas consecutivas
-    fechas = [dia + timedelta(days=i) for i in range(dias)]
+    # Preparar los datos para el gráfico
+    fechas_negociaciones = [dato['ddesembolso'].strftime('%A %d') 
+                            for dato in datos_negociaciones]
+    cantidades = [dato['cantidad'] for dato in datos_negociaciones]
+    # con float se evita el error de JSON
+    montos = [float(dato['total_monto']) for dato in datos_negociaciones]
+    acumulado_cantidades = sum(cantidades)
+    acumulado_montos = sum(montos)
 
-    # Obtener los documentos agrupados por cliente y fecha
-    facturas = Documentos.objects.filter(
-        leliminado=False,
-        nsaldo__gt=0,
-        empresa=id_empresa,
-        dvencimiento__range=[dia, dia + timedelta(days=dias-1)])\
-            .values('cxcliente__cxcliente__ctnombre'
-                    , 'dvencimiento'
-                    , 'cxcliente__npromediodemoradepago')\
-            .annotate(total=Sum(F('nsaldo') * F('nporcentajeanticipo') / 100))\
-            .order_by('cxcliente__cxcliente__ctnombre', 'dvencimiento')
+    datos_cobranzas = Documentos_cabecera.objects\
+        .valores_cobrados_por_dia(id_empresa, año, mes)
+    
+    # Preparar los datos para el gráfico
+    fechas_cobro = [dato['dia'].strftime('%A %d') 
+                    for dato in datos_cobranzas]
+    cobros = [float(dato['total_valor']) for dato in datos_cobranzas]
+    acumulado_cobros = sum(cobros)
 
-    accesorios = ChequesAccesorios.objects\
-        .filter(
-            Q(laccesorioquitado=False) | Q(laccesorioquitado=True, 
-                                           chequequitado__cxestado='A'),
-            cxestado='A',
-            leliminado=False,
-            lcanjeado=False,
-            empresa=id_empresa,
-            documento__cxasignacion__cxestado="P",
-            documento__cxasignacion__leliminado=False,
-            dvencimiento__range=[dia, dia + timedelta(days=dias-1)]
-        )\
-        .values(
-            'documento__cxcliente__cxcliente__ctnombre',
-            'dvencimiento',
-            'documento__cxcliente__npromediodemoradepago'
-        )\
-        .annotate(total=Sum(F('ntotal') * F('nporcentajeanticipo') / 100))\
-        .order_by('documento__cxcliente__cxcliente__ctnombre', 'dvencimiento')
-
-    documentos = facturas.union(accesorios)
-
-    # NOTA: faltaría agrupar por cliente y fecha
-
-    # Organizar los datos en un diccionario
-    datos_por_cliente = {}
-    totales_por_fecha = {f.strftime('%Y-%m-%d'): 0 for f in fechas}
-    for doc in documentos:
-        cliente = doc['cxcliente__cxcliente__ctnombre']
-        fecha = doc['dvencimiento'].strftime('%Y-%m-%d')
-
-        if cliente not in datos_por_cliente:
-            datos_por_cliente[cliente] = {
-            'promedio_demora': doc['cxcliente__npromediodemoradepago'],
-            'fechas': {f.strftime('%Y-%m-%d'): 0 for f in fechas},
-            }
-        datos_por_cliente[cliente]['fechas'][fecha] = doc['total']
-        totales_por_fecha[fecha] += doc['total']
-
+    # clientes nuevos
+    clientes_nuevos = ModeloCliente.Datos_generales.objects\
+        .clientes_nuevos_por_mes(id_empresa, año, mes)
+    
     context = {
-        'fechas': [f.strftime('%A %B-%d') for f in fechas],
-        'datos_por_cliente': datos_por_cliente,
-        'totales_por_fecha': totales_por_fecha,
-        'desde': dia.strftime('%Y-%m-%d'),
+        'año': año,
+        'mes': mes,
+        'fechas': fechas_negociaciones,
+        'cantidades': cantidades,
+        'montos': montos,
+        'acumulado_cantidades': acumulado_cantidades,
+        'acumulado_montos': acumulado_montos,
+        'fechas_cobranzas': fechas_cobro,
+        'valores': cobros,
+        'acumulado_cobros': acumulado_cobros,
+        'periodo': f'{año}-{mes:02d}',
+        'clientes_nuevos': clientes_nuevos,
     }
-    return render(request, 'operaciones/consultaproyeccioncobros.html', context)
+    return render(request, 'operaciones/consultaestadisticasmes.html', context)

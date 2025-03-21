@@ -28,7 +28,16 @@ class Datos_compradores(ClaseModelo):
         
     def estado(self):
         return self.get_cxestado_display()
-    
+
+class Datos_generales_Manager(models.Manager):
+        def clientes_nuevos_por_mes(self, id_empresa, año, mes):
+            return self.filter(
+                dprimeraoperacion__year=año,
+                dprimeraoperacion__month=mes,
+                cxcliente__empresa=id_empresa,
+                leliminado = False,
+            ).count()    
+
 class Datos_generales(ClaseModelo):
     TIPOS_DE_CLIENTES = (
         ('N', 'Natural'),
@@ -65,6 +74,12 @@ class Datos_generales(ClaseModelo):
         help_text='fecha que cae en estado de legal en proceso de envio a legal del sistema'    )
     cxlocalidad =models.ForeignKey(Localidades, on_delete=models.DO_NOTHING, null=True,
         help_text='Cree más sucursales en la opción Localidades del menú Configuración/Empresa'    )
+    dprimeraoperacion=models.DateField(null=True,
+        help_text='fecha de la primera operación'    )
+    ncantidadoperaciones=models.SmallIntegerField(default=0,
+        help_text='cantidad de operaciones realizadas'    )
+    
+    objects = Datos_generales_Manager()
     
     def __str__(self):
         return self.cxcliente.ctnombre
