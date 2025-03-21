@@ -47,7 +47,7 @@ class Documentos_cabecera_Manager(models.Manager):
             leliminado=False,
             dcobranza__year=año,
             dcobranza__month=mes,
-            cxestado='A'  # Asegúrate de filtrar por el estado adecuado si es necesario
+            cxestado__in=('A','L')  # sólo se consideran las activas y las liquidadas
         ).annotate(
             dia=TruncDay('dcobranza')
         ).values('dia').annotate(
