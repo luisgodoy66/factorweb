@@ -23,19 +23,19 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 # ALLOWED_HOSTS = ['factorweb-dev2.us-east-2.elasticbeanstalk.com','localhost', '*']
 # CSRF_TRUSTED_ORIGINS=['http://factorweb-dev2.us-east-2.elasticbeanstalk.com/']
 # # ALLOWED_HOSTS = ['factorweb-dev.us-east-2.elasticbeanstalk.com','localhost', '127.0.0.1','*']
 # # CSRF_TRUSTED_ORIGINS=['http://factorweb-dev.us-east-2.elasticbeanstalk.com/']
 ALLOWED_HOSTS = [
-    '69.62.68.116', 
-    # 'www.margarita.codigobambu.com',
+    'margarita.codigobambu.com', 
+    'www.margarita.codigobambu.com',
     '*'
     ]
 CSRF_TRUSTED_ORIGINS=[
-    'http://69.62.68.116',
-    # 'https://www.margarita.codigobambu.com/'
+    'https://margarita.codigobambu.com/',
+    'https://www.margarita.codigobambu.com/'
     ]
 
 
@@ -96,23 +96,17 @@ WSGI_APPLICATION = 'factorweb25.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME':  'factorwebdb',
-#         'HOST':  'database-2.c5i2bulrjalv.us-east-2.rds.amazonaws.com',
-#         'USER': 'postgres',
-#         'PASSWORD':os.getenv("PASSWORD_BD"),
-#         'PORT': 5432,
-#     }
-# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME':  'postgres',
-        'HOST':  '69.62.68.116',
+        'NAME':  'factorwebdb',
+        # cambiar estas líneas para actualizar la base de producción. 1 es prueba 2 es produccion
+        # 08-sep-23 l.g.    Se eliminó la base 1 que servía de prueba
+        # 'HOST':  'database-1.c5i2bulrjalv.us-east-2.rds.amazonaws.com',
+        'HOST':  'database-2.c5i2bulrjalv.us-east-2.rds.amazonaws.com',
         'USER': 'postgres',
         'PASSWORD':os.getenv("PASSWORD_BD"),
+        # 'PASSWORD':os.environ["PASSWORD_BD"],
         'PORT': 5432,
     }
 }
@@ -155,35 +149,27 @@ LOGIN_REDIRECT_URL='/'
 LOGOUT_REDIRECT_URL ='/login/'
 
 
-# # CONFIGURACION AWS
-# DEFAULT_FILE_STORAGE="storages.backends.s3boto3.S3Boto3Storage"
-# AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-# AWS_SECRET_ACCESS_KEY=os.getenv("AWS_SECRET_ACCESS_KEY")
-# AWS_STORAGE_BUCKET_NAME="factorweb-bucket"
-# AWS_S3_CUSTOM_DOMAIN="%s.s3.amazonaws.com" % AWS_STORAGE_BUCKET_NAME
-# AWS_S3_FILE_OVERWRITE = False
+# CONFIGURACION AWS
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY=os.getenv("AWS_SECRET_ACCESS_KEY")
+# AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
+# AWS_SECRET_ACCESS_KEY=os.environ["AWS_SECRET_ACCESS_KEY"]
 
-
-# CONFIGURACION GOOGLE CLOUD
-DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-GS_BUCKET_NAME = 'factorweb-bucket'
-GS_CREDENTIALS = os.getenv("RUTA_GCS")
-GS_DEFAULT_ACL = 'publicRead' # o 'private' segun tus necesidades.
-print('GS_CREDENTIALS',os.getenv("RUTA_GCS"))
+AWS_STORAGE_BUCKET_NAME="factorweb-bucket"
+AWS_S3_CUSTOM_DOMAIN="%s.s3.amazonaws.com" % AWS_STORAGE_BUCKET_NAME
+AWS_S3_FILE_OVERWRITE = False
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
-# # Static files (CSS, JavaScript, Images)
-# # https://docs.djangoproject.com/en/4.0/howto/static-files/
-# STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
-STATIC_URL = "https://storage.googleapis.com/factorweb-bucket/static/"
-# STORAGES = {
-#    "default": {
-#         "BACKEND" : "storages.backends.s3boto3.S3StaticStorage",
-#     },
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/4.0/howto/static-files/
+STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+DEFAULT_FILE_STORAGE="storages.backends.s3boto3.S3Boto3Storage"
+STORAGES = {
+   "default": {
+        "BACKEND" : "storages.backends.s3boto3.S3StaticStorage",
+    },
 
-#     "staticfiles":  {
-#         "BACKEND" : "storages.backends.s3boto3.S3StaticStorage",
-#     },
-# }
-
-STATICFILES_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
+    "staticfiles":  {
+        "BACKEND" : "storages.backends.s3boto3.S3StaticStorage",
+    },
+}
