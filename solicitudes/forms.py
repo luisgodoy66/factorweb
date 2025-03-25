@@ -253,13 +253,14 @@ class NivelesAprobacionForm(forms.ModelForm):
     class Meta:
         model = Niveles_aprobacion
         fields=['nmontominimo', 'naprobadores', 'nhorasrespuestamaxima'
-                , 'configuracionslack'
+                , 'configuracionslack', 'lactivo'
             ]
         labels={
             'nmontominimo':'Desde'
             , 'naprobadores':'Cantidad de aprobadores'
             , 'nhorasrespuestamaxima':'Horas para responder'
             , 'configuracionslack':'Configuración Slack'
+            , 'lactivo':'Activo'
         }
 
     def __init__(self, *args, **kwargs):

@@ -150,21 +150,32 @@
         </div>
        <div class="col-md-3 col-lg-3">
             <div class="card
-            {% if color_estado == 1 %} 
-                bg-flat-color-1
-            {% elif color_estado == 2 %}
-                bg-flat-color-2
-            {% elif color_estado == 3 %}
-                bg-flat-color-3
-            {% elif color_estado == 4 %}
-                bg-flat-color-4
-            {% elif color_estado == 5 %}
-                bg-flat-color-5
-            {% endif %}
-            text-light">
+                {% if color_estado == 1 %} 
+                    bg-flat-color-1
+                {% elif color_estado == 2 %}
+                    bg-flat-color-2
+                {% elif color_estado == 3 %}
+                    bg-flat-color-3
+                {% elif color_estado == 4 %}
+                    bg-flat-color-4
+                {% elif color_estado == 5 %}
+                    bg-flat-color-5
+                {% endif %}
+                text-light">
                 <div class="card-body">
                     <div class="h4 m-0">{{estado}}</div>
                     <div>Estado</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="stat-widget-one">
+                        <div class="stat-icon dib"><i class="ti-calendar text-danger border-danger"></i></div>
+                        <div class="stat-content dib">
+                            <div class="stat-text">Opera desde</div>
+                            <div class="stat-digit">{{ cliente.dprimeraoperacion|date:"b/Y" }} </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         <!-- </div>

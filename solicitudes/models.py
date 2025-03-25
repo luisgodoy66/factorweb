@@ -42,6 +42,7 @@ class Niveles_aprobacion(ClaseModelo):
     nhorasrespuestamaxima = models.SmallIntegerField(default=0)
     configuracionslack = models.ForeignKey(Configuracion_slack, on_delete=models.RESTRICT
                                     , related_name="canal_slack")
+    lactivo = models.BooleanField(default=True)
 
 class Solicitud_aprobacion(ClaseModelo):
     ESTADO = (

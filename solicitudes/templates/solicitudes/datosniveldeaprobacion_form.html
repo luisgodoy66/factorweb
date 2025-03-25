@@ -55,6 +55,19 @@
                             {{form.configuracionslack}}
                         </div>
                     </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_lactivo" class=" form-control-label">
+                            {{form.lactivo.label}}</label></div>
+                        <div class="col">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  nivel_aprobacion.lactivo %} checked {% endif %} 
+                                id = "id_lactivo" name = "lactivo"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
             </div>    
             
             <div class="card-footer">

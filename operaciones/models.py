@@ -170,6 +170,16 @@ class Documentos_Manager(models.Manager):
                     .filter(cxtipo = "F", cxestado = "P", leliminado = False))\
                     .order_by('dvencimiento')
 
+    def facturas_pendientes_vencimiento_original(self, fecha_corte, id_empresa):
+        # no considera la prorroga
+        fecha = parse_date(fecha_corte)
+        return self.filter(dvencimiento__lte = fecha 
+                , leliminado = False, nsaldo__gt = 0
+                , empresa = id_empresa
+                , cxasignacion__in = Asignacion.objects
+                    .filter(cxtipo = "F", cxestado = "P", leliminado = False))\
+                    .order_by('dvencimiento')
+
     def antigüedad_cartera(self, id_empresa):
         # grafico de antigüedad de cartera 
         vcdo90 = datetime.today()+timedelta(days=-90)
@@ -438,6 +448,18 @@ class ChequesAccesorios_Manager(models.Manager):
         fecha = parse_date(fecha_corte)
         return self.filter(
                 dvencimiento__lte = fecha - F('ndiasprorroga'),
+                laccesorioquitado = True, chequequitado__cxestado = 'A'
+                , leliminado = False, lcanjeado = False
+                , documento__cxasignacion__cxestado = "P"
+                , documento__cxasignacion__leliminado = False
+                , empresa = id_empresa
+                )
+
+    def facturas_pendientes_vencimiento_original(self, fecha_corte, id_empresa):
+        # no considera la prorroga
+        fecha = parse_date(fecha_corte)
+        return self.filter(
+                dvencimiento__lte = fecha ,
                 laccesorioquitado = True, chequequitado__cxestado = 'A'
                 , leliminado = False, lcanjeado = False
                 , documento__cxasignacion__cxestado = "P"
@@ -877,8 +899,6 @@ class Motivos_protesto_maestro(ClaseModelo):
 
     def __str__(self):
         return self.ctabreviacion
-
-# from cobranzas.models import Liquidacion_cabecera, Documentos_cabecera, Recuperaciones_cabecera
 
 class Notas_debito_cabecera(ClaseModelo):
     TIPOS_DE_OPERACION = (

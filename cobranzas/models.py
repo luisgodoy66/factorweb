@@ -129,7 +129,7 @@ class Documentos_detalle_Manager(models.Manager):
         
         totaldias = 0
         for documento in documentos:
-            dias_vencidos = decimal.Decimal( documento.dias_vencidos())
+            dias_vencidos = decimal.Decimal( documento.dias_vencidos_vencimiento_original())
             totaldias += dias_vencidos * (
                 documento.nvalorcobranza 
                 + documento.nvalorbaja 
@@ -174,6 +174,25 @@ class Documentos_detalle(ClaseModelo):
             vencimiento = self.accesorioquitado.dvencimiento
             if self.cxcobranza.cxtipofactoring.lanticipatotalnegociado:
                 vencimiento = vencimiento + timedelta(self.accesorioquitado.ndiasprorroga)
+
+        return (self.cxcobranza.dcobranza - vencimiento)/timedelta(days=1)
+
+    def dias_vencidos_vencimiento_original(self):
+        # si es factura pura, tomo el vencimiento del documento
+        # ai es accesorio, busco el cheque accesorio grabado en la cabecera
+        # usado en cálculo de promedio ponderado de demora
+        if self.cxdocumento.cxasignacion.cxtipo=='F':
+            vencimiento = self.cxdocumento.dvencimiento
+            # if self.cxcobranza.cxtipofactoring.lanticipatotalnegociado:
+            #     vencimiento = vencimiento + timedelta(self.cxdocumento.ndiasprorroga)
+        elif self.cxcobranza.cxformapago =='DEP':
+            vencimiento = self.cxcobranza.cxaccesorio.dvencimiento
+            # if self.cxcobranza.cxtipofactoring.lanticipatotalnegociado:
+            #     vencimiento = vencimiento + timedelta(self.cxcobranza.cxaccesorio.ndiasprorroga)
+        else:
+            vencimiento = self.accesorioquitado.dvencimiento
+            # if self.cxcobranza.cxtipofactoring.lanticipatotalnegociado:
+            #     vencimiento = vencimiento + timedelta(self.accesorioquitado.ndiasprorroga)
 
         return (self.cxcobranza.dcobranza - vencimiento)/timedelta(days=1)
 

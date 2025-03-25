@@ -1739,6 +1739,7 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
         'total_cartera_protestos': cartera + protestos,
         'total_reestructuracion':restructuracion,
         'promedio_ponderado_demora': ppmp,
+        'cliente': operativos.cxcliente
         }
     return render(request, template_path, context)
 
@@ -1813,7 +1814,7 @@ def GeneraListaCarteraClienteJSON(request, cliente_id, fecha_corte = None):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     documentos = Documentos.objects\
-        .facturas_pendientes(fecha_corte, id_empresa.empresa)\
+        .facturas_pendientes_vencimiento_original(fecha_corte, id_empresa.empresa)\
         .filter(cxcliente = cliente_id)
 
     tempBlogs = []
@@ -1822,7 +1823,7 @@ def GeneraListaCarteraClienteJSON(request, cliente_id, fecha_corte = None):
 
     # los accesorios que fueron quitados se convierten en facturas pendientes
     quitados = ChequesAccesorios.objects\
-        .facturas_pendientes(fecha_corte, id_empresa.empresa)\
+        .facturas_pendientes_vencimiento_original(fecha_corte, id_empresa.empresa)\
         .filter(documento__cxcliente = cliente_id)
 
     for i in range(len(quitados)):
@@ -1843,7 +1844,6 @@ def GeneraListaCarteraClienteJSONSalida(doc):
     output["Comprador"] = doc.cxcomprador.cxcomprador.ctnombre
     output["Asignacion"] = doc.cxasignacion.cxasignacion
     output["Documento"] = doc.ctdocumento
-    # output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
     output["Vencimiento"] = doc.dias_vencidos()
     output["Saldo"] = doc.nsaldo
 
@@ -2395,35 +2395,7 @@ def ReversaAceptacionPagare(request, pid_asignacion):
     .format(pid_asignacion))
 
     return HttpResponse(resultado)
-
-# @login_required(login_url='/login/')
-# @permission_required('operaciones.change_desembolsos', login_url='bases:sin_permisos')
-# def ReversoDesembolsoAsignacion(request, desembolso_id):
-
-#     id_empresa = Usuario_empresa.objects\
-#         .filter(user = request.user).first()
-    
-#     desembolso = Desembolsos.objects\
-#         .filter(pk=desembolso_id, empresa = id_empresa.empresa).first()
-    
-#     asignacion = Asignacion.objects\
-#         .filter(pk=desembolso.cxoperacion).first()
-
-#     try:
-#         with transaction.atomic():
-#             # 1. Actualizar el estado de la ASIGNACION
-#             asignacion.cxestado = 'L'
-#             asignacion.save()
-
-#             desembolso.cxusuarioelimina = request.user.id
-#             desembolso.leliminado = True
-#             desembolso.save()
-
-#         return HttpResponse("OK")
-    
-#     except Exception as e:
-#         return HttpResponse( "Error al intentar guardar el registro. {}".format(e))
-        
+       
 @login_required(login_url='/login/')
 @permission_required('operaciones.change_desembolsos', login_url='bases:sin_permisos')
 def ReversoDesembolsoAsignacion(request, desembolso_id):

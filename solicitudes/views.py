@@ -165,11 +165,16 @@ class NivelAprobacionCrearView(SinPrivilegios, generic.CreateView):
     permission_required="solicitudes.add_niveles_aprobacion"
 
     def form_valid(self, form):
-
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super(NivelAprobacionCrearView, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
 
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -192,6 +197,12 @@ class NivelAprobacionEditarView(SinPrivilegios, generic.UpdateView):
 
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super(NivelAprobacionEditarView, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
 
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
