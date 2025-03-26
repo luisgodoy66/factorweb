@@ -21,11 +21,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
 # Expone el puerto en el que correrá la aplicación
-EXPOSE 8000
+EXPOSE 3000
 
 # Establece las variables de entorno necesarias
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=factorweb25.settings
 
 # Comando para ejecutar la aplicación
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:3000"]
