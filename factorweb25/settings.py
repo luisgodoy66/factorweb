@@ -154,10 +154,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL='/'
 LOGOUT_REDIRECT_URL ='/login/'
 
-STATIC_URL = 'static/'
-
-STATICFILES_DIRS = (os.path.join(BASE_DIR,'static'),)
-
 # # CONFIGURACION AWS
 # DEFAULT_FILE_STORAGE="storages.backends.s3boto3.S3Boto3Storage"
 # AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
@@ -165,28 +161,30 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR,'static'),)
 # AWS_STORAGE_BUCKET_NAME="factorweb-bucket"
 # AWS_S3_CUSTOM_DOMAIN="%s.s3.amazonaws.com" % AWS_STORAGE_BUCKET_NAME
 # AWS_S3_FILE_OVERWRITE = False
+# STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+# STORAGES = {
+#    "default": {
+#         "BACKEND" : "storages.backends.s3boto3.S3StaticStorage",
+#     },
 
+#     "staticfiles":  {
+#         "BACKEND" : "storages.backends.s3boto3.S3StaticStorage",
+#     },
+# }
 
-# # CONFIGURACION GOOGLE CLOUD
-# DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-# GS_BUCKET_NAME = 'factorweb-bucket'
-# GS_CREDENTIALS = os.getenv("RUTA_GCS")
-# GS_DEFAULT_ACL = 'publicRead' # o 'private' segun tus necesidades.
-# print('GS_CREDENTIALS',os.getenv("RUTA_GCS"))
-# ADMIN_MEDIA_PREFIX = '/static/admin/'
+# # estaticos en la carpeta del proyecto
+# STATIC_URL = 'static/'
+# STATICFILES_DIRS = (os.path.join(BASE_DIR,'static'),)
 
-# # # Static files (CSS, JavaScript, Images)
-# # # https://docs.djangoproject.com/en/4.0/howto/static-files/
-# # STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
-# STATIC_URL = "https://storage.googleapis.com/factorweb-bucket/static/"
-# # STORAGES = {
-# #    "default": {
-# #         "BACKEND" : "storages.backends.s3boto3.S3StaticStorage",
-# #     },
+# CONFIGURACION GOOGLE CLOUD
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_BUCKET_NAME = 'factorweb-bucket'
+GS_CREDENTIALS = os.getenv("RUTA_GCS")
+GS_DEFAULT_ACL = 'publicRead' # o 'private' segun tus necesidades.
+ADMIN_MEDIA_PREFIX = '/static/admin/'
 
-# #     "staticfiles":  {
-# #         "BACKEND" : "storages.backends.s3boto3.S3StaticStorage",
-# #     },
-# # }
+# # Static files (CSS, JavaScript, Images)
+# # https://docs.djangoproject.com/en/4.0/howto/static-files/
+STATIC_URL = "https://storage.googleapis.com/factorweb-bucket/static/"
 
-# STATICFILES_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
+STATICFILES_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
