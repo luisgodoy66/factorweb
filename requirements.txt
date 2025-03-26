@@ -1,3 +1,7 @@
+libcairo2==1.18.0
+libpango-1.0-0 == 1.52.1
+gir1.2-pango-1.0==1.52.1
+gir1.2-gdkpixbuf-2.0==2.42.10
 arabic-reshaper==3.0.0
 asgiref==3.8.1
 asn1crypto==1.5.1
