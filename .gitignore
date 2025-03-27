@@ -7,14 +7,15 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+# 27-mar-25 l.g. se comenta dist y build para la implementación en hostinger con estaticos en local
 .Python
-build/
+# build/
 develop-eggs/
-dist/
+# dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/
 lib64/
 parts/
 sdist/
