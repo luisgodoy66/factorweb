@@ -172,19 +172,28 @@ LOGOUT_REDIRECT_URL ='/login/'
 #     },
 # }
 
-# # estaticos en la carpeta del proyecto
-# STATIC_URL = 'static/'
-# STATICFILES_DIRS = (os.path.join(BASE_DIR,'static'),)
+# estaticos en la carpeta del proyecto
+STATIC_URL = 'static/'
+STATICFILES_DIRS = (os.path.join(BASE_DIR,'static'),)
 
-# CONFIGURACION GOOGLE CLOUD
-DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-GS_BUCKET_NAME = 'factorweb-bucket'
-GS_CREDENTIALS = os.getenv("RUTA_GCS")
-GS_DEFAULT_ACL = 'publicRead' # o 'private' segun tus necesidades.
-ADMIN_MEDIA_PREFIX = '/static/admin/'
+# # CONFIGURACION GOOGLE CLOUD
+# DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+# GS_BUCKET_NAME = 'factorweb-bucket'
+# GS_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+# GS_DEFAULT_ACL = 'publicRead' # o 'private' segun tus necesidades.
+# ADMIN_MEDIA_PREFIX = '/static/admin/'
 
-# # Static files (CSS, JavaScript, Images)
-# # https://docs.djangoproject.com/en/4.0/howto/static-files/
-STATIC_URL = "https://storage.googleapis.com/factorweb-bucket/static/"
+# # # Static files (CSS, JavaScript, Images)
+# # # https://docs.djangoproject.com/en/4.0/howto/static-files/
+# STATIC_URL = "https://storage.googleapis.com/factorweb-bucket/"
 
-STATICFILES_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
+# STATICFILES_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
+# STORAGES = {
+#    "default": {
+#         "BACKEND" : "storages.backends.gcloud.GoogleCloudStorage",
+#     },
+
+#     "staticfiles":  {
+#         "BACKEND" : "storages.backends.gcloud.GoogleCloudStorage",
+#     },
+# }
