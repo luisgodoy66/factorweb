@@ -175,7 +175,7 @@ LOGOUT_REDIRECT_URL ='/login/'
 # estaticos en la carpeta del proyecto
 STATIC_URL = 'static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR,'static'),)
-
+MEDIA_URL = 'static/'
 # # CONFIGURACION GOOGLE CLOUD
 # DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 # GS_BUCKET_NAME = 'factorweb-bucket'
