@@ -20,6 +20,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia el resto de tu código
 COPY . /app/
 
+# Configura Nginx para servir archivos de media y manejar las subidas
+COPY nginx.uploads.conf /etc/nginx/sites-available/
+
 # Expone el puerto en el que correrá la aplicación
 EXPOSE 3000
 
