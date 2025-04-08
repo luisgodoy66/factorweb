@@ -1,10 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-# from django.utils import timezone
-# from django.utils.http import urlquote
-# from django.utils.translation import ugettext_lazy as _
-# from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin\
-#     , BaseUserManager
 
 # Create your models here.
 class Empresas(models.Model):
@@ -30,9 +25,9 @@ class Empresas(models.Model):
     dfinpruebas = models.DateField(null=True)
     ltipofactoringconfigurado= models.BooleanField(default=False)
     ltasasfactoringconfiguradas= models.BooleanField(default=False)
-    ilogolargo = models.ImageField(null=True, upload_to='factorweb/images/'
+    ilogolargo = models.ImageField(null=True, upload_to='images/'
         , blank=True, default='logo1.png')
-    ilogocorto = models.ImageField(null=True, upload_to='factorweb/images/'
+    ilogocorto = models.ImageField(null=True, upload_to='images/'
         , blank=True, default='logo2.png')
     nporcentajeiva = models.DecimalField(max_digits=5, decimal_places=2, default=15)
     def __str__(self):
@@ -58,55 +53,3 @@ class Usuario_empresa(models.Model):
                              related_name="usuario_empresa")
     empresa =models.ForeignKey(Empresas, on_delete=models.CASCADE,)
 
-# class UsuarioManager(BaseUserManager):
-#     def _create_user(self, username, password, email,**extra_fields):
-
-#         if not username and not email :
-#             raise ValueError('Debe ingresar nombre de usuario e email.')
-#         if len (username)>80:
-#             raise Exception ("El nombre de usuario debe tener menos de 80 caracteres ")
-#         # if extra_fields.get("is_superuser"):
-#         #     raise TypeError("'is_superuser' is a reserved name for internal use.")
-#         # if 'password' in extra_fields:
-#         #     raise TypeError('"password" should not be used as a field. Use "set_password()" instead.')
-        
-#         # Normalize the address by lowercasing it.
-#         email = self.normalize_email(email)
-
-#         user = self.model(username=username 
-#                           , email=email
-#                           , is_active = True
-#                           , last_login = timezone.now()
-#                           , **extra_fields )
-#         user.set_password(password)
-#         user.save(using=self._db)
-
-#     def create_user(self,username,password=None, email=None, **extra_fields):
-#         return self._create_user(username, password, email, **extra_fields)
-    
-
-# class Usuario(AbstractBaseUser,PermissionsMixin):
-#     email = models.EmailField(_('dirección email'), max_length=254, unique=True)
-#     first_name = models.CharField(_('nombres'), max_length=30, blank=True)
-#     last_name = models.CharField(_("apellidos"), max_length=30, blank=True)
-#     is_staff = models.BooleanField(_('administrador?'), default=False,
-#                                    help_text='Usuario puede iniciar sesión en admin')
-#     is_active = models.BooleanField(_('activo'),default=True,
-#                                     help_text=_("Si el usuario está desactivado no podrá acceder a la plataforma"))
-#     date_joined = models.DateTimeField(_('fecha de registro'), default=timezone.now)
-
-#     objects = UsuarioManager
-
-#     class Meta:
-#         verbose_name=_("usuario")
-#         verbose_name_plural = _("usuarios")
-
-#     def get_absolte_url(self):
-#         return "/users/%s" % urlquote(self.email)
-    
-#     def get_full_name(self):
-#         fn = "%s %s" % (self.first_name, self.last_name)
-#         return fn.strip()
-    
-#     def get_short_name(self):
-#         return self.first_name
