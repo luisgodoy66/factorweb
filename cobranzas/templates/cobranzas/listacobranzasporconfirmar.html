@@ -72,7 +72,7 @@
                             <td>{{ item.cxcuentadeposito__cxcuenta}}</td>
                             {% endif %}
                             <td>
-                                <button href="#" onclick='ConfirmarCobranza("{{item.id}}","{{item.tipo}}")' 
+                                <button href="#" onclick='ConfirmarCobranza("{{item.cxcobranza}}","{{item.id}}","{{item.tipo}}")' 
                                     class="btn btn-success btn-sm" role="button" title="Confirmado"
                                     {% if item.ldepositoencuentaconjunta %} disabled {% endif %}
                                     >
