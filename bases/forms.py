@@ -41,7 +41,11 @@ class Userform(forms.ModelForm):
             self.fields[field].widget.attrs.update({
                 'class':'form-control'
             })
-
+        # Hacer que el campo email sea obligatorio
+        self.fields['email'].widget.attrs.update({
+            'required': 'true'
+        })
+        
 class UserPasswordForm(forms.ModelForm):
     password = forms.CharField(widget=PasswordInput)
     
