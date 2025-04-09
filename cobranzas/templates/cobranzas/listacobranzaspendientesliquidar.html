@@ -79,8 +79,8 @@
                         <th data-field="Cobranza" data-sortable="true" >Cobranza</th>
                         <th data-field="TipoFactoring" data-sortable="true" >Tipo de factoring</th>
                         <th data-field="FormaCobro" data-sortable="true" >Forma de cobro</th>
-                        <th data-field="Valor" data-sortable="true" >Valor</th>
-                        <th data-field="AplicadoCartera" data-sortable="true" >Aplicado a cartera</th>
+                        <th data-field="Valor" data-sortable="true" data-formatter="numberFormatter">Valor</th>
+                        <th data-field="AplicadoCartera" data-sortable="true" data-formatter="numberFormatter">Aplicado a cartera</th>
                         <th data-field="operate" data-sortable="false" data-events="window.operateEvents"
                             data-formatter="operateFormatter" data-click-to-select="false">Acción</th>
                         </tr>
@@ -98,4 +98,9 @@
 
 {% block js_page %}
 <script type="text/javascript" src="{% static 'factorweb/js/listacobranzaspendientesliquidar.js' %}"></script>
+<script>
+    function numberFormatter(value) {
+    return Number(value).toLocaleString('es-EC', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+</script>
 {% endblock %}

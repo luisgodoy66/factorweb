@@ -133,7 +133,7 @@ return [
   '<a class="quitar" href="javascript:void(0)" title="Quitar accesorio">',
   '<i class="fa fa-unlink"></i>',
   '</a>  ',
-  '<a class="prorroga" href="javascript:void(0)" title="Prorroga">',
+  '<a class="prorroga" href="javascript:void(0)" title="Prórroga">',
   '<i class="fa fa-mail-forward"></i>',
   '</a>  ',
 ].join('')
