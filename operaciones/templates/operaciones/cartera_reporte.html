@@ -1,4 +1,4 @@
-{% load humanize %}
+{#% load humanize %#}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -47,6 +47,13 @@
                             <td class="centrado" colspan="2"><h3>ANTIGÜEDAD DE LA CARTERA POR CLIENTE </h3></td>
                             <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
                         </tr>
+                        {% if corte %}
+                        <tr>
+                            <td colspan="2"><h4></h4></td>
+                            <td class="centrado" colspan="2"><h3>{{ corte.ctdescripcion }}</h3></td>
+                            <td style="text-align: right;">Realizado el: {{ corte.dregistro|date:"Y/m/d H:i:s" }}</td>
+                        </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>

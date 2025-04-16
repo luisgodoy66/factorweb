@@ -1,6 +1,5 @@
 {% extends 'bases/home.html' %}
 {% load static %}
-{% load humanize %}
 {% block content %}
 <div class="content mt-3">
     <!-- totales -->
@@ -257,12 +256,9 @@
 
 {% endblock %}
 {% block js_page %}
-<!-- <script type="text/javascript" src="{% static 'factorweb/js/dashboard.js' %}"></script> -->
 <!-- Chart js -->
 <script src="{% static 'factorweb/vendors/chart.js/dist/Chart.bundle.min.js' %}"></script>
-<!-- <script src="{% static 'factorweb/assets/js/dashboard.js' %}"></script> -->
 <script src="{% static 'factorweb/assets/js/widgets.js' %}"></script>
-<!-- <script src="{% static 'factorweb/assets/js/init-scripts/chart-js/chartjs-init.js' %}"></script> -->
 <script>
     var $table = jQuery('#table')
     var $tb_asgn = jQuery('#tb_asgn')

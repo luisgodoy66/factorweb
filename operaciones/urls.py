@@ -27,14 +27,18 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     AnexosClienteView, GeneraListaMovimientosClienteJSON, \
     GeneraListaClientesValoresPendientes, NuevaRevisionCarteraJSON,\
     RevisionCartera, RevisionCarteraJSON, RevisionCarteraClienteEdit,\
-    estadisticas_mes
-    
+    estadisticas_mes, CortesHistoricoView, CorteHistoricoEdit, \
+    GuardarCorteHistorico, corteHistorico, \
+    GeneraResumenAntigüedadCarteraCorteJSON
+    # , corteHistoricoJSON
 
 from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
     ImpresionAsignacionDesdeSolicitud, ImpresionFacturasPendientes, \
     ImpresionPagare, ImpresionAccesoriosPendientes, \
     ImpresionResumenAsignaciones, ImpresionPagaresPendientes, \
-    ImpresionLiquidacion, ImpresionRevisionCartera
+    ImpresionLiquidacion, ImpresionRevisionCartera, \
+    ImpresionAntiguedadCarteraCorte, ImpresionFacturasPendientesCorte,\
+    ImpresionAccesoriosPendientesCorte
 
 urlpatterns = [
 # datos operativos
@@ -175,14 +179,15 @@ urlpatterns = [
          , name="detallepagare_json"),
     path('editarcuota/<int:cuota_id>', ModificarCuota
          , name='modificar_cuota'),
-# revision de cartera
+# cartera
     path('revisioncartera/',RevisionCartera.as_view()
          , name='revision_cartera'),
     path('nuevarevisioncarterajson/',NuevaRevisionCarteraJSON
          , name='nueva_revision_cartera_json'),
     path('revisioncarterajson/<int:pk>',RevisionCarteraJSON
          , name='revision_cartera_json'),
-    path('revisioncarteracliente/<int:pk>/<int:revision>/<cliente>',RevisionCarteraClienteEdit.as_view()
+    path('revisioncarteracliente/<int:pk>/<int:revision>/<cliente>'
+         ,RevisionCarteraClienteEdit.as_view()
          , name='revision_cartera_cliente'),
     path('impresionrevisioncartera/<int:revision_id>',ImpresionRevisionCartera
          , name='impresion_revision_cartera'),
@@ -190,5 +195,24 @@ urlpatterns = [
          , name='negociaciones_mes'),
     path('negociaciones/<int:año>/<int:mes>/', estadisticas_mes
          , name='negociaciones_mes'),
-    # otras rutas...
+    path('listacorteshistorico',CortesHistoricoView.as_view(), \
+        name='lista_corteshistorico'),
+    path('editarcortehistorico/<int:pk>', CorteHistoricoEdit.as_view(), \
+        name='cortehistorico_editar'),
+    path('guardarcorteshistorico', GuardarCorteHistorico, ),\
+    path('cortehistorico/<int:corte_id>', corteHistorico
+         , name='corte_historico'),
+    # path('procesacortehistorico/<int:corte_id>', corteHistoricoJSON
+    #      , name='procesa_corte_historico'),
+    path('antigüedadcarteracorte/<int:corte_id>'
+         , GeneraResumenAntigüedadCarteraCorteJSON),
+    path('impresionantigüedadcarteracorte/<int:corte_id>'
+         , ImpresionAntiguedadCarteraCorte
+         , name='antigüedad_por_cliente_corte'),
+    path('impresioncarterapendientecorte/<int:corte_id>'
+         , ImpresionFacturasPendientesCorte
+         , name='detalle_facturas_pendientes_corte'),
+    path('impresionchequespendientescorte/<int:corte_id>'
+         , ImpresionAccesoriosPendientesCorte
+         , name='detalle_cheques_pendientes_corte'),
 ]

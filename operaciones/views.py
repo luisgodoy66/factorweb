@@ -17,20 +17,23 @@ from .forms import DatosOperativosForm, AsignacionesForm, \
     MaestroMovimientosForm, CondicionesOperativasForm, \
     DetalleCondicionesOperativasForm, TasasDocumentosForm, \
     TasasAccesoriosForm, DesembolsarForm, AnexosForm, CuotasForm,\
-    RevisionCarteraClienteForm
+    RevisionCarteraClienteForm, CortesHistoricoForm
 
 from .models import Condiciones_operativas_detalle, \
     Datos_operativos, Asignacion,  Condiciones_operativas_cabecera, \
     Anexos, Pagares, Desembolsos, Documentos, ChequesAccesorios, \
     Notas_debito_cabecera, Cheques_quitados, Movimientos_clientes,\
-    Ampliaciones_plazo_cabecera, Cheques_canjeados, Pagare_detalle
+    Ampliaciones_plazo_cabecera, Cheques_canjeados, Pagare_detalle,\
+    Cortes_historico, Documentos_historico, Pagare_detalle_historico,\
+    Cheques_quitados_historico, ChequesAccesorios_historico
 from .models import Revision_cartera, Revision_cartera_detalle
 from empresa.models import  Clases_cliente, Datos_participantes, \
     Tasas_factoring, Tipos_factoring, Cuentas_bancarias, \
     Otros_cargos, Movimientos_maestro, Contador
 from cobranzas.models import Documentos_protestados, \
     Liquidacion_cabecera, Documentos_cabecera, Documentos_detalle, \
-    Recuperaciones_cabecera, Cheques_protestados
+    Recuperaciones_cabecera, Cheques_protestados, \
+    Cheques_protestados_historico, Documentos_protestados_historico
 from bases.models import Usuario_empresa, Empresas
 from solicitudes import models as ModelosSolicitud
 from clientes import models as ModeloCliente
@@ -330,6 +333,11 @@ class AnexosEdit(SinPrivilegios, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['nuevo'] = False
+        return kwargs
+
 class EstadosOperativosView(SinPrivilegios, generic.ListView):
     model = ModeloCliente.Datos_generales
     template_name = "operaciones/listaestadosoperativos.html"
@@ -352,7 +360,6 @@ class EstadosOperativosView(SinPrivilegios, generic.ListView):
         return context
 
 class DesembolsosConsulta(SinPrivilegios, generic.TemplateView):
-    # model = Desembolsos
     template_name = "operaciones/consultageneraldesembolsos.html"
     context_object_name='consulta'
     login_url = 'bases:login'
@@ -418,9 +425,7 @@ class PagaresView(SinPrivilegios, generic.ListView):
         return context
 
 class PagareDatos(SinPrivilegios, generic.TemplateView):
-    # model = Desembolsos
     template_name = "operaciones/datospagare_form.html"
-    # context_object_name='pagare'
     login_url = 'bases:login'
     permission_required="operaciones.change_pagares"
 
@@ -518,10 +523,42 @@ class RevisionCarteraClienteEdit(SinPrivilegios, generic.UpdateView):
         context["revision"] = revision
         return context
 
-    # def get_success_url(self):
-    #     id = self.kwargs.get('pk')
-    #     return reverse_lazy("operaciones:revision_cartera_json"
-    #         , kwargs={'pk': id})
+class CortesHistoricoView(SinPrivilegios, generic.ListView):
+    model = Cortes_historico
+    template_name = "operaciones/listacorteshistorico.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="Operaciones.view_cortes_historico"
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Cortes_historico.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(CortesHistoricoView, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class CorteHistoricoEdit(SinPrivilegios, generic.UpdateView):
+    model = Cortes_historico
+    template_name = "operaciones/datoscortehistorico_modal.html"
+    context_object_name = "corte"
+    login_url = 'bases:login'
+    form_class=CortesHistoricoForm
+    success_url=reverse_lazy("operaciones:lista_corteshistorico")
+    permission_required="operaciones.change_cortes_historico"
+
+    def form_valid(self, form):
+        try:
+            form.instance.cxusuariomodifica = self.request.user.id
+            return super().form_valid(form)
+        except Exception as e:
+            form.add_error(None, str(e))
+            return self.form_invalid(form)
 
 @login_required(login_url='/login/')
 @permission_required('operaciones.add_desembolsos', login_url='bases:sin_permisos')
@@ -682,9 +719,6 @@ def DatosOperativos(request, cliente_id=None):
         ntasamora = request.POST.get('ntasamora')
 
         idclase = Clases_cliente.objects.filter(pk = cxclase).first()
-
-        # datoscliente = Datos_operativos.objects\
-        #     .filter(cxcliente=cliente_id).first()
 
         if not datoscliente:
             datoscliente= Datos_operativos(
@@ -1010,16 +1044,12 @@ def CalcularCargosPorDocumento(doc, gao, dc, fecha_desembolso
 
         # el comprador esta en el documento no en el cheque
         if tipo_asignacion==FACTURAS_PURAS:
-            # comprador = ModeloCliente.Datos_compradores.objects\
-            #     .filter(cxcomprador = doc.cxcomprador).first()
             comprador = Datos_participantes.objects\
                 .filter(cxparticipante=doc.cxcomprador
                         , empresa = doc.empresa).first()
         else:
             fac = ModelosSolicitud.Documentos.objects\
                 .filter(id = doc.documento_id).first()
-            # comprador = ModeloCliente.Datos_compradores.objects\
-            #     .filter(cxcomprador_id = fac.cxcomprador).first()
             comprador = Datos_participantes.objects\
                 .filter(cxparticipante=fac.cxcomprador
                         , empresa = fac.empresa).first()
@@ -1146,7 +1176,6 @@ def DetalleDocumentoADiccionario(doc, tipo_asignacion):
         output["Documento"] = doc.ctdocumento
         output["Emision"] = doc.demision.strftime("%Y-%m-%d")
     else:
-        # output['id'] = doc.documento.id
         output["Comprador"] = doc.documento.ctcomprador
         output["ClaseComprador"] = doc.documento.ctcomprador
         output["Documento"] = doc.documento.ctdocumento
@@ -1217,7 +1246,6 @@ def SumaCargos(request,asignacion_id, gao_carga_iva, dc_carga_iva, carga_gao
 
     # iva
     iva = round( base_iva * Decimal(porcentaje_iva) / 100,2)
-    # redondear a 2 decimales?
     # neto
     neto =   a -g - d - iva
 
@@ -1516,8 +1544,6 @@ def bajararchivo(request,plantilla, nombrearchivo):
 @permission_required('operaciones.change_asignacion', login_url='bases:sin_permisos')
 def ReversaAceptacionAsignacion(request, pid_asignacion):
     # # ejecuta un store procedure 
-    # resultado=enviarPost("CALL uspReversaAceptacionAsignacion( {0},'')"
-    # .format(pid_asignacion))
     resultado=enviarPost("CALL uspreversaliquidacionasignacion( {0},'')"
         .format( pid_asignacion,  ))
 
@@ -2146,8 +2172,6 @@ def CondicionesOperativasInactivar(request,id):
 def ConsultaAnexosActivos(request, tipo_cliente):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    # tipo_cliente=cliente.datos_generales.cxtipocliente
-
     anexos = Anexos.objects.filter(lactivo = True, empresa = id_empresa.empresa)\
         .filter(Q(cxtipocliente = tipo_cliente)| Q(cxtipocliente = 'T'))\
             .all()
@@ -2526,9 +2550,6 @@ def GeneraListaClientesValoresPendientes(request, porcentaje = 80):
     id_empresa = Usuario_empresa.objects\
         .filter(user = request.user).first()
 
-    # total_por_cliente = Documentos.objects\
-    #     .clientes_con_valores_pendientes(id_empresa.empresa, porcentaje)
-    
     total_por_cliente = ModeloCliente.Linea_Factoring.objects\
         .clientes_con_valores_pendientes(id_empresa.empresa, porcentaje)
     
@@ -2546,7 +2567,6 @@ def NuevaRevisionCarteraJSON(request,):
         cxusuariocrea = request.user,
     )
     revision.save()
-    # revision = Revision_cartera.objects.filter(pk=19).first()
     
     facturas = Documentos.objects.revision_cartera(id_empresa.empresa)
     accesorios = ChequesAccesorios.objects.revision_cartera(id_empresa.empresa)
@@ -2714,3 +2734,141 @@ def estadisticas_mes(request, año = None, mes = None):
         'clientes_nuevos': clientes_nuevos,
     }
     return render(request, 'operaciones/consultaestadisticasmes.html', context)
+
+def GuardarCorteHistorico(request):
+    id_empresa = Usuario_empresa.objects.filter(user=request.user).first().empresa
+
+    resultado=enviarPost("CALL uspguardarcortehistorico( {0},{1}, '')"
+        .format(id_empresa.id, request.user.id))
+    
+    return HttpResponse(resultado)
+
+@login_required(login_url='/login/')
+@permission_required('operaciones.view_documentos', login_url='bases:sin_permisos')
+def corteHistorico(request, corte_id = None):
+    template_name='operaciones/consultacortehistorico.html'
+
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
+    
+    # datos = { 'cortes': Cortes_historico.objects\
+    #         .filter(empresa = id_empresa.empresa
+    #                 , leliminado = False
+    #                 , lactivo = True)
+    # }
+    # return render(request, template_name, datos)
+    cartera = 0
+    protestos = 0
+    pagares = 0
+
+    docs = Documentos_historico.objects\
+        .TotalCartera(id_empresa.empresa, corte_id)
+    if docs['Total']:
+        cartera = docs['Total']
+        
+    prot = Cheques_protestados_historico.objects\
+        .TotalProtestos(id_empresa.empresa, corte_id)
+    if prot['Total']:
+        protestos = prot['Total']
+
+    pag = Pagare_detalle_historico.objects\
+        .TotalPagares(id_empresa.empresa, corte_id)
+    if pag['Total']:
+        pagares = pag['Total']
+
+    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+
+    datos = { 'total_cartera': cartera
+        , 'total_protestos':protestos
+        , 'total_cartera_protestos':cartera+protestos+pagares
+        , 'solicitudes_pendientes':sp
+        , 'corte_historico': Cortes_historico.objects\
+            .filter(pk = corte_id).first()
+    }
+    return render(request, template_name, datos)
+
+# def corteHistoricoJSON(request, corte_id = None):
+#     cartera = 0
+#     protestos = 0
+#     pagares = 0
+
+#     id_empresa = Usuario_empresa.objects\
+#         .filter(user = request.user).first()
+
+#     docs = Documentos_historico.objects\
+#         .TotalCartera(id_empresa.empresa, corte_id)
+#     if docs['Total']:
+#         cartera = docs['Total']
+        
+#     prot = Cheques_protestados_historico.objects\
+#         .TotalProtestos(id_empresa.empresa, corte_id)
+#     if prot['Total']:
+#         protestos = prot['Total']
+
+#     pag = Pagare_detalle_historico.objects\
+#         .TotalPagares(id_empresa.empresa, corte_id)
+#     if pag['Total']:
+#         pagares = pag['Total']
+
+#     sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+#                                        empresa = id_empresa.empresa).count()
+
+
+#     datos = { 'total_cartera': cartera
+#         , 'total_protestos':protestos
+#         , 'total_cartera_protestos':cartera+protestos+pagares
+#         , 'solicitudes_pendientes':sp
+#     }
+#     return JsonResponse(datos)
+
+def GeneraResumenAntigüedadCarteraCorteJSON(request, corte_id = None):
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    documentos = Documentos_historico.objects\
+        .antigüedad_cartera(id_empresa.empresa, corte_id)
+    acc_quitados =  Cheques_quitados_historico.objects\
+        .antigüedad_cartera(id_empresa.empresa, corte_id)
+    cheques = ChequesAccesorios_historico.objects\
+        .antigüedad_cartera(id_empresa.empresa, corte_id)
+    protestados = Documentos_protestados_historico\
+        .objects.antigüedad_cartera(id_empresa.empresa, corte_id)
+    pagares = Pagare_detalle_historico.objects\
+        .antigüedad_cartera(id_empresa.empresa, corte_id)
+
+    fvm90 = documentos["vencido_mas_90"] or 0
+    avm90 = acc_quitados["vencido_mas_90"] or 0
+    fv90 = documentos["vencido_90"] or 0
+    av90 = acc_quitados["vencido_90"] or 0
+    fv60 = documentos["vencido_60"] or 0
+    av60 = acc_quitados["vencido_60"] or 0
+    fv30 = documentos["vencido_30"] or 0
+    av30 = acc_quitados["vencido_30"] or 0
+    fx30 = documentos["porvencer_30"] or 0
+    ax30 = acc_quitados["porvencer_30"] or 0
+    fx60 = documentos["porvencer_60"] or 0
+    ax60 = acc_quitados["porvencer_60"] or 0
+    fx90 = documentos["porvencer_90"] or 0
+    ax90 = acc_quitados["porvencer_90"] or 0
+    fxm90 = documentos["porvencer_mas_90"] or 0
+    axm90 = acc_quitados["porvencer_mas_90"] or 0
+
+    cartera={}
+    cartera["fvencido_mas_90"] = fvm90+avm90
+    cartera["fvencido_90"] = fv90+av90
+    cartera["fvencido_60"] = fv60+av60
+    cartera["fvencido_30"] = fv30+av30
+    cartera["fporvencer_30"] = fx30+ax30
+    cartera["fporvencer_60"] = fx60+ax60
+    cartera["fporvencer_90"] = fx90+ax90
+    cartera["fporvencer_mas_90"] = fxm90+axm90
+
+    data = {"facturas":cartera
+            , "accesorios":cheques
+            , "protestos":protestados
+            , "pagares":pagares
+            }
+            
+    
+    return JsonResponse( data)

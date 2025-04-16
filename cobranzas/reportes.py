@@ -7,10 +7,12 @@ from django.contrib.staticfiles import finders
 from django.templatetags.static import static
 from django_weasyprint import WeasyTemplateResponse
 
-from .models import  Documentos_cabecera, Documentos_detalle, Liquidacion_cabecera\
-        , Liquidacion_detalle, Recuperaciones_cabecera, Recuperaciones_detalle\
-        , Cheques, Cheques_protestados, Cargos_cabecera, Cargos_detalle\
-        , DebitosCuentasConjuntas, Pagare_cabecera, Pagare_detalle
+from .models import  Documentos_cabecera, Documentos_detalle, \
+    Liquidacion_cabecera, Liquidacion_detalle, \
+    Recuperaciones_cabecera, Recuperaciones_detalle, Cheques, \
+    Cheques_protestados, Cargos_cabecera, Cargos_detalle, \
+    DebitosCuentasConjuntas, Pagare_cabecera, Pagare_detalle, \
+    Cheques_protestados_historico, Cortes_historico
 from operaciones.models import Notas_debito_cabecera, Notas_debito_detalle
 from operaciones.models import Ampliaciones_plazo_cabecera, Ampliaciones_plazo_detalle \
 , Documentos, ChequesAccesorios
@@ -894,4 +896,41 @@ def ImpresionCobranzaCuota(request, cobranza_id):
     )
     response['Content-Disposition'] = 'inline; filename="cobranza "' \
         + str(cobranza.cxcobranza) + ".pdf"
+    return response
+
+def ImpresionProtestosPendientesCorte(request, corte_id = None):
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+     
+    corte = Cortes_historico.objects.filter(id=corte_id).first()
+
+    protestos = Cheques_protestados_historico.objects\
+        .protestos_pendientes(id_empresa.empresa, corte_id)
+
+    # totalizar el campo nsaldocartera de la tabla cheques_protestados
+    tot_cobro = Cheques_protestados_historico.objects\
+        .filter(empresa = id_empresa.empresa
+                , leliminado = False, historico = corte_id
+                , nsaldocartera__gt=0)\
+            .aggregate(total_cartera = Sum('nvalorcartera')
+                    , total_saldo = Sum('nsaldocartera'))
+
+    template_path = 'cobranzas/protestos_reporte.html'
+
+    context={
+        "corte" : corte,
+        "protestos" : protestos,
+        "totales": tot_cobro,
+        'empresa': id_empresa.empresa,
+    }
+
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
+    )
+    response['Content-Disposition'] = 'inline; filename="protestos_pendientes.pdf"'
     return response

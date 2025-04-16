@@ -162,9 +162,6 @@
                             <li><i class="menu-icon fa fa-info"></i><a href="{% url 'operaciones:listaestadosoperativos' %}">Estados operativos</a></li>
                         </ul>
                     </li>
-                    <!-- <li>
-                        <a href="widgets.html"> <i class="menu-icon ti-email"></i>Widgets </a>
-                    </li> -->
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
                             <i class="menu-icon fa fa-shopping-cart"></i>Deudores</a>
@@ -172,17 +169,23 @@
                             <li><i class="menu-icon fa fa-info-circle"></i><a href="{% url 'clientes:listacompradores' %}">Ficha general</a></li>
                             <li><i class="menu-icon fa fa-laptop"></i><a href="{% url 'clientes:listacuentasbancarias_deudores' %}">Cuentas bancarias</a></li>
                             <li><i class="menu-icon fa fa-tag"></i><a href="{% url 'clientes:listacupos' %}">Cupos</a></li>
-                            <!-- <li><i class="menu-icon fa fa-info"></i><a href="#">Estados operativos</a></li> -->
                         </ul>
                     </li>
 
-                    <h3 class="menu-title">Análisis</h3><!-- /.menu-title -->
+                    <h3 class="menu-title">Cartera</h3><!-- /.menu-title -->
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
-                            <i class="menu-icon fa fa-eye"></i>Cartera</a>
+                            <i class="menu-icon fa fa-eye"></i>Análisis</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-pencil"></i><a href="{% url 'operaciones:revision_cartera' %}">Revisión</a></li>
-                            <li><i class="menu-icon fa fa-bar-chart-o"></i><a href="{% url 'operaciones:negociaciones_mes' %}">Estadísticas</a></li>
+                            <li><i class="menu-icon fa fa-bar-chart-o"></i><a href="{% url 'operaciones:negociaciones_mes' %}">Estadísticas por mes</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-save"></i>Guardados</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-camera"></i><a href="{% url 'operaciones:lista_corteshistorico' %}">Cortes</a></li>
                         </ul>
                     </li>
 
@@ -271,7 +274,7 @@
                             <li><i class="menu-icon fa ti-book"></i><a href="{% url 'contabilidad:consultaperdidasyganancias' %}">Estado P&G</a></li>
                         </ul>
                     </li>
-                    <li><a href="#">V.2.6.1</a></li>
+                    <li><a href="#">V.2.7</a></li>
                 </ul>
             </div><!-- /.navbar-collapse -->
         </nav>
@@ -337,11 +340,6 @@
 
     <!-- agregado para datetime picker -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js" integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>      
-    <!-- <script>
-        jQuery(document).ready(function(){
-            jQuery.datetimepicker.setlocale('es');
-        });
-    </script> -->
      <!-- /agregado para datetime picker -->
 
      <!-- rutinas generales -->

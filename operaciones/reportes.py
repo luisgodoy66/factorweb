@@ -12,8 +12,10 @@ from datetime import datetime, timedelta, date
 # from xhtml2pdf import pisa
 
 from .models import Asignacion, Documentos, ChequesAccesorios, Cheques_quitados,\
-    Pagares, Pagare_detalle, Revision_cartera_detalle, Revision_cartera
-from cobranzas.models import Documentos_protestados
+    Pagares, Pagare_detalle, Revision_cartera_detalle, Revision_cartera, \
+    Documentos_historico, ChequesAccesorios_historico, Cheques_quitados_historico,\
+    Pagare_detalle_historico, Cortes_historico
+from cobranzas.models import Documentos_protestados, Documentos_protestados_historico
 from empresa.models import Tasas_factoring
 from solicitudes import models as SolicitudModels
 from bases.models import Usuario_empresa
@@ -599,5 +601,195 @@ def ImpresionRevisionCartera(request, revision_id, ):
         # stylesheets=stylesheet_paths
     )
     response['Content-Disposition'] = 'inline; filename="resumen_asignaciones.pdf"'
+    return response
+
+def ImpresionAntiguedadCarteraCorte(request, corte_id):
+    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+
+    corte = Cortes_historico.objects.filter(id=corte_id).first()
+
+    facturas = Documentos_historico.objects.antigüedad_por_cliente(id_empresa.empresa, corte_id)
+    accesorios = ChequesAccesorios_historico.objects.antigüedad_por_cliente(id_empresa.empresa, corte_id)
+    prot_facturas = Documentos_protestados_historico.objects.antigüedad_por_cliente_facturas(id_empresa.empresa, corte_id)
+    prot_accesorios = Documentos_protestados_historico.objects.antigüedad_por_cliente_accesorios(id_empresa.empresa, corte_id)
+    acc_quitados = Cheques_quitados_historico.objects.antigüedad_por_cliente(id_empresa.empresa, corte_id)
+    pagares = Pagare_detalle_historico.objects.antigüedad_por_cliente(id_empresa.empresa, corte_id)
+
+    total_facturas = Documentos_historico.objects.antigüedad_cartera(id_empresa.empresa, corte_id)
+    total_accesorios = ChequesAccesorios_historico.objects.antigüedad_cartera(id_empresa.empresa, corte_id)
+    total_protestos = Documentos_protestados_historico.objects.antigüedad_cartera(id_empresa.empresa, corte_id)
+    total_quitados = Cheques_quitados_historico.objects.antigüedad_cartera(id_empresa.empresa, corte_id)
+    total_pagares = Pagare_detalle_historico.objects.antigüedad_cartera(id_empresa.empresa, corte_id)
+
+    fvm90 = total_facturas['vencido_mas_90'] or 0
+    fv90 = total_facturas['vencido_90'] or 0
+    fv60 = total_facturas['vencido_60'] or 0
+    fv30 = total_facturas['vencido_30'] or 0
+    fx30 = total_facturas['porvencer_30'] or 0
+    fx60 = total_facturas['porvencer_60'] or 0
+    fx90 = total_facturas['porvencer_90'] or 0
+    fxm90 = total_facturas['porvencer_mas_90'] or 0
+
+    avm90 = total_accesorios['vencido_mas_90'] or 0
+    av90 = total_accesorios['vencido_90'] or 0
+    av60 = total_accesorios['vencido_60'] or 0
+    av30 = total_accesorios['vencido_30'] or 0
+    ax30 = total_accesorios['porvencer_30'] or 0
+    ax60 = total_accesorios['porvencer_60'] or 0
+    ax90 = total_accesorios['porvencer_90'] or 0
+    axm90 = total_accesorios['porvencer_mas_90'] or 0
+
+    pvm90 = total_protestos['pvencido_mas_90'] or 0
+    pv90 = total_protestos['pvencido_90'] or 0
+    pv60 = total_protestos['pvencido_60'] or 0
+    pv30 = total_protestos['pvencido_30'] or 0
+    px30 = total_protestos['pporvencer_30'] or 0
+    px60 = total_protestos['pporvencer_60'] or 0
+    px90 = total_protestos['pporvencer_90'] or 0
+    pxm90 = total_protestos['pporvencer_mas_90'] or 0
+
+    qvm90 = total_quitados['vencido_mas_90'] or 0
+    qv90 = total_quitados['vencido_90'] or 0
+    qv60 = total_quitados['vencido_60'] or 0
+    qv30 = total_quitados['vencido_30'] or 0
+    qx30 = total_quitados['porvencer_30'] or 0
+    qx60 = total_quitados['porvencer_60'] or 0
+    qx90 = total_quitados['porvencer_90'] or 0
+    qxm90 = total_quitados['porvencer_mas_90'] or 0
+
+    cvm90 = total_pagares['vencido_mas_90'] or 0
+    cv90 = total_pagares['vencido_90'] or 0
+    cv60 = total_pagares['vencido_60'] or 0
+    cv30 = total_pagares['vencido_30'] or 0
+    cx30 = total_pagares['porvencer_30'] or 0
+    cx60 = total_pagares['porvencer_60'] or 0
+    cx90 = total_pagares['porvencer_90'] or 0
+    cxm90 = total_pagares['porvencer_mas_90'] or 0
+
+    template_path = 'operaciones/cartera_reporte.html'
+    detalle = facturas.union(accesorios, prot_facturas, prot_accesorios, acc_quitados, pagares)\
+            .order_by('cxcliente__cxcliente__ctnombre')
+
+    # Acumular totales por cliente
+    acumulado_por_cliente = {}
+    for doc in detalle:
+        cliente = doc['cxcliente__cxcliente__ctnombre']
+        if cliente not in acumulado_por_cliente:
+            acumulado_por_cliente[cliente] = {
+                'vencido_mas_90': 0,
+                'vencido_90': 0,
+                'vencido_60': 0,
+                'vencido_30': 0,
+                'porvencer_30': 0,
+                'porvencer_60': 0,
+                'porvencer_90': 0,
+                'porvencer_mas_90': 0,
+                'total': 0
+            }
+        acumulado_por_cliente[cliente]['vencido_mas_90'] += doc.get('vencido_mas_90', 0) or 0
+        acumulado_por_cliente[cliente]['vencido_90'] += doc.get('vencido_90', 0) or 0
+        acumulado_por_cliente[cliente]['vencido_60'] += doc.get('vencido_60', 0) or 0
+        acumulado_por_cliente[cliente]['vencido_30'] += doc.get('vencido_30', 0) or 0
+        acumulado_por_cliente[cliente]['porvencer_30'] += doc.get('porvencer_30', 0) or 0
+        acumulado_por_cliente[cliente]['porvencer_60'] += doc.get('porvencer_60', 0) or 0
+        acumulado_por_cliente[cliente]['porvencer_90'] += doc.get('porvencer_90', 0) or 0
+        acumulado_por_cliente[cliente]['porvencer_mas_90'] += doc.get('porvencer_mas_90', 0) or 0
+        acumulado_por_cliente[cliente]['total'] += doc.get('total', 0) or 0
+
+    context = {
+        "corte" : corte,
+        "documentos": acumulado_por_cliente,
+        "totalvm90": fvm90 + avm90 + pvm90 + qvm90 + cvm90,
+        "totalv90": fv90 + av90 + pv90 + qv90 + cv90,
+        "totalv60": fv60 + av60 + pv60 + qv60 + cv60,
+        "totalv30": fv30 + av30 + pv30 + qv30 + cv30,
+        "totalx30": fx30 + ax30 + px30 + qx30 + cx30,
+        "totalx60": fx60 + ax60 + px60 + qx60 + cx60,
+        "totalx90": fx90 + ax90 + px90 + qx90 + cx90,
+        "totalxm90": fxm90 + axm90 + pxm90 + qxm90 + cxm90,
+        "total": fvm90 + fv90 + fv60 + fv30 + avm90 + av90 + av60 + av30 + pvm90 + pv90 + pv60 + pv30
+                + fxm90 + fx90 + fx60 + fx30 + axm90 + ax90 + ax60 + ax30 + pxm90 + px90 + px60 + px30
+                + qvm90 + qv90 + qv60 + qv30 + qx30 + qx60 + ax90 + qxm90
+                + cvm90 + cv90 + cv60 + cv30 + cx30 + cx60 + cx90 + cxm90,
+        'empresa': id_empresa.empresa,
+    }
+
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
+    )
+    response['Content-Disposition'] = 'inline; filename="cartera historica.pdf"'
+    return response
+
+def ImpresionFacturasPendientesCorte(request, corte_id):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    corte = Cortes_historico.objects.filter(id=corte_id).first()
+    totalfacturas=0
+    totalquitados=0
+
+    template_path = 'operaciones/detalle_facturaspendientes_reporte.html'
+
+    facturas = Documentos_historico.objects\
+        .cartera_pendiente(id_empresa.empresa, corte_id)
+    cheques_quitados = ChequesAccesorios_historico\
+        .objects.cartera_pendiente(id_empresa.empresa, corte_id)
+    
+    totalfacturas = facturas.aggregate(total = Sum('nsaldo'))
+    if not totalfacturas['total']: totalfacturas['total']=0
+
+    totalquitados = cheques_quitados.aggregate(total = Sum('chequequitado__nsaldo'))
+    if not totalquitados['total']: totalquitados['total']=0
+    
+    cartera = facturas.union(cheques_quitados).order_by('cxcliente__cxcliente__ctnombre')
+    
+    context={
+        "corte" : corte,
+        "detalle" : cartera,
+        'empresa': id_empresa.empresa,
+        'total' : totalfacturas['total'] + totalquitados['total'],
+    }
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
+    )
+    response['Content-Disposition'] = 'inline; filename="factueas pendientes.pdf"'
+    return response
+
+def ImpresionAccesoriosPendientesCorte(request, corte_id=None):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    corte = Cortes_historico.objects.filter(id=corte_id).first()
+
+    cartera = ChequesAccesorios_historico.objects\
+        .cheques_pendientes(id_empresa.empresa, corte_id)
+
+    total = cartera.aggregate(total = Sum('ntotal'))
+
+    template_path = 'operaciones/detalle_accesoriospendientes_reporte.html'
+
+    context={
+        "corte" : corte,
+        "detalle" : cartera,
+        'empresa': id_empresa.empresa,
+        'total': total['total']
+    }
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
+    )
+    response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
     return response
 

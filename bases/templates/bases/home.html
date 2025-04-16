@@ -181,7 +181,7 @@
 {% endblock %}
 
 {% block content %}
-            {% block alerta %}
+        {% block alerta %}
             {% if user.usuario_empresa.get.empresa.lbloqueada %}
             <div class="col-sm-12">
                 <div class="alert  alert-danger alert-dismissible fade show" role="alert">
@@ -250,5 +250,28 @@
                 </div>
                 {% endif %}
             {% endif %}
-            {% endblock alerta %}
+        {% endblock alerta %}
+        {% if detalle_version.count > 0 %}  
+        <div class="card bg-flat-color-0">
+            <div class="card-header">
+                Versión: 
+                <strong>V.{{ version }}</strong>
+                {{version.ctdescripcion}}
+            </div>
+            <div class="card-body">
+                {% for item in detalle_version %}
+                <div class="alert alert-info" role="alert">
+                    <h4 class="alert-heading">{{item.ctmejora}}</h4>
+                    <p>{{item.ctdescripcion}}</p>
+                    <hr>
+                    <p class="mb-0">Ubicación: 
+                        <a href="{{ item.ctenlace }}" class="alert-link">
+                            {{ item.ctopcionmenu }}
+                        </a>
+                    </p>
+                </div>
+                {% endfor %}
+            </div>  
+        </div>
+        {% endif %}
 {% endblock %}

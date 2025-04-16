@@ -5,28 +5,26 @@
         <div class="page-header float-right">
             <div class="page-title">
                 <ol class="breadcrumb text-right">
-                    <li><a href="#">análisis</a></li>
                     <li><a href="#">cartera</a></li>
+                    <li><a href="#">análisis</a></li>
                     <li class="active">estadísticas</li>
                 </ol>
             </div>
         </div>
     </div>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
 {% endblock breadcrumbs %}
 {% block content %}
 <div class="card bg-flat-color-0">
     <div class="card-body">
         <div class="row form-group ">
-            <!-- <div class="col-md-1">Desembolso:</div> -->
-            <div class="col-md-1">Desde:</div>
+            <div class="col-md-1">Mes:</div>
             <div class="col-md-3">
                 <input type="month" class="form-control" name="fechadesde" 
                 id="fechadesde" placeholder="Desde" >
             </div>
             <div class="col-md-1">
                 <button class="btn btn-success btn-sm"  role="button" id="btnFiltrar">  
-                    <i class="fa fa-filter"></i> Filtrar
+                    <i class="fa fa-filter"></i> Consultar
                 </button>
             </div>
 
@@ -138,10 +136,6 @@
     
         })
     
-    
-        // // cerrar side bar
-        // CerrarSideBar();
-      
     };
         // primer gráfico
         var ctx1 = document.getElementById('negociacionesChart').getContext('2d');

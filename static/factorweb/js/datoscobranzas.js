@@ -21,10 +21,6 @@ window.onload=function(){
     // inicializar tabla
     initTable();
 
-
-    // // cerrar side bar
-    // CerrarSideBar();
-  
 };
 
 window.operateEvents = {
@@ -84,18 +80,20 @@ function DatosCobro(index, asgn, doc, sdo, cobro, ret, bajas){
   }
 
 function calcular_sobrepago(){
-  var seleccion=  $table.bootstrapTable('getData')
+  var seleccion = $table.bootstrapTable('getData');
   
   const total_cobrado = seleccion.map(function(row) {
       return +row.Cobro.substring(0);
-      }).reduce(function (sum, i) {
-          return Math.round((sum + i + Number.EPSILON) * 100) / 100;
-          }, 0)
+  }).reduce(function (sum, i) {
+      return Math.round((sum + i + Number.EPSILON) * 100) / 100;
+  }, 0);
           
-  var sobrepago = capturaValor('id_nvalor') - total_cobrado
+  var sobrepago = capturaValor('id_nvalor') - total_cobrado;
 
-  inicializaValor('id_nsobrepago',sobrepago);
+  // Redondear sobrepago a dos decimales
+  sobrepago = Math.round((sobrepago + Number.EPSILON) * 100) / 100;
 
+  inicializaValor('id_nsobrepago', sobrepago);
 }
 
 function mostrar_cuentas_origen(){
@@ -138,7 +136,7 @@ function mostrar_cuentas_destino(){
 function AceptarCobranza(){
   const recibido_por = document.querySelector('input[name="pagadopor"]:checked');
   const destino_deposito = document.querySelector('input[name="depositaren"]:checked');
-  const forma_de_cobro = capturaValor("forma_cobro")
+  // const forma_de_cobro = capturaValor("forma_cobro")
   const pagado_por_cliente =  (recibido_por.id == "porcliente")
   const deposito_cuenta_conjunta =  (destino_deposito.id == "cuentacliente")
   var cuenta_bancaria = null 
@@ -172,7 +170,6 @@ function AceptarCobranza(){
     ,function(){
 
     var objeto={
-      // "id_cliente":capturaValor("id_cliente"),
       "id_cliente": id_cliente,
       "tipo_factoring":capturaValor("tipo_factoring"),
       "forma_cobro":forma_de_cobro,
@@ -184,7 +181,6 @@ function AceptarCobranza(){
       "arr_documentos_cobrados": JSONdocumentos,
       "arr_cheque": JSONcheque,
       "arr_deposito": JSONdeposito,
-      // "id_deudor":capturaValor("id_deudor"),
       "id_deudor":id_deudor,
     }
 

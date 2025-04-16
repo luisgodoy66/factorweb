@@ -12,7 +12,7 @@ from empresa.models import Datos_participantes , Tipos_factoring, Cuentas_bancar
 from clientes import models as Cliente_models
 from operaciones.models import Documentos, ChequesAccesorios\
     , Cargos_detalle as Operaciones_cargos, Motivos_protesto_maestro\
-    , Pagare_detalle as Cuotas    
+    , Pagare_detalle as Cuotas, Cortes_historico
 from cuentasconjuntas import models as CuentasConjuntasModels
 
 import decimal
@@ -884,3 +884,325 @@ class Factura_cuota(ClaseModelo):
     
     def __str__(self):
         return self.cobranzacuota.cobranza.cxcobranza
+    
+class Protestos_historico_Manager(models.Manager):
+    def TotalProtestos(self, id_empresa, id_corte):
+        return self.filter(leliminado=False
+                           , historico = id_corte
+                           , empresa = id_empresa
+                           , nsaldocartera__gt = 0)\
+            .aggregate(Total = Sum('nsaldocartera'))
+
+    def protestos_pendientes(self, id_empresa, id_corte):
+        cp = self.filter(nsaldocartera__gt=0
+                         , leliminado = False
+                         , historico = id_corte
+                         , empresa = id_empresa
+                         , cxtipooperacion='C')\
+            .values('id','cheque__cheque_cobranza'
+                    ,'cheque__cheque_cobranza__cxcliente__cxcliente__ctnombre'
+                    ,'cheque__cheque_cobranza__cxcobranza'
+                    ,'cheque__cheque_cobranza__dcobranza'
+                    ,'cheque__cheque_cobranza__ddeposito'
+                    ,'cheque__ctgirador','dprotesto'
+                    ,'motivoprotesto__ctmotivoprotesto'
+                    ,'nvalor','nsaldocartera','nvalorcartera', 'cheque__cxparticipante'
+                    )
+        rp = self.filter(nsaldocartera__gt=0
+                         , leliminado = False
+                         , historico = id_corte
+                         , empresa = id_empresa
+                         , cxtipooperacion='R')\
+            .values('id','cheque__cheque_recuperacion'
+                    ,'cheque__cheque_recuperacion__cxcliente__cxcliente__ctnombre'
+                    ,'cheque__cheque_recuperacion__cxrecuperacion'
+                    ,'cheque__cheque_recuperacion__dcobranza'
+                    ,'cheque__cheque_recuperacion__ddeposito'
+                    ,'cheque__ctgirador','dprotesto'
+                    ,'motivoprotesto__ctmotivoprotesto'
+                    ,'nvalor','nsaldocartera','nvalorcartera', 'cheque__cxparticipante'
+                    )
+        return cp.union(rp)
+        
+    # def protestos_pendientes_cliente(self, id_empresa, id_cliente):
+    #     cp = self.filter(nsaldocartera__gt=0
+    #                      , leliminado = False
+    #                      , empresa = id_empresa
+    #                      , cheque__cheque_cobranza__cxcliente = id_cliente
+    #                      , cxtipooperacion='C')\
+    #         .values('id','cheque__cheque_cobranza'
+    #                 ,'cheque__cheque_cobranza__cxcliente__cxcliente__ctnombre'
+    #                 ,'cheque__cheque_cobranza__cxcobranza'
+    #                 ,'cheque__cheque_cobranza__dcobranza'
+    #                 ,'cheque__cheque_cobranza__ddeposito'
+    #                 ,'cheque__ctgirador','dprotesto'
+    #                 ,'motivoprotesto__ctmotivoprotesto'
+    #                 ,'nvalor','nsaldocartera','nvalorcartera'
+    #                 )
+    #     rp = self.filter(nsaldocartera__gt=0
+    #                      , leliminado = False
+    #                      , empresa = id_empresa
+    #                      , cheque__cheque_recuperacion__cxcliente = id_cliente
+    #                      , cxtipooperacion='R')\
+    #         .values('id','cheque__cheque_recuperacion'
+    #                 ,'cheque__cheque_recuperacion__cxcliente__cxcliente__ctnombre'
+    #                 ,'cheque__cheque_recuperacion__cxrecuperacion'
+    #                 ,'cheque__cheque_recuperacion__dcobranza'
+    #                 ,'cheque__cheque_recuperacion__ddeposito'
+    #                 ,'cheque__ctgirador','dprotesto'
+    #                 ,'motivoprotesto__ctmotivoprotesto'
+    #                 ,'nvalor','nsaldocartera','nvalorcartera'
+    #                 )
+    #     return cp.union(rp)
+        
+    # def TotalProtestosCliente(self, id_cliente):
+    #     return self.filter(leliminado=False
+    #                        , nsaldocartera__gt = 0)\
+    #                 .filter(Q(cheque__cheque_cobranza__cxcliente = id_cliente
+    #                           , cxtipooperacion='C')
+    #                         |Q(cheque__cheque_recuperacion__cxcliente = id_cliente
+    #                            , cxtipooperacion='R'))\
+    #         .aggregate(Total = Sum('nsaldocartera'))
+
+class Cheques_protestados_historico(ClaseModelo):
+    FORMAS_DE_COBRO = (
+        ('CHE', 'Cheque'),
+        ('DEP', 'Deposito de accesorio'),
+    )
+    TIPO_OPERACION = (
+        ("C", "Cobranza"),
+        ("R","Recuperacion"),
+    )
+    cheque = models.ForeignKey(Cheques, on_delete= models.RESTRICT
+        , related_name="cheque_protestado_historico")
+    cxformacobro = models.CharField(max_length=3, choices=FORMAS_DE_COBRO)
+    dprotesto = models.DateField()
+    motivoprotesto = models.ForeignKey(Motivos_protesto_maestro
+        , on_delete=models.RESTRICT)
+    nvalor =  models.DecimalField(max_digits=10, decimal_places=2)
+    nvalorcartera = models.DecimalField(max_digits=10, 
+                                        decimal_places=2, default=0)
+    nsaldocartera =  models.DecimalField(max_digits=10, 
+                                         decimal_places=2)
+    cxestado = models.CharField(max_length=1, default="A") 
+    dultimacobranza = models.DateTimeField(null=True) 
+    cxtipooperacion = models.CharField(max_length=1, 
+                                       choices=TIPO_OPERACION)
+    notadedebito = models.ForeignKey(Notas_debito_cabecera, 
+                                     on_delete=models.CASCADE, 
+                                     null=True)
+    lcontabilizada = models.BooleanField(default=False)
+    asiento = models.OneToOneField(Diario_cabecera, 
+                                   on_delete=models.RESTRICT
+                                    , related_name="asiento_protesto_historico"
+                                    , null=True)
+    historico= models.ForeignKey(Cortes_historico, 
+                                 on_delete=models.RESTRICT
+        , related_name="cheque_protestado_historico")
+    idanterior = models.BigIntegerField(default=0)
+
+    objects = Protestos_historico_Manager()
+
+    def __str__(self):
+        return '{} CH/{}'.format(self.cheque.cxcuentabancaria, self.cheque.ctcheque)        
+
+class Documentos_protestados_historico_Manager(models.Manager):
+
+    def antigüedad_cartera(self, id_empresa, id_corte):
+        # grafico de antigüedad de cartera 
+        vcdo90 = datetime.today()+timedelta(days=-90)
+        vcdo60 = datetime.today()+timedelta(days=-60)
+        vcdo30 = datetime.today()+timedelta(days=-30)
+        xver30 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=60)
+        xver90 = datetime.today()+timedelta(days=90)
+
+        protestados = self.filter( leliminado = False
+                                  , nsaldo__gt = 0
+                                  , historico = id_corte
+                                , empresa = id_empresa)\
+            .aggregate(
+                fvencido_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo90
+                                , accesorio__isnull = True) ) 
+                , avencido_mas_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo90
+                                , accesorio__isnull = False) ) 
+                , fvencido_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo60
+                                , documento__dvencimiento__gte = vcdo90
+                                , accesorio__isnull = True) ) 
+                , avencido_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo60
+                                , accesorio__dvencimiento__gte = vcdo90
+                                , accesorio__isnull = False) ) 
+                , fvencido_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo30
+                                , documento__dvencimiento__gte = vcdo60
+                                , accesorio__isnull = True) ) 
+                , avencido_60 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo30
+                                , accesorio__dvencimiento__gte = vcdo60
+                                , accesorio__isnull = False) ) 
+                , fvencido_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = datetime.today()
+                                , documento__dvencimiento__gte = vcdo30
+                                , accesorio__isnull = True) ) 
+                , avencido_30 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = datetime.today()
+                                , accesorio__dvencimiento__gte = vcdo30
+                                , accesorio__isnull = False) ) 
+                ,fporvencer_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__gte = datetime.today()
+                                , documento__dvencimiento__lte = xver30
+                                , accesorio__isnull = True) ) 
+                ,aporvencer_30 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gte = datetime.today()
+                                , accesorio__dvencimiento__lte = xver30
+                                , accesorio__isnull = False ) )
+                ,fporvencer_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver30
+                                , documento__dvencimiento__lte = xver60
+                                , accesorio__isnull = True) ) 
+                ,aporvencer_60 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver30
+                                , accesorio__dvencimiento__lte = xver60
+                                , accesorio__isnull = False) ) 
+                ,fporvencer_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver60
+                                , documento__dvencimiento__lte = xver90
+                                , accesorio__isnull = True) ) 
+                ,aporvencer_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver60
+                                , accesorio__dvencimiento__lte = xver90
+                                , accesorio__isnull = False) ) 
+                , fporvencer_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver90
+                                , accesorio__isnull = True)) 
+                , aporvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver90
+                                , accesorio__isnull = False)) 
+                )
+        fvm90 = protestados["fvencido_mas_90"] or 0
+        fv90 = protestados["fvencido_90"] or 0
+        fv60 = protestados["fvencido_60"] or 0
+        fv30 = protestados["fvencido_30"] or 0
+        fx30 = protestados["fporvencer_30"] or 0
+        fx60 = protestados["fporvencer_60"] or 0
+        fx90 = protestados["fporvencer_90"] or 0
+        fxm90 = protestados["fporvencer_mas_90"] or 0
+        avm90=protestados["avencido_mas_90"] or 0
+        av90=protestados["avencido_90"] or 0
+        av60=protestados["avencido_60"] or 0
+        av30=protestados["avencido_30"] or 0
+        ax30=protestados["aporvencer_30"] or 0
+        ax60=protestados["aporvencer_60"] or 0
+        ax90=protestados["aporvencer_90"] or 0
+        axm90=protestados["aporvencer_mas_90"] or 0
+
+        protestos={}
+
+        protestos["pvencido_mas_90"] = fvm90+avm90
+        protestos["pvencido_90"] = fv90+av90
+        protestos["pvencido_60"] = fv60+av60
+        protestos["pvencido_30"] = fv30+av30
+        protestos["pporvencer_30"] = fx30+ax30
+        protestos["pporvencer_60"] = fx60+ax60
+        protestos["pporvencer_90"] = fx90+ax90
+        protestos["pporvencer_mas_90"] = fxm90+axm90
+
+        return protestos
+    
+    def antigüedad_por_cliente_facturas(self, id_empresa, id_corte):
+        # la fecha de vencimiento está en el documento
+        vcdo90 = datetime.today()+timedelta(days=-90)
+        vcdo60 = datetime.today()+timedelta(days=-60)
+        vcdo30 = datetime.today()+timedelta(days=-30)
+        xver30 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=60)
+        xver90 = datetime.today()+timedelta(days=90)
+
+        return self.filter( leliminado = False
+                            , historico = id_corte
+                           , nsaldo__gt = 0
+                           , accesorio__isnull = True
+                           , empresa = id_empresa)\
+            .values('documento__cxcliente__cxcliente__ctnombre')\
+            .annotate(
+                vencido_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo90) ) 
+                , vencido_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo60
+                                , documento__dvencimiento__gte = vcdo90) ) 
+                , vencido_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo30
+                                , documento__dvencimiento__gte = vcdo60))
+                , vencido_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = datetime.today()
+                                , documento__dvencimiento__gte = vcdo30))
+                ,porvencer_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__gte = datetime.today()
+                                , documento__dvencimiento__lte = xver30))
+                ,porvencer_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver30
+                                , documento__dvencimiento__lte = xver60))
+                ,porvencer_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver60
+                                , documento__dvencimiento__lte = xver90))
+                , porvencer_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver90))
+                , total = Sum('nsaldo')
+                )\
+            .order_by()
+    
+    def antigüedad_por_cliente_accesorios(self, id_empresa, id_corte):
+        # la fecha de vencimiento está en el accesorio
+        vcdo90 = datetime.today()+timedelta(days=-90)
+        vcdo60 = datetime.today()+timedelta(days=-60)
+        vcdo30 = datetime.today()+timedelta(days=-30)
+        xver30 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=60)
+        xver90 = datetime.today()+timedelta(days=90)
+
+        return self.filter( leliminado = False
+                            , historico = id_corte
+                           , nsaldo__gt = 0
+                           , accesorio__isnull = False
+                           , empresa = id_empresa)\
+            .values('documento__cxcliente__cxcliente__ctnombre')\
+            .annotate(
+                vencido_mas_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo90) ) 
+                , vencido_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo60
+                                , accesorio__dvencimiento__gte = vcdo90))
+                , vencido_60 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo30
+                                , accesorio__dvencimiento__gte = vcdo60))
+                , vencido_30 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = datetime.today()
+                                , accesorio__dvencimiento__gte = vcdo30))
+                ,porvencer_30 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gte = datetime.today()
+                                , accesorio__dvencimiento__lte = xver30))
+                ,porvencer_60 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver30
+                                , accesorio__dvencimiento__lte = xver60))
+                ,porvencer_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver60
+                                , accesorio__dvencimiento__lte = xver90))
+                , porvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver90))
+                , total = Sum('nsaldo')
+                )\
+            .order_by()
+    
+    # def revision_cartera(self, id_empresa):
+    #     # si tiene accesorio, la fecha de vencimiento es la del accesorio
+    #     # si no tiene accesorio, la fecha de vencimiento es la del documento
+    #     vcdo30 = datetime.today() + timedelta(days=-30)
+    #     # xver30 = datetime.today() + timedelta(days=30)
+
+    #     return self.filter(leliminado=False, nsaldo__gt=0, empresa=id_empresa) \
+    #         .values('documento__cxcliente__cxcliente__ctnombre',
+    #                 'documento__cxcliente__linea_factoring__nvalor',
+    #                 'documento__cxcliente__datos_operativos__cxclase__cxclase',
+    #                 'documento__cxcliente__datos_operativos__cxestado',
+    #                 'documento__cxcliente',
+    #                 ) \
+    #         .annotate(
+    #             vencido_mas_30=Value(0, output_field=DecimalField()),
+    #             vencido_30=Value(0, output_field=DecimalField()),
+    #             por_vencer=Value(0, output_field=DecimalField()),
+    #             ptotesto=Sum('nsaldo'),
+    #             total=Sum('nsaldo')
+    #         ) \
+    #         .order_by()
+    
+class Documentos_protestados_historico(ClaseModelo):
+    chequeprotestado = models.ForeignKey(Cheques_protestados_historico
+                                         , on_delete= models.RESTRICT)
+    documento = models.ForeignKey(Documentos, on_delete=models.CASCADE)
+    accesorio = models.ForeignKey(ChequesAccesorios, on_delete=models.CASCADE
+        ,null=True, default=None)
+    nvalor = models.DecimalField(max_digits=10, decimal_places=2)
+    nsaldo = models.DecimalField(max_digits=10, decimal_places=2)
+    nvalorbajacobranza =  models.DecimalField(max_digits=10, decimal_places=2
+        , default=0)
+    nsaldobajacobranza =  models.DecimalField(max_digits=10, decimal_places=2
+        , default=0)
+    cxestado = models.CharField(max_length=1, default="A") 
+    dultimacobranza = models.DateTimeField(null=True) 
+    historico= models.ForeignKey(Cortes_historico, on_delete=models.RESTRICT
+        , related_name="documento_protestado_historico")
+
+    objects = Documentos_protestados_historico_Manager()
+

@@ -16,12 +16,24 @@ from cobranzas.models import Cheques_protestados
 from contabilidad.models import Factura_venta
 
 from datetime import date, timedelta
-from .models import Usuario_empresa
+from .models import Usuario_empresa, Version_detalle, Versiones
 from .forms import Userform, UserPasswordForm
 
-class Home(LoginRequiredMixin, generic.TemplateView):
+class Home(LoginRequiredMixin, generic.ListView):
     template_name='bases/home.html'
     login_url='bases:login'
+    model = Version_detalle
+    context_object_name='detalle_version'
+
+    def get_queryset(self) :
+        qs=Version_detalle.objects.filter( version__lultimaversion = True,)
+        return qs
+    def get_context_data(self, **kwargs):
+        context = super(Home, self).get_context_data(**kwargs)
+        version = Versiones.objects.filter( lultimaversion = True,).first()
+        context["version"]=version
+
+        return context
 
 class MixinFormInvalid:
     def form_invalid(self,form):

@@ -6,7 +6,7 @@ from django import forms
 from .models import Condiciones_operativas_detalle, Datos_operativos, \
     Asignacion, Condiciones_operativas_cabecera, Anexos\
     , Desembolsos, Documentos, ChequesAccesorios, Pagare_detalle\
-    , Revision_cartera_detalle
+    , Revision_cartera_detalle, Cortes_historico
 from solicitudes import models as ModelosSolicitudes
 from empresa.models import Clases_cliente, Tipos_factoring, Cuentas_bancarias\
     ,Movimientos_maestro
@@ -265,7 +265,6 @@ class DetalleCondicionesOperativasForm(forms.ModelForm):
                 .filter(empresa=empresa, leliminado = False)
 
 class TasasDocumentosForm(forms.ModelForm):
-    # demision = forms.DateInput()
     
     class Meta:
         model=ModelosSolicitudes.Documentos
@@ -316,7 +315,6 @@ class TasasAccesoriosForm(forms.ModelForm):
             })
 
 class AnexosForm(forms.ModelForm):
-    # fanexo = forms.FileField(widget=forms.FileInput(attrs={'class':'form-control-file'}))
     ctnombre = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))    
     class Meta:
         model=Anexos
@@ -332,7 +330,6 @@ class AnexosForm(forms.ModelForm):
             }
 
 class TasasAPAccesoriosForm(forms.ModelForm):
-    # demision = forms.DateInput()
     
     class Meta:
         model=ChequesAccesorios
@@ -351,7 +348,6 @@ class TasasAPAccesoriosForm(forms.ModelForm):
             })
 
 class TasasAPDocumentoForm(forms.ModelForm):
-    # demision = forms.DateInput()
     
     class Meta:
         model=Documentos
@@ -401,6 +397,23 @@ class RevisionCarteraClienteForm(forms.ModelForm):
         fields=['ctcomentario']
         labels={'ctcomentario':'Comentario'
 
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+
+class CortesHistoricoForm(forms.ModelForm):
+    class Meta:
+        model=Cortes_historico
+        fields=['ctdescripcion', 
+                # 'lactivo'
+                ]
+        labels={'ctdescripcion':'Descripción',
+                # 'lactivo':'Activo'
         }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -28,7 +28,8 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos\
     , ImpresionProtestosPendientes, ImpresionAmpliacionDePlazo\
-    , ImpresionDetalleCobranzas, ImpresionDetalleRecuperaciones, ImpresionCobranzaCuota
+    , ImpresionDetalleCobranzas, ImpresionDetalleRecuperaciones\
+    , ImpresionCobranzaCuota, ImpresionProtestosPendientesCorte
 
 urlpatterns = [
     # cobranzas
@@ -205,4 +206,9 @@ urlpatterns = [
     path('aceptarcobranzacuota/',AceptarCobranzaCuota),
     path('reportecobranzacuota/<int:cobranza_id>',ImpresionCobranzaCuota
         , name='reporte_cobranza_cuota'),
+
+    # cartera
+    path('impresionprotestoscorte/<int:corte_id>', ImpresionProtestosPendientesCorte
+         , name='protestos_pendientes_corte'),
+
 ]

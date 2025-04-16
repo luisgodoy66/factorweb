@@ -53,3 +53,19 @@ class Usuario_empresa(models.Model):
                              related_name="usuario_empresa")
     empresa =models.ForeignKey(Empresas, on_delete=models.CASCADE,)
 
+class Versiones(models.Model):
+    dversion = models.DateField(auto_now_add=True)
+    ctversion = models.CharField(max_length=10, default='')
+    ctdescripcion = models.CharField(max_length=100, default='')
+    lultimaversion = models.BooleanField(default=False)
+    def __str__(self):
+        return self.ctversion
+    
+class Version_detalle(models.Model):
+    version = models.ForeignKey(Versiones, on_delete=models.CASCADE, related_name="version_detalle")
+    ctmejora = models.CharField(max_length=20, default='')
+    ctdescripcion = models.TextField(default='')
+    ctopcionmenu = models.CharField(max_length=40, default='')
+    ctenlace = models.CharField(max_length=100, default='')
+    def __str__(self):
+        return self.ctmejora
