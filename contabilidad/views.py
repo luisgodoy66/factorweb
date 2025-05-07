@@ -1007,10 +1007,13 @@ class BalanceGeneralConsulta(SinPrivilegios, generic.TemplateView):
 
         if mescerrado:
             añomes = mescerrado[0]['ultimomes']
-            año = añomes[0:4]
+            año = int(añomes[0:4])
             mes = int(añomes[4:6])
             if mes < 12:
                 mes +=1
+            else:
+                mes = 1
+                año += 1
         else:
             año = datetime.now().year
             mes = datetime.now().month
@@ -1722,6 +1725,13 @@ def AsientoDiarioNuevo(request, diario_id = None):
                     contador = sec.nultimonumero + 1
                 else:
                     contador = 1
+                    # crear el contador si no existe
+                    sec = Contador(
+                        cxtransaccion = 'AD',
+                        nultimonumero = 0,
+                        empresa = id_empresa.empresa,
+                        cxusuariocrea = request.user,
+                    )
                 # agregar ceros a la izquierda de variable numerica en python?
 
                 transaccion = 'AD-' + str(contador).zfill(7)
@@ -1739,7 +1749,7 @@ def AsientoDiarioNuevo(request, diario_id = None):
                     diario_id = diario.id
 
                 # actualizar la secuencia de diarios
-                sec.nultimonumero +=1
+                sec.nultimonumero = contador
                 sec.save()
 
                 # nueva = True
