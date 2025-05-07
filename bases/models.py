@@ -63,9 +63,9 @@ class Versiones(models.Model):
     
 class Version_detalle(models.Model):
     version = models.ForeignKey(Versiones, on_delete=models.CASCADE, related_name="version_detalle")
-    ctmejora = models.CharField(max_length=20, default='')
+    ctmejora = models.CharField(max_length=50, default='')
     ctdescripcion = models.TextField(default='')
-    ctopcionmenu = models.CharField(max_length=40, default='')
-    ctenlace = models.CharField(max_length=100, default='')
+    ctopcionmenu = models.CharField(max_length=60, default='')
+    ctenlace = models.CharField(max_length=120, default='')
     def __str__(self):
         return self.ctmejora

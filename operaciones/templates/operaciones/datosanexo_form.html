@@ -56,6 +56,21 @@
 
                     <div class="row form-group">
                         <div class="col-md-3">
+                            {{ form.lcesionfacturas.label}}
+                        </div>
+                        <div class="col-md-9 ">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  anexo.lcesionfacturas %} checked {% endif %} 
+                                id = "id_lcesionfacturas" name = "lcesionfacturas"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col-md-3">
                             {{ form.lactivo.label}}
                         </div>
                         <div class="col-md-9 ">

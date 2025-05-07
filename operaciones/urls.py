@@ -29,7 +29,7 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     RevisionCartera, RevisionCarteraJSON, RevisionCarteraClienteEdit,\
     estadisticas_mes, CortesHistoricoView, CorteHistoricoEdit, \
     GuardarCorteHistorico, corteHistorico, \
-    GeneraResumenAntigüedadCarteraCorteJSON
+    GeneraResumenAntigüedadCarteraCorteJSON, AnexosCesionFacturasView
     # , corteHistoricoJSON
 
 from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
@@ -137,14 +137,18 @@ urlpatterns = [
          , name='detalle_cheques_pendientes'),
     path('impresionresumenasignaciones/<desde>/<hasta>/<clientes>'
          , ImpresionResumenAsignaciones, name='resumen_asignaciones'),
-    path('impresionresumenasignaciones/<desde>/<hasta>/', ImpresionResumenAsignaciones
-         , name='resumen_asignaciones'),
+    path('impresionresumenasignaciones/<desde>/<hasta>/'
+         , ImpresionResumenAsignaciones, name='resumen_asignaciones'),
     path("anexosactivos/<tipo_cliente>", ConsultaAnexosActivos),
-    path("generaranexo/<int:asignacion_id>/<anexo_id>", GenerarAnexo,
-         name='generar_anexo'),
+    path("generaranexo/<int:asignacion_id>/<anexo_id>"
+         , GenerarAnexo, name='generar_anexo'),
+    path("generaranexo/<int:asignacion_id>/<anexo_id>/<deudor_id>"
+         , GenerarAnexo, name='generar_anexo_cesion'),
     path('marcaanexogenerado/<int:asignacion_id>', MarcarAnexoGenerado),
-    path('anexoscliente/<cliente_id>/<solicitud_id>', AnexosClienteView.as_view()
-         , name='anexos_cliente'),
+    path('anexoscliente/<cliente_id>/<solicitud_id>'
+         , AnexosClienteView.as_view(), name='anexos_cliente'),
+    path('anexoscesioncliente/<cliente_id>/<solicitud_id>'
+         , AnexosCesionFacturasView.as_view(), name='anexos_cesion_cliente'),
 # dashboard
     path('antigüedadcartera', GeneraResumenAntigüedadCarteraJSON),
     path('carteranegociada/<int:año>', GeneraResumenCarteraNegociadaJSON),

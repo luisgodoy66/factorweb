@@ -25,8 +25,8 @@ from .models import Condiciones_operativas_detalle, \
     Notas_debito_cabecera, Cheques_quitados, Movimientos_clientes,\
     Ampliaciones_plazo_cabecera, Cheques_canjeados, Pagare_detalle,\
     Cortes_historico, Documentos_historico, Pagare_detalle_historico,\
-    Cheques_quitados_historico, ChequesAccesorios_historico
-from .models import Revision_cartera, Revision_cartera_detalle
+    Cheques_quitados_historico, ChequesAccesorios_historico, \
+    Revision_cartera, Revision_cartera_detalle
 from empresa.models import  Clases_cliente, Datos_participantes, \
     Tasas_factoring, Tipos_factoring, Cuentas_bancarias, \
     Otros_cargos, Movimientos_maestro, Contador
@@ -559,6 +559,45 @@ class CorteHistoricoEdit(SinPrivilegios, generic.UpdateView):
         except Exception as e:
             form.add_error(None, str(e))
             return self.form_invalid(form)
+
+class AnexosCesionFacturasView(SinPrivilegios, generic.ListView):
+    model = ModelosSolicitud.Documentos
+    template_name = "operaciones/listaanexocesionfacturascliente.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="operaciones.view_anexos"
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
+        
+        asignacion_id = self.kwargs.get('asignacion_id')
+
+        qs=ModelosSolicitud.Documentos.objects\
+            .filter(leliminado = False
+                , cxasignacion = asignacion_id
+                , empresa = id_empresa.empresa)\
+            .values('comprador'
+                    , 'comprador__datos_generales_comprador__ctnombre'
+                    , 'comprador__comprador_comprador__lsenotifica')\
+            .annotate(documentos=Count('ntotal'))
+        return qs
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(AnexosClienteView, self).get_context_data(**kwargs)
+
+        solicitud_id = self.kwargs.get('solicitud_id')
+        cliente_id = self.kwargs.get('cliente_id')
+        cliente = ModeloCliente.Datos_generales.objects\
+            .filter(pk=cliente_id).first()
+
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        context['solicitud_id'] = solicitud_id
+        context['cliente'] = cliente
+        return context
 
 @login_required(login_url='/login/')
 @permission_required('operaciones.add_desembolsos', login_url='bases:sin_permisos')
@@ -2182,11 +2221,19 @@ def ConsultaAnexosActivos(request, tipo_cliente):
 
     return HttpResponse(json.dumps(data))
 
-def GenerarAnexo(request, asignacion_id, anexo_id):
+def GenerarAnexo(request, asignacion_id, anexo_id, deudor_id = None):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    asignacion = ModelosSolicitud.Asignacion.objects.filter(pk=asignacion_id).first()
-    documentos = ModelosSolicitud.Documentos.objects.filter(cxasignacion = asignacion_id).all()
+    asignacion = ModelosSolicitud.Asignacion.objects\
+        .filter(pk=asignacion_id).first()
+    
+    if not deudor_id:
+        documentos = ModelosSolicitud.Documentos.objects\
+            .filter(cxasignacion = asignacion_id).all()
+    else:
+        documentos = ModelosSolicitud.Documentos.objects\
+            .filter(cxasignacion = asignacion_id
+                    , comprador = deudor_id).all()
     
     anexo = Anexos.objects.filter(pk=anexo_id).first()
 

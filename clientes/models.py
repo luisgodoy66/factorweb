@@ -164,7 +164,6 @@ class Cupos_compradores(ClaseModelo):
         max_digits=10, decimal_places=2, null=False, default=0
     )
     cxtipocupo=models.CharField(max_length=1, null=True    )
-    # cxmodalidadcobranza=models.CharField(max_length=3, null=False)
     lactivo=models.BooleanField(default=True)
     lsenotifica=models.BooleanField(default=False)
 
@@ -278,7 +277,7 @@ class Linea_factoring_hist(ClaseModelo):
 class Personas_juridicas(ClaseModelo):
     TIPOS_DE_EMPRESAS = (
         ('ANO', 'Anónima'),
-        ('LTD', 'Resposabilidad Limitada'),
+        ('LTD', 'Responsabilidad Limitada'),
         ('SAS', 'Por acciones simplificadas'),
         ('COL', 'Nombre colectivo'),
         ('SIM', 'En comandita simple'),

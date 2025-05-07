@@ -888,9 +888,13 @@ class Anexos(ClaseModelo):
     fanexo = models.FileField(upload_to='anexos/', blank=True, )
     cxtipocliente=models.CharField(max_length=1, choices=TIPOS_DE_CLIENTES,
         help_text='tipo de cliente: natural , jurídico, todos', default='J')
+    lcesionfacturas = models.BooleanField(default=False)
     
     def __str__(self):
         return self.ctnombre
+    
+    def tipo_cliente(self):
+        return dict(self.TIPOS_DE_CLIENTES).get(self.cxtipocliente, 'Todos')
         
 class Motivos_protesto_maestro(ClaseModelo):
     ctmotivoprotesto = models.TextField()

@@ -209,3 +209,8 @@ class Otros_cargos(ClaseModelo):
         self.ctabreviacion=self.ctabreviacion.upper()
         return super(Otros_cargos, self).save()
    
+class Tipos_empresas(ClaseModelo):
+    cttipoempresa = models.CharField(max_length=60, blank=True)
+
+    def __str__(self):
+        return self.cttipoempresa

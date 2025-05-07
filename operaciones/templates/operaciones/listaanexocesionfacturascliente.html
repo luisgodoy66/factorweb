@@ -50,26 +50,15 @@
                 <table class="table table-striped table-bordered" 
                     id="bootstrap-data-table-export">
                     <thead>
-                        <th>Nombre de anexo</th>
+                        <th>Deudor</th>
+                        <th>Se notifica</th>
                         <th class="all">Acciones</th>
                     </thead>
                     <tbody>
                         {% for item in consulta %}
                         <tr>
-                            <td>{{ item }}</td>
-                            <td>
-                                {% if item.lcesionfacturas %}
-                                    <a href="{% url 'operaciones:anexos_cesion_cliente' item.id solicitud_id %}" 
-                                        class="btn btn-primary btn-sm" role="button" 
-                                        title="Ver"><i class="fa fa-eye"></i>
-                                    </a>
-                                {% else %}
-                                    <a href="{% url 'operaciones:generar_anexo' solicitud_id item.id %}" 
-                                        class="btn btn-success btn-sm" role="button" 
-                                        title="Anexos"><i class="fa fa-file"></i>
-                                    </a>
-                                {% endif %}
-                            </td>
+                            <td>{{ item.comprador__datos_generales_comprador__ctnombre }}</td>
+                            <td>{{comprador__comprador_comprador__lsenotifica}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
