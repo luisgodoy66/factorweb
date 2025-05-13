@@ -76,6 +76,15 @@ class Diario_cabecera(ClaseModelo):
         self.ctconcepto = self.ctconcepto.upper()
         super(Diario_cabecera, self).save()
 
+    def mes_cerrado(self):
+        result = False
+        mes = str(self.dcontabilizado.month).zfill(2)
+        año = self.dcontabilizado.year
+        control = Control_meses.objects.filter(año=año, mes=mes).first()
+        if control:
+            result = control.lbloqueado
+        return result
+
 class Transaccion(ClaseModelo):
     TIPOS=(
         ('D', 'Debe'),

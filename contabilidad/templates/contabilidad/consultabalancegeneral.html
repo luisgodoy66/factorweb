@@ -71,21 +71,26 @@ var $btnConsultar = jQuery('#btnConsultar')
 var $btnBloquear = jQuery('#btnBloquear')
 
 window.onload=function(){
+    var select = document.getElementById('cmb_mes');
 
     $btnConsultar.click(function () {
 
-        var select = document.getElementById('cmb_mes');
         var mes = select.options[select.selectedIndex].value;
 
         ConsultaBG(capturaValor('añocorte'), mes)
     })
 
     $btnBloquear.click(function () {
-        var select = document.getElementById('cmb_mes');
+        // var select = document.getElementById('cmb_mes');
         var mes = select.options[select.selectedIndex].value;
 
         BloquearMes(capturaValor('añocorte'), mes)
     })
+    
+    select.addEventListener('change', function() {
+        var mes = select.options[select.selectedIndex].value;
+        ConsultarMesBloqueado(capturaValor('añocorte'), mes);
+    });
 
 };
     
@@ -105,5 +110,16 @@ function BloquearMes(año, mes){
         })
     })
 }    
+
+function ConsultarMesBloqueado(año, mes) {
+    fetchRecuperar("/contabilidad/mescerrado/" + año + "/" + mes, function(data) {
+        if (data.mesbloqueado) {
+            $btnBloquear.prop('disabled', true);
+        } else {
+            $btnBloquear.prop('disabled', false);
+        }
+    });
+}
+
 </script>
 {% endblock %}

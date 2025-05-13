@@ -1725,6 +1725,19 @@ def AsientoDiario(request, diario_id = None):
         concepto = request.POST.get("ctconcepto")
         valor =  request.POST.get("total_debe")
 
+        # determinar si el mes está bloqueado
+        mes = fecha[0:7]    
+        mesbloqueado = Control_meses.objects\
+            .filter(lbloqueado = True
+                    , empresa = id_empresa.empresa
+                    , año = fecha[0:4]
+                    , mes = fecha[5:7])\
+            .values('empresa')\
+        
+        print(mesbloqueado)
+        if mesbloqueado:
+            return HttpResponse("El mes " + mes + " está bloqueado. No se puede contabilizar el asiento.")
+        
         # inicio de transaccion
         with transaction.atomic():
 
@@ -2489,3 +2502,15 @@ def CargarDetalleAsiento(request, diario_id):
             )
 
     return JsonResponse(data, safe=False)
+
+def MesCerrado(request, año, mes):
+    # verificar si el mes está bloqueado
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    mesbloqueado = Control_meses.objects\
+        .filter(lbloqueado = True
+                , empresa = id_empresa.empresa
+                , año = año
+                , mes = mes)\
+        .values('empresa')\
+    
+    return JsonResponse({'mesbloqueado': bool(mesbloqueado)})

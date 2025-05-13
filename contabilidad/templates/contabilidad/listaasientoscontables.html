@@ -69,9 +69,13 @@
                             <td>{{ item.nvalor}}</td>
                             <td>{{ item.cxestado}}</td>
                             <td>
+                                {% if not item.mes_cerrado and item.cxestado != "E" %} 
                                 <a href="{% url 'contabilidad:asientodiario_editar' item.id %}" 
-                                    class="btn btn-warning btn-sm" role="button" title="Editar"><i class="fa fa-edit"></i>
+                                    class="btn btn-warning btn-sm" role="button" title="Editar"
+                                    >
+                                    <i class="fa fa-edit"></i>
                                 </a>
+                                {% endif %}
                                 <a 
                                 {% if item.asiento_egreso %}
                                     href="{% url 'contabilidad:imprimircomprobanteegreso' item.id %}" target="{{item.cxtransaccion}}"

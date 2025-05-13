@@ -30,58 +30,72 @@ window.onload=function(){
       inicializaValor("total_debe", total_debe)
       inicializaValor("total_haber", total_haber)
 
-      // convertir la tabla de cheques en un dicconario para pasarlo en el contexto
-      DicDiario = new Array();
+      // validar que el mes no este cerrado
+      var fecha = document.getElementById("id_dcontabilizado").value
+      var mes = fecha.split("-")[1]
+      var anio = fecha.split("-")[0]
+      fetchRecuperar("/contabilidad/mescerrado/"+anio+"/"+mes, function(data){
+        if (data.mesbloqueado){
+          MensajeError("El mes ya esta cerrado, no se puede modificar el asiento contable")
+          return true;
+        }
+        else{
+          // convertir la tabla de cheques en un dicconario para pasarlo en el contexto
+          DicDiario = new Array();
 
-      jQuery("#body_asiento tr").each(function (i,row) {
+          jQuery("#body_asiento tr").each(function (i,row) {
 
-        var referencia = row.children[1].innerText
-        var debe = row.children[2].innerText
-        var haber = row.children[3].innerText
-        var cuenta = row.children[4].innerText
-        var tipo = row.children[5].innerText
+            var referencia = row.children[1].innerText
+            var debe = row.children[2].innerText
+            var haber = row.children[3].innerText
+            var cuenta = row.children[4].innerText
+            var tipo = row.children[5].innerText
 
-        DicDiario.push({          
-          cuenta: cuenta,
-          tipo: tipo,
-          referencia: referencia,
-          debe: debe,
-          haber: haber,  
-          id_linea: row.children[6].innerText      
-        });
+            DicDiario.push({          
+              cuenta: cuenta,
+              tipo: tipo,
+              referencia: referencia,
+              debe: debe,
+              haber: haber,  
+              id_linea: row.children[6].innerText      
+            });
 
-      });
+          });
 
-      var token = jQuery("[name=csrfmiddlewaretoken]").val();
-      var formData = jQuery("form").serializeArray();
+          var token = jQuery("[name=csrfmiddlewaretoken]").val();
+          var formData = jQuery("form").serializeArray();
 
-      // para agregar el diario al contexto estos se deben agregar a
-      // la data usando la siguiente formula
-      formData.push({name:"Diario",value:JSON.stringify(DicDiario)});
-      formData.push({name:"total_debe",value:JSON.stringify(total_debe)});
+          // para agregar el diario al contexto estos se deben agregar a
+          // la data usando la siguiente formula
+          formData.push({name:"Diario",value:JSON.stringify(DicDiario)});
+          formData.push({name:"total_debe",value:JSON.stringify(total_debe)});
 
-      jQuery.ajax({
-        method:"POST",
-        headers: {'X-CSRFToken': token },
-        data: formData
-      })
-      .done(function(r,textStatus,xhr){
-          if(xhr.status=200){
-            location.href="/contabilidad/listaasientoscontables/";
-            // en una nueva ventana abrir el reporte 
-            url = window.location.origin
-            url = url + "/contabilidad/imprimirdiariocontable/"+xhr.responseText;
-            window.open( url);
-               MensajeOk()
-          }
-          else{
-            MensajeError(textStatus);
-          }
-      }).fail(function (error) {
-          MensajeError(error.responseText);
-      });
+          jQuery.ajax({
+            method:"POST",
+            headers: {'X-CSRFToken': token },
+            data: formData
+          })
+          .done(function(r,textStatus,xhr){
+              if(xhr.status=200){
+                location.href="/contabilidad/listaasientoscontables/";
+                // en una nueva ventana abrir el reporte 
+                url = window.location.origin
+                url = url + "/contabilidad/imprimirdiariocontable/"+xhr.responseText;
+                window.open( url);
+                  MensajeOk()
+              }
+              else{
+                MensajeError(textStatus);
+              }
+          }).fail(function (error) {
+              MensajeError(error.responseText);
+          });
 
-      return false;
+          // cerrar el modal
+          CerrarModal();}
+          });
+
+      // return false;
 
     });
 

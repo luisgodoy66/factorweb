@@ -25,7 +25,7 @@ from .views import CuentasView, CuentasEspecialesEdit, BuscarCuentasEspeciales\
     , GenerarAsientosTransferencias, GeneraListaRecuperacionesJSON\
     , GenerarAsientosRecuperaciones, ListaRecuperacionesAGenerar\
     , BuscarCuentasReestructuracion, CuentasReestructuracionNew\
-     , CuentasReestructuracionEdit, CargarDetalleAsiento
+     , CuentasReestructuracionEdit, CargarDetalleAsiento, MesCerrado
 
 from .sri import GeneraXMLFactura
 from .reportes import ImpresionDiarioContable, ImpresionComprobanteEgreso\
@@ -176,11 +176,11 @@ urlpatterns = [
     path('generarasientosrecuperaciones/<ids>', GenerarAsientosRecuperaciones),
     path('consultadesbloqueodemes',DesbloquearMes.as_view(), name="desbloqueo_mes"),
     path('desbloqueodemes/<año>/<mes>',DesbloqueoDeMes),
-
     path('buscarcuentasreestructuracion/',BuscarCuentasReestructuracion
          , name="buscarcuentasreestructuracion"),
     path('asignarcuentascontablesreestructuracion/',CuentasReestructuracionNew.as_view()
          , name="asignarcuentascontablesreestructuracion_nueva"),
     path('asignarcuentascontablesreestructuracion/<pk>',CuentasReestructuracionEdit.as_view()
          , name="asignarcuentascontablesreestructuracion_editar"),
+    path('mescerrado/<año>/<mes>',MesCerrado), # Para el cierre de mes
 ]
