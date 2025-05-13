@@ -22,28 +22,28 @@
                 <div class="card-body card-block">
                 <!-- <div class="col-lg-6"> -->
                     <div class="row form-group">
-                        <div class="col-md-4"><label for="id_cxbanco" class=" form-control-label">
+                        <div class="col-md-4"><label for="id_cxcuenta" class=" form-control-label">
                             {{ form_linea.cxcuenta.label}}</label></div>
                         <div class="col-md-8">
                             {{ form_linea.cxcuenta}}
                         </div>
                     </div>
                     <div class="row form-group">
-                        <div class="col-md-4"><label for="id_cxbanco" class=" form-control-label">
+                        <div class="col-md-4"><label for="id_cxtipo" class=" form-control-label">
                             {{ form_linea.cxtipo.label}}</label></div>
                         <div class="col-md-8">
                             {{ form_linea.cxtipo}}
                         </div>
                     </div>
                     <div class="row form-group">
-                        <div class="col-md-4"><label for="id_ctcuenta" class=" form-control-label">
+                        <div class="col-md-4"><label for="id_ctreferencia" class=" form-control-label">
                             {{ form_linea.ctreferencia.label}}</label></div>
                         <div class="col-md-8">
                             {{ form_linea.ctreferencia}}
                         </div>
                     </div>
                     <div class="row form-group">
-                        <div class="col-md-4"><label for="cheque_nvalor" class=" form-control-label">
+                        <div class="col-md-4"><label for="id_nvalor" class=" form-control-label">
                             {{ form_linea.nvalor.label}}</label>
                         </div>
                         <div class="col-md-8">
@@ -57,10 +57,17 @@
                         onclick="return CerrarModal()">
                         <i class="fa fa-ban"></i> Cerrar
                     </button>
+                    {% if detalle_id %}
+                        <button type="button" class="btn btn-primary btn-sm"
+                            onclick="ActualizarFila()">
+                            <i class="fa fa-dot-circle-o"></i> Actualizar
+                        </button>
+                    {% else %}
                         <button type="button" class="btn btn-primary btn-sm"
                             onclick="AgregarFila()" >
                             <i class="fa fa-dot-circle-o"></i> Grabar
                         </button>
+                    {% endif %}
                 </div>
             </div>
             <!-- </div> -->
@@ -68,3 +75,27 @@
 
     </div>
 </div>    
+
+<script>
+    const detalle_id = {{ detalle_id|default:"0" }};
+
+    function AgregarFila() {
+        var select = document.getElementById('id_cxcuenta');
+        var nombre_cuenta = select.options[select.selectedIndex].text;
+        var cuenta = select.value;
+        var tipo = document.getElementById("id_cxtipo").value;
+        var referencia = document.getElementById("id_ctreferencia").value;
+        var nvalor = document.getElementById("id_nvalor").value;
+
+        agregarFilaTabla(cuenta, nombre_cuenta, tipo, referencia, nvalor, detalle_id);
+        // Cerrar el modal después de agregar la fila
+        CerrarModal();
+    }
+
+    function ActualizarFila() {
+        actualizarFilaTabla(detalle_id);
+
+        // Cerrar el modal después de actualizar la fila
+        CerrarModal();
+    }
+</script>

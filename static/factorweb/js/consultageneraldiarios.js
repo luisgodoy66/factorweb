@@ -32,6 +32,9 @@ window.operateEvents = {
       'click .imprimir': function (e, value, row, index) {
         ImprimirAsientoDiario( row.id, row.Tipo)
       },
+      'click .editar': function (e, value, row, index) {
+        EditarAsientoDiario( row.id)
+      },
     };
       
 function operateFormatter(value, row, index) {
@@ -41,6 +44,9 @@ function operateFormatter(value, row, index) {
         '</a>  ',
         '<a class="imprimir" href="javascript:void(0)" title="Imprimir asiento">',
         '<i class="fa fa-print"></i>',
+        '</a>  ',
+        '<a class="editar" href="javascript:void(0)" title="Editar asiento">',
+        '<i class="fa fa-edit"></i>',
         '</a>  ',
       ].join('')
 }

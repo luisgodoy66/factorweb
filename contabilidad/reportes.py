@@ -36,7 +36,7 @@ def ImpresionDiarioContable(request, diario_id):
 
     # cuando la forma de pago es DEP es deposito de accesorios y de ahí debe
     # tomar la fecha de vencimiento
-    detalle = Transaccion.objects.filter(diario = diario_id, )
+    detalle = Transaccion.objects.filter(diario = diario_id, leliminado = False)
 
     # totales
     tot_cobro_d = detalle.filter(cxtipo='D').aggregate(tot_debe=Sum('nvalor'))

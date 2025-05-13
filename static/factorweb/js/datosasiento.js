@@ -1,8 +1,14 @@
+var linea 
+
 window.onload=function(){
 
+  if (diario != 'None') {
+    // cargar el asiento contable y cargarlo en la tabla
+    cargarTablaDiario(diario)
+  }
 
-    // validar antes de enviar
-    jQuery("#frmAsiento").submit(function(e){
+  // validar antes de enviar
+  jQuery("#frmAsiento").submit(function(e){
 
       var total_debe = 0
       var total_haber = 0
@@ -40,7 +46,8 @@ window.onload=function(){
           tipo: tipo,
           referencia: referencia,
           debe: debe,
-          haber: haber,        
+          haber: haber,  
+          id_linea: row.children[6].innerText      
         });
 
       });
@@ -80,26 +87,38 @@ window.onload=function(){
 
 };
 
+function cargarTablaDiario(diario_id){
+  // leer el asiento contable y cargarlo en la tabla
+  fetchRecuperar("/contabilidad/cargadetalleasiento/"+diario_id, function(data){
+    if (data.length > 0){
+      for (var i=0; i<data.length; i++){
+        cuenta = data[i].cxcuenta
+        nombre_cuenta = data[i].cxcuenta__ctcuenta
+        referencia = data[i].ctreferencia
+        tipo = data[i].cxtipo
+        valor = data[i].nvalor
+        linea = data[i].id
 
-function AgregarFila( ){
+        agregarFilaTabla(cuenta, nombre_cuenta, tipo, referencia, valor, linea)
+      }
+    }
+  })
+}
+
+function agregarFilaTabla(cuenta, nombre_cuenta, tipo, referencia, valor, id_linea){
   var tabla=document.getElementById('tabla_diario')
   var tbody = tabla.children[1]
   var nuevafila=""
-  var cuenta = capturaValor("id_cxcuenta")
-  var tipo = capturaValor("id_cxtipo")
-  var referencia = capturaValor("id_ctreferencia")
   var valordebe = 0
   var valorhaber = 0
-  var select = document.getElementById('id_cxcuenta');
-  var nombre_cuenta = select.options[select.selectedIndex].text;
   
   if (cuenta=="" || tipo=="" || referencia=="" )
     return false;
 
   if (tipo == 'D')
-    valordebe=capturaValor("id_nvalor")
+    valordebe=valor
   else
-    valorhaber=capturaValor("id_nvalor")
+    valorhaber=valor
 
   if (! tbody){
       tbody = document.createElement("tbody")
@@ -117,15 +136,27 @@ function AgregarFila( ){
   nuevafila+="<td>" + valorhaber +"</td>"
   nuevafila+="<td hidden>" + cuenta +"</td>"
   nuevafila+="<td hidden>" + tipo +"</td>"
-  
-  nuevafila+= `<td><a class="remove" onclick='eliminarFila(this)'"
-              title="Eliminar"><i class="fa fa-trash"></i></a></td>`
+  nuevafila+="<td hidden>" + id_linea +"</td>"
+
+  nuevafila+= `<td>
+    <a class="remove" onclick='editarFila(this)' title="Editar">
+              <i class="fa fa-edit"></i>
+    </a>
+    <a class="remove" onclick='eliminarFila(this)' title="Eliminar">
+              <i class="fa fa-trash"></i>
+    </a>
+    </td>`
 
   nuevafila+="</tr>"
 
   tbody.insertAdjacentHTML("beforeend",nuevafila)
   
   // acumular en totales
+  sumarTotales(valordebe, valorhaber)
+}
+
+function sumarTotales(valordebe, valorhaber){
+  console.log("sumarTotales", valordebe, valorhaber)
   totaldebe=capturaValor("total_debe")
   totalhaber=capturaValor("total_haber")
   sumadebe = parseFloat(totaldebe) + parseFloat(valordebe)
@@ -133,37 +164,82 @@ function AgregarFila( ){
   
   inicializaValor("total_debe", sumadebe)
   inicializaValor("total_haber", sumahaber)
+}
 
-  CerrarModal();
-
+function restarTotales(valordebe, valorhaber){
+  totaldebe=capturaValor("total_debe")
+  totalhaber=capturaValor("total_haber")
+  sumadebe = parseFloat(totaldebe) - parseFloat(valordebe)
+  sumahaber = parseFloat(totalhaber) - parseFloat(valorhaber)
+  
+  inicializaValor("total_debe", sumadebe)
+  inicializaValor("total_haber", sumahaber)
 }
 
 function eliminarFila(btn){
   var td=btn.parentNode
   var tr =td.parentNode
   var trpadre = tr.parentNode
+  var valordebe = tr.children[2].innerText
+  var valorhaber = tr.children[3].innerText
+  var id_linea = tr.children[6].innerText
   // actualizar totales
-  totaldebe=capturaValor("total_debe")
-  totalhaber=capturaValor("total_haber")
+  restarTotales(valordebe, valorhaber)
 
-  var tipo = tr.children[5].innerText
-  if (tipo=='D') {
-    var valordebe = tr.children[2].innerText
-    total_debe += parseFloat( valordebe)
-    sumadebe = parseFloat(totaldebe) - parseFloat(valordebe)
-    
-    inicializaValor("total_debe", sumadebe)
+  // si es una linea de un diario existente dejar los valoers en cero
+  if (id_linea != '0'){
+    var td=btn.parentNode
+    var tr =td.parentNode
+    var trpadre = tr.parentNode
+    tr.children[3].innerText = 0
+    tr.children[2].innerText = 0  
+  }else{
+    // si es una linea de un diario nuevo eliminar la fila
+    trpadre.removeChild(tr)
   }
-  if (tipo=='H') {
-    var valorhaber = tr.children[3].innerText
-    total_haber += parseFloat( valorhaber)
-    sumahaber = parseFloat(totalhaber) - parseFloat(valorhaber)
-
-    inicializaValor("total_haber", sumahaber)
-  }
-
-  trpadre.removeChild(tr)
 }
 
+function editarFila(btn){
+  var td=btn.parentNode
+  var tr =td.parentNode
+  var id_linea = tr.children[6].innerText
 
+  linea = btn
+  AbrirModal('/contabilidad/editarlineadeasiento/'+id_linea)
+}
 
+function actualizarFilaTabla(id_linea){
+  var select = document.getElementById('id_cxcuenta');
+  var nombre_cuenta = select.options[select.selectedIndex].text;
+  var cuenta = select.value;
+  var tipo = document.getElementById("id_cxtipo").value;
+  var referencia = document.getElementById("id_ctreferencia").value;
+  var nvalor = document.getElementById("id_nvalor").value;
+
+  var td=linea.parentNode
+  var tr =td.parentNode
+
+  // actualizar el total
+  var valordebe = tr.children[2].innerText
+  var valorhaber = tr.children[3].innerText
+  restarTotales(valordebe, valorhaber)
+
+  tr.children[0].innerText = nombre_cuenta
+  tr.children[1].innerText = referencia
+  if (tipo == 'D'){
+    tr.children[2].innerText = nvalor
+    tr.children[3].innerText = 0
+  }
+  else{
+    tr.children[2].innerText = 0
+    tr.children[3].innerText = nvalor
+  }
+  tr.children[4].innerText = cuenta
+  tr.children[5].innerText = tipo
+  tr.children[6].innerText = id_linea
+  // actualizar el total
+  valordebe = tr.children[2].innerText
+  valorhaber = tr.children[3].innerText
+  sumarTotales(valordebe, valorhaber)
+
+}

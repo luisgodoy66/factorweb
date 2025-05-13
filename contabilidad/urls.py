@@ -1,27 +1,31 @@
 from django.urls import path
 from .views import CuentasView, CuentasEspecialesEdit, BuscarCuentasEspeciales\
-    , CuentasEspecialesNew, CuentasBancosView, CuentaBancoNew, CuentaBancoEdit\
-    , CuentasTiposFactoringView, CuentaTipoFactoringNew, CuentaTipoFactoringEdit\
+    , CuentasEspecialesNew, CuentasBancosView, CuentaBancoNew\
+    , CuentasTiposFactoringView, CuentaTipoFactoringNew\
+    , CuentaTipoFactoringEdit, CuentaBancoEdit,PendientesGenerarFacturaView\
     , CuentasTasasFactoringView, CuentasTasaTiposFactoringView\
-    , CuentaTasaTipoFactoringNew, CuentaTasaTipoFactoringEdit,PendientesGenerarFacturaView\
+    , CuentaTasaTipoFactoringNew, CuentaTasaTipoFactoringEdit\
     , GenerarFactura, ObtenerSecuenciaFactura, DesembolsosPendientesView\
-    , GenerarFacturaDiario, GenerarComprobanteEgreso, GenerarEgresoDiario\
+    , GenerarFacturaDiario, GenerarComprobanteEgreso\
     , CuentasDiferidosView, CuentasProvisionesView, CuentasTasaDiferidoView\
     , CuentaDiferidoTasaTipoFactoringNew, CuentasTasaProvisionView\
     , CuentaDiferidoTasaTipoFactoringEdit, CuentaProvisionTasaTipoFactoringNew\
-    , CuentaProvisionTasaTipoFactoringEdit, CuentasNew, CuentasEdit, AsientosView\
-    , AsientoDiarioNuevo, DatosDiarioEditar, GeneraListaDiariosJSON, DiariosConsulta\
+    , CuentaProvisionTasaTipoFactoringEdit, CuentasNew, CuentasEdit\
+    , AsientosView, AsientoDiario, DatosLineaDiarioEditar\
+    , GeneraListaDiariosJSON, DiariosConsulta, GenerarEgresoDiario\
     , LibroMayorConsulta, GeneraLibroMayorJSON, ReversarAsiento\
     , ListaCobranzasAGenerar, GeneraListaCobranzasJSON, GenerarAsientosCobranzas\
     , BalanceGeneralConsulta, PerdiasyGananciasConsulta, CierreDeMes\
-    , generaFacturasAlVencimiento, GeneraFacturasAlVencimientoDiario, FacturasConsulta\
+    , generaFacturasAlVencimiento, GeneraFacturasAlVencimientoDiario\
+     , FacturasConsulta, DesbloquearMes, DesbloqueoDeMes\
     , GeneraListaFacturasJSON, GeneraListaProtestosJSON, ListaProtestosAGenerar\
     , GenerarAsientosProtestos, CuentasCargosFactoringView, CuentaCargoTipoFactoringNew\
     , CuentaCargoTipoFactoringEdit, CuentasCargoTiposFactoringView\
-    , GeneraListaTransferenciasJSON, ListaTransferenciasAGenerar, DesbloqueoDeMes\
+    , GeneraListaTransferenciasJSON, ListaTransferenciasAGenerar\
     , GenerarAsientosTransferencias, GeneraListaRecuperacionesJSON\
-    , GenerarAsientosRecuperaciones, ListaRecuperacionesAGenerar, DesbloquearMes\
-    , BuscarCuentasReestructuracion, CuentasReestructuracionNew, CuentasReestructuracionEdit
+    , GenerarAsientosRecuperaciones, ListaRecuperacionesAGenerar\
+    , BuscarCuentasReestructuracion, CuentasReestructuracionNew\
+     , CuentasReestructuracionEdit, CargarDetalleAsiento
 
 from .sri import GeneraXMLFactura
 from .reportes import ImpresionDiarioContable, ImpresionComprobanteEgreso\
@@ -103,10 +107,15 @@ urlpatterns = [
     path('imprimircomprobanteegreso/<int:diario_id>',ImpresionComprobanteEgreso
          , name="imprimircomprobanteegreso"),
     path('generaregresodiario/',GenerarEgresoDiario, ),
-    path('listaasientoscontables/',AsientosView.as_view(), name="listaasientoscontables"),
-    path('asientodiarionuevo/',AsientoDiarioNuevo, name="asientodiario_nuevo"),
-    path('editarlineadeasiento/', DatosDiarioEditar, name='editarlineadeasiento'),
-    path('editarlineadeasiento/<int:detalle_id>', DatosDiarioEditar
+    path('listaasientoscontables/',AsientosView.as_view(), 
+         name="listaasientoscontables"),
+    path('asientodiarionuevo/',AsientoDiario, 
+         name="asientodiario_nuevo"),
+    path('asientodiarioeditar/<diario_id>',AsientoDiario, 
+         name="asientodiario_editar"),
+    path('cargadetalleasiento/<diario_id>',CargarDetalleAsiento,),
+    path('editarlineadeasiento/', DatosLineaDiarioEditar, name='editarlineadeasiento'),
+    path('editarlineadeasiento/<int:detalle_id>', DatosLineaDiarioEditar
          , name='editarlineadeasiento'),
     path('consultageneraldiarios/', DiariosConsulta.as_view()
          , name='consulta_diarios'),

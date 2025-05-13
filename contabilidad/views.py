@@ -2,9 +2,9 @@ from django.shortcuts import render, redirect, HttpResponse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.views import generic
 from django.urls import reverse_lazy
-from django.db.models import Q, FilteredRelation, Max
+from django.db.models import Q, FilteredRelation, Max, CharField
 from django.db.models.functions import Concat
-from django.db.models.expressions import RawSQL , F
+from django.db.models.expressions import RawSQL , F, Value
 from django.http import JsonResponse
 from django.db import transaction
 from django.views import generic
@@ -1041,10 +1041,13 @@ class PerdiasyGananciasConsulta(SinPrivilegios, generic.TemplateView):
 
         if mescerrado:
             añomes = mescerrado[0]['ultimomes']
-            año = añomes[0:4]
+            año = int(añomes[0:4])
             mes = int(añomes[4:6])
             if mes < 12:
                 mes +=1
+            else:
+                mes = 1
+                año += 1
         else:
             año = datetime.now().year
             mes = datetime.now().month
@@ -1694,19 +1697,28 @@ def GenerarEgresoDiario(request):
 
 @login_required(login_url='/login/')
 @permission_required('contabilidad.add_diario_cabecera', login_url='bases:sin_permisos')
-def AsientoDiarioNuevo(request, diario_id = None):
+def AsientoDiario(request, diario_id = None):
 
     template_name="contabilidad/datosasiento_form.html"
-    
+    diario_form = DiarioCabeceraForm()
+
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     
     sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
                                     empresa = id_empresa.empresa).count()
 
-    contexto={'form_diario': DiarioCabeceraForm(),
-            'solicitudes_pendientes':sp
-       }
+    if request.method =='GET':
+        d = Diario_cabecera.objects.filter(pk = diario_id).first()
+        if d:
+            diario_form = DiarioCabeceraForm(instance=d, )  
+
+        contexto={'form_diario': diario_form,
+                'diario':diario_id,
+                'solicitudes_pendientes':sp
+        }
     
+        return render(request, template_name, contexto)
+
     if request.method=='POST':
 
         fecha = request.POST.get("dcontabilizado")
@@ -1777,36 +1789,52 @@ def AsientoDiarioNuevo(request, diario_id = None):
 
             for elem in output:      
                 #accedemos a cada elemento de la lista (en este caso cada elemento es un dictionario)
-                cuenta = Plan_cuentas.objects.filter(id = elem.get("cuenta")).first()
+                id_linea =  elem.get("id_linea")
+
+                cuenta = Plan_cuentas.objects\
+                    .filter(id = elem.get("cuenta")).first()
 
                 if elem.get("tipo") =='D':
-                    nvalor = elem.get("debe")
+                    nvalor = float(elem.get("debe"))
                 else:
-                    nvalor = elem.get("haber")
+                    nvalor = float(elem.get("haber"))
 
-                detalle = Transaccion(
-                    diario = diario,
-                    cxcuenta=cuenta,
-                    cxtipo = elem.get("tipo"),
-                    nvalor = nvalor,
-                    ctreferencia = elem.get("referencia"),
-                    cxusuariocrea = request.user,
-                    empresa = id_empresa.empresa,
-                )
+                if id_linea == '0':
+                    detalle = Transaccion(
+                        diario = diario,
+                        cxcuenta=cuenta,
+                        cxtipo = elem.get("tipo"),
+                        nvalor = nvalor,
+                        ctreferencia = elem.get("referencia"),
+                        cxusuariocrea = request.user,
+                        empresa = id_empresa.empresa,
+                    )
+                else:
+                    detalle = Transaccion.objects\
+                        .filter(id = id_linea).first()
+                    
+                    if detalle:
+                        print("valor", nvalor, nvalor != 0.00)
+                        if nvalor != 0.00:
+                            detalle.cxcuenta=cuenta
+                            detalle.cxtipo = elem.get("tipo")
+                            detalle.nvalor = nvalor
+                            detalle.ctreferencia = elem.get("referencia")
+                            detalle.cxusuariomodifica = request.user.id
+                        else:
+                            detalle.leliminado = True
+                            detalle.cxusuarioelimina = request.user.id
+                
                 if detalle:
                     detalle.save()
             
-
-
         # la ejecucion de esta vista POST se hace por jquery.ajax 
         # y ese proceso imprime el asiento y devuelve a la lista de asientos
         return HttpResponse( diario_id)
     
-    return render(request, template_name, contexto)
-
 @login_required(login_url='/login/')
 @permission_required('contabilidad.view_plan_cuentas', login_url='bases:sin_permisos')
-def DatosDiarioEditar(request, detalle_id = None):
+def DatosLineaDiarioEditar(request, detalle_id = None):
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     
@@ -1825,7 +1853,7 @@ def DatosDiarioEditar(request, detalle_id = None):
             form_linea = TransaccionForm(e, empresa=id_empresa.empresa)
 
     contexto={'form_linea': form_linea,
-              'detalle': detalle_id,
+              'detalle_id': detalle_id,
               'valor': 0,
     }
 
@@ -2439,3 +2467,25 @@ def BuscarCuentasReestructuracion(request):
     else:
         return redirect("contabilidad:asignarcuentascontablesreestructuracion_nueva")
 
+
+def CargarDetalleAsiento(request, diario_id):
+    # cargar el detalle del asiento contable
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    detalle_asiento = Transaccion.objects\
+        .filter(diario = diario_id, leliminado = False
+                , empresa = id_empresa.empresa)\
+        .order_by('cxcuenta')
+    
+    data = list(detalle_asiento\
+                .values('cxcuenta'
+                        , 'cxtipo', 'ctreferencia'
+                        , 'nvalor', 'id')
+                .annotate(
+                    cxcuenta__ctcuenta = Concat( F('cxcuenta__cxcuenta')
+                                    , Value(' ')
+                                    ,F('cxcuenta__ctcuenta')
+                                    ,output_field=CharField() )
+                        )
+            )
+
+    return JsonResponse(data, safe=False)

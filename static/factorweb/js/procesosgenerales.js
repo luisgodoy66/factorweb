@@ -977,3 +977,10 @@ function saldoPorCliente(url) {
         });
     });
 }
+
+function EditarAsientoDiario(asiento_id){
+  // en una nueva ventana abrir el reporte de asignación
+    url = '/contabilidad/asientodiarioeditar/'+asiento_id
+    
+    location.href=url
+}

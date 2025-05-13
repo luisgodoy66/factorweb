@@ -69,9 +69,9 @@
                             <td>{{ item.nvalor}}</td>
                             <td>{{ item.cxestado}}</td>
                             <td>
-                                <!-- <a href="{% url 'solicitudes:asignacionfacturaspuras_editar' item.id %}" 
+                                <a href="{% url 'contabilidad:asientodiario_editar' item.id %}" 
                                     class="btn btn-warning btn-sm" role="button" title="Editar"><i class="fa fa-edit"></i>
-                                </a> -->
+                                </a>
                                 <a 
                                 {% if item.asiento_egreso %}
                                     href="{% url 'contabilidad:imprimircomprobanteegreso' item.id %}" target="{{item.cxtransaccion}}"
