@@ -881,7 +881,11 @@ class DesembolsosPendientesView(SinPrivilegios, generic.ListView):
                     , 'nvalor', 'cxformapago', 'cxcuentapago__cxbanco__ctbanco')\
             .annotate(operacion = RawSQL('SELECT cxasignacion '\
                                         'FROM operaciones_asignacion asgn '\
-                                        'WHERE asgn.id = cxoperacion',''))\
+                                        'WHERE asgn.id = cxoperacion','')
+                    , desembolso = RawSQL('SELECT ddesembolso '\
+                                        'FROM operaciones_asignacion asgn '\
+                                        'WHERE asgn.id = cxoperacion','')
+                                        )\
             .order_by('dregistro')
         
         cobr=Desembolsos.objects\
@@ -891,7 +895,11 @@ class DesembolsosPendientesView(SinPrivilegios, generic.ListView):
                     , 'nvalor', 'cxformapago', 'cxcuentapago__cxbanco__ctbanco')\
             .annotate(operacion = RawSQL('SELECT cxliquidacion '\
                                         'FROM cobranzas_liquidacion_cabecera liq '\
-                                        'WHERE liq.id = cxoperacion',''))\
+                                        'WHERE liq.id = cxoperacion','')
+                    , desembolso = RawSQL('SELECT ddesembolso '\
+                                        'FROM cobranzas_liquidacion_cabecera liq '\
+                                        'WHERE liq.id = cxoperacion','')
+                                        )\
             .order_by('dregistro')
         
         return asgn.union(cobr)
@@ -1543,6 +1551,8 @@ def GenerarComprobanteEgreso(request, pk, forma_pago, operacion):
     formulario={}
     desembolso ={}
     id_factura = None
+    id_beneficiario = None
+    beneficiario = None
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
@@ -1559,7 +1569,7 @@ def GenerarComprobanteEgreso(request, pk, forma_pago, operacion):
     else:
         documento_origen = Liquidacion_cabecera.objects.filter(pk = desembolso.cxoperacion).first()
 
-    cliente = documento_origen.cxcliente.cxcliente.ctnombre
+    cliente = documento_origen.cxcliente.cxcliente
 
     if not documento_origen:
         return HttpResponse("Documento " + str(desembolso.cxoperacion) + " no encontrado.")
@@ -1588,18 +1598,29 @@ def GenerarComprobanteEgreso(request, pk, forma_pago, operacion):
             id_factura = factura.id
 
     if request.method=='GET':
+        if desembolso.cxformapago == 'CHE':
+            id_beneficiario = desembolso.cxbeneficiario
+            beneficiario = desembolso.ctbeneficiario    
 
+        if desembolso.cxformapago == 'TRA' and desembolso.cxcuentadestino:
+            if desembolso.cxcuentadestino.cxcuenta.lpropia:
+                id_beneficiario = cliente.cxparticipante
+                beneficiario = cliente.ctnombre
+            else:
+                id_beneficiario = desembolso.cxcuentadestino.cxcuenta.cxidpropietario
+                beneficiario = desembolso.cxcuentadestino.cxcuenta.ctnombrepropietario
+            
         e = {
             'demision': documento_origen.ddesembolso,
-            'cxbeneficiario':desembolso.cxbeneficiario,
-            'ctrecibidopor':desembolso.ctbeneficiario,
+            'cxbeneficiario': id_beneficiario,
+            'ctrecibidopor': beneficiario,
             'cxcuentapago':desembolso.cxcuentapago,
             'cxcuentadestino': desembolso.cxcuentadestino,
             'cxformapago':desembolso.cxformapago,
             'nvalor': desembolso.nvalor,
         }
 
-        concepto= 'PAGO DE LIQUIDACIÓN A ' + cliente +' POR LA OPERACIÓN ' + operacion
+        concepto= 'PAGO DE LIQUIDACIÓN A ' + cliente.ctnombre +' POR LA OPERACIÓN ' + operacion
 
         formulario = ComprobanteEgresoForm(e
                                            , empresa = id_empresa.empresa
@@ -1612,6 +1633,7 @@ def GenerarComprobanteEgreso(request, pk, forma_pago, operacion):
                 , 'forma_pago':forma_pago
                 , 'id_desembolso':pk
                 , 'id_factura': id_factura
+                , 'cliente': cliente.ctnombre
                 }    
     
         return render(request, template_name, contexto)
@@ -1685,14 +1707,20 @@ def GenerarEgresoDiario(request):
         pid_factura= 'NULL'
     # LA CUENTA de pago es null cuando es movimiento contable
     if not pid_cuentapago:
-        pid_cuentapago='NULL'
+        pid_cuentapago='NULL' 
 
-    resultado=enviarPost("CALL uspGenerarEgresoContabilidad( '{0}',{1},'{2}','{3}'\
-                         ,{4},'{5}',{6},'{7}','{8}'\
-                         ,{9},{10},{11},'',0)"
-        .format(psforma_pago, pid_desembolso, pscxbeneficiario, psrecibidopor\
-                , pid_cuentapago, pscheque, pid_cuentadestino, psconcepto, pdemision\
+    if psforma_pago == 'MOV':
+        resultado=enviarPost("CALL uspGenerarDiarioMovimientoContabilidad({0},'{1}','{2}'\
+                         ,{3},{4},{5},'',0)"
+        .format( pid_desembolso, psconcepto, pdemision\
             ,pnvalor, pid_factura, nusuario))
+    else:
+        resultado=enviarPost("CALL uspGenerarEgresoContabilidad( '{0}',{1},'{2}','{3}'\
+                            ,{4},'{5}',{6},'{7}','{8}'\
+                            ,{9},{10},{11},'',0)"
+            .format(psforma_pago, pid_desembolso, pscxbeneficiario, psrecibidopor\
+                    , pid_cuentapago, pscheque, pid_cuentadestino, psconcepto, pdemision\
+                ,pnvalor, pid_factura, nusuario))
     return HttpResponse(resultado)
 
 @login_required(login_url='/login/')

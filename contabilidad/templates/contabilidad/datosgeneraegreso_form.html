@@ -21,11 +21,12 @@
         <div class="card">
             {% csrf_token %}
             <div class="card-header">
-                <strong>Generar comprobante de egreso</strong> 
+                <strong>Generar comprobante de egreso</strong> para {{cliente}}
             </div>
             <div class="card-body card-block">
                 <!-- columna izquierda -->
                 <div class="col-lg-6">
+                    {% if forma_pago != 'MOV' %}
                     <div class="row form-group">
                         <div class="col-md-4">
                             <label for="id_puntoemision" class=" form-control-label">
@@ -39,7 +40,7 @@
                                {{form.ctrecibidopor.label}}</label></div>
                         <div class="col-md-8">{{form.ctrecibidopor}}</div>
                     </div>
-
+                    {% endif %}
                     <div class="row form-group">
                         <div class="col-md-4">
                             <label for="id_demision" class=" form-control-label">
@@ -58,7 +59,7 @@
                         </div>
                     </div>
 
-                    {% if forma_pago != 'EFE' %}
+                    {% if forma_pago != 'EFE' and forma_pago != 'MOV' %}
                     <div class="row form-group">
                         <div class="col-md-4">
                             <label for="id_nvalor" class=" form-control-label">
@@ -154,9 +155,15 @@ jQuery("#frmGenera").submit(function(e){
 
 function GenerarEgreso(){
 cuenta_pago = 'null'
-numero_cheque = 'null'
 cuenta_destino = 'null'
+numero_cheque = ''
+id_beneficiario = ''
+recibido_por = ''
 
+if (forma_pago !='MOV') {
+    id_beneficiario = capturaValor("id_cxbeneficiario")
+    recibido_por = capturaValor("id_ctrecibidopor")
+}
 if (forma_pago == 'CHE') {
     numero_cheque = capturaValor("id_ctcheque")
 }
@@ -167,15 +174,15 @@ if (forma_pago == 'TRA') {
         return false;
     }
 }
-if (forma_pago != 'EFE') {
+if (forma_pago != 'EFE' && forma_pago != 'MOV') {
     cuenta_pago = capturaValor("id_cxcuentapago")
 }
 
 MensajeConfirmacion("Aceptar generación de egreso ?",function(){
 
 var objeto={
-    "pscxbeneficiario" :capturaValor("id_cxbeneficiario"),
-    "psrecibidopor" :capturaValor("id_ctrecibidopor"),
+    "pscxbeneficiario" :id_beneficiario,
+    "psrecibidopor" :recibido_por,
     "pid_cuentapago": cuenta_pago,
     "pscheque": numero_cheque,
     "pid_cuentadestino": cuenta_destino,
