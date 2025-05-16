@@ -1,0 +1,240 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">contabilidad</a></li>
+                    <li><a href="#">asientos</a></li>
+                    <li><a href="{% url 'contabilidad:listaasientoscontables' %}">registro de asientos</a></li>
+                    <li class="active">{{diario|default:'nuevo'}}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmAsiento" enctype="multipart/form-data" 
+        class="form-horizontal">
+    <div class="col-md-12">
+        <div class="card">
+            {% csrf_token %}
+            <div class="card-header">
+                <strong>Detalle de egreso</strong> 
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- columna izquierda -->
+                    <div class="col-md-6">
+                        <div class="row form-group">
+                            <div class="col-md-4">
+                                <label for="id_nvalor" class=" form-control-label">
+                                Forma de pago:</label>
+                            </div>
+                            <div class="btn-group col-md-8" data-toggle="buttons" aria-label="First group">
+                                <label class="btn btn-outline-secondary 
+                                {% if forma_pago == 'CHE' or not forma_pago %}active{% endif %}">
+                                    <input type="radio" name="forma_pago" id="CHE" value="CHE" autocomplete="off" 
+                                    {% if not forma_pago %} checked {% endif %}>
+                                    Cheque
+                                </label>
+                                <label class="btn btn-outline-secondary
+                                {% if forma_pago == 'TRN' %}active{% endif %}">
+                                    <input type="radio" name="forma_pago" id="TRN" value="TRN" autocomplete="off">
+                                    Transferencia
+                                </label>
+                                <label class="btn btn-outline-secondary
+                                {% if forma_pago == 'DEB' %}active{% endif %}">
+                                    <input type="radio" name="forma_pago" id="DEB" value="DEB" autocomplete="off">
+                                    Débito
+                                </label>
+                            </div>
+
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-4"><label for="id_nvalor" class=" form-control-label">
+                                {{ form_egreso.nvalor.label}}</label></div>
+                            <div class="col-md-8">
+                                {{ form_egreso.nvalor}}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col">
+                                <div id="div_cheque" hidden>
+                                    <div class="col-md-4"><label for="id_ctcheque" class=" form-control-label">
+                                        {{ form_egreso.ctcheque.label}}
+                                    </label></div>
+                                    <div class="col-md-8">
+                                        {{ form_egreso.ctcheque}}
+                                    </div>
+                                </div>
+                                <div id="div_transferencia" hidden>
+                                    <div class="col-md-4"><label for="id_ctcuentadestino" class=" form-control-label">
+                                        {{ form_egreso.ctcuentadestino.label}}
+                                    </label></div>
+                                    <div class="col-md-8">
+                                        {{ form_egreso.ctcuentadestino}}
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- columna derecha -->
+                    <div class="col-md-6">
+                        <div class="row form-group">
+                            <div class="col-md-4"><label for="id_cxcuentapago" class=" form-control-label">
+                                {{ form_egreso.cxcuentapago.label}}</label></div>
+                            <div class="col-md-8">
+                                {{ form_egreso.cxcuentapago}}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-4"><label for="id_cxbeneficiario" class=" form-control-label">
+                                {{ form_egreso.cxbeneficiario.label}}</label></div>
+                            <div class="col-md-8">
+                                {{ form_egreso.cxbeneficiario}}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-4"><label for="id_cxbanco" class=" form-control-label">
+                                {{ form_egreso.ctrecibidopor.label}}</label></div>
+                            <div class="col-md-8">
+                                {{ form_egreso.ctrecibidopor}}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="dropdown-divider"></div>
+                <!-- datos asiento -->
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="row form-group">
+                            <div class="col-md-4"><label for="id_cxbanco" class=" form-control-label">
+                                {{ form_diario.dcontabilizado.label}}</label></div>
+                            <div class="col-md-8">
+                                {{ form_diario.dcontabilizado}}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-12">
+                            <button type="button" class="btn btn-success btn-sm float-right" 
+                                onclick="AbrirModal('/contabilidad/editarlineadeasiento/')">  
+                                <i class="fa fa-plus-circle"></i> Agregar detalle
+                            </button>
+                            </div>
+                        </div>  
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row form-group">
+                            <div class="col-md-2"><label for="id_cxbanco" class=" form-control-label">
+                                {{ form_diario.ctconcepto.label}}</label></div>
+                            <div class="col-md-10">
+                                {{ form_diario.ctconcepto}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+
+                        <div class="row form-group">
+                            <div class="col-md-2"><label for="id_cxbanco" class=" form-control-label">
+                                Debe</label></div>
+                            <div class="col-md-10">
+                                <input id="total_debe" name="total_debe" value="0.00" class="form-control" disabled>
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-2"><label for="id_cxbanco" class=" form-control-label">
+                                Haber</label></div>
+                            <div class="col-md-10">
+                                <input id="total_haber" name="total_haber" value="0.00" class="form-control" disabled>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div id="divTabla">
+                    <table class="table table-striped table-bordered" id="tabla_diario" data-propiedadId="Id">
+                        <thead>
+                            <tr>
+                                <td data-cabecera="cxcuenta">Cuenta</td>
+                                <td data-cabecera="referencia">Referencia</td>
+                                <td data-cabecera="debe">Debe</td>
+                                <td data-cabecera="haber">Haber</td>
+                                <td data-cabecera="haber" hidden>Id.Cuenta</td>
+                                <td data-cabecera="haber" hidden>Tipo</td>
+                                <td data-cabecera="Acciones"class="all">Acciones</td>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a class="btn btn-danger btn-sm "
+                    href="{% url 'contabilidad:listaasientoscontables' %}" 
+                ><i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Grabar
+                </button>
+                
+            </div>
+        </div>
+    </div>
+
+</form>
+{% endblock %}
+{% block js_page %}
+<script type="text/javascript" src="{% static 'factorweb/js/datosasiento.js' %}"></script>
+<script>
+    var diario = '{{diario}}'   ;
+    var forma_pago = '{{forma_pago}}'   ;
+
+    function seleccionFormaPago(){
+    const div_c = document.querySelector('#div_cheque');
+    const div_t = document.querySelector('#div_transferencia');
+        
+    let forma_pago = document.querySelector('input[name="forma_pago"]:checked');
+    if (forma_pago.id == "CHE"){
+        div_t.setAttribute('hidden',true);
+        div_c.removeAttribute('hidden');
+        }
+    if (forma_pago.id == "TRN"){
+        div_c.setAttribute('hidden',true);
+        div_t.removeAttribute('hidden');
+        }
+    if (forma_pago.id == "DEB"){
+        div_c.setAttribute('hidden',true);
+        div_t.setAttribute('hidden',true);
+    }
+    }
+
+    function AgregarFilaBanco(){
+        let forma_pago = document.querySelector('input[name="forma_pago"]:checked');
+        var select = document.getElementById('id_cxcuentapago');
+        var id_banco = select.value;
+        var nvalor = document.getElementById("id_nvalor").value;
+        // var referencia = document.getElementById("id_ctreferencia").value;
+        if (forma_pago.id == "CHE"){
+            referencia = 'CH/ ' + document.getElementById("id_ctcheque").value;
+        }
+        if (forma_pago.id == "TRN"){
+            referencia = 'TRANSFERENCIA';
+        }
+        if (forma_pago.id == "DEB"){
+            referencia = 'DEBITO A CUENTA';
+        }
+        fetchRecuperar('/contabilidad/cuentacontablebanco/'+id_banco
+            ,function(data){
+                var cuenta = data.cuenta;
+                var nombre_cuenta = data.nombre_cuenta;
+                agregarFilaTabla(cuenta, nombre_cuenta, 'H', referencia, nvalor, 0);
+            });
+
+    }
+</script>
+{% endblock %}
+

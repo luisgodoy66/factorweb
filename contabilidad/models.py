@@ -237,6 +237,8 @@ class Comprobante_egreso(ClaseModelo):
         ('EFE', 'Efectivo'),
         ('CHE', 'Cheque'),
         ('TRA', 'Transferencia'),
+        ('TRN', 'Transferencia'),
+        ('DEB', 'Debito'),
     )
     demision = models.DateField()
     cxestado = models.CharField(max_length=1, default='A')
@@ -245,13 +247,14 @@ class Comprobante_egreso(ClaseModelo):
     ctrecibidopor = models.CharField(max_length=60)
     cxcuentapago = models.ForeignKey(Cuentas_bancarias, on_delete=models.RESTRICT
                                      , null=True)
-    ctcheque = models.CharField(max_length=8, null=True)
+    ctcheque = models.CharField(max_length=8, null=True, blank=True)
     cxcuentadestino = models.ForeignKey(Cuenta_transferencia
         , on_delete=models.RESTRICT, null = True)
     asiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
                                      , related_name="asiento_egreso"
                                      , null=True)
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    ctcuentadestino = models.CharField(max_length=50, null=True, blank=True)
 
 class Provisiones(ClaseModelo):
     cargo = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT, null=True)

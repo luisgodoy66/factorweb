@@ -17,7 +17,7 @@
 {% block content %}
 
 <form  method="post" id="frmGenera" enctype="multipart/form-data" class="form-horizontal">
-    <!-- <div class="col-lg-6"> -->
+    <div class="col-lg-8">
         <div class="card">
             {% csrf_token %}
             <div class="card-header">
@@ -25,7 +25,7 @@
             </div>
             <div class="card-body card-block">
                 <!-- columna izquierda -->
-                <div class="col-lg-6">
+                <div class="col-lg-12">
                     {% if forma_pago != 'MOV' %}
                     <div class="row form-group">
                         <div class="col-md-4">
@@ -92,17 +92,6 @@
 
 
                 </div>
-                <div class="col-lg-6">
-                    {% if forma_pago == 'TRA' %}
-                    <div class="col-md-12">
-                        <div class="alert alert-info" role="alert">
-                            Para registrar nuevas cuentas bancarias del cliente use <a href="{% url 'clientes:listacuentasbancarias' %}"
-                             class="alert-link">este link</a>.
-                        </div>
-                    </div>
-                    {% endif %}
-    
-                </div>  
             </div>    
             
             <div class="card-footer">
@@ -116,7 +105,7 @@
                 </button>
             </div>
         </div>
-    <!-- </div> -->
+    </div>
 </form>
 {% endblock %}
 {% block js_page %}
@@ -128,28 +117,31 @@
 
 window.onload=function(){
 
-jQuery("#frmGenera").submit(function(e){
-    e.preventDefault();
-    var formData = jQuery("form").serializeArray();
-    var token = jQuery("[name=csrfmiddlewaretoken]").val();
-    // console.log(formData);
-    jQuery.ajax({
-        method:"POST",
-        headers: {'X-CSRFToken': token },
-        data: formData
-    })
-    .done(function(r,textStatus,xhr){
-        if(xhr.status=200){
-            location.href = "/contabilidad/listadesembolsospendientes";
-            window.open('/contabilidad/imprimircomprobanteegreso/'+xhr.responseText);
-        }
-        else{
-            alert(textStatus);
-        }
-    }).fail(function (error) {
-        MensajeError(error.responseText);
+    // deshabilitar el objeto nvalor
+    jQuery("#id_nvalor").attr("disabled",true);
+
+    jQuery("#frmGenera").submit(function(e){
+        e.preventDefault();
+        var formData = jQuery("form").serializeArray();
+        var token = jQuery("[name=csrfmiddlewaretoken]").val();
+
+        jQuery.ajax({
+            method:"POST",
+            headers: {'X-CSRFToken': token },
+            data: formData
+        })
+        .done(function(r,textStatus,xhr){
+            if(xhr.status=200){
+                location.href = "/contabilidad/listadesembolsospendientes";
+                window.open('/contabilidad/imprimircomprobanteegreso/'+xhr.responseText);
+            }
+            else{
+                alert(textStatus);
+            }
+        }).fail(function (error) {
+            MensajeError(error.responseText);
+        });
     });
-});
 
 }
 

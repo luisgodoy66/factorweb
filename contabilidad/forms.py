@@ -245,14 +245,16 @@ class ComprobanteEgresoForm(forms.ModelForm):
     class Meta:
         model=Comprobante_egreso
         fields = ['cxbeneficiario', 'ctrecibidopor', 'cxcuentapago', 'nvalor'
-                  , 'ctcheque', 'cxcuentadestino', 'demision', 'cxformapago']
+                  , 'ctcheque', 'cxcuentadestino', 'demision', 'cxformapago'
+                  , 'ctcuentadestino']
         labels = { 'demision':'Fecha de emisión'
                   , 'cxbeneficiario': 'Id. beneficiario'
                   , 'ctrecibidopor':'Recibido por'
                   , 'cxcuentapago':'Cuenta de pago'
                   , 'ctcheque':'Número de cheque'
-                  , 'cxcuentadestino':'Cuenta destino'
+                  , 'cxcuentadestino':'Cuenta de destino'
                   , 'nvalor':'Valor'
+                  , 'ctcuentadestino':'Cuenta de destino'
                   }
         widgets={'demision': forms.DateInput(
                 format=('%Y-%m-%d'),
@@ -272,8 +274,7 @@ class ComprobanteEgresoForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        # self.fields['demision'].widget.attrs['readonly']=True
-        self.fields['nvalor'].widget.attrs['readonly']=True
+        # self.fields['nvalor'].widget.attrs['readonly']=True
 
         if empresa:
             self.fields['cxcuentapago'].queryset = Cuentas_bancarias.objects\

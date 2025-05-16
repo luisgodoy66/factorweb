@@ -61,7 +61,6 @@ window.onload=function(){
             });
 
           });
-
           var token = jQuery("[name=csrfmiddlewaretoken]").val();
           var formData = jQuery("form").serializeArray();
 
@@ -98,6 +97,29 @@ window.onload=function(){
       // return false;
 
     });
+
+  // si es egreso
+  // cuando selecciona un banco, ejecutar la funcion AgregarFilaBanco
+    var select = document.getElementById('id_cxcuentapago');
+    if (select) {
+      select.addEventListener('change', function() {
+      if (select.value) {
+        AgregarFilaBanco();
+      }
+      });
+
+      // DEPENDIENDO DE LA FORMA DE PAGO ocultar o mostrar el cheque o transferencia
+      jQuery('input[type=radio][name="forma_pago"]').change(function() {
+        seleccionFormaPago();
+      });
+
+      // si es edicion de un egreso tomar el valor de la forma de pago
+      // Seleccionar y activar el radio que tiene la opción descrita en la variable forma_pago
+      var radio = jQuery('input[type=radio][name="forma_pago"][value="' + forma_pago + '"]');
+      radio.prop('checked', true).trigger('change');
+
+      seleccionFormaPago();
+    }
 
 };
 
@@ -170,7 +192,6 @@ function agregarFilaTabla(cuenta, nombre_cuenta, tipo, referencia, valor, id_lin
 }
 
 function sumarTotales(valordebe, valorhaber){
-  console.log("sumarTotales", valordebe, valorhaber)
   totaldebe=capturaValor("total_debe")
   totalhaber=capturaValor("total_haber")
   sumadebe = parseFloat(totaldebe) + parseFloat(valordebe)

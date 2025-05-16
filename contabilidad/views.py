@@ -1736,7 +1736,8 @@ def AsientoDiario(request, diario_id = None):
                                     empresa = id_empresa.empresa).count()
 
     if request.method =='GET':
-        d = Diario_cabecera.objects.filter(pk = diario_id).first()
+        d = Diario_cabecera.objects\
+            .filter(pk = diario_id, empresa = id_empresa.empresa).first()
         if d:
             diario_form = DiarioCabeceraForm(instance=d, )  
 
@@ -2542,3 +2543,220 @@ def MesCerrado(request, año, mes):
         .values('empresa')\
     
     return JsonResponse({'mesbloqueado': bool(mesbloqueado)})
+
+@login_required(login_url='/login/')
+@permission_required('contabilidad.add_diario_cabecera', login_url='bases:sin_permisos')
+def ComprobanteEgreso(request, diario_id = None):
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
+    template_name="contabilidad/datoscomprobanteegreso_form.html"
+    diario_form = DiarioCabeceraForm()
+    egreso_form = ComprobanteEgresoForm(empresa = id_empresa.empresa )
+    forma_pago = None
+    egreso = None
+    diario = None
+
+    if diario_id:
+        diario = Diario_cabecera.objects\
+            .filter(pk = diario_id, empresa = id_empresa.empresa).first()
+        egreso = Comprobante_egreso.objects\
+            .filter(asiento = diario_id, empresa = id_empresa.empresa).first()
+                
+    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                    empresa = id_empresa.empresa).count()
+
+    if request.method =='GET':
+        if diario:
+            diario_form = DiarioCabeceraForm(instance=diario, )  
+
+        if egreso:
+            egreso_form = ComprobanteEgresoForm(instance=egreso
+                                                , empresa = id_empresa.empresa)
+            forma_pago = egreso.cxformapago
+
+        contexto={'form_diario': diario_form,
+                'diario':diario_id,
+                'form_egreso': egreso_form,
+                'solicitudes_pendientes':sp,
+                'forma_pago': forma_pago,
+        }
+    
+        return render(request, template_name, contexto)
+
+    if request.method=='POST':
+
+        fecha = request.POST.get("dcontabilizado")
+        concepto = request.POST.get("ctconcepto")
+        valor =  request.POST.get("total_debe")
+        id_beneficiario = request.POST.get("cxbeneficiario")
+        nombre_beneficiario = request.POST.get("ctrecibidopor")
+        forma_pago = request.POST.get("forma_pago")
+        valor_egreso = request.POST.get("nvalor")
+        cuenta_pago = request.POST.get("cxcuentapago")
+        ctcheque = request.POST.get("ctcheque")
+        ctcuentadestino = request.POST.get("ctcuentadestino")
+        # determinar si el mes está bloqueado
+        mes = fecha[0:7]    
+        mesbloqueado = Control_meses.objects\
+            .filter(lbloqueado = True
+                    , empresa = id_empresa.empresa
+                    , año = fecha[0:4]
+                    , mes = fecha[5:7])\
+            .values('empresa')\
+        
+        if mesbloqueado:
+            return HttpResponse("El mes " + mes + " está bloqueado. No se puede contabilizar el asiento.")
+        
+        # buscar la cuenta de pago
+        cuenta_banco = Cuentas_bancarias.objects\
+            .filter(id = cuenta_pago, empresa = id_empresa.empresa)\
+            .first()
+                    
+        # inicio de transaccion
+        with transaction.atomic():
+
+            if not diario_id:
+                # buscar el secuancial que toca
+                sec = Contador.objects.filter(cxtransaccion = 'CE'
+                                              , empresa = id_empresa.empresa)\
+                                              .first()
+                if sec:
+                    contador = sec.nultimonumero + 1
+                else:
+                    contador = 1
+                    # crear el contador si no existe
+                    sec = Contador(
+                        cxtransaccion = 'CE',
+                        nultimonumero = 0,
+                        empresa = id_empresa.empresa,
+                        cxusuariocrea = request.user,
+                    )
+                # agregar ceros a la izquierda de variable numerica en python?
+
+                transaccion = 'CE-' + str(contador).zfill(7)
+
+                diario = Diario_cabecera(
+                    cxtransaccion = transaccion,
+                    dcontabilizado = fecha,
+                    ctconcepto = concepto,
+                    nvalor = valor,
+                    cxusuariocrea = request.user,
+                    empresa = id_empresa.empresa,
+                )
+                if diario:
+                    diario.save()
+                    diario_id = diario.id
+
+                # actualizar la secuencia de diarios
+                sec.nultimonumero = contador
+                sec.save()
+
+                # grabar el comprobante de egreso
+                egreso = Comprobante_egreso(
+                    demision = fecha,
+                    cxformapago = forma_pago,
+                    cxbeneficiario = id_beneficiario,
+                    ctrecibidopor = nombre_beneficiario,
+                    cxcuentapago = cuenta_banco,
+                    ctcheque = ctcheque,
+                    asiento = diario,
+                    nvalor = valor_egreso,
+                    ctcuentadestino = ctcuentadestino,
+                    cxusuariocrea = request.user,
+                    empresa = id_empresa.empresa,
+                )
+                if egreso:
+                    egreso.save()
+            else:
+                if diario:
+
+                    diario.dcontabilizado = fecha
+                    diario.ctconcepto = concepto
+                    diario.nvalor = valor
+                    diario.cxusuariomodifica = request.user.id
+                    diario.save()
+
+                    # grabar el comprobante de egreso
+                if egreso:
+                    egreso.demision = fecha
+                    egreso.cxformapago = forma_pago
+                    egreso.cxbeneficiario = id_beneficiario
+                    egreso.ctrecibidopor = nombre_beneficiario
+                    egreso.cxcuentapago = cuenta_banco
+                    egreso.ctcheque = ctcheque
+                    egreso.nvalor = valor_egreso
+                    egreso.ctcuentadestino = ctcuentadestino
+                    egreso.cxusuariomodifica = request.user.id
+                    egreso.save()
+                    
+            if not diario_id:
+                return redirect("contabilidad:listaasientoscontables")
+
+            # grabar detalle 
+
+            # recuperar el string de lista  pasado en la data y
+            # convertir a lista
+            lista = request.POST.get("Diario")
+            output = eval(lista)
+
+            for elem in output:      
+                #accedemos a cada elemento de la lista (en este caso cada elemento es un dictionario)
+                id_linea =  elem.get("id_linea")
+
+                cuenta = Plan_cuentas.objects\
+                    .filter(id = elem.get("cuenta")).first()
+
+                if elem.get("tipo") =='D':
+                    nvalor = float(elem.get("debe"))
+                else:
+                    nvalor = float(elem.get("haber"))
+
+                if id_linea == '0':
+                    detalle = Transaccion(
+                        diario = diario,
+                        cxcuenta=cuenta,
+                        cxtipo = elem.get("tipo"),
+                        nvalor = nvalor,
+                        ctreferencia = elem.get("referencia"),
+                        cxusuariocrea = request.user,
+                        empresa = id_empresa.empresa,
+                    )
+                else:
+                    detalle = Transaccion.objects\
+                        .filter(id = id_linea).first()
+                    
+                    if detalle:
+                        if nvalor != 0.00:
+                            detalle.cxcuenta=cuenta
+                            detalle.cxtipo = elem.get("tipo")
+                            detalle.nvalor = nvalor
+                            detalle.ctreferencia = elem.get("referencia")
+                            detalle.cxusuariomodifica = request.user.id
+                        else:
+                            detalle.leliminado = True
+                            detalle.cxusuarioelimina = request.user.id
+                
+                if detalle:
+                    detalle.save()
+            
+        # la ejecucion de esta vista POST se hace por jquery.ajax 
+        # y ese proceso imprime el asiento y devuelve a la lista de asientos
+        return HttpResponse( diario_id)
+    
+def CuentaContableBanco(request, banco_id):
+    # cargar el detalle del asiento contable
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    cuenta_banco = Cuentas_bancos.objects\
+        .filter(id = banco_id, leliminado = False
+                , empresa = id_empresa.empresa)\
+        .values('cuenta',)\
+        .annotate(
+            nombre_cuenta = Concat( F('cuenta__cxcuenta')
+                            , Value(' ')
+                            ,F('cuenta__ctcuenta')
+                            ,output_field=CharField() )
+                )\
+        .first()
+
+    return JsonResponse(cuenta_banco)

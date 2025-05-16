@@ -14,12 +14,14 @@ from .views import CuentasView, CuentasEspecialesEdit, BuscarCuentasEspeciales\
     , AsientosView, AsientoDiario, DatosLineaDiarioEditar\
     , GeneraListaDiariosJSON, DiariosConsulta, GenerarEgresoDiario\
     , LibroMayorConsulta, GeneraLibroMayorJSON, ReversarAsiento\
-    , ListaCobranzasAGenerar, GeneraListaCobranzasJSON, GenerarAsientosCobranzas\
+    , ListaCobranzasAGenerar, GeneraListaCobranzasJSON\
+     , GenerarAsientosCobranzas, CuentaContableBanco\
     , BalanceGeneralConsulta, PerdiasyGananciasConsulta, CierreDeMes\
     , generaFacturasAlVencimiento, GeneraFacturasAlVencimientoDiario\
      , FacturasConsulta, DesbloquearMes, DesbloqueoDeMes\
     , GeneraListaFacturasJSON, GeneraListaProtestosJSON, ListaProtestosAGenerar\
-    , GenerarAsientosProtestos, CuentasCargosFactoringView, CuentaCargoTipoFactoringNew\
+    , GenerarAsientosProtestos, CuentasCargosFactoringView\
+     , CuentaCargoTipoFactoringNew, ComprobanteEgreso\
     , CuentaCargoTipoFactoringEdit, CuentasCargoTiposFactoringView\
     , GeneraListaTransferenciasJSON, ListaTransferenciasAGenerar\
     , GenerarAsientosTransferencias, GeneraListaRecuperacionesJSON\
@@ -183,4 +185,9 @@ urlpatterns = [
     path('asignarcuentascontablesreestructuracion/<pk>',CuentasReestructuracionEdit.as_view()
          , name="asignarcuentascontablesreestructuracion_editar"),
     path('mescerrado/<año>/<mes>',MesCerrado), # Para el cierre de mes
+    path('comprobanteegresonuevo/',ComprobanteEgreso, 
+         name="comprobanteegreso_nuevo"),
+    path('comprobanteegresoeditar/<diario_id>',ComprobanteEgreso, 
+         name="comprobanteegreso_editar"),
+     path('cuentacontablebanco/<banco_id>',CuentaContableBanco),
 ]
