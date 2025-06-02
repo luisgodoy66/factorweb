@@ -179,8 +179,8 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR,'static'),)
 MEDIA_ROOT = '/var/www/uploads'
 MEDIA_URL = '/uploads/'
 
-# para que funcione en la ruta www.codigobambu.com/margarita
-FORCE_SCRIPT_NAME = '/margarita'
-STATIC_URL = '/margarita/static/'
-# MEDIA_URL = '/margarita/media/'
-MEDIA_URL = '/margarita/uploads/'
+# # para que funcione en la ruta www.codigobambu.com/margarita
+# FORCE_SCRIPT_NAME = '/margarita'
+# STATIC_URL = '/margarita/static/'
+# # MEDIA_URL = '/margarita/media/'
+# MEDIA_URL = '/margarita/uploads/'
