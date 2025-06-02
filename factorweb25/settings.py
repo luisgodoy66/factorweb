@@ -178,24 +178,9 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR,'static'),)
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 MEDIA_ROOT = '/var/www/uploads'
 MEDIA_URL = '/uploads/'
-# # CONFIGURACION GOOGLE CLOUD
-# DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-# GS_BUCKET_NAME = 'factorweb-bucket'
-# GS_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-# GS_DEFAULT_ACL = 'publicRead' # o 'private' segun tus necesidades.
-# ADMIN_MEDIA_PREFIX = '/static/admin/'
 
-# # # Static files (CSS, JavaScript, Images)
-# # # https://docs.djangoproject.com/en/4.0/howto/static-files/
-# STATIC_URL = "https://storage.googleapis.com/factorweb-bucket/"
-
-# STATICFILES_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
-# STORAGES = {
-#    "default": {
-#         "BACKEND" : "storages.backends.gcloud.GoogleCloudStorage",
-#     },
-
-#     "staticfiles":  {
-#         "BACKEND" : "storages.backends.gcloud.GoogleCloudStorage",
-#     },
-# }
+# para que funcione en la ruta www.codigobambu.com/margarita
+FORCE_SCRIPT_NAME = '/margarita'
+STATIC_URL = '/margarita/static/'
+# MEDIA_URL = '/margarita/media/'
+MEDIA_URL = '/margarita/uploads/'

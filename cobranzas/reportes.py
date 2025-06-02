@@ -721,8 +721,8 @@ def ImpresionDetalleCobranzas(request, desde, hasta, clientes = None):
     context={
         'detalle':detalle,
         'total_cobrado' :totales['cobrado'] or 0,
-        'total_retencionesybaja':totales['baja'] or 0 +totales['retenciones'] or 0,
-        'total_general':totales['cobrado'] or 0 +totales['baja'] or 0 +totales['retenciones'] or 0,
+        'total_retencionesybaja':(totales['baja'] or 0) + (totales['retenciones'] or 0),
+        'total_general':(totales['cobrado'] or 0) + (totales['baja'] or 0) + (totales['retenciones'] or 0),
         'empresa': id_empresa.empresa,
         'desde': datetime.strptime(desde, '%Y-%m-%d').date(),
         'hasta': datetime.strptime(hasta, '%Y-%m-%d').date(),
