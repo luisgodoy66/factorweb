@@ -78,6 +78,7 @@
                     <li class="active">
                         <a href="{% url 'bases:dashboard' %}"> <i class="menu-icon fa fa-dashboard"></i>Dashboard </a>
                     </li>
+
                     <h3 class="menu-title">Operaciones</h3><!-- /.menu-title -->
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
@@ -135,7 +136,6 @@
                                 <a href="{% url 'contabilidad:consulta_facturas' %}">Consulta de facturas</a></li>
                             </ul>
                     </li>
-
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
                             <i class="menu-icon fa fa-laptop"></i>Cuentas compartidas</a>
@@ -149,7 +149,6 @@
                     </li>
 
                     <h3 class="menu-title">Participantes</h3><!-- /.menu-title -->
-
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
                             <i class="menu-icon fa fa-users"></i>Clientes</a>
@@ -186,45 +185,6 @@
                             <i class="menu-icon fa fa-save"></i>Guardados</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-camera"></i><a href="{% url 'operaciones:lista_corteshistorico' %}">Cortes</a></li>
-                        </ul>
-                    </li>
-
-                    <h3 class="menu-title">Configuración</h3><!-- /.menu-title -->
-
-                    <li class="menu-item-has-children dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
-                            <i class="menu-icon fa fa-wrench"></i>Empresa</a>
-                        <ul class="sub-menu children dropdown-menu">
-                            <li><i class="menu-icon fa fa-building"></i><a href="{% url 'empresa:datosempresa' user.usuario_empresa.get.empresa.id %}">Datos de la empresa</a></li>
-                            <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'empresa:listatiposfactoring' %}">Tipos de factoring</a></li>
-                            <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'empresa:listatasasfactoring' %}">Tasas de factoring</a></li>
-                            <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'empresa:listaotroscargos' %}">Otros cargos</a></li>
-                            <li><i class="menu-icon fa fa-tasks"></i><a href="{% url 'operaciones:listacondicionesoperativas' %}">Condiciones operati.</a></li>
-                            <li><i class="menu-icon fa fa-money"></i><a href="{% url 'empresa:listacuentasbancarias' %}">Cuentas bancarias</a></li>
-                            <li><i class="menu-icon fa fa-dot-circle-o"></i><a href="{% url 'empresa:listapuntosemision' %}">Puntos de emisión</a></li>
-                            <li><i class="menu-icon fa fa-map-marker"></i><a href="{% url 'empresa:listalocalidades' %}">Localidades</a></li>
-                            <li><i class="menu-icon fa fa-paperclip"></i><a href="{% url 'operaciones:listaanexos' %}">Anexos al contrato</a></li>
-                            <li><i class="menu-icon fa fa-filter"></i><a href="{% url 'solicitudes:listanivelesaprobacion' %}">Filtros de aprobación</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="menu-item-has-children dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
-                            <i class="menu-icon fa fa-cog"></i>Tablas</a>
-                        <ul class="sub-menu children dropdown-menu">
-                            <li><i class="menu-icon fa fa-star"></i><a href="{% url 'empresa:listaclasesparticipantes' %}">Clases participantes</a></li>
-                            <li><i class="menu-icon fa fa-building"></i><a href="{% url 'pais:listabancos' %}">Bancos</a></li>
-                            <li><i class="menu-icon fa fa-calendar"></i><a href="{% url 'pais:listaferiados' %}">Días feriados</a></li>
-                            <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'operaciones:listamaestromovimientos' %}">Movimientos</a></li>
-                            <li><i class="menu-icon fa fa-times"></i><a href="{% url 'cobranzas:listamotivosprotesto' %}">Motivos de protesto</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="menu-item-has-children dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
-                            <i class="menu-icon fa fa-comments"></i>Integraciones</a>
-                        <ul class="sub-menu children dropdown-menu">
-                            <li><i class="menu-icon fa fa-comment"></i><a href="{% url 'api:lista_configuraciones_slack' %}">Slack</a></li>
                         </ul>
                     </li>
 
@@ -272,6 +232,42 @@
                             <li><i class="menu-icon fa ti-book"></i><a href="{% url 'contabilidad:consultalibromayor' %}">Libro mayor</a></li>
                             <li><i class="menu-icon fa ti-book"></i><a href="{% url 'contabilidad:consultabalancegeneral' %}">Balance general</a></li>
                             <li><i class="menu-icon fa ti-book"></i><a href="{% url 'contabilidad:consultaperdidasyganancias' %}">Estado P&G</a></li>
+                        </ul>
+                    </li>
+
+                    <h3 class="menu-title">Configuración</h3><!-- /.menu-title -->
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-wrench"></i>Empresa</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-building"></i><a href="{% url 'empresa:datosempresa' user.usuario_empresa.get.empresa.id %}">Datos de la empresa</a></li>
+                            <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'empresa:listatiposfactoring' %}">Tipos de factoring</a></li>
+                            <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'empresa:listatasasfactoring' %}">Tasas de factoring</a></li>
+                            <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'empresa:listaotroscargos' %}">Otros cargos</a></li>
+                            <li><i class="menu-icon fa fa-tasks"></i><a href="{% url 'operaciones:listacondicionesoperativas' %}">Condiciones operati.</a></li>
+                            <li><i class="menu-icon fa fa-money"></i><a href="{% url 'empresa:listacuentasbancarias' %}">Cuentas bancarias</a></li>
+                            <li><i class="menu-icon fa fa-dot-circle-o"></i><a href="{% url 'empresa:listapuntosemision' %}">Puntos de emisión</a></li>
+                            <li><i class="menu-icon fa fa-map-marker"></i><a href="{% url 'empresa:listalocalidades' %}">Localidades</a></li>
+                            <li><i class="menu-icon fa fa-paperclip"></i><a href="{% url 'operaciones:listaanexos' %}">Anexos al contrato</a></li>
+                            <li><i class="menu-icon fa fa-filter"></i><a href="{% url 'solicitudes:listanivelesaprobacion' %}">Filtros de aprobación</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-cog"></i>Tablas</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-star"></i><a href="{% url 'empresa:listaclasesparticipantes' %}">Clases participantes</a></li>
+                            <li><i class="menu-icon fa fa-building"></i><a href="{% url 'pais:listabancos' %}">Bancos</a></li>
+                            <li><i class="menu-icon fa fa-calendar"></i><a href="{% url 'pais:listaferiados' %}">Días feriados</a></li>
+                            <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'operaciones:listamaestromovimientos' %}">Movimientos</a></li>
+                            <li><i class="menu-icon fa fa-times"></i><a href="{% url 'cobranzas:listamotivosprotesto' %}">Motivos de protesto</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-comments"></i>Integraciones</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-comment"></i><a href="{% url 'api:lista_configuraciones_slack' %}">Slack</a></li>
                         </ul>
                     </li>
                     <li><a href="#">V.2.7.2</a></li>
