@@ -315,7 +315,7 @@ class TasasAccesoriosForm(forms.ModelForm):
             })
 
 class AnexosForm(forms.ModelForm):
-    ctnombre = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))    
+    # ctnombre = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))    
     class Meta:
         model=Anexos
 
@@ -329,6 +329,14 @@ class AnexosForm(forms.ModelForm):
 
         widgets={'ctnombre': forms.Textarea(attrs={'rows': '1'}), 
             }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
 
 class TasasAPAccesoriosForm(forms.ModelForm):
     

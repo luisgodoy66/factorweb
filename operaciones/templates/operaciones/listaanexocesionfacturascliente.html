@@ -8,7 +8,7 @@
                     <li><a href="#">operaciones</a></li>
                     <li><a href="#">negociación</a></li>
                     <li><a href="{% url 'operaciones:listaasignaciones' %} ">liquidadas</a></li>
-                    <li class="active">anexos a operación de {{cliente}}</li>
+                    <li class="active">Cesión de facturas</li>
                 </ol>
             </div>
         </div>
@@ -57,8 +57,16 @@
                     <tbody>
                         {% for item in consulta %}
                         <tr>
-                            <td>{{ item.comprador__datos_generales_comprador__ctnombre }}</td>
-                            <td>{{comprador__comprador_comprador__lsenotifica}}</td>
+                            <td>{{ item.comprador__cxcomprador__ctnombre }}</td>
+                            <td>{{ item.comprador__comprador_comprador__lsenotifica | yesno:"Sí,No" }}</td>
+                            <td>
+                                {% if item.comprador__comprador_comprador__lsenotifica %}
+                                    <a href="{% url 'operaciones:generar_anexo_cesion' solicitud_id anexo_id item.comprador %}" 
+                                        class="btn btn-success btn-sm" role="button" 
+                                        title="Generar anexo"><i class="fa fa-file"></i>
+                                    </a>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

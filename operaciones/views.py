@@ -333,11 +333,6 @@ class AnexosEdit(SinPrivilegios, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['nuevo'] = False
-        return kwargs
-
 class EstadosOperativosView(SinPrivilegios, generic.ListView):
     model = ModeloCliente.Datos_generales
     template_name = "operaciones/listaestadosoperativos.html"
@@ -570,33 +565,31 @@ class AnexosCesionFacturasView(SinPrivilegios, generic.ListView):
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects\
             .filter(user = self.request.user).first()
-        
-        asignacion_id = self.kwargs.get('asignacion_id')
+
+        solicitud_id = self.kwargs.get('solicitud_id')
 
         qs=ModelosSolicitud.Documentos.objects\
             .filter(leliminado = False
-                , cxasignacion = asignacion_id
+                , cxasignacion = solicitud_id
                 , empresa = id_empresa.empresa)\
             .values('comprador'
-                    , 'comprador__datos_generales_comprador__ctnombre'
+                    , 'comprador__cxcomprador__ctnombre'
                     , 'comprador__comprador_comprador__lsenotifica')\
             .annotate(documentos=Count('ntotal'))
         return qs
 
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        context = super(AnexosClienteView, self).get_context_data(**kwargs)
+        context = super(AnexosCesionFacturasView, self).get_context_data(**kwargs)
 
         solicitud_id = self.kwargs.get('solicitud_id')
-        cliente_id = self.kwargs.get('cliente_id')
-        cliente = ModeloCliente.Datos_generales.objects\
-            .filter(pk=cliente_id).first()
+        anexo_id = self.kwargs.get('anexo_id')
 
         sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
                                        empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         context['solicitud_id'] = solicitud_id
-        context['cliente'] = cliente
+        context['anexo_id'] = anexo_id
         return context
 
 @login_required(login_url='/login/')
@@ -2222,19 +2215,32 @@ def ConsultaAnexosActivos(request, tipo_cliente):
     return HttpResponse(json.dumps(data))
 
 def GenerarAnexo(request, asignacion_id, anexo_id, deudor_id = None):
+    id_deudor=''
+    nombre_deudor = ''
+    total_deudor_valor = 0
+    # Genera un anexo de la asignación
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     asignacion = ModelosSolicitud.Asignacion.objects\
         .filter(pk=asignacion_id).first()
     
-    if not deudor_id:
-        documentos = ModelosSolicitud.Documentos.objects\
-            .filter(cxasignacion = asignacion_id).all()
-    else:
+    if deudor_id:
         documentos = ModelosSolicitud.Documentos.objects\
             .filter(cxasignacion = asignacion_id
-                    , comprador = deudor_id).all()
-    
+                    , comprador = deudor_id).all()\
+                    .order_by('dvencimiento')
+
+        id_deudor = documentos[0].cxcomprador
+        nombre_deudor = documentos[0].ctcomprador
+        # totalizar los documentos DESDE la consulta documentos
+        # para evitar que se repita el total de cada documento
+        total_deudor = documentos.aggregate(total=Sum(F('ntotal') - F('nvalornonegociado')))
+        total_deudor_valor = total_deudor['total'] if total_deudor else 0
+    else:
+        documentos = ModelosSolicitud.Documentos.objects\
+            .filter(cxasignacion = asignacion_id).all()\
+            .order_by('cxcomprador', 'dvencimiento')
+
     anexo = Anexos.objects.filter(pk=anexo_id).first()
 
     # datos del cliente
@@ -2300,6 +2306,9 @@ def GenerarAnexo(request, asignacion_id, anexo_id, deudor_id = None):
             'netoarecibir': asignacion.neto(),
             'telefonocliente': asignacion.cliente.cxcliente.cttelefono1,
             'vencimiento': fecha_vencimiento.strftime("%d-%B-%Y"),
+            'iddeudor': id_deudor,
+            'nombredeudor': nombre_deudor,
+            'totaldeudor': total_deudor_valor,
             }
         plantilla.render(context)
         x = bajararchivo(request,plantilla,archivo)

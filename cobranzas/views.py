@@ -1788,7 +1788,7 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
            'cxoperacion':liquidacion.id, 
            'cxcliente':cliente_ruc, 
            'nvalor': liquidacion.neto(), 
-           'cxbeneficiario':datosoperativos.cxbeneficiarioasignacion, 
+           'cxbeneficiario':datosoperativos.cxbeneficiariocobranzas, 
            'ctbeneficiario':datosoperativos.ctbeneficiariocobranzas,
            'cxcuentadestino':cuenta_transferencia,
             }

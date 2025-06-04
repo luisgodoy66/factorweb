@@ -59,14 +59,14 @@
                             <td>{{ item }}</td>
                             <td>
                                 {% if item.lcesionfacturas %}
-                                    <a href="{% url 'operaciones:anexos_cesion_cliente' item.id solicitud_id %}" 
+                                    <a href="{% url 'operaciones:anexos_cesion_cliente' solicitud_id item.id %}" 
                                         class="btn btn-primary btn-sm" role="button" 
-                                        title="Ver"><i class="fa fa-eye"></i>
+                                        title="Listar deudores"><i class="fa fa-eye"></i>
                                     </a>
                                 {% else %}
                                     <a href="{% url 'operaciones:generar_anexo' solicitud_id item.id %}" 
                                         class="btn btn-success btn-sm" role="button" 
-                                        title="Anexos"><i class="fa fa-file"></i>
+                                        title="Generar anexo"><i class="fa fa-file"></i>
                                     </a>
                                 {% endif %}
                             </td>

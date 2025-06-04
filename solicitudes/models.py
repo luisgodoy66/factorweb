@@ -182,7 +182,7 @@ class Documentos(ClaseModelo):
         return self.ntotal - self.nvalornonegociado
 
     def __str__(self):
-        return self.ctdocumento
+        return '{}-{}-{}'.format(self.ctserie1, self.ctserie2, self.ctdocumento)
 
     def total_cargos(self):
         return self.ngao + self.ndescuentocartera

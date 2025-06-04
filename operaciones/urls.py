@@ -139,16 +139,17 @@ urlpatterns = [
          , ImpresionResumenAsignaciones, name='resumen_asignaciones'),
     path('impresionresumenasignaciones/<desde>/<hasta>/'
          , ImpresionResumenAsignaciones, name='resumen_asignaciones'),
+#  anexos
     path("anexosactivos/<tipo_cliente>", ConsultaAnexosActivos),
+    path('anexoscliente/<cliente_id>/<solicitud_id>'
+         , AnexosClienteView.as_view(), name='anexos_cliente'),
+    path('anexoscesioncliente/<solicitud_id>/<anexo_id>'
+         , AnexosCesionFacturasView.as_view(), name='anexos_cesion_cliente'),
     path("generaranexo/<int:asignacion_id>/<anexo_id>"
          , GenerarAnexo, name='generar_anexo'),
     path("generaranexo/<int:asignacion_id>/<anexo_id>/<deudor_id>"
          , GenerarAnexo, name='generar_anexo_cesion'),
     path('marcaanexogenerado/<int:asignacion_id>', MarcarAnexoGenerado),
-    path('anexoscliente/<cliente_id>/<solicitud_id>'
-         , AnexosClienteView.as_view(), name='anexos_cliente'),
-    path('anexoscesioncliente/<cliente_id>/<solicitud_id>'
-         , AnexosCesionFacturasView.as_view(), name='anexos_cesion_cliente'),
 # dashboard
     path('antigüedadcartera', GeneraResumenAntigüedadCarteraJSON),
     path('carteranegociada/<int:año>', GeneraResumenCarteraNegociadaJSON),
