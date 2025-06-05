@@ -177,6 +177,8 @@ class Documentos(ClaseModelo):
         , on_delete=models.CASCADE
         , related_name="solicitud_comprador"
     )
+    lnotificaciongenerada = models.BooleanField(default=False
+        , help_text='Indica si se ha generado la notificación de este documento')
 
     def total_negociado(self):
         return self.ntotal - self.nvalornonegociado

@@ -2313,11 +2313,13 @@ def GenerarAnexo(request, asignacion_id, anexo_id, deudor_id = None):
         plantilla.render(context)
         x = bajararchivo(request,plantilla,archivo)
 
-        # # marcar la asignación como generados los anexos
-        # asignacion.lanexosimpresos = True
-        # asignacion.save()
-        
+        # marcar los documentos como notificación generada si el anexo es de notificación
+        if anexo.lcesionfacturas:
+            for doc in documentos:
+                doc.lnotificaciongenerada = True
+                doc.save() 
         return x
+    
     except TypeError as err:
         return HttpResponse("Se ha producido en error en la generación del anexo.{}".format(err))
 

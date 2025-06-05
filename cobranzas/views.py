@@ -838,7 +838,10 @@ def GeneraListaCarterPorVencerJSONSalida(doc):
     output["IdCliente"] = doc.cxcliente.id
     output["Cliente"] = doc.cxcliente.cxcliente.ctnombre
     output["IdComprador"] = doc.cxcomprador.id
-    output["Comprador"] = doc.cxcomprador.cxcomprador.ctnombre
+    if doc.lnotificaciongenerada:
+        output["Comprador"] = '* ' + doc.cxcomprador.cxcomprador.ctnombre
+    else:
+        output["Comprador"] = doc.cxcomprador.cxcomprador.ctnombre
     output["IdTipoFactoring"] = doc.cxtipofactoring.id
     output["TipoFactoring"] = doc.cxtipofactoring.ctabreviacion
     output["Asignacion"] = doc.cxasignacion.cxasignacion
