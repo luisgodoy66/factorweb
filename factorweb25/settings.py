@@ -32,11 +32,13 @@ ALLOWED_HOSTS = [
     '69.62.68.116', 'localhost',
     'codigobambuecuador.com',
     'margarita.codigobambuecuador.com',
+    'www.margarita.codigobambuecuador.com',
     '*'
     ]
 CSRF_TRUSTED_ORIGINS=[
     'http://69.62.68.116',
-    'http://margarita.codigobambuecuador.com/'
+    'http://margarita.codigobambuecuador.com/',
+    'http://www.margarita.codigobambuecuador.com/'
     ]
 
 
