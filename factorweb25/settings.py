@@ -31,11 +31,12 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '69.62.68.116', 'localhost',
     'codigobambuecuador.com',
+    'margarita.codigobambuecuador.com',
     '*'
     ]
 CSRF_TRUSTED_ORIGINS=[
     'http://69.62.68.116',
-    # 'https://www.margarita.codigobambu.com/'
+    'http://margarita.codigobambuecuador.com/'
     ]
 
 
