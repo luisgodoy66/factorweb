@@ -18,7 +18,7 @@ from .forms import AsignacionesForm, ChequesForm, DocumentosForm\
 from empresa.models import Tipos_factoring, Datos_participantes, \
     Contador
 from .models import Asignacion, ChequesAccesorios, Documentos, \
-    Clientes, Niveles_aprobacion
+    Clientes, Niveles_aprobacion, Exceso_temporal
 from clientes.models import Datos_compradores
 from pais.models import Bancos, Feriados
 from bases.models import Usuario_empresa, Empresas
@@ -207,6 +207,35 @@ class NivelAprobacionEditarView(SinPrivilegios, generic.UpdateView):
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(NivelAprobacionEditarView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class ExcesosTemporalesView(SinPrivilegios, generic.ListView):
+    model = Exceso_temporal
+    template_name = "solicitudes/listaexcesostemporales.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="solicitudes.view_exceso_temporal"
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        if self.kwargs.get('filtro') == 'todos':
+            qs=Exceso_temporal.objects\
+                .filter(empresa = id_empresa.empresa)\
+                .order_by("dregistro")
+        else:
+            qs=Exceso_temporal.objects\
+                .filter(empresa = id_empresa.empresa
+                        , leliminado = False
+                        , cxrespuesta = 'P')\
+                .order_by("dregistro")
+        return qs
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(ExcesosTemporalesView, self).get_context_data(**kwargs)
         sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
                                        empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -1144,3 +1173,47 @@ def GeneraListaSolicitudesJSONSalida(asignacion):
     output["Registro"] = asignacion.dregistro.strftime("%Y-%b-%d %H:%M")
 
     return output
+
+@login_required(login_url='/login/')
+@permission_required('solicitudes.change_exceso_temporal', login_url='bases:sin_permisos')
+def RechazarExcesoTemporal(request, exceso_id):
+    # la eliminacion es lógica
+
+    exceso = Exceso_temporal.objects.filter(pk=exceso_id).first()
+
+    if not exceso:
+        return HttpResponse("No existe el exceso temporal", status=400)
+    # si no existe la asignacion, no se puede eliminar
+
+    if request.method=="GET":
+        # deje revertirse la liquidacion primero
+        resultado=enviarPost("CALL uspreversaliquidacionasignacion( {0},'')"
+            .format( exceso.asignacion.id,  ))
+
+        if resultado[0] == "OK":
+            exceso.cxusuariorespuesta = request.user
+            exceso.cxrespuesta = "R"
+            exceso.drespuesta = datetime.datetime.today()
+            exceso.save()
+
+    return HttpResponse(resultado[0])
+
+@login_required(login_url='/login/')
+@permission_required('solicitudes.change_exceso_temporal', login_url='bases:sin_permisos')
+def AceptarExcesoTemporal(request, exceso_id):
+    # la eliminacion es lógica
+
+    exceso = Exceso_temporal.objects.filter(pk=exceso_id).first()
+
+    if not exceso:
+        return HttpResponse("No existe el exceso temporal", status=400)
+    # si no existe la asignacion, no se puede eliminar
+
+    if request.method=="GET":
+        exceso.cxusuariorespuesta = request.user
+        exceso.cxrespuesta = "A"
+        exceso.drespuesta = datetime.datetime.today()
+        exceso.save()
+
+    return HttpResponse("OK")
+

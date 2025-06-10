@@ -507,11 +507,20 @@ class RecuperacionProtestoView(SinPrivilegios, generic.FormView):
         cuentas_deudor = None
 
         if un_solo_deudor=="Si":
-            cuentas_deudor = Cuentas_bancarias\
-                .objects.filter(cxparticipante = deudor_id \
-                    , leliminado = False, lpropia = True).all()
-                    # , cxtipocuenta = 'C').all()   # podría hacer transferencias desde cuenta de ahorros
+            comprador = Datos_compradores.objects\
+                .filter(cxcomprador=deudor_id).first()
 
+            if forma_cobro=="CHE":
+                cuentas_deudor = Cuentas_bancarias\
+                    .objects.filter(cxparticipante = deudor_id \
+                        , lactiva = True
+                        , leliminado = False
+                        , cxtipocuenta = 'C').all()
+            else:
+                cuentas_deudor = Cuentas_bancarias\
+                    .objects.filter(cxparticipante = deudor_id \
+                        , leliminado = False).all()
+                
         cuentas_conjuntas = CuentasConjuntasModels.Cuentas_bancarias\
             .objects.filter(cxcliente = cl.id \
                 , leliminado = False, lactiva = True).all()
@@ -524,14 +533,15 @@ class RecuperacionProtestoView(SinPrivilegios, generic.FormView):
         context["forma_cobro"] = forma_cobro
         context["form_cheque"] = ChequesForm
         context["cuentas_bancarias_cliente"] = cuentas
+        context["cuentas_bancarias_deudor"] = cuentas_deudor
+        context["un_solo_comprador"] = un_solo_deudor
         context["cliente_id"] = cliente_id
         context["cliente"] = cliente
         context["tipo_factoring"] = tipo_factoring
-        context["cuentas_bancarias_deudor"] = cuentas_deudor
-        context["un_solo_comprador"] = un_solo_deudor
         context["deudor_id"] = deudor_id
         context["cuentas_conjuntas"] = cuentas_conjuntas
         context["tipo"]="Recuperación"
+        context["deudor"] = comprador if un_solo_deudor == "Si" else None
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
                                        empresa = id_empresa.empresa).count()
@@ -1616,23 +1626,6 @@ def GeneraListaCobranzasPendientesProcesarJSON(request):
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    # cobranzas= Documentos_cabecera.objects\
-    #     .filter(Q(cxestado='C', empresa = id_empresa.empresa\
-    #               ,leliminado = False) | Q(cxformapago__in=["EFE", "MOV"]
-    #                                        , cxestado='A'))\
-    #         .values('cxcliente__cxcliente__ctnombre','ddeposito'
-    #         ,'cxtipofactoring__ctabreviacion', 'dcobranza', 'nsobrepago'
-    #         ,'cxcobranza','cxformapago','nvalor', 'cxcuentadeposito__cxcuenta'
-    #         , 'id', 'cxcheque_id','cxcliente').annotate(tipo=RawSQL("select 'C'",''))
-
-    # recuperaciones = Recuperaciones_cabecera.objects\
-    #     .filter(Q(cxestado='C', empresa = id_empresa.empresa\
-    #               ,leliminado = False) | Q(cxformacobro__in=["EFE", "MOV"]
-    #                                        , cxestado='A'))\
-    #         .values('cxcliente__cxcliente__ctnombre','ddeposito'
-    #         ,'cxtipofactoring__ctabreviacion', 'dcobranza', 'nsobrepago'
-    #         ,'cxrecuperacion','cxformacobro','nvalor', 'cxcuentadeposito__cxcuenta'
-    #         , 'id', 'cxcheque_id','cxcliente').annotate(tipo=RawSQL("select 'R'",''))
     cobranzas= Documentos_cabecera.objects\
         .filter( leliminado = False , empresa = id_empresa.empresa)\
         .filter(Q(cxestado='C' ) | Q(cxformapago__in=["EFE", "MOV"], cxestado='A'))\

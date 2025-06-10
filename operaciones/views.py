@@ -1389,13 +1389,17 @@ def AceptarDocumentos(request):
     otros_cargos = objeto["arr_otros_cargos"]
     base_iva = objeto["base_iva"]
     base_noiva = objeto["base_noiva"]
+    # 6-jun-25  l.g.  Agregar manejo de excesos temporales
+    exceso_temporal = objeto["exceso_temporal"]
 
-    resultado=enviarPost("CALL uspLiquidarAsignacion( {0},'{1}', '{2}',{3},{4}\
-        ,{5},{6},'{7}',{8},'{9}'\
-        ,{10}, '{11}',{12},{13},'')"
-        .format(pid_asignacion,pdnegociacion,pddesembolso,pnanticipo,pngao\
-            ,pndescuentocartera,pniva,psinstruccionpago,nusuario, pslocalidad
-            , porcentaje_iva, otros_cargos, base_iva, base_noiva))
+    resultado=enviarPost("CALL uspLiquidarAsignacion( {0},'{1}','{2}',{3}\
+                         ,{4},{5},{6},'{7}'\
+                         ,{8},'{9}',{10}, '{11}'\
+                         ,{12},{13},{14},'')"
+        .format(pid_asignacion,pdnegociacion,pddesembolso,pnanticipo
+                ,pngao, pndescuentocartera,pniva,psinstruccionpago
+                ,nusuario, pslocalidad, porcentaje_iva, otros_cargos
+                , base_iva, base_noiva, exceso_temporal))
 
 
     return HttpResponse(resultado)
@@ -1579,6 +1583,18 @@ def ReversaAceptacionAsignacion(request, pid_asignacion):
     resultado=enviarPost("CALL uspreversaliquidacionasignacion( {0},'')"
         .format( pid_asignacion,  ))
 
+    # BUSCAR si existe exceso temporal. si existe, eliminarlo
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    exceso_temporal = ModelosSolicitud.Exceso_temporal.objects\
+            .filter(asignacion = pid_asignacion
+                    , cxrespuesta = 'P', leliminado = False
+                    , empresa = id_empresa.empresa).first()
+    if exceso_temporal:
+        # eliminar el exceso temporal
+        exceso_temporal.leliminado = True
+        exceso_temporal.dmodificacion = datetime.now()
+        exceso_temporal.cxusuarioelimina = request.user.id
+        exceso_temporal.save()
     return HttpResponse(resultado)
   
 def GeneraListaAsignacionesJSON(request, desde = None, hasta= None, clientes =None):

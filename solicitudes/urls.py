@@ -6,7 +6,8 @@ from solicitudes.views import SolicitudesView, DetalleSolicitudFacturasPuras , \
     DatosAsignacionConAccesoriosNueva, AsignacionConAccesoriosView, \
     ClienteCrearView, DatosAccesorioEditar, ImportarOperacion, PedirArchivoXML,\
     GeneraListaSolicitudesRegistradasJSON, NivelesAprobacionView, \
-    NivelAprobacionCrearView, NivelAprobacionEditarView
+    NivelAprobacionCrearView, NivelAprobacionEditarView, \
+    ExcesosTemporalesView, AceptarExcesoTemporal, RechazarExcesoTemporal
 
 urlpatterns=[
     path('listasolicitudes/',SolicitudesView.as_view(), \
@@ -52,4 +53,12 @@ urlpatterns=[
          , name='listanivelesaprobacion'),
     path('nivelaprobacionnuevo/',NivelAprobacionCrearView.as_view(), name='nivelaprobacion_nuevo'),
     path('nivelaprobacioneditar/<int:pk>',NivelAprobacionEditarView.as_view(), name='nivelaprobacion_editar'),
+    path('listaexcesostemporales/',ExcesosTemporalesView.as_view(), \
+        name='lista_excesos_temporales'),
+    path('listaexcesostemporales/<filtro>',ExcesosTemporalesView.as_view(), \
+        name='lista_excesos_temporales'),
+    path('aceptarexcesotemporal/<int:exceso_id>',AceptarExcesoTemporal, \
+        name='aceptar_exceso_temporal'),
+    path('rechazarexcesotemporal/<int:exceso_id>',RechazarExcesoTemporal, \
+        name='rechazar_exceso_temporal'),
 ]

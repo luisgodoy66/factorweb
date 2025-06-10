@@ -4,9 +4,10 @@ from django.db import models
 from bases.models import ClaseModelo
 from empresa.models import Tipos_factoring
 from pais.models import Bancos
-from clientes.models import Datos_generales as Datos_generales_cliente
 from clientes.models import Datos_compradores 
 from api.models import Configuracion_slack
+
+from django.contrib.auth.models import User
 
 class Clientes(ClaseModelo):
     cxcliente = models.CharField(max_length=13)
@@ -67,6 +68,7 @@ class Solicitud_aprobacion(ClaseModelo):
     def pendiente(self):
         return self.cxestado == 'P'
     
+from clientes.models import Datos_generales as Datos_generales_cliente
 class Asignacion(ClaseModelo):
     TIPOS_DE_ASIGNACION = (
         ('A', 'Con accesorios'),
@@ -148,6 +150,13 @@ class Asignacion(ClaseModelo):
     def __str__(self):
         return self.cxasignacion
     
+    def tipo_asignacion(self):
+        return self.get_cxtipo_display()
+    
+    def exceso_pendiente(self):
+        # Verifica si la asignación tiene un exceso temporal pendiente
+        return self.exceso_asignacion.filter(cxrespuesta='P', leliminado=False).exists()
+
 class Documentos(ClaseModelo):
     cxasignacion=models.ForeignKey(Asignacion
         , on_delete=models.CASCADE
@@ -229,3 +238,35 @@ class Respuesta_aprobacion(ClaseModelo):
 
     def __str__(self):
         return self.ctrespuesta
+
+from clientes.models import Linea_Factoring
+class Exceso_temporal(ClaseModelo):
+    RESPUESTA = (
+        ('P', 'Pendiente'),
+        ('A', 'Aprobada'),
+        ('R', 'Rechazada'),
+    )
+    cliente = models.ForeignKey(Datos_generales_cliente, on_delete=models.CASCADE
+        , related_name="exceso_temporal_cliente")
+    cxexceso = models.CharField(max_length=8, )
+    asignacion = models.ForeignKey(Asignacion, on_delete=models.CASCADE
+                                   , related_name="exceso_asignacion")
+    nvalor = models.DecimalField(max_digits=10, decimal_places=2)
+    cxrespuesta = models.CharField(max_length=1, choices=RESPUESTA, default='P')
+    drespuesta = models.DateTimeField(null=True, blank=True)
+    cxusuariorespuesta = models.ForeignKey(User, null=True, blank=True
+        , on_delete=models.SET_NULL, related_name="exceso_aprobado")
+
+    def __str__(self):
+        return self.cxexceso
+    
+    def estado(self):
+        return self.get_cxrespuesta_display()
+
+    def exceso(self):
+        # Obtiene la línea de factoring del cliente
+        linea = Linea_Factoring.objects.filter(cxcliente=self.cliente).first()
+        if not linea:
+            return "{} (Sin línea configurada)".format(self.nvalor)
+        porcentaje = (self.nvalor / linea.nvalor) * 100 if linea.nvalor else 0
+        return "{} ({:.2f}%)".format(self.nvalor, porcentaje)

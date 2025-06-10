@@ -26,10 +26,12 @@
         }
         .caja { 
         font-family: sans-serif; 
-        font-size: 11px; 
+        font-size: 09px; 
         font-weight: 400; 
         color: #090909; 
-        background:#a9b7b7 }        
+        background:#a9b7b7;
+        text-align: center;
+        }        
         .alerta { 
         font-family: sans-serif; 
         font-size: 11px; 
@@ -111,19 +113,17 @@
                             {% for protesto in detalle %}
                             <tr></tr>
                             <tr class="caja">
-                                <div class="caja">
-                                <td colspan="4"><h3>Cheque protestado:</h3></td>
-                                <td ><h3>Valor cartera</h3></td>
+                                <td colspan="4"><h3>Cheque protestado</h3></td>
                                 <td ><h3>Protestado</h3></td>
+                                <td ><h3>Valor cartera</h3></td>
                                 <td colspan="2"><h3>Motivo</h3></td>
                                 <td class="numero"><h3>Aplicado</h3></td>
                                 <td class="numero"><h3>Sdo.Cartera</h3></td>
-                                </div>
                             </tr>
                             <tr class="caja">
                                 <td colspan="4">{{ protesto.nombre }}</td>
-                                <td > {{ protesto.valor_protesto }}</td>
                                 <td > {{ protesto.fecha|date:"Y-m-d"  }}</td>
+                                <td class="numero"> {{ protesto.valor_protesto }}</td>
                                 <td colspan="2"> {{ protesto.motivo }}</td>
                                 <td class="numero"> {{ protesto.valor_aplicado }}</td>
                                 <td class="numero"> {{ protesto.saldo_protesto }}</td>

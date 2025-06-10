@@ -68,9 +68,13 @@
                             <td>{{ item.neto |floatformat:"2g"}}</td>
                             <td>
                                 {% if not item.lrequiereaprobacion or item.solicitudaprobacion.aprobada %}
-                                    <a href="{% url 'operaciones:desembolsarasignacion' item.id item.cliente.id %}" 
-                                    class="btn btn-primary btn-sm" role="button"  title="Pagar">
-                                    <i class="fa fa-check"></i></a>
+                                    {% if item.exceso_pendiente %}
+                                        Exceso pendiente
+                                    {% else %}
+                                        <a href="{% url 'operaciones:desembolsarasignacion' item.id item.cliente.id %}" 
+                                        class="btn btn-primary btn-sm" role="button"  title="Pagar">
+                                        <i class="fa fa-check"></i></a>
+                                    {% endif %}
                                 {% else %}
                                     {% if item.solicitudaprobacion.pendiente %}
                                     <button onclick="reenviarSolicitudAprobacion( {{item.id}})" role="button"

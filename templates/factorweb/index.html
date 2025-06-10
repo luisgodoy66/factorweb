@@ -85,6 +85,7 @@
                             <i class="menu-icon fa fa-file-text"></i>Negociación</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="fa fa-inbox"></i><a href="{% url 'solicitudes:listasolicitudes' %} ">Solicitudes </a></li>
+                            <li><i class="fa fa-inbox"></i><a href="{% url 'solicitudes:lista_excesos_temporales' %} ">Excesos temporales </a></li>
                             <li><i class="fa fa-money"></i><a href="{% url 'operaciones:listaasignaciones' %} ">Liquidadas</a></li>
                             <li><i class="fa fa-check"></i><a href="{% url 'operaciones:consulta_asignaciones' %} ">Aceptadas</a></li>
                             <li><i class="fa fa-file-text"></i><a href="{% url 'operaciones:listapagares' %} ">Reestructuraciones</a></li>
@@ -270,7 +271,7 @@
                             <li><i class="menu-icon fa fa-comment"></i><a href="{% url 'api:lista_configuraciones_slack' %}">Slack</a></li>
                         </ul>
                     </li>
-                    <li><a href="#">V.2.7.3</a></li>
+                    <li><a href="#">V.2.8</a></li>
                 </ul>
             </div><!-- /.navbar-collapse -->
         </nav>

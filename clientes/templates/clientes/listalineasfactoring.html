@@ -56,7 +56,7 @@
                         <th>Clase</th>
                         <th class="text-right">Monto de línea</th>
                         <th>Utilizado</th>
-                        <th>Exceso</th>
+                        <!-- <th>Exceso</th> -->
                         <th>Disponible</th>
                         <th>Estado</th>
                         <th class="all">Acciones</th>
@@ -69,7 +69,7 @@
                             <td>{{ item.datos_operativos.get.cxclase }}</td>
                             <td class="text-right">{{ item.linea_factoring.get.nvalor |floatformat:"2g"}}</td>
                             <td class="text-right">{{ item.linea_factoring.get.utilizado |floatformat:"2g"}}</td>
-                            <td class="text-right">{{ item.linea_factoring.get.nvalorexceso }}</td>
+                            <!-- <td class="text-right">{{ item.linea_factoring.get.nvalorexceso }}</td> -->
                             <td class="text-right">{{ item.linea_factoring.get.disponible |floatformat:"2g"}}</td>
                             <td>{{ item.datos_operativos.get.estado }}</td>
                             <td>

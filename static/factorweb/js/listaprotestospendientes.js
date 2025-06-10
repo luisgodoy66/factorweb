@@ -61,12 +61,18 @@ window.operateEvents = {
     ReversaProtesto(row.IdCobranza, row.id, row.TipoOperacion, row.Cobranza
       , row.IdCliente, row.IdTipoFactoring)
   },
+  'click .imprimir': function (e, value, row, index) {
+    ImprimirCobranza(row.IdCobranza, row.TipoOperacion)
+  },
 };
 
 function operateFormatter(value, row, index) {
 return [
   '<a class="revertir" href="javascript:void(0)" title="Reverso de protesto">',
   '<i class="fa fa-rotate-left"></i>',
+  '</a>  ',
+  '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
+  '<i class="fa fa-print"></i>',
   '</a>  ',
 ].join('')
 }

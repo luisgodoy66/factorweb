@@ -440,8 +440,9 @@ function AceptarAsignacion(){
         "arr_otros_cargos": cargos,
         "base_iva" : base_iva_tasas + base_iva_otros,
         "base_noiva" : base_noiva_tasas + base_noiva_otros,
+        "exceso_temporal": false,
       }
-    fetchPostear("/operaciones/aceptardocumentos/", objeto, function(){
+    fetchAceptar("/operaciones/aceptardocumentos/", objeto, function(){
         // en una nueva ventana abrir el reporte de asignación
         url = window.location.origin
         // 08-feb-25    l.g.    mantener la solicitud como liquidada
@@ -450,13 +451,6 @@ function AceptarAsignacion(){
         window.open( url);
         // regresar a la lista de solicitudes
         window.location.href = "/solicitudes/listasolicitudes";
-        
-								// // abrir la factura en una nueva ventana
-								// window.open("/facturar/" + reserva_id + "/" + filtro, '_blank');
-								// // refrescar la página actual después de un pequeño retraso
-								// setTimeout(function() {
-								// 	window.location.reload();
-								// }, 1000); // 1 segundo de retraso
 
     })
   })
@@ -506,5 +500,43 @@ function obtenerArregloCargos() {
     return arreglo; 
 }
 
+function fetchAceptar(url, objeto, callback){
+    var token= document.getElementsByName("csrfmiddlewaretoken")[0].value
+    fetch(url,{
+        headers:{
+            "Content-type":"application/json",
+            "X-CSRFToken":token
+        },
+        method:"POST",
+        body:JSON.stringify(objeto)
+    }).then(res=>res.text())
+    .then(res=>{
+        // res.slice(0,2) == 'OK' indica que la operación se realizó correctamente
+        if(res.slice(0,2)=='OK'){
+            MensajeOK()
+            callback(res.slice(2))
+        }
+        else{
+          if (res.slice(0,2)=='ND'){
+           MensajeConfirmacion(res.slice(2) + " ¿Desea continuar generando un exceso temporal?",function(){
+                objeto['exceso_temporal'] = true;
+                fetchAceptar("/operaciones/aceptardocumentos/", objeto, function(){
+                    // en una nueva ventana abrir el reporte de asignación
+                    url = window.location.origin
+                    url = url + "/operaciones/reporteliquidacion/"+asignacion_id;
+                    window.open( url);
+                    // regresar a la lista de solicitudes
+                    window.location.href = "/solicitudes/listasolicitudes";
+
+                })
+           })
+          }
+          else{
+           MensajeError(res)       
+        }
+        }
+    })
+
+}
 </script>
 {% endblock %}

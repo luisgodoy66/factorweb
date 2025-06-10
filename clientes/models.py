@@ -3,7 +3,7 @@ from django.db import models
 from bases.models import ClaseModelo
 from empresa.models import Datos_participantes, Clases_cliente, Localidades
 from pais.models import Bancos
-from django.db.models import Sum, Q, F, ExpressionWrapper, DateField, CharField\
+from django.db.models import Sum, F
 
 class Datos_compradores(ClaseModelo):
     ESTADOS_DE_COMPRADORES = (
@@ -224,19 +224,18 @@ class Linea_Manager(models.Manager):
 
         return clientes_por_ciento
 
+# from solicitudes.models import Exceso_temporal
 class Linea_Factoring(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales
-        , on_delete=models.RESTRICT
-        , related_name="linea_factoring"
-    )
+        , on_delete=models.RESTRICT, related_name="linea_factoring")
     cxmoneda = models.CharField( max_length=3, null=False,
         help_text='código de moneda',    )
     nvalor=models.DecimalField(max_digits=10, decimal_places=2, default=0,
         help_text='valor de linea otorgada en función del anticipo'    )
     nutilizado=models.DecimalField(max_digits=10, decimal_places=2, default=0,
         help_text='total utilizado de la línea'    )
-    cxexceso=models.CharField(max_length=6,
-        help_text='Código de exceso temporal'    )
+    # exceso = models.ForeignKey(Exceso_temporal, null=True, blank=True,
+    #     on_delete=models.RESTRICT, related_name="exceso_linea_factoring")
     nvalorexceso=models.DecimalField(max_digits=10, decimal_places=2, default=0,
         help_text='valor de exceso temporal que suma al valor de la línea'    )
     lconrecurso = models.BooleanField(default=True)

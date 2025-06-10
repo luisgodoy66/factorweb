@@ -32,7 +32,7 @@ window.onload=function(){
 
 window.operateEvents = {
   'click .revertir': function (e, value, row, index) {
-    ReversaConfirmacion(row.id, row.TipoOperacion)
+    ReversaConfirmacion(row.id, row.TipoOperacion, row.Cliente)
   },
   'click .condonar': function (e, value, row, index) {
     Condonar( row.id, row.TipoOperacion)
@@ -56,8 +56,8 @@ return [
 ].join('')
 }
 
-function ReversaConfirmacion(cobranza_id, tipo_operacion){
-    MensajeConfirmacion("Reversa la confirmación de " +  cobranza_id +"?",function(){
+function ReversaConfirmacion(cobranza_id, tipo_operacion, cliente){
+    MensajeConfirmacion("Reversa la confirmación de " +  cliente +"?",function(){
       fetchProcesar("/cobranzas/reversaconfirmacioncobranza/"+cobranza_id+"/"+tipo_operacion, function(){
             location.reload();
           })

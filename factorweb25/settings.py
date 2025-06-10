@@ -30,7 +30,6 @@ DEBUG = True
 # # CSRF_TRUSTED_ORIGINS=['http://factorweb-dev.us-east-2.elasticbeanstalk.com/']
 ALLOWED_HOSTS = [
     '69.62.68.116', 'localhost',
-    'codigobambuecuador.com',
     'margarita.codigobambuecuador.com',
     'www.margarita.codigobambuecuador.com',
     '*'
