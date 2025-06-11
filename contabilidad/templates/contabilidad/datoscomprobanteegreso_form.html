@@ -17,7 +17,7 @@
 {% block content %}
 
 <form  method="post" id="frmAsiento" enctype="multipart/form-data" 
-        class="form-horizontal">
+        class="form-horizontal" onsubmit="return checkSubmit();">
     <div class="col-md-12">
         <div class="card">
             {% csrf_token %}
@@ -190,6 +190,7 @@
 {% block js_page %}
 <script type="text/javascript" src="{% static 'factorweb/js/datosasiento.js' %}"></script>
 <script>
+    enviando = false; //Obligaremos a entrar el if en el primer submit
     var diario = '{{diario}}'   ;
     var forma_pago = '{{forma_pago}}'   ;
 
