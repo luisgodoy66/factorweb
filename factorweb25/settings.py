@@ -23,6 +23,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# Para producción, es crucial poner DEBUG en False
 DEBUG = False
 # ALLOWED_HOSTS = ['factorweb-dev2.us-east-2.elasticbeanstalk.com','localhost', '*']
 # CSRF_TRUSTED_ORIGINS=['http://factorweb-dev2.us-east-2.elasticbeanstalk.com/']
@@ -30,16 +31,13 @@ DEBUG = False
 # # CSRF_TRUSTED_ORIGINS=['http://factorweb-dev.us-east-2.elasticbeanstalk.com/']
 ALLOWED_HOSTS = [
     '69.62.68.116', 'localhost',
-    'margarita.codigobambuecuador.com',
-    'www.margarita.codigobambuecuador.com',
-    '*'
+    'www.margarita.codigobambuecuador.com', # Reemplaza con tu dominio
+    # '*' # Es una mala práctica de seguridad en producción
     ]
 CSRF_TRUSTED_ORIGINS=[
     'http://69.62.68.116',
-    'https://margarita.codigobambuecuador.com/',
-    'https://www.margarita.codigobambuecuador.com/'
-    'http://margarita.codigobambuecuador.com/',
-    'http://www.margarita.codigobambuecuador.com/'
+    'https://69.62.68.116',
+    'https://margarita.codigobambuecuador.com' # Añade tu dominio con https
     ]
 
 
@@ -158,6 +156,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL='/'
 LOGOUT_REDIRECT_URL ='/login/'
 
+# --- HTTPS Settings ---
+# Asegúrate que tu proxy (Nginx, ELB, etc.) envía este encabezado
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+# --- Fin de HTTPS Settings ---
+
 # # CONFIGURACION AWS
 # DEFAULT_FILE_STORAGE="storages.backends.s3boto3.S3Boto3Storage"
 # AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
@@ -183,9 +189,3 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR,'static'),)
 MEDIA_ROOT = '/var/www/uploads'
 MEDIA_URL = '/uploads/'
 
-# # para que funcione en la ruta www.codigobambu.com/margarita
-# FORCE_SCRIPT_NAME = '/margarita'
-# STATIC_URL = '/margarita/static/'
-# # STATICFILES_DIRS = (os.path.join(BASE_DIR,'/margarita/static'),)
-# # MEDIA_URL = '/margarita/media/'
-# MEDIA_URL = '/margarita/uploads/'
