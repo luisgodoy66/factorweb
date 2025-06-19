@@ -36,8 +36,8 @@ ALLOWED_HOSTS = [
     ]
 CSRF_TRUSTED_ORIGINS=[
     'http://69.62.68.116',
-    'http://margarita.codigobambuecuador.com/',
-    'http://www.margarita.codigobambuecuador.com/'
+    'https://margarita.codigobambuecuador.com/',
+    'https://www.margarita.codigobambuecuador.com/'
     ]
 
 
