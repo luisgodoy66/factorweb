@@ -24,13 +24,13 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Para producción, es crucial poner DEBUG en False
-DEBUG = False
+DEBUG = True
 # ALLOWED_HOSTS = ['factorweb-dev2.us-east-2.elasticbeanstalk.com','localhost', '*']
 # CSRF_TRUSTED_ORIGINS=['http://factorweb-dev2.us-east-2.elasticbeanstalk.com/']
 # # ALLOWED_HOSTS = ['factorweb-dev.us-east-2.elasticbeanstalk.com','localhost', '127.0.0.1','*']
 # # CSRF_TRUSTED_ORIGINS=['http://factorweb-dev.us-east-2.elasticbeanstalk.com/']
 ALLOWED_HOSTS = [
-    '69.62.68.116', 'localhost',
+    '69.62.68.116', 'localhost','127.0.0.1',
     'www.margarita.codigobambuecuador.com', # Reemplaza con tu dominio
     # '*' # Es una mala práctica de seguridad en producción
     ]
