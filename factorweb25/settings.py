@@ -23,7 +23,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 # ALLOWED_HOSTS = ['factorweb-dev2.us-east-2.elasticbeanstalk.com','localhost', '*']
 # CSRF_TRUSTED_ORIGINS=['http://factorweb-dev2.us-east-2.elasticbeanstalk.com/']
 # # ALLOWED_HOSTS = ['factorweb-dev.us-east-2.elasticbeanstalk.com','localhost', '127.0.0.1','*']
@@ -38,6 +38,8 @@ CSRF_TRUSTED_ORIGINS=[
     'http://69.62.68.116',
     'https://margarita.codigobambuecuador.com/',
     'https://www.margarita.codigobambuecuador.com/'
+    'http://margarita.codigobambuecuador.com/',
+    'http://www.margarita.codigobambuecuador.com/'
     ]
 
 
