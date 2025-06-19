@@ -32,6 +32,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '69.62.68.116', 'localhost','127.0.0.1',
     'www.margarita.codigobambuecuador.com', # Reemplaza con tu dominio
+    'margarita.codigobambuecuador.com', # Reemplaza con tu dominio
     # '*' # Es una mala práctica de seguridad en producción
     ]
 CSRF_TRUSTED_ORIGINS=[
