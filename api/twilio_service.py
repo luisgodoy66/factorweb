@@ -115,6 +115,11 @@ def webhook_whatsapp_twilio(request):
         # Busca la gestión de cobro asociada al número del cliente (si aplica)
         gestion_cobro = Gestion_cobro.objects\
           .filter(ctnumerowhatsapp=from_number).first()
+        
+        if not gestion_cobro:
+            # nota: cambiar a la validación correcta
+            gestion_cobro = Gestion_cobro.objects\
+              .filter(empresa=configuracion.empresa).first()
 
         # Guarda el mensaje en la tabla
         Twilio_whatsapp.objects.create(
