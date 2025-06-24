@@ -108,6 +108,9 @@ def webhook_whatsapp_twilio(request):
         # Busca la configuración activa de Twilio
         configuracion = Configuracion_twilio_whatsapp.objects\
           .filter(lactivo=True).first()
+        
+        if not configuracion:
+            return JsonResponse({'error': 'Configuración de Twilio no encontrada'}, status=404)
 
         # Busca la gestión de cobro asociada al número del cliente (si aplica)
         gestion_cobro = Gestion_cobro.objects\
@@ -123,7 +126,9 @@ def webhook_whatsapp_twilio(request):
             ctsid=sid,
             ctstatus=status,
             ctdirection=direction,
-            jcontexto=json.dumps(dict(request.POST))
+            jcontexto=json.dumps(dict(request.POST),),
+            cxusuariocrea=configuracion.cxusuariocrea,  # No hay usuario asociado en este caso
+            empresa=configuracion.empresa if configuracion else None
         )
 
         return HttpResponse("OK", status=200)

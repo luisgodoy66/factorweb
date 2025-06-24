@@ -39,6 +39,6 @@ urlpatterns = [
          , name='enviar_mensaje_whatsapp'),
      path('historialmensajewhatsapp/<int:gestion_cobro_id>/', historial_mensajes_whatsapp
          , name='historial_mensajes_whatsapp'),
-   path('webhook_whatsapp_twilio/', webhook_whatsapp_twilio
+   path('twilio/webhook_whatsapp_twilio/', webhook_whatsapp_twilio
         , name='webhook_whatsapp_twilio'),
 ]

@@ -17,11 +17,6 @@
 {% endblock breadcrumbs %}
 {% block content %}
 <div class="content mt-3">
-    <!-- <div hidden>
-        <input id="id_cliente" name="id_cliente" value="{{ cliente_id }}" >
-        <input id="porc_disponible" name="porc_disponible" value="{{ porc_disponible }}" >
-        <input id="dias_ultima_operacion" name="dias_ultima_operacion" value="{{ dias_ultima_operacion }}" >
-    </div> -->
 
     <div class="row">
         <!-- <div class="animated fadeIn"> -->
@@ -197,5 +192,10 @@ function cargarHistorialWhatsapp(){
     });
     console.log("Cargando historial de WhatsApp para el cliente " + cliente_id);
 }    
+    // Refrescar la lista automáticamente después de unos segundos
+    setTimeout(function(){
+        cargarHistorialWhatsapp();
+    }, 1000); // 1000 milisegundos = 1 segundos
+
 </script>
 {% endblock %}
