@@ -1,0 +1,85 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Configuración</a></li>
+                    <li><a href="#">integraciones</a></li>
+                    <li><a href="{% url 'api:lista_configuraciones_twilio' %}">Twilio</a></li>
+                    <li class="active">editar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal">
+    <div class="col-lg-12">
+        <div class="card">
+            {% csrf_token %}
+            <div class="card-header">
+                <strong>Slack</strong> 
+            </div>
+            <div class="card-body card-block">
+                    
+                    <div class="row form-group">
+                        <div class="col col-md-3">
+                            <label for="id_cxparticipante" class=" form-control-label">{{form.ctdescripcion.label}}</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.ctdescripcion}}
+                            <!-- <small class="form-text text-muted">Máximo 13 caracteres</small> -->
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3">
+                            <label for="id_ctnombre" class=" form-control-label">{{form.ctaccountsid.label}}</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.ctaccountsid}}
+                        </div>
+                    </div>
+
+                    <div class="row form-group">
+                        <div class="col col-md-3">
+                            <label for="id_cttelefono2" class=" form-control-label">{{form.ctauthtoken.label}}</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.ctauthtoken}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3">
+                            <label for="id_cttelefono2" class=" form-control-label">{{form.ctwhatsappnumber.label}}</label></div>
+                        <div class="col-12 col-md-9">
+                            {{form.ctwhatsappnumber}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_lactivo" class=" form-control-label">
+                            {{form.lactivo.label}}</label></div>
+                        <div class="col">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  configuracion.lactivo %} checked {% endif %} 
+                                id = "id_lactivo" name = "lactivo"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+            </div>    
+            
+            <div class="card-footer">
+                <a href="{% url 'api:lista_configuraciones_twilio' %}" class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Grabar
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+

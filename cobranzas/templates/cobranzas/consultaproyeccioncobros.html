@@ -79,7 +79,7 @@
                     </tr>
                     {% endfor %}
                     <tr>
-                        <td class="cliente"><strong>Total</strong></td>
+                        <td class="cliente"><strong>Acumulado</strong></td>
                         {% for fecha in totales_por_fecha.items %}
                         <td><strong>{{ fecha.1 | floatformat:"2g"}}</strong></td>
                         {% endfor %}

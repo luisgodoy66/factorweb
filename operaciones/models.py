@@ -1192,7 +1192,14 @@ class Pagare_detalle(ClaseModelo):
             ]  
 
 class Revision_cartera(ClaseModelo):
+    TIPOS_DE_PARTICIPANTE = (
+        ('C', 'Cliente'),
+        ('D', 'Deudor'),
+    )
+
     drevision = models.DateField()
+    cxtipoparticipante = models.CharField(max_length=1, default='C',
+                                          choices=TIPOS_DE_PARTICIPANTE)
 
     def __str__(self):
         return self.dregistro.strftime('%A, %d de %B %H:%M')
@@ -1202,10 +1209,13 @@ class Revision_cartera_detalle(ClaseModelo):
     cxcliente = models.ForeignKey(Datos_generales_cliente, on_delete=models.RESTRICT)
     nvencidomas30 = models.DecimalField(max_digits=15, decimal_places=2, default=0, null=True)
     nvencido30 = models.DecimalField(max_digits=15, decimal_places=2, default=0,null=True)
+    nvencido60 = models.DecimalField(max_digits=15, decimal_places=2, default=0,null=True)
+    nvencido90 = models.DecimalField(max_digits=15, decimal_places=2, default=0,null=True)
+    nvencidomas90 = models.DecimalField(max_digits=15, decimal_places=2, default=0,null=True)
     nporvencer = models.DecimalField(max_digits=15, decimal_places=2, default=0,null=True)
     nprotesto = models.DecimalField(max_digits=15, decimal_places=2, default=0,null=True)
     nlineaactual = models.DecimalField(max_digits=15, decimal_places=2, default=0,null=True)
-    ctclaseactual = models.CharField(max_length=1, null=True)
+    ctclaseactual = models.CharField(max_length=3, null=True)
     ctestadoactual = models.CharField(max_length=1, null=True)
     ctcomentario = models.TextField()
 

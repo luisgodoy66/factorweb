@@ -1,0 +1,201 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{#% load humanize %#}
+{% block title %}Estado operativo{% endblock title %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Gestión de cobro</a></li>
+                    <li><a href="{% url 'cobranzas:listar_gestion_cobro' %}">gestión</a></li>
+                    <li class="active">{{gestion_cobro}}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="content mt-3">
+    <!-- <div hidden>
+        <input id="id_cliente" name="id_cliente" value="{{ cliente_id }}" >
+        <input id="porc_disponible" name="porc_disponible" value="{{ porc_disponible }}" >
+        <input id="dias_ultima_operacion" name="dias_ultima_operacion" value="{{ dias_ultima_operacion }}" >
+    </div> -->
+
+    <div class="row">
+        <!-- <div class="animated fadeIn"> -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-3">Antigüedad de la cartera y protestos</h4>
+                    <canvas id="singelBarChart"></canvas>
+                </div>
+            </div>
+        </div><!-- /# column -->
+
+        <div class="col-md-3 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="clearfix">
+                        <i class="fa fa-dollar 
+                        {% if color_estado == 1 %} 
+                            bg-flat-color-1
+                        {% elif color_estado == 2 %}
+                            bg-flat-color-2
+                        {% elif color_estado == 3 %}
+                            bg-flat-color-3
+                        {% elif color_estado == 4 %}
+                            bg-flat-color-4
+                        {% elif color_estado == 5 %}
+                            bg-flat-color-5
+                        {% endif %}                           
+                        p-3 font-2xl mr-3 float-left text-light"></i>
+                        <div class="h5 text-secondary mb-0 mt-1">{{ total_cartera_protestos|floatformat:"2g" }}</div>
+                        <div class="text-muted text-uppercase font-weight-bold font-xs small">
+                            Cartera y protestos</div>
+                    </div>
+                    <div class="b-b-1 pt-3"></div>
+                    <hr>
+                    <div class="more-info pt-2" style="margin-bottom:-10px;">
+                        <a class="font-weight-bold font-xs btn-block text-muted small" 
+                        href="{% url 'operaciones:detalle_facturas_pendientes' cliente_id %}"  target="cartera">
+                        Detalle de facturas pendientes
+                        <i class="fa fa-angle-right float-right font-lg"></i></a>
+                    </div>
+                    <div class="more-info pt-2" style="margin-bottom:-10px;">
+                        <a class="font-weight-bold font-xs btn-block text-muted small" 
+                        href="{% url 'operaciones:detalle_cheques_pendientes' cliente_id %}"  target="cheques">
+                        Detalle de cheques pendientes
+                        <i class="fa fa-angle-right float-right font-lg"></i></a>
+                    </div>
+                    <div class="more-info pt-2" style="margin-bottom:-10px;">
+                        <a class="font-weight-bold font-xs btn-block text-muted small" 
+                        href="{% url 'cobranzas:protestos_pendientes' cliente_id %}"  target="protestos">
+                        Detalle de protestos
+                        <i class="fa fa-angle-right float-right font-lg"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="stat-widget-one">
+                        <div class="stat-icon dib"><i class="ti-time text-success border-success"></i></div>
+                        <div class="stat-content dib">
+                            <div class="stat-text">Demora de pago</div>
+                            <div class="stat-digit">{{ promedio_ponderado_demora|floatformat:"2g"}} días</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+       <div class="col-md-3 col-lg-3">
+            {% if total_reestructuracion > 0 %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="clearfix">
+                        <i class="fa fa-dollar bg-flat-color-4 p-3 font-2xl mr-3 float-left text-light"></i>
+                        <div class="h5 text-secondary mb-0 mt-1">{{total_reestructuracion|floatformat:"2g"}}</div>
+                        <div class="text-muted text-uppercase font-weight-bold font-xs small">
+                            Reestructuración</div>
+                    </div>
+                    <div class="b-b-1 pt-3"></div>
+                    <hr>
+                    <div class="more-info pt-2" style="margin-bottom:-10px;">
+                        <a class="font-weight-bold font-xs btn-block text-muted small" 
+                        href="{% url 'operaciones:detalle_pagares_pendientes' cliente_id %}"  target="cartera">
+                        Detalle de pagarés pendientes
+                        <i class="fa fa-angle-right float-right font-lg"></i></a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <strong class="card-title">Comunicación por WhatsApp</strong>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Enviar Mensaje</h5>
+                        <div class="form-group">
+                            <textarea name="whatsapp_message" id="whatsapp_message" rows="5" placeholder="Escribe tu mensaje aquí..." class="form-control"></textarea>
+                        </div>
+                        <button type="button" id="btnEnviarWhatsapp" class="btn btn-success btn-sm">
+                            <i class="fa fa-whatsapp"></i> Enviar
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Historial de Conversación</h5>
+                        <div id="whatsapp_conversation" style="height: 200px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
+                            <!-- La conversación se cargará aquí dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+   </div>
+</div>
+
+
+{% endblock %}
+{% block js_page %}
+<script src="{% static 'factorweb/vendors/chart.js/dist/Chart.bundle.min.js' %}"></script>
+<script src="{% static 'factorweb/assets/js/widgets.js' %}"></script>
+<script>
+const cliente_id = "{{ cliente_id }}"
+const gestion_cobro_id = "{{ gestion_cobro.id }}"
+
+window.onload=function(){
+
+    antigüedadcartera("/operaciones/antigüedadcarteracliente/"+cliente_id);
+
+    // Cargar historial de WhatsApp
+    cargarHistorialWhatsapp();
+
+    // Enviar mensaje de WhatsApp
+    jQuery('#btnEnviarWhatsapp').click(function(){
+        var mensaje = jQuery('#whatsapp_message').val();
+        if (mensaje.trim() === '') {
+            alert('Por favor, escribe un mensaje.');
+            return;
+        }
+        // Aquí iría la lógica para enviar el mensaje vía AJAX a una vista de Django
+        console.log("Enviando mensaje a cliente " + cliente_id + ": " + mensaje);
+        // Ejemplo: 
+        fetchPostear('/api/enviarmensajewhatsapp/',
+            { 
+            cuerpo_mensaje: mensaje,
+            gestion_cobro_id: gestion_cobro_id
+            },
+            function() { 
+            // Aquí puedes manejar la respuesta
+            cargarHistorialWhatsapp();
+            },
+        );
+        jQuery('#whatsapp_message').val(''); // Limpiar el textarea
+    });
+};
+
+function cargarHistorialWhatsapp(){
+    // Lógica para cargar el historial de conversación desde una vista de Django
+    // Ejemplo: 
+    fetchRecuperar('/api/historialmensajewhatsapp/' + gestion_cobro_id, function(data){
+        var conversationDiv = jQuery('#whatsapp_conversation');
+        conversationDiv.empty();
+        data.forEach(function(msg){
+            // Añadir lógica para formatear y mostrar mensajes
+            conversationDiv.append('<p><strong>' + msg.ctfrom + ':</strong> ' 
+                + msg.ctbody + '</p>');
+        });
+    });
+    console.log("Cargando historial de WhatsApp para el cliente " + cliente_id);
+}    
+</script>
+{% endblock %}

@@ -22,7 +22,8 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , AceptarAmpliacionDePlazo,  GeneraListaAmpliacionesJSON, AmpliacionesConsulta\
     , ModificarCobranza, GeneraListaFacturasPendientesJSON, CobranzasCuotasView\
     , DetalleCuotasJSON, AceptarCobranzaCuota, ReversoDesembolsoLiquidacion\
-    , ReversaAmpliacion, proyeccion_cobros
+    , ReversaAmpliacion, proyeccion_cobros, Registra_gestion_cobro\
+    , GestionesDeCobroView, GestionDeCobro
 
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
@@ -210,5 +211,11 @@ urlpatterns = [
     # cartera
     path('impresionprotestoscorte/<int:corte_id>', ImpresionProtestosPendientesCorte
          , name='protestos_pendientes_corte'),
+    path('gestioncobro/<tipo_participante>/<int:id_detalle_revision>'
+         , Registra_gestion_cobro, ),
+    path('listagestioncobro/', GestionesDeCobroView.as_view()
+         , name='listar_gestion_cobro'),
+    path('gestioncobro/<int:pk>', GestionDeCobro.as_view()
+         , name='gestion_cobro'),
 
 ]

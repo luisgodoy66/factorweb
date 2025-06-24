@@ -12,8 +12,9 @@ from empresa.models import Datos_participantes , Tipos_factoring, Cuentas_bancar
 from clientes import models as Cliente_models
 from operaciones.models import Documentos, ChequesAccesorios\
     , Cargos_detalle as Operaciones_cargos, Motivos_protesto_maestro\
-    , Pagare_detalle as Cuotas, Cortes_historico
+    , Pagare_detalle as Cuotas, Cortes_historico, Revision_cartera_detalle
 from cuentasconjuntas import models as CuentasConjuntasModels
+from api.models import Configuracion_twilio_whatsapp
 
 import decimal
 class Cheques(ClaseModelo):
@@ -1206,3 +1207,47 @@ class Documentos_protestados_historico(ClaseModelo):
 
     objects = Documentos_protestados_historico_Manager()
 
+class Gestion_cobro(ClaseModelo):
+    TIPOS_DE_PARTICIPANTE = (
+        ('C', 'Cliente'),
+        ('D', 'Deudor'),
+    )
+    ESTADOS_DE_GESTION = (
+        ('A', 'Abierta'),
+        ('C', 'Cerrada'),
+        ('P', 'Pendiente'),
+        ('R', 'Reprogramada'),
+    )
+    cxtipoparticipante = models.CharField(max_length=1, choices=TIPOS_DE_PARTICIPANTE)
+    revision_cartera_cliente = models.ForeignKey(Revision_cartera_detalle
+        , on_delete=models.CASCADE, null=True, related_name="revision_cartera_cliente")
+    cxestado = models.CharField(max_length=1, default='P', choices=ESTADOS_DE_GESTION)
+    ctnumerowhatsapp = models.CharField(max_length=20, null=True, blank=True
+        , verbose_name='Número de WhatsApp')
+
+    def __str__(self):
+        if self.cxtipoparticipante == 'C':
+            return f'Cliente: {self.revision_cartera_cliente.cxcliente.cxcliente.ctnombre}'
+        # else:
+        #     return f'Deudor: {self.revision_cartera_cliente.documento.ctdeudor}'
+    def estado(self):
+        return self.get_cxestado_display()
+
+class Twilio_whatsapp(ClaseModelo):
+    configuracion = models.ForeignKey(Configuracion_twilio_whatsapp, on_delete=models.CASCADE)
+    gestion_cobro = models.ForeignKey(Gestion_cobro, on_delete=models.CASCADE
+        , related_name="gestion_cobro_whatsapp", )
+    ctfrom = models.CharField(max_length=25, verbose_name='De')
+    ctto = models.CharField(max_length=25, verbose_name='Para')
+    ctbody = models.TextField(verbose_name='Mensaje')
+    ctsid = models.CharField(max_length=100, unique=True, verbose_name='SID')
+    ctstatus = models.CharField(max_length=20, verbose_name='Estado')
+    ctdirection = models.CharField(max_length=30, verbose_name='Dirección')
+    jcontexto = models.JSONField(verbose_name='Contexto', )
+
+    def __str__(self):
+        return self.ctsid
+
+    class Meta:
+        verbose_name = 'Mensaje de WhatsApp'
+        verbose_name_plural = 'Mensajes de WhatsApp'

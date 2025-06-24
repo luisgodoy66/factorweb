@@ -8,13 +8,17 @@ from django.urls import reverse_lazy
 from django.db.models import Count, Sum, Q, F
 from django.db.models.expressions import RawSQL 
 
-from .models import Documentos_cabecera, Documentos_detalle, Liquidacion_cabecera\
-    , Cheques_protestados, Cheques, Recuperaciones_cabecera, Cargos_cabecera\
-    , Documentos_protestados, Recuperaciones_detalle, Pagare_cabecera
-from operaciones.models import Documentos, ChequesAccesorios, Datos_operativos\
-    , Desembolsos, Motivos_protesto_maestro, Cargos_detalle, Notas_debito_cabecera\
-    , Notas_debito_detalle, Cheques_canjeados, Cheques_quitados\
-    , Ampliaciones_plazo_cabecera, Asignacion as Operaciones, Pagare_detalle
+from .models import Documentos_cabecera, Documentos_detalle\
+    , Liquidacion_cabecera, Cheques_protestados, Cheques\
+    , Recuperaciones_cabecera, Cargos_cabecera\
+    , Documentos_protestados, Recuperaciones_detalle\
+    , Pagare_cabecera, Gestion_cobro
+from operaciones.models import Documentos, ChequesAccesorios\
+    , Datos_operativos, Desembolsos, Motivos_protesto_maestro\
+    , Cargos_detalle, Notas_debito_cabecera, Notas_debito_detalle\
+    , Cheques_canjeados, Cheques_quitados\
+    , Ampliaciones_plazo_cabecera, Asignacion as Operaciones\
+    , Pagare_detalle, Revision_cartera_detalle
 from clientes.models import Cuentas_bancarias, Datos_generales\
     , Cuenta_transferencia, Datos_compradores
 from empresa.models import Tasas_factoring, Cuentas_bancarias as CuentasEmpresa\
@@ -778,6 +782,54 @@ class CobranzasCuotasView(SinPrivilegios, generic.FormView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
+
+class GestionesDeCobroView(SinPrivilegios, generic.ListView):
+    model = Gestion_cobro
+    template_name = "cobranzas/listagestionesdecobro.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="operaciones.view_gestion_cobro"
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
+        qs=Gestion_cobro.objects\
+            .filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
+
+    def get_context_data(self,*args, **kwargs): 
+        context = super(GestionesDeCobroView, self).get_context_data(*args,**kwargs) 
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
+        sp = Asignacion.objects\
+            .filter(cxestado='P', leliminado=False,
+                    empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+
+        return context
+
+class GestionDeCobro(SinPrivilegios, generic.TemplateView):
+    template_name = "cobranzas/datosgestioncobro_form.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="operaciones.view_gestion_cobro"
+
+    def get_context_data(self, **kwargs):
+        context = super(GestionDeCobro, self).get_context_data(**kwargs)
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
+        sp = Asignacion.objects\
+            .filter(cxestado='P', leliminado=False,
+                    empresa = id_empresa.empresa).count()
+        
+        gc = Gestion_cobro.objects\
+            .filter(pk = self.kwargs.get('pk')).first()
+
+        context['solicitudes_pendientes'] = sp
+        context['gestion_cobro'] = gc
+        context['cliente_id'] = gc.revision_cartera_cliente.cxcliente.id
+
+        return context
 
 @login_required(login_url='/login/')
 @permission_required('cobranzas.view_documentos_cabecera', login_url='bases:sin_permisos')
@@ -4079,8 +4131,10 @@ def proyeccion_cobros(request, dia=None, dias=14):
             'dvencimiento',
             'documento__cxcliente__npromediodemoradepago'
         )\
-        .annotate(total=Sum(F('ntotal') * F('nporcentajeanticipo') / 100))\
-        .order_by('documento__cxcliente__cxcliente__ctnombre', 'dvencimiento')
+        .annotate(total=Sum(F('ntotal') * F('nporcentajeanticipo') 
+                            / 100))\
+        .order_by('documento__cxcliente__cxcliente__ctnombre'
+                  , 'dvencimiento')
 
     documentos = facturas.union(accesorios)
 
@@ -4095,11 +4149,17 @@ def proyeccion_cobros(request, dia=None, dias=14):
 
         if cliente not in datos_por_cliente:
             datos_por_cliente[cliente] = {
-            'promedio_demora': doc['cxcliente__npromediodemoradepago'],
-            'fechas': {f.strftime('%Y-%m-%d'): 0 for f in fechas},
+                'promedio_demora': doc['cxcliente__npromediodemoradepago'],
+                'fechas': {f.strftime('%Y-%m-%d'): 0 for f in fechas},
             }
         datos_por_cliente[cliente]['fechas'][fecha] = doc['total']
         totales_por_fecha[fecha] += doc['total']
+
+    # Hacer los totales acumulativos por fecha
+    acumulado = 0
+    for fecha in sorted(totales_por_fecha.keys()):
+        acumulado += totales_por_fecha[fecha]
+        totales_por_fecha[fecha] = acumulado
 
     context = {
         'fechas': [f.strftime('%A %B-%d') for f in fechas],
@@ -4109,3 +4169,23 @@ def proyeccion_cobros(request, dia=None, dias=14):
     }
     return render(request, 'cobranzas/consultaproyeccioncobros.html', context)
 
+@login_required(login_url='/login/')
+@permission_required('operaciones.add_revision_cartera_detalle', login_url='bases:sin_permisos')
+def Registra_gestion_cobro(request, tipo_participante, id_detalle_revision):
+    # nota: validar que no exista un registro del cliente (deudor)
+    # en estado pendiente o abierto
+    id_empresa = Usuario_empresa.objects\
+        .filter(user=request.user).first()
+
+    # if request.method == 'POST':
+    revision = Revision_cartera_detalle.objects\
+        .filter(id=id_detalle_revision).first()
+    
+    celular_cliente = revision.cxcliente.cxcliente.ctcelular
+    gestion = Gestion_cobro(cxtipoparticipante=tipo_participante,
+                            revision_cartera_cliente=revision,
+                            ctnumerowhatsapp=celular_cliente,
+                            cxusuariocrea=request.user,
+                            empresa=id_empresa.empresa)
+    gestion.save()
+    return HttpResponse("OK")  # Retorna una respuesta HTTP simple

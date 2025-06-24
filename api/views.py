@@ -18,15 +18,16 @@ from cobranzas.models import Cheques_protestados
 from bases.models import Usuario_empresa, Empresas
 from solicitudes import models as ModelosSolicitud
 from clientes import models as ModeloCliente
-from .models import Configuracion_slack
+from .models import Configuracion_slack, Configuracion_twilio_whatsapp
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.urls import reverse_lazy
 from django.views import generic
+from django.views.decorators.csrf import csrf_exempt
 
 from bases.views import SinPrivilegios
 
-from .forms import SlackForm
+from .forms import SlackForm, Twilio_whatsapp_Form
 
 class ConfiguracionesSlackView(SinPrivilegios, generic.ListView):
     model = Configuracion_slack
@@ -71,7 +72,6 @@ class ConfiguracionSlackNew(SinPrivilegios, generic.CreateView):
                                        empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
-
     
 class ConfiguracionSlackEdit(SinPrivilegios, generic.UpdateView):
     model = Configuracion_slack
@@ -94,11 +94,71 @@ class ConfiguracionSlackEdit(SinPrivilegios, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-    # def get_form_kwargs(self):
-    #     kwargs = super().get_form_kwargs()
-    #     kwargs['nuevo'] = False
-    #     return kwargs
+class ConfiguracionesTwilioView(SinPrivilegios, generic.ListView):
+    model = Configuracion_twilio_whatsapp
+    template_name = "twilio/listaconfiguracionestwilio.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="api.view_configuracion_twilio_whatsapp"
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Configuracion_twilio_whatsapp.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(ConfiguracionesTwilioView, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class ConfiguracionTwilioNew(SinPrivilegios, generic.CreateView):
+    model = Configuracion_twilio_whatsapp
+    template_name="twilio/datosconfiguraciontwiliowhatsapp_form.html"
+    context_object_name = "configuracion"
+    login_url = 'bases:login'
+    form_class=Twilio_whatsapp_Form
+    success_url=reverse_lazy("api:lista_configuraciones_twilio")
+    success_message="Configuración creada satisfactoriamente"
+    permission_required="api.add_configuracion_twilio_whatsapp"
+
+    def form_valid(self, form):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
+        form.instance.cxusuariocrea = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(ConfiguracionTwilioNew, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
     
+class ConfiguracionTwilioEdit(SinPrivilegios, generic.UpdateView):
+    model = Configuracion_twilio_whatsapp
+    template_name="twilio/datosconfiguraciontwiliowhatsapp_form.html"
+    context_object_name = "configuracion"
+    form_class=Twilio_whatsapp_Form
+    success_url=reverse_lazy("api:lista_configuraciones_twilio")
+    success_message="Configuración actualizada satisfactoriamente"
+    permission_required="api.change_configuracion_twilio_whatsapp"
+
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(ConfiguracionTwilioEdit, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
+                                       empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
 @api_view(['GET'])
 # @permission_classes([IsAuthenticated])
 def estado_operativo_cliente_api(request, cliente_id):

@@ -5,9 +5,9 @@
         <div class="page-header float-right">
             <div class="page-title">
                 <ol class="breadcrumb text-right">
-                    <li><a href="#">análisis</a></li>
                     <li><a href="#">cartera</a></li>
-                    <li class="active">revisión</li>
+                    <li><a href="#">análisis</a></li>
+                    <li class="active">revisión por cliente</li>
                 </ol>
             </div>
         </div>
@@ -21,7 +21,7 @@
                 <div class="col-md-5">
                     <select data-placeholder="Seleccione una cuenta..." 
                         class="form-control"  tabindex="1" 
-                        id="id_clientes" name="cuenta_deudor"
+                        id="id_revisiones" name="cuenta_deudor"
                         >
                         <option value=""></option>
                         {% for item in revisiones %}
@@ -119,7 +119,7 @@ window.onload=function(){
     $table.bootstrapTable({locale:"es-EC"});
 
     // refrescar tabla al cambiar la selección
-    jQuery("#id_clientes").change(function () {
+    jQuery("#id_revisiones").change(function () {
         var options = jQuery(this).val();
         $table.bootstrapTable('refreshOptions', {
             showRefresh: true,
@@ -140,7 +140,7 @@ window.onload=function(){
             });
         });
     });
-    var id_revision = document.getElementById("id_clientes").value;
+    var id_revision = document.getElementById("id_revisiones").value;
     $table.bootstrapTable('refreshOptions', {
             showRefresh: true,
             url: "/operaciones/revisioncarterajson/" + id_revision
@@ -151,29 +151,29 @@ window.onload=function(){
 };
 
 window.operateEvents = {
-    // 'click .revertir': function (e, value, row, index) {
-    //     ReversarAceptacionAsignacion(row.id, row.Asignacion)
-    //   },
       'click .comentario': function (e, value, row, index) {
-        var revision = document.getElementById("id_clientes").value;
+        var revision = document.getElementById("id_revisiones").value;
         AbrirModal("/operaciones/revisioncarteracliente/" + row.id +'/'+revision+'/'+ encodeURIComponent(row.Cliente))
+      },
+      'click .gestion': function (e, value, row, index) {
+        enviarGestionCobro(row.id, row.Cliente)
       },
     };
       
 function operateFormatter(value, row, index) {
     return [
-        // '<a class="revertir" href="javascript:void(0)" title="Reverso de asignación">',
-        // '<i class="fa fa-rotate-left"></i>',
-        // '</a>  ',
         '<a class="comentario" href="javascript:void(0)" title="Comentario">',
         '<i class="fa fa-pencil"></i>',
+        '</a>  ',
+        '<a class="gestion" href="javascript:void(0)" title="Gestión de cobro">',
+        '<i class="fa fa-money"></i>',
         '</a>  ',
       ].join('')
 }
 
 function imprimeRevisionCartera(){
   // en una nueva ventana abrir el reporte de asignación
-  var id_revision = document.getElementById("id_clientes").value;
+  var id_revision = document.getElementById("id_revisiones").value;
   url = window.location.origin
   url = url + "/operaciones/impresionrevisioncartera/"+id_revision;
   window.open( url);
@@ -181,6 +181,14 @@ function imprimeRevisionCartera(){
   
 function numberFormatter(value) {
     return Number(value).toLocaleString('es-EC', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function enviarGestionCobro(id_revision_cartera, cliente) {
+    MensajeConfirmacion("Enviar a " + cliente + " a gestión de cobro?", function(){
+        fetchProcesar("/cobranzas/gestioncobro/C/"+id_revision_cartera, function(){
+            MensajeOK("Enviado a gestión de cobro")
+        })
+    })
 }
 </script>
 {% endblock %}

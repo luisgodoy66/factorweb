@@ -15,3 +15,16 @@ class Configuracion_slack (ClaseModelo):
 
     # def save(self):
     #     self.ctdescripcion = self.ctdescripcion.upper()
+
+class Configuracion_twilio_whatsapp(ClaseModelo):
+    ctdescripcion = models.CharField(max_length=100)
+    ctaccountsid = models.CharField(max_length=100)
+    ctauthtoken = models.CharField(max_length=100)
+    ctwhatsappnumber = models.CharField(max_length=20)
+    lactivo = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.ctdescripcion
+
+    # def save(self):
+    #     self.ctdescripcion = self.ctdescripcion.upper()

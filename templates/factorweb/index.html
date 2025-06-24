@@ -177,7 +177,7 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
                             <i class="menu-icon fa fa-eye"></i>Análisis</a>
                         <ul class="sub-menu children dropdown-menu">
-                            <li><i class="menu-icon fa fa-pencil"></i><a href="{% url 'operaciones:revision_cartera' %}">Revisión</a></li>
+                            <li><i class="menu-icon fa fa-pencil"></i><a href="{% url 'operaciones:revision_cartera' %}">Revisión por cliente</a></li>
                             <li><i class="menu-icon fa fa-bar-chart-o"></i><a href="{% url 'operaciones:negociaciones_mes' %}">Estadísticas por mes</a></li>
                         </ul>
                     </li>
@@ -186,6 +186,13 @@
                             <i class="menu-icon fa fa-save"></i>Guardados</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-camera"></i><a href="{% url 'operaciones:lista_corteshistorico' %}">Cortes</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-money"></i>Gestión de cobro</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-money"></i><a href="{% url 'cobranzas:listar_gestion_cobro' %}">Gestión</a></li>
                         </ul>
                     </li>
 
@@ -269,6 +276,7 @@
                             <i class="menu-icon fa fa-comments"></i>Integraciones</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-comment"></i><a href="{% url 'api:lista_configuraciones_slack' %}">Slack</a></li>
+                            <li><i class="menu-icon fa fa-whatsapp"></i><a href="{% url 'api:lista_configuraciones_twilio' %}">Twilio</a></li>
                         </ul>
                     </li>
                     <li><a href="#">V.2.8</a></li>
