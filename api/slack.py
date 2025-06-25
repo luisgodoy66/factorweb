@@ -20,13 +20,14 @@ def enviar_solicitud_aprobacion(request, id_solicitud):
     asignacion = Asignacion.objects.get(pk=id_solicitud)
 
     nivel_aprobacion = Niveles_aprobacion.objects\
-        .filter(nmontominimo__lte=asignacion.neto())\
+        .filter(nmontominimo__lte=asignacion.neto(),
+                empresa=asignacion.cxcliente.empresa)\
         .order_by('nmontominimo').first()
     
     if not nivel_aprobacion:
         asignacion.lrequiereaprobacion = False
         asignacion.save()
-        return HttpResponse("No se encontró nivel de aprobación"
+        return HttpResponse("No se encontró nivel de aprobación para el monto mostrado. La operación no requiere aprobación"
                             , status=200)
     
     configuracion_slack = nivel_aprobacion.configuracionslack
@@ -93,8 +94,10 @@ def enviar_solicitud_aprobacion(request, id_solicitud):
             ]
         )
     except Exception as e:
-        return HttpResponse("Error al enviar mensaje"+ str(e), status=500)
-    
+        return HttpResponse("Error al enviar mensaje al canal " 
+                            + configuracion_slack.ctslackchannelname + ": " 
+                            + str(e), status=500)
+
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     # crear registro de solicitud de aprobación
@@ -165,18 +168,17 @@ def manejar_interactividad(request):
             enviar_respuesta_asincrona(response_url, "Operación ya no está pendiente de aprobación")
             return HttpResponse("Operación ya no está pendiente de aprobación", status=200)
         
-        # # grabar el registro de la respuesta
-        # id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-        # sa = Solicitud_aprobacion.objects.get(pk=asignacion.solicitudaprobacion.id)
-        # Respuesta_aprobacion.objects.create(
-        #     solicitud=sa,
-        #     cxusuariorespuesta=user_id,
-        #     # cxcanal=canal,
-        #     # cxmensaje=mensaje,
-        #     # ctrespuesta=action,
-        #     cxusuariocrea = request.user,
-        #     empresa = id_empresa.empresa,
-        # )
+        # grabar el registro de la respuesta
+        sa = Solicitud_aprobacion.objects.get(pk=asignacion.solicitudaprobacion.id)
+        Respuesta_aprobacion.objects.create(
+            solicitud=sa,
+            cxusuariorespuesta=user_id,
+            cxcanal=canal,
+            cxmensaje=mensaje,
+            ctrespuesta=action,
+            cxusuariocrea = sa.cxusuariocrea,
+            empresa = sa.empresa,
+        )
 
         if action == "aprobar":
             # Lógica para aprobar la operación
@@ -214,6 +216,8 @@ def manejar_interactividad(request):
                 return JsonResponse({"status": "Error al intentar. {}".format(resultado)})
         else:
             return JsonResponse({"status": "Acción no reconocida"}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido.'}, status=405)
+
     
 import requests
 

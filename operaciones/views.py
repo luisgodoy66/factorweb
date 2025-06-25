@@ -1115,26 +1115,29 @@ def CalcularCargosPorDocumento(doc, gao, dc, fecha_desembolso
     # anticipo
     doc.nanticipo = doc.ntotal * doc.nporcentajeanticipo / 100
     
-    # gao
-    if gao.lsobreanticipo:
-        doc.ngao = (doc.ntotal * doc.nporcentajeanticipo 
-                    * doc.ntasacomision / 10000)
-    else:
-        doc.ngao = (doc.ntotal * doc.ntasacomision / 100)
+    try:
+        # gao
+        if gao.lsobreanticipo:
+            doc.ngao = (doc.ntotal * doc.nporcentajeanticipo 
+                        * doc.ntasacomision / 10000)
+        else:
+            doc.ngao = (doc.ntotal * doc.ntasacomision / 100)
 
-    if not gao.lflat:
-        doc.ngao = (doc.ngao * plazo / gao.ndiasperiocidad)
+        if not gao.lflat:
+            doc.ngao = (doc.ngao * plazo / gao.ndiasperiocidad)
 
-    # dc
-    if dc.lsobreanticipo:
-        doc.ndescuentocartera = (doc.ntotal * doc.nporcentajeanticipo * doc.ntasadescuento / 10000)
-    else:
-        doc.ndescuentocartera = (doc.ntotal * doc.ntasadescuento / 100)
+        # dc
+        if dc.lsobreanticipo:
+            doc.ndescuentocartera = (doc.ntotal * doc.nporcentajeanticipo * doc.ntasadescuento / 10000)
+        else:
+            doc.ndescuentocartera = (doc.ntotal * doc.ntasadescuento / 100)
 
-    if not dc.lflat:
-        doc.ndescuentocartera = (doc.ndescuentocartera * plazo / dc.ndiasperiocidad)
+        if not dc.lflat:
+            doc.ndescuentocartera = (doc.ndescuentocartera * plazo / dc.ndiasperiocidad)
 
-    doc.save()
+        doc.save()
+    except Exception as e:
+        return HttpResponse("Error al calcular los cargos: " + str(e))
 
     return HttpResponse("OK")
 
