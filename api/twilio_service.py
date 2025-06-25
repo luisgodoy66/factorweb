@@ -51,7 +51,7 @@ def enviar_mensaje_whatsapp(request):
                 to='whatsapp:+593987468590'  # Reemplaza con el número de destino
             )
 
-            print(message)
+            print(message.status)
 
             # Guarda el mensaje enviado en la base de datos
             mensaje_enviado = Twilio_whatsapp(
@@ -61,6 +61,7 @@ def enviar_mensaje_whatsapp(request):
                 gestion_cobro=gestion_cobro,
                 configuracion=configuracion_twilio,
                 ctfrom=numero_whatsapp,
+                ctstatus=message.status,
                 jcontexto=json.dumps(datos),  # Guarda el contexto de la solicitud
                 cxusuariocrea=request.user,
                 empresa=id_empresa.empresa
@@ -68,7 +69,7 @@ def enviar_mensaje_whatsapp(request):
             mensaje_enviado.save()
 
             if gestion_cobro.cxestado == 'P':
-                gestion_cobro.cestado = 'A'
+                gestion_cobro.cxestado = 'A'
                 gestion_cobro.save()
 
             return HttpResponse("OK")
