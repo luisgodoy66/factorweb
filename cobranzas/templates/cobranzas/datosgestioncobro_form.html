@@ -75,7 +75,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="stat-widget-one">
-                        <div class="stat-icon dib"><i class="ti-time text-success border-success"></i></div>
+                        <div class="stat-icon dib"><i class="ti-time text-danger border-danger"></i></div>
                         <div class="stat-content dib">
                             <div class="stat-text">Demora de pago</div>
                             <div class="stat-digit">{{ promedio_ponderado_demora|floatformat:"2g"}} días</div>
@@ -86,6 +86,17 @@
 
         </div>
        <div class="col-md-3 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="stat-widget-one">
+                        <div class="stat-icon dib"><i class="ti-mobile text-success border-success"></i></div>
+                        <div class="stat-content dib">
+                            <div class="stat-text">Número WhatsApp</div>
+                            <div class="stat-digit">{{ numero_whatsapp | default:"No registrado" }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {% if total_reestructuracion > 0 %}
             <div class="card">
                 <div class="card-body">
@@ -119,15 +130,17 @@
                     <div class="col-md-6">
                         <h5>Enviar Mensaje</h5>
                         <div class="form-group">
-                            <textarea name="whatsapp_message" id="whatsapp_message" rows="5" placeholder="Escribe tu mensaje aquí..." class="form-control"></textarea>
+                            <textarea name="whatsapp_message" id="whatsapp_message" rows="5" 
+                            placeholder="Escribe tu mensaje aquí..." class="form-control"></textarea>
                         </div>
-                        <button type="button" id="btnEnviarWhatsapp" class="btn btn-success btn-sm">
+                        <button type="button" id="btnEnviarWhatsapp" class="btn btn-success btn-sm"
+                            {% if not numero_whatsapp %}disabled{% endif %}>
                             <i class="fa fa-whatsapp"></i> Enviar
                         </button>
                     </div>
                     <div class="col-md-6">
                         <h5>Historial de Conversación</h5>
-                        <div id="whatsapp_conversation" style="height: 200px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
+                        <div id="whatsapp_conversation" style="height: 400px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
                             <!-- La conversación se cargará aquí dinámicamente -->
                         </div>
                     </div>
@@ -146,12 +159,13 @@
 <script>
 const cliente_id = "{{ cliente_id }}"
 const gestion_cobro_id = "{{ gestion_cobro.id }}"
+const whatsapp_cliente = 'whatsapp:{{ numero_whatsapp  }}'
 
 window.onload=function(){
 
     antigüedadcartera("/operaciones/antigüedadcarteracliente/"+cliente_id);
 
-    // Cargar historial de WhatsApp
+    // Cargar historial de WhatsApp inicialmente
     cargarHistorialWhatsapp();
 
     // Enviar mensaje de WhatsApp
@@ -176,6 +190,11 @@ window.onload=function(){
         );
         jQuery('#whatsapp_message').val(''); // Limpiar el textarea
     });
+
+    // Refrescar la lista automáticamente cada segundo
+    setInterval(function(){
+        cargarHistorialWhatsapp();
+    }, 1000); // 1000 milisegundos = 1 segundo
 };
 
 function cargarHistorialWhatsapp(){
@@ -186,16 +205,15 @@ function cargarHistorialWhatsapp(){
         conversationDiv.empty();
         data.forEach(function(msg){
             // Añadir lógica para formatear y mostrar mensajes
-            conversationDiv.append('<p><strong>' + msg.ctfrom + ':</strong> ' 
-                + msg.ctbody + '</p>');
+            if (msg.ctfrom === whatsapp_cliente) {
+                conversationDiv.append('<p><small style="color: red;>' + msg.dregistro + ':</small> ' 
+                    + msg.ctbody + '</p>');
+            } else {
+                conversationDiv.append('<p style="text-align: right;">' 
+                    + msg.ctbody + ' <small style="color: blue;">:' + msg.dregistro + '</small></p>');
+            }
         });
     });
-    console.log("Cargando historial de WhatsApp para el cliente " + cliente_id);
 }    
-    // Refrescar la lista automáticamente después de unos segundos
-    setTimeout(function(){
-        cargarHistorialWhatsapp();
-    }, 1000); // 1000 milisegundos = 1 segundos
-
 </script>
 {% endblock %}

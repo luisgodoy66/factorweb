@@ -825,10 +825,14 @@ class GestionDeCobro(SinPrivilegios, generic.TemplateView):
         gc = Gestion_cobro.objects\
             .filter(pk = self.kwargs.get('pk')).first()
 
+        ppmp = Documentos_detalle.objects\
+            .promedio_ponderado_demora(gc.revision_cartera_cliente.cxcliente.id)
+        
         context['solicitudes_pendientes'] = sp
         context['gestion_cobro'] = gc
         context['cliente_id'] = gc.revision_cartera_cliente.cxcliente.id
-
+        context['numero_whatsapp'] = gc.revision_cartera_cliente.cxcliente.cxcliente.ctcelular
+        context['promedio_ponderado_demora'] = ppmp
         return context
 
 @login_required(login_url='/login/')

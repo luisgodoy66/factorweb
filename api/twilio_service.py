@@ -22,7 +22,6 @@ def enviar_mensaje_whatsapp(request):
         cuerpo_mensaje = datos.get('cuerpo_mensaje')
         gestion_cobro_id = datos.get('gestion_cobro_id')
 
-        print(f"cuerpo_mensaje: {cuerpo_mensaje}, gestion_cobro_id: {gestion_cobro_id}")
         if not cuerpo_mensaje or not gestion_cobro_id:
             return JsonResponse({'status': 'error', 'message': 'Faltan parámetros.'}, status=400)
         id_empresa = Usuario_empresa.objects\
@@ -85,7 +84,8 @@ def historial_mensajes_whatsapp(request, gestion_cobro_id):
     
     # Filtra los mensajes enviados para esa gestión de cobro
     mensajes = Twilio_whatsapp.objects\
-      .filter(gestion_cobro=gestion_cobro)
+      .filter(gestion_cobro=gestion_cobro)\
+      .order_by('dregistro')  # Ordena por fecha de creación descendente
 
     return JsonResponse(list(mensajes.values()), safe=False)
 
@@ -113,9 +113,10 @@ def webhook_whatsapp_twilio(request):
             return JsonResponse({'error': 'Configuración de Twilio no encontrada'}, status=404)
 
         # Busca la gestión de cobro asociada al número del cliente (si aplica)
+        numero_whatsapp = from_number.replace('whatsapp:', '')
         gestion_cobro = Gestion_cobro.objects\
-          .filter(ctnumerowhatsapp=from_number).first()
-        
+          .filter(ctnumerowhatsapp=numero_whatsapp, cxestado='A').first()
+
         if not gestion_cobro:
             # nota: cambiar a la validación correcta
             gestion_cobro = Gestion_cobro.objects\
