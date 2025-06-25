@@ -22,7 +22,7 @@ class ParticipanteForm(forms.ModelForm):
             'cttelefono1': 'Teléfono principal', 
             'cttelefono2': 'Teléfono secundario',
             'ctemail': 'Email 1', 'ctemail2': 'Email 2', 
-            'ctcelular': 'Celular',
+            'ctcelular': 'WhatsApp',
             'ctgirocomercial': 'Giro comercial', 
             'dinicioactividades': 'Inicio de actividades',
             'actividad': 'Actividad económica'

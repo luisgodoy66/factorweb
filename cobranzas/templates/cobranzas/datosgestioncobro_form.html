@@ -194,7 +194,7 @@ window.onload=function(){
     // Refrescar la lista automáticamente cada segundo
     setInterval(function(){
         cargarHistorialWhatsapp();
-    }, 1000); // 1000 milisegundos = 1 segundo
+    }, 3000); // 3000 milisegundos = 3 segundos
 };
 
 function cargarHistorialWhatsapp(){
@@ -205,8 +205,8 @@ function cargarHistorialWhatsapp(){
         conversationDiv.empty();
         data.forEach(function(msg){
             // Añadir lógica para formatear y mostrar mensajes
-            if (msg.ctfrom === whatsapp_cliente) {
-                conversationDiv.append('<p><small style="color: red;>' + msg.dregistro + ':</small> ' 
+            if (msg.ctfrom == whatsapp_cliente) {
+                conversationDiv.append('<p><small style="color: red;">' + msg.dregistro + ':</small> ' 
                     + msg.ctbody + '</p>');
             } else {
                 conversationDiv.append('<p style="text-align: right;">' 
