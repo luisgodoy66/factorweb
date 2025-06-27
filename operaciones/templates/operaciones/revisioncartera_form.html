@@ -110,9 +110,12 @@
 {% block js_page %}
 <!-- <script type="text/javascript" src="{% static 'factorweb/js/consultageneralasignaciones.js' %}"></script> -->
 <script src="{% static 'factorweb/vendors/chosen/chosen.jquery.min.js' %}"></script>
+<script src="{% static 'factorweb/js/google.js' %}"></script>
+<script src="https://apis.google.com/js/api.js" async defer></script>
 <script>
 var $table = jQuery('#table')
 var $btnRevision = jQuery('#btnRevision')
+const id_usuario = "{{ id_usuario }}";
 
 window.onload=function(){
 
@@ -148,6 +151,8 @@ window.onload=function(){
 
     // cerrar side bar
     CerrarSideBar();
+    // cargar el API de Google
+    loadGoogleAPI();
 };
 
 window.operateEvents = {
@@ -158,15 +163,28 @@ window.operateEvents = {
       'click .gestion': function (e, value, row, index) {
         enviarGestionCobro(row.id, row.Cliente)
       },
+      'click .evento': function (e, value, row, index) {
+        registrarEvento(row.id, row.Cliente)
+      },
     };
       
 function operateFormatter(value, row, index) {
+    if (id_usuario == 1 ) {
+        return [
+            '<a class="comentario" href="javascript:void(0)" title="Comentario">',
+            '<i class="fa fa-pencil"></i>',
+            '</a>  ',
+            '<a class="gestion" href="javascript:void(0)" title="Gestión de cobro">',
+            '<i class="fa fa-money"></i>',
+            '</a>  ',
+            '<a class="evento" href="javascript:void(0)" title="Registrar evento">',
+            '<i class="fa fa-calendar"></i>',
+            '</a>  ',
+        ].join('')
+    }
     return [
         '<a class="comentario" href="javascript:void(0)" title="Comentario">',
         '<i class="fa fa-pencil"></i>',
-        '</a>  ',
-        '<a class="gestion" href="javascript:void(0)" title="Gestión de cobro">',
-        '<i class="fa fa-money"></i>',
         '</a>  ',
       ].join('')
 }
@@ -189,6 +207,31 @@ function enviarGestionCobro(id_revision_cartera, cliente) {
             MensajeOK("Enviado a gestión de cobro")
         })
     })
+}
+
+function registrarEvento(id_revision_cartera, cliente) {
+    initClient().then(function () {
+        var event = {
+            'summary': 'Revisión de cartera: ' + cliente,
+            'description': 'Evento de revisión de cartera para el cliente: ' + cliente,
+            'start': {
+                'dateTime': new Date().toISOString(),
+                'timeZone': 'America/Los_Angeles'
+            },
+            'end': {
+                'dateTime': new Date(new Date().getTime() + 60 * 60 * 1000).toISOString(), // Evento de 1 hora
+                'timeZone': 'America/Los_Angeles'
+            }
+        };
+        gapi.client.calendar.events.insert({
+            'calendarId': 'primary',
+            'resource': event
+        }).then(function(response) {
+            MensajeOK("Evento registrado en Google Calendar");
+        }, function(error) {
+            MensajeError("Error al registrar el evento: " + error.message);
+        });
+    });
 }
 </script>
 {% endblock %}

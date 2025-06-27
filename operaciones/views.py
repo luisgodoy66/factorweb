@@ -491,6 +491,7 @@ class RevisionCartera(SinPrivilegios, generic.TemplateView):
         sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
                                        empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
+        context["id_usuario"] = self.request.user.id
         return context
 
 class RevisionCarteraClienteEdit(SinPrivilegios, generic.UpdateView):
@@ -2828,12 +2829,6 @@ def corteHistorico(request, corte_id = None):
     id_empresa = Usuario_empresa.objects\
         .filter(user = request.user).first()
     
-    # datos = { 'cortes': Cortes_historico.objects\
-    #         .filter(empresa = id_empresa.empresa
-    #                 , leliminado = False
-    #                 , lactivo = True)
-    # }
-    # return render(request, template_name, datos)
     cartera = 0
     protestos = 0
     pagares = 0
@@ -2864,40 +2859,6 @@ def corteHistorico(request, corte_id = None):
             .filter(pk = corte_id).first()
     }
     return render(request, template_name, datos)
-
-# def corteHistoricoJSON(request, corte_id = None):
-#     cartera = 0
-#     protestos = 0
-#     pagares = 0
-
-#     id_empresa = Usuario_empresa.objects\
-#         .filter(user = request.user).first()
-
-#     docs = Documentos_historico.objects\
-#         .TotalCartera(id_empresa.empresa, corte_id)
-#     if docs['Total']:
-#         cartera = docs['Total']
-        
-#     prot = Cheques_protestados_historico.objects\
-#         .TotalProtestos(id_empresa.empresa, corte_id)
-#     if prot['Total']:
-#         protestos = prot['Total']
-
-#     pag = Pagare_detalle_historico.objects\
-#         .TotalPagares(id_empresa.empresa, corte_id)
-#     if pag['Total']:
-#         pagares = pag['Total']
-
-#     sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-#                                        empresa = id_empresa.empresa).count()
-
-
-#     datos = { 'total_cartera': cartera
-#         , 'total_protestos':protestos
-#         , 'total_cartera_protestos':cartera+protestos+pagares
-#         , 'solicitudes_pendientes':sp
-#     }
-#     return JsonResponse(datos)
 
 def GeneraResumenAntigüedadCarteraCorteJSON(request, corte_id = None):
 
