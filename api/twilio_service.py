@@ -51,7 +51,7 @@ def enviar_mensaje_whatsapp(request):
                 to='whatsapp:+593987468590'  # Reemplaza con el número de destino
             )
 
-            print(message.status)
+            print(message.sid)
 
             # Guarda el mensaje enviado en la base de datos
             mensaje_enviado = Twilio_whatsapp(
@@ -86,9 +86,14 @@ def historial_mensajes_whatsapp(request, gestion_cobro_id):
     # Filtra los mensajes enviados para esa gestión de cobro
     mensajes = Twilio_whatsapp.objects\
       .filter(gestion_cobro=gestion_cobro)\
-      .order_by('dregistro')  # Ordena por fecha de creación descendente
+      .order_by('dregistro')  # Ordena por fecha de creación ascendente
 
-    return JsonResponse(list(mensajes.values()), safe=False)
+    mensajes_list = list(mensajes.values())
+    response_data = {
+        'cantidad': len(mensajes_list),
+        'mensajes': mensajes_list
+    }
+    return JsonResponse(response_data, safe=False)
 
 @csrf_exempt
 def webhook_whatsapp_twilio(request):

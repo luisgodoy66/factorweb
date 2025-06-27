@@ -169,6 +169,7 @@ def manejar_interactividad(request):
             return HttpResponse("Operación ya no está pendiente de aprobación", status=200)
         
         # grabar el registro de la respuesta
+        # nota: crear campo nombre de usuario en Respuesta_aprobacion
         sa = Solicitud_aprobacion.objects.get(pk=asignacion.solicitudaprobacion.id)
         Respuesta_aprobacion.objects.create(
             solicitud=sa,
@@ -196,8 +197,6 @@ def manejar_interactividad(request):
                                  , "operacion": asignacion.cxasignacion
                                  , "valor": asignacion.neto()})
         
-        # nota: grabar en la base de datos el resultado de la aprobación
-
         elif action == "rechazar":
             # Lógica para rechazar la operación
             resultado=enviarPost("CALL uspreversaliquidacionasignacion( {0},'')"

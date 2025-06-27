@@ -140,7 +140,8 @@
                     </div>
                     <div class="col-md-6">
                         <h5>Historial de Conversación</h5>
-                        <div id="whatsapp_conversation" style="height: 400px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
+                        <div id="whatsapp_conversation" 
+                            style="height: 400px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
                             <!-- La conversación se cargará aquí dinámicamente -->
                         </div>
                     </div>
@@ -160,6 +161,7 @@
 const cliente_id = "{{ cliente_id }}"
 const gestion_cobro_id = "{{ gestion_cobro.id }}"
 const whatsapp_cliente = 'whatsapp:{{ numero_whatsapp  }}'
+var cantidad_mensajes = 0; // Variable para contar mensajes
 
 window.onload=function(){
 
@@ -184,8 +186,14 @@ window.onload=function(){
             gestion_cobro_id: gestion_cobro_id
             },
             function() { 
-            // Aquí puedes manejar la respuesta
-            cargarHistorialWhatsapp();
+                var conversationDiv = jQuery('#whatsapp_conversation');
+            // // Aquí puedes manejar la respuesta
+            // cargarHistorialWhatsapp();
+                conversationDiv.append('<p style="text-align: right;">' 
+                    + mensaje + ' <small style="color: blue;">:' + new Date().toLocaleString() + '</small></p>');
+                cantidad_mensajes += 1; // Incrementar el contador de mensajes
+                console.log("Cantidad de mensajes enviados: " + cantidad_mensajes);
+                conversationDiv[0].scrollTop = conversationDiv[0].scrollHeight;
             },
         );
         jQuery('#whatsapp_message').val(''); // Limpiar el textarea
@@ -202,8 +210,19 @@ function cargarHistorialWhatsapp(){
     // Ejemplo: 
     fetchRecuperar('/api/historialmensajewhatsapp/' + gestion_cobro_id, function(data){
         var conversationDiv = jQuery('#whatsapp_conversation');
+        console.log(cantidad_mensajes, data.cantidad);
+        if (cantidad_mensajes == data.cantidad) {
+            // Si no hay nuevos mensajes, no hacer nada
+            console.log("No hay nuevos mensajes.");
+            return;
+        }
+        if (cantidad_mensajes != 0) {
+            alert("Nuevos mensajes: ");
+        }
+        cantidad_mensajes = data.cantidad;
+
         conversationDiv.empty();
-        data.forEach(function(msg){
+        data.mensajes.forEach(function(msg){
             // Añadir lógica para formatear y mostrar mensajes
             if (msg.ctfrom == whatsapp_cliente) {
                 conversationDiv.append('<p><small style="color: red;">' + msg.dregistro + ':</small> ' 
@@ -213,6 +232,7 @@ function cargarHistorialWhatsapp(){
                     + msg.ctbody + ' <small style="color: blue;">:' + msg.dregistro + '</small></p>');
             }
         });
+        conversationDiv[0].scrollTop = conversationDiv[0].scrollHeight;
     });
 }    
 </script>
