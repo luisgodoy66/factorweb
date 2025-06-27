@@ -188,6 +188,7 @@
                             <li><i class="menu-icon fa fa-camera"></i><a href="{% url 'operaciones:lista_corteshistorico' %}">Cortes</a></li>
                         </ul>
                     </li>
+                    {% if user.id == 1 %}
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
                             <i class="menu-icon fa fa-money"></i>Gestión de cobro</a>
@@ -195,6 +196,7 @@
                             <li><i class="menu-icon fa fa-money"></i><a href="{% url 'cobranzas:listar_gestion_cobro' %}">Gestión</a></li>
                         </ul>
                     </li>
+                    {% endif %}
 
                     <h3 class="menu-title">Contabilidad</h3><!-- /.menu-title -->
                     <li class="menu-item-has-children dropdown">
