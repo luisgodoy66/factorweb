@@ -563,7 +563,7 @@ function carteranegociada(url){
                     ]
                             },
                 {
-                    label: "Año actual",
+                    label: "Último año",
                     borderColor: "rgba(0, 123, 255, 0.9)",
                     borderWidth: "1",
                     backgroundColor: "rgba(0, 123, 255, 0.5)",
