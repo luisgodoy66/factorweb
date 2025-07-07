@@ -594,10 +594,6 @@ class Documentos_protestados_Manager(models.Manager):
             .order_by()
     
     def revision_cartera(self, id_empresa):
-        # si tiene accesorio, la fecha de vencimiento es la del accesorio
-        # si no tiene accesorio, la fecha de vencimiento es la del documento
-        vcdo30 = datetime.today() + timedelta(days=-30)
-        # xver30 = datetime.today() + timedelta(days=30)
 
         return self.filter(leliminado=False, nsaldo__gt=0, empresa=id_empresa) \
             .values('documento__cxcliente__cxcliente__ctnombre',
@@ -607,7 +603,8 @@ class Documentos_protestados_Manager(models.Manager):
                     'documento__cxcliente',
                     ) \
             .annotate(
-                vencido_mas_30=Value(0, output_field=DecimalField()),
+                vencido_mas_60=Value(0, output_field=DecimalField()),
+                vencido_60=Value(0, output_field=DecimalField()),
                 vencido_30=Value(0, output_field=DecimalField()),
                 por_vencer=Value(0, output_field=DecimalField()),
                 ptotesto=Sum('nsaldo'),

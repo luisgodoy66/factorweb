@@ -8,7 +8,9 @@ from .slack import enviar_solicitud_aprobacion, manejar_interactividad\
 from .sri import obtener_datos_contribuyente
 from .twilio_service import historial_mensajes_whatsapp,\
      enviar_mensaje_whatsapp, webhook_whatsapp_twilio
-
+from .google import oauth2callback, google_login, \
+     crear_evento_recordatorio_cobranza, \
+     google_session_active
 # app_name = 'api'
 
 urlpatterns = [
@@ -39,6 +41,11 @@ urlpatterns = [
          , name='enviar_mensaje_whatsapp'),
      path('historialmensajewhatsapp/<int:gestion_cobro_id>/', historial_mensajes_whatsapp
          , name='historial_mensajes_whatsapp'),
-   path('twilio/webhook_whatsapp_twilio/', webhook_whatsapp_twilio
+     path('twilio/webhook_whatsapp_twilio/', webhook_whatsapp_twilio
         , name='webhook_whatsapp_twilio'),
+     path('google/logingoogle/', google_login, name='google_login'),
+     path('google/oauth2callback/', oauth2callback, name='oauth2callback'),
+     path('google/crear_evento_recordatorio_cobranza/<cliente>', crear_evento_recordatorio_cobranza
+           , name='crear_evento_recordatorio_cobranza'),
+     path('google/session/active/', google_session_active, name='google_session_active'),
 ]

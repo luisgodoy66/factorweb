@@ -70,8 +70,10 @@
                     <thead>
                         <tr>
                         <th data-field="Cliente" data-filter-control="input" data-sortable="true" >Cliente</th>
-                        <th data-field="Vdo+30" data-filter-control="input"data-sortable="true" 
-                        data-formatter="numberFormatter" >Vencido más de 30</th>
+                        <th data-field="Vdo+60" data-filter-control="input"data-sortable="true" 
+                        data-formatter="numberFormatter" >Vencido más de 60</th>
+                        <th data-field="Vdo60" data-filter-control="input"data-sortable="true" 
+                        data-formatter="numberFormatter" >Vencido 60</th>
                         <th data-field="Vdo30" data-filter-control="input"data-sortable="true" 
                         data-formatter="numberFormatter" >Vencido 30</th>
                         <th data-field="Por_vencer" data-filter-control="input"data-sortable="true" 
@@ -81,9 +83,7 @@
                         <th data-field="Linea_actual" data-filter-control="input"data-sortable="true" 
                         data-formatter="numberFormatter" >Monto de línea</th>
                         <th data-field="Clase_actual" data-filter-control="input"data-sortable="true" 
-                        >Clase</th>
-                        <th data-field="Estado_actual" data-filter-control="input"data-sortable="true"
-                        >Estado</th>
+                        >Clase / Estado</th>
                         <th data-field="Comentario" data-filter-control="input"data-sortable="true" 
                         >Comentario</th>
                         <th data-field="operate" data-sortable="true" data-events="window.operateEvents"
@@ -96,37 +96,16 @@
         </div>
 
     </div>
-{% if user.id == 1 %}
-
-   <button id="googleSignIn" disabled>Conectar con Google</button>
-  <button id="createEvent" disabled>Crear Evento</button>
-{% endif %}
-<!-- <button onclick="authenticate().then(loadClient)">authorize and load</button>
-<button onclick="execute()">execute</button> -->
-
-
-     <!-- 
-    data-detail-view="true"
-    data-click-to-select="true"
-    data-minimum-count-columns="2"
-    data-show-toggle="true" 
-    data-show-footer="true" 
--->
 
 {% endblock %}
 
 {% block js_page %}
-<!-- <script type="text/javascript" src="{% static 'factorweb/js/consultageneralasignaciones.js' %}"></script> -->
 <script src="{% static 'factorweb/vendors/chosen/chosen.jquery.min.js' %}"></script>
-<script src="{% static 'factorweb/js/googlecalendar.js' %}"></script>
-<!-- <script async defer src="https://apis.google.com/js/api.js" ></script>
-<script async defer src="https://accounts.google.com/gsi/client" ></script> -->
-<script async defer src="https://apis.google.com/js/api.js" onload="loadGapiClient()"></script>
-<script async defer src="https://accounts.google.com/gsi/client" onload="loadGisClient()"></script>
 <script>
 var $table = jQuery('#table')
 var $btnRevision = jQuery('#btnRevision')
 const id_usuario = "{{ id_usuario }}";
+var observacion = "";
 
 window.onload=function(){
 
@@ -174,7 +153,7 @@ window.operateEvents = {
         enviarGestionCobro(row.id, row.Cliente)
       },
       'click .evento': function (e, value, row, index) {
-        registrarEvento(row.id, row.Cliente)
+        registrarEvento(row.id, row.Cliente, row.Comentario)
       },
     };
       
@@ -219,29 +198,26 @@ function enviarGestionCobro(id_revision_cartera, cliente) {
     })
 }
 
-function registrarEvento(id_revision_cartera, cliente) {
-    initClient().then(function () {
-        var event = {
-            'summary': 'Revisión de cartera: ' + cliente,
-            'description': 'Evento de revisión de cartera para el cliente: ' + cliente,
-            'start': {
-                'dateTime': new Date().toISOString(),
-                'timeZone': 'America/Los_Angeles'
-            },
-            'end': {
-                'dateTime': new Date(new Date().getTime() + 60 * 60 * 1000).toISOString(), // Evento de 1 hora
-                'timeZone': 'America/Los_Angeles'
-            }
-        };
-        gapi.client.calendar.events.insert({
-            'calendarId': 'primary',
-            'resource': event
-        }).then(function(response) {
-            MensajeOK("Evento registrado en Google Calendar");
-        }, function(error) {
-            MensajeError("Error al registrar el evento: " + error.message);
+function registrarEvento(id, cliente, comentario){
+    if (google_session_active()) {
+        MensajeError("Debe conectar con Google antes de registrar un evento");
+        return;
+    }
+    // Abrir el modal para registrar un evento de cobranza
+    observacion = comentario;
+    AbrirModal("/api/google/crear_evento_recordatorio_cobranza/"+encodeURIComponent(cliente));
+}
+
+function google_session_active() {
+    fetch("/api/google/session/active/")
+        .then(response => response.json())
+        .then(data => {
+            return data.active;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            MensajeError("Error al verificar la sesión de Google. Conecte nuevamente.");
         });
-    });
 }
 
 </script>

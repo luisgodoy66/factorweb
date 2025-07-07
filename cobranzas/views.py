@@ -828,11 +828,20 @@ class GestionDeCobro(SinPrivilegios, generic.TemplateView):
         ppmp = Documentos_detalle.objects\
             .promedio_ponderado_demora(gc.revision_cartera_cliente.cxcliente.id)
         
+        total_cartera = Documentos.objects\
+            .TotalCarteraCliente(gc.revision_cartera_cliente.cxcliente.id)
+        cartera = total_cartera['Total'] or 0
+
+        total_protesto = Cheques_protestados.objects\
+            .TotalProtestosCliente(gc.revision_cartera_cliente.cxcliente.id)
+        protestos = total_protesto['Total'] or 0
+
         context['solicitudes_pendientes'] = sp
         context['gestion_cobro'] = gc
         context['cliente_id'] = gc.revision_cartera_cliente.cxcliente.id
         context['numero_whatsapp'] = gc.revision_cartera_cliente.cxcliente.cxcliente.ctcelular
         context['promedio_ponderado_demora'] = ppmp
+        context['total_cartera_protestos'] = cartera + protestos
         return context
 
 @login_required(login_url='/login/')

@@ -275,3 +275,9 @@ function checkSubmit() {
         return false;
     }
 }
+
+function logingoogle() {
+    // Abrir la URL de inicio de sesión de Google en una nueva ventana
+    window.open("/api/google/logingoogle", "_blank", "width=500,height=600");
+}
+

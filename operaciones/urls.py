@@ -29,7 +29,8 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     RevisionCartera, RevisionCarteraJSON, RevisionCarteraClienteEdit,\
     estadisticas_mes, CortesHistoricoView, CorteHistoricoEdit, \
     GuardarCorteHistorico, corteHistorico, \
-    GeneraResumenAntigüedadCarteraCorteJSON, AnexosCesionFacturasView
+    GeneraResumenAntigüedadCarteraCorteJSON, AnexosCesionFacturasView,\
+    GeneraResumenCarteraNegociadaClienteJSON
     # , corteHistoricoJSON
 
 from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
@@ -50,22 +51,24 @@ urlpatterns = [
          name='listaestadosoperativos'),
     path('estadosoperativocliente/<cliente_id>/<nombre_cliente>'
          ,EstadoOperativoCliente, name='estadooperativocliente'),
-    path('antigüedadcarteracliente/<cliente_id>', AntigüedadCarteraClienteJSON),
-    path('carteraclientejson/<cliente_id>/<fecha_corte>',GeneraListaCarteraClienteJSON, 
-        name="carteracliente_json"),
+    path('antigüedadcarteracliente/<cliente_id>'
+         , AntigüedadCarteraClienteJSON),
+    path('carteraclientejson/<cliente_id>/<fecha_corte>'
+         ,GeneraListaCarteraClienteJSON, name="carteracliente_json"),
     path('chequesadepositarclientejson/<cliente_id>/<fecha_corte>'
          ,GeneraListaChequesADepositarClienteJSON
          , name="chequesadepositarcliente_json"),
     path('listacargospendientesclientejson/<cliente_id>',\
          GeneraListaCargosPendientesClienteJSON, name="listacargospendientescliente_json"),
-    path('protestospendientesjson/<cliente_id>',GeneraListaProtestosPendientesClienteJSON, 
-        name="protestospendientescliente_json"),
+    path('protestospendientesjson/<cliente_id>'
+         ,GeneraListaProtestosPendientesClienteJSON, name="protestospendientescliente_json"),
     path('canjesclientejson/<cliente_id>',GeneraListaCanjesClienteJSON, 
         name="listacanjescliente_json"),
     path('chequesquitadosclientejson/<cliente_id>',GeneraListaChequesQuitadosClienteJSON, 
         name="listachequesquitadoscliente_json"),
     path('movimientosclientejson/<cliente_id>/<int:registros>',GeneraListaMovimientosClienteJSON,
         name='movimientoscliente_json'),
+    path('carteranegociadacliente/<cliente_id>/<int:año>', GeneraResumenCarteraNegociadaClienteJSON),
 # movimientos
     path('listamaestromovimientos/',MaestroMovimientosView.as_view(), \
         name='listamaestromovimientos'),

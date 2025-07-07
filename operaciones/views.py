@@ -1746,6 +1746,7 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
     cartera = 0
     protestos=0
     restructuracion=0
+    año = date.today().year
 
     template_path = 'operaciones/estadooperativo_reporte.html'
 
@@ -1761,6 +1762,7 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
         if operativos.dultimanegociacion:
             dias_ultima_operacion = (date.today() 
                                      - operativos.dultimanegociacion)/timedelta(days=1)
+            año = operativos.dultimanegociacion.year
 
     if estado_cliente=='A':
         estado_cliente = 'Activo'
@@ -1817,7 +1819,8 @@ def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
         'total_cartera_protestos': cartera + protestos,
         'total_reestructuracion':restructuracion,
         'promedio_ponderado_demora': ppmp,
-        'cliente': operativos.cxcliente
+        'cliente': operativos.cxcliente,
+        'año': año,
         }
     return render(request, template_path, context)
 
@@ -2664,14 +2667,16 @@ def NuevaRevisionCarteraJSON(request,):
                 'cxcliente__linea_factoring__nvalor': doc['cxcliente__linea_factoring__nvalor'],
                 'cxcliente__datos_operativos__cxclase__cxclase': doc['cxcliente__datos_operativos__cxclase__cxclase'],
                 'cxcliente__datos_operativos__cxestado': doc['cxcliente__datos_operativos__cxestado'],
-                'vencido_mas_30': 0,
+                'vencido_mas_60': 0,
+                'vencido_60': 0,
                 'vencido_30': 0,
                 'por_vencer': 0,
                 'protesto': 0,
                 'total': 0,
                 'cxcliente': doc['cxcliente'],
             }
-        acumulado_por_cliente[cliente]['vencido_mas_30'] += doc.get('vencido_mas_30', 0) or 0
+        acumulado_por_cliente[cliente]['vencido_mas_60'] += doc.get('vencido_mas_60', 0) or 0
+        acumulado_por_cliente[cliente]['vencido_60'] += doc.get('vencido_60', 0) or 0
         acumulado_por_cliente[cliente]['vencido_30'] += doc.get('vencido_30', 0) or 0
         acumulado_por_cliente[cliente]['por_vencer'] += doc.get('por_vencer', 0) or 0
         acumulado_por_cliente[cliente]['protesto'] += doc.get('protesto', 0) or 0
@@ -2679,7 +2684,6 @@ def NuevaRevisionCarteraJSON(request,):
 
     tempBlogs = []
     for i in acumulado_por_cliente:
-        print (acumulado_por_cliente[i]['total'])
         tempBlogs.append(GeneraNuevaListarevisionCarteraJSONSalida(
             acumulado_por_cliente[i], i,
             revision,
@@ -2701,7 +2705,8 @@ def GeneraNuevaListarevisionCarteraJSONSalida(cartera, cliente, revision, usuari
     detalle = Revision_cartera_detalle(
         revision = revision,
         cxcliente = ModeloCliente.Datos_generales.objects.get(pk = cartera['cxcliente']),
-        nvencidomas30 = cartera['vencido_mas_30'],
+        nvencidomas60 = cartera['vencido_mas_60'],
+        nvencido60 = cartera['vencido_60'],
         nvencido30 = cartera['vencido_30'],
         nporvencer = cartera['por_vencer'],
         nprotesto = cartera['protesto'],
@@ -2715,12 +2720,13 @@ def GeneraNuevaListarevisionCarteraJSONSalida(cartera, cliente, revision, usuari
 
     output["id"] = detalle.id
     output["Cliente"] = cliente
-    output["Vdo+30"] = cartera['vencido_mas_30']
+    output["Vdo+60"] = cartera['vencido_mas_60']
+    output["Vdo60"] = cartera['vencido_60']
     output["Vdo30"] = cartera['vencido_30']
     output["Por_vencer"] = cartera['por_vencer']
     output["Protesto"] = cartera['protesto']
     output["Linea_actual"] = cartera['cxcliente__linea_factoring__nvalor']
-    output["Clase_actual"] = cartera['cxcliente__datos_operativos__cxclase__cxclase']
+    output["Clase_actual"] = cartera['cxcliente__datos_operativos__cxclase__cxclase']+'/'+cartera['cxcliente__datos_operativos__cxestado']
     output["Estado_actual"] = cartera['cxcliente__datos_operativos__cxestado']
     output["Comentario"] = ""
 
@@ -2750,12 +2756,13 @@ def GeneraListarevisionCarteraJSONSalida(cartera,):
     output = {}
     output["id"] = cartera.id
     output["Cliente"] = cartera.cxcliente.cxcliente.ctnombre
-    output["Vdo+30"] = cartera.nvencidomas30
+    output["Vdo+60"] = cartera.nvencidomas60
+    output["Vdo60"] = cartera.nvencido60
     output["Vdo30"] = cartera.nvencido30
     output["Por_vencer"] = cartera.nporvencer
     output["Protesto"] = cartera.nprotesto
     output["Linea_actual"] = cartera.nlineaactual
-    output["Clase_actual"] = cartera.ctclaseactual
+    output["Clase_actual"] = cartera.ctclaseactual + '/' + cartera.ctestadoactual
     output["Estado_actual"] = cartera.ctestadoactual
     output["Comentario"] = cartera.ctcomentario
 
@@ -2910,3 +2917,18 @@ def GeneraResumenAntigüedadCarteraCorteJSON(request, corte_id = None):
             
     
     return JsonResponse( data)
+
+def GeneraResumenCarteraNegociadaClienteJSON(request, cliente_id, año):
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    actual = Asignacion.objects\
+        .operaciones_negociadas_cliente(id_empresa.empresa, año, cliente_id)
+    anterior = Asignacion.objects\
+        .operaciones_negociadas_cliente(id_empresa.empresa, año-1, cliente_id)
+
+    data = { "actual":actual,
+            "anterior":anterior}
+    
+    return JsonResponse( data)
+

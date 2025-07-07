@@ -80,9 +80,16 @@
             </div>
         </div>
    </div>
-
     <div class="row">
-        <!-- <div class="animated fadeIn"> -->
+        <!-- grafico cartera negociada -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-3">Cartera negociada </h4>
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
+        </div>
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-body">
@@ -91,6 +98,10 @@
                 </div>
             </div>
         </div><!-- /# column -->
+    </div>
+
+    <div class="row">
+    <div class="col-lg-12 col-md-12">
 
         <div class="col-md-3 col-lg-3">
             <div class="card">
@@ -135,6 +146,8 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="col-md-3 col-lg-3">
             <div class="card">
                 <div class="card-body">
                     <div class="stat-widget-one">
@@ -146,9 +159,8 @@
                     </div>
                 </div>
             </div>
-
         </div>
-       <div class="col-md-3 col-lg-3">
+        <div class="col-md-3 col-lg-3">
             <div class="card
                 {% if color_estado == 1 %} 
                     bg-flat-color-1
@@ -167,6 +179,8 @@
                     <div>Estado</div>
                 </div>
             </div>
+        </div>
+        <div class="col-md-3 col-lg-3">
             <div class="card">
                 <div class="card-body">
                     <div class="stat-widget-one">
@@ -178,9 +192,10 @@
                     </div>
                 </div>
             </div>
-        <!-- </div>
-        <div class="col-md-3 col-lg-3"> -->
+        </div>
+   </div>
         {% if total_reestructuracion > 0 %}
+        <div class="col-md-3 col-lg-3">
             <div class="card">
                 <div class="card-body">
                     <div class="clearfix">
@@ -199,9 +214,8 @@
                     </div>
                 </div>
             </div>
-        {% endif %}
         </div>
-   </div>
+        {% endif %}
     <div class="col-xl-6">
         <div class="card">
             <div class="card-header">
@@ -408,26 +422,27 @@
 <script src="{% static 'factorweb/assets/js/widgets.js' %}"></script>
 <!-- <script type="text/javascript" src="{% static 'factorweb/js/estadooperativo.js' %}"></script> -->
 <script>
-var $table = jQuery('#table')
-var $tbcheques = jQuery('#tbcheques')
-var $tbcargos = jQuery('#tbcargos')
-var $tbprotestos = jQuery('#tbprotestos')
-var $tbcanjes = jQuery('#tbcanjes')
-var $tbquitados = jQuery('#tbquitados')
-var $tbmovimientos = jQuery('#tbmovimientos')
-const cliente_id = capturaValor("id_cliente")
+    var $table = jQuery('#table')
+    var $tbcheques = jQuery('#tbcheques')
+    var $tbcargos = jQuery('#tbcargos')
+    var $tbprotestos = jQuery('#tbprotestos')
+    var $tbcanjes = jQuery('#tbcanjes')
+    var $tbquitados = jQuery('#tbquitados')
+    var $tbmovimientos = jQuery('#tbmovimientos')
+    const cliente_id = capturaValor("id_cliente")
 
-window.onload=function(){
+    window.onload=function(){
 
-$table.bootstrapTable({locale:"es-EC"});
-$tbcargos.bootstrapTable({locale:"es-EC"});
-$tbcheques.bootstrapTable({locale:"es-EC"});
-$tbprotestos.bootstrapTable({locale:"es-EC"});
-$tbcanjes.bootstrapTable({locale:"es-EC"});
-$tbquitados.bootstrapTable({locale:"es-EC"});
-$tbmovimientos.bootstrapTable({locale:"es-EC"});
+    $table.bootstrapTable({locale:"es-EC"});
+    $tbcargos.bootstrapTable({locale:"es-EC"});
+    $tbcheques.bootstrapTable({locale:"es-EC"});
+    $tbprotestos.bootstrapTable({locale:"es-EC"});
+    $tbcanjes.bootstrapTable({locale:"es-EC"});
+    $tbquitados.bootstrapTable({locale:"es-EC"});
+    $tbmovimientos.bootstrapTable({locale:"es-EC"});
 
-antigüedadcartera("/operaciones/antigüedadcarteracliente/"+cliente_id);
+    antigüedadcartera("/operaciones/antigüedadcarteracliente/"+cliente_id);
+    carteranegociada("/operaciones/carteranegociadacliente/"+cliente_id+"/{{año}}");
 }    
 </script>
 {% endblock %}

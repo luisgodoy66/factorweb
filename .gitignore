@@ -160,3 +160,7 @@ cython_debug/
 # carpeta de archivos word y logos
 anexos/
 images/
+
+# claves google
+client_secret.json
+client_secret.json.bak

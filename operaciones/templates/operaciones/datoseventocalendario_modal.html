@@ -1,0 +1,101 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" rol="form"  class="form-horizontal" name="form"
+                action="{% url 'api:crear_evento_recordatorio_cobranza' cliente %}"
+            >
+            <!-- <div class="col-md-12"> -->
+            <div class="card">
+
+                {% csrf_token %}
+                <div class="card-header">
+                    <strong>Evento </strong> para {{ cliente }}
+                </div>
+                
+                <!-- body -->
+                <div class="card-body card-block">
+                    <!-- fecha -->
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="fecha" class=" form-control-label">
+                            Fecha de evento</label></div>
+                        <div class="col-md-8">
+                            <input type="text" name="fecha" class="form-control" 
+                            readonly required id="fecha" value="{{ vencimiento }}">
+                        </div>
+                    </div>
+                </div>    
+                <div class="card-body card-block">
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_ctmotivo" 
+                            class=" form-control-label">
+                            Descripción</label></div>
+                        <div class="col-md-8">
+                            <textarea name="motivo" maxlength="180" rows="5"
+                                class="form-control" required id="motivo"></textarea>
+                        </div>
+                    </div>
+                </div>    
+                <!-- footer -->
+                <div class="card-footer">
+                    <!-- <button id="button" class="btn btn-secondary">updateCell</button> -->
+                    <button type="buttom" class="btn btn-danger btn-sm" 
+                        onclick="return CerrarModal()">
+                        <i class="fa fa-dot-circle-o"></i> Cerrar
+                    </button>
+                    <button id="btnCondonar" class="btn btn-primary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+                </div>
+            </div>
+            <!-- </div> -->
+        </form>
+
+    </div>
+
+    <script>
+        let nuevafecha = new Date();
+        nuevafecha.setDate(nuevafecha.getDate() + 1);
+
+        d = nuevafecha.getFullYear() + "-" + (nuevafecha.getMonth()+1) + "-" + nuevafecha.getDate() + " 09:00"
+        objeto_fechas("#fecha", d);
+
+        inicializaValor("motivo", observacion)
+
+        function objeto_fechas(Campo, Valor = null){
+            jQuery(Campo).datetimepicker({
+            timepicker: true,
+            format: 'Y-m-d H:i',
+            value: Valor
+            });
+        };
+
+        // antes de cerrar modal...
+        jQuery("form").submit(function(e){
+
+            // actualizar la tabla con los valores del modal
+            e.preventDefault();
+            var url = jQuery("[name=form]").attr("action");
+            var token = jQuery("[name=csrfmiddlewaretoken]").val();
+            var formData = jQuery("form").serializeArray();
+
+            jQuery.ajax({
+                url:url,
+                method:"POST",
+                headers: {'X-CSRFToken': token },
+                data: formData
+            })
+            .done(function(r,textStatus,xhr){
+                if(r=="OK"){
+                    CerrarModal();
+                }
+                else{
+                    MensajeError(r);
+                }
+            }).fail(function (error) {
+                MensajeError(error.responseText);
+            });
+            
+
+        });
+    </script>
+</div>

@@ -190,3 +190,6 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR,'static'),)
 MEDIA_ROOT = '/var/www/uploads'
 MEDIA_URL = '/uploads/'
 
+# Configuración de Google OAuth2
+GOOGLE_OAUTH2_REDIRECT_URI = 'https://margarita.codigobambuecuador.com/api/google/oauth2callback/'  # MUST match your Authorized redirect URI
+
