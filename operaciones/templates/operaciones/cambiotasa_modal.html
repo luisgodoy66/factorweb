@@ -1,9 +1,9 @@
 <div class="modal-dialog ">
     <div class="modal-content">
 
-        <form  method="POST" rol="form"  class="form-horizontal" name="form"
+        <form  method="POST" rol="form"  name="form"
                 action="{% url 'operaciones:editartasasdocumento' documento_id fecha_desembolso asignacion %}"
-            >
+            class="form-horizontal" onsubmit="return checkSubmit();">
             <div class="card">
 
                 {% csrf_token %}
@@ -58,6 +58,7 @@
 
     {% block js_page %}
     <script>
+        var enviando = false; //Obligaremos a entrar el if en el primer submit
         var url = jQuery("[name=form]").attr("action");
         var token = jQuery("[name=csrfmiddlewaretoken]").val();
         var asgn = jQuery("[name=asignacion_id]").val();

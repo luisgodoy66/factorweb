@@ -15,7 +15,7 @@ from cobranzas.models import Gestion_cobro, Twilio_whatsapp
 from bases.models import Usuario_empresa
 import json
 
-def enviar_mensaje_whatsapp(request):
+def enviar_mensaje_whatsapp(request, whatsapp_destino ):
     datos = json.loads(request.body.decode('utf-8'))  # Imprime el cuerpo de la solicitud para depuración
     if request.method == 'POST':
         # Lees los parámetros enviados en el cuerpo de la solicitud POST
@@ -31,7 +31,7 @@ def enviar_mensaje_whatsapp(request):
             .filter(empresa=id_empresa.empresa, lactivo=True).first()
                 
         if not configuracion_twilio:
-            raise HttpResponse("Configuración de Twilio no encontrada.")
+            return HttpResponse("Configuración de Twilio no encontrada.")
         
         gestion_cobro = Gestion_cobro.objects.get(id=gestion_cobro_id)
         if not gestion_cobro:
@@ -41,26 +41,25 @@ def enviar_mensaje_whatsapp(request):
 
             account_sid = configuracion_twilio.ctaccountsid
             auth_token = configuracion_twilio.ctauthtoken
-            numero_whatsapp = 'whatsapp:' + configuracion_twilio.ctwhatsappnumber
+            whatsapp_origen = 'whatsapp:' + configuracion_twilio.ctwhatsappnumber
 
             client = Client(account_sid, auth_token)
 
+            print(f"Enviando mensaje a {whatsapp_destino} desde {whatsapp_origen}")
             message = client.messages.create(
-                from_=numero_whatsapp,
+                from_=whatsapp_origen,
                 body=cuerpo_mensaje,
-                to='whatsapp:+593987468590'  # Reemplaza con el número de destino
+                to='whatsapp:' + whatsapp_destino  # Reemplaza con el número de destino
             )
-
-            print(message.sid)
 
             # Guarda el mensaje enviado en la base de datos
             mensaje_enviado = Twilio_whatsapp(
                 ctsid=message.sid,
                 ctbody=cuerpo_mensaje,
-                ctto='whatsapp:+593987468590',  # Reemplaza con el número de destino
+                ctto='whatsapp:' + whatsapp_destino,  # Reemplaza con el número de destino
                 gestion_cobro=gestion_cobro,
                 configuracion=configuracion_twilio,
-                ctfrom=numero_whatsapp,
+                ctfrom=whatsapp_origen,
                 ctstatus=message.status,
                 jcontexto=json.dumps(datos),  # Guarda el contexto de la solicitud
                 cxusuariocrea=request.user,

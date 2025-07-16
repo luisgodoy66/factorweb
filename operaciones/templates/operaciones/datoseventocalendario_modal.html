@@ -1,9 +1,9 @@
 <div class="modal-dialog ">
     <div class="modal-content">
 
-        <form  method="POST" rol="form"  class="form-horizontal" name="form"
+        <form  method="POST" rol="form"  name="form"
                 action="{% url 'api:crear_evento_recordatorio_cobranza' cliente %}"
-            >
+            class="form-horizontal" onsubmit="return checkSubmit();">
             <!-- <div class="col-md-12"> -->
             <div class="card">
 
@@ -53,6 +53,7 @@
     </div>
 
     <script>
+        var enviando = false; //Obligaremos a entrar el if en el primer submit
         let nuevafecha = new Date();
         nuevafecha.setDate(nuevafecha.getDate() + 1);
 

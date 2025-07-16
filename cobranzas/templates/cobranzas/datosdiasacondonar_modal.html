@@ -1,9 +1,9 @@
 <div class="modal-dialog ">
     <div class="modal-content">
 
-        <form  method="POST" rol="form"  class="form-horizontal" name="form"
-                action="{% url 'cobranzas:datos_diascondonar' id dias cobranza tipo_operacion %}"
-            >
+        <form  method="POST" rol="form"  name="form"
+            action="{% url 'cobranzas:datos_diascondonar' id dias cobranza tipo_operacion %}"
+            class="form-horizontal" onsubmit="return checkSubmit();">
             <!-- <div class="col-md-12"> -->
             <div class="card">
 
@@ -52,7 +52,7 @@
     </div>
 
     <script>
-
+        var enviando = false; //Obligaremos a entrar el if en el primer submit
         var cobranza = capturaValor('id_dcobranza');
         calcular_fecha();
 

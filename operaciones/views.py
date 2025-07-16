@@ -2762,7 +2762,11 @@ def GeneraListarevisionCarteraJSONSalida(cartera,):
     output["Por_vencer"] = cartera.nporvencer
     output["Protesto"] = cartera.nprotesto
     output["Linea_actual"] = cartera.nlineaactual
-    output["Clase_actual"] = cartera.ctclaseactual + '/' + cartera.ctestadoactual
+    output["Clase_actual"] = (
+        (cartera.ctclaseactual if cartera.ctclaseactual else '-') +
+        '/' +
+        (cartera.ctestadoactual if cartera.ctestadoactual else '-')
+    )
     output["Estado_actual"] = cartera.ctestadoactual
     output["Comentario"] = cartera.ctcomentario
 

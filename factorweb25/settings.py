@@ -193,3 +193,5 @@ MEDIA_URL = '/uploads/'
 # Configuración de Google OAuth2
 GOOGLE_OAUTH2_REDIRECT_URI = 'https://margarita.codigobambuecuador.com/api/google/oauth2callback/'  # MUST match your Authorized redirect URI
 
+WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN")
+PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")

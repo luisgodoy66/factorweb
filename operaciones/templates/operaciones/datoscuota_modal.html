@@ -1,9 +1,9 @@
 <div class="modal-dialog ">
     <div class="modal-content">
 
-        <form  method="POST" rol="form"  class="form-horizontal" name="form"
+        <form  method="POST" rol="form"  name="form"
                 action="{% url 'operaciones:modificar_cuota' id %}"
-            >
+            class="form-horizontal" onsubmit="return checkSubmit();">
             <!-- <div class="col-md-12"> -->
                 <div class="card">
 
@@ -40,7 +40,7 @@
     </div>
 
     <script>
-        // var $table = jQuery('#table')
+        var enviando = false; //Obligaremos a entrar el if en el primer submit
 
         // antes de cerrar modal...
         jQuery("form").submit(function(e){

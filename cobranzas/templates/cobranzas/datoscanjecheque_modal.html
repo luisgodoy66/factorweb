@@ -1,9 +1,9 @@
 <div class="modal-dialog ">
     <div class="modal-content">
 
-        <form  method="POST" rol="form"  class="form-horizontal" name="form"
-                action="{% url 'cobranzas:canjearchequeaccesorio' cheque cliente_id deudor_id %}"
-            >
+        <form  method="POST" rol="form"  name="form"
+            action="{% url 'cobranzas:canjearchequeaccesorio' cheque cliente_id deudor_id %}"
+            class="form-horizontal" onsubmit="return checkSubmit();">
             <!-- <div class="col-md-12"> -->
             <div hidden>
                 <input type="text" value={{cheque}} id="id_cheque">
@@ -100,6 +100,7 @@
 
     {% block js_page %}
     <script>
+        var enviando = false; //Obligaremos a entrar el if en el primer submit
         var url = jQuery("[name=form]").attr("action");
         var token = jQuery("[name=csrfmiddlewaretoken]").val();
         var asgn = jQuery("[name=asignacion_id]").val();

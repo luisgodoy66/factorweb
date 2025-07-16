@@ -69,7 +69,8 @@ def crear_evento_recordatorio_cobranza(request, cliente):
     # Suponiendo que ya tienes las credenciales OAuth2 en la sesión (ajusta según tu flujo)
     credentials = request.session.get('google_credentials')
     if not credentials:
-        return HttpResponse('No hay credenciales de Google disponibles.', status=401)
+        return HttpResponse('No hay credenciales de Google disponibles. Conecte a una cuenta desde el menú de usuario'
+                            , status=401)
 
     try:
         # Verificar si las credenciales son válidas

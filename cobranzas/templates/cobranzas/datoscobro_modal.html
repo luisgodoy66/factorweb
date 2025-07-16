@@ -1,9 +1,9 @@
 <div class="modal-dialog ">
     <div class="modal-content">
 
-        <form  method="POST" rol="form"  class="form-horizontal" name="form"
-                action="{% url 'cobranzas:datos_cobro' id asignacion documento saldo valor_cobrado valor_retenido baja %}"
-            >
+        <form  method="POST" rol="form"  name="form"
+            action="{% url 'cobranzas:datos_cobro' id asignacion documento saldo valor_cobrado valor_retenido baja %}"
+            class="form-horizontal" onsubmit="return checkSubmit();">
             <!-- <div class="col-md-12"> -->
                 <div class="card">
 
@@ -87,6 +87,7 @@
     </div>
 
     <script>
+        var enviando = false; //Obligaremos a entrar el if en el primer submit
         var $table = jQuery('#table')
         var i, saldo_actual , cobro,retenciones,bajas, saldo;
 

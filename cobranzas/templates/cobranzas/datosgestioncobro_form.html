@@ -177,25 +177,22 @@ window.onload=function(){
             alert('Por favor, escribe un mensaje.');
             return;
         }
-        // Aquí iría la lógica para enviar el mensaje vía AJAX a una vista de Django
-        console.log("Enviando mensaje a cliente " + cliente_id + ": " + mensaje);
-        // Ejemplo: 
-        fetchPostear('/api/enviarmensajewhatsapp/',
-            { 
-            cuerpo_mensaje: mensaje,
-            gestion_cobro_id: gestion_cobro_id
-            },
-            function() { 
+         // con twilio: 
+         fetchPostear('/api/twilio/enviarmensajewhatsapp/' + '{{ numero_whatsapp }}',
+        //  con WhatsApp: se maneja el número de teléfono sin el + inicial
+        //fetchPostear('/api/whatsapp/enviar_mensaje/' + '{{ numero_whatsapp }}',
+             { 
+             cuerpo_mensaje: mensaje,
+             gestion_cobro_id: gestion_cobro_id
+             },
+             function() { 
                 var conversationDiv = jQuery('#whatsapp_conversation');
-            // // Aquí puedes manejar la respuesta
-            // cargarHistorialWhatsapp();
                 conversationDiv.append('<p style="text-align: right;">' 
                     + mensaje + ' <small style="color: blue;">:' + new Date().toLocaleString() + '</small></p>');
                 cantidad_mensajes += 1; // Incrementar el contador de mensajes
-                console.log("Cantidad de mensajes enviados: " + cantidad_mensajes);
                 conversationDiv[0].scrollTop = conversationDiv[0].scrollHeight;
-            },
-        );
+             },
+         );
         jQuery('#whatsapp_message').val(''); // Limpiar el textarea
     });
 
@@ -210,7 +207,7 @@ function cargarHistorialWhatsapp(){
     // Ejemplo: 
     fetchRecuperar('/api/historialmensajewhatsapp/' + gestion_cobro_id, function(data){
         var conversationDiv = jQuery('#whatsapp_conversation');
-        console.log(cantidad_mensajes, data.cantidad);
+
         if (cantidad_mensajes == data.cantidad) {
             // Si no hay nuevos mensajes, no hacer nada
             console.log("No hay nuevos mensajes.");
@@ -224,6 +221,7 @@ function cargarHistorialWhatsapp(){
         conversationDiv.empty();
         data.mensajes.forEach(function(msg){
             // Añadir lógica para formatear y mostrar mensajes
+            console.log(msg.ctfrom, whatsapp_cliente);
             if (msg.ctfrom == whatsapp_cliente) {
                 conversationDiv.append('<p><small style="color: red;">' + msg.dregistro + ':</small> ' 
                     + msg.ctbody + '</p>');
