@@ -39,7 +39,7 @@ from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
     ImpresionResumenAsignaciones, ImpresionPagaresPendientes, \
     ImpresionLiquidacion, ImpresionRevisionCartera, \
     ImpresionAntiguedadCarteraCorte, ImpresionFacturasPendientesCorte,\
-    ImpresionAccesoriosPendientesCorte
+    ImpresionAccesoriosPendientesCorte, ImpresionAntiguedadCarteraPorDeudor
 
 urlpatterns = [
 # datos operativos
@@ -223,4 +223,6 @@ urlpatterns = [
     path('impresionchequespendientescorte/<int:corte_id>'
          , ImpresionAccesoriosPendientesCorte
          , name='detalle_cheques_pendientes_corte'),
+    path('impresioncarterapordeudor/<id_cliente>/<cliente>', ImpresionAntiguedadCarteraPorDeudor
+         , name='antigüedad_por_deudor'),
 ]

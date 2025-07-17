@@ -2769,6 +2769,7 @@ def GeneraListarevisionCarteraJSONSalida(cartera,):
     )
     output["Estado_actual"] = cartera.ctestadoactual
     output["Comentario"] = cartera.ctcomentario
+    output["IdCliente"] = cartera.cxcliente.id
 
     return output
 

@@ -155,6 +155,9 @@ window.operateEvents = {
       'click .evento': function (e, value, row, index) {
         registrarEvento(row.id, row.Cliente, row.Comentario)
       },
+      'click .cartera': function (e, value, row, index) {
+        carteraPorDeudor(row.IdCliente, row.Cliente)
+      },
     };
       
 function operateFormatter(value, row, index) {
@@ -162,6 +165,9 @@ function operateFormatter(value, row, index) {
         return [
             '<a class="comentario" href="javascript:void(0)" title="Comentario">',
             '<i class="fa fa-pencil"></i>',
+            '</a>  ',
+            '<a class="cartera" href="javascript:void(0)" title="Cartera por deudor">',
+            '<i class="fa fa-print"></i>',
             '</a>  ',
             '<a class="gestion" href="javascript:void(0)" title="Gestión de cobro">',
             '<i class="fa fa-money"></i>',
@@ -174,6 +180,9 @@ function operateFormatter(value, row, index) {
     return [
         '<a class="comentario" href="javascript:void(0)" title="Comentario">',
         '<i class="fa fa-pencil"></i>',
+        '</a>  ',
+        '<a class="cartera" href="javascript:void(0)" title="Cartera por deudor">',
+        '<i class="fa fa-print"></i>',
         '</a>  ',
       ].join('')
 }
@@ -220,5 +229,11 @@ function google_session_active() {
         });
 }
 
+function carteraPorDeudor(id_cliente, cliente) {
+    // abrir el reporte de cartera por deudor
+    url = window.location.origin
+    url = url + "/operaciones/impresioncarterapordeudor/"+id_cliente+"/"+encodeURIComponent(cliente);
+    window.open( url);
+}
 </script>
 {% endblock %}

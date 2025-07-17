@@ -793,3 +793,118 @@ def ImpresionAccesoriosPendientesCorte(request, corte_id=None):
     response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
     return response
 
+def ImpresionAntiguedadCarteraPorDeudor(request, id_cliente, cliente):
+    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+
+    facturas = Documentos.objects\
+        .antigüedad_por_deudor(id_empresa.empresa, id_cliente)
+    accesorios = ChequesAccesorios.objects\
+        .antigüedad_por_deudor(id_empresa.empresa, id_cliente)
+    prot_facturas = Documentos_protestados.objects\
+        .antigüedad_por_deudor_facturas(id_empresa.empresa, id_cliente)
+    prot_accesorios = Documentos_protestados.objects\
+        .antigüedad_por_deudor_accesorios(id_empresa.empresa, id_cliente)
+    acc_quitados = Cheques_quitados.objects\
+        .antigüedad_por_deudor(id_empresa.empresa, id_cliente)
+
+    total_facturas = Documentos.objects.antigüedad_cartera(id_empresa.empresa)
+    total_accesorios = ChequesAccesorios.objects.antigüedad_cartera(id_empresa.empresa)
+    total_protestos = Documentos_protestados.objects.antigüedad_cartera(id_empresa.empresa)
+    total_quitados = Cheques_quitados.objects.antigüedad_cartera(id_empresa.empresa)
+
+    fvm90 = total_facturas['vencido_mas_90'] or 0
+    fv90 = total_facturas['vencido_90'] or 0
+    fv60 = total_facturas['vencido_60'] or 0
+    fv30 = total_facturas['vencido_30'] or 0
+    fx30 = total_facturas['porvencer_30'] or 0
+    fx60 = total_facturas['porvencer_60'] or 0
+    fx90 = total_facturas['porvencer_90'] or 0
+    fxm90 = total_facturas['porvencer_mas_90'] or 0
+
+    avm90 = total_accesorios['vencido_mas_90'] or 0
+    av90 = total_accesorios['vencido_90'] or 0
+    av60 = total_accesorios['vencido_60'] or 0
+    av30 = total_accesorios['vencido_30'] or 0
+    ax30 = total_accesorios['porvencer_30'] or 0
+    ax60 = total_accesorios['porvencer_60'] or 0
+    ax90 = total_accesorios['porvencer_90'] or 0
+    axm90 = total_accesorios['porvencer_mas_90'] or 0
+
+    pvm90 = total_protestos['pvencido_mas_90'] or 0
+    pv90 = total_protestos['pvencido_90'] or 0
+    pv60 = total_protestos['pvencido_60'] or 0
+    pv30 = total_protestos['pvencido_30'] or 0
+    px30 = total_protestos['pporvencer_30'] or 0
+    px60 = total_protestos['pporvencer_60'] or 0
+    px90 = total_protestos['pporvencer_90'] or 0
+    pxm90 = total_protestos['pporvencer_mas_90'] or 0
+
+    qvm90 = total_quitados['vencido_mas_90'] or 0
+    qv90 = total_quitados['vencido_90'] or 0
+    qv60 = total_quitados['vencido_60'] or 0
+    qv30 = total_quitados['vencido_30'] or 0
+    qx30 = total_quitados['porvencer_30'] or 0
+    qx60 = total_quitados['porvencer_60'] or 0
+    qx90 = total_quitados['porvencer_90'] or 0
+    qxm90 = total_quitados['porvencer_mas_90'] or 0
+
+    template_path = 'operaciones/carteradeudor_reporte.html'
+    detalle = facturas.union(accesorios, prot_facturas
+                             , prot_accesorios, acc_quitados, )\
+            .order_by('cxcomprador__cxcomprador__ctnombre')
+    print('detalle', detalle)
+    # Acumular totales por deudor
+    acumulado_por_deudor = {}
+    for doc in detalle:
+        deudor = doc['cxcomprador__cxcomprador__ctnombre']
+        print('deudor', deudor)
+        if deudor not in acumulado_por_deudor:
+            acumulado_por_deudor[deudor] = {
+                'vencido_mas_90': 0,
+                'vencido_90': 0,
+                'vencido_60': 0,
+                'vencido_30': 0,
+                'porvencer_30': 0,
+                'porvencer_60': 0,
+                'porvencer_90': 0,
+                'porvencer_mas_90': 0,
+                'total': 0
+            }
+        acumulado_por_deudor[deudor]['vencido_mas_90'] += doc.get('vencido_mas_90', 0) or 0
+        acumulado_por_deudor[deudor]['vencido_90'] += doc.get('vencido_90', 0) or 0
+        acumulado_por_deudor[deudor]['vencido_60'] += doc.get('vencido_60', 0) or 0
+        acumulado_por_deudor[deudor]['vencido_30'] += doc.get('vencido_30', 0) or 0
+        acumulado_por_deudor[deudor]['porvencer_30'] += doc.get('porvencer_30', 0) or 0
+        acumulado_por_deudor[deudor]['porvencer_60'] += doc.get('porvencer_60', 0) or 0
+        acumulado_por_deudor[deudor]['porvencer_90'] += doc.get('porvencer_90', 0) or 0
+        acumulado_por_deudor[deudor]['porvencer_mas_90'] += doc.get('porvencer_mas_90', 0) or 0
+        acumulado_por_deudor[deudor]['total'] += doc.get('total', 0) or 0
+
+    context = {
+        "documentos": acumulado_por_deudor,
+        "totalvm90": fvm90 + avm90 + pvm90 + qvm90,
+        "totalv90": fv90 + av90 + pv90 + qv90,
+        "totalv60": fv60 + av60 + pv60 + qv60,
+        "totalv30": fv30 + av30 + pv30 + qv30,
+        "totalx30": fx30 + ax30 + px30 + qx30,
+        "totalx60": fx60 + ax60 + px60 + qx60,
+        "totalx90": fx90 + ax90 + px90 + qx90,
+        "totalxm90": fxm90 + axm90 + pxm90 + qxm90,
+        "total": fvm90 + fv90 + fv60 + fv30 + avm90 + av90 + av60 + av30 + pvm90 + pv90 + pv60 + pv30
+                + fxm90 + fx90 + fx60 + fx30 + axm90 + ax90 + ax60 + ax30 + pxm90 + px90 + px60 + px30
+                + qvm90 + qv90 + qv60 + qv30 + qx30 + qx60 + ax90 + qxm90,
+        'empresa': id_empresa.empresa,
+        'cliente': cliente
+    }
+
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
+    )
+    response['Content-Disposition'] = 'inline; filename="cartera_por_deudor.pdf"'
+    return response
+

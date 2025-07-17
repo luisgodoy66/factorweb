@@ -611,6 +611,74 @@ class Documentos_protestados_Manager(models.Manager):
                 total=Sum('nsaldo')
             ) \
             .order_by()
+
+    def antigüedad_por_deudor_facturas(self, id_empresa, id_cliente):
+        # la fecha de vencimiento está en el documento
+        vcdo90 = datetime.today()+timedelta(days=-90)
+        vcdo60 = datetime.today()+timedelta(days=-60)
+        vcdo30 = datetime.today()+timedelta(days=-30)
+        xver30 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=60)
+        xver90 = datetime.today()+timedelta(days=90)
+
+        return self.filter( leliminado = False
+                           , nsaldo__gt = 0
+                           , accesorio__isnull = True
+                           , empresa = id_empresa
+                           , documento__cxcliente = id_cliente)\
+            .values('documento__cxcomprador__cxcomprador__ctnombre')\
+            .annotate(
+                vencido_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo90) ) 
+                , vencido_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo60
+                                , documento__dvencimiento__gte = vcdo90) ) 
+                , vencido_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo30
+                                , documento__dvencimiento__gte = vcdo60))
+                , vencido_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = datetime.today()
+                                , documento__dvencimiento__gte = vcdo30))
+                ,porvencer_30 = Sum('nsaldo', filter=Q(documento__dvencimiento__gte = datetime.today()
+                                , documento__dvencimiento__lte = xver30))
+                ,porvencer_60 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver30
+                                , documento__dvencimiento__lte = xver60))
+                ,porvencer_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver60
+                                , documento__dvencimiento__lte = xver90))
+                , porvencer_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__gt = xver90))
+                , total = Sum('nsaldo')
+                )\
+            .order_by()
+    
+    def antigüedad_por_deudor_accesorios(self, id_empresa, id_cliente):
+        # la fecha de vencimiento está en el accesorio
+        vcdo90 = datetime.today()+timedelta(days=-90)
+        vcdo60 = datetime.today()+timedelta(days=-60)
+        vcdo30 = datetime.today()+timedelta(days=-30)
+        xver30 = datetime.today()+timedelta(days=30)
+        xver60 = datetime.today()+timedelta(days=60)
+        xver90 = datetime.today()+timedelta(days=90)
+
+        return self.filter( leliminado = False
+                           , nsaldo__gt = 0
+                           , accesorio__isnull = False
+                           , empresa = id_empresa
+                           , documento__cxcliente = id_cliente)\
+            .values('documento__cxcomprador__cxcomprador__ctnombre')\
+            .annotate(
+                vencido_mas_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo90) ) 
+                , vencido_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo60
+                                , accesorio__dvencimiento__gte = vcdo90))
+                , vencido_60 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo30
+                                , accesorio__dvencimiento__gte = vcdo60))
+                , vencido_30 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = datetime.today()
+                                , accesorio__dvencimiento__gte = vcdo30))
+                ,porvencer_30 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gte = datetime.today()
+                                , accesorio__dvencimiento__lte = xver30))
+                ,porvencer_60 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver30
+                                , accesorio__dvencimiento__lte = xver60))
+                ,porvencer_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver60
+                                , accesorio__dvencimiento__lte = xver90))
+                , porvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__gt = xver90))
+                , total = Sum('nsaldo')
+                )\
+            .order_by()
     
 class Documentos_protestados(ClaseModelo):
     chequeprotestado = models.ForeignKey(Cheques_protestados, on_delete= models.RESTRICT)
