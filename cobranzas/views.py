@@ -5,7 +5,7 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db import transaction
 from django.urls import reverse_lazy
-from django.db.models import Count, Sum, Q, F
+from django.db.models import Count, Sum, Q, F, ExpressionWrapper, DateField
 from django.db.models.expressions import RawSQL 
 
 from .models import Documentos_cabecera, Documentos_detalle\
@@ -489,7 +489,6 @@ class RecuperacionProtestoView(SinPrivilegios, generic.FormView):
         un_solo_deudor = self.kwargs.get('un_comprador')
         deudor_id = self.kwargs.get('deudor_id')
         tipo_factoring = self.kwargs.get('tipo_factoring')
-        # nota: debe tomar del tipo de factoring el con o sin recurso
         modalidad_factoring='CR'
 
         cl = Datos_generales.objects.filter(pk = cliente_id).first()
@@ -4116,16 +4115,27 @@ def proyeccion_cobros(request, dia=None, dias=14):
     fechas = [dia + timedelta(days=i) for i in range(dias)]
 
     # Obtener los documentos agrupados por cliente y fecha
-    facturas = Documentos.objects.filter(
-        leliminado=False,
-        nsaldo__gt=0,
-        empresa=id_empresa,
-        dvencimiento__range=[dia, dia + timedelta(days=dias-1)])\
-            .values('cxcliente__cxcliente__ctnombre'
-                    , 'dvencimiento'
-                    , 'cxcliente__npromediodemoradepago')\
-            .annotate(total=Sum(F('nsaldo') * F('nporcentajeanticipo') / 100))\
-            .order_by('cxcliente__cxcliente__ctnombre', 'dvencimiento')
+    facturas = Documentos.objects\
+        .filter(
+            leliminado=False,
+            nsaldo__gt=0,
+            empresa=id_empresa,
+        )\
+        .annotate(
+            vencimiento_final=ExpressionWrapper(
+                F('dvencimiento') + F('ndiasprorroga') * timedelta(days=1),
+                output_field=DateField()
+            )
+        )\
+        .filter(
+            vencimiento_final__range=[dia, dia + timedelta(days=dias-1)]
+        )\
+        .values('cxcliente__cxcliente__ctnombre'
+                , 'cxcliente__npromediodemoradepago')\
+        .annotate(total=Sum(F('nsaldo') * F('nporcentajeanticipo') / 100)
+                  , vencimiento=F('vencimiento_final')
+                  )\
+        .order_by('cxcliente__cxcliente__ctnombre', 'vencimiento_final')
 
     accesorios = ChequesAccesorios.objects\
         .filter(
@@ -4137,35 +4147,53 @@ def proyeccion_cobros(request, dia=None, dias=14):
             empresa=id_empresa,
             documento__cxasignacion__cxestado="P",
             documento__cxasignacion__leliminado=False,
-            dvencimiento__range=[dia, dia + timedelta(days=dias-1)]
+        )\
+        .annotate(
+            vencimiento_final=ExpressionWrapper(
+                F('dvencimiento') + F('ndiasprorroga') * timedelta(days=1),
+                output_field=DateField()
+            )
+        )\
+        .filter(
+            vencimiento_final__range=[dia, dia + timedelta(days=dias-1)]
         )\
         .values(
             'documento__cxcliente__cxcliente__ctnombre',
-            'dvencimiento',
-            'documento__cxcliente__npromediodemoradepago'
+            'documento__cxcliente__npromediodemoradepago')\
+        .annotate(total=Sum(F('ntotal') * F('nporcentajeanticipo') / 100)
+                  , vencimiento=F('vencimiento_final')
+                  )\
+        .order_by('documento__cxcliente__cxcliente__ctnombre', 'dvencimiento')
+
+    pagares = Pagare_detalle.objects\
+        .filter(
+            leliminado=False,
+            nsaldo__gt=0,
+            empresa=id_empresa,
+            dfechapago__range=[dia, dia + timedelta(days=dias-1)]
         )\
-        .annotate(total=Sum(F('ntotal') * F('nporcentajeanticipo') 
-                            / 100))\
-        .order_by('documento__cxcliente__cxcliente__ctnombre'
-                  , 'dvencimiento')
+        .values('pagare__cxcliente__cxcliente__ctnombre'
+                , 'pagare__cxcliente__npromediodemoradepago')\
+        .annotate(total=Sum(F('nsaldo') )
+                  , vencimiento=F('dfechapago')
+                  )\
+        .order_by('pagare__cxcliente__cxcliente__ctnombre', 'dfechapago')
 
-    documentos = facturas.union(accesorios)
-
-    # NOTA: faltaría agrupar por cliente y fecha
+    documentos = facturas.union(accesorios, pagares)
 
     # Organizar los datos en un diccionario
     datos_por_cliente = {}
     totales_por_fecha = {f.strftime('%Y-%m-%d'): 0 for f in fechas}
     for doc in documentos:
         cliente = doc['cxcliente__cxcliente__ctnombre']
-        fecha = doc['dvencimiento'].strftime('%Y-%m-%d')
+        fecha = doc['vencimiento'].strftime('%Y-%m-%d')
 
         if cliente not in datos_por_cliente:
             datos_por_cliente[cliente] = {
                 'promedio_demora': doc['cxcliente__npromediodemoradepago'],
                 'fechas': {f.strftime('%Y-%m-%d'): 0 for f in fechas},
             }
-        datos_por_cliente[cliente]['fechas'][fecha] = doc['total']
+        datos_por_cliente[cliente]['fechas'][fecha] += doc['total']
         totales_por_fecha[fecha] += doc['total']
 
     # Hacer los totales acumulativos por fecha
@@ -4185,19 +4213,27 @@ def proyeccion_cobros(request, dia=None, dias=14):
 @login_required(login_url='/login/')
 @permission_required('operaciones.add_revision_cartera_detalle', login_url='bases:sin_permisos')
 def Registra_gestion_cobro(request, tipo_participante, id_detalle_revision):
-    # nota: validar que no exista un registro del cliente (deudor)
+    # validar que no exista un registro del cliente (deudor)
     # en estado pendiente o abierto
     id_empresa = Usuario_empresa.objects\
         .filter(user=request.user).first()
 
-    # if request.method == 'POST':
     revision = Revision_cartera_detalle.objects\
         .filter(id=id_detalle_revision).first()
     
-    celular_cliente = revision.cxcliente.cxcliente.ctcelular
+    cliente = revision.cxcliente
+
+    # si existe un registro pendiente o abierto, no se registra la gestion
+    if Gestion_cobro.objects\
+        .filter(
+            revision_cartera_cliente__cxcliente=cliente,
+            cxtipoparticipante=tipo_participante,
+            cxestado__in=['P', 'A']).exists():
+        return HttpResponse("Ya existe una gestión pendiente o abierta para este cliente.", status=400) 
+
     gestion = Gestion_cobro(cxtipoparticipante=tipo_participante,
                             revision_cartera_cliente=revision,
-                            ctnumerowhatsapp=celular_cliente,
+                            ctnumerowhatsapp=cliente.cxcliente.ctcelular,
                             cxusuariocrea=request.user,
                             empresa=id_empresa.empresa)
     gestion.save()

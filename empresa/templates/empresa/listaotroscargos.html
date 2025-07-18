@@ -56,7 +56,7 @@
                             <td>{{ item.otroscargo_movimiento.get.lcargaiva|yesno:"Si,No" }}</td>
                             <td>
                                 <a class="btn btn-warning btn-sm"  title="Editar"
-                                    {% if item.otroscargo_movimiento.get.nvalor %}
+                                    {% if item.otroscargo_movimiento.get.ctabreviacion %}
                                         href="{% url 'empresa:otrocargo_editar' item item.id item.otroscargo_movimiento.get.id %}" 
                                     {% else %}
                                         href="{% url 'empresa:otrocargo_nuevo' item item.id %}" 

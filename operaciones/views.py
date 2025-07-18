@@ -2458,10 +2458,10 @@ def ImportarOperacion(request):
 
             for doc in documentos:
                 if doc:
-                    capital =doc["capital"]
+                    capital = round(doc["capital"], 2)
 
                     if capital > 0:
-                        interes = doc["interes"]
+                        interes = round(doc["interes"], 2)
                         fechapago =doc["fechapago"]
 
                         detalle = Pagare_detalle(
