@@ -577,7 +577,8 @@ def ImpresionRevisionCartera(request, revision_id, ):
         .order_by('cxcliente__cxcliente__ctnombre')
 
     total = detalle.aggregate(
-        vencido_mas_30 = Sum('nvencidomas30'),
+        vencido_mas_60 = Sum('nvencidomas60'),
+        vencido_60 = Sum('nvencido60'),
         vencido_30 = Sum('nvencido30'),
         por_vencer = Sum('nporvencer') ,
         protesto = Sum('nprotesto'),
@@ -587,7 +588,8 @@ def ImpresionRevisionCartera(request, revision_id, ):
         "detalle" : detalle,
         "revision" : revision,
         'empresa': id_empresa.empresa,
-        'total_vencido_mas_30': total['vencido_mas_30'],
+        'total_vencido_mas_60': total['vencido_mas_60'],
+        'total_vencido_60': total['vencido_60'],
         'total_vencido_30': total['vencido_30'],
         'total_por_vencer': total['por_vencer'],
         'total_protesto': total['protesto'],

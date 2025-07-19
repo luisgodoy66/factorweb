@@ -60,11 +60,12 @@
                     <table class="table table-striped table-hover nowrap" style="width:100%">
                         <thead>
                             <th>Cliente</th>        
-                            <th style="text-align: right;">Vencido más de 30 días</th>
+                            <th style="text-align: right;">Vencido más de 60 días</th>
+                            <th style="text-align: right;">Vencido 60 días</th>
                             <th style="text-align: right;">Vencido 30 días</th>
                             <th style="text-align: right;">Por vencer</th>
-                            <th style="text-align: right;">Protesto</th>        
-                            <th style="text-align: right;">Línea actual</th>        
+                            <th style="text-align: right;">Protesto</th>
+                            <th style="text-align: right;">Línea actual</th>
                             <th>Clase actual</th>        
                             <th>Estado actual</th>        
                             <th>Comentario</th>
@@ -73,7 +74,8 @@
                                 {% for item in detalle %}
                                 <tr>
                                     <td>{{ item.cxcliente }}</td>
-                                    <td class="numero">{{ item.nvencidomas30|floatformat:"2g" }}</td>
+                                    <td class="numero">{{ item.nvencidomas60|floatformat:"2g" }}</td>
+                                    <td class="numero">{{ item.nvencido60|floatformat:"2g" }}</td>
                                     <td class="numero">{{ item.nvencido30|floatformat:"2g" }}</td>
                                     <td class="numero">{{ item.nporvencer|floatformat:"2g" }}</td>
                                     <td class="numero">{{ item.nprotesto|floatformat:"2g" }}</td>
@@ -83,11 +85,12 @@
                                     <td>{{ item.ctcomentario}}</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="9"><hr></td>
+                                    <td colspan="10"><hr></td>
                                 </tr>
                                 {% endfor %}
                             <tr>
-                                <td colspan="2" class="numero"><h4>{{ total_vencido_mas_30|floatformat:"2g" }}</h4></td>
+                                <td colspan="2" class="numero"><h4>{{ total_vencido_mas_60|floatformat:"2g" }}</h4></td>
+                                <td class="numero"><h4>{{ total_vencido_60|floatformat:"2g" }}</h4></td>
                                 <td class="numero"><h4>{{ total_vencido_30|floatformat:"2g" }}</h4></td>
                                 <td class="numero"><h4>{{ total_por_vencer|floatformat:"2g" }}</h4></td>
                                 <td class="numero"><h4>{{ total_protesto|floatformat:"2g" }}</h4></td>

@@ -22,7 +22,7 @@ def google_login(request):
 
     flow = Flow.from_client_secrets_file(
         'client_secret.json',  # Replace with the actual path to your client_secret.json file
-        scopes=['https://www.googleapis.com/auth/calendar.events','https://www.googleapis.com/auth/calendar'],  # Adjust scopes as needed
+        scopes=['https://www.googleapis.com/auth/calendar.events'],  # Adjust scopes as needed
         redirect_uri=settings.GOOGLE_OAUTH2_REDIRECT_URI
     )
     authorization_url, state = flow.authorization_url(
@@ -33,33 +33,35 @@ def google_login(request):
     return redirect(authorization_url)
 
 def oauth2callback(request):
-    state = request.session['oauth_state']
-    flow = Flow.from_client_secrets_file(
-        'client_secret.json',  # Replace with the actual path to your client_secret.json file
-        scopes=['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar'],
-        redirect_uri=settings.GOOGLE_OAUTH2_REDIRECT_URI,
-        state=state
-    )
-    flow.fetch_token(code=request.GET.get('code'))
-    credentials = flow.credentials
+    try:
+        state = request.session['oauth_state']
+        flow = Flow.from_client_secrets_file(
+            'client_secret.json',  # Replace with the actual path to your client_secret.json file
+            scopes=['https://www.googleapis.com/auth/calendar.events'],
+            redirect_uri=settings.GOOGLE_OAUTH2_REDIRECT_URI,
+            state=state
+        )
+        flow.fetch_token(code=request.GET.get('code'))
+        credentials = flow.credentials
 
-    # Almacenar las credenciales serializadas en la sesión
-    request.session['google_credentials'] = {
-        'token': credentials.token,
-        'refresh_token': credentials.refresh_token,
-        'token_uri': credentials.token_uri,
-        'client_id': credentials.client_id,
-        'client_secret': credentials.client_secret,
-        'scopes': credentials.scopes,
-    }
+        # Almacenar las credenciales serializadas en la sesión
+        request.session['google_credentials'] = {
+            'token': credentials.token,
+            'refresh_token': credentials.refresh_token,
+            'token_uri': credentials.token_uri,
+            'client_id': credentials.client_id,
+            'client_secret': credentials.client_secret,
+            'scopes': credentials.scopes,
+        }
 
-    # crear_evento_recordatorio_cobranza(request)  # Call the function to create the event
-    return HttpResponse('Conexión exitosa! Puede cerrar esta ventana.')
+        return HttpResponse('Conexión exitosa! Puede cerrar esta ventana.')
+    except Exception as e:
+        print(f"Error en oauth2callback: {e}")
+        return HttpResponse('Error al procesar la solicitud de OAuth2.', status=500)
 
 @login_required(login_url='/login/')
 def crear_evento_recordatorio_cobranza(request, cliente):
     # por GET mostrar el modal para ingresar datos del evento
-    print(request.method, request.GET)
     if request.method != 'POST':
         contexto = {
             'cliente': cliente,
@@ -152,4 +154,5 @@ def google_session_active(request):
         creds = Credentials(**credentials)
         if creds.valid:
             active = True
+    return JsonResponse({'active': active})
     return JsonResponse({'active': active})
