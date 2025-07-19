@@ -42,10 +42,6 @@ window.onload=function(){
         }
     )
 
-    // $table.on('all.bs.table', function (e, name, args) {
-    //   console.log(name, args)
-    // })
-
     // acciones ejecutada sobre registros seleccionados
     $cobroconcheque.click(function () {
       CobroDeDocumentos('CHE');
@@ -145,13 +141,20 @@ window.operateEvents = {
       Prorroga(row.id, row.Tipo_asignacion, row.Vencimiento, row.Documento, por_vencer)
     }
   },
+    'click .evento': function (e, value, row, index) {
+      console.log(row.id, row.Cliente)
+      registrarEvento(row.id, row.Cliente, 'Ingrese el comentario del evento')
+    },
 };
 
 function operateFormatter(value, row, index) {
-return [
-  '<a class="prorroga" href="javascript:void(0)" title="Prorroga">',
-  '<i class="fa fa-mail-forward"></i>',
-  '</a>  ',
-].join('')
-}
+  return [
+    '<a class="prorroga" href="javascript:void(0)" title="Prorroga">',
+    '<i class="fa fa-mail-forward"></i>',
+    '</a>  ',
+    '<a class="evento" href="javascript:void(0)" title="Registrar evento">',
+    '<i class="fa fa-calendar"></i>',
+    '</a>  ',
+  ].join('')
+  }
 

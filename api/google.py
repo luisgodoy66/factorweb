@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 
 import os
 
-# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Only for development!
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Only for development!
 
 def google_login(request):
     if os.path.exists("client_secret.json"):

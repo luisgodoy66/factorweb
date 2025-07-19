@@ -281,3 +281,25 @@ function logingoogle() {
     window.open("/api/google/logingoogle", "_blank", "width=500,height=600");
 }
 
+function google_session_active() {
+    fetch("/api/google/session/active/")
+        .then(response => response.json())
+        .then(data => {
+            return data.active;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            MensajeError("Error al verificar la sesión de Google. Conecte nuevamente.");
+        });
+}
+
+function registrarEvento(id, cliente, comentario){
+    if (google_session_active()) {
+        MensajeError("Debe conectar con Google antes de registrar un evento");
+        return;
+    }
+    // Abrir el modal para registrar un evento de cobranza
+    observacion = comentario;
+    AbrirModal("/api/google/crear_evento_recordatorio_cobranza/"+encodeURIComponent(cliente));
+}
+
