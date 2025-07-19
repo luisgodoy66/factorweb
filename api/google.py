@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 
 import os
 
-# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Only for development!
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Only for development!
 
 def google_login(request):
     if os.path.exists("client_secret.json"):
@@ -20,9 +20,10 @@ def google_login(request):
         print("❌ No se encontró client_secret.json. Asegúrate de tener el archivo correcto.")
         return HttpResponse('No se encontró client_secret.json. Asegúrate de tener el archivo correcto.', status=401)
 
+    scopes = ['https://www.googleapis.com/auth/calendar.events']
     flow = Flow.from_client_secrets_file(
-        'client_secret.json',  # Replace with the actual path to your client_secret.json file
-        scopes=['https://www.googleapis.com/auth/calendar.events'],  # Adjust scopes as needed
+        'client_secret.json',
+        scopes=scopes,
         redirect_uri=settings.GOOGLE_OAUTH2_REDIRECT_URI
     )
     authorization_url, state = flow.authorization_url(
@@ -30,14 +31,17 @@ def google_login(request):
         include_granted_scopes='true'
     )
     request.session['oauth_state'] = state
+    request.session['oauth_scopes'] = scopes  # Guardar los scopes usados
     return redirect(authorization_url)
 
 def oauth2callback(request):
     try:
         state = request.session['oauth_state']
+        # Recuperar los scopes originales usados en la autorización
+        original_scopes = request.session.get('oauth_scopes', ['https://www.googleapis.com/auth/calendar.events'])
         flow = Flow.from_client_secrets_file(
-            'client_secret.json',  # Replace with the actual path to your client_secret.json file
-            scopes=['https://www.googleapis.com/auth/calendar.events'],
+            'client_secret.json',
+            scopes=original_scopes,  # Usar los mismos scopes que en google_login
             redirect_uri=settings.GOOGLE_OAUTH2_REDIRECT_URI,
             state=state
         )
@@ -57,6 +61,12 @@ def oauth2callback(request):
         return HttpResponse('Conexión exitosa! Puede cerrar esta ventana.')
     except Exception as e:
         print(f"Error en oauth2callback: {e}")
+        # Si el error es por cambio de scopes, limpiar la sesión y pedir al usuario que vuelva a conectar
+        if "Scope has changed" in str(e):
+            request.session.pop('oauth_state', None)
+            request.session.pop('google_credentials', None)
+            request.session.pop('oauth_scopes', None)
+            return HttpResponse('Error: Los permisos (scopes) han cambiado. Por favor, vuelva a conectar su cuenta de Google.', status=400)
         return HttpResponse('Error al procesar la solicitud de OAuth2.', status=500)
 
 @login_required(login_url='/login/')
