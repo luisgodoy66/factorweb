@@ -809,10 +809,14 @@ def ImpresionAntiguedadCarteraPorDeudor(request, id_cliente, cliente):
     acc_quitados = Cheques_quitados.objects\
         .antigüedad_por_deudor(id_empresa.empresa, id_cliente)
 
-    total_facturas = Documentos.objects.antigüedad_cartera(id_empresa.empresa)
-    total_accesorios = ChequesAccesorios.objects.antigüedad_cartera(id_empresa.empresa)
-    total_protestos = Documentos_protestados.objects.antigüedad_cartera(id_empresa.empresa)
-    total_quitados = Cheques_quitados.objects.antigüedad_cartera(id_empresa.empresa)
+    total_facturas = Documentos.objects\
+        .antigüedad_cartera(id_empresa.empresa, id_cliente)
+    total_accesorios = ChequesAccesorios.objects\
+        .antigüedad_cartera(id_empresa.empresa, id_cliente)
+    total_protestos = Documentos_protestados.objects\
+        .antigüedad_cartera(id_empresa.empresa, id_cliente)
+    total_quitados = Cheques_quitados.objects\
+        .antigüedad_cartera(id_empresa.empresa, id_cliente)
 
     fvm90 = total_facturas['vencido_mas_90'] or 0
     fv90 = total_facturas['vencido_90'] or 0
