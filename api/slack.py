@@ -119,6 +119,7 @@ def enviar_solicitud_aprobacion(request, id_solicitud):
         )
     except FileNotFoundError:
         print(f"❌ Error: No se encontró el archivo en la ruta '{filepath}'")
+        return HttpResponse("Error: No se encontró el archivo PDF en la ruta "+filepath, status=404)
     except SlackApiError as e:
         # Maneja errores de la API [[1](https://translate.google.com/translate?u=https://stackoverflow.com/questions/43464873/how-to-upload-files-to-slack-using-file-upload-and-requests&hl=es&sl=en&tl=es&client=srp)]
         print(f"❌ Error al enviar el archivo a Slack: {e.response['error']}")

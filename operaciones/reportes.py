@@ -190,7 +190,7 @@ def ImpresionLiquidacion(request, solicitud_id, crear_pdf = False):
         output_filename = os.path.join(settings.MEDIA_ROOT, 'solicitudes', f"asignacion_{solicitud_id}.pdf")
         with open(output_filename, "wb") as f:
             f.write(response.rendered_content)
-        # response['Content-Disposition'] = 'attachment; filename="asgn' + str(solicitud_id) + '.pdf"'
+        print(f"Archivo PDF creado en: {output_filename}")
         return "OK"
     else:
         # Devolver el PDF para visualización en el navegador
