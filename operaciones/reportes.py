@@ -111,7 +111,7 @@ def ImpresionAsignacion(request, asignacion_id):
     response['Content-Disposition'] = 'inline; filename="asgn' + str(asignacion_id) + '.pdf"'
     return response
 
-def ImpresionLiquidacion(request, solicitud_id):
+def ImpresionLiquidacion(request, solicitud_id, crear_pdf = False):
     asignacion = SolicitudModels.Asignacion.objects\
         .filter(id = solicitud_id).first()
     documentos = {}
@@ -185,8 +185,17 @@ def ImpresionLiquidacion(request, solicitud_id):
         content_type='application/pdf',
         # stylesheets=stylesheet_paths
     )
-    response['Content-Disposition'] = 'inline; filename="asgn' + str(solicitud_id) + '.pdf"'
-    return response
+    if crear_pdf:
+        # Guardar el PDF generado en un archivo directamente
+        output_filename = os.path.join(settings.MEDIA_ROOT, 'solicitudes', f"asignacion_{solicitud_id}.pdf")
+        with open(output_filename, "wb") as f:
+            f.write(response.rendered_content)
+        # response['Content-Disposition'] = 'attachment; filename="asgn' + str(solicitud_id) + '.pdf"'
+        return "OK"
+    else:
+        # Devolver el PDF para visualización en el navegador
+        response['Content-Disposition'] = 'inline; filename="asgn' + str(solicitud_id) + '.pdf"'
+        return response
 
 def ImpresionAntiguedadCartera(request):
     id_empresa = Usuario_empresa.objects.filter(user=request.user).first()

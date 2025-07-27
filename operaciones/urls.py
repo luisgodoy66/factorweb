@@ -115,6 +115,8 @@ urlpatterns = [
         name='reporteasignacion'),
     path("reporteliquidacion/<int:solicitud_id>",ImpresionLiquidacion, 
         name='reporteliquidacion'),
+    path("reporteliquidacion/<int:solicitud_id>/<crear_pdf>",ImpresionLiquidacion, 
+        name='reporteliquidacion'),
     path("reporteasignaciondesdesolicitud/<int:asignacion_id>",
         ImpresionAsignacionDesdeSolicitud ),
     path('listaanexos/',AnexosView.as_view(), name='listaanexos'),

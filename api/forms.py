@@ -11,7 +11,7 @@ class SlackForm(forms.ModelForm):
         ]
         labels={'ctdescripcion':'Descripción'
                 , 'ctslackbottoken':'Token'
-                , 'ctslackchannelname':'Nombre de canal'
+                , 'ctslackchannelname':'ID de canal'
                 , 'ctslacksigningsecret':'Firma secreta'
                 , 'lactivo':'Activo'
                 , 'ctappid':'ID de la aplicación'

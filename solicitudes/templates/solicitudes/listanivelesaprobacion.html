@@ -52,7 +52,7 @@
                     <thead>
                         <th>Registro</th>
                         <th>Monto desde</th>
-                        <th>Cantidad de aprobadores</th>
+                        <!-- <th>Cantidad de aprobadores</th> -->
                         <th>Configuración slack</th>
                         <th class="all">Acciones</th>
                     </thead>
@@ -61,7 +61,7 @@
                         <tr>
                             <td>{{ item.dregistro|date:"Y-m-d H:i:s" }}</td>
                             <td>{{ item.nmontominimo }}</td>
-                            <td>{{ item.naprobadores }}</td>
+                            <!-- <td>{{ item.naprobadores }}</td> -->
                             <td>{{ item.configuracionslack }}</td>
                             <td>
                                 <a href="{% url 'solicitudes:nivelaprobacion_editar' item.id %}" title="Editar"

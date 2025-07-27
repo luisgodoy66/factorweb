@@ -16,7 +16,7 @@
 {% endblock breadcrumbs %}
 {% block content %}
 <form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal">
-    <div class="col-lg-12">
+    <div class="col-lg-8">
         <div class="card">
             {% csrf_token %}
             <div class="card-header">
@@ -33,21 +33,21 @@
                         </div>
                     </div>
 
-                    <div class="row form-group">
+                    <!-- <div class="row form-group">
                         <div class="col col-md-3">
                             <label for="id_ctnombre" class=" form-control-label">{{form.naprobadores.label}}</label></div>
                         <div class="col-12 col-md-9">
                             {{form.naprobadores}}
                         </div>
-                    </div>
+                    </div> -->
 
-                    <div class="row form-group">
+                    <!-- <div class="row form-group">
                         <div class="col col-md-3">
                             <label for="id_cttelefono2" class=" form-control-label">{{form.nhorasrespuestamaxima.label}}</label></div>
                         <div class="col-12 col-md-9">
                             {{form.nhorasrespuestamaxima}}
                         </div>
-                    </div>
+                    </div> -->
                     <div class="row form-group">
                         <div class="col col-md-3">
                             <label for="id_cttelefono2" class=" form-control-label">{{form.configuracionslack.label}}</label></div>

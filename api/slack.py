@@ -1,7 +1,9 @@
 from slack_sdk import WebClient
 from slack_sdk.signature import SignatureVerifier
+from slack_sdk.errors import SlackApiError
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 
 from solicitudes.models import Asignacion, Niveles_aprobacion, \
     Solicitud_aprobacion, Respuesta_aprobacion
@@ -9,6 +11,8 @@ from bases.models import Usuario_empresa
 from .models import Configuracion_slack
 
 from bases.views import enviarPost
+from operaciones.reportes import ImpresionLiquidacion
+
 import json
 import os
 
@@ -54,16 +58,36 @@ def enviar_solicitud_aprobacion(request, id_solicitud):
 
     # Enviar un mensaje a un canal o usuario
     try:
-        
+        # Crear el PDF para adjuntar
+        if ImpresionLiquidacion(request,id_solicitud,True) == "OK":
+            print("PDF generado correctamente")
+
+        # usar la misma ruta para el archivo que se genera en ImpresionLiquidacion
+        filepath = os.path.join(settings.MEDIA_ROOT, 'solicitudes', f"asignacion_{id_solicitud}.pdf")
+
+        # 1. Subir el archivo. Esto crea un mensaje en el canal.
+        response_file = client.files_upload_v2(
+            channel=configuracion_slack.ctslackchannelname,
+            file=filepath,
+            title="Solicitud de factoring",
+            initial_comment=f"Solicitud de aprobación para {cliente} - {operacion}"
+        )
+        print(response_file)
+        # 2. Obtener el timestamp del mensaje del archivo para usarlo en el hilo.
+        # file_message_ts = response_file['file']['shares']['public'][configuracion_slack.ctslackchannelname][0]['ts']
+        file_message_ts = response_file['file']['timestamp']
+
+        # 3. Enviar el mensaje con los botones como una respuesta en el hilo.
         response = client.chat_postMessage(
             channel=configuracion_slack.ctslackchannelname,
+            thread_ts=file_message_ts,  # Esto anida el mensaje debajo del archivo.
             text=f"¿Aprobarías esta operación?\nCliente: {cliente}\nOperación: {operacion}\nValor: {valor}",
             blocks=[
                 {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"¿Aprobarías esta operación?\nCliente: {cliente}\nOperación: {operacion}\nValor: {valor}"
+                        "text": f"¿Aprobarías esta operación?\n*Cliente:* {cliente}\n*Operación:* {operacion}\n*Valor:* {valor}"
                     },
                     "accessory": {
                         "type": "button",
@@ -93,10 +117,15 @@ def enviar_solicitud_aprobacion(request, id_solicitud):
                 }
             ]
         )
-    except Exception as e:
+    except FileNotFoundError:
+        print(f"❌ Error: No se encontró el archivo en la ruta '{filepath}'")
+    except SlackApiError as e:
+        # Maneja errores de la API [[1](https://translate.google.com/translate?u=https://stackoverflow.com/questions/43464873/how-to-upload-files-to-slack-using-file-upload-and-requests&hl=es&sl=en&tl=es&client=srp)]
+        print(f"❌ Error al enviar el archivo a Slack: {e.response['error']}")
+    # except Exception as e:
         return HttpResponse("Error al enviar mensaje al canal " 
                             + configuracion_slack.ctslackchannelname + ": " 
-                            + str(e), status=500)
+                            + str(e.response['error']), status=500)
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
@@ -265,3 +294,42 @@ def enviar_respuesta_asincrona(response_url, mensaje):
     #                                         , \\"valor\\": 50000}"
     #                              ,"style":"primary","type":"button"
     #                              ,"action_ts":"1739031829.450234"}]}']}
+
+
+# {
+#     'ok': True, 'files': [{'id': 'F097NPT1B0C'
+#                         , 'created': 1753577295
+#                         , 'timestamp': 1753577295
+#                         , 'name': 'asignacion_158.pdf'
+#                         , 'title': 'Solicitud de factoring'
+#                         , 'mimetype': '', 'filetype': ''
+#                         , 'pretty_type': '', 'user': 'U08EYNZPSSD'
+#                         , 'user_team': 'T08EYNLHQQ1', 'editable': False
+#                         , 'size': 12889, 'mode': 'hosted', 'is_external': False
+#                         , 'external_type': '', 'is_public': False
+#                         , 'public_url_shared': False, 'display_as_bot': False
+#                         , 'username': ''
+#                         , 'url_private': 'https://files.slack.com/files-pri/T08EYNLHQQ1-F097NPT1B0C/asignacion_158.pdf'
+#                         , 'url_private_download': 'https://files.slack.com/files-pri/T08EYNLHQQ1-F097NPT1B0C/download/asignacion_158.pdf'
+#                         , 'media_display_type': 'unknown'
+#                         , 'permalink': 'https://factoringsede.slack.com/files/U08EYNZPSSD/F097NPT1B0C/asignacion_158.pdf'
+#                         , 'permalink_public': 'https://slack-files.com/T08EYNLHQQ1-F097NPT1B0C-589c00900a'
+#                         , 'comments_count': 0, 'is_starred': False
+#                         , 'shares': {}, 'channels': [], 'groups': [], 'ims': []
+#                         , 'has_more_shares': False, 'has_rich_preview': False
+#                         , 'file_access': 'visible'}]
+#     , 'file': {
+#         'id': 'F097NPT1B0C', 'created': 1753577295, 'timestamp': 1753577295
+#         , 'name': 'asignacion_158.pdf', 'title': 'Solicitud de factoring'
+#         , 'mimetype': '', 'filetype': '', 'pretty_type': '', 'user': 'U08EYNZPSSD'
+#         , 'user_team': 'T08EYNLHQQ1', 'editable': False, 'size': 12889, 'mode': 'hosted'
+#         , 'is_external': False, 'external_type': '', 'is_public': False
+#         , 'public_url_shared': False, 'display_as_bot': False, 'username': ''
+#         , 'url_private': 'https://files.slack.com/files-pri/T08EYNLHQQ1-F097NPT1B0C/asignacion_158.pdf'
+#         , 'url_private_download': 'https://files.slack.com/files-pri/T08EYNLHQQ1-F097NPT1B0C/download/asignacion_158.pdf'
+#         , 'media_display_type': 'unknown'
+#         , 'permalink': 'https://factoringsede.slack.com/files/U08EYNZPSSD/F097NPT1B0C/asignacion_158.pdf'
+#         , 'permalink_public': 'https://slack-files.com/T08EYNLHQQ1-F097NPT1B0C-589c00900a'
+#         , 'comments_count': 0, 'is_starred': False, 'shares': {}, 'channels': [], 'groups': [], 'ims': []
+#         , 'has_more_shares': False, 'has_rich_preview': False, 'file_access': 'visible'}
+#     }    
