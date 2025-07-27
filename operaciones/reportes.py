@@ -187,7 +187,7 @@ def ImpresionLiquidacion(request, solicitud_id, crear_pdf = False):
     )
     if crear_pdf:
         # Guardar el PDF generado en un archivo directamente
-        output_filename = os.path.join(settings.MEDIA_ROOT, 'solicitudes', f"asignacion_{solicitud_id}.pdf")
+        output_filename = os.path.join(settings.MEDIA_ROOT, f"asignacion_{solicitud_id}.pdf")
         with open(output_filename, "wb") as f:
             f.write(response.rendered_content)
         print(f"Archivo PDF creado en: {output_filename}")

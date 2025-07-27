@@ -63,7 +63,7 @@ def enviar_solicitud_aprobacion(request, id_solicitud):
             print("PDF generado correctamente")
 
         # usar la misma ruta para el archivo que se genera en ImpresionLiquidacion
-        filepath = os.path.join(settings.MEDIA_ROOT, 'solicitudes', f"asignacion_{id_solicitud}.pdf")
+        filepath = os.path.join(settings.MEDIA_ROOT, f"asignacion_{id_solicitud}.pdf")
 
         # 1. Subir el archivo. Esto crea un mensaje en el canal.
         response_file = client.files_upload_v2(
