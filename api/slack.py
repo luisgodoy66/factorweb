@@ -65,61 +65,85 @@ def enviar_solicitud_aprobacion(request, id_solicitud):
         # usar la misma ruta para el archivo que se genera en ImpresionLiquidacion
         filepath = os.path.join(settings.MEDIA_ROOT, f"asignacion_{id_solicitud}.pdf")
 
-        # 1. Subir el archivo. Esto crea un mensaje en el canal.
-        response_file = client.files_upload_v2(
-            channel=configuracion_slack.ctslackchannelname,
-            file=filepath,
-            title="Solicitud de factoring",
-            initial_comment=f"Solicitud de aprobación para {cliente} - {operacion}"
-        )
-        print(response_file)
-        # 2. Obtener el timestamp del mensaje del archivo para usarlo en el hilo.
-        # file_message_ts = response_file['file']['shares']['public'][configuracion_slack.ctslackchannelname][0]['ts']
-        file_message_ts = response_file['file']['timestamp']
+        # Iterar sobre cada canal/usuario para enviar el archivo y el mensaje
+        canales = configuracion_slack.ctslackchannelname.split(",")
+        response = None # Guardará la respuesta del último mensaje enviado
 
-        # 3. Enviar el mensaje con los botones como una respuesta en el hilo.
-        response = client.chat_postMessage(
-            channel=configuracion_slack.ctslackchannelname,
-            thread_ts=file_message_ts,  # Esto anida el mensaje debajo del archivo.
-            text=f"¿Aprobarías esta operación?\nCliente: {cliente}\nOperación: {operacion}\nValor: {valor}",
-            blocks=[
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"¿Aprobarías esta operación?\n*Cliente:* {cliente}\n*Operación:* {operacion}\n*Valor:* {valor}"
-                    },
-                    "accessory": {
-                        "type": "button",
+        for canal in canales:
+            canal = canal.strip()
+            if not canal:
+                continue
+
+            upload_kwargs = {
+                "file": filepath,
+                "title": "Solicitud de factoring",
+                "initial_comment": f"Solicitud de aprobación para {cliente} - {operacion}"
+            }
+            if canal.startswith("U"):
+                upload_kwargs["user_id"] = canal
+            else:
+                upload_kwargs["channel"] = canal
+            # 1. Subir el archivo al canal actual.
+            response_file = client.files_upload_v2(**upload_kwargs)
+            
+            # 2. Obtener el timestamp del mensaje del archivo para usarlo en el hilo.
+            shares = response_file['file'].get('shares', {})
+            ts = None
+            if shares.get('public'):
+                channel_id = list(shares['public'].keys())[0]
+                ts = shares['public'][channel_id][0]['ts']
+            elif shares.get('private'):
+                channel_id = list(shares['private'].keys())[0]
+                ts = shares['private'][channel_id][0]['ts']
+            else:
+                ts = response_file['file']['timestamp']
+
+            if not ts:
+                print(f"❌ Error: No se pudo determinar el timestamp para el canal {canal}.")
+                continue # Continuar con el siguiente canal
+
+            # 3. Enviar el mensaje con los botones como una respuesta en el hilo del canal actual.
+            response = client.chat_postMessage(
+                channel=canal,
+                thread_ts=ts,
+                text=f"¿Aprobarías esta operación?\nCliente: {cliente}\nOperación: {operacion}\nValor: {valor}",
+                blocks=[
+                    {
+                        "type": "section",
                         "text": {
-                            "type": "plain_text",
-                            "text": "Aprobar"
+                            "type": "mrkdwn",
+                            "text": f"¿Aprobarías esta operación?\n*Cliente:* {cliente}\n*Operación:* {operacion}\n*Valor:* {valor}"
                         },
-                        "style": "primary",
-                        "value": json.dumps({"action": "aprobar", "operacion": asignacion.id})
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": " "
+                        "accessory": {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "Aprobar"
+                            },
+                            "style": "primary",
+                            "value": json.dumps({"action": "aprobar", "operacion": asignacion.id})
+                        }
                     },
-                    "accessory": {
-                        "type": "button",
+                    {
+                        "type": "section",
                         "text": {
-                            "type": "plain_text",
-                            "text": "Rechazar"
+                            "type": "mrkdwn",
+                            "text": " "
                         },
-                        "style": "danger",
-                        "value": json.dumps({"action": "rechazar", "operacion": asignacion.id })
+                        "accessory": {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "Rechazar"
+                            },
+                            "style": "danger",
+                            "value": json.dumps({"action": "rechazar", "operacion": asignacion.id })
+                        }
                     }
-                }
-            ]
-        )
+                ]
+            )
     except FileNotFoundError:
-        # print(f"❌ Error: No se encontró el archivo en la ruta '{filepath}'")
-        print("❌ Error: No se encontró el archivo en la ruta ")
+        print(f"❌ Error: No se encontró el archivo en la ruta '{filepath}'")
         return HttpResponse("Error: No se encontró el archivo PDF en la ruta "+filepath, status=404)
     except SlackApiError as e:
         # Maneja errores de la API [[1](https://translate.google.com/translate?u=https://stackoverflow.com/questions/43464873/how-to-upload-files-to-slack-using-file-upload-and-requests&hl=es&sl=en&tl=es&client=srp)]
@@ -334,4 +358,4 @@ def enviar_respuesta_asincrona(response_url, mensaje):
 #         , 'permalink_public': 'https://slack-files.com/T08EYNLHQQ1-F097NPT1B0C-589c00900a'
 #         , 'comments_count': 0, 'is_starred': False, 'shares': {}, 'channels': [], 'groups': [], 'ims': []
 #         , 'has_more_shares': False, 'has_rich_preview': False, 'file_access': 'visible'}
-#     }    
+#     }
