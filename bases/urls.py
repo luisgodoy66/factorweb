@@ -1,6 +1,6 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-
+from django.views.generic import TemplateView
 from bases.views import Home, HomeSinPrivilegios, dashboard, user_editar, user_password
 
 urlpatterns = [
@@ -11,4 +11,6 @@ urlpatterns = [
     path('dashboard/',dashboard, name='dashboard'),
     path('editarusuario/<int:pk>',user_editar,name='usuario_editar'),
     path('passwordusuario/<int:pk>',user_password,name='usuario_password'),
+    path('politica_de_privacidad/',TemplateView.as_view(template_name='bases/politica_de_privacidad.html')
+         , name='politica_de_privacidad'),
     ]
