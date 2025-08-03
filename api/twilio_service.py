@@ -49,7 +49,7 @@ def enviar_mensaje_whatsapp(request, whatsapp_destino ):
             message = client.messages.create(
                 from_=whatsapp_origen,
                 body=cuerpo_mensaje,
-                to='whatsapp:' + whatsapp_destino  # Reemplaza con el número de destino
+                to='whatsapp:' + whatsapp_destino  ,
             )
 
             # Guarda el mensaje enviado en la base de datos

@@ -174,7 +174,7 @@ class ChequesForm(forms.ModelForm):
             , 'ctcheque':'Número de cheque'
             , 'cxpropietariocuenta':'Propietario de cuenta'
             , 'ctgirador':'Girador', 'ntotal':'Valor'
-            , 'dvencimiento':'Vencimiento'
+            , 'dvencimiento':'Depositar el día'
         }
         # Lo importante es el formato
         widgets = {

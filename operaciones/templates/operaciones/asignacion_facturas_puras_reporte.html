@@ -54,7 +54,11 @@
                     <tbody>
                         <tr>
                             <td colspan="2"><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
-                            <td class="centrado" colspan="2"><h3>LIQUIDACIÓN DE ASIGNACIÓN </h3></td>
+                            {% if fuente == 'operacion' %}
+                                <td class="centrado" colspan="2"><h3>LIQUIDACIÓN DE ASIGNACIÓN </h3></td>
+                            {% else %}
+                                <td class="centrado" colspan="2"><h3>LIQUIDACIÓN DE SOLICITUD </h3></td>
+                            {% endif %}
                             <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
                         </tr>
                     </tbody>
