@@ -59,6 +59,7 @@
                         <th>Tipo de solicitud</th>
                         <th>Cantidad de documentos</th>
                         <th>Total negociado</th>
+                        <th>Estado</th>
                         <th class="all">Acciones</th>
                     </thead>
                     <tbody>
@@ -74,6 +75,7 @@
                             {% endif %}
                             <td>{{ item.ncantidaddocumentos }}</td>
                             <td>{{ item.nvalor |floatformat:"2g"}}</td>
+                            <td>{{ item.estado }}</td>
                             <td>
                                 <a 
                                 {% if item.cxtipo == 'A' %}

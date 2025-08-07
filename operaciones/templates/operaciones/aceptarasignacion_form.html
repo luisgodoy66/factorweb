@@ -102,36 +102,41 @@
                 </div>
                 <!-- columna derecha -->
                 <div class="col-5">
-                    <h5 class="heading-title mb-1 text-secondary">Liquidación de asignación</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="heading-title mb-1 text-secondary">Liquidación de asignación</h5>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnCopiarLiquidacion" title="Copiar liquidación">
+                            <i class="fa fa-clipboard"></i>
+                        </button>
+                    </div>
                     <div class="row form-group">
-                        <div class="col col-xs-9">
+                        <div class="col-md-7">
                             <h5 for="id_ctinstrucciondepago" class=" form-control-label">
                             {{ form_asignacion.nanticipo.label }}</h5></div>
                         <!-- <div class="col"><label for="id_nanticipo" class=" form-control-label">
                             {{ form_asignacion.nanticipo.label }}
                         </label></div> -->
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             {{ form_asignacion.nanticipo}}
                         </div>
                     </div>  
                     <div class="row form-group">
-                        <div class="col col-xs-9">
+                        <div class="col-md-7">
                             <h5 for="id_ctinstrucciondepago" class=" form-control-label">
                             - Cargos</h5></div>
                     </div>  
                     <div class="row form-group">
                         <div class="col-md-1"></div>
-                        <div class="col col-xs-3">
+                        <div class="col-md-6">
                             <label for="id_ngao" class=" form-control-label">{{gao.descripcion}}</label></div>
-                        <div class="col-6 col-md-6">
+                        <div class="col-md-5">
                             {{ form_asignacion.ngao}}
                         </div>
                     </div>  
                     <div class="row form-group">
                         <div class="col-md-1"></div>
-                        <div class="col col-xs-3">
+                        <div class="col-md-6">
                             <label for="id_ndescuentodecartera" class=" form-control-label">{{dc.descripcion}}</label></div>
-                        <div class="col-6 col-md-6">
+                        <div class="col-md-5">
                             {{ form_asignacion.ndescuentodecartera}}
                         </div>
                     </div>  
@@ -140,9 +145,9 @@
                      {% for item in otros_cargos %}
                     <div class="row form-group">
                         <div class="col-md-1"></div>
-                        <div class="col col-xs-3">
+                        <div class="col-md-6">
                             <label for="id_notroscargos" class=" form-control-label">{{item}}</label></div>
-                        <div class="col-6 col-md-6">
+                        <div class="col-md-5">
                             <input type="number" step="1" class="otros_cargos form-control " value="{{item.nvalor}}" 
                                 data-cargo="{{item}}"
                                 data-cargaiva = {{item.lcargaiva}} min="0" data-idmovimiento="{{item.movimiento.id}}">
@@ -159,17 +164,17 @@
                             <input type="number" step="0.01" class="form-control" 
                             readonly id="porcentaje_iva" value="{{ porcentaje_iva }}">
                         </div>
-                        <div class="col-md-1"></div>
-                        <div class="col-6 col-md-6">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-5">
                             {{ form_asignacion.niva}}
                         </div>
                     </div>  
                     <div class="row form-group">
-                        <div class="col col-xs-3">
+                        <div class="col-md-7">
                             <h5 for="id_nvalor" class=" form-control-label">
                             = Neto a recibir
                             </h5></div>
-                        <div class="col-6 col-md-6">
+                        <div class="col-md-5">
                             <input type="number" name="neto" class="form-control" readonly id="neto">
                         </div>
                     </div>  
@@ -265,6 +270,7 @@ window.onload=function(){
     RecalcularCargos(asignacion_id, capturaValor("id_ddesembolso")
       , capturaValor("condicion_id"));
  
+    document.getElementById('btnCopiarLiquidacion').addEventListener('click', copiarLiquidacionAlPortapapeles);
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -498,6 +504,45 @@ function obtenerArregloCargos() {
     });
     console.log('arreglo de cargos:', arreglo); // Muestra el acumulado en la consola
     return arreglo; 
+}
+
+function copiarLiquidacionAlPortapapeles() {
+    let texto = "Liquidación de Asignación\n";
+    texto += "========================\n";
+    
+    const anticipoLabel = document.querySelector('label[for="id_nanticipo"]')?.innerText || 'Anticipo';
+    const anticipoValor = document.getElementById('id_nanticipo').value;
+    texto += `${anticipoLabel}: ${anticipoValor}\n\n`;
+
+    texto += "- Cargos\n";
+
+    const gaoLabel = document.querySelector('label[for="id_ngao"]')?.innerText || 'GAO';
+    const gaoValor = document.getElementById('id_ngao').value;
+    texto += `  ${gaoLabel}: ${gaoValor}\n`;
+
+    const dcLabel = document.querySelector('label[for="id_ndescuentodecartera"]')?.innerText || 'Descuento de Cartera';
+    const dcValor = document.getElementById('id_ndescuentodecartera').value;
+    texto += `  ${dcLabel}: ${dcValor}\n`;
+
+    document.querySelectorAll('.otros_cargos').forEach(input => {
+        const cargoLabel = input.closest('.row.form-group').querySelector('label').innerText;
+        const cargoValor = input.value;
+        texto += `  ${cargoLabel}: ${cargoValor}\n`;
+    });
+
+    const ivaLabel = document.querySelector('label[for="id_niva"]')?.innerText || 'IVA';
+    const ivaValor = document.getElementById('id_niva').value;
+    texto += `\n${ivaLabel}: ${ivaValor}\n`;
+
+    texto += "========================\n";
+    const netoValor = document.getElementById('neto').value;
+    texto += `Neto a recibir: ${netoValor}\n`;
+
+    navigator.clipboard.writeText(texto).then(function() {
+        MensajeOK('Liquidación copiada al portapapeles');
+    }, function(err) {
+        MensajeError('No se pudo copiar la liquidación: ' + err);
+    });
 }
 
 function fetchAceptar(url, objeto, callback){

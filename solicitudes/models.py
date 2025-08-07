@@ -69,6 +69,11 @@ class Solicitud_aprobacion(ClaseModelo):
         return self.cxestado == 'P'
     
 from clientes.models import Datos_generales as Datos_generales_cliente
+
+class Asignacion_Manager(models.Manager):
+    def pendientes_o_rechazadas(self, empresa):
+        return self.filter(cxestado__in=['P', 'R'], leliminado=False, empresa=empresa)
+    
 class Asignacion(ClaseModelo):
     TIPOS_DE_ASIGNACION = (
         ('A', 'Con accesorios'),
@@ -76,7 +81,7 @@ class Asignacion(ClaseModelo):
     )
     TIPOS_DE_ESTADO = (
         ('A', 'Aceptada'),
-        ('R', 'Rechazada'),
+        ('R', 'Reversada'),
         ('P', 'Pendiente'),
         ('L', 'Liquidada'),
     )
@@ -133,6 +138,8 @@ class Asignacion(ClaseModelo):
                                             , on_delete=models.CASCADE)
     nmayorplazonegociacion = models.SmallIntegerField(default=0
                                                       , null=True)
+    
+    objects = Asignacion_Manager()
 
     def cargos(self):
         return self.ngao + self.ndescuentodecartera + self.notroscargos

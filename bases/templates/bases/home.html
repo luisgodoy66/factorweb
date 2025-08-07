@@ -121,7 +121,7 @@
                             <a class="nav-link" href="{% url 'bases:usuario_editar' user.id %}"><i class="fa fa-edit"></i> Editar</a>
                             <a class="nav-link" href="{% url 'bases:usuario_password' user.id %}"><i class="fa fa-key"></i> Password</a>
                             <a class="nav-link" href="{% url 'bases:home' %}"><i class="fa fa-home"></i> Home</a>
-                            <a class="nav-link" href="#" onclick="logingoogle()"><i class="fa fa-google"></i> cuenta Google</a>
+                            <a class="nav-link" href="#" onclick="logingoogle()"><i class="fa fa-google"></i> Cuenta Google</a>
                             <form method="POST" action="{% url 'bases:logout' %}" style="display: inline;">
                                 {% csrf_token %}
                                 <button type="submit" class="nav-link" style="background: none; border: none; padding: 0; cursor: pointer;">

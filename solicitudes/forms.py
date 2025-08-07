@@ -278,3 +278,24 @@ class NivelesAprobacionForm(forms.ModelForm):
                 .filter(empresa=empresa
                         , leliminado = False, lactivo = True)
 
+class LiquidacionesForm(forms.ModelForm):
+
+    class Meta:
+        model=Asignacion
+        fields=['ctinstrucciondepago', 
+        ]
+        labels={ 'ctinstrucciondepago':'Instrucción de pago'
+        }
+        widgets={'ctinstrucciondepago': forms.Textarea(attrs={'rows': '2'}), 
+        }
+
+
+    def __init__(self, *args, **kwargs,):
+        super().__init__(*args, **kwargs)
+        
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+
+

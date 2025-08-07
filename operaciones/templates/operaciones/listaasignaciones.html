@@ -44,7 +44,7 @@
             </div>
             {% endif %}
 
-            <!-- <div class="content"> -->
+            <small>
 
                 <table class="table table-striped table-bordered" 
                     id="bootstrap-data-table-export">
@@ -57,6 +57,7 @@
                         <th>Valor negociado</th>
                         <th>Cargos</th>
                         <th>Neto</th>
+                        <th>Instrucción de pago</th>
                         <th class="all">Acciones</th>
                     </thead>
                     <tbody>
@@ -70,6 +71,7 @@
                             <td>{{ item.nvalor |floatformat:"2g" }}</td>
                             <td>{{ item.cargos | floatformat:"2g"}}</td>
                             <td>{{ item.neto |floatformat:"2g"}}</td>
+                            <td>{{ item.ctinstrucciondepago }}</td>
                             <td>
                                 <a href="{% url 'operaciones:reporteliquidacion' item.id %}" 
                                     class="btn btn-primary btn-sm" role="button" target="reporte"
@@ -79,15 +81,10 @@
                                     class="btn btn-success btn-sm" role="button" 
                                     title="Anexos"><i class="fa fa-paperclip"></i>
                                 </a>
-                                <!-- <button onclick="generaAnexos( {{item.id}}, '{{item.cliente.cxtipocliente}}')" 
-                                    {% if item.lanexosimpresos %}
-                                    class="btn btn-secondary btn-sm" 
-                                    {% else %}
-                                    class="btn btn-success btn-sm" 
-                                    {% endif %}
-                                    title="Anexos" role="button">
-                                    <i class="fa fa-paperclip"></i></a>
-                                </button> -->
+                                <button class="btn btn-warning btn-sm" 
+                                    onclick="return AbrirModal('{% url "solicitudes:instruccion_de_pago" item.id %}')" 
+                                    role="button" title="Instrucción de Pago"><i class="fa fa-edit"></i>
+                                </button>
                                 <button onclick="ReversarAceptacionAsignacion( {{item.id}})" 
                                     class="btn btn-danger btn-sm"  title="Reversar" role="button">
                                     <i class="fa fa-rotate-left"></i>
@@ -97,7 +94,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
-            <!-- </div> -->
+            </small>
 
         </div>
 

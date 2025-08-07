@@ -189,8 +189,8 @@ def dashboard(request):
     if pag['Total']:
         pagares = pag['Total']
 
-    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+    sp = Asignacion.objects\
+        .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
 
     # obtener el último año de proceso
     ultimo_registro = Operaciones.objects.order_by('-dregistro').first()

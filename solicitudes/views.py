@@ -13,7 +13,7 @@ from django.urls import reverse_lazy
 from datetime import datetime, timedelta
 
 from .forms import AsignacionesForm, ChequesForm, DocumentosForm\
-    , ClientesForm, NivelesAprobacionForm
+    , ClientesForm, NivelesAprobacionForm, LiquidacionesForm
 
 from empresa.models import Tipos_factoring, Datos_participantes, \
     Contador
@@ -41,17 +41,19 @@ class SolicitudesView(SinPrivilegios, generic.ListView):
     permission_required="solicitudes.view_asignacion"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        qs=Asignacion.objects.filter(cxestado ='P',leliminado = False
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
+        qs=Asignacion.objects.filter(cxestado__in=['P', 'R'], leliminado = False
                                      , empresa = id_empresa.empresa)\
                                      .order_by("dregistro")
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
         context = super(SolicitudesView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -77,8 +79,8 @@ class AsignacionFacturasPurasView(SinPrivilegios, generic.UpdateView):
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(AsignacionFacturasPurasView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
        
@@ -104,8 +106,8 @@ class AsignacionConAccesoriosView(SinPrivilegios, generic.UpdateView):
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(AsignacionConAccesoriosView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -128,8 +130,8 @@ class ClienteCrearView(SinPrivilegios, generic.CreateView):
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(ClienteCrearView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -150,8 +152,8 @@ class NivelesAprobacionView(SinPrivilegios, generic.ListView):
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(NivelesAprobacionView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -179,8 +181,8 @@ class NivelAprobacionCrearView(SinPrivilegios, generic.CreateView):
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(NivelAprobacionCrearView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -207,8 +209,8 @@ class NivelAprobacionEditarView(SinPrivilegios, generic.UpdateView):
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(NivelAprobacionEditarView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -236,11 +238,35 @@ class ExcesosTemporalesView(SinPrivilegios, generic.ListView):
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(ExcesosTemporalesView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
+class InstruccionDePagoView(SinPrivilegios, generic.UpdateView):
+    model = Asignacion
+    template_name = "solicitudes/datosliquidacion_modal.html"
+    context_object_name = "liquidacion"
+    login_url = 'bases:login'
+    form_class=LiquidacionesForm
+    success_url=reverse_lazy("operaciones:listaasignaciones")
+    permission_required="solicitudes.change_asignacion"
+
+    def form_valid(self, form):
+        try:
+            form.instance.cxusuariomodifica = self.request.user.id
+            return super().form_valid(form)
+        except Exception as e:
+            form.add_error(None, str(e))
+            return self.form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        id = self.kwargs.get('pk')
+
+        context = super(InstruccionDePagoView, self).get_context_data(**kwargs)
+        context["pk"] = id
+        return context
+    
 @login_required(login_url='/login/')
 @permission_required('solicitudes.change_asignacion', login_url='bases:sin_permisos')
 def DatosAsignacionFacturasPurasNueva(request):
@@ -248,8 +274,8 @@ def DatosAsignacionFacturasPurasNueva(request):
 
     template_name="solicitudes/datosasignacionfacturaspuras_form.html"
     
-    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                    empresa = id_empresa.empresa).count()
+    sp = Asignacion.objects\
+        .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
 
     contexto={'form': AsignacionesForm(empresa = id_empresa.empresa),
             'clientes' : Clientes.objects.all() ,
@@ -265,8 +291,8 @@ def DatosAsignacionConAccesoriosNueva(request):
 
     template_name="solicitudes/datosasignacionconaccesorios_form.html"
     
-    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+    sp = Asignacion.objects\
+        .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
 
     contexto={'form': AsignacionesForm(empresa = id_empresa.empresa),
             'clientes' : Clientes.objects.all(),
@@ -562,10 +588,10 @@ def EliminarAsignacion(request, asignacion_id):
 
     if request.method=="GET":
         # marcar como eliminado/ rechazada
-        # asgn.leliminado = True
-        # asgn.cxusuarioelimina = request.user.id
-        asgn.cxusuarioatencion = request.user.id
-        asgn.cxestado = "R"
+        asgn.leliminado = True
+        asgn.cxusuarioelimina = request.user.id
+        # asgn.cxusuarioatencion = request.user.id
+        # asgn.cxestado = "R"
         asgn.save()
 
     return HttpResponse("OK")
@@ -671,8 +697,8 @@ def DatosAsignacionConAccesorios(request, cliente_id,
     if asignacion:
         cliente_nombre = asignacion.cxcliente.ctnombre
     
-    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+    sp = Asignacion.objects\
+        .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
 
     if request.method=='POST':
 

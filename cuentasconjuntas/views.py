@@ -39,8 +39,8 @@ class CuentasView(SinPrivilegios, generic.ListView):
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(CuentasView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -63,8 +63,8 @@ class CuentasBancariasNew(SinPrivilegios, generic.CreateView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(CuentasBancariasNew, self).get_context_data(**kwargs)
         context["nueva"]=True
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -94,8 +94,8 @@ class CuentasBancariasEdit(SinPrivilegios, generic.UpdateView):
         context = super(CuentasBancariasEdit, self).get_context_data(**kwargs)
         context["nueva"]=False
         context["id"]=pk
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -141,8 +141,8 @@ class CobranzasPorConfirmarView(SinPrivilegios, generic.ListView):
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(CobranzasPorConfirmarView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -163,8 +163,8 @@ class CargosPendientesView(SinPrivilegios, generic.ListView):
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(CargosPendientesView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -188,8 +188,8 @@ class DebitoBancarioEdit(SinPrivilegios, generic.UpdateView):
         context["notadedebito"]=nd.notadedebito
         context["cuentaconjunta"]=nd.cuentabancaria
         context["cliente"]=nd.notadedebito.cxcliente
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -249,53 +249,10 @@ class TransferenciasView(SinPrivilegios, generic.ListView):
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(TransferenciasView, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
-
-# class TansferenciaNew(SinPrivilegios, generic.CreateView):
-#     model = Transferencias
-#     template_name = "cuentasconjuntas/datostransferencia_form.html"
-#     context_object_name='transferencias'
-#     form_class = TransferenciasForm
-#     success_url= reverse_lazy("cuentasconjuntas:listatransferencias")
-#     login_url = 'bases:login'
-#     permission_required="cuentasconjuntas.add_transferencias"
-
-#     def form_valid(self, form):
-#         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-#         form.instance.empresa = id_empresa.empresa
-#         form.instance.cxusuariocrea = self.request.user
-#         # NOTA: obtener el id de la transaccion
-#         print('form.intance',form.instance)
-#         cb = self.request.POST.get("cuentaorigen")
-#         cuenta = Cuentas_bancarias.objects.filter(pk = cb).first()
-#         ft = self.request.POST.get("dmovimiento")
-#         vt = self.request.POST.get("nvalor")
-#         id = form.instance
-#         mov = Movimientos(cuentabancaria=cuenta,
-#                     dmovimiento=ft,
-#                     nvalor=vt,
-#                     cxtipo='T',
-#                     cxmovimiento=id
-#                     )
-#         if mov:
-#             mov.save()
-
-#         return super().form_valid(form)
-
-#     def get_context_data(self, **kwargs):
-#         context = super(TansferenciaNew, self).get_context_data(**kwargs)
-#         sp = Asignacion.objects.filter(cxestado='P').filter(leliminado=False).count()
-#         context['solicitudes_pendientes'] = sp
-#         return context
-
-#     def get_form_kwargs(self):
-#         kwargs = super(TansferenciaNew, self).get_form_kwargs()
-#         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-#         kwargs['empresa'] = id_empresa.empresa
-#         return kwargs
 
 class TansferenciaEdit(SinPrivilegios, generic.UpdateView):
     model = Transferencias
@@ -315,8 +272,8 @@ class TansferenciaEdit(SinPrivilegios, generic.UpdateView):
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(TansferenciaEdit, self).get_context_data(**kwargs)
-        sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
 
@@ -333,8 +290,8 @@ def ConfirmarCobranza(request, cobranza_id, tipo_operacion, cuenta_conjunta):
 
     cc = Cuentas_bancarias.objects.filter(pk = cuenta_conjunta).first()
 
-    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+    sp = Asignacion.objects\
+        .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
     
     contexto={"id_operacion": cobranza_id
         , "form_cargos" : DebitosForm
@@ -391,8 +348,8 @@ def AceptarConfirmacion(request):
 def DebitoBancarioSinCobranza(request):
     template_name = "cuentasconjuntas/datosdebitobancario_form.html"
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+    sp = Asignacion.objects\
+        .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
 
     contexto={ "form" : DebitosNuevosForm
               , "solicitudes_pendientes" : sp    }
@@ -491,8 +448,8 @@ def DatosTransferencia(request, pk = None):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     form = TransferenciasForm(empresa = id_empresa.empresa)
     
-    sp = Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                       empresa = id_empresa.empresa).count()
+    sp = Asignacion.objects\
+        .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
     
     contexto={'form':form
             , 'solicitudes_pendientes':sp
