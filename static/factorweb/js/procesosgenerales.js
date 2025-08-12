@@ -984,3 +984,28 @@ function EditarAsientoDiario(asiento_id){
     
     location.href=url
 }
+
+function imprimeFacturasPendientesPorCliente(){
+  var x = [];
+  var options = document.getElementById("id_clientes").selectedOptions;
+  for (var i = 0; i < options.length; i++) {
+    x.push(options[i].value);
+  }
+  // en una nueva ventana abrir el reporte de asignación
+  url = window.location.origin
+  url = url + "/operaciones/impresioncarterapendienteclientes/"+x;
+  window.open( url);
+}
+
+function imprimeFacturasPendientesPorDeudor(){
+  var x = [];
+  var options = document.getElementById("id_deudores").selectedOptions;
+  for (var i = 0; i < options.length; i++) {
+    x.push(options[i].value);
+  }
+  // en una nueva ventana abrir el reporte de asignación
+  url = window.location.origin
+  url = url + "/operaciones/impresioncarterapendientedeudores/"+x;
+  window.open( url);
+}
+

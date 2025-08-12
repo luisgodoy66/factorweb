@@ -333,59 +333,9 @@ def ImpresionFacturasPendientes(request, clientes = None):
         facturas = Documentos.objects.cartera_pendiente(id_empresa.empresa)
         cheques_quitados = ChequesAccesorios.objects.cartera_pendiente(id_empresa.empresa)
     else:
-        facturas = Documentos.objects\
-                .filter(leliminado = False, nsaldo__gt = 0
-                        , cxcliente__in = arr_clientes
-                        , cxasignacion__in = Asignacion.objects
-                .filter(cxtipo = "F", cxestado = "P"
-                        , empresa = id_empresa.empresa
-                        , leliminado = False))\
-                .values("cxcomprador__cxcomprador__ctnombre"
-                        ,"cxcliente__cxcliente__ctnombre"
-                        , "cxasignacion__cxasignacion"
-                        , "ctdocumento"
-                        , "dvencimiento", "ndiasprorroga"
-                        , "cxasignacion__ddesembolso"
-                        , "nsaldo")\
-                .annotate(vencimiento = ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
-                                                        , output_field=DateField()),
-                        dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
-                                                                            , output_field=DateField()))
-                                                , IntegerField()),
-                        dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('dvencimiento')
-                                                                          -F('cxasignacion__ddesembolso')
-                                                                          , output_field=DateField()))
-                                                , IntegerField()),
-                        )\
-                .order_by('cxcliente__cxcliente__ctnombre')
-          
-        cheques_quitados = ChequesAccesorios.objects\
-                .filter(laccesorioquitado = True, chequequitado__cxestado = 'A'
-                , leliminado = False, lcanjeado = False
-                , documento__cxcliente__in = arr_clientes
-                , empresa = id_empresa.empresa
-                , documento__cxasignacion__cxestado = "P"
-                , documento__cxasignacion__leliminado = False)\
-                .values("documento__cxcomprador__cxcomprador__ctnombre"
-                        , "documento__cxcliente__cxcliente__ctnombre"
-                        , "documento__cxasignacion__cxasignacion"
-                        , "documento__ctdocumento"
-                        , "dvencimiento", "ndiasprorroga"
-                        , "documento__cxasignacion__ddesembolso"
-                        , "chequequitado__nsaldo")\
-                .annotate(vencimiento =ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
-                                                         , output_field = DateField() ),
-                        dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
-                                                                            , output_field=DateField()))
-                                                , IntegerField()),
-                        dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('dvencimiento')
-                                                                          -F('documento__cxasignacion__ddesembolso')
-                                                                          , output_field=DateField()))
-                                                , IntegerField()),
-                          )\
-                .order_by('documento__cxcliente__cxcliente__ctnombre')
+        facturas = Documentos.objects.cartera_pendiente_cliente(id_empresa.empresa, arr_clientes)
+        cheques_quitados = ChequesAccesorios.objects.cartera_pendiente_cliente(id_empresa.empresa, arr_clientes)
 
-    
     totalfacturas = facturas.aggregate(total = Sum('nsaldo'))
     if not totalfacturas['total']: totalfacturas['total']=0
 
@@ -921,5 +871,49 @@ def ImpresionAntiguedadCarteraPorDeudor(request, id_cliente, cliente):
         # stylesheets=stylesheet_paths
     )
     response['Content-Disposition'] = 'inline; filename="cartera_por_deudor.pdf"'
+    return response
+
+def ImpresionFacturasPendientesDeudores(request, deudores = None):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    totalfacturas=0
+    totalquitados=0
+    arr_deudores = []
+    
+    if deudores != None:
+        ids = deudores.split(',')
+        for id in ids:
+            arr_deudores.append(id)
+
+    template_path = 'operaciones/detalle_facturaspendientesdeudores_reporte.html'
+
+    if deudores==None:
+        facturas = Documentos.objects.cartera_pendiente(id_empresa.empresa)
+        cheques_quitados = ChequesAccesorios.objects.cartera_pendiente(id_empresa.empresa)
+    else:
+        facturas = Documentos.objects.cartera_pendiente_deudor(id_empresa.empresa, arr_deudores)
+        cheques_quitados = ChequesAccesorios.objects.cartera_pendiente_deudor(id_empresa.empresa, arr_deudores)
+
+    totalfacturas = facturas.aggregate(total = Sum('nsaldo'))
+    if not totalfacturas['total']: totalfacturas['total']=0
+
+    totalquitados = cheques_quitados.aggregate(total = Sum('chequequitado__nsaldo'))
+    if not totalquitados['total']: totalquitados['total']=0
+    
+    cartera = facturas.union(cheques_quitados).order_by('cxcomprador__cxcomprador__ctnombre')
+    
+    context={
+        "detalle" : cartera,
+        'empresa': id_empresa.empresa,
+        'total' : totalfacturas['total'] + totalquitados['total'],
+    }
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
+    )
+    response['Content-Disposition'] = 'inline; filename="factueas pendientes.pdf"'
     return response
 

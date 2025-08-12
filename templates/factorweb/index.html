@@ -188,6 +188,14 @@
                             <li><i class="menu-icon fa fa-camera"></i><a href="{% url 'operaciones:lista_corteshistorico' %}">Cortes</a></li>
                         </ul>
                     </li>
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                            <i class="menu-icon fa fa-print"></i>Reportes</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-print"></i><a href="{% url 'operaciones:consulta_cartera_por_cliente' %}">Por cliente</a></li>
+                            <li><i class="menu-icon fa fa-print"></i><a href="{% url 'operaciones:consulta_cartera_por_deudor' %}">Por deudor</a></li>
+                        </ul>
+                    </li>
                     {% if user.id == 1 %}
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
@@ -281,7 +289,7 @@
                             <li><i class="menu-icon fa fa-whatsapp"></i><a href="{% url 'api:lista_configuraciones_twilio' %}">Twilio</a></li>
                         </ul>
                     </li>
-                    <li><a href="#">V.2.9</a></li>
+                    <li><a href="#">V.2.9.1</a></li>
                 </ul>
             </div><!-- /.navbar-collapse -->
         </nav>

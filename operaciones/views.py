@@ -593,6 +593,36 @@ class AnexosCesionFacturasView(SinPrivilegios, generic.ListView):
         context['anexo_id'] = anexo_id
         return context
 
+class CarteraPorClienteConsulta(SinPrivilegios, generic.TemplateView):
+    template_name = "operaciones/consultacarteraporcliente.html"
+    login_url = 'bases:login'
+    permission_required="operaciones.view_asignacion"
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+
+        context = super(CarteraPorClienteConsulta, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        context['clientes'] = ModeloCliente.Datos_generales.objects.filter(empresa=id_empresa.empresa)
+        return context
+
+class CarteraPorDeudorConsulta(SinPrivilegios, generic.TemplateView):
+    template_name = "operaciones/consultacarterapordeudor.html"
+    login_url = 'bases:login'
+    permission_required="operaciones.view_asignacion"
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+
+        context = super(CarteraPorDeudorConsulta, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        context['deudores'] = ModeloCliente.Datos_compradores.objects.filter(empresa=id_empresa.empresa)
+        return context
+
 @login_required(login_url='/login/')
 @permission_required('operaciones.add_desembolsos', login_url='bases:sin_permisos')
 def DesembolsarAsignacion(request, pk, cliente_id):
@@ -2934,5 +2964,85 @@ def GeneraResumenCarteraNegociadaClienteJSON(request, cliente_id, año):
     data = { "actual":actual,
             "anterior":anterior}
     
+    return JsonResponse( data)
+
+def GeneraListaCarteraClienteJSON(request,  clientes =None):
+    # Es invocado desde la url de una tabla bt
+    arr_clientes = []
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    print("clientes", clientes)
+    if clientes != None:
+        ids = clientes.split(',')
+        for id in ids:
+            arr_clientes.append(id)
+
+    if clientes==None:
+        facturas = Documentos.objects.cartera_pendiente(id_empresa.empresa)
+        cheques_quitados = ChequesAccesorios.objects.cartera_pendiente(id_empresa.empresa)
+    else:
+        facturas = Documentos.objects.cartera_pendiente_cliente(id_empresa.empresa, arr_clientes)
+        cheques_quitados = ChequesAccesorios.objects.cartera_pendiente_cliente(id_empresa.empresa, arr_clientes)
+                
+    cartera = facturas.union(cheques_quitados).order_by('cxcliente__cxcliente__ctnombre')
+
+    tempBlogs = []
+    for i in range(len(cartera)):
+        tempBlogs.append(GeneraListaCarteraClienteJSONSalida(cartera[i]))
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": cartera.count(),
+        "totalNotFiltered": cartera.count(),
+        "rows": docjson
+        }
+    return JsonResponse( data)
+
+def GeneraListaCarteraClienteJSONSalida(transaccion):
+    output = {}
+    # output['id'] = transaccion['id']
+    # output["Registro"] = transaccion["dregistro"]\
+    #     .strftime("%Y-%b-%d %H:%M")
+    output["Cliente"] = transaccion['cxcliente__cxcliente__ctnombre']
+    output["Deudor"] = transaccion['cxcomprador__cxcomprador__ctnombre']
+    output["Operacion"] = transaccion['cxasignacion__cxasignacion']
+    output["Documento"] = transaccion['ctdocumento']
+    output["Vencimiento"] = transaccion['vencimiento'].strftime("%Y-%m-%d")
+    output["Saldo"] =  transaccion['nsaldo']
+    output["DiasVencidos"] = transaccion["dias_vencidos"]
+    output["DiasNegociados"] = transaccion["dias_negociados"]
+
+    return output
+
+def GeneraListaCarteraDeudorJSON(request,  deudores =None):
+    # Es invocado desde la url de una tabla bt
+    arr_deudores = []
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    print("deudores", deudores)
+    if deudores != None:
+        ids = deudores.split(',')
+        for id in ids:
+            arr_deudores.append(id)
+
+    if deudores==None:
+        facturas = Documentos.objects.cartera_pendiente(id_empresa.empresa)
+        cheques_quitados = ChequesAccesorios.objects.cartera_pendiente(id_empresa.empresa)
+    else:
+        facturas = Documentos.objects.cartera_pendiente_deudor(id_empresa.empresa, arr_deudores)
+        cheques_quitados = ChequesAccesorios.objects.cartera_pendiente_deudor(id_empresa.empresa, arr_deudores)
+
+    cartera = facturas.union(cheques_quitados).order_by('cxcomprador__cxcomprador__ctnombre')
+
+    tempBlogs = []
+    for i in range(len(cartera)):
+        tempBlogs.append(GeneraListaCarteraClienteJSONSalida(cartera[i]))
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": cartera.count(),
+        "totalNotFiltered": cartera.count(),
+        "rows": docjson
+        }
     return JsonResponse( data)
 

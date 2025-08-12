@@ -28,18 +28,19 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     GeneraListaClientesValoresPendientes, NuevaRevisionCarteraJSON,\
     RevisionCartera, RevisionCarteraJSON, RevisionCarteraClienteEdit,\
     estadisticas_mes, CortesHistoricoView, CorteHistoricoEdit, \
-    GuardarCorteHistorico, corteHistorico, \
+    GuardarCorteHistorico, corteHistorico, GeneraListaCarteraClienteJSON,\
     GeneraResumenAntigüedadCarteraCorteJSON, AnexosCesionFacturasView,\
-    GeneraResumenCarteraNegociadaClienteJSON
-    # , corteHistoricoJSON
-
+    GeneraResumenCarteraNegociadaClienteJSON, CarteraPorClienteConsulta, \
+    GeneraListaCarteraDeudorJSON, CarteraPorDeudorConsulta
+    
 from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
     ImpresionAsignacionDesdeSolicitud, ImpresionFacturasPendientes, \
     ImpresionPagare, ImpresionAccesoriosPendientes, \
     ImpresionResumenAsignaciones, ImpresionPagaresPendientes, \
     ImpresionLiquidacion, ImpresionRevisionCartera, \
     ImpresionAntiguedadCarteraCorte, ImpresionFacturasPendientesCorte,\
-    ImpresionAccesoriosPendientesCorte, ImpresionAntiguedadCarteraPorDeudor
+    ImpresionAccesoriosPendientesCorte, ImpresionAntiguedadCarteraPorDeudor,\
+    ImpresionFacturasPendientesDeudores
 
 urlpatterns = [
 # datos operativos
@@ -132,10 +133,6 @@ urlpatterns = [
          , name="asignaciones_json"),
     path('asignacionesregistradasjson/<desde>/<hasta>',GeneraListaAsignacionesRegistradasJSON
         , name="asignacionesregistradas_json"),
-    path('impresioncarterapendiente/<clientes>', ImpresionFacturasPendientes
-         , name='detalle_facturas_pendientes'),
-    path('impresioncarterapendiente/', ImpresionFacturasPendientes
-         , name='detalle_facturas_pendientes'),
     path('impresionchequespendientes/', ImpresionAccesoriosPendientes
          , name='detalle_cheques_pendientes'),
     path('impresionchequespendientes/<id_cliente>', ImpresionAccesoriosPendientes
@@ -212,8 +209,6 @@ urlpatterns = [
     path('guardarcorteshistorico', GuardarCorteHistorico, ),\
     path('cortehistorico/<int:corte_id>', corteHistorico
          , name='corte_historico'),
-    # path('procesacortehistorico/<int:corte_id>', corteHistoricoJSON
-    #      , name='procesa_corte_historico'),
     path('antigüedadcarteracorte/<int:corte_id>'
          , GeneraResumenAntigüedadCarteraCorteJSON),
     path('impresionantigüedadcarteracorte/<int:corte_id>'
@@ -227,4 +222,24 @@ urlpatterns = [
          , name='detalle_cheques_pendientes_corte'),
     path('impresioncarterapordeudor/<id_cliente>/<cliente>', ImpresionAntiguedadCarteraPorDeudor
          , name='antigüedad_por_deudor'),
+    path('consultacarteraporcliente', CarteraPorClienteConsulta.as_view()
+         , name='consulta_cartera_por_cliente'),
+    path('carteraclientesjson/<clientes>',GeneraListaCarteraClienteJSON
+        , name="carteraclientes_json"),
+    path('carteraclientesjson/',GeneraListaCarteraClienteJSON
+        , name="carteraclientes_json"),
+    path('consultacarterapordeudor', CarteraPorDeudorConsulta.as_view()
+         , name='consulta_cartera_por_deudor'),
+    path('carteradeudoresjson/',GeneraListaCarteraDeudorJSON
+        , name="carteradeudores_json"),
+    path('carteradeudoresjson/<deudores>',GeneraListaCarteraDeudorJSON
+        , name="carteradeudores_json"),
+    path('impresioncarterapendienteclientes/<clientes>', ImpresionFacturasPendientes
+         , name='detalle_facturas_pendientes'),
+    path('impresioncarterapendienteclientes/', ImpresionFacturasPendientes
+         , name='detalle_facturas_pendientes'),
+    path('impresioncarterapendientedeudores/<deudores>', ImpresionFacturasPendientesDeudores
+         , name='detalle_facturas_pendientes_deudores'),
+    path('impresioncarterapendientedeudores/', ImpresionFacturasPendientesDeudores
+         , name='detalle_facturas_pendientes_deudores'),
 ]

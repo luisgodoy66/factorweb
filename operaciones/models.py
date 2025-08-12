@@ -432,6 +432,58 @@ class Documentos_Manager(models.Manager):
                 )\
             .order_by()
 
+    def cartera_pendiente_cliente(self, id_empresa, arr_clientes):
+        return self.filter(leliminado = False, nsaldo__gt = 0
+                        , cxcliente__in = arr_clientes
+                        , cxasignacion__in = Asignacion.objects
+                .filter(cxtipo = "F", cxestado = "P"
+                        , empresa = id_empresa
+                        , leliminado = False))\
+                .values("cxcomprador__cxcomprador__ctnombre"
+                        ,"cxcliente__cxcliente__ctnombre"
+                        , "cxasignacion__cxasignacion"
+                        , "ctdocumento"
+                        , "dvencimiento", "ndiasprorroga"
+                        , "cxasignacion__ddesembolso"
+                        , "nsaldo")\
+                .annotate(vencimiento = ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
+                                                        , output_field=DateField()),
+                        dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
+                                                                            , output_field=DateField()))
+                                                , IntegerField()),
+                        dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('dvencimiento')
+                                                                          -F('cxasignacion__ddesembolso')
+                                                                          , output_field=DateField()))
+                                                , IntegerField()),
+                        )\
+                .order_by('cxcliente__cxcliente__ctnombre')
+
+    def cartera_pendiente_deudor(self, id_empresa, arr_deudores):
+        return self.filter(leliminado = False, nsaldo__gt = 0
+                        , cxcomprador__in = arr_deudores
+                        , cxasignacion__in = Asignacion.objects
+                .filter(cxtipo = "F", cxestado = "P"
+                        , empresa = id_empresa
+                        , leliminado = False))\
+                .values("cxcomprador__cxcomprador__ctnombre"
+                        ,"cxcliente__cxcliente__ctnombre"
+                        , "cxasignacion__cxasignacion"
+                        , "ctdocumento"
+                        , "dvencimiento", "ndiasprorroga"
+                        , "cxasignacion__ddesembolso"
+                        , "nsaldo")\
+                .annotate(vencimiento = ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
+                                                        , output_field=DateField()),
+                        dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
+                                                                            , output_field=DateField()))
+                                                , IntegerField()),
+                        dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('dvencimiento')
+                                                                          -F('cxasignacion__ddesembolso')
+                                                                          , output_field=DateField()))
+                                                , IntegerField()),
+                        )\
+                .order_by('cxcomprador__cxcomprador__ctnombre')
+    
 
 class Documentos(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
@@ -784,6 +836,58 @@ class ChequesAccesorios_Manager(models.Manager):
                 , total = Sum('ntotal')
                 )\
             .order_by()
+
+    def cartera_pendiente_cliente(self, id_empresa, arr_clientes):
+        return self.filter(laccesorioquitado = True, chequequitado__cxestado = 'A'
+                , leliminado = False, lcanjeado = False
+                , documento__cxcliente__in = arr_clientes
+                , empresa = id_empresa
+                , documento__cxasignacion__cxestado = "P"
+                , documento__cxasignacion__leliminado = False)\
+                .values("documento__cxcomprador__cxcomprador__ctnombre"
+                        , "documento__cxcliente__cxcliente__ctnombre"
+                        , "documento__cxasignacion__cxasignacion"
+                        , "documento__ctdocumento"
+                        , "dvencimiento", "ndiasprorroga"
+                        , "documento__cxasignacion__ddesembolso"
+                        , "chequequitado__nsaldo")\
+                .annotate(vencimiento =ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
+                                                         , output_field = DateField() ),
+                        dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
+                                                                            , output_field=DateField()))
+                                                , IntegerField()),
+                        dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('dvencimiento')
+                                                                          -F('documento__cxasignacion__ddesembolso')
+                                                                          , output_field=DateField()))
+                                                , IntegerField()),
+                          )\
+                .order_by('documento__cxcliente__cxcliente__ctnombre')
+
+    def cartera_pendiente_deudor(self, id_empresa, arr_deudores):
+        return self.filter(laccesorioquitado = True, chequequitado__cxestado = 'A'
+                , leliminado = False, lcanjeado = False
+                , documento__cxcomprador__in = arr_deudores
+                , empresa = id_empresa
+                , documento__cxasignacion__cxestado = "P"
+                , documento__cxasignacion__leliminado = False)\
+                .values("documento__cxcomprador__cxcomprador__ctnombre"
+                        , "documento__cxcliente__cxcliente__ctnombre"
+                        , "documento__cxasignacion__cxasignacion"
+                        , "documento__ctdocumento"
+                        , "dvencimiento", "ndiasprorroga"
+                        , "documento__cxasignacion__ddesembolso"
+                        , "chequequitado__nsaldo")\
+                .annotate(vencimiento =ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
+                                                         , output_field = DateField() ),
+                        dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
+                                                                            , output_field=DateField()))
+                                                , IntegerField()),
+                        dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('dvencimiento')
+                                                                          -F('documento__cxasignacion__ddesembolso')
+                                                                          , output_field=DateField()))
+                                                , IntegerField()),
+                          )\
+                .order_by('documento__cxcomprador__cxcomprador__ctnombre')
 
 class Cheques_quitados_Manager(models.Manager):
     def antigüedad_cartera(self, id_empresa, id_cliente=None):

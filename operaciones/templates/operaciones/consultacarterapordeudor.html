@@ -5,9 +5,9 @@
         <div class="page-header float-right">
             <div class="page-title">
                 <ol class="breadcrumb text-right">
-                    <li><a href="#">operaciones</a></li>
-                    <li><a href="#">cobranzas</a></li>
-                    <li class="active">consulta general</li>
+                    <li><a href="#">cartera</a></li>
+                    <li><a href="#">reportes</a></li>
+                    <li class="active">por deudor</li>
                 </ol>
             </div>
         </div>
@@ -15,30 +15,15 @@
 {% endblock breadcrumbs %}
 {% block content %}
     <div class="card bg-flat-color-0">
-        <div hidden>
-            <input type="text" value = {{desde | date:"Y-m-d"}} id="id_desde">
-            <input type="text" value = {{hasta | date:"Y-m-d"}} id="id_hasta">
-        </div>
         <div class="card-body">
             <!-- <div class="col-md-10"> -->
                 <div class="row form-group ">
-                    <div class="col-md-1">Desde:</div>
-                    <div class="col-md-2">
-                        <input type="date" class="form-control" name="fechadesde"  
-                        id="fechadesde" placeholder="Desde" 
-                        aria-label="Ingrese fecha inicio" >
-                    </div>
-                    <div class="col-md-1">Hasta:</div>
-                    <div class="col-md-2">
-                        <input type="date" class="form-control" name="fechahasta"  
-                        id="fechahasta" placeholder="Hasta" 
-                        aria-label="Ingrese fecha fin" >
-                    </div>
-                    <div class="col-md-4">
-                        <select data-placeholder="Seleccione clientes. Deje en blanco para todos los clientes" 
-                            id="id_clientes" multiple class="standardSelect" tabindex="5">
+                    <div class="col-md-2">Deudor(es):</div>
+                    <div class="col-md-8">
+                        <select data-placeholder="Seleccione deudores. Deje en blanco para todos los deudores" 
+                            id="id_deudores" multiple class="standardSelect" tabindex="5">
                             <option value=""></option>
-                            {% for item in clientes %}
+                            {% for item in deudores %}
                                 <option value="{{item.id}}">{{ item }}</option>
                             {% endfor %}
                         </select>
@@ -55,9 +40,7 @@
                             </button>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                                 <div class="dropdown-menu-content">
-                                    <a class="dropdown-item" href="#" onclick="imprimeCobranzas()">Detalle de cobranzas de cartera</a>
-                                    <a class="dropdown-item" href="#" onclick="imprimeRecuperaciones()">Detalle de recuperaciones</a>
-                                    <!-- <a class="dropdown-item" href="#" onclick="imprimeFacturasPendientes()">Detalle de facturas pendientes</a> -->
+                                    <a class="dropdown-item" href="#" onclick="imprimeFacturasPendientesPorDeudor()">Imprimir</a>
                                 </div>
                             </div>
                         </div>
@@ -68,7 +51,7 @@
             <small>
 
                 <table id="table"  class="table table-striped table-bordered"
-                    data-url="{% url 'cobranzas:cobranzas_json' desde hasta %}"
+                    data-url="{% url 'operaciones:carteradeudores_json' %}"
                     data-filter-control="true"
                     data-show-search-clear-button="true"
                     data-show-refresh="true"
@@ -88,20 +71,16 @@
                     >
                     <thead>
                         <tr>
+                        <th data-field="Deudor" data-filter-control="input"data-sortable="true" >Deudor</th>
                         <th data-field="Cliente" data-filter-control="input" data-sortable="true" >Cliente</th>
-                        <th data-field="Movimiento" data-filter-control="input"data-sortable="true" >Movimiento</th>
                         <th data-field="Operacion" data-filter-control="input"data-sortable="true" >Operación</th>
-                        <th data-field="Fecha" data-filter-control="input"data-sortable="true" >Fecha</th>
-                        <th data-field="Deposito" data-filter-control="input"data-sortable="true" >Depósito</th>
-                        <th data-field="TipoFactoring" data-filter-control="input"data-sortable="true" >Factoring</th>
-                        <th data-field="Valor" data-filter-control="input"data-sortable="true" 
-                            data-formatter="numberFormatter" >Valor</th>
-                        <th data-field="FormaCobro" data-filter-control="input"data-sortable="true" >F. de cobro</th>
-                        <th data-field="Detalle" data-filter-control="input"data-sortable="true" >Detalle</th>
-                        <th data-field="Estado" data-filter-control="input"data-sortable="true" >Estado</th>
-                        <th data-field="Sobrepago" data-filter-control="input"data-sortable="true" >Sobrepago</th>
-                        <th data-field="operate" data-sortable="true" data-events="window.operateEvents"
-                            data-formatter="operateFormatter" data-click-to-select="false">Acción</th>
+                        <th data-field="Documento" data-filter-control="input"data-sortable="true" >Documento</th>
+                        <th data-field="Vencimiento" data-filter-control="input"data-sortable="true" >Vencimiento</th>
+                        <!-- <th data-field="TipoFactoring" data-filter-control="input"data-sortable="true" >Factoring</th> -->
+                        <th data-field="Saldo" data-filter-control="input"data-sortable="true" 
+                            data-formatter="numberFormatter" >Saldo</th>
+                        <th data-field="DiasVencidos" data-filter-control="input"data-sortable="true" >Días vencidos</th>
+                        <th data-field="DiasNegociados" data-filter-control="input"data-sortable="true" >Días negociados</th>
                         </tr>
                     </thead>
                 </table>
@@ -122,10 +101,40 @@
 {% endblock %}
 
 {% block js_page %}
-<script type="text/javascript" src="{% static 'factorweb/js/consultageneralcobranzas.js' %}"></script>
 <script src="{% static 'factorweb/vendors/chosen/chosen.jquery.min.js' %}"></script>
 <script>
-    function numberFormatter(value) {
+var $table = jQuery('#table')
+var $btnFiltrar = jQuery('#btnFiltrar')
+
+window.onload=function(){
+    
+    jQuery(".standardSelect").chosen({
+        disable_search_threshold: 10,
+        no_results_text: "Oops, deudor no encontrado!",
+        width: "100%"
+    });
+
+    $table.bootstrapTable({locale:"es-EC"});
+
+    // boton de refrescar filtro
+    $btnFiltrar.click(function () {
+        var x = [];
+        var options = document.getElementById("id_deudores").selectedOptions;
+        for (var i = 0; i < options.length; i++) {
+          x.push(options[i].value);
+        }
+        $table.bootstrapTable('refreshOptions', {
+            showRefresh: true,
+            url: "/operaciones/carteradeudoresjson/"+x
+        });
+    })
+
+    // cerrar side bar
+    CerrarSideBar();
+  
+}
+
+   function numberFormatter(value) {
       return Number(value).toLocaleString('es-EC', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 </script>

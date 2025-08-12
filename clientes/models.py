@@ -18,16 +18,16 @@ class Datos_compradores(ClaseModelo):
     cxclase =models.ForeignKey(Clases_cliente, on_delete=models.DO_NOTHING 
                                ,null=True,)
 
-    class Meta:
-        ordering = [
-            'cxcomprador__ctnombre'
-            ]  
-
     def __str__(self):
         return self.cxcomprador.ctnombre
         
     def estado(self):
         return self.get_cxestado_display()
+
+    class Meta:
+        ordering = [
+            'cxcomprador__ctnombre'
+            ]  
 
 class Datos_generales_Manager(models.Manager):
         def clientes_nuevos_por_mes(self, id_empresa, año, mes):

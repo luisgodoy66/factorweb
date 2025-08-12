@@ -2242,7 +2242,12 @@ def GeneraFacturasAlVencimientoDiario(request):
                          ,'{4}', {5},{6}, {7},'','')"
         .format(id_empresa.empresa.id, pid_puntoemision, id_factoring, psconcepto
                 , pdemision, nusuario, pnmes, psaño))
-       
+    print("CALL uspGenerarFacturasAlVencimientoSinCargoDescontado( \
+                         {0},{1},{2},'{3}'\
+                         ,'{4}', {5},{6}, {7},'','')"
+        .format(id_empresa.empresa.id, pid_puntoemision, id_factoring, psconcepto
+                , pdemision, nusuario, pnmes, psaño))
+    print(resultado)
     return HttpResponse(resultado)
 
 def GeneraListaFacturasJSON(request, desde = None, hasta= None):

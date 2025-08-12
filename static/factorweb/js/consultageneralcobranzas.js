@@ -77,18 +77,6 @@ function imprimeCobranzas(){
   window.open( url);
 }
 
-function imprimeFacturasPendientes(){
-  var x = [];
-  var options = document.getElementById("id_clientes").selectedOptions;
-  for (var i = 0; i < options.length; i++) {
-    x.push(options[i].value);
-  }
-  // en una nueva ventana abrir el reporte de asignación
-  url = window.location.origin
-  url = url + "/operaciones/impresioncarterapendiente/"+x;
-  window.open( url);
-}
-
 function imprimeRecuperaciones(){
   desde = capturaValor("fechadesde");
   hasta = capturaValor("fechahasta");
