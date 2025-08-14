@@ -2270,26 +2270,19 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                 # considerar los días condonados
                 fechacobrocalculo = cobranza.dcobranza - timedelta(days=documento_cobrado.ndiasacondonar)
 
-                # dias vencidos
-                if fechacobrocalculo > documento.dvencimiento:
-                    dias_vencidos = (fechacobrocalculo - documento.dvencimiento).days
-
-                # dias negociados
                 if not tipo_factoring.lgenerafacturaenaceptacion \
-                    and fechacobrocalculo > documento.dvencimiento\
                     and not documento.lfacturagenerada:
                     return HttpResponse('No ha generado factura al vencimiento')
 
+                # dias negociados
                 if fechacobrocalculo <= documento.dvencimiento:
                     # dc negociado. desde desembolso hasta cobranza
                     dias_negociados = (fechacobrocalculo - fechadesembolso).days
                 else:
-                    if tipo_factoring.lgenerafacturaenaceptacion:                        
-                        # dc negociado. desde desembolso hasta vencimiento
-                        dias_negociados = (documento.dvencimiento - fechadesembolso).days
-                    else:
-                        # esto fue generado por proceso de factura al vencimiento
-                        dias_negociados = 0
+                    # dc negociado. desde desembolso hasta vencimiento
+                    dias_negociados = (documento.dvencimiento - fechadesembolso).days
+                    # dias vencidos
+                    dias_vencidos = (fechacobrocalculo - documento.dvencimiento).days
 
                 # SI NO CARGO DC EN NEGOCIACION HAY DOS CASOS:
                 # QUE GENERE FACTURA EN NEGOCIACION Y QUE NO GENERE
@@ -2300,14 +2293,54 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                 # SI NO GENERA, HAY UN PROCESO DE GENERACIÓN DE FACTURAS AL
                 # VENCIMIENTO QUE CARGARÁ EL DC HASTA ESA FECHA.
 
-                # generar DC
+                gao = Tasas_factoring.objects\
+                    .filter(cxtasa="GAO", empresa = id_empresa.empresa).first()
                 dc = Tasas_factoring.objects\
                     .filter(cxtasa='DCAR', empresa = id_empresa.empresa).first()
-                
-                if not tipo_factoring.lgeneradcenaceptacion or fechacobrocalculo > documento.dvencimiento:
 
-                    # la tasa esta en el documento o en el accesorio
-                    tasa_dc = documento.ntasadescuento
+                # si genera factura en aceptación es posible que falte algún cargo por generar
+                # si no genera, se debió ejecutar factura al vencimiento por lo tanto ya no debe 
+                # generar cargos que corresponden al periodo negociado
+                if tipo_factoring.lgenerafacturaenaceptacion:
+                    # genera GAO
+                    if not tipo_factoring.lgeneragaoenaceptacion:
+
+                        tasa_gao = documento.ntasacomision
+
+                        if gao.lsobreanticipo:
+                            base_gao = documento_cobrado.aplicado() * documento.nporcentajeanticipo / 100
+                        else:
+                            base_gao = documento_cobrado.aplicado()
+
+                        valor_gao = ( base_gao * tasa_gao / 100)
+
+                        if not gao.lflat:
+                            valor_gao = (valor_gao * dias_negociados / gao.ndiasperiocidad)
+
+                    # generar DC
+                    
+                    if not tipo_factoring.lgeneradcenaceptacion:
+
+                        tasa_dc = documento.ntasadescuento
+
+                        if dc.lsobreanticipo:
+                            base_dc = documento_cobrado.aplicado() * documento.nporcentajeanticipo /100
+                        else:
+                            base_dc = documento_cobrado.aplicado() 
+                                            
+                        descuento_cartera = base_dc * tasa_dc /100
+
+                        if not dc.lflat:
+                            descuento_cartera = descuento_cartera * dias_negociados / dc.ndiasperiocidad
+
+                #  cargos por cartera vencida
+                # if fechacobrocalculo > documento.dvencimiento:
+                if dias_vencidos > tipo_factoring.ndiasgracia:
+                    # dc vencido
+                    tasa_dcv = datos_operativos.ntasamora
+                    # si la tasa se acumula, sumarla a la tasa del documento
+                    if tipo_factoring.lacumulamoraatasadc:
+                        tasa_dcv += documento.ntasadescuento
 
                     if dc.lsobreanticipo:
                         base_dc = documento_cobrado.aplicado() * documento.nporcentajeanticipo /100
@@ -2315,52 +2348,15 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                         base_dc = documento_cobrado.aplicado() 
                                         
                     if not dc.lflat:
-
-                        if not tipo_factoring.lgeneradcenaceptacion:
-                            # dc negociado
-                            descuento_cartera = ( base_dc * tasa_dc / 100) \
-                                * dias_negociados / dc.ndiasperiocidad
-                            
-                        if fechacobrocalculo > documento.dvencimiento:
-                            # dc vencido
-                            tasa_dcv = datos_operativos.ntasamora
-
-                            # si la tasa se acumula, sumarla a la tasa del documento
-                            if tipo_factoring.lacumulamoraatasadc:
-                                tasa_dcv += documento.ntasadescuento
-
-                            descuento_cartera_vencido = ( base_dc * tasa_dcv / 100) \
-                                * dias_vencidos / dc.ndiasperiocidad
+                        descuento_cartera_vencido = ( base_dc * tasa_dcv / 100) \
+                            * dias_vencidos / dc.ndiasperiocidad
 
                     else:
-                        # determinar cuantas veces aplicar la tasa según los días de aplicacion
-                        x = math.ceil((dias_vencidos + dias_negociados)/dc.ndiasperiocidad)
-                        tasa_dc = tasa_dc * x
 
-                        valor_gaoa = base_dc * tasa_dc /100
+                        x = math.ceil((dias_vencidos)/dc.ndiasperiocidad)
+                        tasa_dcv = tasa_dcv * x
 
-                # generar crgos colateral
-                cargo_retenciones = base_retenciones * documento.nporcentajeanticipo / 100
-
-                cargo_bajas = base_bajas * documento.nporcentajeanticipo / 100
-
-                # genera GAO
-                gao = Tasas_factoring.objects\
-                    .filter(cxtasa="GAO", empresa = id_empresa.empresa).first()
-
-                if not tipo_factoring.lgeneragaoenaceptacion:
-
-                    tasa_gao = documento.ntasacomision
-
-                    if gao.lsobreanticipo:
-                        base_gao = documento_cobrado.aplicado() * documento.nporcentajeanticipo / 100
-                    else:
-                        base_gao = documento_cobrado.aplicado()
-
-                    valor_gao = ( base_gao * tasa_gao / 100)
-
-                    if not gao.lflat:
-                        valor_gao = (valor_gao * dias_negociados / gao.ndiasperiocidad)
+                        descuento_cartera_vencido = base_dc * tasa_dcv /100
 
 
                 # generar GAOA
@@ -2393,6 +2389,11 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                     else:
                         valor_gaoa = (base_gaoa * tasa_gaoa /100 
                                     * dias_vencidos / gaoa.ndiasperiocidad)
+
+                # generar crgos colateral
+                cargo_retenciones = base_retenciones * documento.nporcentajeanticipo / 100
+
+                cargo_bajas = base_bajas * documento.nporcentajeanticipo / 100
 
                 # json de los cargos
                 # agregar al diccionario
@@ -2777,13 +2778,15 @@ def GeneraListaNotasDeDebitoPendientesJSONSalida(transaccion):
         else:
             opx = "Debe generar factura"
     if transaccion.cxtipooperacion=='F':
-        factura = Factura_venta.objects.filter(id = transaccion.operacion
-                                               , cxtipooperacion='VF').first()
+        # factura = Factura_venta.objects.filter(id = transaccion.operacion
+        #                                        , cxtipooperacion='VF').first()
+        factura = Factura_venta.objects\
+            .filter(notadebito = transaccion.id).first()
         if factura:
             opx = factura.__str__()
         else:
             opx = "Debe generar factura"
-    
+    print(transaccion.cxtipooperacion,transaccion.operacion)
     output["Operacion"] = opx
     output["Tipo"] = transaccion.cxtipooperacion
 
@@ -2840,8 +2843,10 @@ def DetalleNotasDebitoPendientesJSONSalida(doc):
         else:
             opx = "Debe generar factura"
     if doc.cxtipooperacion=='F':
-        factura = Factura_venta.objects.filter(id = doc.operacion
-                                               , cxtipooperacion='VF').first()
+        # factura = Factura_venta.objects.filter(id = doc.operacion
+        #                                        , cxtipooperacion='VF').first()
+        factura = Factura_venta.objects\
+            .filter(notadebito = doc.id).first()
         if factura:
             opx = factura.__str__()
         else:
@@ -3093,12 +3098,10 @@ def ObtenerOtrosCargosDeDocumento(id_documento, listaotroscargos):
         factura = Factura_venta.objects\
             .filter(operacion = cargo.cxasignacion.id).first()
 
-        print(cargo.nsaldo, cargo, factura)
         if factura:
             # Cargos que no han sido cobrados, podrían ser GAO, DC, en facturas generadas
             # al vencimiento. SOLO FILTRAR OTROS CARGOS (con nota de debito)
             if factura.notadebito:
-                print('cargo F')
                 listaotroscargos.append(GeneraOtroCargoJSONSalida(
                     cargo.id, cargo.cxmovimiento.ctmovimiento
                     , cargo.dultimageneracioncargos, cargo.nsaldo, factura.notadebito.id
@@ -3108,7 +3111,7 @@ def ObtenerOtrosCargosDeDocumento(id_documento, listaotroscargos):
             listaotroscargos.append(GeneraOtroCargoJSONSalida(
                 cargo.id, cargo.cxmovimiento.ctmovimiento
                 , cargo.dultimageneracioncargos, cargo.nsaldo, None
-                , 'desconocido', ''))
+                , 'sin factura', ''))
 
         total_cargos += cargo.nsaldo
 

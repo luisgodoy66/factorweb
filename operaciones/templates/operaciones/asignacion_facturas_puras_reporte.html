@@ -27,6 +27,10 @@
         .table td.subrayado{
             border-bottom: 1px solid black;
         }
+        .table td.sobrerayado{
+            border-top: 1.5px solid black;
+            padding-top: 0px; /* Reduce el espacio entre la raya y el texto */
+        }
         .alerta { 
         font-family: sans-serif; 
         font-size: 11px; 
@@ -163,16 +167,16 @@
                             <tr>
                                 <td></td>
                                 <td></td>
-                                <td colspan="2"><h4>Totales a liquidar:</h4></td>
-                                <td class="numero"><h4>{{ asignacion.nvalor|floatformat:"2g" }}</h4></td>
                                 <td></td>
                                 <td></td>
-                                <td class="numero"><h4>{{ asignacion.nanticipo|floatformat:"2g" }}</h4></td>
-                                {% if gao.imprimir %}<td></td>{% endif %}
-                                <td class="numero"><h4>{{ asignacion.ngao|floatformat:"2g" }}</h4></td>
-                                {% if dc.imprimir %}<td></td>{% endif %}
-                                <td class="numero"><h4>{{ asignacion.ndescuentodecartera|floatformat:"2g" }}</h4></td>
-                                <td class="numero"><h4>{{cargos_negociacion|floatformat:"2g"}}</h4></td>
+                                <td class="numero sobrerayado"><h4>{{ asignacion.nvalor|floatformat:"2g" }}</h4></td>
+                                <td colspan="2" style="text-align: right;"><h4>Totales a liquidar:</h4></td>
+                                <td class="sobrerayado numero"><h4>{{ asignacion.nanticipo|floatformat:"2g" }}</h4></td>
+                                {% if gao.imprimir %}<td class="sobrerayado"></td>{% endif %}
+                                <td class="sobrerayado numero"><h4>{{ asignacion.ngao|floatformat:"2g" }}</h4></td>
+                                {% if dc.imprimir %}<td class="sobrerayado"></td>{% endif %}
+                                <td class="sobrerayado numero"><h4>{{ asignacion.ndescuentodecartera|floatformat:"2g" }}</h4></td>
+                                <td class="sobrerayado numero"><h4>{{cargos_negociacion|floatformat:"2g"}}</h4></td>
                             </tr>
                             <tr>
                                 <td></td>

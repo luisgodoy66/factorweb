@@ -50,7 +50,7 @@
                     <div class="row form-group">
                         <div class="col col-xs-9">
                             <h5 for="id_ctinstrucciondepago" class=" form-control-label">
-                            - Cargos</h5></div>
+                            - Cargos por liquidación</h5></div>
                         <div class="col col-md-3 text-right" id="divCargos">
                             {{ total_cargos |floatformat:"2g"}}
                         </div>
@@ -148,7 +148,7 @@
                     <div class="row form-group">
                         <div class="col col-xs-9">
                             <h5 for="id_ctinstrucciondepago" class=" form-control-label">
-                            - Cargos no operativos</h5></div>
+                            - Otros cargos</h5></div>
                         <div class="col col-md-3 text-right">
                             {{ total_otros_cargos }}
                         </div>
@@ -183,7 +183,7 @@
                     </div>  
                 </div>
                 <div class="col-md-7">
-                    <h5 class="heading-title mb-1 text-secondary">Detale de cargos</h5>
+                    <h5 class="heading-title mb-1 text-secondary">Detalle de cargos por liquidación</h5>
 
                     <small>
 
@@ -227,7 +227,7 @@
                     
                     <div {%  if total_otros_cargos == 0 %} hidden {% endif %}>
                         <br>
-                        <h5 class="heading-title mb-1 text-secondary">Detalle de cargos no operativos</h5>
+                        <h5 class="heading-title mb-1 text-secondary">Detalle de otros cargos</h5>
                         <small>
                             <input type="text" hidden id="data_otros_cargos" value="{{ cargos_no_operativos }}">
                             <table id="table_otros"  class="table table-striped table-bordered">
