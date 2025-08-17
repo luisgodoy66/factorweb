@@ -305,6 +305,12 @@ const porcentaje_iva = '{{ porcentaje_iva|floatformat:"2u" }}'
 const cliente = "{{ cliente }}"
 const tipo_factoring = "{{ tipo_factoring }}"
 const total_cargos_operativos = '{{ total_cargos|floatformat:"2u" }}'
+const errorprevio = '{{error}}'
+if (errorprevio != ""){
+    alert(errorprevio)
+    window.close();
+    window.history.back();
+}
 var neto = '{{ neto|floatformat:"2u" }}'
 var iva = '{{ total_iva|floatformat:"2u" }}'
 var base_iva_otros = 0

@@ -25,7 +25,7 @@
             <div hidden><input id="ambiente" value='{{ambiente}}'></div>
              <div class="card-body card-block">
                     <!-- columna izquierda -->
-                <div class="col-lg-6">
+                <div class="col-lg-7">
                     <div class="row form-group " id="filtro" >
                         <div class="col-md-5">
                             <label for="fechacorte">Perìodo:</label>
@@ -106,11 +106,11 @@
 
 
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-5">
                     <div class="alert alert-info" role="alert">
-                        En el concepto puede usar las etiquetas { { cliente } } { { documento } } y { { operacion } } 
-                        para mostrar, en el lugar que ellas se encuentren, el nombre del cliente
-                        , el código de la negociación y el número de documento correspondiente.
+                        En el concepto de diario puede usar las etiquetas { { cliente } } { { operacion } } y { { documento } }
+                        para mostrar, en el lugar que en ellas se encuentren, el nombre del cliente
+                        , el código de la negociación y el número de documento respectivamente.
                     </div>
 
                 </div>
@@ -129,7 +129,87 @@
 </form>
 {% endblock %}
 {% block js_page %}
-<script type="text/javascript" 
+<!-- <script type="text/javascript" 
     src="{% static 'factorweb/js/datosgenerarfacturasalvencimiento.js' %}">
+</script> -->
+<script>
+const ambiente = capturaValor('ambiente')
+window.onload=function(){
+    jQuery('#id_puntoemision')
+        .change(function(){
+        SecuenciaPorPuntoEmision( capturaValor("id_puntoemision"));
+        });
+
+    }  
+
+function SecuenciaPorPuntoEmision( punto_emision){
+    // bucar la secuencia de factura del punto de emisión seleccionado
+    jQuery.ajax({
+        type: "GET",
+        url: "/contabilidad/obtenersecuenciafactura/"+punto_emision,
+        data: { punto_emision: punto_emision, },
+        success: function (data) {
+            if (data.success) {
+                jQuery("#id_cxnumerofactura").val(data.secuencia);
+
+            } else {
+                    jQuery("#id_cxnumerofactura").val("Error");
+                }
+            },
+        error: function(xhr, status, error) {
+            // this function is called if there is an error with the request
+            console.log(error);
+        }
+        });
+}
+
+function GenerarFacturas(){
+    const fechaEmision = capturaValor("id_demision");
+    const anioCorte = capturaValor("añocorte");
+    const mesCorte = capturaValor("cmb_mes");
+
+    if (!fechaEmision) {
+        MensajeError("Por favor, ingrese una fecha de emisión.");
+        return;
+    }
+
+    // Extraer año y mes de la fecha de emisión (formato YYYY-MM-DD)
+    const parts = fechaEmision.split('-');
+    const anioEmision = parseInt(parts[0], 10);
+    const mesEmision = parseInt(parts[1], 10);
+
+    // Validar que el año y mes de la emisión coincidan con el período seleccionado
+    if (anioEmision !== parseInt(anioCorte) || mesEmision !== parseInt(mesCorte)) {
+        MensajeError("La fecha de emisión no corresponde al período seleccionado (año y mes).");
+        return;
+    }
+
+  MensajeConfirmacion("Aceptar generación de facturas desde " 
+    + capturaValor("id_cxnumerofactura") +"?",function(){
+    
+    var objeto={
+        "id_puntoemision": capturaValor("id_puntoemision"),
+        "concepto" : capturaValor("concepto"), 
+        "emision" : capturaValor("id_demision"),
+        "id_factoring" : capturaValor("id_factoring"),
+        "mes" : capturaValor("cmb_mes"),
+        "año" : capturaValor("añocorte"),
+        }
+
+    fetchPostear("/contabilidad/generarfacturasalvencimiento/", objeto, function(data){
+        // regresar a la lista de generar factura
+        if (data==''){
+            MensajeError('Ningún registro encontrado para el mes indicado.')
+        }
+        else{
+                console.log(data)
+                alert('Revise los asientos generados.')
+                window.location.href = "/contabilidad/listaasientoscontables";
+        }
+      })
+  })
+    
+}
+
 </script>
 {% endblock %}

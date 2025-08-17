@@ -25,7 +25,7 @@ from empresa.models import Tasas_factoring, Cuentas_bancarias as CuentasEmpresa\
     , Datos_participantes, Tipos_factoring, Otros_cargos
 from cuentasconjuntas import models as CuentasConjuntasModels
 from bases.models import Usuario_empresa
-from solicitudes.models import Asignacion
+from solicitudes.models import Asignacion, Clientes
 from contabilidad.models import Factura_venta
 
 from .forms import CobranzasDocumentosForm, ChequesForm, LiquidarForm\
@@ -839,6 +839,29 @@ class GestionDeCobro(SinPrivilegios, generic.TemplateView):
         context['numero_whatsapp'] = gc.revision_cartera_cliente.cxcliente.cxcliente.ctcelular
         context['promedio_ponderado_demora'] = ppmp
         context['total_cartera_protestos'] = cartera + protestos
+        return context
+
+class LiquidacionEnCero(SinPrivilegios, generic.TemplateView):
+    template_name = "cobranzas/datosliquidacionencero_form.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="cobranzas.view_documentos_cabecera"
+
+    def get_context_data(self, **kwargs):
+        context = super(LiquidacionEnCero, self).get_context_data(**kwargs)
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+        cliente_id = self.kwargs.get('id_cliente')
+        cliente = Datos_generales.objects.filter(id = cliente_id).first()
+        context['solicitudes_pendientes'] = sp
+        context['documentos'] = self.kwargs.get('ids')
+        context['tipo_factoring'] = self.kwargs.get('tipo_factoring')
+        context['cliente_id'] = cliente_id
+        context['tipo'] = 'Cobranza'
+        context['cliente'] = cliente
+        context['por_vencer'] = self.kwargs.get('por_vencer')
         return context
 
 @login_required(login_url='/login/')
@@ -2145,6 +2168,15 @@ def AceptarRecuperacion(request):
 @permission_required('cobranzas.add_liquidacion_cabecera', login_url='bases:sin_permisos')
 def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
     template_name = "cobranzas/datosliquidacioncobranzas_form.html"
+
+    contexto = obtenercontextoLiquidacion(request, tipo_operacion
+                                          , ids_cobranzas)
+
+    return render(request, template_name, contexto)
+
+def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
+                               , cobranza_liquidacion_0 = None
+                               , detalle_cobranza_liquidacion_0 = None):
     total_vuelto=0
     total_dc =0
     total_dcv = 0
@@ -2163,19 +2195,36 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
     vuelto_cobranza=0
     tipo_factoring = None
     otros_cargos = None
+    error = ''
+    nombre_cliente = None
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     porcentaje_iva = id_empresa.empresa.nporcentajeiva
 
+    gao = Tasas_factoring.objects\
+        .filter(cxtasa="GAO", empresa = id_empresa.empresa).first()
+    dc = Tasas_factoring.objects\
+        .filter(cxtasa='DCAR', empresa = id_empresa.empresa).first()
+    gaoa = Tasas_factoring.objects\
+        .filter(cxtasa="GAOA", empresa = id_empresa.empresa).first()
+    
     if request.method =="GET":
 
         # obtener la lista de cobranzas, puede ser recuoeracion
         if tipo_operacion=='R':
             lista_cobranzas = Recuperaciones_cabecera.objects\
                 .filter(id__in = ids_cobranzas.split(','))
-        else:
+            nombre_cliente = lista_cobranzas[0].cxcliente.cxcliente.ctnombre
+            id_cliente = lista_cobranzas[0].cxcliente.id
+        elif tipo_operacion=='C':
             lista_cobranzas = Documentos_cabecera.objects\
                 .filter(id__in = ids_cobranzas.split(','))
+            nombre_cliente = lista_cobranzas[0].cxcliente.cxcliente.ctnombre
+            id_cliente = lista_cobranzas[0].cxcliente.id
+        else:
+            lista_cobranzas = cobranza_liquidacion_0
+            nombre_cliente = 'Cliente'
+            id_cliente = 0
 
         for c in range(len(lista_cobranzas)):
 
@@ -2185,9 +2234,11 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
             if tipo_operacion =='R':
                 detalle_cobranza = Recuperaciones_detalle.objects\
                     .filter(recuperacion = cobranza)
-            else:
+            elif tipo_operacion=='C':
                 detalle_cobranza = Documentos_detalle.objects\
                     .filter(cxcobranza = cobranza)
+            else:
+                detalle_cobranza = detalle_cobranza_liquidacion_0
 
             cuenta_transferencia = Cuenta_transferencia\
                     .objects.cuenta_default(cobranza.cxcliente).first()
@@ -2199,9 +2250,15 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
             vuelto_cobranza = 0
             
             # buscar el tipo de factoring
-            tipo_factoring = cobranza.cxtipofactoring
+            if tipo_operacion in ('R','C'):
+                tipo_factoring = cobranza.cxtipofactoring
+            else:
+                tipo_factoring = Tipos_factoring.objects\
+                    .filter(id=cobranza.cxtipofactoring).first()
 
             for i in range(len(detalle_cobranza)):
+
+                documento_cobrado = detalle_cobranza[i]
 
                 # inicializar
                 descuento_cartera=0; descuento_cartera_vencido=0; valor_gao=0
@@ -2212,8 +2269,6 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                 base_dc=0; base_gao=0; base_gaoa=0
                 base_bajas=0; base_retenciones=0
                 tasa_dcv=0
-
-                documento_cobrado = detalle_cobranza[i]
 
                 # vuelto
 
@@ -2233,14 +2288,18 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                 # documento con tasas. si es accesorio las tasas etan en el accesorio
                 if accesorios:
                     if tipo_operacion=='R':
-                        documento = documento_cobrado.documentoprotestado.accesorio
+                        # documento = documento_cobrado.documentoprotestado.accesorio
+                        documento = accesorios
                         vuelto = (documento_cobrado.nvalorrecuperacion 
                                   * (100 - documento.nporcentajeanticipo) /100)
                     else:
                         if cobranza.cxformapago == "DEP":
                             documento = cobranza.cxaccesorio
-                        else:
+                        elif tipo_operacion=='C' :
                             documento = accesorios
+                        else:
+                            # liquidacion en cero
+                            documento = ChequesAccesorios.objects.filter(chequequitado = accesorios).first()
 
                         vuelto = (documento_cobrado.nvalorcobranza 
                                   * (100 - documento.nporcentajeanticipo) /100)
@@ -2256,11 +2315,15 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                         documento = documento_cobrado.documentoprotestado.documento
                         vuelto = (documento_cobrado.nvalorrecuperacion 
                                   * (100 - documento.nporcentajeanticipo) /100)
-                    else:
+                    elif tipo_operacion=='C':
                         documento = documento_cobrado.cxdocumento
                         vuelto = (documento_cobrado.nvalorcobranza 
                                   * (100 - documento.nporcentajeanticipo) /100)
-                    
+                    else:
+                        documento = Documentos.objects.filter(pk=documento_cobrado.cxdocumento).first()
+                        vuelto = (documento_cobrado.nvalorcobranza 
+                                  * (100 - documento.nporcentajeanticipo) /100)
+
                     id_documento = documento.id
                     fechadesembolso = documento.cxasignacion.ddesembolso
                     asignacion = documento.cxasignacion.cxasignacion
@@ -2270,9 +2333,14 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                 # considerar los días condonados
                 fechacobrocalculo = cobranza.dcobranza - timedelta(days=documento_cobrado.ndiasacondonar)
 
-                if not tipo_factoring.lgenerafacturaenaceptacion \
-                    and not documento.lfacturagenerada:
-                    return HttpResponse('No ha generado factura al vencimiento')
+                # si genera factura en aceptación es posible que falte algún cargo por generar
+                # si no genera, se debió ejecutar factura al vencimiento por lo tanto ya no debe 
+                # generar cargos que corresponden al periodo negociado
+
+                if not tipo_factoring.lgenerafacturaenaceptacion and not documento.lfacturagenerada\
+                    and not (tipo_factoring.lgeneragaoenaceptacion and tipo_factoring.lgeneradcenaceptacion):
+                    error ='No ha generado factura al vencimiento para el documento ' \
+                        + numero_documento + ' que vence el ' + str(documento.dvencimiento)
 
                 # dias negociados
                 if fechacobrocalculo <= documento.dvencimiento:
@@ -2284,33 +2352,21 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                     # dias vencidos
                     dias_vencidos = (fechacobrocalculo - documento.dvencimiento).days
 
-                # SI NO CARGO DC EN NEGOCIACION HAY DOS CASOS:
-                # QUE GENERE FACTURA EN NEGOCIACION Y QUE NO GENERE
+                if tipo_operacion in ['R','C']:
+                    cobro_aplicado = documento_cobrado.aplicado()
+                else:
+                    cobro_aplicado = documento_cobrado.nvalorcobranza + documento_cobrado.nvalorbaja
 
-                # SI GENERA, en la liquidación se calculará en valor de dc
-                # desde la negociación
-
-                # SI NO GENERA, HAY UN PROCESO DE GENERACIÓN DE FACTURAS AL
-                # VENCIMIENTO QUE CARGARÁ EL DC HASTA ESA FECHA.
-
-                gao = Tasas_factoring.objects\
-                    .filter(cxtasa="GAO", empresa = id_empresa.empresa).first()
-                dc = Tasas_factoring.objects\
-                    .filter(cxtasa='DCAR', empresa = id_empresa.empresa).first()
-
-                # si genera factura en aceptación es posible que falte algún cargo por generar
-                # si no genera, se debió ejecutar factura al vencimiento por lo tanto ya no debe 
-                # generar cargos que corresponden al periodo negociado
                 if tipo_factoring.lgenerafacturaenaceptacion:
                     # genera GAO
                     if not tipo_factoring.lgeneragaoenaceptacion:
 
                         tasa_gao = documento.ntasacomision
 
+                        base_gao = cobro_aplicado
+                        
                         if gao.lsobreanticipo:
-                            base_gao = documento_cobrado.aplicado() * documento.nporcentajeanticipo / 100
-                        else:
-                            base_gao = documento_cobrado.aplicado()
+                            base_gao = base_gao * documento.nporcentajeanticipo / 100
 
                         valor_gao = ( base_gao * tasa_gao / 100)
 
@@ -2323,11 +2379,11 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
 
                         tasa_dc = documento.ntasadescuento
 
+                        base_dc = cobro_aplicado
+
                         if dc.lsobreanticipo:
-                            base_dc = documento_cobrado.aplicado() * documento.nporcentajeanticipo /100
-                        else:
-                            base_dc = documento_cobrado.aplicado() 
-                                            
+                            base_dc = base_dc * documento.nporcentajeanticipo /100
+
                         descuento_cartera = base_dc * tasa_dc /100
 
                         if not dc.lflat:
@@ -2342,11 +2398,11 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                     if tipo_factoring.lacumulamoraatasadc:
                         tasa_dcv += documento.ntasadescuento
 
+                    base_dc = cobro_aplicado
+                                    
                     if dc.lsobreanticipo:
-                        base_dc = documento_cobrado.aplicado() * documento.nporcentajeanticipo /100
-                    else:
-                        base_dc = documento_cobrado.aplicado() 
-                                        
+                        base_dc = base_dc * documento.nporcentajeanticipo /100
+
                     if not dc.lflat:
                         descuento_cartera_vencido = ( base_dc * tasa_dcv / 100) \
                             * dias_vencidos / dc.ndiasperiocidad
@@ -2359,47 +2415,41 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                         descuento_cartera_vencido = base_dc * tasa_dcv /100
 
 
-                # generar GAOA
-                gaoa = Tasas_factoring.objects\
-                    .filter(cxtasa="GAOA", empresa = id_empresa.empresa).first()
+                    # generar GAOA
 
-                if not gaoa:
-                    return HttpResponse("No se ha encontrado tasa de GAOA")
+                    # aplicar los días de gracia
+                    if tipo_factoring.lcargagaoa:
 
-                # aplicar los días de gracia
-                if tipo_factoring.lcargagaoa and dias_vencidos > tipo_factoring.ndiasgracia:
+                        tasa_gaoa = datos_operativos.ntasagaoa
 
-                    tasa_gaoa = datos_operativos.ntasagaoa
+                        base_gaoa = cobro_aplicado
 
-                    if gaoa.lsobreanticipo:
-                        base_gaoa = documento_cobrado.aplicado() * documento.nporcentajeanticipo / 100
-                    else:
-                        base_gaoa = documento_cobrado.aplicado()
+                        if gaoa.lsobreanticipo:
+                            base_gaoa = base_gaoa * documento.nporcentajeanticipo / 100
 
-                    # si la tasa se acumula, sumarla a la tasa del documento
-                    if tipo_factoring.lacumulagaoaatasagao:
-                        tasa_gaoa += documento.ntasacomision
+                        # si la tasa se acumula, sumarla a la tasa del documento
+                        if tipo_factoring.lacumulagaoaatasagao:
+                            tasa_gaoa += documento.ntasacomision
 
-                    if gaoa.lflat :
-                        # determinar cuantas veces aplicar la tasa según los días de aplicacion
-                        x = math.ceil(dias_vencidos/gaoa.ndiasperiocidad)
-                        tasa_gaoa = tasa_gaoa * x
+                        if gaoa.lflat :
+                            # determinar cuantas veces aplicar la tasa según los días de aplicacion
+                            x = math.ceil(dias_vencidos/gaoa.ndiasperiocidad)
+                            tasa_gaoa = tasa_gaoa * x
 
-                        valor_gaoa = base_gaoa * tasa_gaoa /100
-                    else:
-                        valor_gaoa = (base_gaoa * tasa_gaoa /100 
-                                    * dias_vencidos / gaoa.ndiasperiocidad)
+                            valor_gaoa = base_gaoa * tasa_gaoa /100
+                        else:
+                            valor_gaoa = (base_gaoa * tasa_gaoa /100 
+                                        * dias_vencidos / gaoa.ndiasperiocidad)
 
                 # generar crgos colateral
                 cargo_retenciones = base_retenciones * documento.nporcentajeanticipo / 100
 
                 cargo_bajas = base_bajas * documento.nporcentajeanticipo / 100
 
-                # json de los cargos
                 # agregar al diccionario
                 listacargos.append(GeneraCargoJSONSalida(codigo_operacion, cobranza.id
                                 , cobranza.dcobranza, id_asignacion, asignacion, id_documento, numero_documento
-                                , dias_vencidos, dias_negociados, documento_cobrado.aplicado()
+                                , dias_vencidos, dias_negociados, cobro_aplicado
                                 , documento.nporcentajeanticipo, base_dc, tasa_dc
                                 , descuento_cartera, descuento_cartera_vencido, base_gao, tasa_gao
                                 , valor_gao, base_gaoa, tasa_gaoa, valor_gaoa, base_retenciones
@@ -2422,7 +2472,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                 #   considerando que se liquiden cobranzas que hagan referencia a un 
                 #   mismo documento
 
-                total_otroscargos_no_operativos = ObtenerOtrosCargosDeDocumento(documento.id
+                total_otroscargos_no_operativos = ObtenerOtrosCargosDeDocumento(id_documento
                                                                                 , lista_otroscargos_no_operativos)
 
             # fin del for detalle
@@ -2493,7 +2543,7 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
                                     empresa = id_empresa.empresa).count()
 
     contexto={
-        "nombredecliente" : cobranza.cxcliente.cxcliente.ctnombre,
+        "nombredecliente" : nombre_cliente,
         "tipo_factoring" : tipo_factoring.id,
         "total_vuelto": round(total_vuelto,2),
         "total_sobrepagos": total_sobrepagos,
@@ -2519,16 +2569,17 @@ def LiquidarCobranzas(request,ids_cobranzas, tipo_operacion):
         "form": LiquidarForm,
         "base_iva":base_iva,
         "base_noiva":base_noiva,
-        "cliente": cobranza.cxcliente.id,
+        "cliente": id_cliente,
         "cobranzas":json.dumps(listacobranzas),
         "tipo_operacion":tipo_operacion,
         "cargos_no_operativos":json.dumps(lista_otroscargos_no_operativos),
         "solicitudes_pendientes":sp,
         'otros_cargos':otros_cargos,
         'usa_otros_cargos':tipo_factoring.laplicaotroscargos,
+        'error': error,
     }
 
-    return render(request, template_name, contexto)
+    return  contexto
 
 def ObtenerCargosDeProtestos(cobranza, listaotroscargos):
     total_cargos = 0
@@ -3092,7 +3143,7 @@ def ObtenerOtrosCargosDeDocumento(id_documento, listaotroscargos):
     # los cargos indicados en el detalle de la factura.
     cargos = Cargos_detalle.objects\
         .filter(cxdocumento_id = id_documento, nsaldo__gt = 0, leliminado = False )
-
+    
     for cargo in cargos:
         # buscar la factura correspondiente para indicarla en el registro 
         factura = Factura_venta.objects\
@@ -3649,6 +3700,8 @@ def Prorroga(request, id, tipo_asignacion, vencimiento, numero_factura, porvence
     return render(request, template_path, context)
 
 from operaciones.forms import TasasAPAccesoriosForm, TasasAPDocumentoForm
+from collections import namedtuple
+from datetime import datetime
 
 @login_required(login_url='/login/')
 @permission_required('operaciones.change_documentos', login_url='bases:sin_permisos')
@@ -4246,3 +4299,168 @@ def Registra_gestion_cobro(request, tipo_participante, id_detalle_revision):
                             empresa=id_empresa.empresa)
     gestion.save()
     return HttpResponse("OK")  # Retorna una respuesta HTTP simple
+
+def GeneraLiquidacionEnCero(request,ids_documentos, tipo_factoring,
+                            cliente_id, fecha_cobro):
+    tipo_documento = 'C'
+    arr_acc = []
+    arr_fac = []
+    detalle_cobranza = []
+    cabecera_cobranza = []
+
+    ids = ids_documentos.split(',')
+    for id in ids:
+        if int(id) < 0:
+            arr_acc.append(-int(id))
+        else:
+            arr_fac.append(id)
+
+    # Definir un namedtuple para los elementos de detalle_cobranza
+    DetalleCobranza = namedtuple('DetalleCobranza', [
+        'cxdocumento', 'nvalorcobranza', 'ndiasacondonar', 'nvalorbaja', 
+        'nretenciones', 'accesorioquitado'
+    ])
+
+    if tipo_documento == 'C':
+        # barrer lista de documentos
+        facturas = Documentos.objects.filter(id__in=arr_fac)\
+            .values('id', 'nsaldo', 'nporcentajeanticipo')\
+            .annotate(accesorio_quitado=RawSQL('SELECT FALSE',''))
+        quitados = ChequesAccesorios.objects.filter(id__in = arr_acc, leliminado = False)\
+            .values('id', 'chequequitado__nsaldo', 'nporcentajeanticipo', 'chequequitado')
+        lista_documentos = facturas.union(quitados)
+
+    for documento in lista_documentos:
+        print(documento)
+        detalle_cobranza.append(
+            DetalleCobranza(
+                cxdocumento=documento['id'],
+                nvalorcobranza=round(documento['nsaldo'] * documento['nporcentajeanticipo'] / 100, 2),
+                ndiasacondonar=0,
+                nvalorbaja=round(documento['nsaldo'] - (documento['nsaldo'] * documento['nporcentajeanticipo'] / 100), 2),
+                nretenciones=0,
+                accesorioquitado=documento['accesorio_quitado']
+            )
+        )
+    total_cobranza = sum(item.nvalorcobranza for item in detalle_cobranza)
+
+    # Definir un namedtuple para los elementos de cabecera_cobranza
+    CabeceraCobranza = namedtuple('CabeceraCobranza', [
+        'cxtipofactoring', 'cxcliente', 'cxcobranza', 'cxformapago',
+        'dcobranza', 'id', 'nsobrepago', 'nvalor'
+    ])
+
+    cabecera_cobranza.append(
+        CabeceraCobranza(
+            cxtipofactoring=tipo_factoring,
+            cxcliente=cliente_id,
+            cxcobranza='Cobranza',
+            cxformapago='E',
+            dcobranza=datetime.strptime(fecha_cobro, "%Y-%m-%d").date() if fecha_cobro else None,
+            id=None,
+            nsobrepago=0,
+            nvalor=total_cobranza
+        )
+    )
+
+    datos = obtenercontextoLiquidacion(request, "0", None
+                                       , cabecera_cobranza
+                                       , detalle_cobranza)
+    resultado = {
+        'error': datos['error'],
+        'sobrepago': -datos['neto'],
+        'total_cobranza': total_cobranza - (datos['neto'] if 'neto' in datos else 0)
+    }
+
+    return JsonResponse(resultado, safe=False)
+
+def DetalleDocumentosFacturasPurasLiquidacionEnCero(request, ids_documentos):
+    # filtrar los documentos correspondientes a la lista pasada
+    arr_acc = []
+    arr_fac = []
+    tempBlogs = []
+
+    ids = ids_documentos.split(',')
+    for id in ids:
+        if int(id) < 0:
+            arr_acc.append(-int(id))
+        else:
+            arr_fac.append(id)
+
+    documentos = Documentos.objects.filter(id__in = arr_fac, leliminado = False)
+    
+    for id in range(len(documentos)):
+        tempBlogs.append(GeneraListaDocumentosSeleccionadosLiquidacionEnCeroOutput(documentos[id])) # Converting `QuerySet` to a Python Dictionary
+
+    quitados = ChequesAccesorios.objects.filter(id__in = arr_acc, leliminado = False)
+
+    for i in range(len(quitados)):
+        tempBlogs.append(GeneraListaAccesoriosQuitadosSeleccionadosLiquidacionEnCeroOutput(quitados[i])) 
+
+    docjson = tempBlogs
+
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+
+    return HttpResponse(JsonResponse( data))
+
+def GeneraListaDocumentosSeleccionadosLiquidacionEnCeroOutput(doc):
+    # con los datos numericos entre comillas si se calcula el total
+    # de la columna en la tabla. Del otro tipo, no
+
+    # los datos aquí van a obtenerse con el getData de la tb, aunque no se 
+    # presenten en el HTML
+    output = {}
+    output['id'] = doc.id
+    output["IdComprador"] = doc.cxcomprador.id
+    output["Comprador"] = doc.cxcomprador.cxcomprador.ctnombre
+    output["Asignacion"] = doc.cxasignacion.cxasignacion
+    output["Documento"] = doc.ctdocumento
+    output["PorcentajeAnticipo"] = doc.nporcentajeanticipo
+    output["Emision"] = doc.demision.strftime("%Y-%m-%d")
+    # cuando es 100% los cálculos son sobre la nueva fecha ampliada
+    if doc.nporcentajeanticipo ==100:
+        output["Vencimiento"] = doc.vencimiento().strftime("%Y-%m-%d")
+    else:
+        output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
+    output["SaldoActual"] = doc.nsaldo
+    output["Cobro"] = round(doc.nsaldo * doc.nporcentajeanticipo / 100, 2)
+    output["Retenido"] = "0.0"
+    output["Bajas"] = round(doc.nsaldo 
+                                - (doc.nsaldo * doc.nporcentajeanticipo / 100), 2)
+    output["SaldoFinal"] = "0.0"
+    output["AccesorioQuitado"] = None
+    output["Prorroga"] = doc.ndiasprorroga
+
+    return output
+
+def GeneraListaAccesoriosQuitadosSeleccionadosLiquidacionEnCeroOutput(acc):
+    # con los datos numericos entre comillas si se calcula el total
+    # de la columna en la tabla. Del otro tipo, no
+
+    # los datos aquí van a obtenerse con el getData de la tb, aunque no se 
+    # presenten en el HTML
+    output = {}
+    output['id'] = acc.documento.id
+    output["IdComprador"] = acc.documento.cxcomprador.id
+    output["Comprador"] = acc.documento.cxcomprador.cxcomprador.ctnombre
+    output["Asignacion"] = acc.documento.cxasignacion.cxasignacion
+    output["Documento"] = acc.documento.ctdocumento
+    output["Emision"] = acc.documento.demision.strftime("%Y-%m-%d")
+    output["PorcentajeAnticipo"] = acc.nporcentajeanticipo
+    if acc.nporcentajeanticipo ==100:
+        output["Vencimiento"] = acc.vencimiento().strftime("%Y-%m-%d")
+    else:
+        output["Vencimiento"] = acc.dvencimiento.strftime("%Y-%m-%d")
+    output["SaldoActual"] = acc.chequequitado.nsaldo
+    output["Cobro"] = round(acc.chequequitado.nsaldo * acc.nporcentajeanticipo / 100, 2)
+    output["Retenido"] = "0.0"
+    output["Bajas"] = round(acc.chequequitado.nsaldo 
+                                - (acc.chequequitado.nsaldo * acc.nporcentajeanticipo / 100), 2)
+    output["SaldoFinal"] = "0.0"
+    output["AccesorioQuitado"] = acc.chequequitado.id
+    output["Prorroga"] = acc.documento.ndiasprorroga
+
+    return output

@@ -120,6 +120,13 @@ class TipoFactoringForm(forms.ModelForm):
             , 'laplicaotroscargos': 'Aplica otros cargos en liquidaciones al cliente'
             , 'lacumulamoraatasadc': 'Para vencidos, suma la tasa de descuento de cartera a la tasa de mora'
         }
+        widgets = {
+            'ndiasgracia': forms.NumberInput(
+                attrs={
+                    'min': '0', 'step': '1'
+                }
+            ),
+        }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for f in iter(self.fields):

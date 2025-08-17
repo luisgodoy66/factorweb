@@ -50,17 +50,22 @@ class DatosOperativosForm(forms.ModelForm):
             'cxestado': 'Seleccione el estado.',
             'ntasamora': 'Esta tasa se puede sumar a la tasa de descuento del documento para el cálculo del descuento de cartera vencido.'
         }
-        widgets={'ctbeneficiarioasignacion': forms.Textarea(attrs={'rows': '1'})
-            , 'ctbeneficiariocobranzas': forms.Textarea(attrs={'rows': '1'}), 
+        widgets = {
+            'ctbeneficiarioasignacion': forms.Textarea(attrs={'rows': '1'}),
+            'ctbeneficiariocobranzas': forms.Textarea(attrs={'rows': '1'}),
             'dalta': forms.DateInput(
-                format=('%Y-%m-%d'),
-                attrs={'class': 'form-control', 
-                    'placeholder': 'Seleccione una fecha',
-                    'type': 'date'
-                    }
-                    ),
+            format=('%Y-%m-%d'),
+            attrs={
+                'class': 'form-control',
+                'placeholder': 'Seleccione una fecha',
+                'type': 'date'
+            }
+            ),
+            **{
+            field: forms.NumberInput(attrs={'step': '0.25', 'class': 'form-control'})
+            for field in ['ntasacomision', 'ntasadescuentocartera', 'ntasagaoa', 'ntasamora']
+            }
         }
-
 
     def __init__(self, *args, **kwargs):
         empresa = kwargs.pop('empresa', None)

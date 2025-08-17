@@ -1093,6 +1093,7 @@ class ChequesAccesorios(ClaseModelo):
                                               , default=0, null=True)
     ndiasprorroga= models.SmallIntegerField(default=0, null=True)
     ncontadorprorrogas = models.SmallIntegerField(default=0)
+    lfacturagenerada = models.BooleanField(default=False)
     
     objects= ChequesAccesorios_Manager()
 

@@ -28,8 +28,8 @@
                             <div class="col-md-6"><label for="id_ctgirador" class=" form-control-label">
                                 Valor recibido</label></div>
                             <div class="col-md-6">
-                                <input type="number" step="0.01" name = "cobro_id"  id="cobro_id"
-                                value = "{{ valor_cobrado }}">
+                                <input type="number" step="0.01" name="cobro_id" id="cobro_id"
+                                    value="{{ valor_cobrado }}" max="{{ saldo }}">
                             </div>
                         </div>
                         <div class="row form-group">

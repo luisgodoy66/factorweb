@@ -1,0 +1,214 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">cobranzas</a></li>
+                    {% if tipo == "Cobranza" %}
+                        {% if por_vencer == 'Si' %}
+                        <li><a href="{% url 'cobranzas:listadocumentosporvencer' %}">
+                            cartera por vencer</a></li>
+                        {% else %}
+                        <li><a href="{% url 'cobranzas:listadocumentosvencidos' %}">
+                            Cartera vencida
+                        </a>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                        <li><a href="{% url 'cobranzas:listaprotestospendientes' %}">
+                            protestos pendiente</a></li>
+                    {% endif %}
+                    <li class="active">liquidación en cero</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<form  method="post" id="frmCobranza" enctype="multipart/form-data" 
+    class="form-horizontal">
+    <!-- <div class="col-lg-6"> -->
+    <div class="card">
+            {% csrf_token %}
+        <div class="card-header">
+            {% if tipo == "Cobranza" %}
+            <strong>Valores a cobrar de documentos</strong> de {{ cliente }}
+            {% else %}
+            <strong>Valores a recuperar de protestos</strong> de {{ cliente }}
+            {% endif %}
+        </div>
+        <div class="card-body card-block">
+            <!-- lista de clientes -->
+            <div class="row form-group">
+                <div class="col-md-1"><label for="id_dcobranza" 
+                    class=" form-control-label">
+                    Fecha de corte</label>
+                </div>
+                <div class="col-md-2 animate__animated animate__shakeX">
+                    <input type="date" class="form-control" name="fechahasta"  
+                    id="fechahasta" placeholder="Hasta" 
+                    aria-label="Ingrese fecha corte" >
+                </div>
+
+                <div class="col-md-1">
+                    <label for="id_nvalor" class=" form-control-label">
+                    Valor de cobranza</label>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" name="nvalor"  
+                    id="id_nvalor" placeholder="Valor" readonly
+                    aria-label="Ingrese valor de cobranza" >
+                </div>
+               
+                <div class="col-md-1 "><label for="id_nvalor" 
+                    class=" form-control-label">
+                    Sobrepago</label>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" name="nsobrepago"  
+                    id="id_nsobrepago" placeholder="Sobrepago" readonly
+                    aria-label="Ingrese sobrepago" >
+                </div>
+            </div>
+
+            <div >
+                <small>
+                        
+                    <table id="table"                      
+                        data-show-columns-toggle-all="true"
+                        data-detail-formatter="detailFormatter"
+                        data-minimum-count-columns="2"
+                        data-id-field="id"
+                        data-unique-id="id"
+                        data-show-footer="true"
+                        data-side-pagination="server"
+                        {% if tipo == 'Cobranza' %}
+                        data-url="{% url 'cobranzas:detalle_documentosfacturaspuras_liquidacion_en_cero' documentos %}"
+                        {% endif %}
+                        >
+                        </table>
+
+                </small>
+
+            </div>
+            <div class="row form-group">
+                <div class="col-md-5"></div>
+                <div class="col-md-7 ">
+                    <div class="alert alert-warning" role="alert">
+                        <small>
+                        Los <strong>Valores cobrados</strong> corresponden al anticipo del saldo en 
+                        <strong>Recibido</strong> y lo restante en <strong>Bajas</strong> 
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>    
+          
+        <div class="card-footer">
+            {% if tipo == "Cobranza" %}
+                {% if por_vencer == 'Si' %}
+                    <a href="{% url 'cobranzas:listadocumentosporvencer' %}" 
+                    class="btn btn-danger btn-sm">
+                        <i class="fa fa-ban"></i> Cancelar
+                    </a>
+                {% else %}
+                    <a href="{% url 'cobranzas:listadocumentosvencidos' %}" 
+                    class="btn btn-danger btn-sm">
+                        <i class="fa fa-ban"></i> Cancelar
+                    </a>
+                {% endif %}
+            {% else %}
+                <a href="{% url 'cobranzas:listaprotestospendientes' %}" 
+                class="btn btn-danger btn-sm">
+                    <i class="fa fa-ban"></i> Cancelar
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<script>
+const id_cliente = "{{ cliente_id }}";
+const tipo_factoring = "{{ tipo_factoring }}";
+const documentos = "{{ documentos }}";
+var $table = jQuery('#table')
+
+window.onload=function(){
+
+    $table.bootstrapTable({locale:"es-EC"});
+
+    // inicializar tabla
+    initTable();
+    // Ejecutar Recalcular cuando cambie la fecha
+    jQuery('#fechahasta').change(function() {
+        Recalcular(capturaValor("fechahasta"));
+    });
+
+    // inicializar el campo fechahasta con la fecha actual
+    jQuery('#fechahasta').val(new Date().toISOString().split('T')[0]);
+    Recalcular(capturaValor("fechahasta"));
+
+};
+
+function initTable() {
+    $table.bootstrapTable('destroy').bootstrapTable({
+    locale: "es-EC",
+    columns: [
+        [{  title: 'Ref.', field: 'id', rowspan: 2
+        , align: 'center', valign: 'middle', sortable: true,
+        }, {title: 'Deudor', field: 'Comprador', rowspan: 2
+        , align: 'center', valign: 'middle', sortable: true
+        }, {title: 'Asignación', field: 'Asignacion'
+        , rowspan: 2, align: 'center', valign: 'middle', sortable: true,
+        }, {title: 'Documento', field: 'Documento'
+        , rowspan: 2, align: 'center', valign: 'middle', sortable: true,
+        }, {title: 'Vencimiento', field: 'Vencimiento'
+        , rowspan: 2, align: 'center', valign: 'middle', sortable: true,
+        }, {title: 'Saldo actual', field: 'SaldoActual'
+        , rowspan: 2, align: 'right', valign: 'middle', sortable: true,
+        }, {title: 'Valores cobrados', colspan: 3, align: 'center',
+        }, {title: 'Saldo', field: 'SaldoFinal',rowspan: 2, align: 'center'
+        }
+    ],
+        [
+        {field: 'Cobro', title: 'Recibido', sortable: true, align: 'right'
+            ,footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+        }, {field: 'Retenido', title: 'Retenciones', sortable: true, align: 'right'
+        ,footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+        }, {field: 'Bajas', title: 'Bajas', sortable: true, align: 'right'
+            ,footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+        }]
+    ]
+    
+    })
+
+}
+
+function Recalcular(fecha_cobro){
+  // el formato usado es yyyy-mm-dd. Esta validación necesaria pues al digitar la fecha
+  // su pueden tener meses y dias como '00'
+  var isValid = fecha_cobro.match(/^\d{4}(\-)(((0)[0-9])|((1)[0-2]))(\-)([0-2][0-9]|(3)[0-1])$/);
+
+  if (isValid) {
+    fetchRecuperar("/cobranzas/generaliquidacionencero/" + documentos + "/" 
+        + tipo_factoring + "/" + id_cliente + "/" + fecha_cobro, function(data){
+            if (data.error != '') {
+                MensajeError(data.error);
+            }else{
+                inicializaValor('id_nvalor', data.total_cobranza);
+                inicializaValor('id_nsobrepago', data.sobrepago);
+            }
+        }) 
+  } 
+
+}
+
+
+</script>
+{% endblock %}

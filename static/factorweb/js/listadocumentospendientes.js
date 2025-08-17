@@ -5,6 +5,7 @@ var $cobroconcheque = jQuery("#cobroconcheque")
 var $cobroconefectivo = jQuery("#cobroconefectivo")
 var $cobroconmovimiento = jQuery("#cobroconmovimiento")
 var $cobrocontransferencia = jQuery("#cobrocontransferencia")
+var $liquidacionencero = jQuery("#liquidacionencero")
 const por_vencer = capturaValor("filtro")
 var $ampliar_plazo = jQuery("#ampliarplazo")
 
@@ -35,6 +36,7 @@ window.onload=function(){
         $cobroconmovimiento.prop('disabled', !$table.bootstrapTable('getSelections').length)
         $cobrocontransferencia.prop('disabled', !$table.bootstrapTable('getSelections').length)
         $ampliar_plazo.prop('disabled', !$table.bootstrapTable('getSelections').length)
+        $liquidacionencero.prop('disabled', !$table.bootstrapTable('getSelections').length)
 
         // save your data, here just save the current page
         selections = getIdSelections()
@@ -66,6 +68,11 @@ window.onload=function(){
     $ampliar_plazo.click(function () {
       AmpliacionDePlazo('F');
       $ampliar_plazo.prop('disabled', true)
+    })
+
+    $liquidacionencero.click(function () {
+      LiquidacionEnCero();
+      $liquidacionencero.prop('disabled', true)
     })
 };
     
@@ -157,4 +164,49 @@ function operateFormatter(value, row, index) {
     '</a>  ',
   ].join('')
   }
+
+function LiquidacionEnCero(){
+  // validar que los elementos seleccionados sean del mismo cliente
+  // y del mismo tipo de factoring
+
+  var seleccion=  $table.bootstrapTable('getSelections')
+  var ids = getIdSelections()
+  var id_cliente = ''
+  var error = false
+  var tipo_factoring=''
+
+  seleccion.map(function(row)  {
+    // validar un solo cliente
+    if (id_cliente==''){
+      id_cliente=row.IdCliente
+    }
+    else{ if (id_cliente != row.IdCliente){
+      error = true
+    }}
+    // validar un solo tipo de factoring. Aunque este campo no aparece en la bt, 
+    // si está en el data con que se carga la bt
+    if (tipo_factoring==''){
+      tipo_factoring=row.IdTipoFactoring
+    }
+    else{ if (tipo_factoring != row.IdTipoFactoring){
+        error = true
+    }}
+    // solo los tipos de factoring que anticipan el 100%
+    if ( row.Anticipa100){
+      error = true
+    }
+  });
+
+  if (error ){
+    alert("Ha seleccionado varios clientes o tipos de factoring que no aplican liquidación de cobranza."
+      +" No puede continuar")
+  }
+  else{
+
+      url = '/cobranzas/consultaliquidacionencero/'+ids+'/'+id_cliente+'/'+tipo_factoring+'/'+por_vencer;
+    
+    location.href=url
+  }
+  return false
+}
 

@@ -704,8 +704,8 @@ def DesembolsarAsignacion(request, pk, cliente_id):
         else:
             contexto['form_errors'] = formulario.errors
 
-    sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
-                                    empresa = id_empresa.empresa).count()
+    sp = ModelosSolicitud.Asignacion.objects\
+        .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
 
     contexto.update({'liquidacion':asignacion.dnegociacion
         , 'instruccion_de_pago':asignacion.ctinstrucciondepago
