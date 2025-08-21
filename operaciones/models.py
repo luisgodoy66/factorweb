@@ -1260,7 +1260,9 @@ class Notas_debito_cabecera(ClaseModelo):
 
 class Notas_debito_detalle(ClaseModelo):
     notadebito = models.ForeignKey(Notas_debito_cabecera, on_delete=models.CASCADE)
-    cargo = models.OneToOneField(Cargos_detalle, on_delete=models.RESTRICT)
+    cargo = models.OneToOneField(Cargos_detalle, 
+                                 related_name="cargo_detalle_nd", 
+                                 on_delete=models.RESTRICT)
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 class Cheques_canjeados(ClaseModelo):

@@ -77,14 +77,14 @@
                         <tr>
                             <td style="width: 20%; "><strong>Liquidación:</strong></td>
                             <td style="width: 40%; ">{{ liquidacion.cxliquidacion }}</td>
-                            <td style="width: 20%; "><strong>Total:</strong></td>
-                            <td style="width: 20%; ">{{ liquidacion.neto|floatformat:"2g"}}</td>
+                            <td style="width: 20%; "><strong>Fecha de desembolso:</strong></td>
+                            <td style="width: 20%; ">{{ liquidacion.ddesembolso|custom_date_format}}</td>
                         </tr>
                         <tr>
                             <td style="width: 20%; "><strong>Instrucción de pago:</strong></td>
                             <td style="width: 40%; ">{{ liquidacion.ctinstrucciondepago }}</td>
-                            <td style="width: 20%; "><strong>Fecha de desembolso:</strong></td>
-                            <td style="width: 20%; ">{{ liquidacion.ddesembolso|custom_date_format}}</td>
+                            <td style="width: 20%; "><strong>Total:</strong></td>
+                            <td style="width: 20%; ">{{ liquidacion.neto|floatformat:"2g"}}</td>
                         </tr>
                     </tbody>
                 </table>

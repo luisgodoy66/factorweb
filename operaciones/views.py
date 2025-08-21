@@ -1709,6 +1709,7 @@ def GeneraListaAsignacionesJSONSalida(asignacion):
     output["InstruccionDePago"] = asignacion.ctinstrucciondepago
     output["FechaDesembolso"] = asignacion.ddesembolso.strftime("%Y-%m-%d")
     output["ValorNegociado"] =  asignacion.nvalor
+    output["Anticipo"] =  asignacion.nanticipo
     output["PlazoMayor"] = asignacion.nmayorplazonegociacion
     output["Cargos"] = asignacion.ngao + asignacion.ndescuentodecartera
     output["IVA"] = asignacion.niva

@@ -18,6 +18,10 @@ def running_total(sales_list):
     return sum(d.get('ntotal') for d in sales_list)
 
 @register.filter
+def running_anticipo(sales_list):
+    return sum(d.nanticipo for d in sales_list)
+
+@register.filter
 def running_total2(sales_list):
     return sum(d.ntotal for d in sales_list)    
 

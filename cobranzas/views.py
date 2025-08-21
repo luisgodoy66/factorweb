@@ -2837,7 +2837,7 @@ def GeneraListaNotasDeDebitoPendientesJSONSalida(transaccion):
             opx = factura.__str__()
         else:
             opx = "Debe generar factura"
-    print(transaccion.cxtipooperacion,transaccion.operacion)
+
     output["Operacion"] = opx
     output["Tipo"] = transaccion.cxtipooperacion
 
@@ -3145,24 +3145,23 @@ def ObtenerOtrosCargosDeDocumento(id_documento, listaotroscargos):
         .filter(cxdocumento_id = id_documento, nsaldo__gt = 0, leliminado = False )
     
     for cargo in cargos:
-        # buscar la factura correspondiente para indicarla en el registro 
-        factura = Factura_venta.objects\
-            .filter(operacion = cargo.cxasignacion.id).first()
 
-        if factura:
+        if cargo.cargo_detalle_nd:
             # Cargos que no han sido cobrados, podrían ser GAO, DC, en facturas generadas
             # al vencimiento. SOLO FILTRAR OTROS CARGOS (con nota de debito)
-            if factura.notadebito:
-                listaotroscargos.append(GeneraOtroCargoJSONSalida(
-                    cargo.id, cargo.cxmovimiento.ctmovimiento
-                    , cargo.dultimageneracioncargos, cargo.nsaldo, factura.notadebito.id
-                    , factura.__str__(), 'F'))
+            nd = cargo.cargo_detalle_nd.notadebito
+            doc = nd.factura_notadedebito.__str__() if nd.factura_notadedebito else nd.__str__()
+            listaotroscargos.append(GeneraOtroCargoJSONSalida(
+                cargo.id, cargo.cxmovimiento.ctmovimiento
+                , cargo.dultimageneracioncargos, cargo.nsaldo
+                , nd.id
+                , doc, 'F'))
         else:
             print('cargo blanco')
             listaotroscargos.append(GeneraOtroCargoJSONSalida(
                 cargo.id, cargo.cxmovimiento.ctmovimiento
                 , cargo.dultimageneracioncargos, cargo.nsaldo, None
-                , 'sin factura', ''))
+                , 'sin nd', ''))
 
         total_cargos += cargo.nsaldo
 
@@ -4331,7 +4330,6 @@ def GeneraLiquidacionEnCero(request,ids_documentos, tipo_factoring,
         lista_documentos = facturas.union(quitados)
 
     for documento in lista_documentos:
-        print(documento)
         detalle_cobranza.append(
             DetalleCobranza(
                 cxdocumento=documento['id'],

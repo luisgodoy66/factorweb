@@ -425,16 +425,18 @@ def ImpresionResumenAsignaciones(request, desde, hasta, clientes=None):
 
     total = cartera.aggregate(
         total = Sum('nvalor'),
+        total_anticipo = Sum('nanticipo'),
         cargos = Sum('ngao') + Sum('ndescuentodecartera') + Sum('notroscargos'),
-        neto = Sum('nanticipo') - Sum('ngao') - Sum('ndescuentodecartera') 
-            - Sum('notroscargos'),
         iva = Sum('niva'),
+        neto = Sum('nanticipo') - Sum('ngao') - Sum('ndescuentodecartera') 
+            - Sum('notroscargos')- Sum('niva'),
         )
 
     context={
         "detalle" : cartera,
         'empresa': id_empresa.empresa,
         'total_negociado': total['total'],
+        'total_anticipo': total['total_anticipo'],
         'total_cargos': total['cargos'],
         'total_neto': total['neto'],
         'total_iva': total['iva'],

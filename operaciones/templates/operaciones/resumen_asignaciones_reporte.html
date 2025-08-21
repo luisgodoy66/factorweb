@@ -65,10 +65,11 @@
                             <th>Desembolso</th>        
                             <th style="text-align: right;">Plazo mayor</th>        
                             <th style="text-align: right;">Total factura</th>
+                            <th style="text-align: right;">Total anticipo</th>
                             <th style="text-align: right;">Cargos</th>
                             <th style="text-align: right;">IVA</th>
                             <th style="text-align: right;">Neto</th>
-                            <th>Estado</th>
+                            <!-- <th>Estado</th> -->
                             <th>Instrucción</th>
                         </thead>
                         <tbody>
@@ -79,7 +80,8 @@
                             <tr>
                                 <td class="subrayado" colspan="5"><strong>{{ factoring.grouper }}</strong></td>
                                 <td class="subrayado numero"><strong> {{factoring.list|running_valor|floatformat:"2g" }}</strong></td>
-                                <td class="subrayado" colspan="5"></td>
+                                <td class="subrayado numero"><strong> {{factoring.list|running_anticipo|floatformat:"2g" }}</strong></td>
+                                <td class="subrayado" colspan="4"></td>
                             </tr>
                                 {% for item in factoring.list %}
                                 <tr></tr>
@@ -90,10 +92,11 @@
                                     <td>{{ item.ddesembolso|custom_date_format }}</td>
                                     <td class="numero">{{ item.nmayorplazonegociacion }}</td>
                                     <td class="numero">{{ item.nvalor|floatformat:"2g" }}</td>
+                                    <td class="numero">{{ item.nanticipo|floatformat:"2g" }}</td>
                                     <td class="numero">{{ item.cargos|floatformat:"2g" }}</td>
                                     <td class="numero">{{ item.niva|floatformat:"2g" }}</td>
                                     <td class="numero">{{ item.neto|floatformat:"2g" }}</td>
-                                    <td class="centrado">{{ item.cxestado }}</td>
+                                    <!-- <td class="centrado">{{ item.cxestado }}</td> -->
                                     <td width="20%">{{ item.ctinstrucciondepago}}</td>
                                 </tr>
                                 {% endfor %}
@@ -102,6 +105,7 @@
                             <tr></tr>
                             <tr>
                                 <td colspan="6" class="numero"><h4>{{ total_negociado|floatformat:"2g" }}</h4></td>
+                                <td class="numero"><h4>{{ total_anticipo|floatformat:"2g" }}</h4></td>
                                 <td class="numero"><h4>{{ total_cargos|floatformat:"2g" }}</h4></td>
                                 <td class="numero"><h4>{{ total_iva|floatformat:"2g" }}</h4></td>
                                 <td class="numero"><h4>{{ total_neto|floatformat:"2g" }}</h4></td>
