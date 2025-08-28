@@ -968,7 +968,8 @@ def AceptarAsignacion(request, asignacion_id=None):
         "beneficiario": beneficiario,
         'solicitudes_pendientes':sp,
         'otros_cargos':otros_cargos,
-        'usa_otros_cargos':tipo_factoring.laplicaotroscargos
+        'usa_otros_cargos':tipo_factoring.laplicaotroscargos,
+        'tipo_factoring': tipo_factoring.cttipofactoring
     }
 
     return render(request, template_name, contexto)
@@ -2978,13 +2979,26 @@ def GeneraListaCarteraClienteJSON(request,  clientes =None):
             arr_clientes.append(id)
 
     if clientes==None:
-        facturas = Documentos.objects.cartera_pendiente(id_empresa.empresa)
-        cheques_quitados = ChequesAccesorios.objects.cartera_pendiente(id_empresa.empresa)
+        facturas = Documentos.objects\
+            .cartera_pendiente(id_empresa.empresa)
+        cheques_quitados = ChequesAccesorios.objects\
+            .facturas_pendiente(id_empresa.empresa)
+        accesorios = ChequesAccesorios.objects\
+            .cheques_pendientes(id_empresa.empresa)
+        protestos = Documentos_protestados.objects\
+            .facturas_pendiente(id_empresa.empresa)
     else:
-        facturas = Documentos.objects.cartera_pendiente_cliente(id_empresa.empresa, arr_clientes)
-        cheques_quitados = ChequesAccesorios.objects.cartera_pendiente_cliente(id_empresa.empresa, arr_clientes)
-                
-    cartera = facturas.union(cheques_quitados).order_by('cxcliente__cxcliente__ctnombre')
+        facturas = Documentos.objects\
+            .cartera_pendiente_cliente(id_empresa.empresa, arr_clientes)
+        cheques_quitados = ChequesAccesorios.objects\
+            .facturas_pendiente_cliente(id_empresa.empresa, arr_clientes)
+        accesorios = ChequesAccesorios.objects\
+            .cheques_pendientes_cliente(id_empresa.empresa, arr_clientes)
+        protestos = Documentos_protestados.objects\
+            .facturas_pendiente_cliente(id_empresa.empresa, arr_clientes)
+
+    cartera = facturas.union(cheques_quitados, accesorios, protestos)\
+        .order_by('cxcliente__cxcliente__ctnombre')
 
     tempBlogs = []
     for i in range(len(cartera)):
@@ -3027,12 +3041,24 @@ def GeneraListaCarteraDeudorJSON(request,  deudores =None):
 
     if deudores==None:
         facturas = Documentos.objects.cartera_pendiente(id_empresa.empresa)
-        cheques_quitados = ChequesAccesorios.objects.cartera_pendiente(id_empresa.empresa)
+        cheques_quitados = ChequesAccesorios.objects\
+            .facturas_pendiente(id_empresa.empresa)
+        accesorios = ChequesAccesorios.objects\
+            .cheques_pendientes(id_empresa.empresa)
+        protestos = Documentos_protestados.objects\
+            .facturas_pendiente(id_empresa.empresa)
     else:
-        facturas = Documentos.objects.cartera_pendiente_deudor(id_empresa.empresa, arr_deudores)
-        cheques_quitados = ChequesAccesorios.objects.cartera_pendiente_deudor(id_empresa.empresa, arr_deudores)
+        facturas = Documentos.objects\
+            .cartera_pendiente_deudor(id_empresa.empresa, arr_deudores)
+        cheques_quitados = ChequesAccesorios.objects\
+            .facturas_pendiente_deudor(id_empresa.empresa, arr_deudores)
+        accesorios = ChequesAccesorios.objects\
+            .cheques_pendientes_deudor(id_empresa.empresa, arr_deudores)
+        protestos = Documentos_protestados.objects\
+            .facturas_pendiente_deudor(id_empresa.empresa, arr_deudores)
 
-    cartera = facturas.union(cheques_quitados).order_by('cxcomprador__cxcomprador__ctnombre')
+    cartera = facturas.union(cheques_quitados, accesorios, protestos)\
+        .order_by('cxcomprador__cxcomprador__ctnombre')
 
     tempBlogs = []
     for i in range(len(cartera)):

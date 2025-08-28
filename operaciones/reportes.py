@@ -331,10 +331,10 @@ def ImpresionFacturasPendientes(request, clientes = None):
 
     if clientes==None:
         facturas = Documentos.objects.cartera_pendiente(id_empresa.empresa)
-        cheques_quitados = ChequesAccesorios.objects.cartera_pendiente(id_empresa.empresa)
+        cheques_quitados = ChequesAccesorios.objects.facturas_pendiente(id_empresa.empresa)
     else:
         facturas = Documentos.objects.cartera_pendiente_cliente(id_empresa.empresa, arr_clientes)
-        cheques_quitados = ChequesAccesorios.objects.cartera_pendiente_cliente(id_empresa.empresa, arr_clientes)
+        cheques_quitados = ChequesAccesorios.objects.facturas_pendiente_cliente(id_empresa.empresa, arr_clientes)
 
     totalfacturas = facturas.aggregate(total = Sum('nsaldo'))
     if not totalfacturas['total']: totalfacturas['total']=0
@@ -363,17 +363,19 @@ def ImpresionFacturasPendientes(request, clientes = None):
 def ImpresionAccesoriosPendientes(request, id_cliente=None):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 #     se esta filtrando por un solo cliente por lo que el arreglo no hace falta
-#     arr_clientes = []
+    arr_clientes = []
      
-#     if clientes != None:
-#         ids = clientes.split(',')
-#         for id in ids:
-#             arr_clientes.append(id)
+    if id_cliente != None:
+        ids = id_cliente.split(',')
+        for id in ids:
+            arr_clientes.append(id)
 
     if id_cliente == None:
-        cartera = ChequesAccesorios.objects.cheques_pendientes(id_empresa.empresa)
+        cartera = ChequesAccesorios.objects\
+            .cheques_pendientes(id_empresa.empresa)
     else:
-        cartera = ChequesAccesorios.objects.cheques_pendientes_cliente(id_cliente)
+        cartera = ChequesAccesorios.objects\
+            .cheques_pendientes_cliente(id_empresa.empresa, arr_clientes)
 
     total = cartera.aggregate(total = Sum('ntotal'))
 
@@ -890,10 +892,10 @@ def ImpresionFacturasPendientesDeudores(request, deudores = None):
 
     if deudores==None:
         facturas = Documentos.objects.cartera_pendiente(id_empresa.empresa)
-        cheques_quitados = ChequesAccesorios.objects.cartera_pendiente(id_empresa.empresa)
+        cheques_quitados = ChequesAccesorios.objects.facturas_pendiente(id_empresa.empresa)
     else:
         facturas = Documentos.objects.cartera_pendiente_deudor(id_empresa.empresa, arr_deudores)
-        cheques_quitados = ChequesAccesorios.objects.cartera_pendiente_deudor(id_empresa.empresa, arr_deudores)
+        cheques_quitados = ChequesAccesorios.objects.facturas_pendiente_deudor(id_empresa.empresa, arr_deudores)
 
     totalfacturas = facturas.aggregate(total = Sum('nsaldo'))
     if not totalfacturas['total']: totalfacturas['total']=0
@@ -917,5 +919,136 @@ def ImpresionFacturasPendientesDeudores(request, deudores = None):
         # stylesheets=stylesheet_paths
     )
     response['Content-Disposition'] = 'inline; filename="factueas pendientes.pdf"'
+    return response
+
+def ImpresionCarteraPendientePorCliente(request, clientes = None):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    totalfacturas=0
+    totalquitados=0
+    arr_clientes = []
+    
+    if clientes != None:
+        ids = clientes.split(',')
+        for id in ids:
+            arr_clientes.append(id)
+
+    template_path = 'operaciones/detalle_facturaspendientes_reporte.html'
+
+    if clientes==None:
+        facturas = Documentos.objects\
+            .cartera_pendiente(id_empresa.empresa)
+        cheques_quitados = ChequesAccesorios.objects\
+            .facturas_pendiente(id_empresa.empresa)
+        accesorios = ChequesAccesorios.objects\
+            .cheques_pendientes(id_empresa.empresa)
+        protestos = Documentos_protestados.objects\
+            .facturas_pendiente(id_empresa.empresa)
+    else:
+        facturas = Documentos.objects\
+            .cartera_pendiente_cliente(id_empresa.empresa, arr_clientes)
+        cheques_quitados = ChequesAccesorios.objects\
+            .facturas_pendiente_cliente(id_empresa.empresa, arr_clientes)
+        accesorios = ChequesAccesorios.objects\
+            .cheques_pendientes_cliente(id_empresa.empresa, arr_clientes)
+        protestos = Documentos_protestados.objects\
+            .facturas_pendiente_cliente(id_empresa.empresa, arr_clientes)
+
+    totalfacturas = facturas.aggregate(total = Sum('nsaldo'))
+    if not totalfacturas['total']: totalfacturas['total']=0
+
+    totalquitados = cheques_quitados.aggregate(total = Sum('chequequitado__nsaldo'))
+    if not totalquitados['total']: totalquitados['total']=0
+
+    totalaccesorios = accesorios.aggregate(total = Sum('ntotal'))
+    if not totalaccesorios['total']: totalaccesorios['total']=0
+
+    totalprotestos = protestos.aggregate(total = Sum('saldo'))
+    if not totalprotestos['total']: totalprotestos['total']=0
+
+    cartera = facturas.union(cheques_quitados, accesorios, protestos)\
+        .order_by('cxcliente__cxcliente__ctnombre')
+    
+    context={
+        "reporte" : 'CARTERA PENDIENTE',
+        "detalle" : cartera,
+        'empresa': id_empresa.empresa,
+        'total' : totalfacturas['total'] + totalquitados['total'] 
+        + totalaccesorios['total'] + totalprotestos['total'],
+    }
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
+    )
+    response['Content-Disposition'] = 'inline; filename="facturas pendientes.pdf"'
+    return response
+
+def ImpresionCarteraPendientePorDeudor(request, deudores = None):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    totalfacturas=0
+    totalquitados=0
+    arr_deudores = []
+    
+    if deudores != None:
+        ids = deudores.split(',')
+        for id in ids:
+            arr_deudores.append(id)
+
+    template_path = 'operaciones/detalle_facturaspendientesdeudores_reporte.html'
+
+    if deudores==None:
+        facturas = Documentos.objects\
+            .cartera_pendiente(id_empresa.empresa)
+        cheques_quitados = ChequesAccesorios.objects\
+            .facturas_pendiente(id_empresa.empresa)
+        accesorios = ChequesAccesorios.objects\
+            .cheques_pendientes(id_empresa.empresa)
+        protestos = Documentos_protestados.objects\
+            .facturas_pendiente(id_empresa.empresa)
+    else:
+        facturas = Documentos.objects\
+            .cartera_pendiente_deudor(id_empresa.empresa, arr_deudores)
+        cheques_quitados = ChequesAccesorios.objects\
+            .facturas_pendiente_deudor(id_empresa.empresa, arr_deudores)
+        accesorios = ChequesAccesorios.objects\
+            .cheques_pendientes_deudor(id_empresa.empresa, arr_deudores)
+        protestos = Documentos_protestados.objects\
+            .facturas_pendiente_deudor(id_empresa.empresa, arr_deudores)
+
+
+    totalfacturas = facturas.aggregate(total = Sum('nsaldo'))
+    if not totalfacturas['total']: totalfacturas['total']=0
+
+    totalquitados = cheques_quitados.aggregate(total = Sum('chequequitado__nsaldo'))
+    if not totalquitados['total']: totalquitados['total']=0
+
+    totalaccesorios = accesorios.aggregate(total = Sum('ntotal'))
+    if not totalaccesorios['total']: totalaccesorios['total']=0
+
+    totalprotestos = protestos.aggregate(total = Sum('saldo'))
+    if not totalprotestos['total']: totalprotestos['total']=0
+
+    cartera = facturas.union(cheques_quitados, accesorios, protestos)\
+        .order_by('cxcliente__cxcliente__ctnombre')
+    
+    context={
+        "reporte" : 'CARTERA PENDIENTE',
+        "detalle" : cartera,
+        'empresa': id_empresa.empresa,
+        'total' : totalfacturas['total'] + totalquitados['total'] 
+        + totalaccesorios['total'] + totalprotestos['total'],
+    }
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
+    )
+    response['Content-Disposition'] = 'inline; filename="facturas pendientes.pdf"'
     return response
 

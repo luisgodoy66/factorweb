@@ -182,7 +182,7 @@ class Asignacion(ClaseModelo):
         return self.get_cxestado_display()
     
 class Documentos_Manager(models.Manager):
-    def facturas_pendientes(self, fecha_corte, id_empresa):
+    def detalle_facturas_pendientes(self, fecha_corte, id_empresa):
         fecha = parse_date(fecha_corte)
         return self.filter(dvencimiento__lte = fecha - F('ndiasprorroga')
                 , leliminado = False, nsaldo__gt = 0
@@ -318,7 +318,11 @@ class Documentos_Manager(models.Manager):
                                                                           -F('cxasignacion__ddesembolso')
                                                                           , output_field=DateField()))
                                                 , IntegerField()),
-                            )\
+                            descripcion = Concat('cxasignacion__cxasignacion',
+                                                Value(' - '),
+                                                'ctdocumento',
+                                                output_field=CharField())
+                    )\
                     .order_by('cxcliente__cxcliente__ctnombre')
     
     def TotalCarteraCliente(self, id_cliente):
@@ -455,6 +459,9 @@ class Documentos_Manager(models.Manager):
                                                                           -F('cxasignacion__ddesembolso')
                                                                           , output_field=DateField()))
                                                 , IntegerField()),
+                        descripcion = Concat('cxasignacion__cxasignacion'
+                                            , Value('-') 
+                                            , ('ctdocumento'), output_field=CharField())
                         )\
                 .order_by('cxcliente__cxcliente__ctnombre')
 
@@ -481,6 +488,9 @@ class Documentos_Manager(models.Manager):
                                                                           -F('cxasignacion__ddesembolso')
                                                                           , output_field=DateField()))
                                                 , IntegerField()),
+                        descripcion = Concat('cxasignacion__cxasignacion'
+                                            , Value('-') 
+                                            , ('ctdocumento'), output_field=CharField())
                         )\
                 .order_by('cxcomprador__cxcomprador__ctnombre')
     
@@ -578,7 +588,7 @@ class ChequesAccesorios_Manager(models.Manager):
                 , empresa = id_empresa
                 )
 
-    def facturas_pendientes(self, fecha_corte, id_empresa):
+    def detalle_facturas_pendientes(self, fecha_corte, id_empresa):
         fecha = parse_date(fecha_corte)
         return self.filter(
                 dvencimiento__lte = fecha - F('ndiasprorroga'),
@@ -689,7 +699,8 @@ class ChequesAccesorios_Manager(models.Manager):
                 )\
             .order_by()
 
-    def cartera_pendiente(self, id_empresa):
+    def facturas_pendiente(self, id_empresa):
+        # se usa en impresion de cartera pendiente
         return self.filter(laccesorioquitado = True
                            , chequequitado__cxestado = 'A'
                            , leliminado = False, lcanjeado = False
@@ -703,7 +714,8 @@ class ChequesAccesorios_Manager(models.Manager):
                         , "dvencimiento", "ndiasprorroga"
                         , "documento__cxasignacion__ddesembolso"
                         , "chequequitado__nsaldo")\
-                .annotate(vencimiento =ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
+                .annotate(
+                    vencimiento =ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
                                                          , output_field = DateField() ),
                         dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
                                                                             , output_field=DateField()))
@@ -712,10 +724,16 @@ class ChequesAccesorios_Manager(models.Manager):
                                                                           -F('documento__cxasignacion__ddesembolso')
                                                                           , output_field=DateField()))
                                                 , IntegerField()),
-                        )\
+                        descripcion =  Concat('cxbanco__ctbanco'
+                                                , Value(' CTA.') 
+                                                , 'ctcuenta'
+                                                , Value(' CH/')
+                                                , ('ctcheque'), output_field=CharField())
+                          )\
                 .order_by('documento__cxcliente__cxcliente__ctnombre')
 
     def cheques_pendientes(self, id_empresa):
+        # se usa en impresion de accesorio pendientes
         return self.filter(laccesorioquitado = False
                            , cxestado='A'
                            , leliminado = False, lcanjeado = False
@@ -746,10 +764,11 @@ class ChequesAccesorios_Manager(models.Manager):
                           )\
                 .order_by('documento__cxcliente__cxcliente__ctnombre')
 
-    def cheques_pendientes_cliente(self, id_cliente):
+    def cheques_pendientes_cliente(self, id_empresa, arr_cliente):
+        # se usa en impresion de accesorio pendientes
         return self.filter(laccesorioquitado = False, cxestado='A'
                 , leliminado = False, lcanjeado = False
-                , documento__cxcliente = id_cliente
+                , documento__cxcliente__in = arr_cliente
                 , documento__cxasignacion__cxestado = "P"
                 , documento__cxasignacion__leliminado = False)\
                 .values("documento__cxcomprador__cxcomprador__ctnombre"
@@ -837,7 +856,7 @@ class ChequesAccesorios_Manager(models.Manager):
                 )\
             .order_by()
 
-    def cartera_pendiente_cliente(self, id_empresa, arr_clientes):
+    def facturas_pendiente_cliente(self, id_empresa, arr_clientes):
         return self.filter(laccesorioquitado = True, chequequitado__cxestado = 'A'
                 , leliminado = False, lcanjeado = False
                 , documento__cxcliente__in = arr_clientes
@@ -860,10 +879,15 @@ class ChequesAccesorios_Manager(models.Manager):
                                                                           -F('documento__cxasignacion__ddesembolso')
                                                                           , output_field=DateField()))
                                                 , IntegerField()),
+                        descripcion =  Concat('cxbanco__ctbanco'
+                                                , Value(' CTA.') 
+                                                , 'ctcuenta'
+                                                , Value(' CH/')
+                                                , ('ctcheque'), output_field=CharField())
                           )\
                 .order_by('documento__cxcliente__cxcliente__ctnombre')
 
-    def cartera_pendiente_deudor(self, id_empresa, arr_deudores):
+    def facturas_pendiente_deudor(self, id_empresa, arr_deudores):
         return self.filter(laccesorioquitado = True, chequequitado__cxestado = 'A'
                 , leliminado = False, lcanjeado = False
                 , documento__cxcomprador__in = arr_deudores
@@ -886,6 +910,42 @@ class ChequesAccesorios_Manager(models.Manager):
                                                                           -F('documento__cxasignacion__ddesembolso')
                                                                           , output_field=DateField()))
                                                 , IntegerField()),
+                        descripcion =  Concat('cxbanco__ctbanco'
+                                                , Value(' CTA.') 
+                                                , 'ctcuenta'
+                                                , Value(' CH/')
+                                                , ('ctcheque'), output_field=CharField())
+                          )\
+                .order_by('documento__cxcomprador__cxcomprador__ctnombre')
+
+    def cheques_pendientes_deudor(self, id_empresa, arr_deudores):
+        # se usa en impresion de accesorio pendientes
+        return self.filter(laccesorioquitado = False, cxestado='A'
+                , leliminado = False, lcanjeado = False
+                , documento__cxcomprador__in = arr_deudores
+                , documento__cxasignacion__cxestado = "P"
+                , documento__cxasignacion__leliminado = False)\
+                .values("documento__cxcomprador__cxcomprador__ctnombre"
+                        , "documento__cxcliente__cxcliente__ctnombre"
+                        , "documento__cxasignacion__cxasignacion"
+                        , "documento__ctdocumento"
+                        , "dvencimiento", "ndiasprorroga"
+                        , "documento__cxasignacion__ddesembolso"
+                        , "ntotal")\
+                .annotate(vencimiento =ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
+                                                         , output_field = DateField() ),
+                        dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
+                                                                            , output_field=DateField()))
+                                                , IntegerField()),
+                        dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('dvencimiento')
+                                                                          -F('documento__cxasignacion__ddesembolso')
+                                                                          , output_field=DateField()))
+                                                , IntegerField()),
+                        descripcion =  Concat('cxbanco__ctbanco'
+                                                , Value(' CTA.') 
+                                                , 'ctcuenta'
+                                                , Value(' CH/')
+                                                , ('ctcheque'), output_field=CharField())
                           )\
                 .order_by('documento__cxcomprador__cxcomprador__ctnombre')
 

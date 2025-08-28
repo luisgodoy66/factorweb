@@ -73,11 +73,11 @@
                             {% for item in protestos %}
                             <tr>
                                 <td>{{ item.cheque__cheque_cobranza__cxcliente__cxcliente__ctnombre }}</td>
-                                <td class="numero">{{ item.cheque__cheque_cobranza__cxcobranza}}</td>
-                                <td class="numero">{{ item.cheque__cheque_cobranza__ddeposito|date:"Y-m-d"}}</td>
-                                <td class="numero">{{ item.cheque__ctgirador }}</td>
-                                <td class="numero">{{ item.dprotesto|custom_date_format}}</td>
-                                <td class="numero">{{ item.motivoprotesto__ctmotivoprotesto}}</td>
+                                <td >{{ item.cheque__cheque_cobranza__cxcobranza}}</td>
+                                <td >{{ item.cheque__cheque_cobranza__ddeposito|date:"Y-m-d"}}</td>
+                                <td >{{ item.cheque__ctgirador }}</td>
+                                <td >{{ item.dprotesto|custom_date_format}}</td>
+                                <td >{{ item.motivoprotesto__ctmotivoprotesto}}</td>
                                 <td class="numero">{{ item.nvalor|floatformat:"2g"}}</td>
                                 <td class="numero">{{ item.nvalorcartera|floatformat:"2g"}}</td>
                                 <td class="numero">{{ item.nsaldocartera|floatformat:"2g"}}</td>

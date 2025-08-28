@@ -1009,3 +1009,27 @@ function imprimeFacturasPendientesPorDeudor(){
   window.open( url);
 }
 
+function imprimeCarteraPendientePorCliente(){
+  var x = [];
+  var options = document.getElementById("id_clientes").selectedOptions;
+  for (var i = 0; i < options.length; i++) {
+    x.push(options[i].value);
+  }
+  // en una nueva ventana abrir el reporte de asignación
+  url = window.location.origin
+  url = url + "/operaciones/reportecarterapendienteclientes/"+x;
+  window.open( url);
+}
+
+function imprimeCarteraPendientePorDeudor(){
+  var x = [];
+  var options = document.getElementById("id_deudores").selectedOptions;
+  for (var i = 0; i < options.length; i++) {
+    x.push(options[i].value);
+  }
+  // en una nueva ventana abrir el reporte de asignación
+  url = window.location.origin
+  url = url + "/operaciones/reportecarterapendientedeudores/"+x;
+  window.open( url);
+}
+

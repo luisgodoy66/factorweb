@@ -40,7 +40,8 @@ from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
     ImpresionLiquidacion, ImpresionRevisionCartera, \
     ImpresionAntiguedadCarteraCorte, ImpresionFacturasPendientesCorte,\
     ImpresionAccesoriosPendientesCorte, ImpresionAntiguedadCarteraPorDeudor,\
-    ImpresionFacturasPendientesDeudores
+    ImpresionFacturasPendientesDeudores, ImpresionCarteraPendientePorCliente,\
+    ImpresionCarteraPendientePorDeudor
 
 urlpatterns = [
 # datos operativos
@@ -242,4 +243,12 @@ urlpatterns = [
          , name='detalle_facturas_pendientes_deudores'),
     path('impresioncarterapendientedeudores/', ImpresionFacturasPendientesDeudores
          , name='detalle_facturas_pendientes_deudores'),
+    path('reportecarterapendienteclientes/<clientes>', ImpresionCarteraPendientePorCliente
+         , name='detalle_cartera_pendiente'),
+    path('reportecarterapendienteclientes/', ImpresionCarteraPendientePorCliente
+         , name='detalle_cartera_pendiente'),
+    path('reportecarterapendientedeudores/<deudores>', ImpresionCarteraPendientePorDeudor
+         , name='detalle_cartera_pendiente_deudores'),
+    path('reportecarterapendientedeudores/', ImpresionCarteraPendientePorDeudor
+         , name='detalle_cartera_pendiente_deudores'),
 ]

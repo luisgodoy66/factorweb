@@ -895,14 +895,14 @@ def GeneraListaCarteraPorVencerJSON(request, fecha_corte = None):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     tempBlogs = []
-    documentos = Documentos.objects.facturas_pendientes(fecha_corte
+    documentos = Documentos.objects.detalle_facturas_pendientes(fecha_corte
                                                         , id_empresa.empresa).all()
 
     for i in range(len(documentos)):
         tempBlogs.append(GeneraListaCarterPorVencerJSONSalida(documentos[i])) 
 
     # los accesorios que fueron quitados se convierten en facturas pendientes
-    quitados = ChequesAccesorios.objects.facturas_pendientes(fecha_corte
+    quitados = ChequesAccesorios.objects.detalle_facturas_pendientes(fecha_corte
                                                              , id_empresa.empresa).all()
 
     for i in range(len(quitados)):

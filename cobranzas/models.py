@@ -2,8 +2,9 @@
 # from statistics import mode
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models import Sum, Q, Value, DecimalField
-from django.db.models.functions import TruncDay
+from django.db.models import Sum, Q, Value, DecimalField\
+, ExpressionWrapper, IntegerField, CharField, DateField, F
+from django.db.models.functions import TruncDay, Cast, ExtractDay, Concat
 
 from datetime import timedelta, datetime, date
 
@@ -347,7 +348,6 @@ class Protestos_Manager(models.Manager):
                     ,'motivoprotesto__ctmotivoprotesto'
                     ,'nvalor','nsaldocartera','nvalorcartera', 'cheque__cxparticipante'
                     )
-        print(cp.union(rp))
         return cp.union(rp)
         
     def protestos_pendientes_cliente(self, id_empresa, id_cliente):
@@ -717,6 +717,181 @@ class Documentos_protestados_Manager(models.Manager):
                 )\
             .order_by()
     
+    def facturas_pendiente(self, id_empresa):
+
+        cp = self.filter(leliminado=False
+                           , nsaldo__gt = 0
+                           , accesorio__isnull = True
+                           , empresa = id_empresa)\
+                .values("documento__cxcomprador__cxcomprador__ctnombre"
+                        , "documento__cxcliente__cxcliente__ctnombre"
+                        , "documento__cxasignacion__cxasignacion"
+                        , "documento__ctdocumento"
+                        , "documento__dvencimiento"
+                        , "documento__ndiasprorroga"
+                        , "documento__cxasignacion__ddesembolso"
+                    ) \
+                .annotate(saldo = F('nsaldo'),
+                    vencimiento =ExpressionWrapper( F('documento__dvencimiento') + F('documento__ndiasprorroga')
+                                                         , output_field = DateField() ),
+                    dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('documento__dvencimiento')
+                                                                        , output_field=DateField())), IntegerField()),
+                    dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('documento__dvencimiento')
+                                                                      -F('documento__cxasignacion__ddesembolso')
+                                                                      , output_field=DateField()))
+                                            , IntegerField()),
+                    descripcion = Concat('documento__cxasignacion__cxasignacion'
+                                        , Value('-') 
+                                        , ('documento__ctdocumento'), output_field=CharField())
+            ) 
+        rp = self.filter(leliminado=False
+                           , nsaldo__gt = 0
+                           , accesorio__isnull = False
+                           , empresa = id_empresa)\
+                .values("documento__cxcomprador__cxcomprador__ctnombre"
+                        , "documento__cxcliente__cxcliente__ctnombre"
+                        , "documento__cxasignacion__cxasignacion"
+                        , "documento__ctdocumento"
+                        , "accesorio__dvencimiento"
+                        , "accesorio__ndiasprorroga"
+                        , "documento__cxasignacion__ddesembolso"
+                    ) \
+                .annotate(
+                    saldo = F('nsaldo'),
+                    vencimiento =ExpressionWrapper( F('accesorio__dvencimiento') + F('accesorio__ndiasprorroga')
+                                                         , output_field = DateField() ),
+                    dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('accesorio__dvencimiento')
+                                                                        , output_field=DateField())), IntegerField()),
+                    dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('accesorio__dvencimiento')
+                                                                      -F('documento__cxasignacion__ddesembolso')
+                                                                        , output_field=DateField()))
+                                            , IntegerField()),
+                    descripcion = Concat('documento__cxasignacion__cxasignacion'
+                                        , Value('-') 
+                                        , ('documento__ctdocumento'), output_field=CharField())
+            ) 
+
+
+        return cp.union(rp).order_by('documento__cxcliente__cxcliente__ctnombre')
+
+    def facturas_pendiente_cliente(self, id_empresa, arr_clientes):
+
+        cp = self.filter(leliminado=False
+                         , documento__cxcliente__in=arr_clientes
+                           , nsaldo__gt = 0
+                           , accesorio__isnull = True
+                           , empresa = id_empresa)\
+                .values("documento__cxcomprador__cxcomprador__ctnombre"
+                        , "documento__cxcliente__cxcliente__ctnombre"
+                        , "documento__cxasignacion__cxasignacion"
+                        , "documento__ctdocumento"
+                        , "documento__dvencimiento"
+                        , "documento__ndiasprorroga"
+                        , "documento__cxasignacion__ddesembolso"
+                    ) \
+                .annotate(saldo = F('nsaldo'),
+                    vencimiento =ExpressionWrapper( F('documento__dvencimiento') + F('documento__ndiasprorroga')
+                                                         , output_field = DateField() ),
+                    dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('documento__dvencimiento')
+                                                                        , output_field=DateField())), IntegerField()),
+                    dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('documento__dvencimiento')
+                                                                      -F('documento__cxasignacion__ddesembolso')
+                                                                      , output_field=DateField()))
+                                            , IntegerField()),
+                    descripcion = Concat('documento__cxasignacion__cxasignacion'
+                                        , Value('-') 
+                                        , ('documento__ctdocumento'), output_field=CharField())
+            ) 
+        rp = self.filter(leliminado=False
+                           , documento__cxcliente__in=arr_clientes
+                           , nsaldo__gt = 0
+                           , accesorio__isnull = False
+                           , empresa = id_empresa)\
+                .values("documento__cxcomprador__cxcomprador__ctnombre"
+                        , "documento__cxcliente__cxcliente__ctnombre"
+                        , "documento__cxasignacion__cxasignacion"
+                        , "documento__ctdocumento"
+                        , "accesorio__dvencimiento"
+                        , "accesorio__ndiasprorroga"
+                        , "documento__cxasignacion__ddesembolso"
+                    ) \
+                .annotate(
+                    saldo = F('nsaldo'),
+                    vencimiento =ExpressionWrapper( F('accesorio__dvencimiento') + F('accesorio__ndiasprorroga')
+                                                         , output_field = DateField() ),
+                    dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('accesorio__dvencimiento')
+                                                                        , output_field=DateField())), IntegerField()),
+                    dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('accesorio__dvencimiento')
+                                                                      -F('documento__cxasignacion__ddesembolso')
+                                                                        , output_field=DateField()))
+                                            , IntegerField()),
+                    descripcion = Concat('documento__cxasignacion__cxasignacion'
+                                        , Value('-') 
+                                        , ('documento__ctdocumento'), output_field=CharField())
+            ) 
+
+
+        return cp.union(rp).order_by('documento__cxcliente__cxcliente__ctnombre')
+
+    def facturas_pendiente_deudor(self, id_empresa, arr_deudores):
+
+        cp = self.filter(leliminado=False
+                         , documento__cxcomprador__in=arr_deudores
+                           , nsaldo__gt = 0
+                           , accesorio__isnull = True
+                           , empresa = id_empresa)\
+                .values("documento__cxcomprador__cxcomprador__ctnombre"
+                        , "documento__cxcliente__cxcliente__ctnombre"
+                        , "documento__cxasignacion__cxasignacion"
+                        , "documento__ctdocumento"
+                        , "documento__dvencimiento"
+                        , "documento__ndiasprorroga"
+                        , "documento__cxasignacion__ddesembolso"
+                    ) \
+                .annotate(saldo = F('nsaldo'),
+                    vencimiento =ExpressionWrapper( F('documento__dvencimiento') + F('documento__ndiasprorroga')
+                                                         , output_field = DateField() ),
+                    dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('documento__dvencimiento')
+                                                                        , output_field=DateField())), IntegerField()),
+                    dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('documento__dvencimiento')
+                                                                      -F('documento__cxasignacion__ddesembolso')
+                                                                      , output_field=DateField()))
+                                            , IntegerField()),
+                    descripcion = Concat('documento__cxasignacion__cxasignacion'
+                                        , Value('-') 
+                                        , ('documento__ctdocumento'), output_field=CharField())
+            ) 
+        rp = self.filter(leliminado=False
+                           , documento__cxcomprador__in=arr_deudores
+                           , nsaldo__gt = 0
+                           , accesorio__isnull = False
+                           , empresa = id_empresa)\
+                .values("documento__cxcomprador__cxcomprador__ctnombre"
+                        , "documento__cxcliente__cxcliente__ctnombre"
+                        , "documento__cxasignacion__cxasignacion"
+                        , "documento__ctdocumento"
+                        , "accesorio__dvencimiento"
+                        , "accesorio__ndiasprorroga"
+                        , "documento__cxasignacion__ddesembolso"
+                    ) \
+                .annotate(
+                    saldo = F('nsaldo'),
+                    vencimiento =ExpressionWrapper( F('accesorio__dvencimiento') + F('accesorio__ndiasprorroga')
+                                                         , output_field = DateField() ),
+                    dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('accesorio__dvencimiento')
+                                                                        , output_field=DateField())), IntegerField()),
+                    dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('accesorio__dvencimiento')
+                                                                      -F('documento__cxasignacion__ddesembolso')
+                                                                        , output_field=DateField()))
+                                            , IntegerField()),
+                    descripcion = Concat('documento__cxasignacion__cxasignacion'
+                                        , Value('-') 
+                                        , ('documento__ctdocumento'), output_field=CharField())
+            ) 
+
+
+        return cp.union(rp).order_by('documento__cxcomprador__cxcomprador__ctnombre')
+
 class Documentos_protestados(ClaseModelo):
     chequeprotestado = models.ForeignKey(Cheques_protestados, on_delete= models.RESTRICT)
     documento = models.ForeignKey(Documentos, on_delete=models.CASCADE)

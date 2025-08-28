@@ -67,25 +67,25 @@
                             <td>{{ item.ddesembolso|date:"Y/m/d" }}</td>
                             <td>{{ item.neto |floatformat:"2g"}}</td>
                             <td>
-                                {% if not item.lrequiereaprobacion or item.solicitudaprobacion.aprobada %}
-                                    {% if item.exceso_pendiente %}
-                                        Exceso pendiente
-                                    {% else %}
+                                {% if item.exceso_pendiente %}
+                                    Exceso pendiente
+                                {% else %}
+                                    {% if not item.lrequiereaprobacion or item.solicitudaprobacion.aprobada %}
                                         <a href="{% url 'operaciones:desembolsarasignacion' item.id item.cliente.id %}" 
                                         class="btn btn-primary btn-sm" role="button"  title="Pagar">
                                         <i class="fa fa-check"></i></a>
-                                    {% endif %}
-                                {% else %}
-                                    {% if item.solicitudaprobacion.pendiente %}
-                                    <button onclick="reenviarSolicitudAprobacion( {{item.id}})" role="button"
-                                            class="btn btn-warning btn-sm" title="Reenviar aprobación" >
-                                        <i class="fa fa-rotate-right"></i></a>
-                                    </button>
                                     {% else %}
-                                    <button onclick="enviarSolicitudAprobacion( {{item.id}})" role="button"
-                                            class="btn btn-info btn-sm" title="Solicitar aprobación" >
-                                        <i class="fa fa-envelope"></i></a>
-                                    </button>
+                                        {% if item.solicitudaprobacion.pendiente %}
+                                        <button onclick="reenviarSolicitudAprobacion( {{item.id}})" role="button"
+                                                class="btn btn-warning btn-sm" title="Reenviar aprobación" >
+                                            <i class="fa fa-rotate-right"></i></a>
+                                        </button>
+                                        {% else %}
+                                        <button onclick="enviarSolicitudAprobacion( {{item.id}})" role="button"
+                                                class="btn btn-info btn-sm" title="Solicitar aprobación" >
+                                            <i class="fa fa-envelope"></i></a>
+                                        </button>
+                                        {% endif %}
                                     {% endif %}
                                 {% endif %}
                             </td>
