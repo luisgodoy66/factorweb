@@ -126,6 +126,7 @@ class Asignacion(ClaseModelo):
     ESTADOS_DE_ASIGNACION = (
         ('L', 'Liquidada'),
         ('P', 'Pagada'),
+        ('E', 'Eliminada')
     )
     cxcliente=models.ForeignKey(Datos_generales_cliente
         , on_delete=models.CASCADE

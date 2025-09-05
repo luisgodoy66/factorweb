@@ -250,8 +250,8 @@ from clientes.models import Linea_Factoring
 class Exceso_temporal(ClaseModelo):
     RESPUESTA = (
         ('P', 'Pendiente'),
-        ('A', 'Aprobada'),
-        ('R', 'Rechazada'),
+        ('A', 'Aprobado'),
+        ('R', 'Rechazado'),
     )
     cliente = models.ForeignKey(Datos_generales_cliente, on_delete=models.CASCADE
         , related_name="exceso_temporal_cliente")
@@ -268,12 +268,21 @@ class Exceso_temporal(ClaseModelo):
         return self.cxexceso
     
     def estado(self):
+        if self.cxrespuesta == 'P':
+            linea = self.cliente.linea_factoring.first()
+
+            if not linea:
+                return self.get_cxrespuesta_display()
+            if self.nvalor <= linea.disponible():
+                return "Cubierto"
         return self.get_cxrespuesta_display()
 
     def exceso(self):
         # Obtiene la línea de factoring del cliente
-        linea = Linea_Factoring.objects.filter(cxcliente=self.cliente).first()
+        linea = self.cliente.linea_factoring.first()
+        
         if not linea:
             return "{} (Sin línea configurada)".format(self.nvalor)
-        porcentaje = (self.nvalor / linea.nvalor) * 100 if linea.nvalor else 0
+        
+        porcentaje = (self.nvalor / linea.valor()) * 100 if linea.valor() else 0
         return "{} ({:.2f}%)".format(self.nvalor, porcentaje)

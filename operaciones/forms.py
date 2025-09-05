@@ -28,7 +28,7 @@ class DatosOperativosForm(forms.ModelForm):
             , 'cxclase':'Clase', 'nporcentajeanticipo':'% Anticipo'
             ,'ntasacomision':'Tasa comisión'
             , 'ntasadescuentocartera':'Tasa de descuento de cartera'
-            , 'ntasagaoa':'Tasa de comisión adicional'
+            , 'ntasagao':'Tasa de comisión adicional'
             , 'cxbeneficiarioasignacion': 'Id. de beneficiario de cheque'
             , 'ctbeneficiarioasignacion': 'Nombre de beneficiario de cheque'
             , 'cxbeneficiariocobranzas':'Id. de beneficiario de cheque'
@@ -178,6 +178,11 @@ class DesembolsarForm(forms.ModelForm):
         cxcuentapago = cleaned_data.get('cxcuentapago')
         cxcuentadestino = cleaned_data.get('cxcuentadestino')
         ctbeneficiario = cleaned_data.get('ctbeneficiario')
+        nvalor = cleaned_data.get('nvalor')
+
+        if nvalor is not None and nvalor <= 0 and cxformapago != 'MOV':
+            self.add_error('cxformapago', 
+                           'Para valores cero o negativos, la forma de pago debe ser "Movimiento contable".')
 
         if cxformapago in ['TRA'] and not cxcuentadestino:
             self.add_error('cxcuentadestino', 

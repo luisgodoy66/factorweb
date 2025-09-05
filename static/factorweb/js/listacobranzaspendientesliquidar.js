@@ -18,7 +18,6 @@ window.onload=function(){
   )
     
   $table.on('all.bs.table', function (e, name, args) {
-    console.log(name, args)
   })
   
   // acciones ejecutada sobre registros seleccionados
@@ -32,7 +31,7 @@ window.onload=function(){
 
 window.operateEvents = {
   'click .revertir': function (e, value, row, index) {
-    ReversaConfirmacion(row.id, row.TipoOperacion, row.Cliente)
+    ReversaConfirmacion(row.id, row.TipoOperacion, row.Cliente, row.FormaCobro)
   },
   'click .condonar': function (e, value, row, index) {
     Condonar( row.id, row.TipoOperacion)
@@ -56,12 +55,17 @@ return [
 ].join('')
 }
 
-function ReversaConfirmacion(cobranza_id, tipo_operacion, cliente){
+function ReversaConfirmacion(cobranza_id, tipo_operacion, cliente, forma_cobro){
+  console.log("ReversaConfirmacion", forma_cobro)
+  if (forma_cobro == 'EFE'){
+    MensajeOK("La cobranza en efectivo no tiene confirmación a revertir")
+  }else{
     MensajeConfirmacion("Reversa la confirmación de " +  cliente +"?",function(){
       fetchProcesar("/cobranzas/reversaconfirmacioncobranza/"+cobranza_id+"/"+tipo_operacion, function(){
             location.reload();
           })
       })
+  }
 
   }
 

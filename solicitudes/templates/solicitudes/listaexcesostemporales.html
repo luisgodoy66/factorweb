@@ -27,6 +27,10 @@
                         <a class="dropdown-item" 
                         href="{% url 'solicitudes:lista_excesos_temporales' 'todos' %}">Todos</a>
                     </div>
+                    <div class="dropdown-menu-content">
+                        <a class="dropdown-item" 
+                        href="{% url 'solicitudes:lista_excesos_temporales' %}">Pendientes</a>
+                    </div>
                 </div>
             </div>
             <h4 class="mb-0">
@@ -83,7 +87,7 @@
                                 {% if item.leliminado %}
                                         {{ item.dmodificacion|date:"Y-m-d H:i:s" }}
                                 {% else %}
-                                    {% if item.estado == "Pendiente" %}
+                                    {% if item.estado == "Pendiente" or item.estado == "Cubierto" %}
                                         <a href="#" onclick='AceptarExceso({{item.id}},"{{item.cliente}}")' title="Aceptar"
                                             class="btn btn-success btn-sm" role="button"><i class="fa fa-check"></i></a>
                                         <a href="#" onclick='RechazarExceso({{item.id}},"{{item.cliente}}")' title="Rechazar"
