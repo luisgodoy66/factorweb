@@ -380,27 +380,49 @@ class Documentos_Manager(models.Manager):
     def revision_cartera(self, id_empresa):
         vcdo30 = datetime.today() + timedelta(days=-30)
         vcdo60 = datetime.today() + timedelta(days=-60)
+        vcdo90 = datetime.today() + timedelta(days=-90)
 
-        return self.filter(leliminado=False, nsaldo__gt=0,
-                   cxasignacion__cxtipo="F",
-                   cxasignacion__cxestado="P",
-                   cxasignacion__leliminado=False,
-                   empresa=id_empresa) \
-            .values('cxcliente__cxcliente__ctnombre',
-                'cxcliente__linea_factoring__nvalor',
-                'cxcliente__datos_operativos__cxclase__cxclase',
-                'cxcliente__datos_operativos__cxestado',
-                'cxcliente',
-                ) \
-            .annotate(
+        qs = self.filter(
+            leliminado=False, nsaldo__gt=0,
+            cxasignacion__cxtipo="F",
+            cxasignacion__cxestado="P",
+            cxasignacion__leliminado=False,
+            empresa=id_empresa
+        )
+
+        # Agrupar los registros por cliente y obtener los datos requeridos
+        clientes = qs.values('cxcliente').distinct()
+        registros = {}
+
+        for cliente in clientes:
+            registros = qs.filter(cxcliente=cliente['cxcliente'])\
+                .values(
+                    'cxcliente',
+                ).annotate(
+                    deudor=F('cxcomprador__cxcomprador__ctnombre'),
+                    documento_negociado=F('ctdocumento'),
+                    vencimiento_str=Cast('dvencimiento', output_field=CharField()),
+                    saldo=Cast('nsaldo', output_field=CharField())
+            )
+
+        registros_serializables = list(registros)
+        return qs.values(
+            'cxcliente__cxcliente__ctnombre',
+            'cxcliente__linea_factoring__nvalor',
+            'cxcliente__datos_operativos__cxclase__cxclase',
+            'cxcliente__datos_operativos__cxestado',
+            'cxcliente',
+        ).annotate(
             vencido_mas_60=Sum('nsaldo', filter=Q(dvencimiento__lt=vcdo60)),
+            vencido_mas_90=Sum('nsaldo', filter=Q(dvencimiento__lt=vcdo90)),
+            vencido_90=Sum('nsaldo', filter=Q(dvencimiento__lt=vcdo60, dvencimiento__gte=vcdo90)),
             vencido_60=Sum('nsaldo', filter=Q(dvencimiento__lt=vcdo30, dvencimiento__gte=vcdo60)),
             vencido_30=Sum('nsaldo', filter=Q(dvencimiento__lt=datetime.today(), dvencimiento__gte=vcdo30)),
             por_vencer=Sum('nsaldo', filter=Q(dvencimiento__gte=datetime.today())),
             protesto=Value(0, output_field=DecimalField()),
-            total=Sum('nsaldo')
-            ) \
-            .order_by()
+            total=Sum('nsaldo'),
+            datos_json=Value(registros_serializables, output_field=models.JSONField())
+        ).order_by()
 
     def antigüedad_por_deudor(self, id_empresa, id_cliente):
         vcdo90 = datetime.today()+timedelta(days=-90)
@@ -799,13 +821,30 @@ class ChequesAccesorios_Manager(models.Manager):
     def revision_cartera(self, id_empresa):
         vcdo30 = datetime.today() + timedelta(days=-30)
         vcdo60 = datetime.today() + timedelta(days=-60)
+        vcdo90 = datetime.today() + timedelta(days=-90)
 
-        return self.filter(cxestado = 'A'
+        qs= self.filter(cxestado = 'A'
                 , leliminado = False, lcanjeado  = False, laccesorioquitado = False
                 , documento__cxasignacion__cxestado = "P"
                 , documento__cxasignacion__leliminado = False
-                , empresa = id_empresa)\
-            .values('documento__cxcliente__cxcliente__ctnombre',
+                , empresa = id_empresa)
+        # Agrupar los registros por cliente y obtener los datos requeridos
+        clientes= qs.values('documento__cxcliente').distinct()
+        registros = {}
+
+        for cliente in clientes:
+            registros = qs.filter(documento__cxcliente=cliente['documento__cxcliente'])\
+                .values(
+                    'documento__cxcliente',
+                ).annotate(
+                    deudor=F('documento__cxcomprador__cxcomprador__ctnombre'),
+                    documento_negociado=F('documento__ctdocumento'),
+                    vencimiento_str=Cast('dvencimiento', output_field=CharField()),
+                    saldo=Cast('ntotal', output_field=CharField())
+            )
+        registros_serializables = list(registros)
+
+        return qs.values('documento__cxcliente__cxcliente__ctnombre',
                     'documento__cxcliente__linea_factoring__nvalor',
                     'documento__cxcliente__datos_operativos__cxclase__cxclase',
                     'documento__cxcliente__datos_operativos__cxestado',
@@ -813,12 +852,15 @@ class ChequesAccesorios_Manager(models.Manager):
                     ) \
             .annotate(
                 vencido_mas_60=Sum('ntotal', filter=Q(dvencimiento__lt=vcdo60)),
+                vencido_mas_90=Sum('ntotal', filter=Q(dvencimiento__lt=vcdo90)),
+                vencido_90=Sum('ntotal', filter=Q(dvencimiento__lt=vcdo60, dvencimiento__gte=vcdo90)),
                 vencido_60=Sum('ntotal', filter=Q(dvencimiento__lt=vcdo30, dvencimiento__gte=vcdo60)),
                 vencido_30=Sum('ntotal', filter=Q(dvencimiento__lt=datetime.today()
                     , dvencimiento__gte=vcdo30)),
                 por_vencer=Sum('ntotal', filter=Q(dvencimiento__gte=datetime.today())),
                 protesto=Value(0, output_field=DecimalField()),
-                total=Sum('ntotal')
+                total=Sum('ntotal'),
+                datos_json=Value(registros_serializables, output_field=models.JSONField())
             ) \
             .order_by()
 
@@ -1042,13 +1084,30 @@ class Cheques_quitados_Manager(models.Manager):
     def revision_cartera(self, id_empresa):
         vcdo30 = datetime.today() + timedelta(days=-30)
         vcdo60 = datetime.today() + timedelta(days=-60)
+        vcdo90 = datetime.today() + timedelta(days=-90)
 
-        return self.filter(cxestado = 'A'
+        qs = self.filter(cxestado = 'A'
                 , leliminado = False
                 , accesorio_quitado__documento__cxasignacion__cxestado = "P"
                 , accesorio_quitado__documento__cxasignacion__leliminado = False
-                , empresa = id_empresa)\
-            .values('accesorio_quitado__documento__cxcliente__cxcliente__ctnombre',
+                , empresa = id_empresa)
+        # Agrupar los registros por cliente y obtener los datos requeridos
+        clientes = qs.values('accesorio_quitado__documento__cxcliente').distinct()
+        registros = {}
+
+        for cliente in clientes:
+            registros = qs.filter(accesorio_quitado__documento__cxcliente=cliente['accesorio_quitado__documento__cxcliente'])\
+                .values(
+                    'accesorio_quitado__documento__cxcliente',
+                ).annotate(
+                    deudor=F('accesorio_quitado__documento__cxcomprador__cxcomprador__ctnombre'),
+                    documento_negociado=F('accesorio_quitado__documento__ctdocumento'),
+                    vencimiento=Cast('accesorio_quitado__dvencimiento', output_field=CharField()),
+                    saldo=Cast('nsaldo', output_field=CharField())
+            )
+        registros_serializables = list(registros)
+
+        return qs.values('accesorio_quitado__documento__cxcliente__cxcliente__ctnombre',
                     'accesorio_quitado__documento__cxcliente__linea_factoring__nvalor',
                     'accesorio_quitado__documento__cxcliente__datos_operativos__cxclase__cxclase',
                     'accesorio_quitado__documento__cxcliente__datos_operativos__cxestado',
@@ -1056,13 +1115,17 @@ class Cheques_quitados_Manager(models.Manager):
                     ) \
             .annotate(
                 vencido_mas_60=Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt=vcdo60)),
+                vencido_mas_90=Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt=vcdo90)),
+                vencido_90=Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt=vcdo60
+                                                  , accesorio_quitado__dvencimiento__gte=vcdo90)),
                 vencido_60=Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt=vcdo30
                     , accesorio_quitado__dvencimiento__gte=vcdo60)),
                 vencido_30=Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt=datetime.today()
                     , accesorio_quitado__dvencimiento__gte=vcdo30)),
                 por_vencer=Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__gte=datetime.today())),
                 protesto=Value(0, output_field=DecimalField()),
-                total=Sum('nsaldo')
+                total=Sum('nsaldo'),
+                datos_json=Value(registros_serializables, output_field=models.JSONField())
             ) \
             .order_by()
 
@@ -1514,6 +1577,7 @@ class Cuotas_pagare_Manager(models.Manager):
     def revision_cartera(self, id_empresa):
         vcdo30 = datetime.today() + timedelta(days=-30)
         vcdo60 = datetime.today() + timedelta(days=-60)
+        vcdo90 = datetime.today() + timedelta(days=-90)
 
         return self.filter(leliminado = False, nsaldo__gt = 0
             , pagare__leliminado = False
@@ -1526,12 +1590,15 @@ class Cuotas_pagare_Manager(models.Manager):
                     ) \
             .annotate(
                 vencido_mas_60=Sum('nsaldo', filter=Q(dfechapago__lt=vcdo60)),
+                vencido_mas_90=Sum('nsaldo', filter=Q(dfechapago__lt=vcdo90)),
+                vencido_90=Sum('nsaldo', filter=Q(dfechapago__lt=vcdo60, dfechapago__gte=vcdo90)),
                 vencido_60=Sum('nsaldo', filter=Q(dfechapago__lt=vcdo30, dfechapago__gte=vcdo60)),
                 vencido_30=Sum('nsaldo', filter=Q(dfechapago__lt=datetime.today()
                     , dfechapago__gte=vcdo30)),
                 por_vencer=Sum('nsaldo', filter=Q(dfechapago__gte=datetime.today())),
                 protesto = Value(0, output_field=DecimalField()),
-                total=Sum('nsaldo')
+                total=Sum('nsaldo'),
+                datos_json=Value('', output_field=models.JSONField())
             ) \
             .order_by()
 
@@ -1588,6 +1655,7 @@ class Revision_cartera_detalle(ClaseModelo):
     nlineaactual = models.DecimalField(max_digits=15, decimal_places=2, default=0,null=True)
     ctclaseactual = models.CharField(max_length=3, null=True)
     ctestadoactual = models.CharField(max_length=1, null=True)
+    jdetalle = models.JSONField(null=True)
     ctcomentario = models.TextField()
 
 class Cortes_historico(ClaseModelo):

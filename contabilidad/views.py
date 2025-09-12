@@ -424,7 +424,9 @@ class CuentasTasaTiposFactoringView(SinPrivilegios, generic.ListView):
         # forma más burda en el HTML con condiciones tags de Django.
         qs=Tipos_factoring.objects\
             .filter(empresa=id_empresa.empresa
-                    , cuenta_tasatipofactoring__tasafactoring = id_tasa)\
+                    , cuenta_tasatipofactoring__tasafactoring = id_tasa
+                    , cuenta_tasatipofactoring__leliminado = False
+                    )\
             .values('id', 'cttipofactoring'
                     ,'cuenta_tasatipofactoring__cuenta__ctcuenta'
                     ,'cuenta_tasatipofactoring'
@@ -476,19 +478,20 @@ class CuentasTasaDiferidoView(SinPrivilegios, generic.ListView):
         # forma más burda en el HTML con condiciones tags de Django.
         qs=Tipos_factoring.objects\
             .filter(empresa=id_empresa.empresa
-                    , cuenta_tasatipofactoring__tasafactoring = id_tasa)\
+                    , cuentadiferido_tasatipofactoring__tasafactoring = id_tasa
+                    , cuentadiferido_tasatipofactoring__leliminado = False)\
             .values('id', 'cttipofactoring'
-                    ,'cuenta_tasatipofactoring__cuenta__ctcuenta'
-                    ,'cuenta_tasatipofactoring'
-                    ,'cuenta_tasatipofactoring__tasafactoring')
+                    ,'cuentadiferido_tasatipofactoring__cuenta__ctcuenta'
+                    ,'cuentadiferido_tasatipofactoring'
+                    ,'cuentadiferido_tasatipofactoring__tasafactoring')
         
         qs2=Tipos_factoring.objects\
-            .annotate(registros=FilteredRelation('cuenta_tasatipofactoring'
-                                                 , condition = Q(cuenta_tasatipofactoring__tasafactoring=id_tasa)))\
+            .annotate(registros=FilteredRelation('cuentadiferido_tasatipofactoring'
+                                                 , condition = Q(cuentadiferido_tasatipofactoring__tasafactoring=id_tasa)))\
             .values('id','cttipofactoring'
                     , 'registros__cuenta__ctcuenta'
-                    ,'cuenta_tasatipofactoring'
-                    ,'cuenta_tasatipofactoring__tasafactoring')\
+                    ,'cuentadiferido_tasatipofactoring'
+                    ,'cuentadiferido_tasatipofactoring__tasafactoring')\
             .filter(empresa = id_empresa.empresa, registros__cuenta__ctcuenta__isnull=True)
         return qs.union(qs2)
 
@@ -528,19 +531,20 @@ class CuentasTasaProvisionView(SinPrivilegios, generic.ListView):
         # forma más burda en el HTML con condiciones tags de Django.
         qs=Tipos_factoring.objects\
             .filter(empresa=id_empresa.empresa
-                    , cuenta_tasatipofactoring__tasafactoring = id_tasa)\
+                    , cuentaprovision_tasatipofactoring__tasafactoring = id_tasa
+                    , cuentaprovision_tasatipofactoring__leliminado = False)\
             .values('id', 'cttipofactoring'
-                    ,'cuenta_tasatipofactoring__cuenta__ctcuenta'
-                    ,'cuenta_tasatipofactoring'
-                    ,'cuenta_tasatipofactoring__tasafactoring')
-        
+                    ,'cuentaprovision_tasatipofactoring__cuenta__ctcuenta'
+                    ,'cuentaprovision_tasatipofactoring'
+                    ,'cuentaprovision_tasatipofactoring__tasafactoring')
+
         qs2=Tipos_factoring.objects\
-            .annotate(registros=FilteredRelation('cuenta_tasatipofactoring'
-                                                 , condition = Q(cuenta_tasatipofactoring__tasafactoring=id_tasa)))\
+            .annotate(registros=FilteredRelation('cuentaprovision_tasatipofactoring'
+                                                 , condition = Q(cuentaprovision_tasatipofactoring__tasafactoring=id_tasa)))\
             .values('id','cttipofactoring'
                     , 'registros__cuenta__ctcuenta'
-                    ,'cuenta_tasatipofactoring'
-                    ,'cuenta_tasatipofactoring__tasafactoring')\
+                    ,'cuentaprovision_tasatipofactoring'
+                    ,'cuentaprovision_tasatipofactoring__tasafactoring')\
             .filter(empresa = id_empresa.empresa, registros__cuenta__ctcuenta__isnull=True)
         return qs.union(qs2)
 

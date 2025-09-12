@@ -632,8 +632,26 @@ class Documentos_protestados_Manager(models.Manager):
     
     def revision_cartera(self, id_empresa):
 
-        return self.filter(leliminado=False, nsaldo__gt=0, empresa=id_empresa) \
-            .values('documento__cxcliente__cxcliente__ctnombre',
+        qs = self.filter(leliminado=False
+                         , nsaldo__gt=0
+                         , empresa=id_empresa) 
+        # Agrupar los registros por cliente y obtener los datos requeridos
+        clientes= qs.values('documento__cxcliente').distinct()
+        registros = {}
+
+        for cliente in clientes:
+            registros = qs.filter(documento__cxcliente=cliente['documento__cxcliente'])\
+                .values(
+                    'documento__cxcliente',
+                ).annotate(
+                    deudor=F('chequeprotestado__cheque__cxparticipante__ctnombre'),
+                    documento_negociado=F('documento__ctdocumento'),
+                    vencimiento_str=Cast('chequeprotestado__dprotesto', output_field=CharField()),
+                    saldo=Cast('nsaldo', output_field=CharField())
+            )
+        registros_serializables = list(registros)
+
+        return qs.values('documento__cxcliente__cxcliente__ctnombre',
                     'documento__cxcliente__linea_factoring__nvalor',
                     'documento__cxcliente__datos_operativos__cxclase__cxclase',
                     'documento__cxcliente__datos_operativos__cxestado',
@@ -641,11 +659,14 @@ class Documentos_protestados_Manager(models.Manager):
                     ) \
             .annotate(
                 vencido_mas_60=Value(0, output_field=DecimalField()),
+                vencido_mas_90=Value(0, output_field=DecimalField()),
+                vencido_90=Value(0, output_field=DecimalField()),
                 vencido_60=Value(0, output_field=DecimalField()),
                 vencido_30=Value(0, output_field=DecimalField()),
                 por_vencer=Value(0, output_field=DecimalField()),
                 ptotesto=Sum('nsaldo'),
-                total=Sum('nsaldo')
+                total=Sum('nsaldo'),
+                datos_json=Value(registros_serializables, output_field=models.JSONField())
             ) \
             .order_by()
 

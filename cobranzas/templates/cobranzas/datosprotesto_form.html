@@ -30,7 +30,7 @@
                 <strong>Protesto</strong> 
                 de {{ cheque.cxparticipante }}
             </div>
-            <div hidden>
+            <!-- <div hidden>
                 <input type="text" value="{{ id_cliente }}" id="id_cliente">
                 <input type="text" value="{{ forma_cobro }}" id="forma_cobro">
                 <input type="text" value="{{ codigo_cobranza }}" id="codigo_cobranza">
@@ -41,7 +41,7 @@
                 <input type="text" value="{{ cheque.nvalor|floatformat:"2u"  }}" id="valor_cheque">
                 <input type="text" value="{{ cheque.cxtipoparticipante }}" id="tipo_emisor">
                 <input type="text" value="{{ tipo_operacion }}" id="tipo_operacion">
-            </div>
+            </div> -->
             <div class="card-body card-block">
                     <!-- columna izquierda -->
                     <!-- <div class="col-6"> -->
@@ -134,5 +134,107 @@
 </form>
 {% endblock %}
 {% block js_page %}
-<script type="text/javascript" src="{% static 'factorweb/js/datosprotesto.js' %}"></script>
+<!-- <script type="text/javascript" src="{% static 'factorweb/js/datosprotesto.js' %}"></script> -->
+<script>
+// const tipo_operacion = capturaValor("tipo_operacion")
+const id_cliente = "{{ id_cliente }}"
+const forma_cobro = "{{ forma_cobro }}"
+const codigo_cobranza = "{{ codigo_cobranza }}"
+const id_cobranza = "{{ cobranza.id }}"
+const tipo_factoring = "{{ cobranza.cxtipofactoring.id }}"
+const id_accesorio = "{{ cobranza.cxaccesorio.id }}"
+const id_cheque = "{{ cheque.id }}"
+const valor_cheque = "{{ cheque.nvalor }}"
+const tipo_emisor = "{{ cheque.cxtipoparticipante }}"
+const tipo_operacion = "{{ tipo_operacion }}"
+
+window.onload=function(){
+    // objeto_fechas("#id_dprotesto")
+    const motivoInicial = capturaValor("id_motivoprotesto");
+    if (motivoInicial) {
+        validarValorNotaDebito(motivoInicial);
+    }
+
+    jQuery("#id_motivoprotesto").change(function() {
+        validarValorNotaDebito(this.value);
+    });
+}
+
+function validarValorNotaDebito(motivoId) {
+    if (!motivoId) return;
+
+    const inputNotaDebito = document.getElementById('id_nvalornotadebito');
+    
+    fetchRecuperar(`/cobranzas/motivo_responsabilidad/${motivoId}/`, function(data) {
+        if (data.lresponsabilidadgirador) {
+            inputNotaDebito.readOnly = false;
+        } else {
+            inputNotaDebito.value = "0.00";
+            inputNotaDebito.readOnly = true;
+        }
+    });
+}
+
+function AceptarProtesto(){
+    const motivoId = capturaValor("id_motivoprotesto");
+    const valorNd = parseFloat(capturaValor("id_nvalornotadebito"));
+
+    if (!motivoId) {
+        MensajeError("Debe seleccionar un motivo de protesto.");
+        return;
+    }
+    fetchRecuperar(`/cobranzas/motivo_responsabilidad/${motivoId}/`, function(data) {
+        const esResponsable = data.lresponsabilidadgirador;
+
+        if (esResponsable && (!valorNd || valorNd <= 0)) {
+            MensajeError("Debe ingresar un valor de nota de débito para este motivo de protesto.");
+            return;
+        }
+
+        if (!esResponsable && valorNd > 0) {
+            MensajeError("No debe ingresar un valor de nota de débito para este motivo. El valor se establecerá en 0.");
+            document.getElementById('id_nvalornotadebito').value = "0.00";
+        }
+  
+        MensajeConfirmacion("Aceptar el protesto de " + codigo_cobranza +"?"
+            ,function(){
+            var tipo
+
+            if (tipo_operacion=='Cobranza') {tipo = 'C'} else {tipo = 'R'}
+
+            var objeto={
+                "id_cliente":id_cliente,
+                "tipo_factoring":tipo_factoring,
+                "forma_cobro":forma_cobro,
+                "id_cobranza" :id_cobranza,
+                "codigo_cobranza" : codigo_cobranza,
+                "id_cheque":id_cheque,
+                "valor" :valor_cheque, 
+                "fecha_protesto":capturaValor("id_dprotesto"), 
+                "valor_nd": valorNd, 
+                "motivoprotesto" : motivoId,
+                "tipo_emisor":tipo_emisor,
+                "id_accesorio":id_accesorio,
+                "tipo_operacion":tipo
+                }
+            console.log(objeto)    
+            fetchPostear("/cobranzas/aceptarprotesto/", objeto, function(data){
+                // en una nueva ventana abrir el reporte de cobranza
+                url = window.location.origin
+                if (tipo_operacion=="Cobranza"){
+                    url = url + "/cobranzas/reportecobranzacartera/"+data;
+                }
+                else{
+                    url = url + "/cobranzas/reporterecuperacion/"+data;
+                }
+                window.open( url);
+                // regresar a la lista de solicitudes
+                window.location.href = "/cobranzas/listacobranzasporconfirmar";
+                })
+            })
+    });
+}
+   
+      
+</script>
 {% endblock %}

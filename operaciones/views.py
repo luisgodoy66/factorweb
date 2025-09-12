@@ -2672,14 +2672,6 @@ def NuevaRevisionCarteraJSON(request,):
     # Es invocado desde la url de una tabla bt
     id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
 
-    # crear registro de revision de cartera 
-    revision = Revision_cartera(
-        drevision = datetime.now(),
-        empresa = id_empresa.empresa,
-        cxusuariocrea = request.user,
-    )
-    revision.save()
-    
     facturas = Documentos.objects.revision_cartera(id_empresa.empresa)
     accesorios = ChequesAccesorios.objects.revision_cartera(id_empresa.empresa)
     pagares = Pagare_detalle.objects.revision_cartera(id_empresa.empresa)
@@ -2705,7 +2697,11 @@ def NuevaRevisionCarteraJSON(request,):
                 'protesto': 0,
                 'total': 0,
                 'cxcliente': doc['cxcliente'],
+                'detalle': [doc.get('datos_json', {})] if doc.get('datos_json', {}) else [],
             }
+        else:
+            acumulado_por_cliente[cliente]['detalle'].append(doc.get('datos_json', {}))
+
         acumulado_por_cliente[cliente]['vencido_mas_60'] += doc.get('vencido_mas_60', 0) or 0
         acumulado_por_cliente[cliente]['vencido_60'] += doc.get('vencido_60', 0) or 0
         acumulado_por_cliente[cliente]['vencido_30'] += doc.get('vencido_30', 0) or 0
@@ -2713,6 +2709,14 @@ def NuevaRevisionCarteraJSON(request,):
         acumulado_por_cliente[cliente]['protesto'] += doc.get('protesto', 0) or 0
         acumulado_por_cliente[cliente]['total'] += doc.get('total', 0) or 0
 
+    # crear registro de revision de cartera 
+    revision = Revision_cartera(
+        drevision = datetime.now(),
+        empresa = id_empresa.empresa,
+        cxusuariocrea = request.user,
+    )
+    revision.save()
+    
     tempBlogs = []
     for i in acumulado_por_cliente:
         tempBlogs.append(GeneraNuevaListarevisionCarteraJSONSalida(
@@ -2746,6 +2750,7 @@ def GeneraNuevaListarevisionCarteraJSONSalida(cartera, cliente, revision, usuari
         ctestadoactual = cartera['cxcliente__datos_operativos__cxestado'],
         cxusuariocrea = usuario,
         empresa = revision.empresa,
+        jdetalle = json.dumps(cartera['detalle'], default=str)
     )   
     detalle.save()
 
@@ -3073,3 +3078,26 @@ def GeneraListaCarteraDeudorJSON(request,  deudores =None):
         }
     return JsonResponse( data)
 
+@login_required(login_url='/login/')
+@permission_required('operaciones.view_revision_cartera', login_url='bases:sin_permisos')
+def RevisionCarteraDetalle(request, cliente_id, revision_id):
+    template_name = "operaciones/revisioncarteradetalle_modal.html"
+    contexto={}
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    # if request.method=='GET':
+    detalle = Revision_cartera_detalle.objects\
+        .filter(revision = revision_id
+                , cxcliente = cliente_id
+                , empresa = id_empresa.empresa).first()
+    
+    if not detalle:
+        return HttpResponse("No se ha encontrado el detalle de la revisión de cartera para este cliente.", status=400)
+    
+    jdetalle = json.loads(detalle.jdetalle)
+
+    contexto={
+        'detalle':jdetalle
+    }
+
+    return render(request, template_name, contexto)

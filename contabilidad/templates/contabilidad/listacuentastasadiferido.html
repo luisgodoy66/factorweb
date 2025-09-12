@@ -59,10 +59,10 @@
                         <tr>
                             <td>{{ item.id }}</td>
                             <td>{{ item.cttipofactoring }}</td>
-                            <td>{{ item.cuentadiferido_tasatipofactoring__cuentadiferido__ctcuenta }}</td>
+                            <td>{{ item.cuentadiferido_tasatipofactoring__cuenta__ctcuenta }}</td>
                             <td>
                                 <button class="btn btn-warning btn-sm"  title="Editar"
-                                    {% if item.cuentadiferido_tasatipofactoring__cuentadiferido__ctcuenta != None %}
+                                    {% if item.cuentadiferido_tasatipofactoring__cuenta__ctcuenta != None %}
                                         onclick="return AbrirModal(
                                             '{% url 'contabilidad:cuentadiferidotasatipofactoring_editar' item.cttipofactoring item.id nombre_tasa id_tasa item.cuentadiferido_tasatipofactoring %}')"
                                     {% else %}

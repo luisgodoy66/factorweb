@@ -597,6 +597,12 @@ class ProtestoRecuperacionNew(SinPrivilegios, generic.CreateView):
 
         return context
 
+    def get_form_kwargs(self):
+        kwargs = super(ProtestoRecuperacionNew, self).get_form_kwargs()
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        kwargs['empresa'] = id_empresa.empresa
+        return kwargs
+
 class LiquidacionesEnNegativoPendientesView(SinPrivilegios, generic.ListView):
     model = Notas_debito_cabecera
     template_name = "cobranzas/listaliquidacionesennegativo.html"
@@ -4462,3 +4468,18 @@ def GeneraListaAccesoriosQuitadosSeleccionadosLiquidacionEnCeroOutput(acc):
     output["Prorroga"] = acc.documento.ndiasprorroga
 
     return output
+
+@login_required(login_url='/login/')
+@permission_required('cobranzas.view_documentos_cabecera', login_url='bases:sin_permisos')
+def get_motivo_responsabilidad(request, motivo_id):
+    """
+    Devuelve un JSON indicando si el motivo de protesto
+    implica responsabilidad del girador.
+    """
+    from .models import Motivos_protesto_maestro
+
+    try:
+        motivo = Motivos_protesto_maestro.objects.get(pk=motivo_id)
+        return JsonResponse({'lresponsabilidadgirador': motivo.lresponsabilidadgirador})
+    except Motivos_protesto_maestro.DoesNotExist:
+        return JsonResponse({'error': 'Motivo no encontrado'}, status=404)

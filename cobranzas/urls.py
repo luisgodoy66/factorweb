@@ -24,7 +24,7 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , DetalleCuotasJSON, AceptarCobranzaCuota, ReversoDesembolsoLiquidacion\
     , ReversaAmpliacion, proyeccion_cobros, Registra_gestion_cobro\
     , GestionesDeCobroView, GestionDeCobro, LiquidacionEnCero, GeneraLiquidacionEnCero\
-    , DetalleDocumentosFacturasPurasLiquidacionEnCero
+    , DetalleDocumentosFacturasPurasLiquidacionEnCero, get_motivo_responsabilidad
 
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
@@ -157,8 +157,12 @@ urlpatterns = [
         ,ProtestoRecuperacionNew.as_view(), name='protestorecuperacion'),
     path('reversaprotesto/<int:id_cobranza>/<tipo_operacion>/<int:id_protesto>/<cobranza>/<cliente_id>/<factoring_id>'
          ,ReversaProtesto),
-    path('impresionprotestos/<id_cliente>', ImpresionProtestosPendientes, name='protestos_pendientes'),
-    path('impresionprotestos', ImpresionProtestosPendientes, name='protestos_pendientes'),
+    path('impresionprotestos/<id_cliente>', ImpresionProtestosPendientes
+         , name='protestos_pendientes'),
+    path('impresionprotestos', ImpresionProtestosPendientes
+         , name='protestos_pendientes'),
+    path('motivo_responsabilidad/<int:motivo_id>/', get_motivo_responsabilidad
+         , name='motivo_responsabilidad'),
 
     # notas de debito
     path('listaliquidacionesennegativopendientes/',LiquidacionesEnNegativoPendientesView.as_view()

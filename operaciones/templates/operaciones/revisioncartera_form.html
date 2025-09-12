@@ -156,7 +156,8 @@ window.operateEvents = {
         registrarEvento(row.id, row.Cliente, row.Comentario)
       },
       'click .cartera': function (e, value, row, index) {
-        carteraPorDeudor(row.IdCliente, row.Cliente)
+        var revision = document.getElementById("id_revisiones").value;
+        AbrirModal("/operaciones/obtenerdetallerevisioncarteracliente/" + row.IdCliente +'/'+revision)
       },
     };
       
@@ -166,11 +167,11 @@ function operateFormatter(value, row, index) {
             '<a class="comentario" href="javascript:void(0)" title="Comentario">',
             '<i class="fa fa-pencil"></i>',
             '</a>  ',
-            '<a class="cartera" href="javascript:void(0)" title="Cartera por deudor">',
-            '<i class="fa fa-print"></i>',
+            '<a class="cartera" href="javascript:void(0)" title="Detalle por deudor">',
+            '<i class="fa fa-shopping-cart"></i>',
             '</a>  ',
-            '<a class="gestion" href="javascript:void(0)" title="Gestión de cobro">',
-            '<i class="fa fa-money"></i>',
+            '<a class="gestion" href="javascript:void(0)" title="Seguimiento">',
+            '<i class="fa fa-eye"></i>',
             '</a>  ',
             '<a class="evento" href="javascript:void(0)" title="Registrar evento">',
             '<i class="fa fa-calendar"></i>',
@@ -181,8 +182,8 @@ function operateFormatter(value, row, index) {
         '<a class="comentario" href="javascript:void(0)" title="Comentario">',
         '<i class="fa fa-pencil"></i>',
         '</a>  ',
-        '<a class="cartera" href="javascript:void(0)" title="Cartera por deudor">',
-        '<i class="fa fa-print"></i>',
+        '<a class="cartera" href="javascript:void(0)" title="Detalle por deudor">',
+        '<i class="fa fa-shopping-cart"></i>',
         '</a>  ',
         '<a class="evento" href="javascript:void(0)" title="Registrar evento">',
         '<i class="fa fa-calendar"></i>',
@@ -203,18 +204,18 @@ function numberFormatter(value) {
 }
 
 function enviarGestionCobro(id_revision_cartera, cliente) {
-    MensajeConfirmacion("Enviar a " + cliente + " a gestión de cobro?", function(){
+    MensajeConfirmacion("Enviar a " + cliente + " a seguimiento?", function(){
         fetchProcesar("/cobranzas/gestioncobro/C/"+id_revision_cartera, function(){
-            MensajeOK("Enviado a gestión de cobro")
+            MensajeOK("Enviado a seguimiento")
         })
     })
 }
 
-function carteraPorDeudor(id_cliente, cliente) {
-    // abrir el reporte de cartera por deudor
-    url = window.location.origin
-    url = url + "/operaciones/impresioncarterapordeudor/"+id_cliente+"/"+encodeURIComponent(cliente);
-    window.open( url);
-}
+// function carteraPorDeudor(id_cliente, cliente) {
+//     // abrir el reporte de cartera por deudor
+//     url = window.location.origin
+//     url = url + "/operaciones/impresioncarterapordeudor/"+id_cliente+"/"+encodeURIComponent(cliente);
+//     window.open( url);
+// }
 </script>
 {% endblock %}

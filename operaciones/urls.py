@@ -31,7 +31,8 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     GuardarCorteHistorico, corteHistorico, GeneraListaCarteraClienteJSON,\
     GeneraResumenAntigüedadCarteraCorteJSON, AnexosCesionFacturasView,\
     GeneraResumenCarteraNegociadaClienteJSON, CarteraPorClienteConsulta, \
-    GeneraListaCarteraDeudorJSON, CarteraPorDeudorConsulta
+    GeneraListaCarteraDeudorJSON, CarteraPorDeudorConsulta, \
+    RevisionCarteraDetalle
     
 from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
     ImpresionAsignacionDesdeSolicitud, ImpresionFacturasPendientes, \
@@ -251,4 +252,6 @@ urlpatterns = [
          , name='detalle_cartera_pendiente_deudores'),
     path('reportecarterapendientedeudores/', ImpresionCarteraPendientePorDeudor
          , name='detalle_cartera_pendiente_deudores'),
+    path('obtenerdetallerevisioncarteracliente/<int:cliente_id>/<int:revision_id>', RevisionCarteraDetalle
+         , name='obtener_detalle_revision_cartera_cliente'),
 ]

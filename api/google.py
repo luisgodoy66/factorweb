@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 import os
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Only for development!
+SCOPES = ['https://www.googleapis.com/auth/calendar.events']
 
 def google_login(request):
     if os.path.exists("client_secret.json"):
@@ -20,25 +21,25 @@ def google_login(request):
         print("❌ No se encontró client_secret.json. Asegúrate de tener el archivo correcto.")
         return HttpResponse('No se encontró client_secret.json. Asegúrate de tener el archivo correcto.', status=401)
 
-    scopes = ['https://www.googleapis.com/auth/calendar.events']
     flow = Flow.from_client_secrets_file(
         'client_secret.json',
-        scopes=scopes,
+        scopes=SCOPES,
         redirect_uri=settings.GOOGLE_OAUTH2_REDIRECT_URI
     )
     authorization_url, state = flow.authorization_url(
         access_type='offline',
-        include_granted_scopes='true'
+        include_granted_scopes='true',
+        # prompt='consent'  # <-- AÑADIR ESTA LÍNEA
     )
     request.session['oauth_state'] = state
-    request.session['oauth_scopes'] = scopes  # Guardar los scopes usados
+    request.session['oauth_scopes'] = SCOPES  # Guardar los scopes usados
     return redirect(authorization_url)
 
 def oauth2callback(request):
     try:
         state = request.session['oauth_state']
         # Recuperar los scopes originales usados en la autorización
-        original_scopes = request.session.get('oauth_scopes', ['https://www.googleapis.com/auth/calendar.events'])
+        original_scopes = request.session.get('oauth_scopes', SCOPES)
         flow = Flow.from_client_secrets_file(
             'client_secret.json',
             scopes=original_scopes,  # Usar los mismos scopes que en google_login
