@@ -686,6 +686,7 @@ def DatosClientes(request, participante_id=None, solicitante_id=None):
         'solicitudes_pendientes': sp,
         'form_submitted': form_submitted,
         'form_cliente':form_cliente,
+        'desde_solicitud': True if solicitante_id else False,
     })
 
     return render(request, template_name, contexto)

@@ -79,7 +79,7 @@ class DocumentosForm(forms.ModelForm):
                     'type': 'date'
                     }
                     ),
-            'cxautorizacion_ec':forms.Textarea(attrs={'rows': '3'}),
+            'cxautorizacion_ec':forms.Textarea(attrs={'rows': '4'}),
         }
     def __init__(self, *args, **kwargs):
         self.ruc = kwargs.pop('ruc', None)
@@ -118,22 +118,22 @@ class DocumentosForm(forms.ModelForm):
                 raise ValidationError({
                     'cxautorizacion_ec': f"La Autorización SRI corresponde a otro emisor, número de documento, fecha de emisión, ambiente o tipo de documento ( '{expected_prefix}...')."
                 })
-            # else:
-                # service = SRIConsultationService("https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl")
-                # result = service.consult_document_status(cxautorizacion_ec)
-                # if "error" in result:
-                #     raise ValidationError({
-                #         'cxautorizacion_ec': f"Error al consultar el SRI: {result['error']}"
-                #     })
-                # elif "mensaje" in result:
-                #     raise ValidationError({
-                #         'cxautorizacion_ec': f"Error al consultar el SRI: {result['mensaje']} o tiene más de 45 días de antigüedad."
-                #     })
-                # else:
-                    # if result[0]["estado"] != "AUTORIZADO":
-                    #     raise ValidationError({
-                    #         'cxautorizacion_ec': f"Documento no autorizado por el SRI o tiene más de 45 días de antigüedad."
-                    #     })
+            else:
+                service = SRIConsultationService("https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl")
+                result = service.consult_document_status(cxautorizacion_ec)
+                if "error" in result:
+                    raise ValidationError({
+                        'cxautorizacion_ec': f"Error al consultar el SRI: {result['error']}"
+                    })
+                elif "mensaje" in result:
+                    raise ValidationError({
+                        'cxautorizacion_ec': f"Error al consultar el SRI: {result['mensaje']} o tiene más de 45 días de antigüedad."
+                    })
+                else:
+                    if result[0]["estado"] != "AUTORIZADO":
+                        raise ValidationError({
+                            'cxautorizacion_ec': f"Documento no autorizado por el SRI o tiene más de 45 días de antigüedad."
+                        })
 
                 #  validar que el documento no exista
         try:
@@ -209,16 +209,16 @@ class ClientesForm(forms.ModelForm):
             , 'ctgirocomercial', 'dinicioactividades', 'empresa']
         labels={
             'cxcliente':'Id. cliente', 'ctnombre':'Nombre de cliente'
-            , 'ctdireccion':'Dirección', 'cttelefono1':'Teléfono'
-            , 'cttelefono2':'Teléfono', 'ctemail':'Dirección email'
-            , 'ctemail2':'Dirección email', 'ctcelular':'Celular'
+            , 'ctdireccion':'Dirección', 'cttelefono1':'Teléfono principal'
+            , 'cttelefono2':'Teléfono secundario', 'ctemail':'Dirección email'
+            , 'ctemail2':'Dirección email', 'ctcelular':'WhatsApp'
             , 'ctgirocomercial':'Giro comercial'
             , 'empresa':'Empresa'
             , 'dinicioactividades': 'Inicio de actividades'
         }
 
         widgets={
-            'ctdireccion': forms.Textarea(attrs={'rows': '3'}),
+            'ctdireccion': forms.Textarea(attrs={'rows': '6'}),
             'ctgirocomercial':forms.Textarea(attrs={'rows': '5'}),
             'dinicioactividades': forms.DateInput(
                 format=('%Y-%m-%d'),

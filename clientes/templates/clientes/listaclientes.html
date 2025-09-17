@@ -63,7 +63,11 @@
                             <td>{{ item.cxcliente.cxparticipante }}</td>
                             <td>{{ item }}</td>
                             <td>{{ item.cxcliente.ctdireccion }}</td>
-                            <td>{{ item.cxcliente.cttelefono1 }}  {{ item.cxcliente.cttelefono2 }}  {{ item.cxcliente.ctcelular }}</td>
+                            <td>
+                                {{ item.cxcliente.cttelefono1|default:"" }}
+                                {{ item.cxcliente.cttelefono2|default:"" }}
+                                {{ item.cxcliente.ctcelular|default:"" }}
+                            </td>
                             <td>{{ item.cxcliente.ctemail }}</td>
                             <!-- <td>{{ item.cxlocalidad }}</td> -->
                             <td>{{ item.dregistro|date:"Y/m/d H:i:s" }}</td>

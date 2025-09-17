@@ -1,7 +1,6 @@
-from decimal import Decimal
-from datetime import date
-from pydoc import doc
+import os
 
+from django.conf import settings
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views import generic
 from django.db.models import Sum, Count
@@ -10,7 +9,8 @@ from django.http import HttpResponse
 from django.db import transaction
 from django.utils.dateparse import parse_date
 from django.urls import reverse_lazy
-from datetime import datetime, timedelta
+from django_weasyprint import WeasyTemplateResponse
+from django.http import JsonResponse
 
 from .forms import AsignacionesForm, ChequesForm, DocumentosForm\
     , ClientesForm, NivelesAprobacionForm, LiquidacionesForm
@@ -24,6 +24,10 @@ from pais.models import Bancos, Feriados
 from bases.models import Usuario_empresa, Empresas
 
 from bases.views import enviarPost, SinPrivilegios
+
+from decimal import Decimal
+from datetime import datetime, timedelta, date
+from pydoc import doc
 
 import datetime
 import json
@@ -596,12 +600,11 @@ def EliminarAsignacion(request, asignacion_id):
 
     return HttpResponse("OK")
 
-from django.http import JsonResponse
-from . import models
+# from . import models
 
 def DetalleSolicitudFacturasPuras(request, asignacion_id = None):
     
-    documentos = models.Documentos.objects\
+    documentos = Documentos.objects\
         .filter(cxasignacion=asignacion_id)\
             # .filter( leliminado = False)
     
@@ -638,8 +641,8 @@ def DetalleSolicitudFacturasPurasOutput(doc):
 
 def DetalleSolicitudConAccesorios(request, asignacion_id = None):
     # mostrar incluso los documentos eliminados
-    documentos = models.ChequesAccesorios.objects\
-        .filter(documento__in=models.Documentos.objects\
+    documentos = ChequesAccesorios.objects\
+        .filter(documento__in=Documentos.objects\
             .filter(cxasignacion=asignacion_id
                     # , leliminado = False
                     ))\
@@ -1242,4 +1245,56 @@ def AceptarExcesoTemporal(request, exceso_id):
         exceso.save()
 
     return HttpResponse("OK")
+
+def ImpresionSolicitud(request, solicitud_id, crear_pdf = False):
+    asignacion = Asignacion.objects\
+        .filter(id = solicitud_id).first()
+    documentos = {}
+
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
+
+    if asignacion.cxtipo==FACTURAS_PURAS:
+
+        template_path = 'solicitudes/asignacion_facturas_puras_reporte.html'
+
+        documentos = Documentos.objects\
+            .filter(cxasignacion = asignacion)\
+                .filter(leliminado = False)\
+                .order_by('comprador__cxcomprador__ctnombre')
+    else:
+        template_path = 'solicitudes/asignacion_facturas_accesorios_reporte.html'
+
+        documentos = ChequesAccesorios.objects\
+            .filter(leliminado = False
+                    , documento__in=Documentos.objects\
+                        .filter(cxasignacion=asignacion))\
+                .order_by('documento__comprador__cxcomprador__ctnombre')
+                
+    context = {
+        "asignacion" : asignacion,
+        "documentos" : documentos,
+        'neto': asignacion.neto(),
+        'empresa': id_empresa.empresa,
+    }
+
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
+    )
+    if crear_pdf:
+        # Guardar el PDF generado en un archivo directamente
+        output_filename = os.path.join(settings.MEDIA_ROOT, f"solicitud_{solicitud_id}.pdf")
+        with open(output_filename, "wb") as f:
+            f.write(response.rendered_content)
+        print(f"Archivo PDF creado en: {output_filename}")
+        return "OK"
+    else:
+        # Devolver el PDF para visualización en el navegador
+        response['Content-Disposition'] = 'inline; filename="solicitud_' + str(solicitud_id) + '.pdf"'
+        return response
 

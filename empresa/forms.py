@@ -28,7 +28,7 @@ class ParticipanteForm(forms.ModelForm):
             'actividad': 'Actividad económica'
         }
         widgets = {
-            'ctdireccion': forms.Textarea(attrs={'rows': '2'}),
+            'ctdireccion': forms.Textarea(attrs={'rows': '6'}),
             'ctgirocomercial': forms.Textarea(attrs={'rows': '5'}),
             'dinicioactividades': forms.DateInput(
                 format=('%Y-%m-%d'),

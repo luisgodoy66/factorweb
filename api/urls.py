@@ -5,7 +5,8 @@ from .views import estado_operativo_cliente_api, \
      ConfiguracionTwilioNew , ConfiguracionTwilioEdit
 from .slack import enviar_solicitud_aprobacion, manejar_interactividad\
      , reenviar_solicitud_aprobacion
-from .sri import obtener_datos_contribuyente
+from .sri import obtener_datos_contribuyente, \
+     consulta_estado_comprobante_sri
 from .twilio_service import historial_mensajes_whatsapp,\
      enviar_mensaje_whatsapp, webhook_whatsapp_twilio
 from .google import oauth2callback, google_login, \
@@ -20,6 +21,8 @@ urlpatterns = [
      # Rutas para SRI
      path('sri/obtener-datos-contribuyente/<ruc>', obtener_datos_contribuyente
          , name='obtener_datos_contribuyente'),
+     path('sri/consulta-estado-comprobante/<access_key>', consulta_estado_comprobante_sri
+         , name='consulta_estado_comprobante_sri'),
      # Rutas para Slack
     path('slack/enviar-solicitud-aprobacion/<int:id_solicitud>'
          , enviar_solicitud_aprobacion, name='enviar_solicitud_aprobacion'),

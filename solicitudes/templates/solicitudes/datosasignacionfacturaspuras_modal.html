@@ -21,6 +21,20 @@
                 <div class="card-body">
                     <div class="col-md-6">
                         <div class="row form-group">
+                            <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
+                                {{ form_documento.cxautorizacion_ec.label}}</label>
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_documento.cxautorizacion_ec}}
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-success btn-sm" title="Cargar datos de la factura desde el SRI"
+                                onclick="return CargarDatosFactura(document.getElementById('id_cxautorizacion_ec').value)">
+                                <i class="fa fa-search"></i>
+                                </button>
+                            </div>
+                        </div>  
+                        <div class="row form-group">
                             <div class="col col-md-4">
                                 <select name="cxtipoid" class="form-control" required id="cxtipoid">
                                     <option value="" >---------</option>                                            
@@ -80,21 +94,14 @@
                                 {{ form_documento.demision}}
                             </div>
                         </div>  
-                        <div class="row form-group">
-                            <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
-                                {{ form_documento.cxautorizacion_ec.label}}</label>
-                            </div>
-                            <div class="col-md-8">
-                                {{ form_documento.cxautorizacion_ec}}
-                            </div>
-                        </div>  
     
                     </div>
                     <!-- parte derecha -->
                     <div class="col-md-6">
                         <div class="row form-group">
-                            <input type="file" id="xmlFile" accept=".xml">
-
+                            <div class="col">
+                                <input type="file" id="xmlFile" accept=".xml">
+                            </div>
                         </div>
 
                         <div class="row form-group">
@@ -146,7 +153,9 @@
                     {% if not vencimiento_en_feriado %}
                     <div class="col-md-12">
                         <div class="alert alert-info" role="alert">
-                            Este tipo de factoring no acepta vencimiento en sábados, domingos y feriados registrados. La fecha se trasladará al siguiente día hábil
+                            Este tipo de factoring no acepta vencimiento en sábados, domingos y feriados registrados.
+                            <br>
+                            La fecha se trasladará al siguiente día hábil
                         </div>
                      </div>
                     {% endif %}

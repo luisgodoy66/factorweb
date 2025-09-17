@@ -29,67 +29,72 @@
                 <!-- columna izquierda -->
                 <div class="col-lg-6">
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cxtipoid" class=" form-control-label">
+                        <div class="col col-md-4"><label for="id_cxtipoid" class=" form-control-label">
                             {{form.cxtipoid.label}}
                         </label></div>
-                        <div class="col-12 col-md-9">
+                        <div class="col-12 col-md-8">
                             {{form.cxtipoid}}
                             <!-- <small class="form-text text-muted">Máximo 13 caracteres</small> -->
                         </div>
                     </div>
                     
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cxtipocliente" class=" form-control-label">
+                        <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
                             {{ form_cliente.cxtipocliente.label}}
                         </label></div>
-                        <div class="col-12 col-md-9">
+                        <div class="col-12 col-md-8">
                             {{ form_cliente.cxtipocliente}}
                         </div>
                     </div>  
     
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cxparticipante" class=" form-control-label">
+                        <div class="col col-md-4"><label for="id_cxparticipante" class=" form-control-label">
                             {{form.cxparticipante.label}}
                         </label></div>
-                        <div class="col-12 col-md-9">
+                        <div class="col-12 col-md-8">
                             {{form.cxparticipante}}
-                            <small class="form-text text-muted">Máximo 13 caracteres</small></div>
+                            <!-- <small class="form-text text-muted">Máximo 13 caracteres</small> -->
+                        </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_ctnombre" class=" form-control-label">
+                        <div class="col col-md-4"><label for="id_ctnombre" class=" form-control-label">
                             {{form.ctnombre.label}}
                         </label></div>
-                        <div class="col-12 col-md-9">
+                        <div class="col-12 col-md-8">
                             {{form.ctnombre}}
                             <small class="form-text text-muted">Máximo 100 caracteres</small></div>
                     </div>
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cxlocalidad" class=" form-control-label">
+                        <div class="col col-md-4"><label for="id_cxlocalidad" class=" form-control-label">
                             {{form_cliente.cxlocalidad.label}}
                         </label></div>
-                        <div class="col-12 col-md-9">
+                        <div class="col-12 col-md-8">
                             {{form_cliente.cxlocalidad}}
                             <small class="form-text text-muted">{{form_cliente.cxlocalidad.help_text}}</small>
                         </div>
                     </div>
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_ctdireccion" class=" form-control-label">
+                        <div class="col col-md-4"><label for="id_ctdireccion" class=" form-control-label">
                             {{form.ctdireccion.label}}
                         </label></div>
-                        <div class="col-12 col-md-9">
+                        <div class="col-12 col-md-8">
                             {{form.ctdireccion}}
                         </div>
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cttelefono1" class=" form-control-label">
+                        <div class="col col-md-4"><label for="id_cttelefono1" class=" form-control-label">
                             {{form.cttelefono1.label}}
                         </label></div>
-                        <div class="col-12 col-md-9">
+                        <div class="col-12 col-md-8">
                             {{form.cttelefono1}}
                             <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
                     </div>
+
+                </div>
+                <!-- columna derecha -->
+                <div class="col-lg-6">
                     <div class="row form-group">
                         <div class="col col-md-3"><label for="id_cttelefono2" class=" form-control-label">
                             {{form.cttelefono2.label}}
@@ -98,17 +103,13 @@
                             {{form.cttelefono2}}
                             <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
                     </div>
-
-                </div>
-                <!-- columna derecha -->
-                <div class="col-lg-6">
                     <div class="row form-group">
                         <div class="col col-md-3"><label for="id_ctcelular" class=" form-control-label">
                             {{form.ctcelular.label}}
                         </label></div>
                         <div class="col-12 col-md-9">
                             {{form.ctcelular}}
-                            <small class="form-text text-muted">Máximo 30 caracteres. Incluya el código de país</small></div>
+                            <small class="form-text text-muted">Use el formato internacional. Ejemplo: +593934567890</small></div>
                     </div>
 
                     <div class="row form-group">
@@ -157,7 +158,13 @@
             </div>    
             
             <div class="card-footer">
-                <a href="{% url 'clientes:listaclientes' %}" class="btn btn-danger btn-sm">
+                <a 
+                {% if desde_solicitud %} 
+                    href="{% url 'clientes:listaclientessolicitudes' %}" 
+                {% else %} 
+                    href="{% url 'clientes:listaclientes' %}" 
+                {% endif %}
+                class="btn btn-danger btn-sm">
                     <i class="fa fa-ban"></i> Cancelar
                 </a>
                 <button type="submit" class="btn btn-primary btn-sm">
@@ -165,8 +172,8 @@
                 </button>
             </div>
            <!-- Sección para mostrar errores del formulario -->
-           {#% if form_submitted and form.errors %#}
-           {% if form.errors %}
+           {% if form_submitted and form.errors %}
+           {#% if form.errors %#}
            <div class="alert alert-danger" role="alert">
                <ul>
                    {% for field, errors in form.errors.items %}

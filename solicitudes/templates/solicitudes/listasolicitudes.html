@@ -87,8 +87,12 @@
                                 </a>
                                 <a href="{% url 'operaciones:aceptarasignacion' item.id %}" title="Liquidar"
                                     class="btn btn-success btn-sm" role="button"><i class="fa fa-money"></i></a>
-                                <a href="#" onclick='EliminarAsignacion({{item.id}},"{{item.cxcliente}}")' title="Eliminar"
+                                <a href="#" onclick='EliminarAsignacion("{{item.id}}","{{item.cxcliente}}")' title="Eliminar"
                                     class="btn btn-danger btn-sm" role="button"><i class="fa fa-trash"></i></a>
+                                <a href="{% url 'solicitudes:reporte_solicitud' item.id %}" 
+                                    class="btn btn-primary btn-sm" role="button" target="reporte"
+                                    title="Imprimir"><i class="fa fa-print"></i>
+                                </a>
                             </td>
                         </tr>
                         {% endfor %}

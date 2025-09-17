@@ -1,8 +1,11 @@
 # import zeep
+from urllib import response
 from zeep import Client
 from zeep.transports import Transport
 from requests import Session
 from django.http import HttpResponse, JsonResponse
+
+WSDL_URL = "https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl"
 
 class SRIConsultationService:
     def __init__(self, wsdl_url):
@@ -31,17 +34,16 @@ class SRIConsultationService:
                     "numeroAutorizacion": autorizacion.numeroAutorizacion,
                     "fechaAutorizacion": autorizacion.fechaAutorizacion,
                     "ambiente": autorizacion.ambiente,
-                    # "comprobante": autorizacion.comprobante,
+                    "comprobante": autorizacion.comprobante,
                 } for autorizacion in autorizaciones.autorizacion]
         print(response)
         return {"mensaje": "No se encontraron autorizaciones."}
 
 # Ejemplo de uso
 if __name__ == "__main__":
-    wsdl_url = "https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl"
-    access_key = "2802202501099037901700120010050510694800990379019"  # Reemplazar con clave de acceso real
+    access_key = "2508202501171423032100120010020000035750000007211"  # Reemplazar con clave de acceso real
 
-    service = SRIConsultationService(wsdl_url)
+    service = SRIConsultationService(WSDL_URL)
     result = service.consult_document_status(access_key)
     print(result)
 
@@ -72,24 +74,30 @@ def consulta_contribuyente_sri(ruc):
         # Manejar errores de conexión o solicitud
         return {"error": f"Error de conexión: {str(e)}"}
 
+def consulta_estado_comprobante_sri(request, access_key):
+    # Crear cliente SOAP
+    try:
+        client = Client(wsdl=WSDL_URL)
+    except Exception as e:
+        return JsonResponse({"error": f"Error al crear cliente SOAP: {str(e)}"}, safe=False)
 
-# # Ejemplo de uso
-# if __name__ == "__main__":
-#     # Ejemplo de uso
-#     ruc = "0993220167001"  # Reemplaza con el RUC que deseas consultar
-#     datos = obtener_datos_contribuyente(None,ruc)
+    try:
+        response = client.service.autorizacionComprobante(claveAccesoComprobante=access_key)
+    except Exception as e:
+        return JsonResponse({"error": f"Error al consultar estado del comprobante: {str(e)}"}, safe=False)
 
-#     # Imprimir los datos obtenidos
-#     print(datos)
-#     datos = [{'numeroRuc': '0993220167001'
-#               , 'razonSocial': 'CODIGO BAMBÚ COBAMBUSA S.A.'
-#               , 'estadoContribuyenteRuc': 'ACTIVO'
-#               , 'actividadEconomicaPrincipal': 'VENTA AL POR MAYOR DE ARTÍCULOS DE LIMPIEZA.'
-#               , 'tipoContribuyente': 'SOCIEDAD'
-#               , 'regimen': 'GENERAL', 'categoria': None, 'obligadoLlevarContabilidad': 'SI', 'agenteRetencion': 'NO'
-#               , 'contribuyenteEspecial': 'NO'
-#               , 'informacionFechasContribuyente': {'fechaInicioActividades': '2019-08-21 00:00:00.0', 'fechaCese': ''
-#                                                    , 'fechaReinicioActividades': '', 'fechaActualizacion': '2019-08-22 18:37:25.0'}
-#               , 'representantesLegales': [{'identificacion': '0910487388', 'nombre': 'GODOY CHOCA LUIS ANTONIO'}]
-#               , 'motivoCancelacionSuspension': None, 'contribuyenteFantasma': 'NO', 'transaccionesInexistente': 'NO'}
-#               ]
+    # Mostrar resultados
+    if response.autorizaciones is None:
+        return JsonResponse({"mensaje": "No se encontró autorización en la base del SRI. "
+        "Podría ser una autorización errada o una emisión de varios meses atrás."}, safe=False)
+    autorizaciones = response.autorizaciones.autorizacion
+    resultado = []
+    for autorizacion in autorizaciones:
+        resultado.append({
+            "estado": autorizacion.estado,
+            "numeroAutorizacion": autorizacion.numeroAutorizacion,
+            "fechaAutorizacion": autorizacion.fechaAutorizacion,
+            "ambiente": autorizacion.ambiente,
+            "comprobante": autorizacion.comprobante,
+        })
+    return JsonResponse(resultado, safe=False)

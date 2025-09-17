@@ -142,9 +142,12 @@
             <button type="submit" class="btn btn-primary btn-sm">
                 <i class="fa fa-dot-circle-o"></i> Grabar
             </button>
-            {{ form.errors }}
         </div>
-
+        {% if form.errors %}
+        <div class="alert alert-danger" role="alert">
+                    {{ form.errors }}
+        </div>
+        {% endif %}
 
     </div>
  

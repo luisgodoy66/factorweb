@@ -28,7 +28,7 @@ class DatosOperativosForm(forms.ModelForm):
             , 'cxclase':'Clase', 'nporcentajeanticipo':'% Anticipo'
             ,'ntasacomision':'Tasa comisión'
             , 'ntasadescuentocartera':'Tasa de descuento de cartera'
-            , 'ntasagao':'Tasa de comisión adicional'
+            , 'ntasagaoa':'Tasa de comisión adicional'
             , 'cxbeneficiarioasignacion': 'Id. de beneficiario de cheque'
             , 'ctbeneficiarioasignacion': 'Nombre de beneficiario de cheque'
             , 'cxbeneficiariocobranzas':'Id. de beneficiario de cheque'

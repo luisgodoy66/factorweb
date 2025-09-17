@@ -61,7 +61,9 @@
                             <td>{{ item.cxcliente }}</td>
                             <td>{{ item.ctnombre }}</td>
                             <td>{{ item.ctdireccion }}</td>
-                            <td>{{ item.cttelefono1 }} / {{ item.cttelefono2 }} / {{ item.ctcelular }}</td>
+                            <td>{{ item.cttelefono1 | default:"" }}  
+                                {{ item.cttelefono2 | default:"" }}  
+                                {{ item.ctcelular | default:"" }}</td>
                             <td>{{ item.cxcliente.ctemail }}</td>
                             <td>{{ item.dregistro|date:"Y/m/d H:i:s" }}</td>
                             <td>
