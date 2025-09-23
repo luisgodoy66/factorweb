@@ -54,13 +54,13 @@ class DatosOperativosForm(forms.ModelForm):
             'ctbeneficiarioasignacion': forms.Textarea(attrs={'rows': '1'}),
             'ctbeneficiariocobranzas': forms.Textarea(attrs={'rows': '1'}),
             'dalta': forms.DateInput(
-            format=('%Y-%m-%d'),
-            attrs={
-                'class': 'form-control',
-                'placeholder': 'Seleccione una fecha',
-                'type': 'date'
-            }
-            ),
+                format=('%Y-%m-%d'),
+                attrs={
+                        'class': 'form-control',
+                        'placeholder': 'Seleccione una fecha',
+                        'type': 'date'
+                    }
+                ),
             **{
             field: forms.NumberInput(attrs={'step': '0.25', 'class': 'form-control'})
             for field in ['ntasacomision', 'ntasadescuentocartera', 'ntasagaoa', 'ntasamora']
@@ -79,6 +79,10 @@ class DatosOperativosForm(forms.ModelForm):
         if empresa:
             self.fields['cxclase'].queryset = Clases_cliente.objects\
                 .filter(empresa=empresa, leliminado = False)
+
+        # Si dalta es nulo, inicializar con la fecha de hoy
+        if not self.initial.get('dalta'):
+            self.initial['dalta'] = date.today()
 
 class AsignacionesForm(forms.ModelForm):
     class Meta:

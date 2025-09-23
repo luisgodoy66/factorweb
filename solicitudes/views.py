@@ -548,13 +548,37 @@ def RecuperarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
             asignacion = Asignacion.objects.filter(pk=asignacion_id).first()
 
             if tipo_asignacion==FACTURAS_PURAS:
-                doc = Documentos.objects.filter(pk=documento_id).first()
+                doc = Documentos.objects\
+                    .filter(pk=documento_id).first()
+                # verificar si el documento ya existe en operaciones
+                # si existe, marcar como eliminado en la solicitud
+                sc = DocumentosOperaciones.objects\
+                    .filter(ctdocumento=doc.ctserie1+'-'+doc.ctserie2+'-'+doc.ctdocumento
+                            , cxcliente__cxcliente__cxparticipante=doc.cxasignacion.cxcliente.cxcliente
+                            , leliminado=False
+                        )
+                if sc.exists():
+                    return HttpResponse("ERROR: No es posible recuperar el documento" \
+                    ", porque ya fue utilizado en la operación " + str(sc.first().cxasignacion))
             else:
                 # si es cheque actualizar el valor no negociado del documento
                 # si es un solo cheque, eliminar la factura
-                doc = ChequesAccesorios.objects.filter(pk = documento_id).first()
-                factura =  Documentos.objects.filter(pk=doc.documento.id).first()
+                doc = ChequesAccesorios.objects\
+                    .filter(pk = documento_id).first()
+                factura =  Documentos.objects\
+                    .filter(pk=doc.documento.id).first()
 
+                # verificar si el documento ya existe en operaciones
+                # si existe, marcar como eliminado en la solicitud
+                sc = DocumentosOperaciones.objects\
+                    .filter(ctdocumento=factura.ctserie1+'-'+factura.ctserie2+'-'+factura.ctdocumento
+                            , cxcliente__cxcliente__cxparticipante=factura.cxasignacion.cxcliente.cxcliente
+                            , leliminado=False
+                        )
+                if sc.exists():
+                    return HttpResponse("ERROR: No es posible recuperar el documento" \
+                    ", porque ya fue utilizado en la operación " + str(sc.first().cxasignacion))
+                
                 factura.nvalornonegociado -= doc.ntotal
                 factura.ntotal += doc.ntotal
                 if factura.leliminado:
@@ -599,8 +623,6 @@ def EliminarAsignacion(request, asignacion_id):
         asgn.save()
 
     return HttpResponse("OK")
-
-# from . import models
 
 def DetalleSolicitudFacturasPuras(request, asignacion_id = None):
     
@@ -969,6 +991,7 @@ def PedirArchivoXML(request):
     return render(request, template_name)
 from django.http import JsonResponse
 from django.db import DataError
+from operaciones.models import Documentos as DocumentosOperaciones
 
 def ImportarOperacion(request):
     objeto=json.loads(request.body.decode("utf-8"))
@@ -1057,6 +1080,13 @@ def ImportarOperacion(request):
                     total = doc.get("total", 0)
                     no_negociado = doc.get("descartar", 0)
 
+                    # verificar si el documento ya existe en operaciones
+                    # si existe, marcar como eliminado en la solicitud
+                    sc = DocumentosOperaciones.objects\
+                        .filter(ctdocumento=serie1+'-'+serie2+'-'+documento
+                                , cxcliente__cxcliente__cxparticipante=ruc
+                                , leliminado=False
+                            )
                     # si el id del comprador no existe, descartar el documento
                     if not id_comprador or not nombre_comprador or not emision \
                         or not vencimiento or total == 0:
@@ -1124,7 +1154,9 @@ def ImportarOperacion(request):
                         nvalornonegociado = no_negociado,
                         cxusuariocrea = request.user,
                         empresa = id_empresa.empresa,
-                        comprador = comprador
+                        comprador = comprador,
+                        cxautorizacion_ec = doc.get("numero_autorizacion", ""),
+                        leliminado = True if sc.exists() else False,  # si no existe en operaciones, marcar como eliminado
                     )
 
                     if detalle:
@@ -1297,4 +1329,3 @@ def ImpresionSolicitud(request, solicitud_id, crear_pdf = False):
         # Devolver el PDF para visualización en el navegador
         response['Content-Disposition'] = 'inline; filename="solicitud_' + str(solicitud_id) + '.pdf"'
         return response
-

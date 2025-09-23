@@ -725,34 +725,34 @@ def DatosOperativos(request, cliente_id=None):
     template_name="operaciones/datosoperativos_form.html"
     contexto={}
     formulario={}
-    datoscliente={}
+    datos_operativos={}
     
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     cliente = ModeloCliente.Datos_generales.objects\
         .filter(cxcliente=cliente_id).first()
     
-    datoscliente = Datos_operativos.objects\
+    datos_operativos = Datos_operativos.objects\
         .filter(cxcliente=cliente).first()
     
     if request.method=='GET':
 
-        if datoscliente:
-            dalta= date.isoformat(datoscliente.dalta)
+        if datos_operativos:
+            dalta= date.isoformat(datos_operativos.dalta)
             e={ 
-                'cxcliente':datoscliente.cxcliente,
+                'cxcliente':datos_operativos.cxcliente,
                 'dalta':dalta,
-                'cxclase':datoscliente.cxclase,
-                'nporcentajeanticipo':datoscliente.nporcentajeanticipo,
-                'ntasacomision':datoscliente.ntasacomision,
-                'ntasadescuentocartera':datoscliente.ntasadescuentocartera,
-                'ntasagaoa':datoscliente.ntasagaoa,
-                'cxbeneficiarioasignacion':datoscliente.cxbeneficiarioasignacion,
-                'ctbeneficiarioasignacion':datoscliente.ctbeneficiarioasignacion,
-                'cxbeneficiariocobranzas':datoscliente.cxbeneficiariocobranzas,
-                'ctbeneficiariocobranzas':datoscliente.ctbeneficiariocobranzas,
-                'cxestado':datoscliente.cxestado,
-                'ntasamora':datoscliente.ntasamora
+                'cxclase':datos_operativos.cxclase,
+                'nporcentajeanticipo':datos_operativos.nporcentajeanticipo,
+                'ntasacomision':datos_operativos.ntasacomision,
+                'ntasadescuentocartera':datos_operativos.ntasadescuentocartera,
+                'ntasagaoa':datos_operativos.ntasagaoa,
+                'cxbeneficiarioasignacion':datos_operativos.cxbeneficiarioasignacion,
+                'ctbeneficiarioasignacion':datos_operativos.ctbeneficiarioasignacion,
+                'cxbeneficiariocobranzas':datos_operativos.cxbeneficiariocobranzas,
+                'ctbeneficiariocobranzas':datos_operativos.ctbeneficiariocobranzas,
+                'cxestado':datos_operativos.cxestado,
+                'ntasamora':datos_operativos.ntasamora
             }
             formulario=DatosOperativosForm(e, empresa = id_empresa.empresa)
         else:
@@ -783,8 +783,8 @@ def DatosOperativos(request, cliente_id=None):
 
         idclase = Clases_cliente.objects.filter(pk = cxclase).first()
 
-        if not datoscliente:
-            datoscliente= Datos_operativos(
+        if not datos_operativos:
+            datos_operativos= Datos_operativos(
                 dalta = dalta,
                 cxclase=idclase,
                 nporcentajeanticipo=nporcentajeanticipo,
@@ -801,25 +801,25 @@ def DatosOperativos(request, cliente_id=None):
                 empresa = id_empresa.empresa,
                 ntasamora = ntasamora
             )
-            if datoscliente:
-                datoscliente.save()
+            if datos_operativos:
+                datos_operativos.save()
                 
         else:
-            datoscliente.dalta=dalta
-            datoscliente.cxclase = idclase
-            datoscliente.nporcentajeanticipo=nporcentajeanticipo
-            datoscliente.ntasacomision=ntasacomision
-            datoscliente.ntasadescuentocartera=ntasadescuentocartera
-            datoscliente.ntasagaoa=ntasagaoa
-            datoscliente.cxbeneficiarioasignacion = id_beneficiario_asgn
-            datoscliente.ctbeneficiarioasignacion = beneficiario_asgn
-            datoscliente.cxbeneficiariocobranzas = id_beneficiario_cobr
-            datoscliente.ctbeneficiariocobranzas = beneficiario_cobr
-            datoscliente.cxusuariomodifica = request.user.id
-            datoscliente.cxestado= estado
-            datoscliente.ntasamora = ntasamora
+            datos_operativos.dalta=dalta
+            datos_operativos.cxclase = idclase
+            datos_operativos.nporcentajeanticipo=nporcentajeanticipo
+            datos_operativos.ntasacomision=ntasacomision
+            datos_operativos.ntasadescuentocartera=ntasadescuentocartera
+            datos_operativos.ntasagaoa=ntasagaoa
+            datos_operativos.cxbeneficiarioasignacion = id_beneficiario_asgn
+            datos_operativos.ctbeneficiarioasignacion = beneficiario_asgn
+            datos_operativos.cxbeneficiariocobranzas = id_beneficiario_cobr
+            datos_operativos.ctbeneficiariocobranzas = beneficiario_cobr
+            datos_operativos.cxusuariomodifica = request.user.id
+            datos_operativos.cxestado= estado
+            datos_operativos.ntasamora = ntasamora
 
-            datoscliente.save()
+            datos_operativos.save()
 
         # crear un registro historico del cambio realizado
         datoshistorico= ModeloCliente.Datos_operativos_hist(

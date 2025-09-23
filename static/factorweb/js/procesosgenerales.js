@@ -758,9 +758,9 @@ function CargaXMLOperacion(xmlFile){
                       case "NOMBRECOMP":
                           objetoDetalle.nombre_comprador = detalle1[j].childNodes[0].nodeValue;
                           break;
-                      // case "DOCTIPO":
-                      //     objetoDetalle.tipo_documento = detalle1[j].childNodes[0].nodeValue;
-                      //     break;
+                      case "NO":
+                          objetoDetalle.numero_autorizacion = detalle1[j].childNodes[0].nodeValue;
+                          break;
                       case "SERIE1":
                           objetoDetalle.serie1 = detalle1[j].childNodes[0].nodeValue;
                           break;

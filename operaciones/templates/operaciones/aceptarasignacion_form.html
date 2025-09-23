@@ -8,7 +8,7 @@
                     <li><a href="#">Operaciones</a></li>
                     <li><a href="#">Negociación</a></li>
                     <li><a href="{% url 'solicitudes:listasolicitudes' %}" >solicitudes</a></li>
-                    <li class="active">Aceptar</li>
+                    <li class="active">Liquidar</li>
                 </ol>
             </div>
         </div>
@@ -469,7 +469,6 @@ function obtenerAcumuladoBaseIVAOtrosCargos() {
             acumulado += valor; // Suma al acumulado
         }
     });
-    console.log('Acumulado con carga IVA:', acumulado); // Muestra el acumulado en la consola
     return acumulado; // Retorna el valor acumulado por si necesitas usarlo
 }
 
@@ -483,7 +482,6 @@ function obtenerAcumuladoBaseNoIVAOtrosCargos() {
             acumulado += valor; // Suma al acumulado
         }
     });
-    console.log('Acumulado con carga no IVA:', acumulado); // Muestra el acumulado en la consola
     return acumulado; // Retorna el valor acumulado por si necesitas usarlo
 }
 
@@ -528,7 +526,7 @@ function copiarLiquidacionAlPortapapeles() {
 
     const ivaLabel = document.querySelector('label[for="id_niva"]')?.innerText || 'IVA';
     const ivaValor = document.getElementById('id_niva').value;
-    texto += `\n${ivaLabel}: ${ivaValor}\n`;
+    texto += `\n- ${ivaLabel}: ${ivaValor}\n`;
 
     texto += "========================\n";
     const netoValor = document.getElementById('neto').value;
