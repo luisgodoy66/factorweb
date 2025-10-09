@@ -2428,18 +2428,18 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
 
                         tasa_gaoa = datos_operativos.ntasagaoa
 
+                        # si la tasa se acumula, sumarla a la tasa del documento
+                        if tipo_factoring.lacumulagaoaatasagao:
+                            tasa_gaoa += documento.ntasacomision
+
                         base_gaoa = cobro_aplicado
 
                         if gaoa.lsobreanticipo:
                             base_gaoa = base_gaoa * documento.nporcentajeanticipo / 100
 
-                        # si la tasa se acumula, sumarla a la tasa del documento
-                        if tipo_factoring.lacumulagaoaatasagao:
-                            tasa_gaoa += documento.ntasacomision
-
                         if gaoa.lflat :
                             # determinar cuantas veces aplicar la tasa según los días de aplicacion
-                            x = math.ceil(dias_vencidos/gaoa.ndiasperiocidad)
+                            x = math.ceil(dias_vencidos / gaoa.ndiasperiocidad)
                             tasa_gaoa = tasa_gaoa * x
 
                             valor_gaoa = base_gaoa * tasa_gaoa /100
@@ -4476,7 +4476,6 @@ def get_motivo_responsabilidad(request, motivo_id):
     Devuelve un JSON indicando si el motivo de protesto
     implica responsabilidad del girador.
     """
-    from .models import Motivos_protesto_maestro
 
     try:
         motivo = Motivos_protesto_maestro.objects.get(pk=motivo_id)

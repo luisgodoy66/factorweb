@@ -195,3 +195,20 @@ GOOGLE_OAUTH2_REDIRECT_URI = 'https://margarita.codigobambuecuador.com/api/googl
 
 WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN")
 PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")
+
+# settings.py
+
+# URL del servicio del SRI
+SRI_WSDL_URL = "https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl"
+
+# Proxy autorizado por el SRI (si requiere usuario y contraseña)
+SRI_PROXY = {
+    "https": "http://usuario:contraseña@IP_DEL_PROXY:PUERTO"
+}
+
+# Timeout en segundos para la conexión
+SRI_TIMEOUT = 20
+
+# Ruta al certificado del proxy, si aplica (opcional)
+# SRI_VERIFY_CERT = "/ruta/al/certificado.pem"
+SRI_VERIFY_CERT = True  # usa True si quieres verificar certificados por defecto

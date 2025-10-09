@@ -1052,3 +1052,86 @@ def ImpresionCarteraPendientePorDeudor(request, deudores = None):
     response['Content-Disposition'] = 'inline; filename="facturas pendientes.pdf"'
     return response
 
+def ImpresionCargosCarteraVencida(request, fecha_corte, clientes = None):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    totalfacturas=0
+    totalquitados=0
+    arr_clientes = []
+    
+    template_path = 'operaciones/cargoscarteravencida_reporte.html'
+
+    if not clientes == None:
+        ids = clientes.split(',')
+        for id in ids:
+            arr_clientes.append(id)
+
+    if not isinstance(fecha_corte, date):
+        fecha_corte = datetime.strptime(fecha_corte, "%Y-%m-%d").date()
+
+    facturas = Documentos.objects\
+        .provision_cargos(id_empresa.empresa, fecha_corte, arr_clientes)
+    cheques = ChequesAccesorios.objects\
+        .provision_cargos(id_empresa.empresa, fecha_corte, arr_clientes)
+    quitados = Cheques_quitados.objects\
+        .provision_cargos(id_empresa.empresa, fecha_corte, arr_clientes)
+    protestos_facturas = Documentos_protestados.objects\
+        .provision_cargos_facturas(id_empresa.empresa, fecha_corte, arr_clientes)
+    protestos_accesorios = Documentos_protestados.objects\
+        .provision_cargos_accesorios(id_empresa.empresa, fecha_corte, arr_clientes)
+
+    protestos = protestos_facturas.union(protestos_accesorios)
+
+    cartera = facturas.union(cheques, quitados, protestos)\
+        .order_by('cxtipofactoring__cttipofactoring', 'cxcliente__cxcliente__ctnombre')
+
+    # totalfacturas = facturas.aggregate(total = Sum('nsaldo'))
+    # if not totalfacturas['total']: totalfacturas['total']=0
+
+    # totalquitados = quitados.aggregate(total = Sum('nsaldo'))
+    # if not totalquitados['total']: totalquitados['total']=0
+
+    # totalaccesorios = cheques.aggregate(total = Sum('ntotal'))
+    # if not totalaccesorios['total']: totalaccesorios['total']=0
+
+    # totalprotestos1 = protestos_facturas.aggregate(total = Sum('nsaldo'))
+    # if not totalprotestos1['total']: totalprotestos1['total']=0
+    # totalprotestos2 = protestos_accesorios.aggregate(total = Sum('nsaldo'))
+    # if not totalprotestos2['total']: totalprotestos2['total']=0
+
+    totales = cartera.aggregate(
+        saldo_cartera = Sum('saldo'),
+        dc_vencido = Sum('dc_vencido'), 
+        dc_negociado = Sum('dc_negociado'),
+        saldo_anticipado = Sum('saldo_anticipado'),
+        gao_adicional = Sum('gao_adicional'),
+        iva = Sum('iva'),
+        deuda = Sum('deuda'),
+    )
+
+    if not totales['dc_negociado']: totales['dc_negociado']=0
+
+    context={
+        "detalle" : cartera,
+        'empresa': id_empresa.empresa,
+        # # 'total' : totalfacturas['total'] + totalquitados['total'] 
+        # # + totalaccesorios['total'] + totalprotestos1['total'] 
+        # # + totalprotestos2['total'],
+        'total_saldo_cartera': totales['saldo_cartera'],
+        'total_saldo_anticipado': totales['saldo_anticipado'],
+        'total_dc_negociado': totales['dc_negociado'],
+        'total_dc_vencido': totales['dc_vencido'],
+        'total_gao_adicional': totales['gao_adicional'],
+        'total_iva': totales['iva'],
+        'total_deuda': totales['deuda'],
+    }
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
+    )
+    response['Content-Disposition'] = 'inline; filename="facturas pendientes.pdf"'
+    return response
+

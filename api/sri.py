@@ -101,3 +101,48 @@ def consulta_estado_comprobante_sri(request, access_key):
             "comprobante": autorizacion.comprobante,
         })
     return JsonResponse(resultado, safe=False)
+
+# sri_utils.py
+import requests
+import logging
+from django.conf import settings
+
+logger = logging.getLogger(__name__)
+
+def consulta_contribuyente_sri_vps_externo(ruc):
+    """
+    Consulta el SRI usando proxy autorizado, con manejo de errores y logs.
+    """
+    url = f"https://srienlinea.sri.gob.ec/sri-catastro-sujeto-servicio-internet/rest/ConsolidadoContribuyente/obtenerPorNumerosRuc?ruc={ruc}"
+    try:
+        response = requests.get(
+            url,
+            proxies=settings.SRI_PROXY,
+            timeout=settings.SRI_TIMEOUT,
+            verify=settings.SRI_VERIFY_CERT
+        )
+        response.raise_for_status()  # Lanza excepción si HTTP >=400
+        logger.info("Conexión exitosa al SRI, status %s", response.status_code)
+        # Verificar si la solicitud fue exitosa (código 200)
+        if response.status_code == 200:
+            # Convertir la respuesta a JSON
+            datos_contribuyente = response.json()
+            return datos_contribuyente[0]
+        else:
+            # Si la solicitud no fue exitosa, devolver un mensaje de error
+            return {"error": f"Error al consultar el RUC. Código de estado: {response.status_code}"}
+    
+    except requests.exceptions.SSLError as e:
+        logger.error("Error SSL/TLS al conectar con SRI: %s", e)
+    except requests.exceptions.ProxyError as e:
+        logger.error("Error de proxy al conectar con SRI: %s", e)
+    except requests.exceptions.ConnectionError as e:
+        logger.error("Error de conexión al SRI: %s", e)
+    except requests.exceptions.Timeout as e:
+        logger.error("Timeout al conectar con SRI: %s", e)
+    except requests.exceptions.HTTPError as e:
+        logger.error("Error HTTP al SRI: %s", e)
+    except Exception as e:
+        logger.error("Error inesperado al conectar con SRI: %s", e)
+    
+    return None  # En caso de error

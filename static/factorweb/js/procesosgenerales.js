@@ -1067,3 +1067,15 @@ function imprimeCarteraPendientePorDeudor(){
   window.open( url);
 }
 
+function imprimeCargosCarteraVencida(){
+  var x = [];
+  var options = document.getElementById("id_clientes").selectedOptions;
+  for (var i = 0; i < options.length; i++) {
+    x.push(options[i].value);
+  }
+  // en una nueva ventana abrir el reporte de asignación
+  url = window.location.origin
+  url = url + "/operaciones/impresioncargoscarteravencida/"+capturaValor("fechahasta")+"/"+x;
+  window.open( url);
+}
+

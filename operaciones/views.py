@@ -623,6 +623,22 @@ class CarteraPorDeudorConsulta(SinPrivilegios, generic.TemplateView):
         context['deudores'] = ModeloCliente.Datos_compradores.objects.filter(empresa=id_empresa.empresa)
         return context
 
+class CarteraVencidaConsulta(SinPrivilegios, generic.TemplateView):
+    template_name = "operaciones/consultacarteravencida.html"
+    login_url = 'bases:login'
+    permission_required="operaciones.view_asignacion"
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+
+        context = super(CarteraVencidaConsulta, self).get_context_data(**kwargs)
+        sp = ModelosSolicitud.Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        context['clientes'] = ModeloCliente.Datos_generales.objects.filter(empresa=id_empresa.empresa)
+        context['hoy'] = date.today().strftime('%Y-%m-%d')
+        return context
+
 @login_required(login_url='/login/')
 @permission_required('operaciones.add_desembolsos', login_url='bases:sin_permisos')
 def DesembolsarAsignacion(request, pk, cliente_id):
@@ -1921,7 +1937,7 @@ def AntigüedadCarteraClienteJSON(request, cliente_id):
         }
     return JsonResponse( data)
 
-def GeneraListaCarteraClienteJSON(request, cliente_id, fecha_corte = None):
+def GeneraListaFacturasPendientesClienteJSON(request, cliente_id, fecha_corte = None):
     # Es invocado desde la url de una tabla bt
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
@@ -1931,7 +1947,7 @@ def GeneraListaCarteraClienteJSON(request, cliente_id, fecha_corte = None):
 
     tempBlogs = []
     for i in range(len(documentos)):
-        tempBlogs.append(GeneraListaCarteraClienteJSONSalida(documentos[i])) 
+        tempBlogs.append(GeneraListaFacturasPendientesClienteJSONSalida(documentos[i])) 
 
     # los accesorios que fueron quitados se convierten en facturas pendientes
     quitados = ChequesAccesorios.objects\
@@ -1950,7 +1966,7 @@ def GeneraListaCarteraClienteJSON(request, cliente_id, fecha_corte = None):
         }
     return JsonResponse( data)
 
-def GeneraListaCarteraClienteJSONSalida(doc):
+def GeneraListaFacturasPendientesClienteJSONSalida(doc):
     output = {}
 
     output["Comprador"] = doc.cxcomprador.cxcomprador.ctnombre
@@ -2977,11 +2993,6 @@ def GeneraListaCarteraClienteJSON(request,  clientes =None):
     # Es invocado desde la url de una tabla bt
     arr_clientes = []
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-    print("clientes", clientes)
-    if clientes != None:
-        ids = clientes.split(',')
-        for id in ids:
-            arr_clientes.append(id)
 
     if clientes==None:
         facturas = Documentos.objects\
@@ -2993,6 +3004,10 @@ def GeneraListaCarteraClienteJSON(request,  clientes =None):
         protestos = Documentos_protestados.objects\
             .facturas_pendiente(id_empresa.empresa)
     else:
+        ids = clientes.split(',')
+        for id in ids:
+            arr_clientes.append(id)
+
         facturas = Documentos.objects\
             .cartera_pendiente_cliente(id_empresa.empresa, arr_clientes)
         cheques_quitados = ChequesAccesorios.objects\
@@ -3101,3 +3116,70 @@ def RevisionCarteraDetalle(request, cliente_id, revision_id):
     }
 
     return render(request, template_name, contexto)
+
+def GeneraListaCarteraVencidaJSON(request, fecha_corte=None,  clientes =None):
+    # Es invocado desde la url de una tabla bt
+    arr_clientes = []
+    # id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    if not fecha_corte:
+        fecha_corte = date.today()
+    if not isinstance(fecha_corte, date):
+        fecha_corte = datetime.strptime(fecha_corte, "%Y-%m-%d").date()
+
+    if not clientes == None:
+        ids = clientes.split(',')
+        for id in ids:
+            arr_clientes.append(id)
+
+    facturas = Documentos.objects\
+        .provision_cargos(id_empresa.empresa, fecha_corte, arr_clientes)
+    cheques = ChequesAccesorios.objects\
+        .provision_cargos(id_empresa.empresa, fecha_corte, arr_clientes)
+    quitados = Cheques_quitados.objects\
+        .provision_cargos(id_empresa.empresa, fecha_corte, arr_clientes)
+    protestos_facturas = Documentos_protestados.objects\
+        .provision_cargos_facturas(id_empresa.empresa, fecha_corte, arr_clientes)
+    protestos_accesorios = Documentos_protestados.objects\
+        .provision_cargos_accesorios(id_empresa.empresa, fecha_corte, arr_clientes)
+
+    cartera = facturas.union(cheques, quitados, protestos_facturas, protestos_accesorios)\
+        .order_by('cxcliente__cxcliente__ctnombre')
+
+    tempBlogs = []
+    for i in range(len(cartera)):
+        tempBlogs.append(GeneraListaProvisionCarteraVencidaJSONSalida(cartera[i]))
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": cartera.count(),
+        "totalNotFiltered": cartera.count(),
+        "rows": docjson
+        }
+    return JsonResponse( data)
+
+def GeneraListaProvisionCarteraVencidaJSONSalida(transaccion):
+    output = {}
+    # output['id'] = transaccion['id']
+    output["TipoFactoring"] = transaccion['cxtipofactoring__cttipofactoring']
+    output["Cliente"] = transaccion['cxcliente__cxcliente__ctnombre']
+    output["Operacion"] = transaccion['cxasignacion__cxasignacion']
+    output["Documento"] = transaccion['ctdocumento']
+    output["Vencimiento"] = transaccion['dvencimiento'].strftime("%Y-%m-%d")
+    output["Saldo"] =  transaccion['saldo']
+    output["SaldoAnticipado"] = round(transaccion['saldo_anticipado'], 2)
+    output["DiasVencidos"] = transaccion["dias_vencidos"]
+    output["DescuentoCarteraNegociado"] = round(transaccion["dc_negociado"], 2)
+    output["DescuentoCarteraVencido"] = round(transaccion["dc_vencido"], 2)
+    output["GaoAdicional"] = round(transaccion["gao_adicional"], 2)
+    output["IVA"] = round(transaccion["iva"], 2)
+    output["TotalCargos"] = (output["DescuentoCarteraNegociado"] 
+                              + output["DescuentoCarteraVencido"]
+                              + output["GaoAdicional"] 
+                              )
+    output["Deuda"] = transaccion["deuda"]
+
+    return output
+

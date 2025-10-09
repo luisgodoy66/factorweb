@@ -1,14 +1,15 @@
 from random import choices
 from django.db import models
 from django.forms import BooleanField
-from django.db.models import Sum, Q, F, ExpressionWrapper, DateField, CharField\
-    , Value, Count, IntegerField, DecimalField
-from django.db.models.functions import Cast, ExtractDay
-from django.db.models.functions import Concat
+from django.db.models import Sum, Q, F, ExpressionWrapper\
+    , DateField, CharField\
+    , Value, Count, IntegerField, DecimalField, Case, When
+from django.db.models.functions import Cast, ExtractDay, Concat\
+    , Floor, Mod
 from django.utils.dateparse import parse_date
 
 from bases.models import ClaseModelo
-from empresa.models import Clases_cliente, Tipos_factoring, Cuentas_bancarias\
+from empresa.models import Clases_cliente, Tasas_factoring, Tipos_factoring, Cuentas_bancarias\
     , Movimientos_maestro
 from clientes.models import Datos_generales as Datos_generales_cliente\
     , Cuenta_transferencia, Datos_compradores
@@ -298,33 +299,34 @@ class Documentos_Manager(models.Manager):
             .aggregate(Total = Sum('nsaldo'))
 
     def cartera_pendiente(self, id_empresa):
-        return self.filter(leliminado = False, nsaldo__gt = 0
+        return self\
+            .filter(leliminado = False, nsaldo__gt = 0
                            , cxasignacion__in = Asignacion.objects
                     .filter(cxtipo = "F", cxestado = "P"
                             , empresa = id_empresa
                             , leliminado = False))\
-                    .values("cxcomprador__cxcomprador__ctnombre"
-                            ,"cxcliente__cxcliente__ctnombre"
-                            , "cxasignacion__cxasignacion"
-                            , "ctdocumento"
-                            , "dvencimiento", "ndiasprorroga"
-                            , "cxasignacion__ddesembolso"
-                            , "nsaldo")\
-                    .annotate(vencimiento = ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
-                                                              , output_field=DateField()),
-                            dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
-                                                                            , output_field=DateField()))
-                                                , IntegerField()),
-                            dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('dvencimiento')
-                                                                          -F('cxasignacion__ddesembolso')
-                                                                          , output_field=DateField()))
-                                                , IntegerField()),
-                            descripcion = Concat('cxasignacion__cxasignacion',
-                                                Value(' - '),
-                                                'ctdocumento',
-                                                output_field=CharField())
-                    )\
-                    .order_by('cxcliente__cxcliente__ctnombre')
+            .values("cxcomprador__cxcomprador__ctnombre"
+                    ,"cxcliente__cxcliente__ctnombre"
+                    , "cxasignacion__cxasignacion"
+                    , "ctdocumento"
+                    , "dvencimiento", "ndiasprorroga"
+                    , "cxasignacion__ddesembolso"
+                    , "nsaldo")\
+            .annotate(vencimiento = ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
+                                                        , output_field=DateField()),
+                    dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
+                                                                    , output_field=DateField()))
+                                        , IntegerField()),
+                    dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('dvencimiento')
+                                                                    -F('cxasignacion__ddesembolso')
+                                                                    , output_field=DateField()))
+                                        , IntegerField()),
+                    descripcion = Concat('cxasignacion__cxasignacion',
+                                        Value(' - '),
+                                        'ctdocumento',
+                                        output_field=CharField())
+            )\
+            .order_by('cxcliente__cxcliente__ctnombre')
     
     def TotalCarteraCliente(self, id_cliente):
         return self.filter(leliminado = False, nsaldo__gt = 0
@@ -517,7 +519,166 @@ class Documentos_Manager(models.Manager):
                         )\
                 .order_by('cxcomprador__cxcomprador__ctnombre')
     
+    def provision_cargos(self, id_empresa, fecha_corte, arr_clientes = None):
+        gao = Tasas_factoring.objects\
+            .filter(cxtasa="GAO", empresa=id_empresa).first()
+        dc = Tasas_factoring.objects\
+            .filter(cxtasa='DCAR', empresa=id_empresa).first()
+        gaoa = Tasas_factoring.objects\
+            .filter(cxtasa="GAOA", empresa=id_empresa).first()
 
+        if not arr_clientes:
+            qs = self.filter(
+                leliminado=False,
+                dvencimiento__lte=fecha_corte,
+                nsaldo__gt=0,
+                cxasignacion__in=Asignacion.objects.filter(
+                    cxtipo="F",
+                    empresa=id_empresa,
+                    leliminado=False
+                )
+            ).values(
+                "cxcliente__cxcliente__ctnombre",
+                "cxasignacion__cxasignacion",
+                "cxtipofactoring__cttipofactoring",
+                "ctdocumento",
+                "cxasignacion__ddesembolso",
+                "cxcliente__datos_operativos__ntasamora",
+                "dvencimiento",
+            )
+        else:
+            qs = self.filter(
+                leliminado=False,
+                dvencimiento__lte=fecha_corte,
+                nsaldo__gt=0,
+                cxcliente__in=arr_clientes,
+                cxasignacion__in=Asignacion.objects.filter(
+                    cxtipo="F",
+                    empresa=id_empresa,
+                    leliminado=False
+                )
+            ).values(
+                "cxcliente__cxcliente__ctnombre",
+                "cxasignacion__cxasignacion",
+                "cxtipofactoring__cttipofactoring",
+                "ctdocumento",
+                "cxasignacion__ddesembolso",
+                "cxcliente__datos_operativos__ntasamora",
+                "dvencimiento",
+            )
+
+        # Expresiones a usar en la anotación
+        dias_negociados_expr = Cast(
+            ExtractDay(
+            ExpressionWrapper(
+                F('dvencimiento') - F('cxasignacion__ddesembolso'),
+                output_field=DateField()
+            )
+            ),
+            IntegerField()
+        )
+        dias_vencidos_expr = Cast(
+            ExtractDay(
+            ExpressionWrapper(
+                fecha_corte - F('dvencimiento'),
+                output_field=DateField()
+            )
+            ),
+            IntegerField()
+        )
+        saldo_anticipado_expr = ExpressionWrapper(
+            F('nsaldo') * F('nporcentajeanticipo') / 100,
+            output_field=DecimalField()
+        )
+
+        # Anotación para dc negociado y vencido
+        factor_calcular_expr = Case(
+            When(cxtipofactoring__lgeneradcenaceptacion=True, then=0),
+            default=1,
+            output_field=DecimalField()
+        )
+        base_dc_expr = (F('nsaldo') 
+                        / (dc.ndiasperiocidad if dc else 1)
+        )
+        if dc and dc.lsobreanticipo:
+            base_dc_expr = base_dc_expr * F('nporcentajeanticipo') / 100
+
+        tasa_dcv_expr = Case(
+            When(cxtipofactoring__lacumulamoraatasadc=True,
+                 then=F('cxcliente__datos_operativos__ntasamora')
+                 +F('ntasadescuento')),
+            default=F('cxcliente__datos_operativos__ntasamora'),
+            output_field=DecimalField()
+        )
+        dc_negociado_expr = ExpressionWrapper(
+            base_dc_expr * dias_negociados_expr * F('ntasadescuento') / 100
+            * factor_calcular_expr,
+            output_field=DecimalField()
+        )
+        dc_vencido_expr = ExpressionWrapper(
+            base_dc_expr * dias_vencidos_expr * tasa_dcv_expr / 100,
+            output_field=DecimalField()
+        )
+
+        # Anotación para gao adicional
+        tasa_gaoa_expr = Case(
+            When(cxtipofactoring__lacumulagaoaatasagao=True,
+                 then=F('cxcliente__datos_operativos__ntasagaoa')
+                 +F('ntasacomision')),
+            default=F('cxcliente__datos_operativos__ntasagaoa'),
+            output_field=DecimalField()
+        )
+        base_gaoa_expr = F('nsaldo') 
+
+        if gaoa and gaoa.lsobreanticipo:
+            base_gaoa_expr = base_gaoa_expr * F('nporcentajeanticipo') / 100
+
+        if gaoa and gaoa.lflat:
+            # Annotate the ceiling value first, then use it in the calculation. NO FUNCIONA CORECTAMENTE
+            # Calcular el techo matemático usando Floor y Mod en vez de Ceil
+            dias_vencidos_floor = Floor(dias_vencidos_expr / gaoa.ndiasperiocidad)
+            dias_vencidos_mod = Mod(dias_vencidos_expr, gaoa.ndiasperiocidad)
+            dias_vencidos_ceiling = ExpressionWrapper(
+                dias_vencidos_floor + (0 if dias_vencidos_mod == 0 else 1),
+                output_field=IntegerField()
+            )
+            tasa_gaoa_expr = ExpressionWrapper(
+                tasa_gaoa_expr * dias_vencidos_ceiling / 100,
+                output_field=DecimalField()
+            )
+        else:
+            tasa_gaoa_expr = (tasa_gaoa_expr * dias_vencidos_expr 
+                              / gaoa.ndiasperiocidad / 100)
+
+        gao_adicional_expr = ExpressionWrapper(
+            base_gaoa_expr * tasa_gaoa_expr,
+            output_field=DecimalField()
+        )
+
+        # iva
+        base_iva_expr = 0
+
+        if dc.lcargaiva:
+            base_iva_expr = dc_negociado_expr + dc_vencido_expr
+        if gao.lcargaiva:
+            base_iva_expr = base_iva_expr + gao_adicional_expr
+
+        iva_expr = ExpressionWrapper(
+            base_iva_expr * F('cxasignacion__nporcentajeiva') / 100,
+            output_field=DecimalField()
+        )
+
+        return qs.annotate(
+            saldo = F('nsaldo'),
+            saldo_anticipado = saldo_anticipado_expr,
+            dias_vencidos = dias_vencidos_expr,
+            dc_negociado = dc_negociado_expr,
+            dc_vencido = dc_vencido_expr,
+            gao_adicional = gao_adicional_expr, 
+            iva = iva_expr,
+            deuda = saldo_anticipado_expr + dc_negociado_expr + dc_vencido_expr + gao_adicional_expr + iva_expr
+        ).order_by('cxtipofactoring__cttipofactoring', 'cxcliente__cxcliente__ctnombre')
+    
 class Documentos(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
         , on_delete=models.CASCADE
@@ -992,6 +1153,168 @@ class ChequesAccesorios_Manager(models.Manager):
                           )\
                 .order_by('documento__cxcomprador__cxcomprador__ctnombre')
 
+    def provision_cargos(self, id_empresa, fecha_corte, arr_clientes=None):
+        gao = Tasas_factoring.objects\
+            .filter(cxtasa="GAO", empresa=id_empresa).first()
+        dc = Tasas_factoring.objects\
+            .filter(cxtasa='DCAR', empresa=id_empresa).first()
+        gaoa = Tasas_factoring.objects\
+            .filter(cxtasa="GAOA", empresa=id_empresa).first()
+
+        if not arr_clientes:
+            qs = self.filter(
+                leliminado = False, lcanjeado  = False, laccesorioquitado = False,
+                dvencimiento__lte = fecha_corte,
+                cxestado='A',
+                documento__cxasignacion__in=Asignacion.objects.filter(
+                    cxtipo="A",
+                    empresa=id_empresa,
+                    leliminado=False
+                )
+            ).values(
+                "documento__cxcliente__cxcliente__ctnombre",
+                "documento__cxasignacion__cxasignacion",
+                "documento__cxtipofactoring__cttipofactoring",
+                "documento__ctdocumento",
+                "documento__cxasignacion__ddesembolso",
+                "documento__cxcliente__datos_operativos__ntasamora",
+                "dvencimiento",
+            )
+        else:
+            qs = self.filter(
+                leliminado = False, lcanjeado  = False, laccesorioquitado = False,
+                dvencimiento__lte = fecha_corte,
+                cxestado='A',
+                documento__cxcliente__in=arr_clientes,
+                documento__cxasignacion__in=Asignacion.objects.filter(
+                    cxtipo="A",
+                    empresa=id_empresa,
+                    leliminado=False
+                )
+            ).values(
+                "documento__cxcliente__cxcliente__ctnombre",
+                "documento__cxasignacion__cxasignacion",
+                "documento__cxtipofactoring__cttipofactoring",
+                "documento__ctdocumento",
+                "documento__cxasignacion__ddesembolso",
+                "documento__cxcliente__datos_operativos__ntasamora",
+                "dvencimiento",
+            )
+
+        # Expresiones a usar en la anotación
+        dias_negociados_expr = Cast(
+            ExtractDay(
+            ExpressionWrapper(
+                F('dvencimiento') - F('documento__cxasignacion__ddesembolso'),
+                output_field=DateField()
+            )
+            ),
+            IntegerField()
+        )
+        dias_vencidos_expr = Cast(
+            ExtractDay(
+            ExpressionWrapper(
+                fecha_corte - F('dvencimiento'),
+                output_field=DateField()
+            )
+            ),
+            IntegerField()
+        )
+        saldo_anticipado_expr = ExpressionWrapper(
+            F('ntotal') * F('nporcentajeanticipo') / 100,
+            output_field=DecimalField()
+        )
+
+        # Anotación para dc negociado y vencido
+        factor_calcular_expr = Case(
+            When(documento__cxtipofactoring__lgeneradcenaceptacion=True, then=0),
+            default=1,
+            output_field=DecimalField()
+        )
+        base_dc_expr = (F('ntotal')
+                        / (dc.ndiasperiocidad if dc else 1)
+        )
+        if dc and dc.lsobreanticipo:
+            base_dc_expr = base_dc_expr * F('nporcentajeanticipo') / 100
+
+        tasa_dcv_expr = Case(
+            When(documento__cxtipofactoring__lacumulamoraatasadc=True,
+                 then=F('documento__cxcliente__datos_operativos__ntasamora')
+                 +F('ntasadescuento')),
+            default=F('documento__cxcliente__datos_operativos__ntasamora'),
+            output_field=DecimalField()
+        )
+        dc_negociado_expr = ExpressionWrapper(
+            base_dc_expr * dias_negociados_expr * F('ntasadescuento') / 100
+            * factor_calcular_expr,
+            output_field=DecimalField()
+        )
+        dc_vencido_expr = ExpressionWrapper(
+            base_dc_expr * dias_vencidos_expr * tasa_dcv_expr / 100,
+            output_field=DecimalField()
+        )
+
+        # Anotación para gao adicional
+        tasa_gaoa_expr = Case(
+            When(documento__cxtipofactoring__lacumulagaoaatasagao=True,
+                 then=F('documento__cxcliente__datos_operativos__ntasagaoa')
+                 +F('ntasacomision')),
+            default=F('documento__cxcliente__datos_operativos__ntasagaoa'),
+            output_field=DecimalField()
+        )
+        base_gaoa_expr = F('ntotal') 
+
+        if gaoa and gaoa.lsobreanticipo:
+            base_gaoa_expr = base_gaoa_expr * F('nporcentajeanticipo') / 100
+
+        if gaoa and gaoa.lflat:
+            # # Annotate the ceiling value first, then use it in the calculation
+            # dias_vencidos_ceiling = Ceil(dias_vencidos_expr 
+            #                              / gaoa.ndiasperiocidad, output_field=IntegerField())
+            dias_vencidos_floor = Floor(dias_vencidos_expr / gaoa.ndiasperiocidad)
+            dias_vencidos_mod = Mod(dias_vencidos_expr, gaoa.ndiasperiocidad)
+            dias_vencidos_ceiling = ExpressionWrapper(
+                dias_vencidos_floor + (0 if dias_vencidos_mod == 0 else 1),
+                output_field=IntegerField()
+            )
+            tasa_gaoa_expr = ExpressionWrapper(
+                tasa_gaoa_expr * dias_vencidos_ceiling / 100,
+                output_field=DecimalField()
+            )
+        else:
+            tasa_gaoa_expr = (tasa_gaoa_expr * dias_vencidos_expr 
+                              / gaoa.ndiasperiocidad / 100)
+
+        gao_adicional_expr = ExpressionWrapper(
+            base_gaoa_expr * tasa_gaoa_expr,
+            output_field=DecimalField()
+        )
+
+        # iva
+        base_iva_expr = 0
+
+        if dc.lcargaiva:
+            base_iva_expr = dc_negociado_expr + dc_vencido_expr
+        if gao.lcargaiva:
+            base_iva_expr = base_iva_expr + gao_adicional_expr
+
+        iva_expr = ExpressionWrapper(
+            base_iva_expr * F('documento__cxasignacion__nporcentajeiva') / 100,
+            output_field=DecimalField()
+        )
+
+        return qs.annotate(
+            saldo = F('ntotal'),
+            saldo_anticipado = saldo_anticipado_expr,
+            dias_vencidos = dias_vencidos_expr,
+            dc_negociado = dc_negociado_expr,
+            dc_vencido = dc_vencido_expr,
+            gao_adicional = gao_adicional_expr, 
+            iva = iva_expr,
+            deuda = saldo_anticipado_expr + dc_negociado_expr + dc_vencido_expr + gao_adicional_expr + iva_expr,
+        ).order_by('documento__cxtipofactoring__cttipofactoring',
+                   'documento__cxcliente__cxcliente__ctnombre')
+
 class Cheques_quitados_Manager(models.Manager):
     def antigüedad_cartera(self, id_empresa, id_cliente=None):
         # grafico de antigüedad de cartera 
@@ -1161,6 +1484,172 @@ class Cheques_quitados_Manager(models.Manager):
                 , porvencer_mas_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__gt = xver90) ) 
                 , total = Sum('nsaldo')
                 )
+
+    def provision_cargos(self, id_empresa, fecha_corte, arr_clientes=None):
+        gao = Tasas_factoring.objects\
+            .filter(cxtasa="GAO", empresa=id_empresa).first()
+        dc = Tasas_factoring.objects\
+            .filter(cxtasa='DCAR', empresa=id_empresa).first()
+        gaoa = Tasas_factoring.objects\
+            .filter(cxtasa="GAOA", empresa=id_empresa).first()
+
+        if not arr_clientes:
+            qs = self.filter(
+                leliminado = False,
+                accesorio_quitado__dvencimiento__lte = fecha_corte,
+                cxestado='A',
+                accesorio_quitado__documento__cxasignacion__in=Asignacion.objects.filter(
+                    cxtipo="A",
+                    empresa=id_empresa,
+                    leliminado=False
+                )
+            ).values(
+                "accesorio_quitado__documento__cxcliente__cxcliente__ctnombre",
+                "accesorio_quitado__documento__cxasignacion__cxasignacion",
+                "accesorio_quitado__documento__cxtipofactoring__cttipofactoring",
+                "accesorio_quitado__documento__ctdocumento",
+                "accesorio_quitado__documento__cxasignacion__ddesembolso",
+                "accesorio_quitado__documento__cxcliente__datos_operativos__ntasamora",
+                "accesorio_quitado__dvencimiento",
+            )
+        else:
+            qs = self.filter(
+                leliminado = False,
+                accesorio_quitado__dvencimiento__lte = fecha_corte,
+                cxestado='A',
+                accesorio_quitado__documento__cxcliente__in=arr_clientes,
+                accesorio_quitado__documento__cxasignacion__in=Asignacion.objects.filter(
+                    cxtipo="A",
+                    empresa=id_empresa,
+                    leliminado=False
+                )
+            ).values(
+                "accesorio_quitado__documento__cxcliente__cxcliente__ctnombre",
+                "accesorio_quitado__documento__cxasignacion__cxasignacion",
+                "accesorio_quitado__documento__cxtipofactoring__cttipofactoring",
+                "accesorio_quitado__documento__ctdocumento",
+                "accesorio_quitado__documento__cxasignacion__ddesembolso",
+                "accesorio_quitado__documento__cxcliente__datos_operativos__ntasamora",
+                "accesorio_quitado__dvencimiento",
+            )
+
+        # Expresiones a usar en la anotación
+        dias_negociados_expr = Cast(
+            ExtractDay(
+            ExpressionWrapper(
+                F('accesorio_quitado__dvencimiento') 
+                - F('accesorio_quitado__documento__cxasignacion__ddesembolso'),
+                output_field=DateField()
+            )
+            ),
+            IntegerField()
+        )
+        dias_vencidos_expr = Cast(
+            ExtractDay(
+            ExpressionWrapper(
+                fecha_corte - F('accesorio_quitado__dvencimiento'),
+                output_field=DateField()
+            )
+            ),
+            IntegerField()
+        )
+        saldo_anticipado_expr = ExpressionWrapper(
+            F('nsaldo') * F('accesorio_quitado__nporcentajeanticipo') / 100,
+            output_field=DecimalField()
+        )
+
+        # Anotación para dc negociado y vencido
+        factor_calcular_expr = Case(
+            When(accesorio_quitado__documento__cxtipofactoring__lgeneradcenaceptacion=True, then=0),
+            default=1,
+            output_field=DecimalField()
+        )
+        base_dc_expr = (F('nsaldo')
+                        / (dc.ndiasperiocidad if dc else 1)
+        )
+        if dc and dc.lsobreanticipo:
+            base_dc_expr = base_dc_expr * F('accesorio_quitado__nporcentajeanticipo') / 100
+
+        tasa_dcv_expr = Case(
+            When(accesorio_quitado__documento__cxtipofactoring__lacumulamoraatasadc=True,
+                 then=F('accesorio_quitado__documento__cxcliente__datos_operativos__ntasamora')
+                 +F('accesorio_quitado__ntasadescuento')),
+            default=F('accesorio_quitado__documento__cxcliente__datos_operativos__ntasamora'),
+            output_field=DecimalField()
+        )
+        dc_negociado_expr = ExpressionWrapper(
+            base_dc_expr * dias_negociados_expr * F('accesorio_quitado__ntasadescuento') / 100
+            * factor_calcular_expr,
+            output_field=DecimalField()
+        )
+        dc_vencido_expr = ExpressionWrapper(
+            base_dc_expr * dias_vencidos_expr * tasa_dcv_expr / 100,
+            output_field=DecimalField()
+        )
+
+        # Anotación para gao adicional
+        tasa_gaoa_expr = Case(
+            When(accesorio_quitado__documento__cxtipofactoring__lacumulagaoaatasagao=True,
+                 then=F('accesorio_quitado__documento__cxcliente__datos_operativos__ntasagaoa')
+                 +F('accesorio_quitado__ntasacomision')),
+            default=F('accesorio_quitado__documento__cxcliente__datos_operativos__ntasagaoa'),
+            output_field=DecimalField()
+        )
+        base_gaoa_expr = F('nsaldo') 
+
+        if gaoa and gaoa.lsobreanticipo:
+            base_gaoa_expr = (base_gaoa_expr 
+                              * F('accesorio_quitado__nporcentajeanticipo') 
+                              / 100)
+
+        if gaoa and gaoa.lflat:
+            # Annotate the ceiling value first, then use it in the calculation
+            # dias_vencidos_ceiling = Ceil(dias_vencidos_expr 
+            #                              / gaoa.ndiasperiocidad)
+            dias_vencidos_floor = Floor(dias_vencidos_expr / gaoa.ndiasperiocidad)
+            dias_vencidos_mod = Mod(dias_vencidos_expr, gaoa.ndiasperiocidad)
+            dias_vencidos_ceiling = ExpressionWrapper(
+                dias_vencidos_floor + (0 if dias_vencidos_mod == 0 else 1),
+                output_field=IntegerField()
+            )
+            tasa_gaoa_expr = ExpressionWrapper(
+                tasa_gaoa_expr * dias_vencidos_ceiling / 100,
+                output_field=DecimalField()
+            )
+        else:
+            tasa_gaoa_expr = (tasa_gaoa_expr * dias_vencidos_expr 
+                              / gaoa.ndiasperiocidad / 100)
+
+        gao_adicional_expr = ExpressionWrapper(
+            base_gaoa_expr * tasa_gaoa_expr,
+            output_field=DecimalField()
+        )
+
+        # iva
+        base_iva_expr = 0
+
+        if dc.lcargaiva:
+            base_iva_expr = dc_negociado_expr + dc_vencido_expr
+        if gao.lcargaiva:
+            base_iva_expr = base_iva_expr + gao_adicional_expr
+
+        iva_expr = ExpressionWrapper(
+            base_iva_expr 
+            * F('accesorio_quitado__documento__cxasignacion__nporcentajeiva') / 100,
+            output_field=DecimalField()
+        )
+
+        return qs.annotate(
+            saldo = F('nsaldo'),
+            saldo_anticipado = saldo_anticipado_expr,
+            dias_vencidos = dias_vencidos_expr,
+            dc_negociado = dc_negociado_expr,
+            dc_vencido = dc_vencido_expr,
+            gao_adicional = gao_adicional_expr, 
+            iva = iva_expr,
+            deuda = saldo_anticipado_expr + dc_negociado_expr + dc_vencido_expr + gao_adicional_expr + iva_expr,
+        ).order_by('accesorio_quitado__documento__cxtipofactoring__cttipofactoring',
+                   'accesorio_quitado__documento__cxcliente__cxcliente__ctnombre')
 
 class Cheques_quitados(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
