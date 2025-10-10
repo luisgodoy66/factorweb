@@ -5,7 +5,7 @@ from django.db.models import Sum, Q, F, ExpressionWrapper\
     , DateField, CharField\
     , Value, Count, IntegerField, DecimalField, Case, When
 from django.db.models.functions import Cast, ExtractDay, Concat\
-    , Floor, Mod
+    , Floor, Mod, Ceil
 from django.utils.dateparse import parse_date
 
 from bases.models import ClaseModelo
@@ -584,7 +584,7 @@ class Documentos_Manager(models.Manager):
                 output_field=DateField()
             )
             ),
-            IntegerField()
+            DecimalField(max_digits=6, decimal_places=2)
         )
         saldo_anticipado_expr = ExpressionWrapper(
             F('nsaldo') * F('nporcentajeanticipo') / 100,
@@ -636,12 +636,10 @@ class Documentos_Manager(models.Manager):
         if gaoa and gaoa.lflat:
             # Annotate the ceiling value first, then use it in the calculation. NO FUNCIONA CORECTAMENTE
             # Calcular el techo matemático usando Floor y Mod en vez de Ceil
-            dias_vencidos_floor = Floor(dias_vencidos_expr / gaoa.ndiasperiocidad)
-            dias_vencidos_mod = Mod(dias_vencidos_expr, gaoa.ndiasperiocidad)
-            dias_vencidos_ceiling = ExpressionWrapper(
-                dias_vencidos_floor + (0 if dias_vencidos_mod == 0 else 1),
-                output_field=IntegerField()
-            )
+            dias_vencidos_ceiling = Ceil(ExpressionWrapper(
+                dias_vencidos_expr / gaoa.ndiasperiocidad,
+                output_field=DecimalField()
+            ))
             tasa_gaoa_expr = ExpressionWrapper(
                 tasa_gaoa_expr * dias_vencidos_ceiling / 100,
                 output_field=DecimalField()
@@ -660,15 +658,15 @@ class Documentos_Manager(models.Manager):
 
         if dc.lcargaiva:
             base_iva_expr = dc_negociado_expr + dc_vencido_expr
-        if gao.lcargaiva:
+        if gaoa.lcargaiva:
             base_iva_expr = base_iva_expr + gao_adicional_expr
 
         iva_expr = ExpressionWrapper(
             base_iva_expr * F('cxasignacion__nporcentajeiva') / 100,
             output_field=DecimalField()
         )
-
-        return qs.annotate(
+        
+        x= qs.annotate(
             saldo = F('nsaldo'),
             saldo_anticipado = saldo_anticipado_expr,
             dias_vencidos = dias_vencidos_expr,
@@ -678,6 +676,8 @@ class Documentos_Manager(models.Manager):
             iva = iva_expr,
             deuda = saldo_anticipado_expr + dc_negociado_expr + dc_vencido_expr + gao_adicional_expr + iva_expr
         ).order_by('cxtipofactoring__cttipofactoring', 'cxcliente__cxcliente__ctnombre')
+        print(x.query)
+        return x
     
 class Documentos(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
@@ -1218,7 +1218,7 @@ class ChequesAccesorios_Manager(models.Manager):
                 output_field=DateField()
             )
             ),
-            IntegerField()
+            DecimalField(max_digits=6, decimal_places=2)
         )
         saldo_anticipado_expr = ExpressionWrapper(
             F('ntotal') * F('nporcentajeanticipo') / 100,
@@ -1268,15 +1268,10 @@ class ChequesAccesorios_Manager(models.Manager):
             base_gaoa_expr = base_gaoa_expr * F('nporcentajeanticipo') / 100
 
         if gaoa and gaoa.lflat:
-            # # Annotate the ceiling value first, then use it in the calculation
-            # dias_vencidos_ceiling = Ceil(dias_vencidos_expr 
-            #                              / gaoa.ndiasperiocidad, output_field=IntegerField())
-            dias_vencidos_floor = Floor(dias_vencidos_expr / gaoa.ndiasperiocidad)
-            dias_vencidos_mod = Mod(dias_vencidos_expr, gaoa.ndiasperiocidad)
-            dias_vencidos_ceiling = ExpressionWrapper(
-                dias_vencidos_floor + (0 if dias_vencidos_mod == 0 else 1),
-                output_field=IntegerField()
-            )
+            dias_vencidos_ceiling = Ceil(ExpressionWrapper(
+                dias_vencidos_expr / gaoa.ndiasperiocidad,
+                output_field=DecimalField()
+            ))
             tasa_gaoa_expr = ExpressionWrapper(
                 tasa_gaoa_expr * dias_vencidos_ceiling / 100,
                 output_field=DecimalField()
@@ -1295,7 +1290,7 @@ class ChequesAccesorios_Manager(models.Manager):
 
         if dc.lcargaiva:
             base_iva_expr = dc_negociado_expr + dc_vencido_expr
-        if gao.lcargaiva:
+        if gaoa.lcargaiva:
             base_iva_expr = base_iva_expr + gao_adicional_expr
 
         iva_expr = ExpressionWrapper(
@@ -1551,7 +1546,7 @@ class Cheques_quitados_Manager(models.Manager):
                 output_field=DateField()
             )
             ),
-            IntegerField()
+            DecimalField(max_digits=6, decimal_places=2)
         )
         saldo_anticipado_expr = ExpressionWrapper(
             F('nsaldo') * F('accesorio_quitado__nporcentajeanticipo') / 100,
@@ -1603,15 +1598,10 @@ class Cheques_quitados_Manager(models.Manager):
                               / 100)
 
         if gaoa and gaoa.lflat:
-            # Annotate the ceiling value first, then use it in the calculation
-            # dias_vencidos_ceiling = Ceil(dias_vencidos_expr 
-            #                              / gaoa.ndiasperiocidad)
-            dias_vencidos_floor = Floor(dias_vencidos_expr / gaoa.ndiasperiocidad)
-            dias_vencidos_mod = Mod(dias_vencidos_expr, gaoa.ndiasperiocidad)
-            dias_vencidos_ceiling = ExpressionWrapper(
-                dias_vencidos_floor + (0 if dias_vencidos_mod == 0 else 1),
-                output_field=IntegerField()
-            )
+            dias_vencidos_ceiling = Ceil(ExpressionWrapper(
+                dias_vencidos_expr / gaoa.ndiasperiocidad,
+                output_field=DecimalField()
+            ))
             tasa_gaoa_expr = ExpressionWrapper(
                 tasa_gaoa_expr * dias_vencidos_ceiling / 100,
                 output_field=DecimalField()

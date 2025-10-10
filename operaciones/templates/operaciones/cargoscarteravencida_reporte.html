@@ -53,16 +53,13 @@
                     <tbody>
                         <tr>
                             <td colspan="2"><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
-                            <td class="centrado" colspan="2"><h3>{{ reporte | default:"CARGOS POR CARTERA VENCIDA" }}</h3></td>
+                            <td class="centrado" colspan="2"><h3>{{ reporte | default:"CARGOS POR CARTERA" }}</h3></td>
                             <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
                         </tr>
-                        {% if corte %}
                         <tr>
                             <td colspan="2"><h4></h4></td>
-                            <td class="centrado" colspan="2"><h3>{{ corte.ctdescripcion }}</h3></td>
-                            <td style="text-align: right;">Realizado el: {{ corte.dregistro|date:"Y/m/d H:i:s" }}</td>
+                            <td class="centrado" colspan="2"><h3>Corte al {{ fecha_corte |custom_date_format}}</h3></td>
                         </tr>
-                        {% endif %}
                     </tbody>
                 </table>
             </div>

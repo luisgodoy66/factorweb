@@ -6,7 +6,7 @@ from django.db.models import Sum, Q, Value, DecimalField\
     , ExpressionWrapper, IntegerField, CharField, DateField, F\
     , Case, When
 from django.db.models.functions import TruncDay, Cast\
-    , ExtractDay, Concat, Floor, Mod
+    , ExtractDay, Concat, Floor, Mod, Ceil
 
 from datetime import timedelta, datetime, date
 
@@ -973,7 +973,7 @@ class Documentos_protestados_Manager(models.Manager):
                 output_field=DateField()
             )
             ),
-            IntegerField()
+            DecimalField(max_digits=6, decimal_places=2)
         )
         saldo_anticipado_expr = ExpressionWrapper(
             F('nsaldo') * F('documento__nporcentajeanticipo') / 100,
@@ -1020,17 +1020,15 @@ class Documentos_protestados_Manager(models.Manager):
         base_gaoa_expr = F('nsaldo') 
 
         if gaoa and gaoa.lsobreanticipo:
-            base_gaoa_expr = base_gaoa_expr * F('documento__nporcentajeanticipo') / 100
+            base_gaoa_expr = (base_gaoa_expr 
+                              * F('documento__nporcentajeanticipo') 
+                              / 100)
 
         if gaoa and gaoa.lflat:
-            # Annotate the ceiling value first, then use it in the calculation. NO FUNCIONA CORECTAMENTE
-            # Calcular el techo matemático usando Floor y Mod en vez de Ceil
-            dias_vencidos_floor = Floor(dias_vencidos_expr / gaoa.ndiasperiocidad)
-            dias_vencidos_mod = Mod(dias_vencidos_expr, gaoa.ndiasperiocidad)
-            dias_vencidos_ceiling = ExpressionWrapper(
-                dias_vencidos_floor + (0 if dias_vencidos_mod == 0 else 1),
-                output_field=IntegerField()
-            )
+            dias_vencidos_ceiling = Ceil(ExpressionWrapper(
+                dias_vencidos_expr / gaoa.ndiasperiocidad,
+                output_field=DecimalField()
+            ))
             tasa_gaoa_expr = ExpressionWrapper(
                 tasa_gaoa_expr * dias_vencidos_ceiling / 100,
                 output_field=DecimalField()
@@ -1124,7 +1122,7 @@ class Documentos_protestados_Manager(models.Manager):
                 output_field=DateField()
             )
             ),
-            IntegerField()
+            DecimalField(max_digits=6, decimal_places=2)
         )
         saldo_anticipado_expr = ExpressionWrapper(
             F('nsaldo') * F('accesorio__nporcentajeanticipo') / 100,
@@ -1174,14 +1172,10 @@ class Documentos_protestados_Manager(models.Manager):
             base_gaoa_expr = base_gaoa_expr * F('accesorio__nporcentajeanticipo') / 100
 
         if gaoa and gaoa.lflat:
-            # Annotate the ceiling value first, then use it in the calculation. NO FUNCIONA CORECTAMENTE
-            # Calcular el techo matemático usando Floor y Mod en vez de Ceil
-            dias_vencidos_floor = Floor(dias_vencidos_expr / gaoa.ndiasperiocidad)
-            dias_vencidos_mod = Mod(dias_vencidos_expr, gaoa.ndiasperiocidad)
-            dias_vencidos_ceiling = ExpressionWrapper(
-                dias_vencidos_floor + (0 if dias_vencidos_mod == 0 else 1),
-                output_field=IntegerField()
-            )
+            dias_vencidos_ceiling = Ceil(ExpressionWrapper(
+                dias_vencidos_expr / gaoa.ndiasperiocidad,
+                output_field=DecimalField()
+            ))
             tasa_gaoa_expr = ExpressionWrapper(
                 tasa_gaoa_expr * dias_vencidos_ceiling / 100,
                 output_field=DecimalField()

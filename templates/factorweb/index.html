@@ -194,7 +194,7 @@
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-print"></i><a href="{% url 'operaciones:consulta_cartera_por_cliente' %}">Por cliente</a></li>
                             <li><i class="menu-icon fa fa-print"></i><a href="{% url 'operaciones:consulta_cartera_por_deudor' %}">Por deudor</a></li>
-                            <li><i class="menu-icon fa fa-print"></i><a href="{% url 'operaciones:consulta_cartera_vencida' %}">Cargos / cartera vcda</a></li>
+                            <li><i class="menu-icon fa fa-print"></i><a href="{% url 'operaciones:consulta_cartera_vencida' %}">Cargos por cartera</a></li>
                         </ul>
                     </li>
                     {% if user.id == 1 %}
@@ -290,7 +290,7 @@
                             <li><i class="menu-icon fa fa-whatsapp"></i><a href="{% url 'api:lista_configuraciones_twilio' %}">Twilio</a></li>
                         </ul>
                     </li>
-                    <li><a href="#">V.2.9.2</a></li>
+                    <li><a href="#">V.2.10</a></li>
                 </ul>
             </div><!-- /.navbar-collapse -->
         </nav>

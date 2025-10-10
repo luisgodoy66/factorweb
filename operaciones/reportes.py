@@ -1054,8 +1054,6 @@ def ImpresionCarteraPendientePorDeudor(request, deudores = None):
 
 def ImpresionCargosCarteraVencida(request, fecha_corte, clientes = None):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-    totalfacturas=0
-    totalquitados=0
     arr_clientes = []
     
     template_path = 'operaciones/cargoscarteravencida_reporte.html'
@@ -1084,20 +1082,6 @@ def ImpresionCargosCarteraVencida(request, fecha_corte, clientes = None):
     cartera = facturas.union(cheques, quitados, protestos)\
         .order_by('cxtipofactoring__cttipofactoring', 'cxcliente__cxcliente__ctnombre')
 
-    # totalfacturas = facturas.aggregate(total = Sum('nsaldo'))
-    # if not totalfacturas['total']: totalfacturas['total']=0
-
-    # totalquitados = quitados.aggregate(total = Sum('nsaldo'))
-    # if not totalquitados['total']: totalquitados['total']=0
-
-    # totalaccesorios = cheques.aggregate(total = Sum('ntotal'))
-    # if not totalaccesorios['total']: totalaccesorios['total']=0
-
-    # totalprotestos1 = protestos_facturas.aggregate(total = Sum('nsaldo'))
-    # if not totalprotestos1['total']: totalprotestos1['total']=0
-    # totalprotestos2 = protestos_accesorios.aggregate(total = Sum('nsaldo'))
-    # if not totalprotestos2['total']: totalprotestos2['total']=0
-
     totales = cartera.aggregate(
         saldo_cartera = Sum('saldo'),
         dc_vencido = Sum('dc_vencido'), 
@@ -1113,9 +1097,6 @@ def ImpresionCargosCarteraVencida(request, fecha_corte, clientes = None):
     context={
         "detalle" : cartera,
         'empresa': id_empresa.empresa,
-        # # 'total' : totalfacturas['total'] + totalquitados['total'] 
-        # # + totalaccesorios['total'] + totalprotestos1['total'] 
-        # # + totalprotestos2['total'],
         'total_saldo_cartera': totales['saldo_cartera'],
         'total_saldo_anticipado': totales['saldo_anticipado'],
         'total_dc_negociado': totales['dc_negociado'],
@@ -1123,6 +1104,7 @@ def ImpresionCargosCarteraVencida(request, fecha_corte, clientes = None):
         'total_gao_adicional': totales['gao_adicional'],
         'total_iva': totales['iva'],
         'total_deuda': totales['deuda'],
+        'fecha_corte': fecha_corte,
     }
     # Generar el archivo PDF usando WeasyTemplateResponse
     response = WeasyTemplateResponse(
