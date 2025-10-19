@@ -2170,7 +2170,7 @@ def GeneraListaChequesQuitadosClienteJSON(request, cliente_id):
 
 def GeneraListaChequesQuitadosClienteJSONSalida(doc):
     output = {}
-    output["Fecha"] = doc.dregistro
+    output["Registro"] = doc.dregistro.strftime("%Y-%b-%d %H:%M")
     accesorio = ChequesAccesorios.objects.filter(chequequitado=doc.id).first()
     output["Asignacion"] = accesorio.documento.cxasignacion.cxasignacion
     output["Cheque"] = accesorio.__str__()

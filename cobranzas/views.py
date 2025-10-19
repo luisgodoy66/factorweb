@@ -3874,15 +3874,6 @@ def GeneraListaAmpliacionesJSON(request, desde = None, hasta= None):
     if desde == 'None':
         movimiento = Ampliaciones_plazo_cabecera.objects\
             .filter(empresa = id_empresa.empresa)\
-                .values('cxcliente__cxcliente__ctnombre', 'notadebito__id'
-                        ,'notadebito__cxnotadebito'
-                        ,'dregistro'
-                        ,'notadebito__dnotadebito'
-                        , 'notadebito__cxestado'
-                        ,'notadebito__cxtipofactoring__ctabreviacion'
-                        ,'ncomision','ndescuentodecartera', 'niva'
-                        ,'nvalor', 'dampliacionhasta'
-                        ,'notadebito__nsaldo')\
                 .order_by('notadebito__dnotadebito')
         
     else:
@@ -3891,16 +3882,6 @@ def GeneraListaAmpliacionesJSON(request, desde = None, hasta= None):
             .filter(notadebito__dnotadebito__gte = desde
                     , empresa = id_empresa.empresa
                     , notadebito__dnotadebito__lte = hasta)\
-                .values('cxcliente__cxcliente__ctnombre'
-                        ,'notadebito__id'
-                        ,'notadebito__cxnotadebito'
-                        ,'dregistro'
-                        ,'notadebito__dnotadebito'
-                        ,'notadebito__cxestado'
-                        ,'notadebito__cxtipofactoring__ctabreviacion'
-                        ,'ncomision','ndescuentodecartera', 'niva'
-                        ,'nvalor', 'dampliacionhasta'
-                        ,'notadebito__nsaldo')\
                 .order_by('notadebito__dnotadebito')
                 
     tempBlogs = []
@@ -3918,19 +3899,19 @@ def GeneraListaAmpliacionesJSON(request, desde = None, hasta= None):
 
 def GeneraListaAmpliacionesJSONSalida(transaccion):
     output = {}
-    output['id'] = transaccion['notadebito__id']
-    output["Cliente"] = transaccion['cxcliente__cxcliente__ctnombre']
-    output["Operacion"] = transaccion['notadebito__cxnotadebito']
-    output["Fecha"] = transaccion['notadebito__dnotadebito'].strftime("%Y-%m-%d")
-    output["FechaHasta"] = transaccion['dampliacionhasta'].strftime("%Y-%m-%d")
-    output["Estado"] = transaccion['notadebito__cxestado']
-    output["TipoFactoring"] = transaccion['notadebito__cxtipofactoring__ctabreviacion']
-    output["Registro"] = transaccion["dregistro"]
-    output["Comision"] = transaccion["ncomision"]
-    output["DescuentoCartera"] = transaccion["ndescuentodecartera"]
-    output["IVA"] = transaccion["niva"]
-    output["Total"] = transaccion["nvalor"]
-    output["Saldo"] = transaccion["notadebito__nsaldo"]
+    output['id'] = transaccion.notadebito.id
+    output["Cliente"] = transaccion.cxcliente.cxcliente.ctnombre
+    output["Operacion"] = transaccion.notadebito.cxnotadebito
+    output["Fecha"] = transaccion.notadebito.dnotadebito.strftime("%Y-%m-%d")
+    output["FechaHasta"] = transaccion.dampliacionhasta.strftime("%Y-%m-%d")
+    output["Estado"] = transaccion.notadebito.estado()
+    output["TipoFactoring"] = transaccion.notadebito.cxtipofactoring.ctabreviacion
+    output["Registro"] = transaccion.dregistro
+    output["Comision"] = transaccion.ncomision
+    output["DescuentoCartera"] = transaccion.ndescuentodecartera
+    output["IVA"] = transaccion.niva
+    output["Total"] = transaccion.nvalor
+    output["Saldo"] = transaccion.notadebito.nsaldo
 
     return output
 

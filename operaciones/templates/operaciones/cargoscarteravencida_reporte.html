@@ -52,13 +52,13 @@
                 <table class="table" style="width:100%">
                     <tbody>
                         <tr>
-                            <td colspan="2"><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
-                            <td class="centrado" colspan="2"><h3>{{ reporte | default:"CARGOS POR CARTERA" }}</h3></td>
+                            <td ><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
+                            <td class="centrado" ><h3>{{ reporte | default:"CARGOS POR CARTERA" }}</h3></td>
                             <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
                         </tr>
                         <tr>
-                            <td colspan="2"><h4></h4></td>
-                            <td class="centrado" colspan="2"><h3>Corte al {{ fecha_corte |custom_date_format}}</h3></td>
+                            <td ><h4></h4></td>
+                            <td class="centrado" ><h3>Corte al {{ fecha_corte |custom_date_format}}</h3></td>
                         </tr>
                     </tbody>
                 </table>

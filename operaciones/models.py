@@ -676,7 +676,6 @@ class Documentos_Manager(models.Manager):
             iva = iva_expr,
             deuda = saldo_anticipado_expr + dc_negociado_expr + dc_vencido_expr + gao_adicional_expr + iva_expr
         ).order_by('cxtipofactoring__cttipofactoring', 'cxcliente__cxcliente__ctnombre')
-        print(x.query)
         return x
     
 class Documentos(ClaseModelo):
@@ -1823,6 +1822,11 @@ class Notas_debito_cabecera(ClaseModelo):
         ('A', 'Ampliación de plazo'), 
         ('F', 'Factural al vencimiento'), 
     )
+    ESTADOS = (
+        ('A', 'Activa'),
+        ('C', 'Cobrada'),
+        ('E', 'Eliminada')
+    )
     cxcliente=models.ForeignKey(Datos_generales_cliente
         , on_delete=models.RESTRICT
     )
@@ -1831,7 +1835,7 @@ class Notas_debito_cabecera(ClaseModelo):
     cxtipofactoring = models.ForeignKey(Tipos_factoring, null=True
         , on_delete=models.CASCADE)
     nvalor =  models.DecimalField(max_digits=10, decimal_places=2)
-    cxestado = models.CharField(max_length=1, default="A") 
+    cxestado = models.CharField(max_length=1, default="A", choices=ESTADOS)
     nsaldo =  models.DecimalField(max_digits=10, decimal_places=2)
     # permitir nulo en los siguientes dos campos para registrar notas de debito
     # que no esten asociadas a alguna cobranza. Caso cuentas conjuntas
@@ -1860,6 +1864,9 @@ class Notas_debito_cabecera(ClaseModelo):
                 return 'Cargo efectuado por el banco'
             else:
                 return self.operacion
+    
+    def estado(self):
+        return self.get_cxestado_display()
 
 class Notas_debito_detalle(ClaseModelo):
     notadebito = models.ForeignKey(Notas_debito_cabecera, on_delete=models.CASCADE)
