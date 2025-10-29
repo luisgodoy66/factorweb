@@ -176,6 +176,9 @@ class CobranzasDocumentosView(SinPrivilegios, generic.FormView):
             .objects.filter(cxcliente = cliente_id \
                 , leliminado = False, lactiva = True).all()
 
+        tipofactoring = Tipos_factoring.objects\
+            .filter(id=tipo_factoring).first()
+        
         context = super(CobranzasDocumentosView, self).get_context_data(**kwargs)
         context["documentos"] = docs
         context["total_cartera"] = total_cartera
@@ -192,6 +195,7 @@ class CobranzasDocumentosView(SinPrivilegios, generic.FormView):
         context["tipo"]="Cobranza"
         context["por_vencer"]=por_vencer
         context["deudor"] = comprador if un_solo_deudor == "Si" else None
+        context["Anticipa100"] = tipofactoring.lanticipatotalnegociado if tipofactoring else False
 
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         sp = Asignacion.objects\
@@ -2326,6 +2330,7 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
                         vuelto = (documento_cobrado.nvalorcobranza 
                                   * (100 - documento.nporcentajeanticipo) /100)
                     else:
+                        # nota: en este punto podría ser una recuperación no necesariamente una cobranza
                         documento = Documentos.objects.filter(pk=documento_cobrado.cxdocumento).first()
                         vuelto = (documento_cobrado.nvalorcobranza 
                                   * (100 - documento.nporcentajeanticipo) /100)
@@ -2524,14 +2529,12 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
         else:
             base_noiva += total_gaoa
 
-        total_iva = base_iva * porcentaje_iva / 100
+        total_iva = round(base_iva * porcentaje_iva / 100, 2)
 
         # Calcular neto
         total_cargos = (total_dc + total_dcv + total_gao + total_gaoa 
                         + total_cargobajas + total_cargoretenciones 
-                        # + total_iva 
                         )
-                        # + total_otroscargos_no_operativos )
 
         neto = (total_vuelto 
                 + total_sobrepagos 
@@ -3148,7 +3151,8 @@ def ObtenerOtrosCargosDeDocumento(id_documento, listaotroscargos):
 
     # los cargos indicados en el detalle de la factura.
     cargos = Cargos_detalle.objects\
-        .filter(cxdocumento_id = id_documento, nsaldo__gt = 0, leliminado = False )
+        .filter(cxdocumento_id = id_documento, nsaldo__gt = 0
+        , leliminado = False )
     
     for cargo in cargos:
 
@@ -4287,12 +4291,12 @@ def Registra_gestion_cobro(request, tipo_participante, id_detalle_revision):
     return HttpResponse("OK")  # Retorna una respuesta HTTP simple
 
 def GeneraLiquidacionEnCero(request,ids_documentos, tipo_factoring,
-                            cliente_id, fecha_cobro):
-    tipo_documento = 'C'
+                            cliente_id, fecha_cobro, tipo_operacion='Cobranza'):
     arr_acc = []
     arr_fac = []
     detalle_cobranza = []
     cabecera_cobranza = []
+    lista_documentos = {}
 
     ids = ids_documentos.split(',')
     for id in ids:
@@ -4307,14 +4311,33 @@ def GeneraLiquidacionEnCero(request,ids_documentos, tipo_factoring,
         'nretenciones', 'accesorioquitado'
     ])
 
-    if tipo_documento == 'C':
+    if tipo_operacion == 'Cobranza':
         # barrer lista de documentos
         facturas = Documentos.objects.filter(id__in=arr_fac)\
             .values('id', 'nsaldo', 'nporcentajeanticipo')\
-            .annotate(accesorio_quitado=RawSQL('SELECT FALSE',''))
+            .annotate(accesorio_quitado=RawSQL('SELECT 0',''))
         quitados = ChequesAccesorios.objects.filter(id__in = arr_acc, leliminado = False)\
             .values('id', 'chequequitado__nsaldo', 'nporcentajeanticipo', 'chequequitado')
         lista_documentos = facturas.union(quitados)
+
+    if tipo_operacion == 'Recuperación':
+        facturas = Documentos_protestados.objects\
+            .filter(chequeprotestado__in=arr_fac
+                    , accesorio__isnull = True
+                    )\
+            .values('id', 'nsaldo')\
+            .annotate(nporcentajeanticipo=F('documento__nporcentajeanticipo'),
+                       accesorio_quitado=RawSQL('SELECT 0',''))
+
+        accesorios = Documentos_protestados.objects\
+            .filter(chequeprotestado__in=arr_acc
+                    , accesorio__isnull = False
+                    )\
+            .values('id', 'nsaldo')\
+            .annotate(nporcentajeanticipo=F('accesorio__nporcentajeanticipo'),
+                accesorio_quitado=RawSQL('SELECT 0',''))
+        # barrer lista de cheques protestados
+        lista_documentos = facturas.union(accesorios)
 
     for documento in lista_documentos:
         detalle_cobranza.append(

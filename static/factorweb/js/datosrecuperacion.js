@@ -170,7 +170,7 @@ function mostrar_cuentas_origen(){
 
     var objeto={
       "id_cliente": id_cliente,
-      "tipo_factoring":capturaValor("tipo_factoring"),
+      "tipo_factoring":tipo_factoring,
       "forma_cobro":forma_de_cobro,
       "fecha_cobro":capturaValor("id_dcobranza"),
       "valor_recibido": capturaValor("id_nvalor"), 

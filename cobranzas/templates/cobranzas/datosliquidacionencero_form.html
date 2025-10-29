@@ -137,6 +137,7 @@
 const id_cliente = "{{ cliente_id }}";
 const tipo_factoring = "{{ tipo_factoring }}";
 const documentos = "{{ documentos }}";
+const tipo = "{{ tipo }}";
 var $table = jQuery('#table')
 
 window.onload=function(){
@@ -197,7 +198,7 @@ function Recalcular(fecha_cobro){
 
   if (isValid) {
     fetchRecuperar("/cobranzas/generaliquidacionencero/" + documentos + "/" 
-        + tipo_factoring + "/" + id_cliente + "/" + fecha_cobro, function(data){
+        + tipo_factoring + "/" + id_cliente + "/" + fecha_cobro + "/" + tipo, function(data){
             if (data.error != '') {
                 MensajeError(data.error);
             }else{

@@ -117,7 +117,7 @@ urlpatterns = [
         , name="liquidacionesregistradas_json"),
     path('consultaliquidacionencero/<ids>/<id_cliente>/<tipo_factoring>/<por_vencer>'
          , LiquidacionEnCero.as_view(), name='consulta_liquidacion_en_cero'),
-    path('generaliquidacionencero/<ids_documentos>/<tipo_factoring>/<cliente_id>/<fecha_cobro>'
+    path('generaliquidacionencero/<ids_documentos>/<tipo_factoring>/<cliente_id>/<fecha_cobro>/<tipo_operacion>'
          , GeneraLiquidacionEnCero),
     path('detalledocumentosfacturaspurasliquidacionencero/<ids_documentos>'
          , DetalleDocumentosFacturasPurasLiquidacionEnCero
