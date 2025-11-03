@@ -24,7 +24,8 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , DetalleCuotasJSON, AceptarCobranzaCuota, ReversoDesembolsoLiquidacion\
     , ReversaAmpliacion, proyeccion_cobros, Registra_gestion_cobro\
     , GestionesDeCobroView, GestionDeCobro, LiquidacionEnCero, GeneraLiquidacionEnCero\
-    , DetalleDocumentosFacturasPurasLiquidacionEnCero, get_motivo_responsabilidad
+    , DetalleDocumentosFacturasPurasLiquidacionEnCero, get_motivo_responsabilidad\
+    , DetalleDocumentosProtestosLiquidacionEnCero
 
 
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
@@ -115,13 +116,16 @@ urlpatterns = [
     path('reversarliquidacion/<int:pid_liquidacion>/',ReversaLiquidacion),
     path('liquidacionesregistradasjson/<desde>/<hasta>',GeneraListaLiquidacionesRegistradasJSON
         , name="liquidacionesregistradas_json"),
-    path('consultaliquidacionencero/<ids>/<id_cliente>/<tipo_factoring>/<por_vencer>'
+    path('consultaliquidacionencero/<ids>/<id_cliente>/<tipo_factoring>/<por_vencer>/<tipo_operacion>'
          , LiquidacionEnCero.as_view(), name='consulta_liquidacion_en_cero'),
     path('generaliquidacionencero/<ids_documentos>/<tipo_factoring>/<cliente_id>/<fecha_cobro>/<tipo_operacion>'
          , GeneraLiquidacionEnCero),
     path('detalledocumentosfacturaspurasliquidacionencero/<ids_documentos>'
          , DetalleDocumentosFacturasPurasLiquidacionEnCero
         , name="detalle_documentosfacturaspuras_liquidacion_en_cero"),
+    path('detalledocumentosprotestosliquidacionencero/<ids_protestos>'
+         , DetalleDocumentosProtestosLiquidacionEnCero
+        , name="detalle_documentosprotestos_liquidacion_en_cero"),
     # desembolsos
     path('listaliquidacionespendientespagar/',LiquidacionesPendientesPagarView.as_view()
         , name="listaliquidacionespendientespagar"),

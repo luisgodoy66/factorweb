@@ -88,6 +88,8 @@
                         data-side-pagination="server"
                         {% if tipo == 'Cobranza' %}
                         data-url="{% url 'cobranzas:detalle_documentosfacturaspuras_liquidacion_en_cero' documentos %}"
+                        {% else %}
+                        data-url="{% url 'cobranzas:detalle_documentosprotestos_liquidacion_en_cero' documentos %}"
                         {% endif %}
                         >
                         </table>

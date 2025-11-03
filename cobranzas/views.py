@@ -869,7 +869,7 @@ class LiquidacionEnCero(SinPrivilegios, generic.TemplateView):
         context['documentos'] = self.kwargs.get('ids')
         context['tipo_factoring'] = self.kwargs.get('tipo_factoring')
         context['cliente_id'] = cliente_id
-        context['tipo'] = 'Cobranza'
+        context['tipo'] = self.kwargs.get('tipo_operacion')
         context['cliente'] = cliente
         context['por_vencer'] = self.kwargs.get('por_vencer')
         return context
@@ -2084,7 +2084,7 @@ def DocumentoProtestoJSONSalida(doc):
     output["Documento"] = doc.documento.ctdocumento
     output["Emision"] = doc.documento.demision.strftime("%Y-%m-%d")
     
-    if doc.chequeprotestado.cxformacobro =="CHE":
+    if doc.accesorio is None:
         output["PorcentajeAnticipo"] = doc.documento.nporcentajeanticipo
         output["Vencimiento"] = doc.documento.dvencimiento
     else:
@@ -2248,7 +2248,14 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
                 detalle_cobranza = Documentos_detalle.objects\
                     .filter(cxcobranza = cobranza)
             else:
-                detalle_cobranza = detalle_cobranza_liquidacion_0
+                if cobranza.cxcobranza == 'Cobranza':
+                    detalle_cobranza = detalle_cobranza_liquidacion_0
+                else:
+                    # para protestos habrá una cobranza por cada protesto
+                    detalle_cobranza = [
+                        item for item in detalle_cobranza_liquidacion_0 
+                        if item.protesto == cobranza.protesto
+                    ]
 
             cuenta_transferencia = Cuenta_transferencia\
                     .objects.cuenta_default(cobranza.cxcliente).first()
@@ -2291,7 +2298,7 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
                     codigo_operacion = cobranza.cxcobranza
                     # puede estar cobrando un cheque quitado lo que lo convierte en accesorio
                     accesorios = (cobranza.cxformapago == "DEP" 
-                                  or documento_cobrado.accesorioquitado)
+                                  or documento_cobrado.accesorio)
                     base_bajas=documento_cobrado.nvalorbaja
                     base_retenciones = documento_cobrado.nretenciones
 
@@ -2309,7 +2316,13 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
                             documento = accesorios
                         else:
                             # liquidacion en cero
-                            documento = ChequesAccesorios.objects.filter(chequequitado = accesorios).first()
+                            if cobranza.cxcobranza == 'Cobranza':
+                                documento = ChequesAccesorios.objects\
+                                    .filter(chequequitado = accesorios).first()
+                            else:
+                                # EN PROTESTO se usa el accesorio del protesto
+                                documento = ChequesAccesorios.objects\
+                                    .filter(id = accesorios).first()
 
                         vuelto = (documento_cobrado.nvalorcobranza 
                                   * (100 - documento.nporcentajeanticipo) /100)
@@ -2483,7 +2496,7 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
                 #   considerando que se liquiden cobranzas que hagan referencia a un 
                 #   mismo documento
 
-                total_otroscargos_no_operativos = ObtenerOtrosCargosDeDocumento(id_documento
+                total_otroscargos_no_operativos += ObtenerOtrosCargosDeDocumento(id_documento
                                                                                 , lista_otroscargos_no_operativos)
 
             # fin del for detalle
@@ -2503,8 +2516,10 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
             listacobranzas.append(output)
 
             # si es recuperacion obtener cargos del protesto
-            if tipo_operacion  == 'R':
-                total_otroscargos_no_operativos += ObtenerCargosDeProtestos(cobranza, lista_otroscargos_no_operativos)
+            if tipo_operacion  == 'R' or (tipo_operacion == '0' and cobranza.cxcobranza=='Recuperación'):
+                total_otroscargos_no_operativos += ObtenerCargosDeProtestos(cobranza, 
+                                                                            lista_otroscargos_no_operativos,
+                                                                            cobranza_liquidacion_0 is not None)
 
             # obtener cualkquier cargo cargado a la cobranza
             total_otroscargos_no_operativos += ObtenerOtrosCargosDeCobranza(tipo_operacion
@@ -2590,13 +2605,18 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
 
     return  contexto
 
-def ObtenerCargosDeProtestos(cobranza, listaotroscargos):
+def ObtenerCargosDeProtestos(cobranza, listaotroscargos, liquidacion_0 = False):
     total_cargos = 0
 
-    # Las recueraciones se hacen sobre protestos, determinar los protestos
-    protestos = Cheques_protestados.objects\
-        .filter(id__in = Recuperaciones_detalle.objects\
-            .filter(recuperacion = cobranza).values('chequeprotestado'))
+    if liquidacion_0:
+        # si es liquidacion en cero, no hay recuperacion, obtener el protesto directo
+        protestos = Cheques_protestados.objects\
+            .filter(id = cobranza.protesto)
+    else:
+        # Las recueraciones se hacen sobre protestos, determinar los protestos
+        protestos = Cheques_protestados.objects\
+            .filter(id__in = Recuperaciones_detalle.objects\
+                .filter(recuperacion = cobranza).values('chequeprotestado'))
 
     if protestos:
         for prox in protestos:
@@ -2637,10 +2657,10 @@ def ObtenerCargosDeProtestos(cobranza, listaotroscargos):
                         # verificar que la nd no se encuentre ya registrada, para no duplicar.
                         # eso pasa con recuperaciones del mismo protesto
 
-                        elemento = (GeneraOtroCargoJSONSalida(
+                        elemento = GeneraOtroCargoJSONSalida(
                             cargo.id, cargo.cxmovimiento.ctmovimiento
                             , ndx.dnotadebito, cargo.nsaldo, ndx.id
-                            , codigo_operacion))
+                            , codigo_operacion)
 
                         try:
                             x = listaotroscargos.index(elemento)
@@ -4305,71 +4325,134 @@ def GeneraLiquidacionEnCero(request,ids_documentos, tipo_factoring,
         else:
             arr_fac.append(id)
 
+    # Definir un namedtuple para los elementos de cabecera_cobranza
+    CabeceraCobranza = namedtuple('CabeceraCobranza', [
+        'cxtipofactoring', 'cxcliente', 'cxcobranza', 'cxformapago',
+        'dcobranza', 'protesto', 'nsobrepago', 'nvalor', 'id'
+    ])
+
     # Definir un namedtuple para los elementos de detalle_cobranza
     DetalleCobranza = namedtuple('DetalleCobranza', [
         'cxdocumento', 'nvalorcobranza', 'ndiasacondonar', 'nvalorbaja', 
-        'nretenciones', 'accesorioquitado'
+        'nretenciones', 'accesorio', 'protesto'
     ])
 
     if tipo_operacion == 'Cobranza':
         # barrer lista de documentos
-        facturas = Documentos.objects.filter(id__in=arr_fac)\
-            .values('id', 'nsaldo', 'nporcentajeanticipo')\
+        
+        # Crear los registros de la única cobranza para todos los documentos
+        facturas = Documentos.objects\
+            .filter(id__in=arr_fac)\
+            .values('id', 'nsaldo', 
+                    'nporcentajeanticipo')\
             .annotate(accesorio_quitado=RawSQL('SELECT 0',''))
-        quitados = ChequesAccesorios.objects.filter(id__in = arr_acc, leliminado = False)\
-            .values('id', 'chequequitado__nsaldo', 'nporcentajeanticipo', 'chequequitado')
+        
+        quitados = ChequesAccesorios.objects\
+            .filter(id__in = arr_acc, leliminado = False)\
+            .values('id', 'chequequitado__nsaldo', 
+                    'nporcentajeanticipo', 
+                    'chequequitado')
+        
         lista_documentos = facturas.union(quitados)
 
-    if tipo_operacion == 'Recuperación':
-        facturas = Documentos_protestados.objects\
-            .filter(chequeprotestado__in=arr_fac
-                    , accesorio__isnull = True
-                    )\
-            .values('id', 'nsaldo')\
-            .annotate(nporcentajeanticipo=F('documento__nporcentajeanticipo'),
-                       accesorio_quitado=RawSQL('SELECT 0',''))
+        for documento in lista_documentos:
+            detalle_cobranza.append(
+                DetalleCobranza(
+                    protesto=None,
+                    cxdocumento=documento['id'],
+                    nvalorcobranza=round(documento['nsaldo'] 
+                                         * documento['nporcentajeanticipo'] / 100, 2),
+                    ndiasacondonar=0,
+                    nvalorbaja=round(documento['nsaldo'] 
+                                    - (documento['nsaldo'] 
+                                        * documento['nporcentajeanticipo'] / 100)
+                                        , 2) ,
+                    nretenciones=0,
+                    accesorio=documento['accesorio_quitado']
+                )
+            )
+        total_cobranza = sum(item.nvalorcobranza for item in detalle_cobranza)
 
-        accesorios = Documentos_protestados.objects\
-            .filter(chequeprotestado__in=arr_acc
-                    , accesorio__isnull = False
-                    )\
-            .values('id', 'nsaldo')\
-            .annotate(nporcentajeanticipo=F('accesorio__nporcentajeanticipo'),
-                accesorio_quitado=RawSQL('SELECT 0',''))
-        # barrer lista de cheques protestados
-        lista_documentos = facturas.union(accesorios)
-
-    for documento in lista_documentos:
-        detalle_cobranza.append(
-            DetalleCobranza(
-                cxdocumento=documento['id'],
-                nvalorcobranza=round(documento['nsaldo'] * documento['nporcentajeanticipo'] / 100, 2),
-                ndiasacondonar=0,
-                nvalorbaja=round(documento['nsaldo'] - (documento['nsaldo'] * documento['nporcentajeanticipo'] / 100), 2),
-                nretenciones=0,
-                accesorioquitado=documento['accesorio_quitado']
+        cabecera_cobranza.append(
+            CabeceraCobranza(
+                cxtipofactoring=tipo_factoring,
+                cxcliente=cliente_id,
+                cxcobranza='Cobranza',
+                cxformapago='E',
+                dcobranza=datetime.strptime(fecha_cobro, "%Y-%m-%d").date() if fecha_cobro else None,
+                protesto=None,
+                nsobrepago=0,
+                nvalor=total_cobranza,
+                id=None
             )
         )
-    total_cobranza = sum(item.nvalorcobranza for item in detalle_cobranza)
 
-    # Definir un namedtuple para los elementos de cabecera_cobranza
-    CabeceraCobranza = namedtuple('CabeceraCobranza', [
-        'cxtipofactoring', 'cxcliente', 'cxcobranza', 'cxformapago',
-        'dcobranza', 'id', 'nsobrepago', 'nvalor'
-    ])
+    if tipo_operacion == 'Recuperación':
 
-    cabecera_cobranza.append(
-        CabeceraCobranza(
-            cxtipofactoring=tipo_factoring,
-            cxcliente=cliente_id,
-            cxcobranza='Cobranza',
-            cxformapago='E',
-            dcobranza=datetime.strptime(fecha_cobro, "%Y-%m-%d").date() if fecha_cobro else None,
-            id=None,
-            nsobrepago=0,
-            nvalor=total_cobranza
-        )
-    )
+        total_cobranza = 0
+        # Crear una cobranza por cada cheque protestado
+        for protest in arr_fac:
+            facturas = Documentos_protestados.objects\
+                .filter(chequeprotestado=protest
+                        , accesorio__isnull = True
+                        )\
+                .values()\
+                .annotate(id = F('documento__id'),
+                        nsaldo=F('nsaldo'),
+                        baja=F('nsaldobajacobranza'),
+                        nporcentajeanticipo=F('documento__nporcentajeanticipo'),
+                        accesorio=RawSQL('SELECT 0','')
+                        )
+
+            accesorios = Documentos_protestados.objects\
+                .filter(chequeprotestado=protest
+                        , accesorio__isnull = False
+                        )\
+                .values()\
+                .annotate(id = F('accesorio__id'),
+                        nsaldo=F('nsaldo'),
+                        baja=F('nsaldobajacobranza'),
+                        nporcentajeanticipo=F('accesorio__nporcentajeanticipo'),
+                        accesorio=F('accesorio__id')
+                        )
+            # barrer lista de cheques protestados
+            lista_documentos = facturas.union(accesorios)
+
+            for documento in lista_documentos:
+                detalle_cobranza.append(
+                    DetalleCobranza(
+                        protesto=protest,
+                        cxdocumento=documento['id'],
+                        nvalorcobranza=round(documento['nsaldo'] 
+                                             * documento['nporcentajeanticipo'] / 100, 2),
+                        ndiasacondonar=0,
+                        nvalorbaja=round(documento['nsaldo'] 
+                                        - (documento['nsaldo'] 
+                                            * documento['nporcentajeanticipo'] / 100)
+                                            , 2) + documento.get('baja', 0),
+                        nretenciones=0,
+                        accesorio=documento['accesorio']
+                    )
+                )
+            total = sum(item.nvalorcobranza for item in detalle_cobranza 
+                        if item.protesto == protest)
+
+            # Crear la cabecera de cobranza. Indicar que es una recuperación en el campo cxcobranza 
+            # para que proceso de liquidar en cero busque cargos adicionales asociados a la recuperación
+            cabecera_cobranza.append(
+                CabeceraCobranza(
+                    cxtipofactoring=tipo_factoring,
+                    cxcliente=cliente_id,
+                    cxcobranza='Recuperación',
+                    cxformapago='CHE' if facturas else 'E',
+                    dcobranza=datetime.strptime(fecha_cobro, "%Y-%m-%d").date() if fecha_cobro else None,
+                    protesto=protest,
+                    nsobrepago=0,
+                    nvalor=total,
+                    id=None
+                )
+            )
+            total_cobranza += total
 
     datos = obtenercontextoLiquidacion(request, "0", None
                                        , cabecera_cobranza
@@ -4486,3 +4569,64 @@ def get_motivo_responsabilidad(request, motivo_id):
         return JsonResponse({'lresponsabilidadgirador': motivo.lresponsabilidadgirador})
     except Motivos_protesto_maestro.DoesNotExist:
         return JsonResponse({'error': 'Motivo no encontrado'}, status=404)
+
+def DetalleDocumentosProtestosLiquidacionEnCero(request, ids_protestos):
+    # filtrar los documentos correspondientes a la lista pasada
+    documentos = Documentos_protestados.objects\
+        .filter(chequeprotestado__in = ids_protestos.split(',')
+                , leliminado = False)
+    
+    tempBlogs = []
+
+    # Converting `QuerySet` to a Python Dictionary
+    for i in range(len(documentos)):
+        tempBlogs.append(DocumentoProtestoJSONLiquidacionEnCeroSalida(documentos[i])) # Converting `QuerySet` to a Python Dictionary
+
+    docjson = tempBlogs
+
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+
+    return HttpResponse(JsonResponse( data))
+
+def DocumentoProtestoJSONLiquidacionEnCeroSalida(doc):
+    # con los datos numericos entre comillas si se calcula el total
+    # de la columna en la tabla. Del otro tipo, no
+
+    # el porcenaje de anticipo se uriliza para actualizar el utilizado del cliente
+    # si es accesorio el % anticipo esta en el accesorio, no en el documento.
+
+    # los datos aquí van a obtenerse con el getData de la tb, aunque no se 
+    # presenten en el HTML
+    output = {}
+    output['id'] = doc.id
+    output["IdComprador"] = doc.documento.cxcomprador.id
+    output["Comprador"] = doc.documento.cxcomprador.cxcomprador.ctnombre
+    output["Asignacion"] = doc.documento.cxasignacion.cxasignacion
+    output["Documento"] = doc.documento.ctdocumento
+    output["Emision"] = doc.documento.demision.strftime("%Y-%m-%d")
+
+    if doc.accesorio is None:
+        output["PorcentajeAnticipo"] = doc.documento.nporcentajeanticipo
+        output["Vencimiento"] = doc.documento.dvencimiento
+        output["Cobro"] = round(doc.nsaldo * doc.documento.nporcentajeanticipo / 100, 2)
+        output["Bajas"] = round(doc.nsaldo 
+                                    - (doc.nsaldo * doc.documento.nporcentajeanticipo / 100), 2)
+    else:
+        output["PorcentajeAnticipo"] = doc.accesorio.nporcentajeanticipo
+        output["Vencimiento"] = doc.accesorio.dvencimiento
+        output["Cobro"] = round(doc.nsaldo * doc.accesorio.nporcentajeanticipo / 100, 2)
+        output["Bajas"] = round(doc.nsaldo 
+                                    - (doc.nsaldo * doc.accesorio.nporcentajeanticipo / 100), 2)
+
+    output["SaldoActual"] = doc.nsaldo
+    output["Retenido"] = "0.0"
+    output["SaldoFinal"] = "0.0"
+    output["IdProtesto"] = doc.chequeprotestado.id
+    output["BajaCobranza"] = doc.nvalorbajacobranza
+    output["SaldoBajaCobranza"] = doc.nsaldobajacobranza
+
+    return output
+

@@ -976,7 +976,7 @@ class Documentos_protestados_Manager(models.Manager):
             DecimalField(max_digits=6, decimal_places=2)
         )
         saldo_anticipado_expr = ExpressionWrapper(
-            F('nsaldo') * F('documento__nporcentajeanticipo') / 100,
+            (F('nsaldo')+F('nsaldobajacobranza')) * F('documento__nporcentajeanticipo') / 100,
             output_field=DecimalField()
         )
 
@@ -986,7 +986,7 @@ class Documentos_protestados_Manager(models.Manager):
             default=1,
             output_field=DecimalField()
         )
-        base_dc_expr = (F('nsaldo') 
+        base_dc_expr = ((F('nsaldo') + F('nsaldobajacobranza'))
                         / (dc.ndiasperiocidad if dc else 1)
         )
         if dc and dc.lsobreanticipo:
@@ -1017,7 +1017,7 @@ class Documentos_protestados_Manager(models.Manager):
             default=F('documento__cxcliente__datos_operativos__ntasagaoa'),
             output_field=DecimalField()
         )
-        base_gaoa_expr = F('nsaldo') 
+        base_gaoa_expr = F('nsaldo') + F('nsaldobajacobranza')
 
         if gaoa and gaoa.lsobreanticipo:
             base_gaoa_expr = (base_gaoa_expr 
@@ -1125,7 +1125,7 @@ class Documentos_protestados_Manager(models.Manager):
             DecimalField(max_digits=6, decimal_places=2)
         )
         saldo_anticipado_expr = ExpressionWrapper(
-            F('nsaldo') * F('accesorio__nporcentajeanticipo') / 100,
+            (F('nsaldo') + F('nsaldobajacobranza')) * F('accesorio__nporcentajeanticipo') / 100,
             output_field=DecimalField()
         )
 
@@ -1135,7 +1135,7 @@ class Documentos_protestados_Manager(models.Manager):
             default=1,
             output_field=DecimalField()
         )
-        base_dc_expr = (F('nsaldo') 
+        base_dc_expr = ((F('nsaldo') + F('nsaldobajacobranza'))
                         / (dc.ndiasperiocidad if dc else 1)
         )
         if dc and dc.lsobreanticipo:
@@ -1166,7 +1166,7 @@ class Documentos_protestados_Manager(models.Manager):
             default=F('documento__cxcliente__datos_operativos__ntasagaoa'),
             output_field=DecimalField()
         )
-        base_gaoa_expr = F('nsaldo') 
+        base_gaoa_expr = (F('nsaldo') + F('nsaldobajacobranza'))
 
         if gaoa and gaoa.lsobreanticipo:
             base_gaoa_expr = base_gaoa_expr * F('accesorio__nporcentajeanticipo') / 100

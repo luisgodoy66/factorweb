@@ -358,7 +358,7 @@ function EliminarDebitoCuentaCompartida(nd_id,){
     
 }
 
-function CargaXMLfactura(xmlFile){
+function CargaXMLfactura(xmlFile, desdeSRI = false){
   const file = xmlFile.files[0];
   const reader = new FileReader();
   var parser = new DOMParser();
@@ -373,18 +373,30 @@ function CargaXMLfactura(xmlFile){
           alert('No corresponde')
       }
       else{
-          let numero_autorizacion=xmlDoc.getElementsByTagName("numeroAutorizacion")[0]
-            .childNodes[0].nodeValue;
+          let estado=xmlDoc.getElementsByTagName("estado")[0]
+            .childNodes[0].nodeValue ;
 
-          // llamar al servicio del SRI para recuperar el comprobante y tomar los datos
-          // no desde el archivo sino de la respuesta del SRI
-          CargarDatosFactura(numero_autorizacion, xmlDoc);
+          if (estado != 'AUTORIZADO'){
+              alert('Documento no tiene estado de autorizado')
+          }else{
+            if (desdeSRI){
+              let numero_autorizacion=xmlDoc.getElementsByTagName("numeroAutorizacion")[0]
+                .childNodes[0].nodeValue;
+
+              // llamar al servicio del SRI para recuperar el comprobante y tomar los datos
+              // no desde el archivo sino de la respuesta del SRI
+              CargarDatosFactura(numero_autorizacion, xmlDoc);
+            }else{
+              comprobante = xmlDoc.getElementsByTagName("comprobante")[0]
+                .childNodes[0].nodeValue;
+              CargarFacturaDesdeComprobante(comprobante)
+            }
+          }
       }
   };
 }
 
 function CargarDatosFactura(numero_autorizacion, xmlDoc=null){
-  var parser = new DOMParser();
 
   if (numero_autorizacion.length != 49){
       alert('Número de autorización debe tener 49 dígitos')
@@ -421,6 +433,13 @@ function CargarDatosFactura(numero_autorizacion, xmlDoc=null){
           alert('Documento no tiene estado de autorizado o no es de producción')
       }
       else{
+        CargarFacturaDesdeComprobante(comprobante)
+      }
+    })
+}
+
+function CargarFacturaDesdeComprobante(comprobante){
+  var parser = new DOMParser();
         xmlFactura = parser.parseFromString(comprobante,"text/xml")
 
         let infoTributaria=xmlFactura.getElementsByTagName("infoTributaria")[0]
@@ -509,8 +528,7 @@ function CargarDatosFactura(numero_autorizacion, xmlDoc=null){
         total=jQuery("#id_nvalorantesiva").val()
         total = +total+valorIva;
         inicializaValor("id_ntotal",total.toFixed(2))
-      }
-    })
+
 }
 
 function ProrrogaStyle(value, row, index) {
@@ -1077,5 +1095,50 @@ function imprimeCargosCarteraVencida(){
   url = window.location.origin
   url = url + "/operaciones/impresioncargoscarteravencida/"+capturaValor("fechahasta")+"/"+x;
   window.open( url);
+}
+
+function LiquidacionEnCero(Tipo_operacion, por_vencer){
+  // validar que los elementos seleccionados sean del mismo cliente
+  // y del mismo tipo de factoring
+
+  var seleccion=  $table.bootstrapTable('getSelections')
+  var ids = getIdSelections()
+  var id_cliente = ''
+  var error = false
+  var tipo_factoring=''
+
+  seleccion.map(function(row)  {
+    // validar un solo cliente
+    if (id_cliente==''){
+      id_cliente=row.IdCliente
+    }
+    else{ if (id_cliente != row.IdCliente){
+      error = true
+    }}
+    // validar un solo tipo de factoring. Aunque este campo no aparece en la bt, 
+    // si está en el data con que se carga la bt
+    if (tipo_factoring==''){
+      tipo_factoring=row.IdTipoFactoring
+    }
+    else{ if (tipo_factoring != row.IdTipoFactoring){
+        error = true
+    }}
+    // solo los tipos de factoring que anticipan el 100%
+    if ( row.Anticipa100){
+      error = true
+    }
+  });
+
+  if (error ){
+    alert("Ha seleccionado varios clientes o tipos de factoring que no aplican liquidación de cobranza."
+      +" No puede continuar")
+  }
+  else{
+
+      url = '/cobranzas/consultaliquidacionencero/'+ids+'/'+id_cliente+'/'+tipo_factoring+'/'+por_vencer+'/'+Tipo_operacion;
+    
+    location.href=url
+  }
+  return false
 }
 
