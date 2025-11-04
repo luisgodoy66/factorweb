@@ -530,7 +530,7 @@ class Documentos_Manager(models.Manager):
         if not arr_clientes:
             qs = self.filter(
                 leliminado=False,
-                dvencimiento__lte=fecha_corte,
+                dvencimiento__lt=fecha_corte - F('cxtipofactoring__ndiasgracia'),
                 nsaldo__gt=0,
                 cxasignacion__in=Asignacion.objects.filter(
                     cxtipo="F",
@@ -549,7 +549,7 @@ class Documentos_Manager(models.Manager):
         else:
             qs = self.filter(
                 leliminado=False,
-                dvencimiento__lte=fecha_corte,
+                dvencimiento__lt=fecha_corte - F('cxtipofactoring__ndiasgracia'),
                 nsaldo__gt=0,
                 cxcliente__in=arr_clientes,
                 cxasignacion__in=Asignacion.objects.filter(
@@ -1163,7 +1163,7 @@ class ChequesAccesorios_Manager(models.Manager):
         if not arr_clientes:
             qs = self.filter(
                 leliminado = False, lcanjeado  = False, laccesorioquitado = False,
-                dvencimiento__lte = fecha_corte,
+                dvencimiento__lt=fecha_corte - F('documento__cxtipofactoring__ndiasgracia'),
                 cxestado='A',
                 documento__cxasignacion__in=Asignacion.objects.filter(
                     cxtipo="A",
@@ -1182,7 +1182,7 @@ class ChequesAccesorios_Manager(models.Manager):
         else:
             qs = self.filter(
                 leliminado = False, lcanjeado  = False, laccesorioquitado = False,
-                dvencimiento__lte = fecha_corte,
+                dvencimiento__lt=fecha_corte - F('documento__cxtipofactoring__ndiasgracia'),
                 cxestado='A',
                 documento__cxcliente__in=arr_clientes,
                 documento__cxasignacion__in=Asignacion.objects.filter(
@@ -1490,7 +1490,7 @@ class Cheques_quitados_Manager(models.Manager):
         if not arr_clientes:
             qs = self.filter(
                 leliminado = False,
-                accesorio_quitado__dvencimiento__lte = fecha_corte,
+                accesorio_quitado__dvencimiento__lt = fecha_corte - F('accesorio_quitado__documento__cxtipofactoring__ndiasgracia'),
                 cxestado='A',
                 accesorio_quitado__documento__cxasignacion__in=Asignacion.objects.filter(
                     cxtipo="A",
@@ -1509,7 +1509,7 @@ class Cheques_quitados_Manager(models.Manager):
         else:
             qs = self.filter(
                 leliminado = False,
-                accesorio_quitado__dvencimiento__lte = fecha_corte,
+                accesorio_quitado__dvencimiento__lt = fecha_corte - F('accesorio_quitado__documento__cxtipofactoring__ndiasgracia'),
                 cxestado='A',
                 accesorio_quitado__documento__cxcliente__in=arr_clientes,
                 accesorio_quitado__documento__cxasignacion__in=Asignacion.objects.filter(
@@ -1619,7 +1619,7 @@ class Cheques_quitados_Manager(models.Manager):
 
         if dc.lcargaiva:
             base_iva_expr = dc_negociado_expr + dc_vencido_expr
-        if gao.lcargaiva:
+        if gaoa.lcargaiva:
             base_iva_expr = base_iva_expr + gao_adicional_expr
 
         iva_expr = ExpressionWrapper(

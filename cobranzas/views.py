@@ -1848,7 +1848,7 @@ def Liquidacion(request, tipo_operacion):
          ,pnvuelto ,pnsobrepago ,pngao ,pngaoa,pndescuentodecartera ,pnretenciones\
          ,pnbajas ,pnotros ,pnneto,pnbaseiva ,pnporcentajeiva ,pniva ,psinstruccionpago
          ,nusuario ,padocumentos, pjcobranzas, tipo_operacion, pjotroscargosnooperativos
-         , pndescuentodecarteravencido, base_noiva))
+         ,pndescuentodecarteravencido, base_noiva))
     return HttpResponse(resultado)
 
 @login_required(login_url='/login/')
@@ -2298,7 +2298,7 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
                     codigo_operacion = cobranza.cxcobranza
                     # puede estar cobrando un cheque quitado lo que lo convierte en accesorio
                     accesorios = (cobranza.cxformapago == "DEP" 
-                                  or documento_cobrado.accesorio)
+                                  or (hasattr(documento_cobrado, 'accesorio') and documento_cobrado.accesorio))
                     base_bajas=documento_cobrado.nvalorbaja
                     base_retenciones = documento_cobrado.nretenciones
 
@@ -2577,10 +2577,10 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
         "total_gao": round(total_gao,2),
         "total_gaoa":round(total_gaoa,2),
         "total_iva": round(total_iva,2),
-        "porcentaje_iva":porcentaje_iva,
         "total_cargoretenciones":round(total_cargoretenciones,2),
         "total_cargobajas": round(total_cargobajas,2),
         "total_otros_cargos": round(total_otroscargos_no_operativos,2),
+        "porcentaje_iva":porcentaje_iva,
         "nombre_dc": dc.ctdescripcionenreporte,
         "nombre_gao": gao.ctdescripcionenreporte,
         "nombre_gaoa": gaoa.ctdescripcionenreporte,
@@ -4460,7 +4460,20 @@ def GeneraLiquidacionEnCero(request,ids_documentos, tipo_factoring,
     resultado = {
         'error': datos['error'],
         'sobrepago': -datos['neto'],
-        'total_cobranza': total_cobranza - (datos['neto'] if 'neto' in datos else 0)
+        'total_cobranza': total_cobranza - (datos['neto'] if 'neto' in datos else 0),
+        'cargos_operativos': datos['data'],
+        'cargos_no_operativos': datos['cargos_no_operativos'],
+        "total_dc": datos['total_dc'],
+        "total_dcv": datos['total_dcv'],
+        "total_gao": datos['total_gao'],
+        "total_gaoa":datos['total_gaoa'],
+        "total_cargoretenciones":datos['total_cargoretenciones'],
+        "total_cargobajas": datos['total_cargobajas'],
+        "total_iva": datos['total_iva'],
+        "total_otros_cargos": datos['total_otros_cargos'],
+        "nombre_dc": datos['nombre_dc'],
+        "nombre_gao": datos['nombre_gao'],
+        "nombre_gaoa": datos['nombre_gaoa'],
     }
 
     return JsonResponse(resultado, safe=False)

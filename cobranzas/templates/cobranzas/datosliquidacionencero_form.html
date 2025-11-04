@@ -102,12 +102,57 @@
                 <div class="col-md-7 ">
                     <div class="alert alert-warning" role="alert">
                         <small>
-                        Los <strong>Valores cobrados</strong> corresponden al anticipo del saldo en 
+                        Los <strong>Valores a cobrar</strong> corresponden al anticipo del saldo en 
                         <strong>Recibido</strong> y lo restante en <strong>Bajas</strong> 
                         </small>
                     </div>
                 </div>
             </div>
+            <div class="dropdown-divider"></div>
+            <div>
+
+                    <h5 class="heading-title mb-1 text-secondary">Detalle de cargos por liquidación</h5>
+            </div>
+            <div >
+
+                    <small>
+
+                    <table id="table_cargos"  class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                            <th data-field="cobranza">Cobranza</th>
+                            <th data-field="asignacion">Asignación</th>
+                            <th data-field="documento">Documento</th>
+                            <th data-field="dias_vencidos">Días vencidos</th>
+                            <th data-field="dias_negociados">Días negociados</th>
+                            <th data-field="valor_cobrado">Aplicado a cartera</th>
+                            <!-- Las columnas se crearán dinámicamente en JavaScript -->
+                            </tr>
+                        </thead>
+                    </table>
+
+                    </small>
+            </div>
+                    
+            <div {%  if total_otros_cargos == 0 %} hidden {% endif %}>
+                <br>
+                    <h5 class="heading-title mb-1 text-secondary">Detalle de cargos previos</h5>
+
+
+                <small>
+                    <table id="table_otros"  class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                        <th data-field="descripcion">Cargo</th>
+                        <th data-field="codigo_cobranza">Operación</th>
+                        <th data-field="fecha">Fecha</th>
+                        <th data-field="valor">Valor</th>
+                        </tr>
+                    </thead>
+                    </table>
+                </small>
+            </div>
+
         </div>    
           
         <div class="card-footer">
@@ -141,10 +186,10 @@ const tipo_factoring = "{{ tipo_factoring }}";
 const documentos = "{{ documentos }}";
 const tipo = "{{ tipo }}";
 var $table = jQuery('#table')
+var $tablecargos = jQuery('#table_cargos')
+var $tableotros = jQuery('#table_otros')
 
 window.onload=function(){
-
-    $table.bootstrapTable({locale:"es-EC"});
 
     // inicializar tabla
     initTable();
@@ -175,7 +220,7 @@ function initTable() {
         , rowspan: 2, align: 'center', valign: 'middle', sortable: true,
         }, {title: 'Saldo actual', field: 'SaldoActual'
         , rowspan: 2, align: 'right', valign: 'middle', sortable: true,
-        }, {title: 'Valores cobrados', colspan: 3, align: 'center',
+        }, {title: 'Valores a cobrar', colspan: 3, align: 'center',
         }, {title: 'Saldo', field: 'SaldoFinal',rowspan: 2, align: 'center'
         }
     ],
@@ -206,6 +251,60 @@ function Recalcular(fecha_cobro){
             }else{
                 inicializaValor('id_nvalor', data.total_cobranza);
                 inicializaValor('id_nsobrepago', data.sobrepago);
+
+                // Crear columnas dinámicamente basadas en los totales
+                var columns = [
+                    {field: 'cobranza', title: 'Cobranza'},
+                    {field: 'asignacion', title: 'Asignación'},
+                    {field: 'documento', title: 'Documento'},
+                    {field: 'dias_vencidos', title: 'Días vencidos'},
+                    {field: 'dias_negociados', title: 'Días negociados'},
+                    {field: 'valor_cobrado', title: 'Aplicado a cartera'}
+                ];
+
+                // Agregar columnas condicionalmente
+                if (data.total_dc > 0) {
+                    columns.push({field: 'tasa_dc', title: 'Tasa DC %'});
+                    columns.push({field: 'dc', title: data.nombre_dc + ' negociado'});
+                }
+                if (data.total_dcv > 0) {
+                    columns.push({field: 'tasa_dcv', title: 'Tasa mora %'});
+                    columns.push({field: 'dcv', title: data.nombre_dc + ' vencido'});
+                }
+                if (data.total_gao > 0) {
+                    columns.push({field: 'tasa_gao', title: 'Tasa GAO'});
+                    columns.push({field: 'gao', title: data.nombre_gao});
+                }
+                if (data.total_gaoa > 0) {
+                    columns.push({field: 'tasa_gaoa', title: 'Tasa GAOA'});
+                    columns.push({field: 'gaoa', title: data.nombre_gaoa});
+                }
+                if (data.total_cargoretenciones > 0) {
+                    columns.push({field: 'retenciones', title: 'Retenciones'});
+                }
+                if (data.total_cargobajas > 0) {
+                    columns.push({field: 'bajas', title: 'Bajas'});
+                }
+
+                // cargar la tabla de cargos
+                const cargostxt = data.cargos_operativos;
+                const otroscargostxt = data.cargos_no_operativos;
+                // para cargar la data en la tabla se necesita convertir, se usa JSON.parse
+                var cargosData = JSON.parse(cargostxt);
+
+                $tablecargos.bootstrapTable('destroy').bootstrapTable({
+                    data: cargosData,
+                    columns: columns,
+                    fixedColumns: true,
+                    fixedNumber: 3
+                });
+
+                // para cargar la data en la tabla se necesita convertir, se usa JSON.parse
+                otros = JSON.parse(otroscargostxt);
+
+                $tableotros.bootstrapTable('destroy').bootstrapTable({
+                    data: otros,
+                });
             }
         }) 
   } 

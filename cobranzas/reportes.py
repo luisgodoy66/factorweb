@@ -314,6 +314,7 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
     totales = {
         "cobrado":tot_cobro["nvalorrecuperacion__sum"]
         , "bajas":tot_bajas["nvalorbaja__sum"]
+        , "bajas_cobranza":tot_bajascobranza["nvalorbajacobranza__sum"]
         , "aplicado":tot_cobro["nvalorrecuperacion__sum"]
                 +tot_bajas["nvalorbaja__sum"]
                 +tot_bajascobranza["nvalorbajacobranza__sum"]

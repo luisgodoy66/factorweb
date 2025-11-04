@@ -187,7 +187,7 @@
 
                     <small>
 
-                    <input type="text" hidden id="data_cargos" value="{{ data }}">
+                    <!-- <input type="text" hidden id="data_cargos" value="{{ data }}"> -->
                     <table id="table"  class="table table-striped table-bordered">
                         <thead>
                             <tr>
@@ -229,7 +229,7 @@
                         <br>
                         <h5 class="heading-title mb-1 text-secondary">Detalle de cargos previos</h5>
                         <small>
-                            <input type="text" hidden id="data_otros_cargos" value="{{ cargos_no_operativos }}">
+                            <!-- <input type="text" hidden id="data_otros_cargos" value="{{ cargos_no_operativos }}"> -->
                             <table id="table_otros"  class="table table-striped table-bordered">
                             <thead>
                                 <tr>
@@ -287,8 +287,8 @@ var $table = jQuery('#table')
 // data_cargos y data_cargos se cargan desde elementos tipo json.dumps que vienen 
 // en el contexto
 const cobranzastxt =capturaValor("data_cobranzas")
-const cargostxt =capturaValor("data_cargos")
-const otroscargostxt =capturaValor("data_otros_cargos")
+const cargostxt ="{{data|escapejs}}"
+const otroscargostxt ="{{ cargos_no_operativos|escapejs }}"
 const tipo_operacion = "{{ tipo_operacion }}"
 const vuelto = "{{ total_vuelto|floatformat:'2u' }}"
 const sobrepago = "{{ total_sobrepagos|floatformat:'2u' }}"
@@ -340,7 +340,10 @@ window.onload= function(){
             , total_cargos_operativos
             , total_cargos_no_operativos
         )
-
+    // si neto es 0 cargar el texto Liquidacion en cero en instruccion de pago
+    if (parseFloat(neto) == 0){
+        inicializaValor("id_ctinstrucciondepago","Liquidación en cero")
+    }
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -364,11 +367,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-function agregaOtrosCargos(vuelto, sobrepago, cargos_operativos, cargos_no_operativos) {
+function agregaOtrosCargos(vuelto, sobrepago, total_cargos_operativos, total_cargos_no_operativos) {
     const nvuelto = parseFloat(vuelto)
     const nsobrepago = parseFloat(sobrepago)
-    const ncargos_operativos = parseFloat(cargos_operativos)
-    const ncargos_no_operativos = parseFloat(cargos_no_operativos)
+    const ncargos_operativos = parseFloat(total_cargos_operativos)
+    const ncargos_no_operativos = parseFloat(total_cargos_no_operativos)
     base_iva_otros = obtenerAcumuladoBaseIVAOtrosCargos()
     base_noiva_otros = obtenerAcumuladoBaseNoIVAOtrosCargos()
     var ivaotroscargos = 0
@@ -443,36 +446,20 @@ function LiquidarCobranza(){
             "fecha_liquidacion":capturaValor("id_dliquidacion"),
             "ddesembolso": capturaValor("id_ddesembolso"), 
             "sinstruccionpago": capturaValor("id_ctinstrucciondepago"),
-        //   "id_cliente":capturaValor("cliente_id"),
             "id_cliente":cliente,
-        //   "tipo_factoring":capturaValor("tipo_factoring_id"), 
             "tipo_factoring":tipo_factoring, 
-        //   "base_iva": capturaValor("base_iva_id"),
-            // "base_iva": base_iva,
-        //   "porcentaje_iva": capturaValor("porcentaje_iva_id"),
             "porcentaje_iva": porcentaje_iva,
-        //   "niva": capturaValor("iva_id"),
             "niva": iva,
             "documentos": cargostxt,
-        //   "vuelto":capturaValor("vuelto_id"),
             "vuelto":vuelto,
-        //   "sobrepago":capturaValor("sobrepago_id"),
             "sobrepago":sobrepago,
-        //   "gao":capturaValor("gao_id"),
             "gao":gao,
-        //   "gaoa":capturaValor("gaoa_id"),
             "gaoa":gaoa,
-        //   "descuentodecartera":capturaValor("dc_id"),
             "descuentodecartera":dc,
-        //   "descuentodecarteravencido":capturaValor("dcv_id"),
             "descuentodecarteravencido":dcv,
-        //   "retenciones":capturaValor("retenciones_id"),
             "retenciones":retenciones,
-        //   "bajas":capturaValor("bajas_id"),
             "bajas":bajas,
-        //   "otros":capturaValor("otros_id"),
             "otros":total_cargos_no_operativos,
-        //   "neto":capturaValor("neto_id"),
             "neto":neto,
             "cobranzas" : cobranzastxt,
             "otros_cargos_no_operativos":otroscargostxt,

@@ -928,7 +928,7 @@ class Documentos_protestados_Manager(models.Manager):
         if not arr_clientes:
             qs = self.filter(leliminado=False
                             , nsaldo__gt = 0
-                            , documento__dvencimiento__lte=fecha_corte
+                            , documento__dvencimiento__lt=fecha_corte-F('documento__cxasignacion__cxtipofactoring__ndiasgracia')
                             , accesorio__isnull = True
                             , empresa = id_empresa)\
                 .values("documento__cxcliente__cxcliente__ctnombre"
@@ -944,7 +944,7 @@ class Documentos_protestados_Manager(models.Manager):
             qs = self.filter(leliminado=False
                             , nsaldo__gt = 0
                             , documento__cxcliente__in=arr_clientes
-                            , documento__dvencimiento__lte=fecha_corte
+                            , documento__dvencimiento__lt=fecha_corte-F('documento__cxasignacion__cxtipofactoring__ndiasgracia')
                             , accesorio__isnull = True
                             , empresa = id_empresa)\
                 .values("documento__cxcliente__cxcliente__ctnombre"
@@ -1047,7 +1047,7 @@ class Documentos_protestados_Manager(models.Manager):
 
         if dc.lcargaiva:
             base_iva_expr = dc_negociado_expr + dc_vencido_expr
-        if gao.lcargaiva:
+        if gaoa.lcargaiva:
             base_iva_expr = base_iva_expr + gao_adicional_expr
 
         iva_expr = ExpressionWrapper(
@@ -1194,7 +1194,7 @@ class Documentos_protestados_Manager(models.Manager):
 
         if dc.lcargaiva:
             base_iva_expr = dc_negociado_expr + dc_vencido_expr
-        if gao.lcargaiva:
+        if gaoa.lcargaiva:
             base_iva_expr = base_iva_expr + gao_adicional_expr
 
         iva_expr = ExpressionWrapper(
