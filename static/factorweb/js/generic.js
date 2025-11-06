@@ -294,7 +294,7 @@ function google_session_active() {
 }
 
 function registrarEvento(id, cliente, comentario){
-    if (google_session_active()) {
+    if (!google_session_active()) {
         MensajeError("Debe conectar con Google antes de registrar un evento");
         return;
     }

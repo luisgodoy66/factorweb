@@ -2343,7 +2343,6 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
                         vuelto = (documento_cobrado.nvalorcobranza 
                                   * (100 - documento.nporcentajeanticipo) /100)
                     else:
-                        # nota: en este punto podría ser una recuperación no necesariamente una cobranza
                         documento = Documentos.objects.filter(pk=documento_cobrado.cxdocumento).first()
                         vuelto = (documento_cobrado.nvalorcobranza 
                                   * (100 - documento.nporcentajeanticipo) /100)
@@ -2492,7 +2491,7 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
 
                 # añadir los cargos por documento que se hayan generado por proceso
                 # de generar factura al vencimiento.
-                # nota: validar que sólo se cargue un valor por cargo-documento,
+                # validar que sólo se cargue un valor por cargo-documento,
                 #   considerando que se liquiden cobranzas que hagan referencia a un 
                 #   mismo documento
 
@@ -3175,25 +3174,28 @@ def ObtenerOtrosCargosDeDocumento(id_documento, listaotroscargos):
         , leliminado = False )
     
     for cargo in cargos:
+        # Verificar que el cargo.id no se encuentre ya presente en la lista
+        cargo_existente = any(item.get('id_cargo') == cargo.id for item in listaotroscargos)
+        
+        if not cargo_existente:
+            if cargo.cargo_detalle_nd:
+                # Cargos que no han sido cobrados, podrían ser GAO, DC, en facturas generadas
+                # al vencimiento. SOLO FILTRAR OTROS CARGOS (con nota de debito)
+                nd = cargo.cargo_detalle_nd.notadebito
+                doc = nd.factura_notadedebito.__str__() if nd.factura_notadedebito else nd.__str__()
+                listaotroscargos.append(GeneraOtroCargoJSONSalida(
+                    cargo.id, cargo.cxmovimiento.ctmovimiento
+                    , cargo.dultimageneracioncargos, cargo.nsaldo
+                    , nd.id
+                    , doc, 'F'))
+            else:
+                print('cargo blanco')
+                listaotroscargos.append(GeneraOtroCargoJSONSalida(
+                    cargo.id, cargo.cxmovimiento.ctmovimiento
+                    , cargo.dultimageneracioncargos, cargo.nsaldo, None
+                    , 'sin nd', ''))
 
-        if cargo.cargo_detalle_nd:
-            # Cargos que no han sido cobrados, podrían ser GAO, DC, en facturas generadas
-            # al vencimiento. SOLO FILTRAR OTROS CARGOS (con nota de debito)
-            nd = cargo.cargo_detalle_nd.notadebito
-            doc = nd.factura_notadedebito.__str__() if nd.factura_notadedebito else nd.__str__()
-            listaotroscargos.append(GeneraOtroCargoJSONSalida(
-                cargo.id, cargo.cxmovimiento.ctmovimiento
-                , cargo.dultimageneracioncargos, cargo.nsaldo
-                , nd.id
-                , doc, 'F'))
-        else:
-            print('cargo blanco')
-            listaotroscargos.append(GeneraOtroCargoJSONSalida(
-                cargo.id, cargo.cxmovimiento.ctmovimiento
-                , cargo.dultimageneracioncargos, cargo.nsaldo, None
-                , 'sin nd', ''))
-
-        total_cargos += cargo.nsaldo
+            total_cargos += cargo.nsaldo
 
     return total_cargos
 

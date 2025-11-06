@@ -1135,7 +1135,7 @@ function LiquidacionEnCero(Tipo_operacion, por_vencer){
   }
   else{
 
-      url = '/cobranzas/consultaliquidacionencero/'+ids+'/'+id_cliente+'/'+tipo_factoring+'/'+por_vencer+'/'+Tipo_operacion;
+      url = `/cobranzas/consultaliquidacionencero/${ids}/${id_cliente}/${tipo_factoring}/${por_vencer}/${Tipo_operacion}`;
     
     location.href=url
   }
