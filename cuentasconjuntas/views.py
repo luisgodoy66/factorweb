@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required, permission_required
 from django.views import generic
-from django.http import HttpResponse, JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse
 # from django.contrib.auth.decorators import login_required, permission_required
 from django.db import transaction
 from django.urls import reverse_lazy
@@ -82,6 +82,13 @@ class CuentasBancariasEdit(SinPrivilegios, generic.UpdateView):
     success_url= reverse_lazy("cuentasconjuntas:listacuentasconjuntas")
     login_url = 'bases:login'
     permission_required="cuentasconjuntas.change_cuentas_bancarias"
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -177,6 +184,13 @@ class DebitoBancarioEdit(SinPrivilegios, generic.UpdateView):
     success_url= reverse_lazy("cuentasconjuntas:listacargospendientes")
     permission_required="cobranzas.change_debitoscuentasconjuntas"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         pk = self.kwargs.get('pk')
@@ -263,6 +277,13 @@ class TansferenciaEdit(SinPrivilegios, generic.UpdateView):
     login_url = 'bases:login'
     permission_required="cuentasconjuntas.change_transferencias"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
     def form_valid(self, form):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         form.instance.empresa = id_empresa.empresa
@@ -288,8 +309,13 @@ def ConfirmarCobranza(request, cobranza_id, tipo_operacion, cuenta_conjunta):
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    cc = Cuentas_bancarias.objects.filter(pk = cuenta_conjunta).first()
+    cc = Cuentas_bancarias.objects\
+        .filter(pk = cuenta_conjunta
+                , empresa = id_empresa.empresa).first()
 
+    if not cc:
+        return HttpResponse("Cuenta conjunta no encontrada")
+    
     sp = Asignacion.objects\
         .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
     
@@ -384,8 +410,11 @@ def DebitoBancarioSinCobranza(request):
 @permission_required('cobranzas.change_debitoscuentasconjuntas', login_url='bases:sin_permisos')
 def EliminarNotaDebito(request, pk):
     resultado = 'OK'
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    ndcc = DebitosCuentasConjuntas.objects.filter(pk = pk).first()
+    ndcc = DebitosCuentasConjuntas.objects\
+        .filter(pk = pk, empresa = id_empresa.empresa).first()
+    
     if ndcc:
         with transaction.atomic():
             ndcc.leliminado = True
@@ -409,8 +438,10 @@ def EliminarNotaDebito(request, pk):
 @permission_required('cuentasconjuntas.change_transferencias', login_url='bases:sin_permisos')
 def EliminarTransferencia(request, pk):
     # la eliminacion es lógica
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     resultado = 'OK'
-    transferencia = Transferencias.objects.filter(pk=pk).first()
+    transferencia = Transferencias.objects\
+        .filter(pk=pk, empresa = id_empresa.empresa).first()
 
     if not transferencia:
         return HttpResponse("Transferencia no encontrada")
@@ -443,7 +474,7 @@ def EliminarTransferencia(request, pk):
 
 @login_required(login_url='/login/')
 @permission_required('cuentasconjuntas.add_transferencias', login_url='bases:sin_permisos')
-def DatosTransferencia(request, pk = None):
+def DatosTransferencia(request):
     template_name = "cuentasconjuntas/datostransferencia_form.html"
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     form = TransferenciasForm(empresa = id_empresa.empresa)

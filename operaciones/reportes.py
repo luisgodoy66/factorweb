@@ -6,7 +6,7 @@ from django.contrib.staticfiles import finders
 from django.templatetags.static import static
 from django_weasyprint import WeasyTemplateResponse
 from django.db.models.functions import Cast, ExtractDay
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db.models import Sum, IntegerField, F, ExpressionWrapper, DateField
 from datetime import datetime, timedelta, date
 # from xhtml2pdf import pisa
@@ -25,15 +25,19 @@ FACTURAS_PURAS = 'F'
 
 def ImpresionAsignacionDesdeSolicitud(request, asignacion_id):
 
-        solicitud = SolicitudModels.Asignacion.objects.filter(id= asignacion_id).first()
-        
-        asgn = Asignacion.objects\
-                .filter(id = solicitud.asignacion).first()
+    solicitud = SolicitudModels.Asignacion.objects.filter(id= asignacion_id).first()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
+    if solicitud.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
+    asgn = Asignacion.objects\
+            .filter(id = solicitud.asignacion).first()
 
-        if asgn:
-                return ImpresionAsignacion(request, asgn.id)
-        else:   
-                return HttpResponse("no encontró asignación ")
+    if asgn:
+            return ImpresionAsignacion(request, asgn.id)
+    else:   
+            return HttpResponse("no encontró asignación ")
 
 def ImpresionAsignacion(request, asignacion_id):
     asignacion = Asignacion.objects\
@@ -42,7 +46,10 @@ def ImpresionAsignacion(request, asignacion_id):
 
     id_empresa = Usuario_empresa.objects\
         .filter(user = request.user).first()
-
+    
+    if asignacion.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     if asignacion.cxtipo==FACTURAS_PURAS:
 
         template_path = 'operaciones/asignacion_facturas_puras_reporte.html'
@@ -118,6 +125,9 @@ def ImpresionLiquidacion(request, solicitud_id, crear_pdf = False):
 
     id_empresa = Usuario_empresa.objects\
         .filter(user = request.user).first()
+
+    if asignacion.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
 
     if asignacion.cxtipo==FACTURAS_PURAS:
 
@@ -330,11 +340,15 @@ def ImpresionFacturasPendientes(request, clientes = None):
     template_path = 'operaciones/detalle_facturaspendientes_reporte.html'
 
     if clientes==None:
-        facturas = Documentos.objects.cartera_pendiente(id_empresa.empresa)
-        cheques_quitados = ChequesAccesorios.objects.facturas_pendiente(id_empresa.empresa)
+        facturas = Documentos.objects\
+            .cartera_pendiente(id_empresa.empresa)
+        cheques_quitados = ChequesAccesorios.objects\
+            .facturas_pendiente(id_empresa.empresa)
     else:
-        facturas = Documentos.objects.cartera_pendiente_cliente(id_empresa.empresa, arr_clientes)
-        cheques_quitados = ChequesAccesorios.objects.facturas_pendiente_cliente(id_empresa.empresa, arr_clientes)
+        facturas = Documentos.objects\
+            .cartera_pendiente_cliente(id_empresa.empresa, arr_clientes)
+        cheques_quitados = ChequesAccesorios.objects\
+            .facturas_pendiente_cliente(id_empresa.empresa, arr_clientes)
 
     totalfacturas = facturas.aggregate(total = Sum('nsaldo'))
     if not totalfacturas['total']: totalfacturas['total']=0
@@ -460,6 +474,9 @@ def ImpresionPagare(request, pagare_id):
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
+    if pagare.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     template_path = 'operaciones/pagare_reporte.html'
 
     cuotas = Pagare_detalle.objects\
@@ -533,6 +550,9 @@ def ImpresionRevisionCartera(request, revision_id, ):
 
     revision = Revision_cartera.objects.filter(id = revision_id).first()
 
+    if revision.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     detalle = Revision_cartera_detalle.objects\
         .filter(revision = revision_id,
                 empresa = id_empresa.empresa,
@@ -573,19 +593,33 @@ def ImpresionAntiguedadCarteraCorte(request, corte_id):
 
     corte = Cortes_historico.objects.filter(id=corte_id).first()
 
-    facturas = Documentos_historico.objects.antigüedad_por_cliente(id_empresa.empresa, corte_id)
-    accesorios = ChequesAccesorios_historico.objects.antigüedad_por_cliente(id_empresa.empresa, corte_id)
-    prot_facturas = Documentos_protestados_historico.objects.antigüedad_por_cliente_facturas(id_empresa.empresa, corte_id)
-    prot_accesorios = Documentos_protestados_historico.objects.antigüedad_por_cliente_accesorios(id_empresa.empresa, corte_id)
-    acc_quitados = Cheques_quitados_historico.objects.antigüedad_por_cliente(id_empresa.empresa, corte_id)
-    pagares = Pagare_detalle_historico.objects.antigüedad_por_cliente(id_empresa.empresa, corte_id)
+    if corte.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
+    facturas = Documentos_historico.objects\
+        .antigüedad_por_cliente(id_empresa.empresa, corte_id)
+    accesorios = ChequesAccesorios_historico.objects\
+        .antigüedad_por_cliente(id_empresa.empresa, corte_id)
+    prot_facturas = Documentos_protestados_historico.objects\
+        .antigüedad_por_cliente_facturas(id_empresa.empresa, corte_id)
+    prot_accesorios = Documentos_protestados_historico.objects\
+        .antigüedad_por_cliente_accesorios(id_empresa.empresa, corte_id)
+    acc_quitados = Cheques_quitados_historico.objects\
+        .antigüedad_por_cliente(id_empresa.empresa, corte_id)
+    pagares = Pagare_detalle_historico.objects\
+        .antigüedad_por_cliente(id_empresa.empresa, corte_id)
 
-    total_facturas = Documentos_historico.objects.antigüedad_cartera(id_empresa.empresa, corte_id)
-    total_accesorios = ChequesAccesorios_historico.objects.antigüedad_cartera(id_empresa.empresa, corte_id)
-    total_protestos = Documentos_protestados_historico.objects.antigüedad_cartera(id_empresa.empresa, corte_id)
-    total_quitados = Cheques_quitados_historico.objects.antigüedad_cartera(id_empresa.empresa, corte_id)
-    total_pagares = Pagare_detalle_historico.objects.antigüedad_cartera(id_empresa.empresa, corte_id)
-
+    total_facturas = Documentos_historico.objects\
+        .antigüedad_cartera(id_empresa.empresa, corte_id)
+    total_accesorios = ChequesAccesorios_historico.objects\
+        .antigüedad_cartera(id_empresa.empresa, corte_id)
+    total_protestos = Documentos_protestados_historico.objects\
+        .antigüedad_cartera(id_empresa.empresa, corte_id)
+    total_quitados = Cheques_quitados_historico.objects\
+        .antigüedad_cartera(id_empresa.empresa, corte_id)
+    total_pagares = Pagare_detalle_historico.objects\
+        .antigüedad_cartera(id_empresa.empresa, corte_id)
+    
     fvm90 = total_facturas['vencido_mas_90'] or 0
     fv90 = total_facturas['vencido_90'] or 0
     fv60 = total_facturas['vencido_60'] or 0
@@ -694,6 +728,10 @@ def ImpresionFacturasPendientesCorte(request, corte_id):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     corte = Cortes_historico.objects.filter(id=corte_id).first()
+
+    if corte.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     totalfacturas=0
     totalquitados=0
 
@@ -734,6 +772,9 @@ def ImpresionAccesoriosPendientesCorte(request, corte_id=None):
 
     corte = Cortes_historico.objects.filter(id=corte_id).first()
 
+    if corte.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     cartera = ChequesAccesorios_historico.objects\
         .cheques_pendientes(id_empresa.empresa, corte_id)
 
@@ -891,11 +932,15 @@ def ImpresionFacturasPendientesDeudores(request, deudores = None):
     template_path = 'operaciones/detalle_facturaspendientesdeudores_reporte.html'
 
     if deudores==None:
-        facturas = Documentos.objects.cartera_pendiente(id_empresa.empresa)
-        cheques_quitados = ChequesAccesorios.objects.facturas_pendiente(id_empresa.empresa)
+        facturas = Documentos.objects\
+            .cartera_pendiente(id_empresa.empresa)
+        cheques_quitados = ChequesAccesorios.objects\
+            .facturas_pendiente(id_empresa.empresa)
     else:
-        facturas = Documentos.objects.cartera_pendiente_deudor(id_empresa.empresa, arr_deudores)
-        cheques_quitados = ChequesAccesorios.objects.facturas_pendiente_deudor(id_empresa.empresa, arr_deudores)
+        facturas = Documentos.objects\
+            .cartera_pendiente_deudor(id_empresa.empresa, arr_deudores)
+        cheques_quitados = ChequesAccesorios.objects\
+            .facturas_pendiente_deudor(id_empresa.empresa, arr_deudores)
 
     totalfacturas = facturas.aggregate(total = Sum('nsaldo'))
     if not totalfacturas['total']: totalfacturas['total']=0

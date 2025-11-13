@@ -7,6 +7,8 @@ from django.db.models import Sum, Q, F, ExpressionWrapper\
 from django.db.models.functions import Cast, ExtractDay, Concat\
     , Floor, Mod, Ceil
 from django.utils.dateparse import parse_date
+from django.db.models import Subquery, OuterRef
+from django.contrib.postgres.aggregates import JSONBAgg
 
 from bases.models import ClaseModelo
 from empresa.models import Clases_cliente, Tasas_factoring, Tipos_factoring, Cuentas_bancarias\
@@ -397,17 +399,17 @@ class Documentos_Manager(models.Manager):
         registros = {}
 
         for cliente in clientes:
-            registros = qs.filter(cxcliente=cliente['cxcliente'])\
-                .values(
-                    'cxcliente',
-                ).annotate(
-                    deudor=F('cxcomprador__cxcomprador__ctnombre'),
-                    documento_negociado=F('ctdocumento'),
-                    vencimiento_str=Cast('dvencimiento', output_field=CharField()),
-                    saldo=Cast('nsaldo', output_field=CharField())
+            registros_cliente = qs.filter(cxcliente=cliente['cxcliente']
+            ).values(
+                'cxcliente',
+            ).annotate(
+                deudor=F('cxcomprador__cxcomprador__ctnombre'),
+                documento_negociado=F('ctdocumento'),
+                vencimiento_str=Cast('dvencimiento', output_field=CharField()),
+                saldo=Cast('nsaldo', output_field=CharField())
             )
+            registros[cliente['cxcliente']] = list(registros_cliente)
 
-        registros_serializables = list(registros)
         return qs.values(
             'cxcliente__cxcliente__ctnombre',
             'cxcliente__linea_factoring__nvalor',
@@ -423,7 +425,11 @@ class Documentos_Manager(models.Manager):
             por_vencer=Sum('nsaldo', filter=Q(dvencimiento__gte=datetime.today())),
             protesto=Value(0, output_field=DecimalField()),
             total=Sum('nsaldo'),
-            datos_json=Value(registros_serializables, output_field=models.JSONField())
+            datos_json=Case(
+                *[When(cxcliente=k, then=Value(v, output_field=models.JSONField())) 
+                  for k, v in registros.items()],
+                default=Value([], output_field=models.JSONField())
+            )
         ).order_by()
 
     def antigüedad_por_deudor(self, id_empresa, id_cliente):
@@ -951,6 +957,7 @@ class ChequesAccesorios_Manager(models.Manager):
         # se usa en impresion de accesorio pendientes
         return self.filter(laccesorioquitado = False, cxestado='A'
                 , leliminado = False, lcanjeado = False
+                , empresa = id_empresa
                 , documento__cxcliente__in = arr_cliente
                 , documento__cxasignacion__cxestado = "P"
                 , documento__cxasignacion__leliminado = False)\
@@ -987,13 +994,14 @@ class ChequesAccesorios_Manager(models.Manager):
                 , leliminado = False, lcanjeado  = False, laccesorioquitado = False
                 , documento__cxasignacion__cxestado = "P"
                 , documento__cxasignacion__leliminado = False
-                , empresa = id_empresa)
+                , empresa = id_empresa
+                )
         # Agrupar los registros por cliente y obtener los datos requeridos
         clientes= qs.values('documento__cxcliente').distinct()
         registros = {}
 
         for cliente in clientes:
-            registros = qs.filter(documento__cxcliente=cliente['documento__cxcliente'])\
+            registros_cliente = qs.filter(documento__cxcliente=cliente['documento__cxcliente'])\
                 .values(
                     'documento__cxcliente',
                 ).annotate(
@@ -1002,7 +1010,7 @@ class ChequesAccesorios_Manager(models.Manager):
                     vencimiento_str=Cast('dvencimiento', output_field=CharField()),
                     saldo=Cast('ntotal', output_field=CharField())
             )
-        registros_serializables = list(registros)
+            registros[cliente['documento__cxcliente']] = list(registros_cliente)
 
         return qs.values('documento__cxcliente__cxcliente__ctnombre',
                     'documento__cxcliente__linea_factoring__nvalor',
@@ -1020,7 +1028,11 @@ class ChequesAccesorios_Manager(models.Manager):
                 por_vencer=Sum('ntotal', filter=Q(dvencimiento__gte=datetime.today())),
                 protesto=Value(0, output_field=DecimalField()),
                 total=Sum('ntotal'),
-                datos_json=Value(registros_serializables, output_field=models.JSONField())
+                datos_json=Case(
+                    *[When(documento__cxcliente=k, then=Value(v, output_field=models.JSONField())) 
+                    for k, v in registros.items()],
+                    default=Value([], output_field=models.JSONField())
+                )
             ) \
             .order_by()
 
@@ -1125,6 +1137,7 @@ class ChequesAccesorios_Manager(models.Manager):
         # se usa en impresion de accesorio pendientes
         return self.filter(laccesorioquitado = False, cxestado='A'
                 , leliminado = False, lcanjeado = False
+                , empresa = id_empresa
                 , documento__cxcomprador__in = arr_deudores
                 , documento__cxasignacion__cxestado = "P"
                 , documento__cxasignacion__leliminado = False)\
@@ -1413,16 +1426,16 @@ class Cheques_quitados_Manager(models.Manager):
         registros = {}
 
         for cliente in clientes:
-            registros = qs.filter(accesorio_quitado__documento__cxcliente=cliente['accesorio_quitado__documento__cxcliente'])\
+            registros_cliente = qs.filter(accesorio_quitado__documento__cxcliente=cliente['accesorio_quitado__documento__cxcliente'])\
                 .values(
                     'accesorio_quitado__documento__cxcliente',
                 ).annotate(
                     deudor=F('accesorio_quitado__documento__cxcomprador__cxcomprador__ctnombre'),
                     documento_negociado=F('accesorio_quitado__documento__ctdocumento'),
-                    vencimiento=Cast('accesorio_quitado__dvencimiento', output_field=CharField()),
+                    vencimiento_str=Cast('accesorio_quitado__dvencimiento', output_field=CharField()),
                     saldo=Cast('nsaldo', output_field=CharField())
             )
-        registros_serializables = list(registros)
+            registros[cliente['accesorio_quitado__documento__cxcliente']] = list(registros_cliente)
 
         return qs.values('accesorio_quitado__documento__cxcliente__cxcliente__ctnombre',
                     'accesorio_quitado__documento__cxcliente__linea_factoring__nvalor',
@@ -1442,7 +1455,11 @@ class Cheques_quitados_Manager(models.Manager):
                 por_vencer=Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__gte=datetime.today())),
                 protesto=Value(0, output_field=DecimalField()),
                 total=Sum('nsaldo'),
-                datos_json=Value(registros_serializables, output_field=models.JSONField())
+            datos_json=Case(
+                *[When(accesorio_quitado__documento__cxcliente=k, then=Value(v, output_field=models.JSONField())) 
+                  for k, v in registros.items()],
+                default=Value([], output_field=models.JSONField())
+            )
             ) \
             .order_by()
 

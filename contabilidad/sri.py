@@ -7,15 +7,23 @@ import io
 from django.shortcuts import redirect, HttpResponse
 from decimal import Decimal
 
+from bases.models import Usuario_empresa
+
 from .models import Impuestos_facturaventa, Items_facturaventa, Factura_venta\
     , Diario_cabecera
 
 def GeneraXMLFactura(request, ids_facturas, ambiente):
     # clave de acceso
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     ids = ids_facturas.split(',')
     for id_factura in ids:
 
-        factura = Factura_venta.objects.get(pk = id_factura)
+        factura = Factura_venta.objects\
+            .get(pk = id_factura, empresa = id_empresa.empresa)
+        if not factura:
+            return HttpResponse("No encontró factura de venta "+ str(id_factura))
+        
         claveacceso = time.strftime('%d%m%Y',time.strptime(str(factura.demision), '%Y-%m-%d')) \
             + '01' +factura.empresa.ctruccompania + ambiente \
             + factura.puntoemision.cxestablecimiento \
@@ -64,7 +72,6 @@ def GeneraXMLFactura(request, ids_facturas, ambiente):
 
         try:
             
-            # return generar_xml(request)
             return bajararchivo(request, tree ,claveacceso+".XML")
         except TypeError as err:
             return HttpResponse("Se ha producido en error en la generación del archivo.{}".format(err))

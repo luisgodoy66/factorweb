@@ -644,16 +644,20 @@ class Documentos_protestados_Manager(models.Manager):
         registros = {}
 
         for cliente in clientes:
-            registros = qs.filter(documento__cxcliente=cliente['documento__cxcliente'])\
+            registros_cliente = qs.filter(documento__cxcliente=cliente['documento__cxcliente'])\
                 .values(
                     'documento__cxcliente',
                 ).annotate(
                     deudor=F('chequeprotestado__cheque__cxparticipante__ctnombre'),
                     documento_negociado=F('documento__ctdocumento'),
-                    vencimiento_str=Cast('chequeprotestado__dprotesto', output_field=CharField()),
+                    vencimiento_str=Concat(
+                        Value('Protestado el: '),
+                        Cast('chequeprotestado__dprotesto', output_field=CharField()),
+                        output_field=CharField()
+                    ),
                     saldo=Cast('nsaldo', output_field=CharField())
             )
-        registros_serializables = list(registros)
+            registros[cliente['documento__cxcliente']] = list(registros_cliente)
 
         return qs.values('documento__cxcliente__cxcliente__ctnombre',
                     'documento__cxcliente__linea_factoring__nvalor',
@@ -670,7 +674,11 @@ class Documentos_protestados_Manager(models.Manager):
                 por_vencer=Value(0, output_field=DecimalField()),
                 ptotesto=Sum('nsaldo'),
                 total=Sum('nsaldo'),
-                datos_json=Value(registros_serializables, output_field=models.JSONField())
+            datos_json=Case(
+                *[When(documento__cxcliente=k, then=Value(v, output_field=models.JSONField())) 
+                  for k, v in registros.items()],
+                default=Value([], output_field=models.JSONField())
+            )
             ) \
             .order_by()
 

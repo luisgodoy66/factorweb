@@ -583,7 +583,7 @@ function generaAnexos(id_asignacion, tipo_cliente){
 
 }
 
-function carteranegociada(url){
+function carteranegociada(url, año_actual='Ultimo año'){
 
     //line chart
   fetchRecuperar(url,function(cartera){
@@ -615,7 +615,7 @@ function carteranegociada(url){
                     ]
                             },
                 {
-                    label: "Último año",
+                    label: año_actual,
                     borderColor: "rgba(0, 123, 255, 0.9)",
                     borderWidth: "1",
                     backgroundColor: "rgba(0, 123, 255, 0.5)",

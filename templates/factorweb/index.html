@@ -65,10 +65,10 @@
                 aria-expanded="false" aria-label="Toggle navigation" >
                     <i class="fa fa-bars"></i>
                 </button>
-                <a class="navbar-brand" href="{% url 'empresa:datosempresa' user.usuario_empresa.get.empresa.id %}">
+                <a class="navbar-brand" href="{% url 'empresa:datosempresa' %}">
                     <!-- <img src="{% static 'factorweb/images/logo1.png' %}" alt="Logo"></a> -->
                     <img src="{{ user.usuario_empresa.get.empresa.ilogolargo.url }}" alt="Logo"></a>
-                <a class="navbar-brand hidden" href="{% url 'empresa:datosempresa' user.usuario_empresa.get.empresa.id %}">
+                <a class="navbar-brand hidden" href="{% url 'empresa:datosempresa'  %}">
                     <!-- <img src="{% static 'factorweb/images/logo2.png' %}" alt="Logo"></a> -->
                     <img src="{{ user.usuario_empresa.get.empresa.ilogocorto.url }}" alt="Logo"></a>
             </div>
@@ -259,7 +259,7 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
                             <i class="menu-icon fa fa-wrench"></i>Empresa</a>
                         <ul class="sub-menu children dropdown-menu">
-                            <li><i class="menu-icon fa fa-building"></i><a href="{% url 'empresa:datosempresa' user.usuario_empresa.get.empresa.id %}">Datos de la empresa</a></li>
+                            <li><i class="menu-icon fa fa-building"></i><a href="{% url 'empresa:datosempresa'  %}">Datos de la empresa</a></li>
                             <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'empresa:listatiposfactoring' %}">Tipos de factoring</a></li>
                             <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'empresa:listatasasfactoring' %}">Tasas de factoring</a></li>
                             <li><i class="menu-icon fa fa-list-ul"></i><a href="{% url 'empresa:listaotroscargos' %}">Otros cargos</a></li>
@@ -290,7 +290,7 @@
                             <li><i class="menu-icon fa fa-whatsapp"></i><a href="{% url 'api:lista_configuraciones_twilio' %}">Twilio</a></li>
                         </ul>
                     </li>
-                    <li><a href="#">V.2.10</a></li>
+                    <li><a href="#">V.2.11</a></li>
                 </ul>
             </div><!-- /.navbar-collapse -->
         </nav>

@@ -272,7 +272,7 @@
                 <a href="{% url 'cobranzas:listacobranzaspendientesliquidar' %}" class="btn btn-danger btn-sm ">
                     <i class="fa fa-ban"></i> Cancelar
                 </a>
-                <button type="button" onclick="LiquidarCobranza()" class="btn btn-primary btn-sm">
+                <button type="button" onclick="LiquidarCobranza()" id="btnAceptar" class="btn btn-primary btn-sm">
                     <i class="fa fa-dot-circle-o"></i> Aceptar
                 </button>
             </div>
@@ -306,11 +306,6 @@ const cliente = "{{ cliente }}"
 const tipo_factoring = "{{ tipo_factoring }}"
 const total_cargos_operativos = '{{ total_cargos|floatformat:"2u" }}'
 const errorprevio = '{{error}}'
-if (errorprevio != ""){
-    alert(errorprevio)
-    window.close();
-    window.history.back();
-}
 var neto = '{{ neto|floatformat:"2u" }}'
 var iva = '{{ total_iva|floatformat:"2u" }}'
 var base_iva_otros = 0
@@ -320,6 +315,10 @@ var $tableotros = jQuery('#table_otros')
 
 window.onload= function(){
 
+    if (errorprevio != ""){
+        alert(errorprevio)
+        document.getElementById('btnAceptar').disabled = true;
+    }
     // para cargar la data en la tabla se necesita convertir, se usa JSON.parse
     data = JSON.parse(cargostxt)
 

@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
-from django.http import HttpResponse, JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db import transaction
 from django.urls import reverse_lazy
@@ -134,6 +134,8 @@ class CobranzasDocumentosView(SinPrivilegios, generic.FormView):
     # los pasa al html para que se pasen al js que carga el detalle
     def get_context_data(self, **kwargs):
 
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        
         docs = self.kwargs.get('ids_documentos')
         total_cartera=self.kwargs.get('total_cartera')
         forma_cobro=self.kwargs.get('forma_cobro')
@@ -197,7 +199,6 @@ class CobranzasDocumentosView(SinPrivilegios, generic.FormView):
         context["deudor"] = comprador if un_solo_deudor == "Si" else None
         context["Anticipa100"] = tipofactoring.lanticipatotalnegociado if tipofactoring else False
 
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -391,6 +392,13 @@ class MotivoProtestoEdit(SinPrivilegios, generic.UpdateView):
     form_class = MotivoProtestoForm
     success_url= reverse_lazy("cobranzas:listamotivosprotesto")
     permission_required="operaciones.change_motivos_protesto_maestro"
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -831,6 +839,9 @@ class GestionDeCobro(SinPrivilegios, generic.TemplateView):
         
         gc = Gestion_cobro.objects\
             .filter(pk = self.kwargs.get('pk')).first()
+        
+        if gc.empresa != id_empresa.empresa:
+            raise Http404("No tiene permisos para editar este registro")
 
         ppmp = Documentos_detalle.objects\
             .promedio_ponderado_demora(gc.revision_cartera_cliente.cxcliente.id)
@@ -858,13 +869,17 @@ class LiquidacionEnCero(SinPrivilegios, generic.TemplateView):
     permission_required="cobranzas.view_documentos_cabecera"
 
     def get_context_data(self, **kwargs):
-        context = super(LiquidacionEnCero, self).get_context_data(**kwargs)
         id_empresa = Usuario_empresa.objects\
             .filter(user = self.request.user).first()
-        sp = Asignacion.objects\
-            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         cliente_id = self.kwargs.get('id_cliente')
         cliente = Datos_generales.objects.filter(id = cliente_id).first()
+
+        if cliente.empresa != id_empresa.empresa:
+            raise Http404("No tiene permisos para editar este registro")
+
+        context = super(LiquidacionEnCero, self).get_context_data(**kwargs)
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         context['documentos'] = self.kwargs.get('ids')
         context['tipo_factoring'] = self.kwargs.get('tipo_factoring')
@@ -889,6 +904,9 @@ def CobranzaPorCondonar(request,pk, tipo_operacion):
     else:
         operacion = Recuperaciones_cabecera.objects.filter(pk=pk).first()
         
+    if operacion.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     contexto={"operacion": operacion
         , "tipo_operacion": tipo_operacion
         ,'solicitudes_pendientes': sp
@@ -997,6 +1015,7 @@ def DetalleDocumentosFacturasPuras(request, ids_documentos):
     arr_acc = []
     arr_fac = []
     tempBlogs = []
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     ids = ids_documentos.split(',')
     for id in ids:
@@ -1005,12 +1024,16 @@ def DetalleDocumentosFacturasPuras(request, ids_documentos):
         else:
             arr_fac.append(id)
 
-    documentos = Documentos.objects.filter(id__in = arr_fac, leliminado = False)
+    documentos = Documentos.objects\
+        .filter(id__in = arr_fac, leliminado = False
+                , empresa = id_empresa.empresa)
     
     for id in range(len(documentos)):
         tempBlogs.append(GeneraListaDocumentosSeleccionadosOutput(documentos[id])) # Converting `QuerySet` to a Python Dictionary
 
-    quitados = ChequesAccesorios.objects.filter(id__in = arr_acc, leliminado = False)
+    quitados = ChequesAccesorios.objects\
+        .filter(id__in = arr_acc, leliminado = False
+                , empresa = id_empresa.empresa)
 
     for i in range(len(quitados)):
         tempBlogs.append(GeneraListaAccesoriosQuitadosSeleccionadosOutput(quitados[i])) 
@@ -1210,7 +1233,10 @@ def DepositoCheques(request, ids_cheques, total_cartera, cuenta_destino
 
     if request.method =='GET':
 
-        result = (ChequesAccesorios.objects.filter(id__in = ids_cheques.split(','))
+        result = (ChequesAccesorios.objects\
+                  .filter(id__in = ids_cheques.split(',')
+                          , leliminado = False
+                          , empresa = id_empresa.empresa)
             .values( 'documento__cxcliente__cxcliente__ctnombre')
             .annotate(pcount=Count('documento'))
             .annotate(total = Sum('ntotal'))
@@ -1558,6 +1584,8 @@ def GeneraListaCobranzasJSONSalida(transaccion):
 # distincion de la tabla de recuperaciones
 def ConfirmarCobranza(request, cobranza_id, tipo_operacion):
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
     if tipo_operacion=='C':
         cobr = Documentos_cabecera.objects.filter(pk=cobranza_id).first()
     else:
@@ -1566,6 +1594,9 @@ def ConfirmarCobranza(request, cobranza_id, tipo_operacion):
     if not cobr:
         return HttpResponse("Cobranza no encontrada")
 
+    if cobr.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     if request.method=="GET":
         # cobr.cxusuarioatencion = request.user.id
         cobr.cxestado = "C"
@@ -1575,6 +1606,7 @@ def ConfirmarCobranza(request, cobranza_id, tipo_operacion):
 
 def DetalleDocumentosCobrados(request, cobranza_id, tipo_operacion):
     # filtrar los documentos correspondientes a la lista pasada
+    tempBlogs = []
 
     if tipo_operacion=='C':
         detalle = Documentos_detalle.objects\
@@ -1582,8 +1614,10 @@ def DetalleDocumentosCobrados(request, cobranza_id, tipo_operacion):
     else:
         detalle = Recuperaciones_detalle.objects\
             .filter(recuperacion = cobranza_id, leliminado = False)
-    tempBlogs = []
 
+    if detalle.empresa != Usuario_empresa.objects.filter(user = request.user).first().empresa:
+        return redirect("bases:sin_permisos")
+    
     # Converting `QuerySet` to a Python Dictionary
     for i in range(len(detalle)):
         if tipo_operacion=='C':
@@ -1645,6 +1679,14 @@ def DatosDiasACondonar(request, id, dias, cobranza_id, tipo_operacion):
     sp = Asignacion.objects\
         .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
     
+    if tipo_operacion =='C':
+        cobro = Documentos_detalle.objects.filter(pk=id).first()
+    else:
+        cobro = Recuperaciones_detalle.objects.filter(pk=id).first()
+
+    if cobro.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     contexto={
         "id": id,
         "dias":dias,
@@ -1652,15 +1694,11 @@ def DatosDiasACondonar(request, id, dias, cobranza_id, tipo_operacion):
         "tipo_operacion": tipo_operacion,
         "solicitudes_pendientes":sp
     }
+    
     if request.method =="POST":
 
         dias = request.POST.get("dias_id")
         
-        if tipo_operacion =='C':
-            cobro = Documentos_detalle.objects.filter(pk=id).first()
-        else:
-            cobro = Recuperaciones_detalle.objects.filter(pk=id).first()
-
         if cobro:
             cobro.ndiasacondonar = dias
             cobro.cxusuariocondona = request.user
@@ -1680,6 +1718,7 @@ def DatosDiasACondonar(request, id, dias, cobranza_id, tipo_operacion):
 def ReversaConfirmacionCobranza(request, cobranza_id, tipo_operacion):
     # la eliminacion es lógica
     # debe devolver: OK si esta bien
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     if tipo_operacion =='C':
         cobr = Documentos_cabecera.objects.filter(pk=cobranza_id).first()
@@ -1693,7 +1732,9 @@ def ReversaConfirmacionCobranza(request, cobranza_id, tipo_operacion):
             return HttpResponse("Recuperación no encontrada")
         operacion = cobr.cxrecuperacion
 
-
+    if cobr.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     if request.method=="GET":
         cobr.cxestado = "A"
         cobr.save()
@@ -1849,6 +1890,7 @@ def Liquidacion(request, tipo_operacion):
          ,pnbajas ,pnotros ,pnneto,pnbaseiva ,pnporcentajeiva ,pniva ,psinstruccionpago
          ,nusuario ,padocumentos, pjcobranzas, tipo_operacion, pjotroscargosnooperativos
          ,pndescuentodecarteravencido, base_noiva))
+    print(resultado)
     return HttpResponse(resultado)
 
 @login_required(login_url='/login/')
@@ -1861,6 +1903,12 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
     id_empresa = Usuario_empresa.objects\
         .filter(user = request.user).first()
     
+    liquidacion = Liquidacion_cabecera.objects\
+        .filter(pk=pk).first()
+
+    if liquidacion.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     cliente = Datos_generales.objects\
         .filter(pk=cliente_ruc).first()
     
@@ -1870,8 +1918,6 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
     cuenta_transferencia = Cuenta_transferencia\
         .objects.cuenta_default(cliente_ruc).first()
     
-    liquidacion = Liquidacion_cabecera.objects.filter(pk=pk).first()
-
     if request.method=="GET":
         form_submitted = False
 
@@ -2047,11 +2093,15 @@ def GeneraListaProtestosPendientesJSONSalida(doc):
     return output
 
 def DetalleDocumentosProtesosJSON(request, ids_protestos):
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
+
     # filtrar los documentos correspondientes a la lista pasada
     documentos = Documentos_protestados.objects\
         .filter(chequeprotestado__in = ids_protestos.split(',')
-                , leliminado = False)
-    
+                , leliminado = False
+                , empresa = id_empresa.empresa)
+
     tempBlogs = []
 
     # Converting `QuerySet` to a Python Dictionary
@@ -2223,12 +2273,14 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
         # obtener la lista de cobranzas, puede ser recuoeracion
         if tipo_operacion=='R':
             lista_cobranzas = Recuperaciones_cabecera.objects\
-                .filter(id__in = ids_cobranzas.split(','))
+                .filter(id__in = ids_cobranzas.split(',')
+                        , empresa = id_empresa.empresa)
             nombre_cliente = lista_cobranzas[0].cxcliente.cxcliente.ctnombre
             id_cliente = lista_cobranzas[0].cxcliente.id
         elif tipo_operacion=='C':
             lista_cobranzas = Documentos_cabecera.objects\
-                .filter(id__in = ids_cobranzas.split(','))
+                .filter(id__in = ids_cobranzas.split(',')
+                        , empresa = id_empresa.empresa)
             nombre_cliente = lista_cobranzas[0].cxcliente.cxcliente.ctnombre
             id_cliente = lista_cobranzas[0].cxcliente.id
         else:
@@ -2298,7 +2350,9 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
                     codigo_operacion = cobranza.cxcobranza
                     # puede estar cobrando un cheque quitado lo que lo convierte en accesorio
                     accesorios = (cobranza.cxformapago == "DEP" 
-                                  or (hasattr(documento_cobrado, 'accesorio') and documento_cobrado.accesorio))
+                                  or (hasattr(documento_cobrado, 'accesorio') and documento_cobrado.accesorio)
+                                  or (hasattr(documento_cobrado, 'accesorioquitado') and documento_cobrado.accesorioquitado)
+                                  )
                     base_bajas=documento_cobrado.nvalorbaja
                     base_retenciones = documento_cobrado.nretenciones
 
@@ -2687,6 +2741,14 @@ def GeneraOtroCargoJSONSalida(id_cargo, nombre_cargo, fecha,  valor
 @permission_required('cobranzas.change_liquidacion_cabecera', login_url='bases:sin_permisos')
 def ReversaLiquidacion(request, pid_liquidacion):
     # # ejecuta un store procedure 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    liquidacion = Liquidacion_cabecera.objects\
+        .filter(id = pid_liquidacion)\
+            .first()
+    if liquidacion.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     nusuario = request.user.id
     resultado=enviarPost("CALL uspReversaLiquidarCobranzas( {0},{1},'')"
         .format(pid_liquidacion, nusuario))
@@ -2732,7 +2794,7 @@ def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
                 , 'id', 'cxcuentatransferencia','nsobrepago'
                 , 'lcontabilizada'
                 )\
-                    .annotate(tipo=RawSQL("select 'C'",''))
+            .annotate(tipo=RawSQL("select 'C'",''))
         
         recuperaciones = Recuperaciones_cabecera.objects\
             .filter(empresa = id_empresa.empresa)\
@@ -2745,7 +2807,7 @@ def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
                 , 'id', 'cxcuentatransferencia','nsobrepago'
                 , 'lcontabilizada'
                 )\
-                    .annotate(tipo=RawSQL("select 'R'",''))
+            .annotate(tipo=RawSQL("select 'R'",''))
     else:
 
         cobranzas = Documentos_cabecera.objects\
@@ -2872,9 +2934,14 @@ def GeneraListaNotasDeDebitoPendientesJSONSalida(transaccion):
     return output
 
 def DetalleNotasDebitoPendientesJSON(request, ids_documentos):
+    id_empresa = Usuario_empresa.objects\
+        .filter(user=request.user).first()
+
     # filtrar los documentos correspondientes a la lista pasada
     documentos = Notas_debito_cabecera.objects\
-        .filter(id__in = ids_documentos.split(','), leliminado = False)
+        .filter(id__in = ids_documentos.split(',')
+                , leliminado = False
+                , empresa = id_empresa.empresa)
     
     tempBlogs = []
 
@@ -3201,11 +3268,21 @@ def ObtenerOtrosCargosDeDocumento(id_documento, listaotroscargos):
 
 @login_required(login_url='/login/')
 @permission_required('operaciones.change_cheques_protestados', login_url='bases:sin_permisos')
-def ReversaProtesto(request, id_cobranza,tipo_operacion,id_protesto, cobranza
+def ReversaProtesto(request, id_cobranza, tipo_operacion, id_protesto, cobranza
                     , cliente_id, factoring_id):
     # # ejecuta un store procedure 
+    id_empresa = Usuario_empresa.objects\
+        .filter(user=request.user).first()
+
     nusuario = request.user.id
 
+    protesto = Cheques_protestados.objects\
+        .filter(id = id_protesto).first()
+    if not protesto:
+        return HttpResponse("El protesto indicado no existe")
+    if protesto.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+        
     resultado=enviarPost("CALL uspReversaProtesto( '{0}',{1},{2},'{3}',{4}\
         ,{5},{6},'')"
     .format(tipo_operacion,id_cobranza,id_protesto, cobranza,cliente_id
@@ -3218,8 +3295,14 @@ def ReversaProtesto(request, id_cobranza,tipo_operacion,id_protesto, cobranza
 def CanjeDeCheque(request, cheque_id, cliente_id, deudor_id):
     template_path = 'cobranzas/datoscanjecheque_modal.html'
 
-    cliente = Datos_generales.objects.filter(pk = cliente_id).first()
-    comprador = Datos_compradores.objects.filter(pk = deudor_id).first()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
+    cliente = Datos_generales.objects\
+        .filter(pk = cliente_id
+                , empresa = id_empresa.empresa).first()
+    comprador = Datos_compradores.objects\
+        .filter(pk = deudor_id
+        , empresa = id_empresa.empresa).first()
 
     cuentas = Cuentas_bancarias\
         .objects.filter(cxparticipante = cliente.cxcliente.id \
@@ -3238,8 +3321,6 @@ def CanjeDeCheque(request, cheque_id, cliente_id, deudor_id):
         'cliente_id':cliente_id,
         'deudor_id':deudor_id,
         }
-    
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     
     if request.method =='POST':
 
@@ -3314,23 +3395,25 @@ def CanjeDeCheque(request, cheque_id, cliente_id, deudor_id):
 def QuitarAccesorio(request, cheque_id, cliente_id):
     template_path = 'cobranzas/datosquitaraccesorio_modal.html'
 
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
+    cheque = ChequesAccesorios.objects.filter(id = cheque_id).first()
+    if cheque.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     context={
         'cheque':cheque_id,
         'cliente_ruc':cliente_id,
         }
     
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-    
     if request.method =='POST':
 
         with transaction.atomic():
 
-            cheque = ChequesAccesorios.objects.filter(id = cheque_id).first()
-
             # registrar quitada con el motivo
             motivo  = request.POST.get('motivo')
             cliente = Datos_generales.objects.filter(id = cliente_id).first()
-            
+            # nota: debería buscar el cliente en los datos del cheque
             quitado = Cheques_quitados(
                 cxcliente = cliente,
                 nsaldo = cheque.ntotal,
@@ -3467,9 +3550,15 @@ def DetalleCargosAmpliacionPlazo(request, ids, tipo_asignacion, fecha_corte
             else:
                 arr_fac.append(id)
 
-        documentos = Documentos.objects.filter(id__in=arr_fac)
+        documentos = Documentos.objects\
+            .filter(id__in=arr_fac
+                    , leliminado = False
+                    , empresa = id_empresa.empresa)
     else:
-       documentos = ChequesAccesorios.objects.filter(id__in = ids.split(','))
+       documentos = ChequesAccesorios.objects\
+        .filter(id__in = ids.split(',')
+                , leliminado = False
+                , empresa = id_empresa.empresa)
             
     # calcular cargos
     for i in range(len(documentos)):
@@ -3545,6 +3634,9 @@ def GeneraDetalleCargosAmpliacionPlazoJSON(request, ids, tipo_asignacion):
     arr_acc = []    # estos dos arreglos son
     arr_fac = []    # usados para separar facturas de accesorio quitados
 
+    id_empresa = Usuario_empresa.objects\
+        .filter(user=request.user).first()
+
     if tipo_asignacion==FACTURAS_PURAS:
         ids = ids.split(',')
 
@@ -3554,10 +3646,13 @@ def GeneraDetalleCargosAmpliacionPlazoJSON(request, ids, tipo_asignacion):
             else:
                 arr_fac.append(id)
 
-        documentos = Documentos.objects.filter(id__in=arr_fac)
+        documentos = Documentos.objects\
+            .filter(id__in=arr_fac, leliminado = False
+                    , empresa = id_empresa.empresa)
     else:
         documentos = ChequesAccesorios.objects\
-            .filter(id__in=ids.split(','), leliminado = False)
+            .filter(id__in=ids.split(','), leliminado = False
+                    , empresa = id_empresa.empresa)
 
     tempBlogs = []
     for i in range(len(documentos)):
@@ -3692,12 +3787,15 @@ def SumaCargos(request, ids, tipo_asignacion, gaoa_carga_iva, dc_carga_iva
 # distincion de la tabla de accesorios
 def Prorroga(request, id, tipo_asignacion, vencimiento, numero_factura, porvencer='No'):
     template_path = 'cobranzas/datosdiasprorroga_modal.html'
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     if tipo_asignacion ==FACTURAS_PURAS:
         documento = Documentos.objects.filter(pk=id).first()
     else:
         documento = ChequesAccesorios.objects.filter(pk=id).first()
-
+    if documento.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     context={
         'id':id,
         'tipo_asignacion':tipo_asignacion,
@@ -3750,18 +3848,24 @@ def EditarTasasDocumentoAmpliacionDePlazo(request, documento_id, fecha_ampliacio
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     if tipo_asignacion ==FACTURAS_PURAS:
-        documento = Documentos.objects.filter(pk=documento_id).first()
+        documento = Documentos.objects\
+            .filter(pk=documento_id).first()
         es_facturas_puras = True
         e = {'ntasacomisionap': documento.ntasacomisionap
              , 'ntasadescuentoap': documento.ntasadescuentoap}
         formulario = TasasAPDocumentoForm(e)
     else:
-        documento = ChequesAccesorios.objects.filter(pk=documento_id).first()
+        documento = ChequesAccesorios.objects\
+            .filter(pk=documento_id).first()
         es_facturas_puras = False
         e = {'ntasacomisionap': documento.ntasacomisionap
              , 'ntasadescuentoap': documento.ntasadescuentoap}
         formulario = TasasAPAccesoriosForm(e)
 
+    if documento.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+
+     # obtener el numero de documento
     if request.method=='GET':
         if documento:
             if es_facturas_puras:
@@ -3945,7 +4049,7 @@ def GeneraListaAmpliacionesJSONSalida(transaccion):
 @permission_required('cobranzas.change_documentos_cabecera', login_url='bases:sin_permisos')
 # este privilegio esta enfocado en la tabla de cobranzas y no esta haciendo 
 # distincion de la tabla de recuperaciones ni cobro de cargos
-def ModificarCobranza(request,id, tipo_operacion):
+def ModificarCobranza(request, id, tipo_operacion):
     template_name = "cobranzas/datoscobranza_modal.html"
     fecha_cobro={}
     fecha_deposito={}
@@ -3959,40 +4063,32 @@ def ModificarCobranza(request,id, tipo_operacion):
     
     if tipo_operacion=='C':
         cobranza=Documentos_cabecera.objects.get(pk=id)
-        fecha_cobro = cobranza.dcobranza
-        fecha_deposito = cobranza.ddeposito
-        estado = cobranza.cxestado
-        if cobranza.ldepositoencuentaconjunta:
-            deposito_en_cuentacompartida = True
-            cuenta_compartida = cobranza.cxcuentaconjunta
-        else:
-            deposito_en_cuentacompartida = False
-            cuenta_deposito = cobranza.cxcuentadeposito
-
-        e = {'dcobranza':fecha_cobro,
-             'ddeposito':fecha_deposito,
-             'cxcuentadeposito' : cuenta_deposito,
-             'cxcuentaconjunta': cuenta_compartida,
-             }
-        form_cobranza=CobranzasDocumentosForm(e, empresa = id_empresa.empresa)
-
     else:
         cobranza=Recuperaciones_cabecera.objects.get(pk=id)
-        fecha_cobro = cobranza.dcobranza
-        fecha_deposito = cobranza.ddeposito
-        estado = cobranza.cxestado
-        if cobranza.ldepositoencuentaconjunta:
-            deposito_en_cuentacompartida = True
-            cuenta_compartida = cobranza.cxcuentaconjunta
-        else:
-            deposito_en_cuentacompartida = False
-            cuenta_deposito = cobranza.cxcuentadeposito
 
-        e = {'dcobranza':fecha_cobro,
-             'ddeposito':fecha_deposito,
-             'cxcuentadeposito' : cuenta_deposito,
-             'cxcuentaconjunta': cuenta_compartida,
-             }
+    if cobranza.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
+    fecha_cobro = cobranza.dcobranza
+    fecha_deposito = cobranza.ddeposito
+    estado = cobranza.cxestado
+
+    if cobranza.ldepositoencuentaconjunta:
+        deposito_en_cuentacompartida = True
+        cuenta_compartida = cobranza.cxcuentaconjunta
+    else:
+        deposito_en_cuentacompartida = False
+        cuenta_deposito = cobranza.cxcuentadeposito
+
+    e = {'dcobranza':fecha_cobro,
+            'ddeposito':fecha_deposito,
+            'cxcuentadeposito' : cuenta_deposito,
+            'cxcuentaconjunta': cuenta_compartida,
+            }
+    
+    if tipo_operacion=='C':
+        form_cobranza=CobranzasDocumentosForm(e, empresa = id_empresa.empresa)
+    else:
         form_cobranza=RecuperacionesProtestosForm(e, empresa = id_empresa.empresa)
 
     contexto={
@@ -4057,10 +4153,14 @@ def GeneraListaCuotasPorVencerJSONSalida(doc):
     return output
 
 def DetalleCuotasJSON(request, ids_cuotas):
+    id_empresa = Usuario_empresa.objects\
+        .filter(user=request.user).first()
+
     # filtrar los documentos correspondientes a la lista pasada
     documentos = Pagare_detalle.objects\
         .filter(id__in = ids_cuotas.split(',')
-                , leliminado = False)
+                , leliminado = False
+                , empresa = id_empresa.empresa)
 
     tempBlogs = []
 
@@ -4146,7 +4246,10 @@ def ReversoDesembolsoLiquidacion(request, desembolso_id):
         .filter(user = request.user).first()
     
     desembolso = Desembolsos.objects\
-        .filter(pk=desembolso_id, empresa = id_empresa.empresa).first()
+        .filter(pk=desembolso_id).first()
+    
+    if desembolso.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
     
     liquidacion = Liquidacion_cabecera.objects\
         .filter(pk=desembolso.cxoperacion).first()
@@ -4169,6 +4272,15 @@ def ReversoDesembolsoLiquidacion(request, desembolso_id):
 @login_required(login_url='/login/')
 @permission_required('operaciones.change_ampliaciones_plazo_cabecera', login_url='bases:sin_permisos')
 def ReversaAmpliacion(request, id_nd):
+    id_empresa = Usuario_empresa.objects\
+        .filter(user=request.user).first()
+
+    notadebito = Notas_debito_cabecera.objects\
+        .filter(pk=id_nd).first()
+    
+    if notadebito.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     # # ejecuta un store procedure 
     nusuario = request.user.id
 
@@ -4294,6 +4406,9 @@ def Registra_gestion_cobro(request, tipo_participante, id_detalle_revision):
     revision = Revision_cartera_detalle.objects\
         .filter(id=id_detalle_revision).first()
     
+    if revision.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     cliente = revision.cxcliente
 
     # si existe un registro pendiente o abierto, no se registra la gestion
@@ -4301,6 +4416,7 @@ def Registra_gestion_cobro(request, tipo_participante, id_detalle_revision):
         .filter(
             revision_cartera_cliente__cxcliente=cliente,
             cxtipoparticipante=tipo_participante,
+            leliminado=False,
             cxestado__in=['P', 'A']).exists():
         return HttpResponse("Ya existe una gestión pendiente o abierta para este cliente.", status=400) 
 
@@ -4312,13 +4428,15 @@ def Registra_gestion_cobro(request, tipo_participante, id_detalle_revision):
     gestion.save()
     return HttpResponse("OK")  # Retorna una respuesta HTTP simple
 
-def GeneraLiquidacionEnCero(request,ids_documentos, tipo_factoring,
+def GeneraLiquidacionEnCero(request, ids_documentos, tipo_factoring,
                             cliente_id, fecha_cobro, tipo_operacion='Cobranza'):
     arr_acc = []
     arr_fac = []
     detalle_cobranza = []
     cabecera_cobranza = []
     lista_documentos = {}
+    id_empresa = Usuario_empresa.objects\
+        .filter(user=request.user).first()
 
     ids = ids_documentos.split(',')
     for id in ids:
@@ -4344,13 +4462,15 @@ def GeneraLiquidacionEnCero(request,ids_documentos, tipo_factoring,
         
         # Crear los registros de la única cobranza para todos los documentos
         facturas = Documentos.objects\
-            .filter(id__in=arr_fac)\
+            .filter(id__in=arr_fac
+                    , empresa = id_empresa.empresa)\
             .values('id', 'nsaldo', 
                     'nporcentajeanticipo')\
             .annotate(accesorio_quitado=RawSQL('SELECT 0',''))
         
         quitados = ChequesAccesorios.objects\
-            .filter(id__in = arr_acc, leliminado = False)\
+            .filter(id__in = arr_acc, leliminado = False
+                    , empresa = id_empresa.empresa)\
             .values('id', 'chequequitado__nsaldo', 
                     'nporcentajeanticipo', 
                     'chequequitado')
@@ -4397,6 +4517,7 @@ def GeneraLiquidacionEnCero(request,ids_documentos, tipo_factoring,
             facturas = Documentos_protestados.objects\
                 .filter(chequeprotestado=protest
                         , accesorio__isnull = True
+                        , empresa = id_empresa.empresa
                         )\
                 .values()\
                 .annotate(id = F('documento__id'),
@@ -4409,6 +4530,7 @@ def GeneraLiquidacionEnCero(request,ids_documentos, tipo_factoring,
             accesorios = Documentos_protestados.objects\
                 .filter(chequeprotestado=protest
                         , accesorio__isnull = False
+                        , empresa = id_empresa.empresa
                         )\
                 .values()\
                 .annotate(id = F('accesorio__id'),
@@ -4485,6 +4607,8 @@ def DetalleDocumentosFacturasPurasLiquidacionEnCero(request, ids_documentos):
     arr_acc = []
     arr_fac = []
     tempBlogs = []
+    id_empresa = Usuario_empresa.objects\
+        .filter(user=request.user).first()
 
     ids = ids_documentos.split(',')
     for id in ids:
@@ -4493,12 +4617,16 @@ def DetalleDocumentosFacturasPurasLiquidacionEnCero(request, ids_documentos):
         else:
             arr_fac.append(id)
 
-    documentos = Documentos.objects.filter(id__in = arr_fac, leliminado = False)
+    documentos = Documentos.objects\
+        .filter(id__in = arr_fac, leliminado = False
+                , empresa = id_empresa.empresa)
     
     for id in range(len(documentos)):
         tempBlogs.append(GeneraListaDocumentosSeleccionadosLiquidacionEnCeroOutput(documentos[id])) # Converting `QuerySet` to a Python Dictionary
 
-    quitados = ChequesAccesorios.objects.filter(id__in = arr_acc, leliminado = False)
+    quitados = ChequesAccesorios.objects\
+        .filter(id__in = arr_acc, leliminado = False
+                , empresa = id_empresa.empresa)
 
     for i in range(len(quitados)):
         tempBlogs.append(GeneraListaAccesoriosQuitadosSeleccionadosLiquidacionEnCeroOutput(quitados[i])) 
@@ -4586,10 +4714,14 @@ def get_motivo_responsabilidad(request, motivo_id):
         return JsonResponse({'error': 'Motivo no encontrado'}, status=404)
 
 def DetalleDocumentosProtestosLiquidacionEnCero(request, ids_protestos):
+    id_empresa = Usuario_empresa.objects\
+        .filter(user=request.user).first()
+
     # filtrar los documentos correspondientes a la lista pasada
     documentos = Documentos_protestados.objects\
         .filter(chequeprotestado__in = ids_protestos.split(',')
-                , leliminado = False)
+                , leliminado = False
+                , empresa = id_empresa.empresa)
     
     tempBlogs = []
 

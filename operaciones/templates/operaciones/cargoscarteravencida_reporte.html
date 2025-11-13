@@ -79,7 +79,7 @@
                             <th>DC vencido</th>
                             <th>GAO adicional</th>
                             <th>IVA</th>
-                            <th>Deuda</th>
+                            <!-- <th>Deuda</th> -->
                         </thead>
                         <tbody>
                             <tr></tr>
@@ -103,7 +103,7 @@
                                     <td class="numero">{{ item.dc_vencido|floatformat:"2g" }}</td>
                                     <td class="numero">{{ item.gao_adicional|floatformat:"2g" }}</td>
                                     <td class="numero">{{ item.iva|floatformat:"2g" }}</td>
-                                    <td class="numero">{{ item.deuda|floatformat:"2g" }}</td>
+                                    <!-- <td class="numero">{{ item.deuda|floatformat:"2g" }}</td> -->
                                 </tr>
                                 {% endfor %}
                                 <tr></tr>
@@ -116,7 +116,7 @@
                                 <td class="numero"><h4>{{ total_dc_vencido|floatformat:"2g" }}</h4></td>
                                 <td class="numero"><h4>{{ total_gao_adicional|floatformat:"2g" }}</h4></td>
                                 <td class="numero"><h4>{{ total_iva|floatformat:"2g" }}</h4></td>
-                                <td class="numero"><h4>{{ total_deuda|floatformat:"2g" }}</h4></td>
+                                <!-- <td class="numero"><h4>{{ total_deuda|floatformat:"2g" }}</h4></td> -->
                             </tr>
                         </tbody>
                     </table>

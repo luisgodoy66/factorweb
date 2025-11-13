@@ -29,7 +29,9 @@ def ImpresionDiarioContable(request, diario_id):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     # tomar el codigo de asignacion grabado en la solicitud
-    diario = Diario_cabecera.objects.filter(id= diario_id).first()
+    diario = Diario_cabecera.objects\
+        .filter(id= diario_id
+                , empresa = id_empresa.empresa).first()
     
     if not diario:
         return HttpResponse("no encontró diario contable "+ str(diario_id))
@@ -74,7 +76,8 @@ def ImpresionComprobanteEgreso(request, diario_id):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     # tomar el codigo de asignacion grabado en la solicitud
-    diario = Diario_cabecera.objects.filter(id= diario_id).first()
+    diario = Diario_cabecera.objects\
+        .filter(id= diario_id, empresa = id_empresa.empresa).first()
     
     if not diario:
         return HttpResponse("no encontró diario contable")

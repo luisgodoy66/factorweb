@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.http import HttpResponse
 from django.template.loader import get_template
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db.models import Sum, Case, When, FloatField, DecimalField, Q
 from django.contrib.staticfiles import finders
 from django.templatetags.static import static
@@ -43,6 +43,9 @@ def ImpresionCobranzaCartera(request, cobranza_id):
     if not cobranza:
         return HttpResponse("no encontró cobranza ")
 
+    if cobranza.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     # obtener el detalle de la cobranza ordenado por comprador
     detalle = Documentos_detalle.objects\
         .filter(cxcobranza = cobranza_id, leliminado = False)\
@@ -136,6 +139,10 @@ def ImpresionLiquidacion(request, liquidacion_id):
 
     liquidacion = Liquidacion_cabecera.objects.filter(pk = liquidacion_id).first()
 
+    if liquidacion.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
+    # detalle de cargos de la liquidacion
     detalle_cargos = Liquidacion_detalle.objects.filter(liquidacion = liquidacion)\
         .order_by('cargo__cxmovimiento__cxmovimiento')
 
@@ -273,6 +280,9 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
     if not recuperacion:
         return HttpResponse("no encontró cobranza ")
 
+    if recuperacion.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     # cuando la forma de pago es DEP es deposito de accesorios y de ahí DebitosCuentasConjuntase
     # tomar la fecha de vencimiento
     detalle = Recuperaciones_detalle.objects\
@@ -438,7 +448,10 @@ def ImpresionCobranzaCargos(request, cobranza_id):
     
     if not cobranza:
         return HttpResponse("no encontró cobranza ")
-
+    if cobranza.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
+    # obtener el detalle de la cobranza ordenado por comprador
     detalle = Cargos_detalle.objects\
         .filter(cxcobranza = cobranza_id)
 
@@ -547,6 +560,9 @@ def ImpresionAmpliacionDePlazo(request, ampliacion_id):
     ampliacion = Notas_debito_cabecera.objects\
         .filter(pk = ampliacion_id).first()
 
+    if ampliacion.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     ap = Ampliaciones_plazo_cabecera.objects\
         .filter(pk = ampliacion.operacion).first()
 
@@ -826,7 +842,9 @@ def ImpresionCobranzaCuota(request, cobranza_id):
     
     if not cobranza:
         return HttpResponse("no encontró cobranza ")
-
+    if cobranza.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     # cuando la forma de pago es DEP es deposito de accesorios y de ahí debe
     # tomar la fecha de vencimiento
     detalle = Pagare_detalle.objects\
@@ -904,7 +922,11 @@ def ImpresionProtestosPendientesCorte(request, corte_id = None):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
      
     corte = Cortes_historico.objects.filter(id=corte_id).first()
-
+    if not corte:
+        return HttpResponse("no encontró corte histórico ")
+    if corte.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
     protestos = Cheques_protestados_historico.objects\
         .protestos_pendientes(id_empresa.empresa, corte_id)
 

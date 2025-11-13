@@ -8,8 +8,8 @@ from .views import  ClientesView,  DatosClientes, DatosClienteNatural \
     , CuentasBancariasDeudoresView, CuentasBancariasDeudorNew\
     , CuentasBancariasDeudorEdit, ClientesSolicitudesView\
     , EstadoCompradorEdit,CuentasBancariasEdit, CompradorEdit, CompradorNew\
-    , DeClienteAComprador,DatosCuposCompradorNuevo, EliminarCupoComprador
-    # , DatosCompradores\
+    , DeClienteAComprador, EliminarCupoComprador
+    # , DatosCuposCompradorNuevo,DatosCompradores\
 from operaciones.views import DatosOperativosHistoricoView
 
 urlpatterns = [

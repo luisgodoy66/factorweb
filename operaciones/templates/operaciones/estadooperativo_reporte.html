@@ -390,12 +390,12 @@
     <div class="col-xl-6">
         <div class="card">
             <div class="card-header">
-                <strong>Últimos movimientos</strong>
+                <strong>{{cantidad_movimientos}} últimos movimientos</strong>
             </div>
             <small>
                 <div>
                     <table id="tbmovimientos"  class="table table-striped table-bordered"
-                        data-url="{% url 'operaciones:movimientoscliente_json' cliente_id 10 %}"
+                        data-url="{% url 'operaciones:movimientoscliente_json' cliente_id cantidad_movimientos %}"
                         data-id-field="id"
                         >
                         <thead>
@@ -442,7 +442,7 @@
     $tbmovimientos.bootstrapTable({locale:"es-EC"});
 
     antigüedadcartera("/operaciones/antigüedadcarteracliente/"+cliente_id);
-    carteranegociada("/operaciones/carteranegociadacliente/"+cliente_id+"/{{año}}");
+    carteranegociada("/operaciones/carteranegociadacliente/"+cliente_id+"/{{año}}", "{{año}}");
 }    
 </script>
 {% endblock %}

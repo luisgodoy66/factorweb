@@ -5,7 +5,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.views import generic
 from django.db.models import Sum, Count
 from django.contrib.auth.decorators import login_required, permission_required
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.db import transaction
 from django.utils.dateparse import parse_date
 from django.urls import reverse_lazy
@@ -70,6 +70,13 @@ class AsignacionFacturasPurasView(SinPrivilegios, generic.UpdateView):
     success_url=reverse_lazy("solicitudes:listasolicitudes")
     permission_required="solicitudes.change_asignacion"
     
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
@@ -96,6 +103,13 @@ class AsignacionConAccesoriosView(SinPrivilegios, generic.UpdateView):
     form_class = AsignacionesForm
     success_url=reverse_lazy("solicitudes:listasolicitudes")
     permission_required="solicitudes.change_asignacion"
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -199,6 +213,13 @@ class NivelAprobacionEditarView(SinPrivilegios, generic.UpdateView):
     success_url= reverse_lazy("solicitudes:listanivelesaprobacion")
     permission_required="solicitudes.change_niveles_aprobacion"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
     def form_valid(self, form):
 
         form.instance.cxusuariomodifica = self.request.user.id
@@ -256,6 +277,13 @@ class InstruccionDePagoView(SinPrivilegios, generic.UpdateView):
     success_url=reverse_lazy("operaciones:listaasignaciones")
     permission_required="solicitudes.change_asignacion"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
     def form_valid(self, form):
         try:
             form.instance.cxusuariomodifica = self.request.user.id
@@ -310,6 +338,9 @@ def DatosAsignacionConAccesoriosNueva(request):
 def DatosFacturasPuras(request, cliente_id, tipo_factoring_id
                        , asignacion_id=None, doc_id = None):
 
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
+    
     template_name="solicitudes/datosasignacionfacturaspuras_modal.html"
     acepta_vencimiento_en_feriado = False
 
@@ -317,7 +348,9 @@ def DatosFacturasPuras(request, cliente_id, tipo_factoring_id
     acepta_vencimiento_en_feriado = tipoFactoring.lpermitediasferiados
 
     if doc_id:
-       detalle = get_object_or_404(Documentos, pk=doc_id)
+        detalle = get_object_or_404(Documentos, pk=doc_id)
+        if detalle.empresa != id_empresa.empresa:
+           return redirect("bases:sin_permisos")
     else:
         detalle = None
 
@@ -330,9 +363,6 @@ def DatosFacturasPuras(request, cliente_id, tipo_factoring_id
         cliente = Clientes.objects.get(pk=cliente_id)
         ruc = cliente.cxcliente
 
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = request.user).first()
-        
         form_documento = DocumentosForm(request.POST
                                         , instance = detalle
                                         , ruc=ruc
@@ -474,8 +504,6 @@ def DatosFacturasPuras(request, cliente_id, tipo_factoring_id
                     factor.save()
 
             return HttpResponse( asignacion_id)
-            # return redirect("solicitudes:asignacionfacturaspuras_editar"
-            #                 , pk= asignacion_id, )
         else:
             return JsonResponse(form_documento.errors, status=400)
         
@@ -495,6 +523,7 @@ def EliminarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
     # la eliminacion es lógica
     # el documento_id debe ser el id del accesorio cuando es asignacin con accesorios
     # el valor no negociado se encuentra en el total del documento, no debe restar adicional
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     if request.method=="GET":
         # marcar como eliminado el doc o el cheque
@@ -503,11 +532,20 @@ def EliminarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
             asignacion = Asignacion.objects.filter(pk=asignacion_id).first()
 
             if tipo_asignacion==FACTURAS_PURAS:
-                doc = Documentos.objects.filter(pk=documento_id).first()
+                doc = Documentos.objects\
+                    .filter(pk=documento_id
+                            , empresa = id_empresa.empresa).first()
+                if not doc:
+                    return HttpResponse("Documento no encontrado.", status=400)
             else:
                 # si es cheque actualizar el valor no negociado del documento
                 # si es un solo cheque, eliminar la factura
-                doc = ChequesAccesorios.objects.filter(pk = documento_id).first()
+                doc = ChequesAccesorios.objects\
+                    .filter(pk = documento_id
+                            , empresa = id_empresa.empresa).first()
+                if not doc:
+                    return HttpResponse("Documento no encontrado.", status=400)
+                
                 factura =  Documentos.objects.filter(pk=doc.documento.id).first()
 
                 factura.nvalornonegociado += doc.ntotal
@@ -540,6 +578,7 @@ def RecuperarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
     # la eliminacion es lógica
     # el documento_id debe ser el id del accesorio cuando es asignacin con accesorios
     # el valor no negociado se encuentra en el total del documento, no debe restar adicional
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     if request.method=="GET":
         # marcar como eliminado el doc o el cheque
@@ -549,7 +588,11 @@ def RecuperarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
 
             if tipo_asignacion==FACTURAS_PURAS:
                 doc = Documentos.objects\
-                    .filter(pk=documento_id).first()
+                    .filter(pk=documento_id
+                            , empresa = id_empresa.empresa).first()
+                if not doc:
+                    return HttpResponse("Documento no encontrado.", status=400)
+                
                 # verificar si el documento ya existe en operaciones
                 # si existe, marcar como eliminado en la solicitud
                 sc = DocumentosOperaciones.objects\
@@ -564,7 +607,11 @@ def RecuperarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
                 # si es cheque actualizar el valor no negociado del documento
                 # si es un solo cheque, eliminar la factura
                 doc = ChequesAccesorios.objects\
-                    .filter(pk = documento_id).first()
+                    .filter(pk = documento_id
+                            , empresa = id_empresa.empresa).first()
+                if not doc:
+                    return HttpResponse("Documento no encontrado.", status=400)
+                
                 factura =  Documentos.objects\
                     .filter(pk=doc.documento.id).first()
 
@@ -607,12 +654,13 @@ def RecuperarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
 @permission_required('solicitudes.change_documentos', login_url='bases:sin_permisos')
 def EliminarAsignacion(request, asignacion_id):
     # la eliminacion es lógica
-    # debe devolver: 1 si esta bien, 0 si esta mal
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    asgn = Asignacion.objects.filter(pk=asignacion_id).first()
-
+    asgn = Asignacion.objects\
+        .filter(pk=asignacion_id
+                , empresa = id_empresa.empresa).first()
     if not asgn:
-        return HttpResponse(0)
+        return HttpResponse("ERROR: La asignación no existe")
 
     if request.method=="GET":
         # marcar como eliminado/ rechazada
@@ -624,10 +672,13 @@ def EliminarAsignacion(request, asignacion_id):
 
     return HttpResponse("OK")
 
-def DetalleSolicitudFacturasPuras(request, asignacion_id = None):
+def DetalleSolicitudFacturasPuras(request, asignacion_id):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     
     documentos = Documentos.objects\
-        .filter(cxasignacion=asignacion_id)\
+        .filter(cxasignacion=asignacion_id
+                , empresa = id_empresa.empresa
+                )\
             # .filter( leliminado = False)
     
     tempBlogs = []
@@ -663,10 +714,13 @@ def DetalleSolicitudFacturasPurasOutput(doc):
 
 def DetalleSolicitudConAccesorios(request, asignacion_id = None):
     # mostrar incluso los documentos eliminados
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
     documentos = ChequesAccesorios.objects\
         .filter(documento__in=Documentos.objects\
             .filter(cxasignacion=asignacion_id
                     # , leliminado = False
+                    , empresa = id_empresa.empresa
                     ))\
             # .filter( leliminado = False)
     
@@ -913,7 +967,12 @@ def DatosAccesorioEditar(request, accesorio_id = None, tipo_factoring_id = None)
     
     if request.method=='GET':
         if accesorio_id:
-            accesorio = ChequesAccesorios.objects.get(id=accesorio_id)
+            accesorio = ChequesAccesorios.objects\
+                .get(id=accesorio_id
+                     , empresa = id_empresa.empresa)
+            if not accesorio:
+                return HttpResponse("Accesorio no encontrado.", status=400)
+            
             e = {'documento':accesorio.documento
                 , 'cxbanco':accesorio.cxbanco
                 , 'ctcuenta':accesorio.ctcuenta
@@ -1240,7 +1299,11 @@ def GeneraListaSolicitudesJSONSalida(asignacion):
 def RechazarExcesoTemporal(request, exceso_id):
     # la eliminacion es lógica
 
-    exceso = Exceso_temporal.objects.filter(pk=exceso_id).first()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
+    exceso = Exceso_temporal.objects\
+        .filter(pk=exceso_id
+                , empresa = id_empresa.empresa).first()
 
     if not exceso:
         return HttpResponse("No existe el exceso temporal", status=400)
@@ -1264,7 +1327,10 @@ def RechazarExcesoTemporal(request, exceso_id):
 def AceptarExcesoTemporal(request, exceso_id):
     # la eliminacion es lógica
 
-    exceso = Exceso_temporal.objects.filter(pk=exceso_id).first()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    exceso = Exceso_temporal.objects\
+        .filter(pk=exceso_id, empresa = id_empresa.empresa).first()
 
     if not exceso:
         return HttpResponse("No existe el exceso temporal", status=400)
@@ -1279,12 +1345,16 @@ def AceptarExcesoTemporal(request, exceso_id):
     return HttpResponse("OK")
 
 def ImpresionSolicitud(request, solicitud_id, crear_pdf = False):
-    asignacion = Asignacion.objects\
-        .filter(id = solicitud_id).first()
-    documentos = {}
-
     id_empresa = Usuario_empresa.objects\
         .filter(user = request.user).first()
+
+    asignacion = Asignacion.objects\
+        .filter(id = solicitud_id
+                , empresa = id_empresa.empresa).first()
+    if not asignacion:
+        return HttpResponse("Asignación no encontrada.", status=400)
+    
+    documentos = {}
 
     if asignacion.cxtipo==FACTURAS_PURAS:
 

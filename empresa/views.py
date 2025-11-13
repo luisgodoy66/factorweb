@@ -2,7 +2,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required, permission_required
 from django.views import generic
 from django.urls import reverse_lazy
-from django.http import HttpResponse, JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.db.models import Value, CharField, BooleanField, IntegerField
 
 from .models import Tipos_factoring, Tasas_factoring, Clases_cliente\
@@ -85,6 +85,13 @@ class TipoFactoringEdit(SinPrivilegios, generic.UpdateView):
     login_url = 'bases:login'
     permission_required="empresa.change_tipos_factoring"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
@@ -150,6 +157,13 @@ class TasaFactoringEdit(SinPrivilegios, generic.UpdateView):
     success_url= reverse_lazy("empresa:listatasasfactoring")
     login_url = 'bases:login'
     permission_required="empresa.change_tasas_factoring"
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -282,6 +296,13 @@ class CuentaBancariaEdit(SinPrivilegios, generic.UpdateView):
     login_url = 'bases:login'
     permission_required="empresa.change_cuentas_bancarias"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
@@ -354,6 +375,13 @@ class LocalidadesEdit(SinPrivilegios, generic.UpdateView):
     login_url = 'bases:login'
     permission_required="empresa.change_localidades"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
@@ -419,6 +447,13 @@ class PuntoEmisionEdit(SinPrivilegios, generic.UpdateView):
     login_url = 'bases:login'
     permission_required="empresa.change_puntos_emision"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -442,9 +477,10 @@ class DatosEmpresaEdit(SinPrivilegios, generic.UpdateView):
     login_url = 'bases:login'
     permission_required="empresa.change_empresas"
 
-    # def form_valid(self, form):
-    #     form.instance.cxusuariomodifica = self.request.user.id
-    #     return super().form_valid(form)
+    def get_object(self, queryset=None):
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        return Empresas.objects.get(pk=id_empresa.empresa.id)
+
     def form_valid(self, form):
         try:
             form.instance.cxusuariomodifica = self.request.user.id
@@ -526,6 +562,13 @@ class OtroCargoEdit(SinPrivilegios, generic.UpdateView):
     login_url = 'bases:login'
     permission_required="empresa.change_otros_cargos"
   
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)

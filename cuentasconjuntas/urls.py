@@ -2,8 +2,8 @@ from django.urls import path
 from .views import CuentasView, CuentasBancariasNew, CuentasBancariasEdit\
     , CobranzasPorConfirmarView, ConfirmarCobranza, AceptarConfirmacion\
     , CargosPendientesView, DebitoBancarioEdit, DebitoBancarioSinCobranza\
-    , EliminarNotaDebito, TransferenciasView, TansferenciaEdit, DatosTransferencia\
-    , EliminarTransferencia
+    , EliminarNotaDebito, TransferenciasView, TansferenciaEdit\
+    , DatosTransferencia, EliminarTransferencia
 
 urlpatterns = [
     # cobranzas

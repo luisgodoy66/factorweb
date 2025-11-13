@@ -28,8 +28,6 @@ urlpatterns = [
     , name='otrocargo_nuevo'),
     path('otrocargoedit/<movimiento>/<movimiento_id>/<int:pk>',OtroCargoEdit.as_view()
     , name='otrocargo_editar'),
-    # path('otrocargoedit/<nombre>/<id_movimiento>/<id_cargo>',DatosOtroCargo
-    # , name='otrocargo_editar'),
     path('listaclasesparticipantes/',ClasesParticipanteView.as_view()
     , name='listaclasesparticipantes'),
     path('datosclaseparticipante_nueva', ClasesParticipanteNew.as_view()
@@ -47,6 +45,6 @@ urlpatterns = [
     path('puntoemisionnuevo/',PuntoEmisionNew.as_view(), name='puntoemision_nuevo'),
     path('puntoemisioneditar/<int:pk>',PuntoEmisionEdit.as_view()
     , name='puntoemision_editar'),
-    path('datosempresa/<int:pk>',DatosEmpresaEdit.as_view(), name='datosempresa'),
+    path('datosempresa',DatosEmpresaEdit.as_view(), name='datosempresa'),
     path('listaotroscargosjson', OtrosCargosJSON, name='listaotroscargos_json')
 ]

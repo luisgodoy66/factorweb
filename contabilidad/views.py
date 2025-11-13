@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from django.db.models import Q, FilteredRelation, Max, CharField
 from django.db.models.functions import Concat
 from django.db.models.expressions import RawSQL , F, Value
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.db import transaction
 from django.views import generic
 from django.utils.dateparse import parse_date
@@ -92,6 +92,13 @@ class CuentasEdit(SinPrivilegios, generic.UpdateView):
     login_url = 'bases:login'
     permission_required="contabilidad.change_plan_cuentas"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
     def form_valid(self, form):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         form.instance.empresa = id_empresa.empresa
@@ -143,6 +150,13 @@ class CuentasEspecialesEdit(SinPrivilegios, generic.UpdateView):
     success_url= reverse_lazy("contabilidad:listacuentascontables")
     login_url = 'bases:login'
     permission_required="contabilidad.change_cuentas_especiales"
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -222,6 +236,13 @@ class CuentaBancoEdit(SinPrivilegios, generic.UpdateView):
     success_url=reverse_lazy("contabilidad:listacuentasbancos")
     success_message="cuenta modificada satisfactoriamente"
     permission_required="contabilidad.change_cuentas_bancos"
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -305,6 +326,13 @@ class CuentaTipoFactoringEdit(SinPrivilegios, generic.UpdateView):
     success_url=reverse_lazy("contabilidad:listacuentastiposfactoring")
     success_message="cuenta modificada satisfactoriamente"
     permission_required="contabilidad.change_cuentas_tiposfactoring"
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
@@ -690,6 +718,13 @@ class CuentaTasaTipoFactoringEdit(SinPrivilegios, generic.UpdateView):
     success_message="cuenta modificada satisfactoriamente"
     permission_required="contabilidad.change_cuentas_tasasfactoring"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -731,6 +766,13 @@ class CuentaDiferidoTasaTipoFactoringEdit(SinPrivilegios, generic.UpdateView):
     success_message="cuenta modificada satisfactoriamente"
     permission_required="contabilidad.change_cuentas_diferidos"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -771,6 +813,13 @@ class CuentaProvisionTasaTipoFactoringEdit(SinPrivilegios, generic.UpdateView):
     form_class=CuentasProvisionTasaTiposFactoringForm
     success_message="cuenta creada satisfactoriamente"
     permission_required="contabilidad.change_cuentas_provisiones"
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
@@ -1235,6 +1284,13 @@ class CuentaCargoTipoFactoringEdit(SinPrivilegios, generic.UpdateView):
     success_message="cuenta modificada satisfactoriamente"
     permission_required="contabilidad.change_cuentas_cargosfactoring"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
@@ -1375,6 +1431,13 @@ class CuentasReestructuracionEdit(SinPrivilegios, generic.UpdateView):
     login_url = 'bases:login'
     permission_required="contabilidad.change_cuentas_reestructuracion"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
@@ -1442,14 +1505,16 @@ def GenerarFactura(request, pk, tipo, operacion):
         return HttpResponse("no encontró registro de tasa de gao adicional en tabla de tasas de factoring")
 
     if tipo == 'LA':
-        documento_origen = Operacion.objects.get(id=pk)
+        documento_origen = Operacion.objects\
+            .get(id=pk, empresa = id_empresa.empresa)
         valor_gao = documento_origen.ngao
         valor_dc = documento_origen.ndescuentodecartera
         # valor_iva=documento_origen.niva
         desembolso=documento_origen.ddesembolso
 
     if tipo == 'LC':
-        documento_origen = Liquidacion_cabecera.objects.get(id=pk)
+        documento_origen = Liquidacion_cabecera.objects\
+            .get(id=pk, empresa = id_empresa.empresa)
         valor_gao = documento_origen.ngao
         valor_dc = documento_origen.ndescuentodecartera
         valor_dcv = documento_origen.ndescuentodecarteravencido
@@ -1458,16 +1523,21 @@ def GenerarFactura(request, pk, tipo, operacion):
         desembolso=documento_origen.ddesembolso
 
     if tipo == 'AP':
-        documento_origen = Ampliaciones_plazo_cabecera.objects.get(id=pk)
+        documento_origen = Ampliaciones_plazo_cabecera.objects\
+            .get(id=pk, empresa = id_empresa.empresa)
         valor_gaoa = documento_origen.ncomision
         valor_dcv = documento_origen.ndescuentodecartera
         # valor_iva=documento_origen.niva
         desembolso=documento_origen.notadebito.dnotadebito
 
     if tipo == 'CP':
-        documento_origen = Factura_cuota.objects.get(id=pk)
+        documento_origen = Factura_cuota.objects\
+            .get(id=pk, empresa = id_empresa.empresa)
         desembolso=documento_origen.cobranzacuota.cobranza.dcobranza
 
+    if not documento_origen:
+        return HttpResponse("Documento " + str(pk) + " no encontrado.")
+    
     if tipo == 'AP':
         if gao.lcargaiva:
             base_iva = valor_gao
@@ -1533,11 +1603,15 @@ def GenerarFactura(request, pk, tipo, operacion):
     
     return render(request, template_name, contexto)
 
-def ObtenerSecuenciaFactura(request,punto_emision):
+def ObtenerSecuenciaFactura(request, punto_emision):
     success = False
     secuencia = 0
 
-    x = Puntos_emision.objects.filter(pk=punto_emision).first()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    x = Puntos_emision.objects\
+        .filter(pk=punto_emision
+                , empresa = id_empresa.empresa).first()
 
     if x:
         success = True
@@ -1565,14 +1639,18 @@ def GenerarComprobanteEgreso(request, pk, forma_pago, operacion):
     desembolso = Desembolsos.objects.get(id=pk)
 
     if desembolso.cxtipooperacion =='A':
-        documento_origen = Operacion.objects.filter(pk = desembolso.cxoperacion).first()        
+        documento_origen = Operacion.objects\
+            .filter(pk = desembolso.cxoperacion
+                    , empresa = id_empresa.empresa).first()        
     else:
-        documento_origen = Liquidacion_cabecera.objects.filter(pk = desembolso.cxoperacion).first()
-
-    cliente = documento_origen.cxcliente.cxcliente
+        documento_origen = Liquidacion_cabecera.objects\
+            .filter(pk = desembolso.cxoperacion
+                    , empresa = id_empresa.empresa).first()
 
     if not documento_origen:
         return HttpResponse("Documento " + str(desembolso.cxoperacion) + " no encontrado.")
+
+    cliente = documento_origen.cxcliente.cxcliente
 
     # determinar si tipo de factoring de la operacion requiere que se emita la factura en la negociacion
     if desembolso.cxtipooperacion=='A':
@@ -1763,7 +1841,6 @@ def AsientoDiario(request, diario_id = None):
                     , mes = fecha[5:7])\
             .values('empresa')\
         
-        print(mesbloqueado)
         if mesbloqueado:
             return HttpResponse("El mes " + mes + " está bloqueado. No se puede contabilizar el asiento.")
         
@@ -1808,7 +1885,9 @@ def AsientoDiario(request, diario_id = None):
 
                 # nueva = True
             else:
-                diario = Diario_cabecera.objects.filter(pk= diario_id).first()
+                diario = Diario_cabecera.objects\
+                    .filter(pk= diario_id
+                            , empresa = id_empresa.empresa).first()
                 if diario:
 
                     diario.dcontabilizado = fecha
@@ -1886,7 +1965,11 @@ def DatosLineaDiarioEditar(request, detalle_id = None):
     
     if request.method=='GET':
         if detalle_id:
-            detalle = Transaccion.objects.get(id=detalle_id)
+            detalle = Transaccion.objects\
+                .get(id=detalle_id, empresa = id_empresa.empresa)
+            if not detalle:
+                return HttpResponse("Detalle de asiento no encontrado.")
+            
             e = {'cxcuenta':detalle.cxcuenta
                 , 'cxtipo':detalle.cxtipo
                 , 'ctreferencia':detalle.ctreferencia
@@ -2063,8 +2146,14 @@ def GeneraLibroMayorJSONSalida(detalle, saldo):
 @permission_required('contabilidad.change_diario_cabecera', login_url='bases:sin_permisos')
 def ReversarAsiento(request, pk):
     # marcar el detalle de transaccion como la cabecera de aasiento
-    asiento = Diario_cabecera.objects.filter(pk = pk).first()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
+    asiento = Diario_cabecera.objects\
+        .filter(pk = pk, empresa = id_empresa.empresa).first()
+
+    if not asiento:
+        return HttpResponse("Asiento no encontrado.")
+    
     asiento.leliminado = True
     asiento.cxusuarioelimina = request.user.id
     asiento.cxestado="E"
@@ -2169,7 +2258,17 @@ def GeneraListaCobranzasJSONSalida(cobranza):
 
 @login_required(login_url='/login/')
 @permission_required('contabilidad.add_diario_cabecera', login_url='bases:sin_permisos')
-def GenerarAsientosCobranzas(request,ids):
+def GenerarAsientosCobranzas(request, ids):
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    cobranzas = Cobranzas.objects\
+        .filter(id__in = ids.split(',')
+                , lcontabilizada = False
+                , leliminado = False
+                , empresa = id_empresa.empresa)
+    if not cobranzas:
+        return HttpResponse("No hay cobranzas para procesar.")
+    
     resultado=enviarPost("CALL uspGenerarAsientosCobranzas( '{0}',{1},'')"
         .format(ids, request.user.id, ))
 
@@ -2370,7 +2469,15 @@ def GeneraListaProtestosJSONSalida(doc):
 
 @login_required(login_url='/login/')
 @permission_required('contabilidad.add_diario_cabecera', login_url='bases:sin_permisos')
-def GenerarAsientosProtestos(request,ids):
+def GenerarAsientosProtestos(request, ids):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    protestos = Cheques_protestados.objects\
+        .filter(id__in = ids.split(',')
+                , lcontabilizada = False
+                , leliminado = False
+                , empresa = id_empresa.empresa)
+    if not protestos:
+        return HttpResponse("No hay protestos para procesar.")
     resultado=enviarPost("CALL uspGenerarAsientosProtestos( '{0}',{1},'')"
         .format(ids, request.user.id, ))
 
@@ -2421,7 +2528,16 @@ def GeneraListaTransferenciasJSONSalida(doc):
 
 @login_required(login_url='/login/')
 @permission_required('contabilidad.add_diario_cabecera', login_url='bases:sin_permisos')
-def GenerarAsientosTransferencias(request,ids):
+def GenerarAsientosTransferencias(request, ids):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    transferencias = Transferencias.objects\
+        .filter(id__in = ids.split(',')
+                , lcontabilizado = False
+                , leliminado = False
+                , empresa = id_empresa.empresa)
+    if not transferencias:
+        return HttpResponse("No hay transferencias para procesar.")
+    
     resultado=enviarPost("CALL uspGenerarAsientosTransferencias( '{0}',{1},'')"
         .format(ids, request.user.id, ))
 
@@ -2478,7 +2594,16 @@ def GeneraListaRecuperacionesJSONSalida(cobranza):
 
 @login_required(login_url='/login/')
 @permission_required('contabilidad.add_diario_cabecera', login_url='bases:sin_permisos')
-def GenerarAsientosRecuperaciones(request,ids):
+def GenerarAsientosRecuperaciones(request, ids):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    recuperaciones = Recuperaciones_cabecera.objects\
+        .filter(id__in = ids.split(',')
+                , lcontabilizada = False
+                , leliminado = False
+                , empresa = id_empresa.empresa)
+    if not recuperaciones:
+        return HttpResponse("No hay recuperaciones para procesar.")
+    
     resultado=enviarPost("CALL uspGenerarAsientosRecuperaciones( '{0}',{1},'')"
         .format(ids, request.user.id, ))
 
@@ -2514,6 +2639,9 @@ def CargarDetalleAsiento(request, diario_id):
         .filter(diario = diario_id, leliminado = False
                 , empresa = id_empresa.empresa)\
         .order_by('cxcuenta')
+    
+    if not detalle_asiento:
+        return JsonResponse([], safe=False) 
     
     data = list(detalle_asiento\
                 .values('cxcuenta'
@@ -2556,9 +2684,11 @@ def ComprobanteEgreso(request, diario_id = None):
 
     if diario_id:
         diario = Diario_cabecera.objects\
-            .filter(pk = diario_id, empresa = id_empresa.empresa).first()
+            .filter(pk = diario_id
+                    , empresa = id_empresa.empresa).first()
         egreso = Comprobante_egreso.objects\
-            .filter(asiento = diario_id, empresa = id_empresa.empresa).first()
+            .filter(asiento = diario_id
+                    , empresa = id_empresa.empresa).first()
                 
     sp = Asignacion.objects\
         .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
