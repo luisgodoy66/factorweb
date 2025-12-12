@@ -51,6 +51,9 @@
                         <th>Creado el</th>
                         <th>Descripción</th>
                         <th>Realizado por</th>
+                        <th>Valor en facturas</th>
+                        <th>Valor en protestos</th>
+                        <th>Valor en pagarés</th>
                         <!-- <th>Activo</th> -->
                         <th class="all">Acciones</th>
                     </thead>
@@ -60,6 +63,9 @@
                             <td>{{ item.dregistro|date:"Y/m/d H:i:s" }}</td>
                             <td>{{ item }}</td>
                             <td>{{ item.cxusuariocrea }}</td>
+                            <td>{{ item.nvalorfacturas}}</td>
+                            <td>{{ item.nvalorprotestos}}</td>
+                            <td>{{ item.nvalorpagares}}</td>
                             <!-- <td>{{ item.lactivo | yesno:"Si,No" }}</td> -->
                             <td>
                                 <a href="{% url 'operaciones:corte_historico' item.id %}"  title="Cartera"

@@ -2164,6 +2164,9 @@ class Revision_cartera_detalle(ClaseModelo):
 class Cortes_historico(ClaseModelo):
     ctdescripcion = models.CharField(max_length=60)
     lactivo = models.BooleanField(default=True)
+    nvalorfacturas = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    nvalorprotestos = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    nvalorpagares = models.DecimalField(max_digits=15, decimal_places=2, default=0)
 
     def __str__(self):
         return self.ctdescripcion
