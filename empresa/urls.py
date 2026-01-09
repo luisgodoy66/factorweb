@@ -5,7 +5,7 @@ from .views import TiposFactoringView, TipoFactoringNew , TipoFactoringEdit\
     , CuentasBancariasView, CuentaBancariaNew, CuentaBancariaEdit\
     , LocalidadesView, LocalidadesNew, LocalidadesEdit, PuntosEmisionView\
     , PuntoEmisionNew, PuntoEmisionEdit, DatosEmpresaEdit\
-    , OtroCargoEdit, OtroCargoNew\
+    , OtroCargoEdit, OtroCargoNew, TiposEmpresasView, TiposEmpresasNew\
     , OtrosCargosJSON
 # , DatosOtroCargo
 
@@ -47,4 +47,8 @@ urlpatterns = [
     , name='puntoemision_editar'),
     path('datosempresa',DatosEmpresaEdit.as_view(), name='datosempresa'),
     path('listaotroscargosjson', OtrosCargosJSON, name='listaotroscargos_json')
+    , path('listatiposempresas/',TiposEmpresasView.as_view()
+    , name='listatiposempresas'),
+    path('datostipoempresa_nueva', TiposEmpresasNew.as_view()
+    , name="datostipoempresa_nueva"),
 ]

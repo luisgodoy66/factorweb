@@ -2,7 +2,8 @@ from dataclasses import fields
 from django import forms
 
 from .models import Clases_cliente, Datos_participantes, Tipos_factoring, \
-    Tasas_factoring, Cuentas_bancarias, Localidades, Puntos_emision, Otros_cargos
+    Tasas_factoring, Cuentas_bancarias, Localidades, Puntos_emision, \
+    Otros_cargos, Tipos_empresas
 from pais.models import Bancos, Actividades
 from datetime import datetime
 
@@ -263,6 +264,20 @@ class OtroCargoForm(forms.ModelForm):
             , 'lcargaiva':'Carga IVA'
             , 'lactivo':'Activo'
             }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+
+class TiposEmpresasForm(forms.ModelForm):
+    class Meta:
+        model = Tipos_empresas
+
+        fields = [ 'cttipoempresa']
+        labels={'cttipoempresa':'Tipo de empresa'}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

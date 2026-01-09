@@ -6,13 +6,15 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.db.models import Value, CharField, BooleanField, IntegerField
 
 from .models import Tipos_factoring, Tasas_factoring, Clases_cliente\
-    , Cuentas_bancarias, Localidades, Puntos_emision, Otros_cargos
+    , Cuentas_bancarias, Localidades, Puntos_emision, Otros_cargos\
+    , Tipos_empresas, Movimientos_maestro
 from bases.models import Usuario_empresa, Empresas
 from solicitudes.models import Asignacion
-from empresa.models import Movimientos_maestro
+# from empresa.models import Movimientos_maestro
 
 from .forms import CuentaBancariaForm, TipoFactoringForm, TasaFactoringForm\
-    , ClasesParticipantesForm, LocalidadForm, PuntoEmisionForm, OtroCargoForm
+    , ClasesParticipantesForm, LocalidadForm, PuntoEmisionForm\
+    , OtroCargoForm, TiposEmpresasForm
 from bases.forms import EmpresaForm
 
 from bases.views import enviarPost, SinPrivilegios
@@ -599,4 +601,49 @@ def OtrosCargosJSON(request):
     resultado = list(lista)
     print(resultado)
     return HttpResponse(JsonResponse( resultado, safe=False))
+
+class TiposEmpresasView(SinPrivilegios, generic.ListView):
+    model = Tipos_empresas
+    template_name = "empresa/listatiposempresas.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="empresa.view_tipos_empresas"
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Tipos_empresas.objects.filter(leliminado = False
+                                     , empresa = id_empresa.empresa)\
+                                     .order_by("cttipoempresa")
+        return qs
+    
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(TiposEmpresasView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class TiposEmpresasNew(SinPrivilegios, generic.CreateView):
+    model = Tipos_empresas
+    template_name="empresa/datostiposempresas_form.html"
+    form_class=TiposEmpresasForm
+    context_object_name='consulta'
+    success_url= reverse_lazy("empresa:listatiposempresas")
+    login_url = 'bases:login'
+    permission_required="empresa.add_tipos_empresas"
+
+    def form_valid(self, form):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.cxusuariocrea = self.request.user
+        form.instance.empresa = id_empresa.empresa
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(TiposEmpresasNew, self).get_context_data(**kwargs)
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
 

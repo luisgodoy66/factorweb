@@ -6,7 +6,7 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">configuración</a></li>
                     <li><a href="#">Tablas</a></li>
-                    <li><a href="{% url 'empresa:listaclasesparticipantes' %}">Clases de participantes</a></li>
+                    <li><a href="{% url 'empresa:listatiposempresas' %}">tipos de empresas</a></li>
                     <li class="active">editar</li>
                 </ol>
             </div>
@@ -26,17 +26,19 @@
             <div class="card-body card-block">
 
                     <div class="row form-group">
-                        <div class="col-12 col-md-6"><label for="id_cxtipoid" class=" form-control-label">Código</label></div>
+                        <div class="col-12 col-md-6">
+                            <label for="id_cttipoempresa" class=" form-control-label">{{ form.cttipoempresa.label}}</label>
+                        </div>
                         <div class="col col-md-6">
-                            {{ form.cxclase}}
-                            <small class="form-text text-muted">Máximo 3 caracteres</small>
+                            {{ form.cttipoempresa}}
+                            <small class="form-text text-muted">Máximo 60 caracteres</small>
                         </div>
                     </div>  
 
             </div>    
 
             <div class="card-footer">
-                <a href="{% url 'empresa:listaclasesparticipantes' %}" class="btn btn-danger btn-sm">
+                <a href="{% url 'empresa:listatiposempresas' %}" class="btn btn-danger btn-sm">
                     <i class="fa fa-ban"></i> Cancelar
                 </a>
                 <button type="submit" class="btn btn-primary btn-sm">

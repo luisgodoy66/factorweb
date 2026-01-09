@@ -842,9 +842,11 @@ def DatosClienteJuridico(request, cliente_id=None):
     template_name="clientes/datosclientejuridico_form.html"
     contexto={}
     formulario={}
-    datoscliente={}
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-    
+
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
+    datoscliente: Personas_juridicas | None = Personas_juridicas.objects\
+        .filter(cxcliente=cliente_id).first()    
     cliente = Datos_generales.objects\
         .filter(cxcliente=cliente_id).first()
 
@@ -852,150 +854,46 @@ def DatosClienteJuridico(request, cliente_id=None):
         return redirect("bases:sin_permisos")
     
     if request.method=='GET':
+        form_submitted = False
 
-        datoscliente = Personas_juridicas.objects\
-            .filter(cxcliente=cliente_id).first()
         if datoscliente:
-            e={ 
-                'cxcliente':datoscliente.cxcliente,
-                'ctnombrecorto':datoscliente.ctnombrecorto,
-                'cxtipoempresa':datoscliente.cxtipoempresa,
-                'ctcontacto':datoscliente.ctcontacto,
-                'ladministrasocios':datoscliente.ladministrasocios,
-                'ladministraindividual':datoscliente.ladministraindividual,
-                'ctobjetosocial':datoscliente.ctobjetosocial,
-                'cxrepresentante1':datoscliente.cxrepresentante1,
-                'ctrepresentante1':datoscliente.ctrepresentante1,
-                'dvencimientocargorepresentante1':date.isoformat(datoscliente.dvencimientocargorepresentante1),
-                'ctcargorepresentante1':datoscliente.ctcargorepresentante1,
-                'cxestadocivilrepresentante1':datoscliente.cxestadocivilrepresentante1,
-                'cttelefonorepresentante1':datoscliente.cttelefonorepresentante1,
-                'cxrepresentante2':datoscliente.cxrepresentante2,
-                'ctrepresentante2':datoscliente.ctrepresentante2,
-                'dvencimientocargorepresentante2':date.isoformat(datoscliente.dvencimientocargorepresentante2),
-                'ctcargorepresentante2':datoscliente.ctcargorepresentante2,
-                'cxestadocivilrepresentante2':datoscliente.cxestadocivilrepresentante2,
-                'cttelefonorepresentante2':datoscliente.cttelefonorepresentante2,
-                'cxrepresentante3':datoscliente.cxrepresentante3,
-                'ctrepresentante3':datoscliente.ctrepresentante3,
-                'dvencimientocargorepresentante3':date.isoformat(datoscliente.dvencimientocargorepresentante3),
-                'ctcargorepresentante3':datoscliente.ctcargorepresentante3,
-                'cxestadocivilrepresentante3':datoscliente.cxestadocivilrepresentante3,
-                'cttelefonorepresentante3':datoscliente.cttelefonorepresentante3,
-            }
-            formulario=PersonaJuridicaForm(e)
+            formulario = PersonaJuridicaForm(instance=datoscliente, )
         else:
             formulario=PersonaJuridicaForm()
+
+    if request.method=='POST':
+        form_submitted = True
+
+        if not datoscliente:
+            formulario = PersonaJuridicaForm(request.POST,  )
+        else:
+            formulario = PersonaJuridicaForm(request.POST, instance=datoscliente, )
+            
+        if formulario.is_valid():
+
+            datoscliente = formulario.save(commit=False)
+            
+            if not cliente_id:
+                datoscliente.cxusuariocrea = request.user
+                datoscliente.empresa = id_empresa.empresa
+            else:
+                datoscliente.cxusuariomodifica = request.user.id
+
+            datoscliente.save()
+            return redirect("clientes:listaclientes")
+        else:
+            contexto['form_errors'] = formulario.errors
 
     sp = Asignacion.objects\
         .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
 
-    contexto={'nombrecliente':cliente
+    contexto.update({'nombrecliente':cliente
               , 'datoscliente':datoscliente
               , 'form':formulario
               , 'solicitudes_pendientes':sp
-            }
+              , 'form_submitted': form_submitted,
 
-    if request.method=='POST':
-
-        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-        
-        ctnombrecorto = request.POST.get("ctnombrecorto")
-        cxtipoempresa = request.POST.get("cxtipoempresa")
-        ctcontacto = request.POST.get("ctcontacto")
-        ladministrasocios = request.POST.get("ladministrasocios")
-        ladministraindividual = request.POST.get("ladministraindividual")
-        ctobjetosocial = request.POST.get("ctobjetosocial")
-        cxrepresentante1 = request.POST.get("cxrepresentante1")
-        ctrepresentante1 = request.POST.get("ctrepresentante1")
-        dvencimientocargorepresentante1 = request.POST.get("dvencimientocargorepresentante1")
-        ctcargorepresentante1 = request.POST.get("ctcargorepresentante1")
-        cxestadocivilrepresentante1 = request.POST.get("cxestadocivilrepresentante1")
-        cttelefonorepresentante1 = request.POST.get("cttelefonorepresentante1")
-        cxrepresentante2 = request.POST.get("cxrepresentante2")
-        ctrepresentante2 = request.POST.get("ctrepresentante2")
-        dvencimientocargorepresentante2 = request.POST.get("dvencimientocargorepresentante2")
-        ctcargorepresentante2 = request.POST.get("ctcargorepresentante2")
-        cxestadocivilrepresentante2 = request.POST.get("cxestadocivilrepresentante2")
-        cttelefonorepresentante2 = request.POST.get("cttelefonorepresentante2")
-        cxrepresentante3 = request.POST.get("cxrepresentante3")
-        ctrepresentante3 = request.POST.get("ctrepresentante3")
-        dvencimientocargorepresentante3 = request.POST.get("dvencimientocargorepresentante3")
-        ctcargorepresentante3 = request.POST.get("ctcargorepresentante3")
-        cxestadocivilrepresentante3 = request.POST.get("cxestadocivilrepresentante3")
-        cttelefonorepresentante3 = request.POST.get("cttelefonorepresentante3")
-
-        datoscliente = Personas_juridicas.objects\
-            .filter(cxcliente=cliente.cxcliente).first()
-
-        administrasocios_on=False; administraindividual_on=False
-
-        if ladministrasocios: administrasocios_on= True
-        if ladministraindividual: administraindividual_on= True
-
-        if not datoscliente:
-            datoscliente= Personas_juridicas(
-                cxcliente = cliente.cxcliente,
-                ctnombrecorto = ctnombrecorto,
-                cxtipoempresa = cxtipoempresa,
-                ctcontacto = ctcontacto,
-                ladministrasocios = administrasocios_on,
-                ladministraindividual = administraindividual_on,
-                ctobjetosocial = ctobjetosocial,
-                cxrepresentante1 = cxrepresentante1,
-                ctrepresentante1 = ctrepresentante1,
-                dvencimientocargorepresentante1 = dvencimientocargorepresentante1,
-                ctcargorepresentante1 = ctcargorepresentante1,
-                cxestadocivilrepresentante1 = cxestadocivilrepresentante1,
-                cttelefonorepresentante1 = cttelefonorepresentante1,
-                cxrepresentante2 = cxrepresentante2,
-                ctrepresentante2 = ctrepresentante2,
-                dvencimientocargorepresentante2 = dvencimientocargorepresentante2,
-                ctcargorepresentante2 = ctcargorepresentante2,
-                cxestadocivilrepresentante2 = cxestadocivilrepresentante2,
-                cttelefonorepresentante2 = cttelefonorepresentante2,
-                cxrepresentante3 = cxrepresentante3,
-                ctrepresentante3 = ctrepresentante3,
-                dvencimientocargorepresentante3 = dvencimientocargorepresentante3,
-                ctcargorepresentante3 = ctcargorepresentante3,
-                cxestadocivilrepresentante3 = cxestadocivilrepresentante3,
-                cttelefonorepresentante3 = cttelefonorepresentante3,
-                cxusuariocrea = request.user,
-                empresa = id_empresa.empresa,
-            )
-            if datoscliente:
-                datoscliente.save()
-        else:
-
-            datoscliente.ctnombrecorto = ctnombrecorto
-            datoscliente.cxtipoempresa = cxtipoempresa
-            datoscliente.ctcontacto = ctcontacto
-            datoscliente.ladministrasocios = administrasocios_on
-            datoscliente.ladministraindividual = administraindividual_on
-            datoscliente.ctobjetosocial = ctobjetosocial
-            datoscliente.cxrepresentante1 = cxrepresentante1
-            datoscliente.ctrepresentante1 = ctrepresentante1
-            datoscliente.dvencimientocargorepresentante1 = dvencimientocargorepresentante1
-            datoscliente.ctcargorepresentante1 = ctcargorepresentante1
-            datoscliente.cxestadocivilrepresentante1 = cxestadocivilrepresentante1
-            datoscliente.cttelefonorepresentante1 = cttelefonorepresentante1
-            datoscliente.cxrepresentante2 = cxrepresentante2
-            datoscliente.ctrepresentante2 = ctrepresentante2
-            datoscliente.dvencimientocargorepresentante2 = dvencimientocargorepresentante2
-            datoscliente.ctcargorepresentante2 = ctcargorepresentante2
-            datoscliente.cxestadocivilrepresentante2 = cxestadocivilrepresentante2
-            datoscliente.cttelefonorepresentante2 = cttelefonorepresentante2
-            datoscliente.cxrepresentante3 = cxrepresentante3
-            datoscliente.ctrepresentante3 = ctrepresentante3
-            datoscliente.dvencimientocargorepresentante3 = dvencimientocargorepresentante3
-            datoscliente.ctcargorepresentante3 = ctcargorepresentante3
-            datoscliente.cxestadocivilrepresentante3 = cxestadocivilrepresentante3
-            datoscliente.cttelefonorepresentante3 = cttelefonorepresentante3
-            datoscliente.cxusuariomodifica = request.user.id
-
-            datoscliente.save()
-
-        return redirect("clientes:listaclientes")
+            })
 
     return render(request, template_name, contexto)
 

@@ -1,7 +1,8 @@
 from django.db import models
 
 from bases.models import ClaseModelo
-from empresa.models import Datos_participantes, Clases_cliente, Localidades
+from empresa.models import Datos_participantes, Clases_cliente, \
+    Localidades, Tipos_empresas
 from pais.models import Bancos
 from django.db.models import Sum, F
 
@@ -295,8 +296,8 @@ class Personas_juridicas(ClaseModelo):
         on_delete=models.CASCADE,
         related_name="persona_juridica")
     ctnombrecorto = models.TextField( blank=True, help_text='nombre de fantasia')
-    cxtipoempresa = models.CharField( max_length=3
-        , help_text='Anonima, limitada, etc.', choices=TIPOS_DE_EMPRESAS)
+    # cxtipoempresa = models.CharField( max_length=3
+    #     , help_text='Anonima, limitada, etc.', choices=TIPOS_DE_EMPRESAS)
     ctcontacto = models.TextField()
     ladministrasocios=models.BooleanField(null=False)
     ladministraindividual =models.BooleanField(null=False)
@@ -334,6 +335,8 @@ class Personas_juridicas(ClaseModelo):
     , null=True, choices=TIPOS_DE_ESTADO_CIVIL, blank=True)
     cttelefonorepresentante3 = models.CharField( max_length=20
         , null=True, blank=True)
+    tipoempresa = models.ForeignKey(Tipos_empresas, null=True,
+        on_delete=models.RESTRICT)
     
 
     def __str__(self):

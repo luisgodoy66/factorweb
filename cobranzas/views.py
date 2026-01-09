@@ -4251,9 +4251,17 @@ def ReversoDesembolsoLiquidacion(request, desembolso_id):
     if desembolso.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
     
+    if desembolso.lcontabilizado:
+        return HttpResponse("No se puede revertir el desembolso. El desembolso ya ha sido contabilizado.")
+    
+     # obtener la liquidacion asociada al desembolso
     liquidacion = Liquidacion_cabecera.objects\
         .filter(pk=desembolso.cxoperacion).first()
 
+    if liquidacion.lfacturagenerada:
+        return HttpResponse("No se puede revertir el desembolso. La liquidación tiene factura generada.")
+    
+     # realizar el reverso dentro de una transacción
     try:
         with transaction.atomic():
             # 1. Actualizar el estado de la ASIGNACION

@@ -27,41 +27,50 @@
         </div>
         <div class="card-body card-block">
             <!-- columna izquierda -->
-            <div class="col-lg-5">
+            <div class="col-lg-6">
                 
+                <div hidden>{{ form.cxcliente}}</div>  
                 <div class="row form-group">
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         {{ form.ctnombrecorto.label}}
                     </div>
-                    <div class="col-md-7">
+                    <div class="col-md-8">
                         {{ form.ctnombrecorto}}
                         <small class="form-text text-muted">Nombre de fantasía</small>
                     </div>
                 </div>  
 
-                <div class="row form-group">
-                    <div class="col-md-5">
+                <!-- <div class="row form-group">
+                    <div class="col-md-4">
                         {{form.cxtipoempresa.label}}
                     </div>
-                    <div class="col-md-7">
+                    <div class="col-md-8">
                         {{form.cxtipoempresa}}
+                    </div>
+                </div> -->
+                <div class="row form-group">
+                    <div class="col-md-4">
+                        {{form.tipoempresa.label}}
+                    </div>
+                    <div class="col-md-8">
+                        {{form.tipoempresa}}
                     </div>
                 </div>
                 <div class="row form-group">
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         {{form.ctcontacto.label}}
                     </div>
-                    <div class="col-md-7">
+                    <div class="col-md-8">
                         {{form.ctcontacto}}
                         <small class="form-text text-muted">Persona de contacto</small>
                     </div>
                 </div>
 
                 <div class="row form-group">
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         {{form.ladministrasocios.label}}
                     </div>
-                    <div class="col-md-7">
+                    <div class="col-md-8">
                         <!-- {{form.ladministrasocios}} -->
                         <label class="switch switch-3d switch-success mr-3">
                             <input type="checkbox" class="switch-input" 
@@ -74,10 +83,10 @@
                 </div>
 
                 <div class="row form-group">
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         {{form.ladministraindividual.label}}
                     </div>
-                    <div class="col-md-7">
+                    <div class="col-md-8">
                         <!-- {{form.ladministraindividual}} -->
                         <label class="switch switch-3d switch-success mr-3">
                             <input type="checkbox" class="switch-input" 
@@ -90,28 +99,28 @@
                 </div>
 
                 <div class="row form-group">
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         {{form.ctobjetosocial.label}}
                     </div>
-                    <div class="col-md-7">
+                    <div class="col-md-8">
                         {{form.ctobjetosocial}}
                     </div>
                 </div> 
             </div>
             <!-- columna derecha -->
-            <div class="col-lg-7">
+            <div class="col-lg-6">
                 <div class="default-tab">
                     <nav>
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
                             <a class="nav-item nav-link active" id="nav-home-tab" 
                                 data-toggle="tab" href="#nav-home" role="tab" 
-                                aria-controls="nav-home" aria-selected="true">Representante legal 1</a>
+                                aria-controls="nav-home" aria-selected="true">Represent. legal 1</a>
                             <a class="nav-item nav-link" id="nav-profile-tab" 
                             data-toggle="tab" href="#nav-profile" role="tab" 
-                            aria-controls="nav-profile" aria-selected="false">Representante legal 2</a>
+                            aria-controls="nav-profile" aria-selected="false">Represent. legal 2</a>
                             <a class="nav-item nav-link" id="nav-contact-tab" 
                             data-toggle="tab" href="#nav-contact" role="tab" 
-                            aria-controls="nav-contact" aria-selected="false">Representante legal 3</a>
+                            aria-controls="nav-contact" aria-selected="false">Represent. legal 3</a>
                         </div>
                     </nav>
                     <div class="tab-content pl-3 pt-2" id="nav-tabContent">
@@ -284,6 +293,20 @@
                 <i class="fa fa-dot-circle-o"></i> Grabar
             </button>
         </div>
+           <!-- Sección para mostrar errores del formulario -->
+           {% if form_submitted and form_errors %}
+           {#% if form_errors %#}
+           <div class="alert alert-danger" role="alert">
+               <ul>
+                   {% for field, errors in form_errors.items %}
+                       {% for error in errors %}
+                           <li>{{ field }}: {{ error }}</li>
+                           <!-- <li>{{ error }}</li> -->
+                       {% endfor %}
+                   {% endfor %}
+               </ul>
+           </div>
+            {% endif %}
     </div>
     <!-- </div> -->
 </form>

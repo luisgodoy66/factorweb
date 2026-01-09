@@ -91,7 +91,9 @@ class PersonaJuridicaForm(forms.ModelForm):
 
     class Meta:
         model=Personas_juridicas
-        fields=['cxcliente','ctnombrecorto', 'cxtipoempresa', 'ctcontacto'
+        fields=['cxcliente','ctnombrecorto'
+                # , 'cxtipoempresa'
+                , 'ctcontacto'
             , 'ladministrasocios', 'ladministraindividual', 'ctobjetosocial'
             , 'cxrepresentante1', 'ctrepresentante1'
             , 'dvencimientocargorepresentante1', 'ctcargorepresentante1'
@@ -102,9 +104,11 @@ class PersonaJuridicaForm(forms.ModelForm):
             , 'cxrepresentante3', 'ctrepresentante3'
             , 'dvencimientocargorepresentante3', 'ctcargorepresentante3'
             , 'cxestadocivilrepresentante3', 'cttelefonorepresentante3'
+            , 'tipoempresa'
             ]
         labels={'cxcliente':'Cliente','ctnombrecorto':'Nombre corto'
-            , 'cxtipoempresa':'Tipo de empresa', 'ctcontacto':'Contacto'
+            # , 'cxtipoempresa':'Tipo de empresa'
+            , 'ctcontacto':'Contacto'
             , 'ladministrasocios':'Administran socios'
             , 'ladministraindividual':'Administración individual'
             , 'ctobjetosocial':'Objeto social'
@@ -126,12 +130,14 @@ class PersonaJuridicaForm(forms.ModelForm):
             , 'ctcargorepresentante3':'Cargo de representate legal'
             , 'cxestadocivilrepresentante3':'Estado civil'
             , 'cttelefonorepresentante3':'Teléfono '
+            , 'tipoempresa':'Tipo de empresa'
         }
         widgets={'ctnombrecorto': forms.Textarea(attrs={'rows': '1'})
             , 'ctcontacto':forms.Textarea(attrs={'rows': '1'})
             , 'ctobjetosocial':forms.Textarea(attrs={'rows': '3'})
             , 'ctrepresentante1':forms.Textarea(attrs={'rows': '1'})
-            , 'ctrepresentante2':forms.Textarea(attrs={'rows': '1'})                , 'ctrepresentante3':forms.Textarea(attrs={'rows': '1'})
+            , 'ctrepresentante2':forms.Textarea(attrs={'rows': '1'})
+            , 'ctrepresentante3':forms.Textarea(attrs={'rows': '1'})
             ,'dvencimientocargorepresentante1': forms.DateInput(
                 format=('%Y-%m-%d'),
                 attrs={'class': 'form-control', 
@@ -163,9 +169,6 @@ class PersonaJuridicaForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        # self.fields['dvencimientocargorepresentante1'].widget.attrs['readonly']=True
-        # self.fields['dvencimientocargorepresentante2'].widget.attrs['readonly']=True
-        # self.fields['dvencimientocargorepresentante3'].widget.attrs['readonly']=True
         self.fields['dvencimientocargorepresentante1'].widget.attrs['value']=date.today
         self.fields['dvencimientocargorepresentante2'].widget.attrs['value']=date.today
         self.fields['dvencimientocargorepresentante3'].widget.attrs['value']=date.today
