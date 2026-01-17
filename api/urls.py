@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import estado_operativo_cliente_api, \
+from .views import ConsultarFacturaAI, estado_operativo_cliente_api, \
      ConfiguracionesSlackView, ConfiguracionSlackNew, \
      ConfiguracionSlackEdit, ConfiguracionesTwilioView, \
      ConfiguracionTwilioNew , ConfiguracionTwilioEdit
@@ -13,6 +13,7 @@ from .google import oauth2callback, google_login, \
      crear_evento_recordatorio_cobranza, \
      google_session_active
 from .whatsapp import enviar_mensaje, webhook_whatsapp
+from .views import InvoiceAIAnalysisView
 
 urlpatterns = [
     # Otras rutas...
@@ -59,4 +60,8 @@ urlpatterns = [
      path('whatsapp/enviar_mensaje/<str:numero_destino>', enviar_mensaje
           , name='enviar_mensaje_whatsapp'),
      path('whatsapp/webhook/', webhook_whatsapp, name='webhook_whatsapp'),
+    path("invoices/<int:id>/analyze-ai/", InvoiceAIAnalysisView.as_view(),
+        name="invoice-ai-analysis"
+    ),
+    path("invoices/<int:id>/consultar-ai/", ConsultarFacturaAI, name="consultar-factura-ai"    ),
 ]

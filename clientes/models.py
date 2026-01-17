@@ -5,6 +5,7 @@ from empresa.models import Datos_participantes, Clases_cliente, \
     Localidades, Tipos_empresas
 from pais.models import Bancos
 from django.db.models import Sum, F
+import json
 
 class Datos_compradores(ClaseModelo):
     ESTADOS_DE_COMPRADORES = (
@@ -25,6 +26,26 @@ class Datos_compradores(ClaseModelo):
     def estado(self):
         return self.get_cxestado_display()
 
+    def reporte_ultimas_cobranzas(self):
+        # devolver la fecha de pago y los días de demora de las últimas 5 cobranzas en formato JSON
+        # uitilizado para el análisis de riesgo con IA
+        from cobranzas.models import Documentos_detalle
+        
+        ultimas_cobranzas = Documentos_detalle.objects.filter(
+            leliminado=False,
+            cxdocumento__cxcomprador=self.id,
+            cxcobranza__lpagadoporelcliente = False
+        ).order_by('-cxcobranza__dcobranza')[:5]
+        
+        cobranzas_data = []
+        for cobranza in ultimas_cobranzas:
+            cobranzas_data.append({
+            'fecha_pago': cobranza.cxcobranza.dcobranza.strftime('%Y-%m-%d') if cobranza.cxcobranza.dcobranza else None,
+            'dias_vencidos': cobranza.dias_vencidos()
+            })
+        
+        return json.dumps(cobranzas_data)
+    
     class Meta:
         ordering = [
             'cxcomprador__ctnombre'
@@ -85,6 +106,15 @@ class Datos_generales(ClaseModelo):
     def __str__(self):
         return self.cxcliente.ctnombre
 
+    def monto_total_negociado(self):
+        # utlizado para análisis de riesgo con IA
+        from operaciones.models import Documentos
+        total = Documentos.objects.filter(
+            leliminado=False,
+            cxcliente=self.id
+        ).aggregate(total_facturado=Sum('ntotal'))['total_facturado']
+        return total if total else 0
+    
     class Meta:
         ordering = [
             'cxcliente__ctnombre'

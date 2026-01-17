@@ -28,3 +28,21 @@ class Configuracion_twilio_whatsapp(ClaseModelo):
 
     # def save(self):
     #     self.ctdescripcion = self.ctdescripcion.upper()
+
+class InvoiceAIAnalysis(ClaseModelo):
+    RISK_CHOICES = (
+        ('BAJO', 'Bajo'),
+        ('MEDIO', 'Medio'),
+        ('ALTO', 'Alto'),
+    )
+
+    invoice = models.OneToOneField(
+        'solicitudes.Documentos',
+        on_delete=models.CASCADE,
+        related_name='ai_analysis'
+    )
+    risk_level = models.CharField(max_length=10, choices=RISK_CHOICES)
+    analysis_text = models.TextField()
+    recommendation = models.TextField()
+    raw_response = models.JSONField(null=True, blank=True)
+

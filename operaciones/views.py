@@ -1320,11 +1320,13 @@ def DetalleDocumentoADiccionario(doc, tipo_asignacion):
         output["ClaseComprador"] = doc.ctcomprador
         output["Documento"] = doc.ctdocumento
         output["Emision"] = doc.demision.strftime("%Y-%m-%d")
+        output["ia_analizada"] = hasattr(doc, 'ai_analysis')
     else:
         output["Comprador"] = doc.documento.ctcomprador
         output["ClaseComprador"] = doc.documento.ctcomprador
         output["Documento"] = doc.documento.ctdocumento
         output["Emision"] = doc.documento.demision.strftime("%Y-%m-%d")
+        output["ia_analizada"] = hasattr(doc.documento, 'ai_analysis')
 
     output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
     output["Total"] = doc.ntotal

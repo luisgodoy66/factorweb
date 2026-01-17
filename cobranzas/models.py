@@ -145,6 +145,39 @@ class Documentos_detalle_Manager(models.Manager):
             return totaldias / total['Total']
         else:
             return 0
+        
+    def promedio_ponderado_demora_por_deudor(self, id_cliente, id_deudor):
+        # promedio ponderado de demora de los documentos
+        # de la empresa y del deudor
+        documentos = self.filter(leliminado=False
+                                 , cxcobranza__cxcliente=id_cliente
+                                 , cxdocumento__cxcomprador=id_deudor
+                                 , cxcobranza__lpagadoporelcliente=False
+                                 )
+        
+        if not documentos.exists():
+            return 'N/A'
+        
+        total = documentos.aggregate(
+            Total=Sum(
+                models.F('nvalorcobranza') 
+                + models.F('nvalorbaja') 
+                + models.F('nretenciones')
+                )
+            )
+        
+        totaldias = 0
+        for documento in documentos:
+            dias_vencidos = decimal.Decimal( documento.dias_vencidos_vencimiento_original())
+            totaldias += dias_vencidos * (
+                documento.nvalorcobranza 
+                + documento.nvalorbaja 
+                + documento.nretenciones)
+        
+        if total['Total'] and totaldias:
+            return totaldias / total['Total']
+        else:
+            return 0
 
 class Documentos_detalle(ClaseModelo):
     cxcobranza =models.ForeignKey(Documentos_cabecera

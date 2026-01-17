@@ -95,6 +95,11 @@
                             {{ cuenta_transferencia}}
                         </div>
                     </div>  
+                    
+                    <div id="ai-result" style="display:none; margin-top:20px;"></div>
+                    <div id="ai-loading" style="display:none; margin-top:15px;">
+                    <em>Analizando factura con IA…</em>
+                    </div>
                 </div>
                 <!-- columna derecha -->
                 <div class="col-5">
@@ -182,7 +187,6 @@
                     <small>
                           
                         <table id="table"                      
-                            data-show-export="true"
                             data-detail-formatter="detailFormatter"
                             data-minimum-count-columns="2"
                             data-pagination="false"
@@ -191,6 +195,7 @@
                             data-side-pagination="server"z
                             >
                         </table>
+                            <!-- data-show-export="true" -->
                     </small>
 
                     </div>
@@ -217,16 +222,11 @@ const asignacion_id = capturaValor("asignacion_id")
 const carga_gao = capturaValor("carga_gao")
 const carga_dc = capturaValor("carga_dc")
 const tipo_asignacion = capturaValor("tipo_asignacion")
-// const porcentaje_iva = capturaValor("porcentaje_iva")
 const porcentaje_iva = "{{porcentaje_iva}}"
 const aplica_otros_cargos = "{{usa_otros_cargos}}"
-// var iniciales_dc = capturaValor("iniciales_dc")
-// var iniciales_gao = capturaValor("iniciales_gao")
 var iniciales_gao = "{{ gao.iniciales }}"
 var iniciales_dc = "{{ dc.iniciales }}"
 var selections = []
-// var iva_gao = capturaValor("iva_gao")
-// var iva_dc = capturaValor("iva_dc")
 var iva_gao = "{{ gao.carga_iva }}"
 var iva_dc = "{{ dc.carga_iva }}"
 var base_iva_tasas = 0
@@ -257,10 +257,6 @@ window.onload=function(){
     if (iniciales_gao==''){iniciales_gao='GAO'}
 
     initTable(iniciales_gao,iniciales_dc);
-    // if (aplica_otros_cargos==='True')
-    // {
-    //     CargaCargos();
-    // }
 
     // mostrar valores
     RecalcularCargos(asignacion_id, capturaValor("id_ddesembolso")
@@ -297,17 +293,29 @@ window.operateEvents = {
   'click .remove': function (e, value, row, index) {
   EliminarDocumentoDeSolicitudAsignacion(asignacion_id, row.id, tipo_asignacion
     , row.Documento)
-  }
+  },
+    'click .analizar': function (e, value, row, index) {
+    analizarFacturaAI(row.id);
+    },
+    'click .consultar': function (e, value, row, index) {
+    consultarFacturaAI(row.id);
+    }
 };
 
 function operateFormatter(value, row, index) {
+    if (row.ia_analizada){
+        var ia_icon = '<a class="consultar" href="javascript:void(0)" title="Consultar"><i class="fa fa-search"></i></a>'
+    } else {
+        var ia_icon = '<a class="analizar" href="javascript:void(0)" title="Analizar"><i class="fa fa-search"></i></a>'
+    }
   return [
     '<a class="like" href="javascript:void(0)" title="Configurar tasas">',
     '<i class="fa fa-cog"></i>',
     '</a>  ',
+    ia_icon,
     '<a class="remove" href="javascript:void(0)" title="Eliminar">',
       '<i class="fa fa-trash"></i>',
-      '</a>'
+      '</a>',
   ].join('')
 }
   
@@ -577,5 +585,115 @@ function fetchAceptar(url, objeto, callback){
     })
 
 }
+
+// document.getElementById("analyze-ai-btn").addEventListener("click", async function () {}
+async function analizarFacturaAI(invoiceId) {
+    // const invoiceId = this.dataset.invoiceId;
+    const resultDiv = document.getElementById("ai-result");
+    const loadingDiv = document.getElementById("ai-loading");
+
+    resultDiv.style.display = "none";
+    loadingDiv.style.display = "block";
+
+    try {
+        const response = await fetch(
+            `/api/invoices/${invoiceId}/analyze-ai/`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Error al analizar factura");
+        }
+
+        resultDiv.innerHTML = renderAIResult(data);
+        resultDiv.style.display = "block";
+
+    } catch (error) {
+        alert(error.message);
+    } finally {
+        loadingDiv.style.display = "none";
+    }
+};
+
+function renderAIResult(data) {
+    return `
+        <div style="border:1px solid #ddd; padding:15px; border-radius:8px; position:relative;">
+            <button onclick="event.preventDefault(); document.getElementById('ai-result').style.display='none'; return false;" 
+                    style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:18px; cursor:pointer; color:#999;">
+                ×
+            </button>
+            
+            <h4>🧠 Evaluación IA</h4>
+
+            <p>
+              <strong>Riesgo:</strong>
+              <span style="color:${riskColor(data.risk_level)}">
+                ${data.risk_level}
+              </span>
+            </p>
+
+            <p><strong>Análisis:</strong><br>${data.analysis}</p>
+
+            <p><strong>Recomendación:</strong><br>${data.recommendation}</p>
+
+            <small style="color:#777;">
+              Generado automáticamente el ${data.created_at}· Revisión humana recomendada.
+            </small>
+        </div>
+    `;
+}
+
+function riskColor(level) {
+    switch (level) {
+        case "BAJO": return "green";
+        case "MEDIO": return "orange";
+        case "ALTO": return "red";
+        default: return "black";
+    }
+}
+
+async function consultarFacturaAI(invoiceId) {
+    const resultDiv = document.getElementById("ai-result");
+    const loadingDiv = document.getElementById("ai-loading");
+
+    resultDiv.style.display = "none";
+    loadingDiv.style.display = "block";
+
+    try {
+        const response = await fetch(
+            `/api/invoices/${invoiceId}/consultar-ai/`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value
+                }
+            }
+        );
+        
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Error al consultar factura");
+        }
+
+        resultDiv.innerHTML = renderAIResult(data);
+        resultDiv.style.display = "block";
+
+    } catch (error) {
+        alert(error.message);
+    } finally {
+        loadingDiv.style.display = "none";
+    }
+};
 </script>
+
 {% endblock %}

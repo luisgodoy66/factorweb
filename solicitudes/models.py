@@ -80,10 +80,10 @@ class Asignacion(ClaseModelo):
         ('F', 'Facturas puras'),
     )
     TIPOS_DE_ESTADO = (
-        ('A', 'Aceptada'),
-        ('R', 'Reversada'),
         ('P', 'Pendiente'),
+        ('R', 'Reversada'),
         ('L', 'Liquidada'),
+        ('A', 'Aceptada'),
     )
     cxcliente=models.ForeignKey(Clientes
                                 , on_delete=models.CASCADE
@@ -166,7 +166,7 @@ class Asignacion(ClaseModelo):
 
 class Documentos(ClaseModelo):
     cxasignacion=models.ForeignKey(Asignacion
-        , on_delete=models.CASCADE
+        , on_delete=models.CASCADE, related_name="documentos_asignacion"
     )
     cxcomprador=models.CharField(max_length=13) 
     ctcomprador = models.CharField(max_length=100)
@@ -197,7 +197,7 @@ class Documentos(ClaseModelo):
         , help_text='Indica si se ha generado la notificación de este documento')
 
     def total_negociado(self):
-        return self.ntotal - self.nvalornonegociado
+        return self.ntotal #- self.nvalornonegociado
 
     def __str__(self):
         return '{}-{}-{}'.format(self.ctserie1, self.ctserie2, self.ctdocumento)

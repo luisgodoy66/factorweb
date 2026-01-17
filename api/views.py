@@ -10,6 +10,16 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .serializers import EstadoOperativoClienteSerializer
+# factoring/api/views.py
+
+from rest_framework.views import APIView
+# from rest_framework.response import Response
+from rest_framework import status
+
+from .models import  InvoiceAIAnalysis
+# from solicitudes.models import Documentos as Invoice, Asignacion
+from .servicios import analyze_invoice_with_ai
+from .servicios import parse_ai_response
 
 from datetime import date, timedelta
 
@@ -19,6 +29,7 @@ from bases.models import Usuario_empresa, Empresas
 from solicitudes import models as ModelosSolicitud
 from clientes import models as ModeloCliente
 from .models import Configuracion_slack, Configuracion_twilio_whatsapp
+from cobranzas.models import Documentos_detalle as CobranzasDocumentosDetalle
 
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse_lazy
@@ -236,3 +247,125 @@ def estado_operativo_cliente_api(request, cliente_id):
     serializer = EstadoOperativoClienteSerializer(data)
     # return Response(serializer.data)
     return JsonResponse(serializer.data)
+
+class InvoiceAIAnalysisView(APIView):
+    """
+    POST /api/invoices/<id>/analyze-ai/
+    """
+
+    def post(self, request, id):
+        try:
+            invoice = ModelosSolicitud.Documentos.objects.select_related(
+                 'comprador', 'cxasignacion__cxcliente',
+            ).get(id=id)
+        except ModelosSolicitud.Documentos.DoesNotExist:
+            return Response(
+                {"error": "Factura no encontrada"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if hasattr(invoice, 'ai_analysis'):
+            return Response(
+                {"error": "La factura ya fue analizada"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 🔹 Construir historial resumido del solciitante/cliente
+        solicitante = invoice.cxasignacion.cxcliente
+        facturas_previas = ModelosSolicitud.Documentos.objects\
+            .filter( leliminado=False,
+                    cxasignacion__cxestado = 'A',
+                    cxasignacion__cxcliente=solicitante.id
+                    ).count()
+        
+        # determinar si es cliente
+        es_cliente = ModelosSolicitud.Asignacion.objects\
+            .filter(
+                cxcliente=solicitante, cliente__isnull = False, leliminado=False
+                )\
+            .first().cliente
+        if es_cliente:
+            cliente = ModeloCliente.Datos_generales.objects\
+                .filter(
+                    id=es_cliente.id
+                    )\
+                .first()
+            
+            total_negociado = cliente.monto_total_negociado()
+            promedio_demora_pago = cliente.npromediodemoradepago
+            actividad_economica = cliente.cxcliente.actividad.ctactividad if cliente.cxcliente.actividad.ctactividad else 'N/A'
+            inicio_actividades = cliente.cxcliente.dinicioactividades.strftime("%Y-%m-%d") if cliente.cxcliente.dinicioactividades else 'N/A'
+
+            # relacion cliente 
+            promedio_demora_pago_deudor = CobranzasDocumentosDetalle.objects\
+                .promedio_ponderado_demora_por_deudor(cliente.id, invoice.comprador.id)
+        else:
+            promedio_demora_pago = 'N/A'
+            inicio_actividades = solicitante.dinicioactividades.strftime("%Y-%m-%d") if solicitante.dinicioactividades else 'N/A'
+            actividad_economica = solicitante.ctgirocomercial if solicitante.ctgirocomercial  else 'N/A'
+
+
+        client_history = f"""
+- Cliente: {solicitante.ctnombre}
+- Facturas previas: {facturas_previas - 1}
+- Monto total negociado: {total_negociado if total_negociado else 'N/A'}
+- Promedio demora de pago: {promedio_demora_pago}
+- Actividad económica: {actividad_economica}
+- Inicio de actividades: {inicio_actividades}
+"""
+
+        # 🔹 Construir historial del deudor/comprador
+        debtor_history = f"""
+- Comprador: {invoice.ctcomprador}
+- Ultimas cobranzas: {invoice.comprador.reporte_ultimas_cobranzas() if invoice.comprador else 'N/A'}
+- Actividad económica: {invoice.comprador.cxcomprador.actividad.ctactividad if invoice.comprador.cxcomprador.actividad else 'N/A'}
+- Inicio de actividades: {invoice.comprador.cxcomprador.dinicioactividades.strftime("%Y-%m-%d") if invoice.comprador.cxcomprador.dinicioactividades else 'N/A'}
+- Promedio demora de pago con el cliente: {promedio_demora_pago_deudor if es_cliente else 'N/A'}
+"""
+
+        ai_raw = analyze_invoice_with_ai(
+            invoice,
+            client_history,
+            debtor_history
+        )
+
+        parsed = parse_ai_response(ai_raw)
+
+        analysis = InvoiceAIAnalysis.objects.create(
+            invoice=invoice,
+            risk_level=parsed["risk_level"],
+            analysis_text=parsed["analysis"],
+            recommendation=parsed["recommendation"],
+            raw_response=parsed["raw"],
+            cxusuariocrea=request.user,
+            empresa = Usuario_empresa.objects.filter(user=request.user).first().empresa
+        )
+
+        return Response(
+            {
+                "invoice_id": invoice.id,
+                "risk_level": analysis.risk_level,
+                "analysis": analysis.analysis_text,
+                "recommendation": analysis.recommendation,
+                "created_at": analysis.dregistro.strftime("%Y-%m-%d %H:%M:%S"),
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+def ConsultarFacturaAI(request, id):
+    try:
+        analysis = InvoiceAIAnalysis.objects.get(invoice__id=id)
+        return JsonResponse(
+            {
+                "invoice_id": analysis.invoice.id,
+                "risk_level": analysis.risk_level,
+                "analysis": analysis.analysis_text,
+                "recommendation": analysis.recommendation,
+                "created_at": analysis.dregistro.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+        )
+    except InvoiceAIAnalysis.DoesNotExist:
+        return JsonResponse(
+            {"error": "Análisis de IA no encontrado para esta factura"},
+            status=404
+        )
