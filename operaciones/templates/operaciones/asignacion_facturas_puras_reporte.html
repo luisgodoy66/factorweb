@@ -163,12 +163,12 @@
                                         {% if gao.imprimir %}
                                             <td class="numero">{{ item.ntasacomision|floatformat:2 }}</td>
                                         {% endif %}
-                                        <td class="numero">{{ item.ngao }}</td>
+                                        <td class="numero">{{ item.ngao|floatformat:"2g"  }}</td>
                                         {% if dc.imprimir %}
                                             <td class="numero">{{ item.ntasadescuento|floatformat:2 }}</td>
                                         {% endif %}
-                                        <td class="numero">{{ item.ndescuentocartera }}</td>
-                                        <td class="numero">{{ item.total_cargos}}</td>
+                                        <td class="numero">{{ item.ndescuentocartera|floatformat:"2g"  }}</td>
+                                        <td class="numero">{{ item.total_cargos|floatformat:"2g" }}</td>
                                     </tr>
                                 {% endfor %}
                                 <tr></tr>
@@ -259,7 +259,11 @@
                 <table style="width: 100%;">
                     <tbody>
                         <tr>
-                            <td><strong>Elaborado por: </strong>{{ asignacion.cxusuariocrea}}</td>
+                            {% if asignacion.cxusuariomodifica %}
+                                <td><strong>Elaborado por: </strong>{{ asignacion.cxusuariomodifica}}</td>
+                            {% else %}
+                                <td><strong>Elaborado por: </strong>{{ asignacion.cxusuariocrea}}</td>
+                            {% endif %}
                             <td><strong>Revisado por:</strong></td>
                             <td><strong>Recibido por:</strong></td>
                             {% if asignacion.cxestado == 'E' %}

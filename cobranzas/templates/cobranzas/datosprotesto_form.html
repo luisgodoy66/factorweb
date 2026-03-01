@@ -22,30 +22,25 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
-<form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal">
-    <div class="col-lg-6">
+<div class="col-lg-6">
+    <form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal">
+        {% csrf_token %}
         <div class="card">
-                {% csrf_token %}
-            <div class="card-header">
-                <strong>Protesto</strong> 
-                de {{ cheque.cxparticipante }}
+            <div class="card-header" style="background-color: white;">
+                <div class="d-flex justify-content-between align-items-center ">
+                    <h6>Protesto de {{ cheque.cxparticipante }}</h6> 
+                    <a 
+                    {% if lista_deposito == 'Cuentas cliente' %}
+                        href="{% url 'cuentasconjuntas:listacobranzasporconfirmar' %}"
+                    {% else %}
+                        href="{% url 'cobranzas:listacobranzasporconfirmar' %}"
+                    {% endif %}
+                    class="btn btn-sm "><i class="fa fa-times"></i>
+                    </a>
+                </div>                
             </div>
-            <!-- <div hidden>
-                <input type="text" value="{{ id_cliente }}" id="id_cliente">
-                <input type="text" value="{{ forma_cobro }}" id="forma_cobro">
-                <input type="text" value="{{ codigo_cobranza }}" id="codigo_cobranza">
-                <input type="text" value="{{ cobranza.id }}" id="id_cobranza">
-                <input type="text" value="{{ cobranza.cxtipofactoring.id }}" id="tipo_factoring">
-                <input type="text" value="{{ cobranza.cxaccesorio.id }}" id="id_accesorio">
-                <input type="text" value="{{ cheque.id }}" id="id_cheque">
-                <input type="text" value="{{ cheque.nvalor|floatformat:"2u"  }}" id="valor_cheque">
-                <input type="text" value="{{ cheque.cxtipoparticipante }}" id="tipo_emisor">
-                <input type="text" value="{{ tipo_operacion }}" id="tipo_operacion">
-            </div> -->
             <div class="card-body card-block">
-                    <!-- columna izquierda -->
                     <!-- <div class="col-6"> -->
-                            <!-- fechas -->
                         <div class="row form-group">
                             <div class="col-md-5"><label for="id_ddesembolso" class=" form-control-label">
                                 Operación
@@ -116,22 +111,15 @@
                 <!-- </div> -->
             </div>    
             <div class="card-footer">
-                <a 
-                {% if lista_deposito == 'Cuentas cliente' %}
-                    href="{% url 'cuentasconjuntas:listacobranzasporconfirmar' %}"
-                {% else %}
-                    href="{% url 'cobranzas:listacobranzasporconfirmar' %}"
-                {% endif %}
-                class="btn btn-danger btn-sm "><i class="fa fa-ban"></i> Cancelar
-                </a>
-                <button type="button" class="btn btn-primary btn-sm" onclick="AceptarProtesto()">  
+                <div class="text-right">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="AceptarProtesto()">  
                     <i class="fa fa-dot-circle-o"></i> Protestar
                 </button>
-
+                </div>
             </div>
         </div>
-    </div>
-</form>
+    </form>
+</div>
 {% endblock %}
 {% block js_page %}
 <!-- <script type="text/javascript" src="{% static 'factorweb/js/datosprotesto.js' %}"></script> -->
@@ -144,7 +132,7 @@ const id_cobranza = "{{ cobranza.id }}"
 const tipo_factoring = "{{ cobranza.cxtipofactoring.id }}"
 const id_accesorio = "{{ cobranza.cxaccesorio.id }}"
 const id_cheque = "{{ cheque.id }}"
-const valor_cheque = "{{ cheque.nvalor }}"
+const valor_cheque = "{{ cheque.nvalor |floatformat:'2u' }}"
 const tipo_emisor = "{{ cheque.cxtipoparticipante }}"
 const tipo_operacion = "{{ tipo_operacion }}"
 

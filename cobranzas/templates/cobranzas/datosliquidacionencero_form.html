@@ -31,150 +31,228 @@
 
 <form  method="post" id="frmCobranza" enctype="multipart/form-data" 
     class="form-horizontal">
-    <!-- <div class="col-lg-6"> -->
-    <div class="card">
             {% csrf_token %}
-        <div class="card-header">
-            {% if tipo == "Cobranza" %}
-            <strong>Valores a cobrar de documentos</strong> de {{ cliente }}
-            {% else %}
-            <strong>Valores a recuperar de protestos</strong> de {{ cliente }}
-            {% endif %}
-        </div>
-        <div class="card-body card-block">
-            <!-- lista de clientes -->
-            <div class="row form-group">
-                <div class="col-md-1"><label for="id_dcobranza" 
-                    class=" form-control-label">
-                    Fecha de corte</label>
-                </div>
-                <div class="col-md-2 animate__animated animate__shakeX">
-                    <input type="date" class="form-control" name="fechahasta"  
-                    id="fechahasta" placeholder="Hasta" 
-                    aria-label="Ingrese fecha corte" >
-                </div>
-
-                <div class="col-md-1">
-                    <label for="id_nvalor" class=" form-control-label">
-                    Valor de cobranza</label>
-                </div>
-                <div class="col-md-2">
-                    <input type="number" class="form-control" name="nvalor"  
-                    id="id_nvalor" placeholder="Valor" readonly
-                    aria-label="Ingrese valor de cobranza" >
-                </div>
-               
-                <div class="col-md-1 "><label for="id_nvalor" 
-                    class=" form-control-label">
-                    Sobrepago</label>
-                </div>
-                <div class="col-md-2">
-                    <input type="number" class="form-control" name="nsobrepago"  
-                    id="id_nsobrepago" placeholder="Sobrepago" readonly
-                    aria-label="Ingrese sobrepago" >
-                </div>
-            </div>
-
-            <div >
-                <small>
-                        
-                    <table id="table"                      
-                        data-show-columns-toggle-all="true"
-                        data-detail-formatter="detailFormatter"
-                        data-minimum-count-columns="2"
-                        data-id-field="id"
-                        data-unique-id="id"
-                        data-show-footer="true"
-                        data-side-pagination="server"
-                        {% if tipo == 'Cobranza' %}
-                        data-url="{% url 'cobranzas:detalle_documentosfacturaspuras_liquidacion_en_cero' documentos %}"
-                        {% else %}
-                        data-url="{% url 'cobranzas:detalle_documentosprotestos_liquidacion_en_cero' documentos %}"
-                        {% endif %}
-                        >
-                        </table>
-
-                </small>
-
-            </div>
-            <div class="row form-group">
-                <div class="col-md-5"></div>
-                <div class="col-md-7 ">
-                    <div class="alert alert-warning" role="alert">
-                        <small>
-                        Los <strong>Valores a cobrar</strong> corresponden al anticipo del saldo en 
-                        <strong>Recibido</strong> y lo restante en <strong>Bajas</strong> 
-                        </small>
-                    </div>
-                </div>
-            </div>
-            <div class="dropdown-divider"></div>
-            <div>
-
-                    <h5 class="heading-title mb-1 text-secondary">Detalle de cargos por liquidación</h5>
-            </div>
-            <div >
-
-                    <small>
-
-                    <table id="table_cargos"  class="table table-striped table-bordered">
-                        <thead>
-                            <tr>
-                            <th data-field="cobranza">Cobranza</th>
-                            <th data-field="asignacion">Asignación</th>
-                            <th data-field="documento">Documento</th>
-                            <th data-field="dias_vencidos">Días vencidos</th>
-                            <th data-field="dias_negociados">Días negociados</th>
-                            <th data-field="valor_cobrado">Aplicado a cartera</th>
-                            <!-- Las columnas se crearán dinámicamente en JavaScript -->
-                            </tr>
-                        </thead>
-                    </table>
-
-                    </small>
-            </div>
-                    
-            <div {%  if total_otros_cargos == 0 %} hidden {% endif %}>
-                <br>
-                    <h5 class="heading-title mb-1 text-secondary">Detalle de cargos previos</h5>
-
-
-                <small>
-                    <table id="table_otros"  class="table table-striped table-bordered">
-                    <thead>
-                        <tr>
-                        <th data-field="descripcion">Cargo</th>
-                        <th data-field="codigo_cobranza">Operación</th>
-                        <th data-field="fecha">Fecha</th>
-                        <th data-field="valor">Valor</th>
-                        </tr>
-                    </thead>
-                    </table>
-                </small>
-            </div>
-
-        </div>    
-          
-        <div class="card-footer">
-            {% if tipo == "Cobranza" %}
-                {% if por_vencer == 'Si' %}
-                    <a href="{% url 'cobranzas:listadocumentosporvencer' %}" 
-                    class="btn btn-danger btn-sm">
-                        <i class="fa fa-ban"></i> Cancelar
-                    </a>
+    <!-- <div class="col-lg-6"> -->
+    <div class="card" >
+        <div class="card-header" style="background-color: white;">
+            <div class="d-flex justify-content-between align-items-center ">
+                <h5>
+                    {% if tipo == "Cobranza" %}
+                        Valores a cobrar de documentos
+                    {% else %}
+                        Valores a recuperar de protestos
+                    {% endif %}
+                    de {{ cliente }}
+                </h5>
+                {% if tipo == "Cobranza" %}
+                    {% if por_vencer == 'Si' %}
+                        <a href="{% url 'cobranzas:listadocumentosporvencer' %}" 
+                        class="btn  btn-sm">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'cobranzas:listadocumentosvencidos' %}" 
+                        class="btn  btn-sm">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    {% endif %}
                 {% else %}
-                    <a href="{% url 'cobranzas:listadocumentosvencidos' %}" 
-                    class="btn btn-danger btn-sm">
-                        <i class="fa fa-ban"></i> Cancelar
+                    <a href="{% url 'cobranzas:listaprotestospendientes' %}" 
+                    class="btn  btn-sm">
+                        <i class="fa fa-times"></i>
                     </a>
                 {% endif %}
-            {% else %}
-                <a href="{% url 'cobranzas:listaprotestospendientes' %}" 
-                class="btn btn-danger btn-sm">
-                    <i class="fa fa-ban"></i> Cancelar
-                </a>
-            {% endif %}
+            </div>
         </div>
+        <div class="card-body card-block">
+            <div class="card" style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <div class="card-header">
+                    <h6>Datos de la cobranza</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row form-group">
+                        <div class="col-md-1"><label for="id_dcobranza" 
+                            class=" form-control-label">
+                            Fecha de corte</label>
+                        </div>
+                        <div class="col-md-2 animate__animated animate__shakeX">
+                            <input type="date" class="form-control" name="fechahasta"  
+                            id="fechahasta" placeholder="Hasta" 
+                            aria-label="Ingrese fecha corte" >
+                        </div>
+                        <div class="col-md-3"></div>
+                        <!-- <div class="col-md-1">
+                            <label for="id_nvalor" class=" form-control-label">
+                            Valor de cobranza</label>
+                        </div>
+                        <div class="col-md-2">
+                            <div id="divValor"></div>
+                        </div> -->
+                        <div class="col-md-3">
+                            <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <div id="divValor"></div>
+                                <label class="form-control-label">
+                                    Valor de cobranza
+                                </label>
+                            </div>
+                        </div>
+                    
+                        <!-- <div class="col-md-1 "><label for="id_nvalor" 
+                            class=" form-control-label">
+                            Sobrepago</label>
+                        </div>
+                        <div class="col-md-2">
+                            <div id="divSobrepago"></div>
+                        </div> -->
+                        <div class="col-md-3">
+                            <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <div id="divSobrepago"></div>
+                                <label class="form-control-label">
+                                    Sobrepago
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div >
+                        <!-- <small>                             -->
+                            <table id="table"                      
+                                data-show-columns-toggle-all="true"
+                                data-detail-formatter="detailFormatter"
+                                data-minimum-count-columns="2"
+                                data-id-field="id"
+                                data-unique-id="id"
+                                data-show-footer="true"
+                                data-side-pagination="server"
+                                {% if tipo == 'Cobranza' %}
+                                data-url="{% url 'cobranzas:detalle_documentosfacturaspuras_liquidacion_en_cero' documentos %}"
+                                {% else %}
+                                data-url="{% url 'cobranzas:detalle_documentosprotestos_liquidacion_en_cero' documentos %}"
+                                {% endif %}
+                                >
+                                </table>
+
+                        <!-- </small> -->
+                        <div class="row form-group">
+                            <div class="col-md-5"></div>
+                            <div class="col-md-7 ">
+                                <div class="alert alert-warning" role="alert">
+                                    <!-- <small> -->
+                                    Los <strong>Valores a cobrar</strong> corresponden al anticipo del saldo en 
+                                    <strong>Recibido</strong> y lo restante en <strong>Bajas</strong> 
+                                    <!-- </small> -->
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+            <div class="card" style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <div class="card-header" style="background-color: white;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="heading-title text-secondary">Detalle de cargos por liquidación</h6>
+                        <h6 class="heading-title text-secondary">Total: <span id="total_cargos_liquidacion"></span></h6>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row form-group">
+                        <div class="col-md-3" id="divDCV0" hidden>
+                            <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <div id="divDCV"></div>
+                                <label class="form-control-label">
+                                    <div id="divDCVNombre"></div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-3" id="divGAOA0" hidden>
+                            <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <div id="divGAOA"></div>
+                                <label class="form-control-label">
+                                    <div id="divGAOANombre"></div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-3" id="divIVA0" hidden>
+                            <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <div id="divIVA"></div>
+                                <label class="form-control-label">
+                                    IVA
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-3" id="divBajas0" hidden>
+                            <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <div id="divBajas"></div>
+                                <label class="form-control-label">
+                                    Bajas
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="body">
+                        <!-- <small> -->
+                        <table id="table_cargos"  class="table table-hover table-bordered">
+                                <!-- Las columnas se crearán dinámicamente en JavaScript -->
+                        </table>
+
+                        <!-- </small> -->
+                        
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-3" id="divGAO0" hidden>
+                            <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <div id="divGAO"></div>
+                                <label class="form-control-label">
+                                    <div id="divGAONombre"></div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-3" id="divDC0" hidden>
+                            <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <div id="divDC"></div>
+                                <label class="form-control-label">
+                                    <div id="divDCNombre"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- </div> -->
+            </div>  
+            <div class="card" style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <div class="card-header" style="background-color: white;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="heading-title text-secondary">Detalle de cargos previos</h6>
+                        <h6 class="heading-title text-secondary">Total: <span id="divOtrosCargos"></span></h6>
+                    </div>
+                </div>
+                <!-- <div class="row form-group mb-3">
+                    <div class="col-md-9">
+                        <h6 class="heading-title text-secondary">Detalle de cargos previos</h6>
+                    </div>
+                </div> -->
+                <div class="body">
+                <!-- <small> -->
+                    <table id="table_otros"  class="table table-hover table-bordered">
+                    <!-- <thead>
+                        <tr>
+                        <th data-field="descripcion">Cargo</th>
+                        <th data-field="codigo_cobranza">Operación / Factura</th>
+                        <th data-field="fecha">Fecha</th>
+                        <th data-field="valor">Saldo</th>
+                        </tr>
+                    </thead> -->
+                    </table>
+                <!-- </small> -->
+
+                </div>
+            </div>
+        </div>    
+          
     </div>
     <!-- </div> -->
 </form>
@@ -249,8 +327,10 @@ function Recalcular(fecha_cobro){
             if (data.error != '') {
                 MensajeError(data.error);
             }else{
-                inicializaValor('id_nvalor', data.total_cobranza);
-                inicializaValor('id_nsobrepago', data.sobrepago);
+                // inicializaValor('id_nvalor', data.total_cobranza);
+                // inicializaValor('id_nsobrepago', data.sobrepago);
+                inicializarInner('divValor', '<h6>' + data.total_cobranza + '</h6>');
+                inicializarInner('divSobrepago', '<h6>' + data.sobrepago + '</h6>');
 
                 // Crear columnas dinámicamente basadas en los totales
                 var columns = [
@@ -264,33 +344,92 @@ function Recalcular(fecha_cobro){
 
                 // Agregar columnas condicionalmente
                 if (data.total_dc > 0) {
-                    columns.push({field: 'tasa_dc', title: 'Tasa DC %'});
-                    columns.push({field: 'dc', title: data.nombre_dc + ' negociado'});
+                    columns.push({field: 'dc_combined', title: data.nombre_dc + '<br/>' + ' negociado'});
+                    // columns.push({field: 'dc', title: data.nombre_dc + ' negociado'});
+                    inicializarInner('divDC', '<h6>' + data.total_dc + '</h6>');
+                    inicializarInner('divDCNombre', data.nombre_dc + ' negociado');
+                    document.getElementById('divDC0').hidden = false;
                 }
                 if (data.total_dcv > 0) {
-                    columns.push({field: 'tasa_dcv', title: 'Tasa mora %'});
-                    columns.push({field: 'dcv', title: data.nombre_dc + ' vencido'});
+                    columns.push({field: 'dcv_combined', title: data.nombre_dc + '<br/>' + ' vencido'});
+                    // columns.push({field: 'dcv', title: data.nombre_dc + ' vencido'});
+                    inicializarInner('divDCV', '<h6>' + data.total_dcv + '</h6>');
+                    inicializarInner('divDCVNombre', data.nombre_dc + ' vencido');
+                    document.getElementById('divDCV0').hidden = false;
                 }
                 if (data.total_gao > 0) {
-                    columns.push({field: 'tasa_gao', title: 'Tasa GAO'});
-                    columns.push({field: 'gao', title: data.nombre_gao});
+                    columns.push({field: 'gao_combined', title: data.nombre_gao});
+                    // columns.push({field: 'gao', title: data.nombre_gao});
+                    inicializarInner('divGAO', '<h6>' + data.total_gao + '</h6>');
+                    inicializarInner('divGAONombre', data.nombre_gao);
+                    document.getElementById('divGAO0').hidden = false;
                 }
                 if (data.total_gaoa > 0) {
-                    columns.push({field: 'tasa_gaoa', title: 'Tasa GAOA'});
-                    columns.push({field: 'gaoa', title: data.nombre_gaoa});
+                    columns.push({field: 'gaoa_combined', title: data.nombre_gaoa});
+                    // columns.push({field: 'gaoa', title: data.nombre_gaoa});
+                    inicializarInner('divGAOA', '<h6>' + data.total_gaoa + '</h6>');
+                    inicializarInner('divGAOANombre', data.nombre_gaoa);
+                    document.getElementById('divGAOA0').hidden = false;
                 }
+                // en liquidacion en cero no se muestran las retenciones y bajas, 
+                // pero se dejan estas columnas para mostrar el total de retenciones y bajas en la parte superior
                 if (data.total_cargoretenciones > 0) {
                     columns.push({field: 'retenciones', title: 'Retenciones'});
                 }
                 if (data.total_cargobajas > 0) {
                     columns.push({field: 'bajas', title: 'Bajas'});
+                    inicializarInner('divBajas', '<h6>' + data.total_cargobajas + '</h6>');
+                    document.getElementById('divBajas0').hidden = false;
                 }
+                // cargar IVA
+                if (data.total_iva > 0) {
+                    inicializarInner('divIVA', '<h6>' + data.total_iva + '</h6>');
+                    document.getElementById('divIVA0').hidden = false;
+                }
+
+                // cargar el total de cargos en la liquidación incluyendo el IVA
+                const total_cargos_liquidacion = parseFloat(data.total_dc) + parseFloat(data.total_dcv) 
+                    + parseFloat(data.total_gao) + parseFloat(data.total_gaoa) 
+                    + parseFloat(data.total_cargoretenciones) + parseFloat(data.total_cargobajas) 
+                    + parseFloat(data.total_iva);
+
+                document.getElementById('total_cargos_liquidacion').innerText = total_cargos_liquidacion.toFixed(2);
 
                 // cargar la tabla de cargos
                 const cargostxt = data.cargos_operativos;
                 const otroscargostxt = data.cargos_no_operativos;
                 // para cargar la data en la tabla se necesita convertir, se usa JSON.parse
                 var cargosData = JSON.parse(cargostxt);
+                // Process data to combine tasa_dc and dc columns
+                if (cargosData && cargosData.length > 0) {
+                    cargosData = cargosData.map(function(row) {
+                        if (row.tasa_dc !== undefined && row.dc !== undefined) {
+                            row.dc_combined = '<div class="combined-dc-column"><div class="tasa-value">$' + 
+                                            parseFloat(row.dc).toFixed(2) + '</div><div class="dc-value"><span class="badge badge-info">Tasa: ' + 
+                                            parseFloat(row.tasa_dc).toFixed(2) + '%</span></div></div>'
+                                            ;
+                        }
+                        if (row.tasa_dcv !== undefined && row.dcv !== undefined) {
+                            row.dcv_combined = '<div class="combined-dcv-column"><div class="tasa-value">$' + 
+                                            parseFloat(row.dcv).toFixed(2) + '</div><div class="dc-value"><span class="badge badge-info">Tasa: ' + 
+                                            parseFloat(row.tasa_dcv).toFixed(2) + '%</span></div></div>'
+                                            ;
+                        }
+                        if (row.tasa_gao !== undefined && row.gao !== undefined) {
+                            row.gao_combined = '<div class="combined-gao-column"><div class="tasa-value">$' + 
+                                            parseFloat(row.gao).toFixed(2) + '</div><div class="dc-value"><span class="badge badge-info">Tasa: ' + 
+                                            parseFloat(row.tasa_gao).toFixed(2) + '%</span></div></div>'
+                                            ;
+                        }
+                        if (row.tasa_gaoa !== undefined && row.gaoa !== undefined) {
+                            row.gaoa_combined = '<div class="combined-gaoa-column"><div class="tasa-value">$' + 
+                                            parseFloat(row.gaoa).toFixed(2) + '</div><div class="dc-value"><span class="badge badge-info">Tasa: ' + 
+                                            parseFloat(row.tasa_gaoa).toFixed(2) + '%</span></div></div>'
+                                            ;
+                        }
+                        return row;
+                    });
+                }
 
                 $tablecargos.bootstrapTable('destroy').bootstrapTable({
                     data: cargosData,
@@ -304,6 +443,22 @@ function Recalcular(fecha_cobro){
 
                 $tableotros.bootstrapTable('destroy').bootstrapTable({
                     data: otros,
+                    showFooter: true,
+                    columns: [
+                        {field: 'descripcion', title: 'Cargo'},
+                        {field: 'codigo_cobranza', title: 'Operación / Factura'},
+                        {field: 'fecha', title: 'Fecha'},
+                        {field: 'valor', title: 'Saldo', footerFormatter: function(data) {
+                            let sum = 0;
+                            data.forEach(row => {
+                                if (row.valor) {
+                                    sum += parseFloat(row.valor) || 0;
+                                }
+                            });
+                            inicializarInner('divOtrosCargos', sum.toFixed(2));
+                            return '';
+                        }}
+                    ]
                 });
             }
         }) 

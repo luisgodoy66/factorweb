@@ -95,7 +95,7 @@ class TipoFactoringEdit(SinPrivilegios, generic.UpdateView):
         return obj
 
     def form_valid(self, form):
-        form.instance.cxusuariocrea = self.request.user
+        form.instance.cxusuariomodifica = self.request.user.id
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
@@ -234,6 +234,34 @@ class ClasesParticipanteNew(SinPrivilegios, generic.CreateView):
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(ClasesParticipanteNew, self).get_context_data(**kwargs)
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class ClasesParticipanteEdit(SinPrivilegios, generic.UpdateView):
+    model = Clases_cliente
+    template_name="empresa/datosclaseparticipante_form.html"
+    form_class=ClasesParticipantesForm
+    context_object_name='clase'
+    success_url= reverse_lazy("empresa:listaclasesparticipantes")
+    login_url = 'bases:login'
+    permission_required="empresa.change_clases_cliente"
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(ClasesParticipanteEdit, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -499,7 +527,7 @@ class DatosEmpresaEdit(SinPrivilegios, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-from django.db.models import Prefetch
+# from django.db.models import Prefetch
 
 class OtrosCargosView(SinPrivilegios, generic.ListView):
     model = Movimientos_maestro
@@ -614,6 +642,8 @@ class TiposEmpresasView(SinPrivilegios, generic.ListView):
         qs=Tipos_empresas.objects.filter(leliminado = False
                                      , empresa = id_empresa.empresa)\
                                      .order_by("cttipoempresa")
+        print(qs)
+        print(id_empresa.empresa.id)
         return qs
     
     def get_context_data(self, **kwargs):
@@ -626,9 +656,9 @@ class TiposEmpresasView(SinPrivilegios, generic.ListView):
 
 class TiposEmpresasNew(SinPrivilegios, generic.CreateView):
     model = Tipos_empresas
-    template_name="empresa/datostiposempresas_form.html"
+    template_name="empresa/datostipoempresa_form.html"
     form_class=TiposEmpresasForm
-    context_object_name='consulta'
+    context_object_name='tipoempresa'
     success_url= reverse_lazy("empresa:listatiposempresas")
     login_url = 'bases:login'
     permission_required="empresa.add_tipos_empresas"
@@ -642,6 +672,27 @@ class TiposEmpresasNew(SinPrivilegios, generic.CreateView):
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(TiposEmpresasNew, self).get_context_data(**kwargs)
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class TiposEmpresasEdit(SinPrivilegios, generic.UpdateView):
+    model = Tipos_empresas
+    template_name="empresa/datostipoempresa_form.html"
+    form_class=TiposEmpresasForm
+    context_object_name='tipoempresa'
+    success_url= reverse_lazy("empresa:listatiposempresas")
+    login_url = 'bases:login'
+    permission_required="empresa.change_tipos_empresas"
+
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(TiposEmpresasEdit, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp

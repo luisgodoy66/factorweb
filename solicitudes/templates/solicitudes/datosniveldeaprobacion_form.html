@@ -15,18 +15,23 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
-<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal">
-    <div class="col-lg-8">
-        <div class="card">
+<div class="col-lg-8">
+    <form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal">
             {% csrf_token %}
-            <div class="card-header">
-                <strong>Nivel de aprobación</strong> 
+        <div class="card">
+            <div class="card-header" style="background-color: white;">
+                <div class="d-flex justify-content-between align-items-center ">
+                    <h5>Nivel de aprobación</h5> 
+                    <a href="{% url 'solicitudes:listanivelesaprobacion' %}" class="btn  btn-sm">
+                        <i class="fa fa-times"></i>
+                    </a>
+                </div>
             </div>
             <div class="card-body card-block">
                     
                     <div class="row form-group">
                         <div class="col col-md-3">
-                            <label for="id_cxparticipante" class=" form-control-label">{{form.nmontominimo.label}}</label></div>
+                            <label for="id_nmontominimo" class=" form-control-label">{{form.nmontominimo.label}}</label></div>
                         <div class="col-12 col-md-9">
                             {{form.nmontominimo}}
                             <!-- <small class="form-text text-muted">Máximo 13 caracteres</small> -->
@@ -35,7 +40,7 @@
 
                     <div class="row form-group">
                         <div class="col col-md-3">
-                            <label for="id_ctnombre" class=" form-control-label">{{form.naprobadores.label}}</label></div>
+                            <label for="id_naprobadores" class=" form-control-label">{{form.naprobadores.label}}</label></div>
                         <div class="col-12 col-md-9">
                             {{form.naprobadores}}
                         </div>
@@ -50,7 +55,7 @@
                     </div> -->
                     <div class="row form-group">
                         <div class="col col-md-3">
-                            <label for="id_cttelefono2" class=" form-control-label">{{form.configuracionslack.label}}</label></div>
+                            <label for="id_configuracionslack" class=" form-control-label">{{form.configuracionslack.label}}</label></div>
                         <div class="col-12 col-md-9">
                             {{form.configuracionslack}}
                         </div>
@@ -71,15 +76,15 @@
             </div>    
             
             <div class="card-footer">
-                <a href="{% url 'solicitudes:listanivelesaprobacion' %}" class="btn btn-danger btn-sm">
-                    <i class="fa fa-ban"></i> Cancelar
-                </a>
-                <button type="submit" class="btn btn-primary btn-sm">
-                    <i class="fa fa-dot-circle-o"></i> Grabar
-                </button>
+                <div class="text-right">
+                    <button type="submit" class="btn btn-secondary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+
+                </div>
             </div>
         </div>
-    </div>
-</form>
+    </form>
+</div>
 {% endblock %}
 

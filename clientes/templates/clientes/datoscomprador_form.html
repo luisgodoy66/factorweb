@@ -21,9 +21,13 @@
     <!-- <div class="col-lg-6"> -->
         <div class="card">
             {% csrf_token %}
-            <div class="card-header">
-                <strong>Ficha general</strong> 
-                de {% if datosparticipante %} {{ datosparticipante }} {% else %}  nuevo comprador {% endif %} 
+            <div class="card-header" style="background-color: white;">
+                <div class="d-flex justify-content-between align-items-center ">
+                    <h5>Ficha general de {% if datosparticipante %} {{ datosparticipante }} {% else %}  nuevo comprador {% endif %}</h5> 
+                    <a href="{% url 'clientes:listacompradores' %}" class="btn  btn-sm">
+                        <i class="fa fa-times"></i>
+                    </a>
+                </div>
             </div>
             <div class="card-body card-block">
                 <!-- columna izquierda -->
@@ -127,7 +131,7 @@
                         </div>
                     </div> 
                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cxactividad" class=" form-control-label">
+                        <div class="col col-md-3"><label for="id_actividad" class=" form-control-label">
                             {{form.actividad.label}}
                         </label></div>
                         <div class="col-12 col-md-9">
@@ -147,12 +151,12 @@
             </div>    
             
             <div class="card-footer">
-                <a href="{% url 'clientes:listacompradores' %}" class="btn btn-danger btn-sm">
-                    <i class="fa fa-ban"></i> Cancelar
-                </a>
-                <button type="submit" class="btn btn-primary btn-sm">
-                    <i class="fa fa-dot-circle-o"></i> Grabar
-                </button>
+                <div class="text-right">
+                    <button type="submit" class="btn btn-secondary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+
+                </div>
             </div>
            <!-- Sección para mostrar errores del formulario -->
            {#% if form_submitted and form.errors %#}

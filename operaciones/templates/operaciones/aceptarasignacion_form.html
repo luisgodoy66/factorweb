@@ -15,177 +15,263 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
-<form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal">
-    <!-- <div class="col-lg-6"> -->
-    <div class="card">
-            {% csrf_token %}
-        <div class="card-header">
-            <strong>Solicitud de factoring {{tipo_factoring}}</strong> 
-            {% if asignacion.id %} de  {{ asignacion.cxcliente }}  {% else %}  nueva{% endif %} 
+<div class="card ">
+    <div class="card-header" style="background-color: white;">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="heading-title mb-3">Solicitud de factoring {{tipo_factoring}}</h5>
+            <a href="{% url 'solicitudes:listasolicitudes' %}" class="btn btn-sm"
+                title="Salir">
+                <i class="fa fa-times"></i>
+            </a>
         </div>
-        <div class="col-6 col-md-6" hidden>
-            <input id="asignacion_id" name="asignacion_id" value="{{ asignacion.id }}" >
-            <input id="id_cliente" name="id_cliente" value="{{ asignacion.cxcliente_id }}">
-            <input id="carga_gao" name="carga_gao" value="{{ gao.generar }}" >
-            <input id="carga_dc" name="carga_dc" value="{{ dc.generar }}">
-            <input id="usa_linea_factoring" name="usa_linea_factoring" value="{{ usa_linea_factoring }}">
-            <input id="tipo_asignacion" name="tipo_asignacion" value="{{ tipo_asignacion }}">
+    </div>
+    <div class="card-body">
+        <!-- datos de cliente -->
+        <div class="row form-group">
+            <div class="col-12">
+                <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    <div class="card-header" style="background-color: white;">
+                        <div class="d-flex justify-content-between align-items-center ">
+                            <h6 class="heading-title mb-1 text-secondary">Información de {{ asignacion.cxcliente }} </h6>
+                            <a type="button" href="{% url 'operaciones:datosoperativos_editar' id_cliente %}" style="border: 1px solid #ddd; border-radius: 8px; padding: 10px;"
+                                class="btn btn-outline-secondary btn-sm"><i class="fa fa-folder"></i> Ir a datos operativos</a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row form-group ">
+                            <div class="col-2">
+                                <label class="form-control-label"><h6>
+                                    Estado:</h6>
+                                </label><br>
+                                {{ estado_cliente|default:'No registrado' }}
+                            </div>  
+                            <div class="col-4">
+                                <label class="form-control-label"><h6>
+                                    Beneficiario de cheque:</h6>
+                                </label><br>
+                                {{ beneficiario|default:'No registrado' }}
+                            </div>
+                            <div class="col-5">
+                                <label class="form-control-label"><h6>
+                                    Cuenta de transferencia:</h6>
+                                </label><br>
+                                {{ cuenta_transferencia|default:'No registrada' }}
+                            </div>  
+                            <div class="col-1">
+                                <label class="form-control-label"><h6>
+                                    Clase:</h6>
+                                </label><br>
+                                {{ clase_cliente|default:'No registrada' }}
+                            </div>  
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
         </div>
-            <div class="card-body card-block">
-                <!-- columna izquierda -->
-                <div class="col-7">
-                        <!-- fechas -->
-                    <div class="row form-group">
-                        <div class="col-md-2"><label for="id_dnegociacion" class=" form-control-label">
-                            {{ form_asignacion.dnegociacion.label}}
-                        </label></div>
-                        <div class="col-md-3">
-                            {{ form_asignacion.dnegociacion}}
+        <!-- datos de asignacion y liquidacion -->
+        <div class="row form-group">
+            <!-- datos de aceptación -->
+            <div class="col-7">
+                <form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal">
+                    <!-- <div class="col-lg-6"> -->
+                    {% csrf_token %}
+                    <div hidden>
+                        <input id="asignacion_id" name="asignacion_id" value="{{ asignacion.id }}" >
+                        <input id="id_cliente" name="id_cliente" value="{{ asignacion.cxcliente_id }}">
+                        <input id="carga_gao" name="carga_gao" value="{{ gao.generar }}" >
+                        <input id="carga_dc" name="carga_dc" value="{{ dc.generar }}">
+                        <input id="usa_linea_factoring" name="usa_linea_factoring" value="{{ usa_linea_factoring }}">
+                    </div>
+                    <!-- <div class="col-7 "style="border:1px solid #ddd; padding:15px; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);"> -->
+                    <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header">
+                            <h6>Datos de la asignación</h6> 
                         </div>
-                        <div class="col-md-2"><label for="id_ddesembolso" class=" form-control-label">
-                            {{ form_asignacion.ddesembolso.label}}
-                        </label></div>
-                        <div class="col-md-5">
-                            {{ form_asignacion.ddesembolso}}
+                        <div class="card-body">
+                            <div class="row form-group">
+                                <div class="col-md-3"><label for="id_dnegociacion" class="form-control-label">
+                                    {{ form_asignacion.dnegociacion.label}}
+                                </label></div>
+                                <div class="col-md-9">
+                                    <!-- {{ form_asignacion.dnegociacion}} -->
+                                    {% now "j F Y" %}
+                                </div>
+                            </div>  
+                            <div class="row form-group">
+                                <div class="col-md-3"><label for="id_nvalor" class="form-control-label">
+                                    {{ form_asignacion.nvalor.label }}
+                                </label></div>
+                                <div class="col-md-9">
+                                    <!-- {{ form_asignacion.nvalor}} -->
+                                      <div  id = 'divValor'></div>
+                                </div>
+                            </div>                          
+                            <div class="row form-group">
+                                <div class="col-md-3"><label for="id_ddesembolso" class="form-control-label">
+                                    {{ form_asignacion.ddesembolso.label}}
+                                </label></div>
+                                <div class="col-md-9">
+                                    {{ form_asignacion.ddesembolso}}
+                                </div>
+                            </div>
+                            <div class="row form-group"{% if not condicion_operativa %} hidden {% endif %}>
+                                <div class="col col-md-3">
+                                    <label for="condicion_id" class="form-control-label">
+                                    Condición operativa
+                                </label></div>
+                                <div class="col col-md-9">
+                                    <select data-placeholder="Seleccione una condición operativa..." class="form-control" tabindex="1" 
+                                    id="condicion_id" name="condicion_id" 
+                                    >
+                                    <!-- style="background-color: #f8f9fa;" -->
+                                    {% for cond in condicion_operativa %}
+                                    <option value="{{ cond.id}}" >{{ cond.ctcondicion}} </option>
+                                    {% endfor %}
+                                    </select>
+                                </div>
+                            </div>  
+                            <div class="row form-group">
+                                <div class="col-md-3"><label for="id_ctinstrucciondepago" class="form-control-label">
+                                    {{ form_asignacion.ctinstrucciondepago.label}}</label></div>
+                                <div class="col-md-9">
+                                    {{ form_asignacion.ctinstrucciondepago}}
+                                </div>
+                            </div>  
+
                         </div>
-                    </div>  
-                       
-                    <div class="row form-group">
-                        <div class="col-md-2"><label for="id_nvalor" class=" form-control-label">
-                            {{ form_asignacion.nvalor.label }}
-                        </label></div>
-                        <div class="col-md-3">
-                            {{ form_asignacion.nvalor}}
+                        <div class="card-footer">
+                            <div class="text-right">
+                                <button type="button" onclick="AceptarAsignacion()" class="btn btn-secondary btn-sm ">
+                                    <i class="fa fa-dot-circle-o"></i> Aceptar
+                                </button>
+                            </div>
                         </div>
-                        <div class="col col-md-2"{% if not condicion_operativa %} hidden {% endif %}>
-                            <label for="id_nvalor" class=" form-control-label">
-                            Condición operativa
-                        </label></div>
-                        <div class="col col-md-5"{% if not condicion_operativa %} hidden {% endif %}>
-                            <select data-placeholder="Seleccione una condición operativa..." class="form-control" tabindex="1" 
-                            id="condicion_id" name="condicion_id"
-                            >
-                            {% for cond in condicion_operativa %}
-                            <option value="{{ cond.id}}" >{{ cond.ctcondicion}} </option>
-                            {% endfor %}
-                            </select>
+                    </div>
+                <!-- </div> -->
+
+                </form>
+            </div>
+            <!-- columna derecha -->
+            <div class="col-5">
+            <!-- <div class="col-4" style="border:1px solid #ddd; padding:15px; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);"> -->
+                <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    <div class="card-header" style="background-color: white;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="heading-title mb-1 text-secondary">Liquidación de asignación</h6> 
+                            <button type="button" class="btn btn-sm" id="btnCopiarLiquidacion" title="Copiar al clipboard como texto" 
+                                style="background-color: white;">
+                                <i class="fa fa-clipboard"></i>
+                            </button>
                         </div>
-                    </div>  
-                    <div class="row form-group">
-                        <div class="col-md-2"><label for="id_ctinstrucciondepago" class=" form-control-label">
-                            {{ form_asignacion.ctinstrucciondepago.label}}</label></div>
-                        <div class="col-md-10">
-                            {{ form_asignacion.ctinstrucciondepago}}
-                        </div>
-                    </div>  
-                    <!-- datos de cliente -->
-                    <div class="dropdown-divider"></div>
-                    <h5 class="heading-title mb-1 text-secondary">Datos del cliente</h5>
-                    <div class="row form-group">
-                        <div class="col-md-2"><label for="id_nvalor" class=" form-control-label">
-                            Beneficiario de cheque:
-                        </label></div>
-                        <div class="col-md-4">
-                            {{ beneficiario}}
-                        </div>
-                        <div class="col-md-2"><label for="id_nvalor" class=" form-control-label">
-                            Cuenta de transferencia:
-                        </label></div>
-                        <div class="col-md-4">
-                            {{ cuenta_transferencia}}
-                        </div>
-                    </div>  
-                    
+                    </div>
+                    <div class="card-body">
+                        <div class="row form-group">
+                            <!-- anticipo -->
+                            <div class="col-md-8">
+                                <h6 for="id_ctinstrucciondepago" class="form-control-label">
+                                {{ form_asignacion.nanticipo.label }}</h6>
+                            </div>
+                            <!-- <div class="col-md-4">
+                                {{ form_asignacion.nanticipo}}
+                            </div> -->
+                            <div class="col col-md-4 text-right" id="divAnticipo">
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col-md-7">
+                                <h6 for="id_ctinstrucciondepago" class="form-control-label">
+                                - Cargos</h6>
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-7">
+                                <label for="id_ndescuentodecartera" class="form-control-label">{{dc.descripcion}}</label></div>
+                            <!-- <div class="col-md-4">
+                                {{ form_asignacion.ndescuentodecartera}}
+                            </div> -->
+                            <div class="col col-md-4 text-right" id="divDC">
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-7">
+                                <label for="id_ngao" class="form-control-label">{{gao.descripcion}}</label></div>
+                            <!-- <div class="col-md-4">
+                                {{ form_asignacion.ngao}}
+                            </div> -->
+                            <div class="col col-md-4 text-right" id="divGAO">
+                            </div>
+                        </div>  
+                        <!-- cargar los otros cargos -->
+                        {% for item in otros_cargos %}
+                        <div class="row form-group">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-7">
+                                <label for="id_notroscargos" class="form-control-label">{{item}}</label></div>
+                            <div class="col-md-4">
+                                <input type="number" step="1" class="otros_cargos form-control text-right" value="{{item.nvalor}}" 
+                                    data-cargo="{{item}}"
+                                    data-cargaiva = {{item.lcargaiva}} min="0" data-idmovimiento="{{item.movimiento.id}}">
+                            </div>
+                        </div>  
+                        {% endfor %}
+                        <!-- IVA -->
+                        <div class="row form-group">
+                            <!-- <div class="col-md-1"></div> -->
+                            <div class="col-md-2">
+                                <h6 for="id_niva" class="form-control-label">
+                                - {{ form_asignacion.niva.label}}
+                            </h6></div>
+                            <!-- <div class="col-md-3">
+                                <input type="number" class="form-control" readonly 
+                                id="porcentaje_iva" value="{{ porcentaje_iva }}">
+                            </div> -->
+                            <div class="col col-md-3 text-right">{{ porcentaje_iva }}%
+                            </div>
+                            <div class="col-md-3"></div>
+                            <!-- <div class="col-md-4">
+                                {{ form_asignacion.niva}}
+                            </div> -->
+                            <div class="col col-md-4 text-right" id="divIVA">
+                            </div>
+                        </div>  
+
+                    </div>
+                    <div class="card-footer"style="background-color: white;">
+                        <div class="row form-group">
+                            <div class="col-md-8">
+                                <h5>Neto a recibir</h5></div>
+                            <div class="col col-md-4 text-right" id="divNeto">
+                            </div>
+                        </div>  
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- detalle de documentos -->
+        <div class="row form-group">
+            <div class="col-12">
                     <div id="ai-result" style="display:none; margin-top:20px;"></div>
                     <div id="ai-loading" style="display:none; margin-top:15px;">
-                    <em>Analizando factura con IA…</em>
+                        <em>Analizando factura con IA…</em>
                     </div>
-                </div>
-                <!-- columna derecha -->
-                <div class="col-5">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="heading-title mb-1 text-secondary">Liquidación de asignación</h5>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnCopiarLiquidacion" title="Copiar liquidación">
-                            <i class="fa fa-clipboard"></i>
-                        </button>
+                <!-- <div class="col-11 " role="alert" style="border:1px solid #ddd; padding:15px; border-radius:8px; position:relative; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"> -->
+                <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center ">
+                            <h6>Documentos en la solicitud</h6>
+                            <button type="button" onclick="editarCondicionOperativa()" {% if not condicion_operativa %} hidden {% endif %}
+                                style="border: 1px solid #ddd; border-radius: 8px; padding: 10px;"
+                                class="btn btn-outline-secondary btn-sm">
+                                <i class="fa fa-tasks"></i> Ir a condición operativa</button>
+                        </div>
                     </div>
-                    <div class="row form-group">
-                        <div class="col-md-7">
-                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
-                            {{ form_asignacion.nanticipo.label }}</h5></div>
-                        <!-- <div class="col"><label for="id_nanticipo" class=" form-control-label">
-                            {{ form_asignacion.nanticipo.label }}
-                        </label></div> -->
-                        <div class="col-md-5">
-                            {{ form_asignacion.nanticipo}}
-                        </div>
-                    </div>  
-                    <div class="row form-group">
-                        <div class="col-md-7">
-                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
-                            - Cargos</h5></div>
-                    </div>  
-                    <div class="row form-group">
-                        <div class="col-md-1"></div>
-                        <div class="col-md-6">
-                            <label for="id_ngao" class=" form-control-label">{{gao.descripcion}}</label></div>
-                        <div class="col-md-5">
-                            {{ form_asignacion.ngao}}
-                        </div>
-                    </div>  
-                    <div class="row form-group">
-                        <div class="col-md-1"></div>
-                        <div class="col-md-6">
-                            <label for="id_ndescuentodecartera" class=" form-control-label">{{dc.descripcion}}</label></div>
-                        <div class="col-md-5">
-                            {{ form_asignacion.ndescuentodecartera}}
-                        </div>
-                    </div>  
-                    <!-- cargar los otros cargos -->
-                    <!-- <div id="divOtrosCargos"></div> -->
-                     {% for item in otros_cargos %}
-                    <div class="row form-group">
-                        <div class="col-md-1"></div>
-                        <div class="col-md-6">
-                            <label for="id_notroscargos" class=" form-control-label">{{item}}</label></div>
-                        <div class="col-md-5">
-                            <input type="number" step="1" class="otros_cargos form-control " value="{{item.nvalor}}" 
-                                data-cargo="{{item}}"
-                                data-cargaiva = {{item.lcargaiva}} min="0" data-idmovimiento="{{item.movimiento.id}}">
-                        </div>
-                    </div>  
-                    {% endfor %}
-                    <div class="row form-group">
-                        <div class="col-md-1"></div>
-                        <div class="col-md-1">
-                            <label for="id_niva" class=" form-control-label">
-                            {{ form_asignacion.niva.label}}
-                        </label></div>
-                        <div class="col-md-3">
-                            <input type="number" step="0.01" class="form-control" 
-                            readonly id="porcentaje_iva" value="{{ porcentaje_iva }}">
-                        </div>
-                        <div class="col-md-2"></div>
-                        <div class="col-md-5">
-                            {{ form_asignacion.niva}}
-                        </div>
-                    </div>  
-                    <div class="row form-group">
-                        <div class="col-md-7">
-                            <h5 for="id_nvalor" class=" form-control-label">
-                            = Neto a recibir
-                            </h5></div>
-                        <div class="col-md-5">
-                            <input type="number" name="neto" class="form-control" readonly id="neto">
-                        </div>
-                    </div>  
-                </div>
-                <!-- parte inferior -->
-                <div class="row form-group">
-
-                    <div class="col-md-12">
-                    <small>
-                          
+                    <div class="body">
+                    <!-- <small>                             -->
                         <table id="table"                      
                             data-detail-formatter="detailFormatter"
                             data-minimum-count-columns="2"
@@ -196,23 +282,24 @@
                             >
                         </table>
                             <!-- data-show-export="true" -->
-                    </small>
-
+                    <!-- </small> -->
+                    
                     </div>
+                </div>
 
-               </div>
-            </div>    
-        <div class="card-footer">
-            <a href="{% url 'solicitudes:listasolicitudes' %}" class="btn btn-danger btn-sm ">
-                <i class="fa fa-ban"></i> Cancelar
-            </a>
-            <button type="button" onclick="AceptarAsignacion()" class="btn btn-primary btn-sm ">
-                <i class="fa fa-dot-circle-o"></i> Aceptar
-            </button>
+            </div>
         </div>
+    <!-- </div>     -->
     </div>
-    <!-- </div> -->
-</form>
+    <!-- <div class="card-footer">
+        <div class="col-md-6">
+            <a href="{% url 'solicitudes:listasolicitudes' %}" class="btn btn-danger btn-sm">
+                <i class="fa fa-ban"></i> Salir
+            </a>
+
+        </div>
+    </div> -->
+</div>
 {% endblock %}
 {% block js_page %}
 <!-- <script type="text/javascript" src="{% static 'factorweb/js/aceptarasignacion.js' %}"></script> -->
@@ -221,7 +308,7 @@ const $table = jQuery('#table')
 const asignacion_id = capturaValor("asignacion_id")
 const carga_gao = capturaValor("carga_gao")
 const carga_dc = capturaValor("carga_dc")
-const tipo_asignacion = capturaValor("tipo_asignacion")
+const tipo_asignacion = "{{ asignacion.cxtipo }}"
 const porcentaje_iva = "{{porcentaje_iva}}"
 const aplica_otros_cargos = "{{usa_otros_cargos}}"
 var iniciales_gao = "{{ gao.iniciales }}"
@@ -235,8 +322,8 @@ var base_iva_otros = 0
 var base_noiva_otros = 0
 
 window.onload=function(){
-  //  // cerrar side bar
-    CerrarSideBar();
+//    // cerrar side bar
+//     CerrarSideBar();
  
     // configuar cambios en los campos de fecha y valores y select
     jQuery('#condicion_id')
@@ -273,15 +360,22 @@ document.addEventListener('DOMContentLoaded', function() {
     function onInputChange(event) {
         console.log('Nuevo valor:', event.target.value);
         // Aquí puedes agregar más lógica para manejar el cambio de valor
-        agregaOtrosCargos(capturaValor('id_nanticipo')
-            , capturaValor('id_ngao')
-            , capturaValor('id_ndescuentodecartera')
+        agregaOtrosCargos(document.getElementById('divAnticipo').innerText
+            , document.getElementById('divGAO').innerText
+            , document.getElementById('divDC').innerText
             )
     }
 
     // Agrega el controlador de eventos 'change' a cada input
     inputs.forEach(input => {
         input.addEventListener('change', onInputChange);
+    });
+});
+
+// Llamar a calcularTotales después de que la tabla se haya refrescado
+jQuery(document).ready(function() {
+    jQuery('#table').on('post-body.bs.table', function() {
+        Suma_Cargos(asignacion_id, iva_gao, iva_dc, carga_gao, carga_dc, porcentaje_iva )
     });
 });
 
@@ -304,22 +398,22 @@ window.operateEvents = {
 
 function operateFormatter(value, row, index) {
     if (row.ia_analizada){
-        var ia_icon = '<a class="consultar" href="javascript:void(0)" title="Consultar"><i class="fa fa-search"></i></a>'
+        var ia_icon = '<a class="consultar" href="javascript:void(0)" title="Consultar análisis"><i class="fa fa-search"></i></a>'
     } else {
-        var ia_icon = '<a class="analizar" href="javascript:void(0)" title="Analizar"><i class="fa fa-search"></i></a>'
+        var ia_icon = '<a class="analizar" href="javascript:void(0)" title="Analizar inteligente de riesgo"><i class="fa fa-search"></i></a>'
     }
   return [
     '<a class="like" href="javascript:void(0)" title="Configurar tasas">',
     '<i class="fa fa-cog"></i>',
-    '</a>  ',
+    '</a>&nbsp;&nbsp;',
     ia_icon,
-    '<a class="remove" href="javascript:void(0)" title="Eliminar">',
+    '&nbsp;&nbsp;<a class="remove" href="javascript:void(0)" title="Eliminar">',
       '<i class="fa fa-trash"></i>',
       '</a>',
   ].join('')
 }
   
-function RecalcularCargos(asgn,fecha_desembolso, cond){
+function RecalcularCargos(asgn, fecha_desembolso, cond){
   // el formato usado es yyyy-mm-dd. Esta validación necesaria pues al digitar la fecha
   // su pueden tener meses y dias como '00'
   var isValid = fecha_desembolso.match(/^\d{4}(\-)(((0)[0-9])|((1)[0-2]))(\-)([0-2][0-9]|(3)[0-1])$/);
@@ -339,7 +433,6 @@ function RefrescarTabla(asgn){
     url: "/operaciones/refrescadetallesolicitud/" + asgn 
   });
   Suma_Cargos(asgn, iva_gao, iva_dc, carga_gao, carga_dc, porcentaje_iva )
-  console.log('refrescar tabla',porcentaje_iva)
 }
 
 function Suma_Cargos(asgn, iva_gao, iva_dc, carga_gao, carga_dc, porcentaje_iva){
@@ -347,11 +440,16 @@ function Suma_Cargos(asgn, iva_gao, iva_dc, carga_gao, carga_dc, porcentaje_iva)
               +"/"+carga_gao+"/"+carga_dc+"/"+porcentaje_iva
     , function(data){
     if (data){
-        jQuery("#id_nanticipo").val(data['anticipo'])    
-        jQuery("#id_ngao").val(data['gao'])    
-        jQuery("#id_ndescuentodecartera").val(data['dc'])
-        jQuery("#id_niva").val(data['iva'])    
-        jQuery("#neto").val(data['neto'])
+        // jQuery("#id_nanticipo").val(data['anticipo'])    
+        // jQuery("#id_ngao").val(data['gao'])    
+        // jQuery("#id_ndescuentodecartera").val(data['dc'])
+        // jQuery("#id_niva").val(data['iva'])    
+
+        inicializarInner("divAnticipo", data['anticipo'] )
+        inicializarInner("divGAO", data['gao'] )
+        inicializarInner("divDC", data['dc'] )
+        inicializarInner("divIVA", data['iva'] )
+        inicializarInner("divNeto",'<h6>' + data['neto'] + '</h6>')    
 
         base_iva_tasas = parseFloat(data['base_iva'])
         base_noiva_tasas = parseFloat(data['base_noiva'])
@@ -360,7 +458,8 @@ function Suma_Cargos(asgn, iva_gao, iva_dc, carga_gao, carga_dc, porcentaje_iva)
             agregaOtrosCargos(data['anticipo'], data['gao'], data['dc']);
         }
 
-        jQuery("#id_nvalor").val(data['negociado'])    
+        // jQuery("#id_nvalor").val(data['negociado'])    
+        inicializarInner("divValor", '<h6>' + data['negociado'] + '</h6>')
     }
   })
 }
@@ -373,7 +472,6 @@ function agregaOtrosCargos(anticipo, gao, dc){
     base_noiva_otros = obtenerAcumuladoBaseNoIVAOtrosCargos()
     var ivaotroscargos = 0
     var niva = 0
-    var final = 0
 
     niva = parseFloat(((base_iva_tasas + base_iva_otros) * porcentaje_iva / 100).toFixed(2));
     console.log('base_iva_tasa:', base_iva_tasas )
@@ -382,48 +480,58 @@ function agregaOtrosCargos(anticipo, gao, dc){
     jQuery("#id_niva").val(niva)    
     
     final = (nanticipo -ngao - ndc - base_iva_otros - base_noiva_otros - niva).toFixed(2)
-    jQuery("#neto").val(final)
+    inicializarInner("divNeto",'<h6>' + final + '</h6>')    
     
 }
 
 function initTable(iniciales_GAO, iniciales_DC) {
 
     $table.bootstrapTable('destroy').bootstrapTable({
-      locale: "es-EC",
-      columns: [
-        [{title: 'Ref.', field: 'id', rowspan: 2, align: 'center', valign: 'middle', 
-          sortable: true, footerFormatter: LineaTotalEnPieDePaginaDeTabla
-          }, {title: 'Deudor', field: 'Comprador', rowspan: 2, align: 'center', 
-          valign: 'middle', sortable: true, footerFormatter: LineaCantidadEnPieDePaginaDeTabla
-          }, {title: 'Documento', field: 'Documento', rowspan: 2, align: 'center', 
-          valign: 'middle', sortable: true,
-          }, {title: 'Emisión', field: 'Emision', rowspan: 2, align: 'center', 
-          valign: 'middle', sortable: true,
-          }, {title: 'Vencimiento', field: 'Vencimiento', rowspan: 2, align: 'center', 
-          valign: 'middle', sortable: true,
-          }, {title: 'Negociado', field: 'Total', rowspan: 2, align: 'center', valign: 'middle', 
-          sortable: true, footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
-          }, {title: 'Plazo', field: 'Plazo', rowspan: 2, align: 'center', valign: 'middle', 
-          sortable: true, 
-          }, {title: 'Anticipo', colspan: 2, align: 'center'
-          }, {title: iniciales_GAO, colspan: 2, align: 'center'
-          }, {title: iniciales_DC, colspan: 2, align: 'center'
-          
-          }, {field: 'operate', title: 'Acción',rowspan: 2, align: 'center', valign: 'middle'
-          , clickToSelect: false, events: window.operateEvents, formatter: operateFormatter
-          }],
-        [{field: 'Porc_anticipo', title: '%', sortable: true
-          }, {field: 'Valor_anticipo', title: 'valor', sortable: true, align: 'center', 
-          footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
-          }, {field: 'Porc_GAO', title: '%', sortable: true, align: 'center'
-          }, {field: 'Valor_GAO', title: 'valor', sortable: true, align: 'center', 
-          footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
-          }, {field: 'Porc_DC', title: '%', sortable: true, align: 'center'
-          }, {field: 'Valor_DC', title: 'valor', sortable: true, align: 'center', 
-          footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
-        }]
-      ],
-      
+        locale: "es-EC",
+        fixedColumns: true,
+        fixedNumber: 2,
+        footerStyle: function() {
+            return {
+                css: {
+                    'background-color': '#f8f9fa',
+                    'color': '#000000',
+                    'border-top': '2px solid #dee2e6',
+                    'font-weight': 'bold'
+                }
+            }
+        },
+        columns: [
+            [{title: 'Deudor', field: 'Comprador', rowspan: 2, align: 'center', 
+                valign: 'middle', sortable: true, footerFormatter: LineaCantidadEnPieDePaginaDeTabla
+                }, {title: 'Documento', field: 'Documento', rowspan: 2, align: 'center', 
+                valign: 'middle', sortable: true,
+                }, {title: 'Emisión', field: 'Emision', rowspan: 2, align: 'center', 
+                valign: 'middle', sortable: true,
+                }, {title: 'Vencimiento', field: 'Vencimiento', rowspan: 2, align: 'center', 
+                valign: 'middle', sortable: true,
+                }, {title: 'Negociado', field: 'Total', rowspan: 2, align: 'center', valign: 'middle', 
+                sortable: true, footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+                }, {title: 'Plazo', field: 'Plazo', rowspan: 2, align: 'center', valign: 'middle', 
+                sortable: true, 
+                }, {title: 'Anticipo', colspan: 2, align: 'center'
+                }, {title: iniciales_GAO, colspan: 2, align: 'center'
+                }, {title: iniciales_DC, colspan: 2, align: 'center'
+                
+                }, {field: 'operate', title: 'Acción',rowspan: 2, align: 'center', valign: 'middle'
+                , clickToSelect: false, events: window.operateEvents, formatter: operateFormatter
+                }],
+            [{field: 'Porc_anticipo', title: '%', sortable: true
+                }, {field: 'Valor_anticipo', title: 'valor', sortable: true, align: 'center', 
+                footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+                }, {field: 'Porc_GAO', title: '%', sortable: true, align: 'center'
+                }, {field: 'Valor_GAO', title: 'valor', sortable: true, align: 'center', 
+                footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+                }, {field: 'Porc_DC', title: '%', sortable: true, align: 'center'
+                }, {field: 'Valor_DC', title: 'valor', sortable: true, align: 'center', 
+                footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+            }]
+        ],
+        
     })
 }
 
@@ -439,12 +547,12 @@ function AceptarAsignacion(){
     var cargos = JSON.stringify(obtenerArregloCargos())
     var objeto={
         "id_asignacion":asignacion_id,
-        "dnegociacion":capturaValor("id_dnegociacion"),
+        "dnegociacion": new Date().toISOString().split('T')[0],
         "ddesembolso": capturaValor("id_ddesembolso"), 
-        "nanticipo":capturaValor("id_nanticipo"),
-        "ngao":capturaValor("id_ngao"), 
-        "ndescuentocartera": capturaValor("id_ndescuentodecartera"),
-        "niva": capturaValor("id_niva"),
+        "nanticipo":document.getElementById('divAnticipo').innerText,
+        "ngao":document.getElementById('divGAO').innerText,
+        "ndescuentocartera": document.getElementById('divDC').innerText,
+        "niva": document.getElementById('divIVA').innerText,
         "sinstruccionpago": capturaValor("id_ctinstrucciondepago"),
         "porcentaje_iva": porcentaje_iva,
         "arr_otros_cargos": cargos,
@@ -513,17 +621,17 @@ function copiarLiquidacionAlPortapapeles() {
     texto += "========================\n";
     
     const anticipoLabel = document.querySelector('label[for="id_nanticipo"]')?.innerText || 'Anticipo';
-    const anticipoValor = document.getElementById('id_nanticipo').value;
+    const anticipoValor = document.getElementById('divAnticipo').innerText;
     texto += `${anticipoLabel}: ${anticipoValor}\n\n`;
 
     texto += "- Cargos\n";
 
     const gaoLabel = document.querySelector('label[for="id_ngao"]')?.innerText || 'GAO';
-    const gaoValor = document.getElementById('id_ngao').value;
+    const gaoValor = document.getElementById('divGAO').innerText;
     texto += `  ${gaoLabel}: ${gaoValor}\n`;
 
     const dcLabel = document.querySelector('label[for="id_ndescuentodecartera"]')?.innerText || 'Descuento de Cartera';
-    const dcValor = document.getElementById('id_ndescuentodecartera').value;
+    const dcValor = document.getElementById('divDC').innerText;
     texto += `  ${dcLabel}: ${dcValor}\n`;
 
     document.querySelectorAll('.otros_cargos').forEach(input => {
@@ -533,11 +641,11 @@ function copiarLiquidacionAlPortapapeles() {
     });
 
     const ivaLabel = document.querySelector('label[for="id_niva"]')?.innerText || 'IVA';
-    const ivaValor = document.getElementById('id_niva').value;
+    const ivaValor = document.getElementById('divIVA').innerText;
     texto += `\n- ${ivaLabel}: ${ivaValor}\n`;
 
     texto += "========================\n";
-    const netoValor = document.getElementById('neto').value;
+    const netoValor = document.getElementById('divNeto').innerText;
     texto += `Neto a recibir: ${netoValor}\n`;
 
     navigator.clipboard.writeText(texto).then(function() {
@@ -625,7 +733,7 @@ async function analizarFacturaAI(invoiceId) {
 
 function renderAIResult(data) {
     return `
-        <div style="border:1px solid #ddd; padding:15px; border-radius:8px; position:relative;">
+        <div style="border:1px solid #ddd; padding:15px; border-radius:8px; position:relative; background-color: white;" class=" mr-3 mb-3">
             <button onclick="event.preventDefault(); document.getElementById('ai-result').style.display='none'; return false;" 
                     style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:18px; cursor:pointer; color:#999;">
                 ×
@@ -694,6 +802,17 @@ async function consultarFacturaAI(invoiceId) {
         loadingDiv.style.display = "none";
     }
 };
-</script>
 
+function editarCondicionOperativa() {
+    const condicionId = document.getElementById('condicion_id').value;
+    
+    if (!condicionId) {
+        MensajeError('Por favor seleccione una condición operativa');
+        return;
+    }
+    
+    const url = "{% url 'operaciones:condicionesoperativas_editar' 0 %}".replace('0', condicionId);
+    window.location.href = url;
+}
+</script>
 {% endblock %}

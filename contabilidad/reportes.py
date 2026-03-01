@@ -154,9 +154,12 @@ def ImpresionBalanceGeneral(request, año, mes):
     else:
         data = enviarConsulta("SELECT * FROM uspImprimeBGAcumulado('{0}',{1},{2})"
                             .format(año, mes,  id_empresa.empresa.id))
-    if not data:
-        return HttpResponse ("Ningún dato encontrado para "+año + "-" + mes)
+    # if not data:
+    #     return HttpResponse ("Ningún dato encontrado para "+año + "-" + mes)
 
+    if 'nada' in data[0][0]:
+        return HttpResponse (data[0][0]['nada'] + " para "+año + "-" + mes)
+    
     result = []
     for r in data:
         result.append( r[0])
@@ -200,8 +203,10 @@ def ImpresionPerdidasyGanancias(request, año, mes,):
     else:
         data = enviarConsulta("SELECT * FROM uspImprimePyGAcumulado('{0}',{1},{2})"
                             .format(año, mes,  id_empresa.empresa.id))
-    if not data:
-        return HttpResponse ("Ningún dato encontrado para "+año + "-" + mes)
+    # if not data:
+    #     return HttpResponse ("Ningún dato encontrado para "+año + "-" + mes)
+    if 'nada' in data[0][0]:
+        return HttpResponse (data[0][0]['nada'] + " para "+año + "-" + mes)
     
     result = []
     for r in data:

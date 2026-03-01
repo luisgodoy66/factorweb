@@ -115,6 +115,8 @@ urlpatterns = [
          name="asientodiario_nuevo"),
     path('asientodiarioeditar/<diario_id>',AsientoDiario, 
          name="asientodiario_editar"),
+    path('asientodiarioeditar/<diario_id>/<desde_consulta>',AsientoDiario, 
+         name="asientodiario_editar"),
     path('cargadetalleasiento/<diario_id>',CargarDetalleAsiento,),
     path('editarlineadeasiento/', DatosLineaDiarioEditar, name='editarlineadeasiento'),
     path('editarlineadeasiento/<int:detalle_id>', DatosLineaDiarioEditar
@@ -188,6 +190,8 @@ urlpatterns = [
     path('comprobanteegresonuevo/',ComprobanteEgreso, 
          name="comprobanteegreso_nuevo"),
     path('comprobanteegresoeditar/<diario_id>',ComprobanteEgreso, 
+         name="comprobanteegreso_editar"),
+    path('comprobanteegresoeditar/<diario_id>/<desde_consulta>',ComprobanteEgreso, 
          name="comprobanteegreso_editar"),
      path('cuentacontablebanco/<banco_id>',CuentaContableBanco),
 ]

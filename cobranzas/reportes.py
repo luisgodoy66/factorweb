@@ -69,7 +69,7 @@ def ImpresionCobranzaCartera(request, cobranza_id):
     if cobranza.cxformapago=="CHE":
         forma_cobro += 'emite cheque ' + cobranza.cxcheque.__str__()
     if cobranza.cxformapago=="DEP":
-        forma_cobro = 'Se depositó accesorio ' + cobranza.cxcheque.__str__()
+        forma_cobro = 'Se depositó cheque ' + cobranza.cxcheque.__str__()
     
     if cobranza.cxformapago != "MOV":
         datos_deposito = cobranza.ddeposito.strftime("%Y-%m-%d")
@@ -517,9 +517,14 @@ def ImpresionProtestosPendientes(request, id_cliente = None):
             .protestos_pendientes_cliente(id_empresa.empresa, id_cliente)
 
         tot_cobro = Cheques_protestados.objects\
-            .filter(empresa = id_empresa.empresa, leliminado = False
-                    , nsaldocartera__gt=0, cheque__cxparticipante = id_cliente)\
-                .aggregate(total_cartera = Sum('nvalorcartera')
+            .filter(empresa = id_empresa.empresa
+                    , leliminado = False
+                    , nsaldocartera__gt=0)\
+            .filter(Q(cheque__cheque_cobranza__cxcliente = id_cliente
+                        , cxtipooperacion='C')
+                    |Q(cheque__cheque_recuperacion__cxcliente = id_cliente
+                        , cxtipooperacion='R'))\
+            .aggregate(total_cartera = Sum('nvalorcartera')
                         , total_saldo = Sum('nsaldocartera'))
 
     else:

@@ -14,39 +14,43 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
+    <div class="col-lg-8">
 <form  method="post"  class="form-horizontal">
-    <div class="col-lg-6">
         <div class="card">
-            <div class="card-header">
-                <strong>Datos</strong> 
-                de {% if cuentabancaria %}  {{ cuentabancaria }} {% else %}  nueva cuenta bancaria {% endif %} 
+            <div class="card-header" style="background-color: white;">
+                <div class="d-flex justify-content-between align-items-center ">
+                    <h5>Datos de {% if cuentabancaria %}  {{ cuentabancaria }} {% else %}  nueva cuenta bancaria {% endif %} </h5> 
+                    <a href="{% url 'empresa:listacuentasbancarias' %}" class="btn  btn-sm">
+                        <i class="fa fa-times"></i>
+                    </a>
+                </div>
             </div>
                 {% csrf_token %}
             <div class="card-body card-block">
 
                     <div class="row form-group">
-                        <div class="col-12 col-md-6">
-                            {{ form.cxbanco.label}}
+                        <div class="col-md-4"><label for="id_cxbanco">{{ form.cxbanco.label}}</label>
+                            
                         </div>
-                        <div class="col col-md-6">
+                        <div class="col col-md-8">
                             {{ form.cxbanco}}
                         </div>
                     </div>  
 
                     <div class="row form-group">
-                        <div class="col col-md-6">
-                            {{ form.cxcuenta.label}}
+                        <div class="col col-md-4">
+                            <label for="id_cxcuenta">{{ form.cxcuenta.label}}</label>
                         </div>
-                        <div class="col">
+                        <div class="col col-md-8">
                             {{ form.cxcuenta}}
                             <small class="form-text text-muted">Máximo 20 caracteres</small>
                         </div>
                     </div>
                     <div class="row form-group">
-                        <div class="col col-md-6">
-                            {{ form.lactiva.label}}
+                        <div class="col col-md-4">
+                            <label for="id_lactiva">{{ form.lactiva.label}}</label>
                         </div>
-                        <div class="col ">
+                        <div class="col col-md-8">
                             <label class="switch switch-3d switch-success mr-3">
                                 <input type="checkbox" class="switch-input" 
                                 {% if  cuentabancaria.lactiva %} checked {% endif %} 
@@ -60,16 +64,16 @@
             </div>    
 
             <div class="card-footer">
-                    <a href="{% url 'empresa:listacuentasbancarias' %}" class="btn btn-danger btn-sm">
-                        <i class="fa fa-ban"></i> Cancelar
-                    </a>
-                    <button type="submit" class="btn btn-primary btn-sm">
+                <div class="text-right">
+                    <button type="submit" class="btn btn-secondary btn-sm">
                         <span class="fa fa-dot-circle-o"></span> Grabar
                     </button>
-                    {{ form.errors}}
+
+                </div>
+                {{ form.errors}}
             </div>
         </div>
-    </div>
 </form>
+    </div>
 {% endblock %}
 {% block js_page %}{% endblock %}

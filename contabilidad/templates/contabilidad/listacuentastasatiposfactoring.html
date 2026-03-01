@@ -15,21 +15,19 @@
 {% endblock breadcrumbs %}
 {% block content %}
     <div class="card bg-flat-color-0">
-        <div class="card-body">
-            <div class="dropdown float-right">
-                <button class="btn bg-transparent dropdown-toggle theme-toggle " 
-                    type="button" id="dropdownMenuButton1" data-toggle="dropdown">
-                    <i class="fa fa-bars"></i>
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                    <div class="dropdown-menu-content">
-                        <a class="dropdown-item" href="#">Imprimir</a>
-                    </div>
-                </div>
+        <div class="card-header" style="background-color: white;">
+            <div class="d-flex justify-content-between align-items-center ">
+                <h4 class="mb-0">
+                    <span class="count">{{ consulta.count }} registrado{% if consulta.count != 1 %}s{% endif %}</span>
+                </h4>
+                <a href="{% url 'contabilidad:listacuentastasasfactoring' %}" 
+                    class="btn  btn-sm">
+                    <i class="fa fa-times"></i>
+                </a>
             </div>
-            <h4 class="mb-0">
-                <span class="count">{{ consulta.count }}</span>
-            </h4>
+
+        </div>
+        <div class="card-body">
 
             {% if not consulta %}
             <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
@@ -47,7 +45,7 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-striped table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
                     <thead>
                         <th>Id</th>
                         <th>Tipo de factoring</th>
@@ -61,7 +59,7 @@
                             <td>{{ item.cttipofactoring }}</td>
                             <td>{{ item.cuenta_tasatipofactoring__cuenta__ctcuenta }}</td>
                             <td>
-                                <button class="btn btn-warning btn-sm"  title="Editar"
+                                <button class="btn  btn-sm"  title="Editar"
                                     {% if item.cuenta_tasatipofactoring__cuenta__ctcuenta != None %}
                                         onclick="return AbrirModal(
                                             '{% url 'contabilidad:cuentatasatipofactoring_editar' item.cttipofactoring item.id nombre_tasa id_tasa item.cuenta_tasatipofactoring %}')"
@@ -72,7 +70,7 @@
                                     role="button">
                                     <i class="fa fa-edit"></i>
                                 </button>
-                                <a href="#" class="btn btn-danger btn-sm" role="button"><i class="fa fa-exclamation"></i></a>
+                                <!-- <a href="#" class="btn btn-danger btn-sm" role="button"><i class="fa fa-exclamation"></i></a> -->
                             </td>
                         </tr>
                         {% endfor %}

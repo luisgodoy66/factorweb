@@ -63,7 +63,7 @@ class CuentasView(SinPrivilegios, generic.ListView):
 class CuentasNew(SinPrivilegios, generic.CreateView):
     model = Plan_cuentas
     template_name = "contabilidad/datoscuenta_form.html"
-    context_object_name='cuentas'
+    context_object_name='cuenta'
     form_class = PlanCuentasForm
     success_url= reverse_lazy("contabilidad:listacuentascontables")
     login_url = 'bases:login'
@@ -86,7 +86,7 @@ class CuentasNew(SinPrivilegios, generic.CreateView):
 class CuentasEdit(SinPrivilegios, generic.UpdateView):
     model = Plan_cuentas
     template_name = "contabilidad/datoscuenta_form.html"
-    context_object_name='cuentas'
+    context_object_name='cuenta'
     form_class = PlanCuentasForm
     success_url= reverse_lazy("contabilidad:listacuentascontables")
     login_url = 'bases:login'
@@ -439,17 +439,6 @@ class CuentasTasaTiposFactoringView(SinPrivilegios, generic.ListView):
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         id_tasa = self.kwargs.get('tasa')
-        # qs= Tipos_factoring.objects\
-        #     .annotate(registros = FilteredRelation('cuenta_tasatipofactoring'
-        #                                            ,condition = Q(cuenta_tasatipofactoring__tasafactoring__id=id_tasa) ))\
-        #     .values('id','cttipofactoring'
-        #             ,'cuenta_tasatipofactoring__cuenta__ctcuenta'
-        #             , 'cuenta_tasatipofactoring__tasafactoring__id'
-        #             , 'cuenta_tasatipofactoring__id')\
-        #     .filter(leliminado = False, empresa = id_empresa.empresa, registros__isnull = True)
-        # en este query la condition ingresada en el FilterdRelation no se pasa al query
-        # y no se filtra por la tasa ingresada. La filtración se está resolviendo en la
-        # forma más burda en el HTML con condiciones tags de Django.
         qs=Tipos_factoring.objects\
             .filter(empresa=id_empresa.empresa
                     , cuenta_tasatipofactoring__tasafactoring = id_tasa
@@ -458,15 +447,14 @@ class CuentasTasaTiposFactoringView(SinPrivilegios, generic.ListView):
             .values('id', 'cttipofactoring'
                     ,'cuenta_tasatipofactoring__cuenta__ctcuenta'
                     ,'cuenta_tasatipofactoring'
-                    ,'cuenta_tasatipofactoring__tasafactoring')
+                    )
         
         qs2=Tipos_factoring.objects\
             .annotate(registros=FilteredRelation('cuenta_tasatipofactoring'
                                                  , condition = Q(cuenta_tasatipofactoring__tasafactoring=id_tasa)))\
             .values('id','cttipofactoring'
                     , 'registros__cuenta__ctcuenta'
-                    ,'cuenta_tasatipofactoring'
-                    ,'cuenta_tasatipofactoring__tasafactoring')\
+                    ,'id')\
             .filter(empresa = id_empresa.empresa, registros__cuenta__ctcuenta__isnull=True)
         return qs.union(qs2)
 
@@ -493,17 +481,6 @@ class CuentasTasaDiferidoView(SinPrivilegios, generic.ListView):
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         id_tasa = self.kwargs.get('tasa')
-        # qs= Tipos_factoring.objects\
-        #     .annotate(registros = FilteredRelation('cuenta_tasatipofactoring'
-        #                                            ,condition = Q(cuenta_tasatipofactoring__tasafactoring__id=id_tasa) ))\
-        #     .values('id','cttipofactoring'
-        #             ,'cuenta_tasatipofactoring__cuenta__ctcuenta'
-        #             , 'cuenta_tasatipofactoring__tasafactoring__id'
-        #             , 'cuenta_tasatipofactoring__id')\
-        #     .filter(leliminado = False, empresa = id_empresa.empresa, registros__isnull = True)
-        # en este query la condition ingresada en el FilterdRelation no se pasa al query
-        # y no se filtra por la tasa ingresada. La filtración se está resolviendo en la
-        # forma más burda en el HTML con condiciones tags de Django.
         qs=Tipos_factoring.objects\
             .filter(empresa=id_empresa.empresa
                     , cuentadiferido_tasatipofactoring__tasafactoring = id_tasa
@@ -511,15 +488,18 @@ class CuentasTasaDiferidoView(SinPrivilegios, generic.ListView):
             .values('id', 'cttipofactoring'
                     ,'cuentadiferido_tasatipofactoring__cuenta__ctcuenta'
                     ,'cuentadiferido_tasatipofactoring'
-                    ,'cuentadiferido_tasatipofactoring__tasafactoring')
+                    # ,'cuentadiferido_tasatipofactoring__tasafactoring'
+                    )
         
         qs2=Tipos_factoring.objects\
             .annotate(registros=FilteredRelation('cuentadiferido_tasatipofactoring'
                                                  , condition = Q(cuentadiferido_tasatipofactoring__tasafactoring=id_tasa)))\
             .values('id','cttipofactoring'
                     , 'registros__cuenta__ctcuenta'
-                    ,'cuentadiferido_tasatipofactoring'
-                    ,'cuentadiferido_tasatipofactoring__tasafactoring')\
+                    ,'id'
+                    # ,'cuentadiferido_tasatipofactoring'
+                    # ,'cuentadiferido_tasatipofactoring__tasafactoring'
+                    )\
             .filter(empresa = id_empresa.empresa, registros__cuenta__ctcuenta__isnull=True)
         return qs.union(qs2)
 
@@ -546,17 +526,6 @@ class CuentasTasaProvisionView(SinPrivilegios, generic.ListView):
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         id_tasa = self.kwargs.get('tasa')
-        # qs= Tipos_factoring.objects\
-        #     .annotate(registros = FilteredRelation('cuenta_tasatipofactoring'
-        #                                            ,condition = Q(cuenta_tasatipofactoring__tasafactoring__id=id_tasa) ))\
-        #     .values('id','cttipofactoring'
-        #             ,'cuenta_tasatipofactoring__cuenta__ctcuenta'
-        #             , 'cuenta_tasatipofactoring__tasafactoring__id'
-        #             , 'cuenta_tasatipofactoring__id')\
-        #     .filter(leliminado = False, empresa = id_empresa.empresa, registros__isnull = True)
-        # en este query la condition ingresada en el FilterdRelation no se pasa al query
-        # y no se filtra por la tasa ingresada. La filtración se está resolviendo en la
-        # forma más burda en el HTML con condiciones tags de Django.
         qs=Tipos_factoring.objects\
             .filter(empresa=id_empresa.empresa
                     , cuentaprovision_tasatipofactoring__tasafactoring = id_tasa
@@ -564,15 +533,18 @@ class CuentasTasaProvisionView(SinPrivilegios, generic.ListView):
             .values('id', 'cttipofactoring'
                     ,'cuentaprovision_tasatipofactoring__cuenta__ctcuenta'
                     ,'cuentaprovision_tasatipofactoring'
-                    ,'cuentaprovision_tasatipofactoring__tasafactoring')
+                    # ,'cuentaprovision_tasatipofactoring__tasafactoring'
+                    )
 
         qs2=Tipos_factoring.objects\
             .annotate(registros=FilteredRelation('cuentaprovision_tasatipofactoring'
                                                  , condition = Q(cuentaprovision_tasatipofactoring__tasafactoring=id_tasa)))\
             .values('id','cttipofactoring'
                     , 'registros__cuenta__ctcuenta'
-                    ,'cuentaprovision_tasatipofactoring'
-                    ,'cuentaprovision_tasatipofactoring__tasafactoring')\
+                    ,'id'
+                    # ,'cuentaprovision_tasatipofactoring'
+                    # ,'cuentaprovision_tasatipofactoring__tasafactoring'
+                    )\
             .filter(empresa = id_empresa.empresa, registros__cuenta__ctcuenta__isnull=True)
         return qs.union(qs2)
 
@@ -866,24 +838,28 @@ class PendientesGenerarFacturaView(SinPrivilegios, generic.ListView):
                     , lfacturagenerada = False
                     , cxtipofactoring__lgenerafacturaenaceptacion = True)\
             .values('cxcliente__cxcliente__ctnombre', 'cxasignacion'
-                    , 'ddesembolso', 'id')\
+                    , 'id', 'dnegociacion')\
             .annotate(tipo_operacion = RawSQL("select 'Asignación'",'')
                       , tipo = RawSQL("select 'LA'",'')
-                      , facturar = F('ngao')+ F('ndescuentodecartera')+F('notroscargos'))\
+                      , facturar = F('ngao')+ F('ndescuentodecartera')+F('notroscargos')
+                      , tipo_factoring=F('cxtipofactoring__ctabreviacion')
+                      )\
             .order_by('dregistro')
         
         cobr=Liquidacion_cabecera.objects\
             .filter(leliminado = False, empresa = id_empresa.empresa
                     , lfacturagenerada = False)\
             .values('cxcliente__cxcliente__ctnombre', 'cxliquidacion'
-                    , 'ddesembolso', 'id')\
+                    , 'id', 'dliquidacion')\
             .annotate(tipo_operacion = RawSQL("select 'Liquidación de cobranza'",'')
                       , tipo = RawSQL("select 'LC'",'')
                       , facturar = F('ngaoa')
                         + F('ngao')
                         + F('ndescuentodecartera') 
                         + F('ndescuentodecarteravencido')
-                        + F('notroscargos'))\
+                        + F('notroscargos')
+                      , tipo_factoring=F('cxtipofactoring__ctabreviacion')
+                        )\
             .filter(facturar__gt=0)\
             .order_by('dregistro')
         
@@ -891,20 +867,23 @@ class PendientesGenerarFacturaView(SinPrivilegios, generic.ListView):
             .filter(leliminado = False, empresa = id_empresa.empresa
                     , lfacturagenerada = False)\
             .values('cxcliente__cxcliente__ctnombre', 'notadebito__cxnotadebito'
-                    , 'dregistro', 'id')\
+                    , 'id', 'dregistro')\
             .annotate(tipo_operacion = RawSQL("select 'Ampliación de plazo'",'')
                       , tipo = RawSQL("select 'AP'",'')
-                      , facturar = F('nvalor'))\
+                      , facturar = F('nvalor')
+                      , tipo_factoring=F('notadebito__cxtipofactoring__ctabreviacion'))\
             .order_by('dregistro')
         
         paga=Factura_cuota.objects\
             .filter(leliminado = False, empresa = id_empresa.empresa
                     , lfacturagenerada = False)\
             .values('cuota__pagare__cxcliente__cxcliente__ctnombre', 'cobranzacuota__cobranza__cxcobranza'
-                    , 'dregistro', 'id')\
+                    , 'id', 'dregistro')\
             .annotate(tipo_operacion = RawSQL("select 'Cobro de pagaré'",'')
                       , tipo = RawSQL("select 'CP'",'')
-                      , facturar = F('nbaseiva') + F('nbasenoiva'))\
+                      , facturar = F('nbaseiva') + F('nbasenoiva')
+                      , tipo_factoring=RawSQL("select 'Restructuración'",'')
+                      )\
             .order_by('dregistro')
 
         return asgn.union(cobr,ampl, paga)
@@ -930,28 +909,38 @@ class DesembolsosPendientesView(SinPrivilegios, generic.ListView):
             .filter(leliminado = False, empresa = id_empresa.empresa
                     , lcontabilizado = False, cxtipooperacion ='A')\
             .values('id','cxcliente__cxcliente__ctnombre'
-                    , 'nvalor', 'cxformapago', 'cxcuentapago__cxbanco__ctbanco')\
+                    , 'nvalor', 'cxformapago',)\
             .annotate(operacion = RawSQL('SELECT cxasignacion '\
                                         'FROM operaciones_asignacion asgn '\
                                         'WHERE asgn.id = cxoperacion','')
                     , desembolso = RawSQL('SELECT ddesembolso '\
                                         'FROM operaciones_asignacion asgn '\
                                         'WHERE asgn.id = cxoperacion','')
-                                        )\
+                    , cuenta = Concat(F( 'cxcuentapago__cxbanco__ctbanco')
+                                      , RawSQL("select ' - '", '')
+                                      ,F('cxcuentapago__cxcuenta')
+                                      , output_field=CharField()
+                                      )
+                    )\
             .order_by('dregistro')
         
         cobr=Desembolsos.objects\
             .filter(leliminado = False, empresa = id_empresa.empresa
                     , lcontabilizado = False, cxtipooperacion ='C')\
             .values('id','cxcliente__cxcliente__ctnombre'
-                    , 'nvalor', 'cxformapago', 'cxcuentapago__cxbanco__ctbanco')\
+                    , 'nvalor', 'cxformapago',)\
             .annotate(operacion = RawSQL('SELECT cxliquidacion '\
                                         'FROM cobranzas_liquidacion_cabecera liq '\
                                         'WHERE liq.id = cxoperacion','')
                     , desembolso = RawSQL('SELECT ddesembolso '\
                                         'FROM cobranzas_liquidacion_cabecera liq '\
                                         'WHERE liq.id = cxoperacion','')
-                                        )\
+                    , cuenta = Concat(F('cxcuentapago__cxbanco__ctbanco')
+                                      , RawSQL("select ' - '", '')
+                                      ,F('cxcuentapago__cxcuenta')
+                                      , output_field=CharField()
+                                      )
+                    )\
             .order_by('dregistro')
         
         return asgn.union(cobr)
@@ -978,7 +967,7 @@ class AsientosView(SinPrivilegios, generic.ListView):
         qs=Diario_cabecera.objects\
             .filter( dregistro__gte = desde, dregistro__lte = hasta
                     , empresa = id_empresa.empresa)\
-            .order_by('dcontabilizado')
+            .order_by('dregistro')
         return qs
     
     def get_context_data(self, **kwargs):
@@ -1193,32 +1182,24 @@ class CuentasCargoTiposFactoringView(SinPrivilegios, generic.ListView):
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         id_cargo = self.kwargs.get('cargo')
-        # qs= Tipos_factoring.objects\
-        #     .annotate(registros = FilteredRelation('cuenta_tasatipofactoring'
-        #                                            ,condition = Q(cuenta_tasatipofactoring__tasafactoring__id=id_tasa) ))\
-        #     .values('id','cttipofactoring'
-        #             ,'cuenta_tasatipofactoring__cuenta__ctcuenta'
-        #             , 'cuenta_tasatipofactoring__tasafactoring__id'
-        #             , 'cuenta_tasatipofactoring__id')\
-        #     .filter(leliminado = False, empresa = id_empresa.empresa, registros__isnull = True)
-        # en este query la condition ingresada en el FilterdRelation no se pasa al query
-        # y no se filtra por la tasa ingresada. La filtración se está resolviendo en la
-        # forma más burda en el HTML con condiciones tags de Django.
         qs=Tipos_factoring.objects\
             .filter(empresa=id_empresa.empresa
                     , cuenta_cargotipofactoring__cargo = id_cargo)\
             .values('id', 'cttipofactoring'
                     ,'cuenta_cargotipofactoring__cuenta__ctcuenta'
                     ,'cuenta_cargotipofactoring'
-                    ,'cuenta_cargotipofactoring__cargo')
+                    # ,'cuenta_cargotipofactoring__cargo'
+                    )
         
         qs2=Tipos_factoring.objects\
             .annotate(registros=FilteredRelation('cuenta_cargotipofactoring'
                                                  , condition = Q(cuenta_cargotipofactoring__cargo=id_cargo)))\
             .values('id','cttipofactoring'
                     , 'registros__cuenta__ctcuenta'
-                    ,'cuenta_cargotipofactoring'
-                    ,'cuenta_cargotipofactoring__cargo')\
+                    , 'id'
+                    # ,'cuenta_cargotipofactoring'
+                    # ,'cuenta_cargotipofactoring__cargo'
+                    )\
             .filter(empresa = id_empresa.empresa, registros__cuenta__ctcuenta__isnull=True)
         return qs.union(qs2)
 
@@ -1378,13 +1359,14 @@ class DesbloquearMes(SinPrivilegios, generic.TemplateView):
             .filter(lbloqueado = True, empresa = id_empresa.empresa)\
             .values('empresa')\
             .annotate(ultimomes = Max(Concat('año','mes')))
-        print(mescerrado)
         if mescerrado:
             añomes = mescerrado[0]['ultimomes']
             año = añomes[0:4]
             mes = int(añomes[4:6])
         else:
-            return HttpResponse("Ningún mes encontrado como cerrado.")
+            año = None
+            mes = None
+            # return HttpResponse("Ningún mes encontrado como cerrado.")
 
         context = super(DesbloquearMes, self).get_context_data(**kwargs)
         context['solicitudes_pendientes'] = sp
@@ -1599,6 +1581,11 @@ def GenerarFactura(request, pk, tipo, operacion):
                 , 'valor_dcv': valor_dcv
                 , 'valor_gaoa': valor_gaoa
                 , 'ambiente': id_empresa.empresa.ambientesri
+                , 'cliente': cliente
+                , 'base_iva': base_iva
+                , 'base_no_iva': base_no_iva
+                , 'valor_iva': valor_iva
+                , 'total': base_iva + base_no_iva + valor_iva
                 }    
     
     return render(request, template_name, contexto)
@@ -1617,7 +1604,7 @@ def ObtenerSecuenciaFactura(request, punto_emision):
         success = True
         secuencia = x.nultimasecuencia + 1
 
-    data = {'secuencia':secuencia, 'success':success}
+    data = {'secuencia':secuencia, 'success':success, 'genera_xml': x.lgeneracionxmldocumentoelectronico}
     return JsonResponse(data)
 
 @login_required(login_url='/login/')
@@ -1712,6 +1699,7 @@ def GenerarComprobanteEgreso(request, pk, forma_pago, operacion):
                 , 'id_desembolso':pk
                 , 'id_factura': id_factura
                 , 'cliente': cliente.ctnombre
+                , 'valor': desembolso.nvalor
                 }    
     
         return render(request, template_name, contexto)
@@ -1758,6 +1746,8 @@ def GenerarFacturaDiario(request):
                     , pnbase_iva, pnbase_noiva, pniva, psconcepto, pdemision
                 , porcentaje_iva, nusuario, secuencia))
 
+    if resultado[0] !='OK':
+        return HttpResponse(resultado[0])
     return HttpResponse(resultado)
 
 def GenerarEgresoDiario(request):
@@ -1793,17 +1783,26 @@ def GenerarEgresoDiario(request):
         .format( pid_desembolso, psconcepto, pdemision\
             ,pnvalor, pid_factura, nusuario))
     else:
+        print("CALL uspGenerarEgresoContabilidad( '{0}',{1},'{2}','{3}'\
+                            ,{4},'{5}',{6},'{7}','{8}'\
+                            ,{9},{10},{11},'',0)"
+            .format(psforma_pago, pid_desembolso, pscxbeneficiario, psrecibidopor\
+                    , pid_cuentapago, pscheque, pid_cuentadestino, psconcepto, pdemision\
+                ,pnvalor, pid_factura, nusuario))
         resultado=enviarPost("CALL uspGenerarEgresoContabilidad( '{0}',{1},'{2}','{3}'\
                             ,{4},'{5}',{6},'{7}','{8}'\
                             ,{9},{10},{11},'',0)"
             .format(psforma_pago, pid_desembolso, pscxbeneficiario, psrecibidopor\
                     , pid_cuentapago, pscheque, pid_cuentadestino, psconcepto, pdemision\
                 ,pnvalor, pid_factura, nusuario))
+    
+    if resultado[0] !='OK':
+        return HttpResponse(resultado[0])
     return HttpResponse(resultado)
 
 @login_required(login_url='/login/')
 @permission_required('contabilidad.add_diario_cabecera', login_url='bases:sin_permisos')
-def AsientoDiario(request, diario_id = None):
+def AsientoDiario(request, diario_id = None, desde_consulta = None):
 
     template_name="contabilidad/datosasiento_form.html"
     diario_form = DiarioCabeceraForm()
@@ -1820,8 +1819,9 @@ def AsientoDiario(request, diario_id = None):
             diario_form = DiarioCabeceraForm(instance=d, )  
 
         contexto={'form_diario': diario_form,
-                'diario':diario_id,
-                'solicitudes_pendientes':sp
+                'diario':d,
+                'solicitudes_pendientes':sp,
+                'desde_consulta': desde_consulta
         }
     
         return render(request, template_name, contexto)
@@ -2209,6 +2209,7 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                     , 'cxcuentadeposito__cxcuenta'
                     , 'ldepositoencuentaconjunta'
                     ,'cxtipofactoring__ctabreviacion'
+                    , 'cxformapago'
                     )
 
         cobrocuotas = Pagare_cabecera.objects\
@@ -2222,6 +2223,7 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None):
                     )\
             .annotate(depositoencuentaconjunta = RawSQL("select False",'')
                         ,tipo=RawSQL("select 'PAGARE'",'')
+                        ,formapago=F("cxformapago")
                         )
     cobranzas = cartera.union(cobrocuotas).order_by('dcobranza')    
 
@@ -2246,13 +2248,17 @@ def GeneraListaCobranzasJSONSalida(cobranza):
     output["Cliente"] = cobranza['cxcliente__cxcliente__ctnombre']
     output["Valor"] = cobranza['nvalor']
     output["TipoFactoring"] = cobranza['cxtipofactoring__ctabreviacion']
-    if cobranza['ldepositoencuentaconjunta']:
-        output["Deposito"] = 'Cuenta del cliente'
+    if cobranza['cxformapago'] == 'MOV':
+        output["Deposito"] = 'N/A. Movimiento contable'
     else:
-        output["Deposito"] = cobranza['cxcuentadeposito__cxbanco__ctbanco'] \
-            + ' Cta # ' + cobranza['cxcuentadeposito__cxcuenta']  
+        if cobranza['ldepositoencuentaconjunta']:
+            output["Deposito"] = 'Cuenta del cliente'
+        else:
+            output["Deposito"] = cobranza['cxcuentadeposito__cxbanco__ctbanco'] \
+                + ' Cta # ' + cobranza['cxcuentadeposito__cxcuenta']  
     output["Cobranza"] = cobranza['cxcobranza']
     output["Sobrepago"] = cobranza['nsobrepago']
+    output["FormaPago"] = cobranza['cxformapago']
 
     return output
 
@@ -2273,7 +2279,7 @@ def GenerarAsientosCobranzas(request, ids):
         .format(ids, request.user.id, ))
 
     if resultado[0] !='OK':
-        return HttpResponse(resultado)
+        return HttpResponse(resultado[0])
     return HttpResponse('OK')
 
 @login_required(login_url='/login/')
@@ -2285,6 +2291,8 @@ def CierreDeMes(request, año, mes):
     resultado=enviarPost("CALL uspBloqueoMesContabilidad( '{0}',{1},{2},{3},'')"
         .format(año, mes, nusuario, id_empresa.empresa.id))
     
+    if resultado[0] !='OK':
+        return HttpResponse(resultado[0])
     return HttpResponse(resultado)
 
 @login_required(login_url='/login/')
@@ -2345,6 +2353,8 @@ def GeneraFacturasAlVencimientoDiario(request):
                          ,'{4}', {5},{6}, {7},'','')"
         .format(id_empresa.empresa.id, pid_puntoemision, id_factoring, psconcepto
                 , pdemision, nusuario, pnmes, psaño))
+    if resultado[0] !='OK':
+        return HttpResponse(resultado[0])
     return HttpResponse(resultado)
 
 def GeneraListaFacturasJSON(request, desde = None, hasta= None):
@@ -2482,7 +2492,7 @@ def GenerarAsientosProtestos(request, ids):
         .format(ids, request.user.id, ))
 
     if resultado[0] !='OK':
-        return HttpResponse(resultado)
+        return HttpResponse(resultado[0])
     return HttpResponse('OK')
 
 def GeneraListaTransferenciasJSON(request, desde = None, hasta= None):
@@ -2542,7 +2552,7 @@ def GenerarAsientosTransferencias(request, ids):
         .format(ids, request.user.id, ))
 
     if resultado[0] !='OK':
-        return HttpResponse(resultado)
+        return HttpResponse(resultado[0])
     return HttpResponse('OK')
 
 def GeneraListaRecuperacionesJSON(request, desde = None, hasta= None):
@@ -2562,7 +2572,6 @@ def GeneraListaRecuperacionesJSON(request, desde = None, hasta= None):
             .order_by('dcobranza')
         
     tempBlogs = []
-    print(cobranzas)
     for i in range(len(cobranzas)):
         tempBlogs.append(GeneraListaRecuperacionesJSONSalida(cobranzas[i])) 
 
@@ -2608,7 +2617,7 @@ def GenerarAsientosRecuperaciones(request, ids):
         .format(ids, request.user.id, ))
 
     if resultado[0] !='OK':
-        return HttpResponse(resultado)
+        return HttpResponse(resultado[0])
     return HttpResponse('OK')
 
 @login_required(login_url='/login/')
@@ -2620,6 +2629,8 @@ def DesbloqueoDeMes(request, año, mes):
     resultado=enviarPost("CALL uspDesbloqueoMesContabilidad( '{0}',{1},{2},{3},'')"
         .format(año, mes, nusuario, id_empresa.empresa.id))
     
+    if resultado[0] !='OK':
+        return HttpResponse(resultado[0])
     return HttpResponse(resultado)
 
 @login_required(login_url='/login/')
@@ -2671,7 +2682,7 @@ def MesCerrado(request, año, mes):
 
 @login_required(login_url='/login/')
 @permission_required('contabilidad.add_diario_cabecera', login_url='bases:sin_permisos')
-def ComprobanteEgreso(request, diario_id = None):
+def ComprobanteEgreso(request, diario_id = None, desde_consulta = None):
 
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     
@@ -2681,6 +2692,7 @@ def ComprobanteEgreso(request, diario_id = None):
     forma_pago = None
     egreso = None
     diario = None
+    comprobante = None
 
     if diario_id:
         diario = Diario_cabecera.objects\
@@ -2695,18 +2707,22 @@ def ComprobanteEgreso(request, diario_id = None):
 
     if request.method =='GET':
         if diario:
-            diario_form = DiarioCabeceraForm(instance=diario, )  
+            diario_form = DiarioCabeceraForm(instance=diario, ) 
+            comprobante = diario.cxtransaccion 
 
         if egreso:
             egreso_form = ComprobanteEgresoForm(instance=egreso
                                                 , empresa = id_empresa.empresa)
             forma_pago = egreso.cxformapago
+            comprobante = egreso.asiento.cxtransaccion
 
         contexto={'form_diario': diario_form,
                 'diario':diario_id,
                 'form_egreso': egreso_form,
                 'solicitudes_pendientes':sp,
                 'forma_pago': forma_pago,
+                'comprobante': comprobante,
+                'desde_consulta': desde_consulta,
         }
     
         return render(request, template_name, contexto)
@@ -2719,7 +2735,7 @@ def ComprobanteEgreso(request, diario_id = None):
         id_beneficiario = request.POST.get("cxbeneficiario")
         nombre_beneficiario = request.POST.get("ctrecibidopor")
         forma_pago = request.POST.get("forma_pago")
-        valor_egreso = request.POST.get("nvalor")
+        valor_egreso = request.POST.get("valor_egreso")
         cuenta_pago = request.POST.get("cxcuentapago")
         ctcheque = request.POST.get("ctcheque")
         ctcuentadestino = request.POST.get("ctcuentadestino")

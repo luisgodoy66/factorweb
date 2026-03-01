@@ -14,12 +14,12 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
-    <div class="card bg-flat-color-0">
         <div hidden>
             <input value = {{desde | date:"Y-m-d"}} id="id_desde">
             <input value = {{hasta | date:"Y-m-d"}} id="id_hasta">
         </div>
-        <div class="card-body">
+    <div class="card bg-flat-color-0">
+        <div class="card-header" style="background-color: white;">
             <div class="row form-group ">
                 <!-- <div class="col-md-1">
                     <label for="fechacorte">Período:</label>
@@ -51,7 +51,7 @@
                     </select>
                 </div>
                 <div class="col-md-1">
-                    <button class="btn btn-success btn-sm"  role="button" id="btnFiltrar">  
+                    <button class="btn btn-primary btn-sm"  role="button" id="btnFiltrar">  
                         <i class="fa fa-filter"></i> Filtrar
                     </button>
                 </div>
@@ -70,9 +70,12 @@
                  </div>
            </div>
 
-            <small>
+        </div>
+        <div class="card-body">
 
-                <table id="table"  class="table table-striped table-bordered"
+            <!-- <small> -->
+
+                <table id="table"  class="table table-hover table-bordered"
                     data-filter-control="true"
                     data-show-search-clear-button="true"
                     data-show-refresh="true"
@@ -102,7 +105,7 @@
                         </tr>
                     </thead>
                 </table>
-            </small>
+            <!-- </small> -->
 
         </div>
 

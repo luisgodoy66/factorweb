@@ -8,11 +8,11 @@ window.onload=function(){
         calcular_sobrepago();
     });
 
-    jQuery('input[type=radio][name="pagadopor"]').change(function() {
+    jQuery('input[type=checkbox][name="pagadopor"]').change(function() {
       mostrar_cuentas_origen();
     });
 
-    jQuery('input[type=radio][name="depositaren"]').change(function() {
+    jQuery('input[type=checkbox][name="depositaren"]').change(function() {
       mostrar_cuentas_destino();
     });
 
@@ -41,6 +41,16 @@ function operateFormatter(value, row, index) {
 function initTable() {
     $table.bootstrapTable('destroy').bootstrapTable({
       locale: "es-EC",
+        footerStyle: function() {
+            return {
+                css: {
+                    'background-color': '#f8f9fa',
+                    'color': '#000000',
+                    'border-top': '2px solid #dee2e6',
+                    'font-weight': 'bold'
+                }
+            }
+        },
       columns: [
         [{  title: 'Ref.', field: 'id', rowspan: 2
         , align: 'center', valign: 'middle', sortable: true,
@@ -93,19 +103,20 @@ function calcular_sobrepago(){
   // Redondear sobrepago a dos decimales
   sobrepago = Math.round((sobrepago + Number.EPSILON) * 100) / 100;
 
-  inicializaValor('id_nsobrepago', sobrepago);
+  // inicializaValor('id_nsobrepago', sobrepago);
+  inicializarInner('divSobrepago', sobrepago);
 }
 
 function mostrar_cuentas_origen(){
-  // obtener el valor de radio button cliente
+  // obtener el valor de checkbox button cliente
   // si es on, esconder las cuentas del deudor, mostrar la del cliente
   // si es off, esconder la cuentas del cliente, mostrar la del deudor
     const div_c = document.querySelector('#div_cuentas_cliente');
     const div_d = document.querySelector('#div_cuentas_deudor');
   
-    let recibido_por = document.querySelector('input[name="pagadopor"]:checked');
+    let recibido_de_cliente = document.querySelector('input[name="pagadopor"]:checked');
   
-    if (recibido_por.id == "porcliente"){
+  if (recibido_de_cliente != null){
       div_d.setAttribute('hidden',true);
       div_c.removeAttribute('hidden');
       inicializaValor("id_ctgirador",nombre_cliente);
@@ -123,7 +134,7 @@ function mostrar_cuentas_origen(){
   
     let deposito_en = document.querySelector('input[name="depositaren"]:checked');
   
-    if (deposito_en.id == "cuentacliente"){
+  if (deposito_en != null){
       div_e.setAttribute('hidden',true);
       div_c.removeAttribute('hidden');
       }
@@ -137,8 +148,8 @@ function mostrar_cuentas_origen(){
   const recibido_por = document.querySelector('input[name="pagadopor"]:checked');
   const destino_deposito = document.querySelector('input[name="depositaren"]:checked');
   // const forma_de_cobro = capturaValor("forma_cobro")
-  const pagado_por_cliente =  (recibido_por.id == "porcliente")
-  const deposito_cuenta_conjunta =  (destino_deposito.id == "cuentacliente")
+  const pagado_por_cliente = recibido_por != null
+  const deposito_cuenta_conjunta =  destino_deposito != null
   var cuenta_bancaria = null 
 
   mp_deposito = new Map()
@@ -174,13 +185,15 @@ function mostrar_cuentas_origen(){
       "forma_cobro":forma_de_cobro,
       "fecha_cobro":capturaValor("id_dcobranza"),
       "valor_recibido": capturaValor("id_nvalor"), 
-      "sobrepago":capturaValor("id_nsobrepago"), 
+      // "sobrepago":capturaValor("id_nsobrepago"), 
+      "sobrepago":document.getElementById('divSobrepago').innerText, 
       "cuenta_bancaria": cuenta_bancaria,
       "arr_documentos_cobrados": JSONdocumentos,
       "arr_cheque": JSONcheque,
       "arr_deposito": JSONdeposito,
       "pagador_por_cliente":pagado_por_cliente,
       "id_deudor":id_deudor,
+      "comentario": capturaValor("id_ctcomentario"),
     }
     fetchPostear("/cobranzas/aceptarrecuperacion/", objeto, function(data){
         // en una nueva ventana abrir el reporte de cobranza

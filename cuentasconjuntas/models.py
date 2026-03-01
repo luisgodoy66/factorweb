@@ -27,6 +27,12 @@ class Cuentas_bancarias(ClaseModelo):
     def __str__(self):
         return '{} Cta. {}'.format(self.cxbanco,self.cxcuenta)
 
+    def debitos_pendientes(self):
+        from cobranzas.models import DebitosCuentasConjuntas
+        return DebitosCuentasConjuntas.objects\
+            .filter(cuentabancaria=self, notadedebito__leliminado=False)\
+            .aggregate(total=models.Sum('notadedebito__nsaldo'))['total'] or 0
+    
 class Transferencias(ClaseModelo):
     cuentaorigen = models.ForeignKey(Cuentas_bancarias, on_delete=models.CASCADE)
     cuentadestino = models.ForeignKey(Empresa_modelo.Cuentas_bancarias, on_delete=models.RESTRICT

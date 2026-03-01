@@ -18,13 +18,13 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
-    <div class="card bg-flat-color-0">
-        <div hidden>
-            <input type="text" value="{{ por_vencer}}" id="filtro">
-        </div>
-        <div class="card-body">
-            <div class="row form-group " id="filtro_por_vencer" hidden>
-                <div class="col-md-3">
+<div hidden>
+    <input type="text" value="{{ por_vencer}}" id="filtro">
+</div>
+    <div class="card ">
+        <div class="card-header" id="filtro_por_vencer" style="background-color: white;" hidden>
+            <div class="row form-group " >
+                <div class="col-md-2">
                     <label for="fechacorte">Fecha de corte de vencimiento:</label>
                 </div>
                 <div class="col-md-2">
@@ -32,12 +32,12 @@
                     id="fechacorte" placeholder="Ingrese fecha de corte" 
                     aria-label="Ingrese fecha de corte" value="{{ fecha_corte|date:'Y-m-d'}}">
                 </div>
-                <div class="col-md-2">
-                    <button class="btn btn-success btn-sm"  role="button" id="btnFiltrar">  
+                <div class="col-md-4">
+                    <button class="btn btn-primary btn-sm"  role="button" id="btnFiltrar">  
                         <i class="fa fa-filter"></i> Filtrar
                     </button>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <strong>*</strong>  = Notificación de cesión generada
                 </div>
                 <div class="col-md-1">
@@ -56,6 +56,9 @@
                     </div>
                 </div>
             </div>
+            
+        </div>
+        <div class="card-body">
             {% if not consulta %}
             <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
                 <span class="badge badge-pill badge-danger">Sin registros</span>
@@ -98,9 +101,9 @@
                 </div>
             </div>        
             <div>
-                <small>
+                <!-- <small> -->
 
-                <table id="table"  class="table table-striped table-bordered"
+                <table id="table"  class="table table-hover table-bordered"
                     data-url="{% url 'cobranzas:carteraporvencer_json' fecha_corte %}"
                     data-filter-control="true"
                     data-show-search-clear-button="true"
@@ -139,7 +142,7 @@
                         </tr>
                     </thead>
                 </table>
-                </small>
+                <!-- </small> -->
             </div>
 
         </div>
@@ -151,10 +154,10 @@
 
 {% block js_page %}
 <script type="text/javascript" src="{% static 'factorweb/js/listadocumentospendientes.js' %}"></script>
-<script>
+<!-- <script>
     function numberFormatter(value) {
       return Number(value).toLocaleString('es-EC', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
-</script>
+</script> -->
 
 {% endblock %}

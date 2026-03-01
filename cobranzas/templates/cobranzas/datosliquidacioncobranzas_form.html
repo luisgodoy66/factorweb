@@ -15,278 +15,342 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
-<form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal">
-    <div class="col-md-12">
         <div hidden>
             <input id="data_cobranzas" value="{{ cobranzas }}">
         </div>
-        <div class="card">
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal">
                 {% csrf_token %}
-            <div class="card-header">
-                <strong>Liquidación </strong> 
-                de {{ nombredecliente }}
-            </div>
-            <div class="card-body card-block">
-                <div class="col-md-5 ">
-
-                    <div class="row form-group">
-                        <div class="col col-xs-9">
-                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
-                            Reserva</h5></div>
-                        <div class="col col-md-3 text-right">
-                            {{ total_vuelto |floatformat:"2g"}}
+    <!-- <div class="col-md-12"> -->
+    <div class="card">
+        <div class="card-header" style="background-color: white;">
+            <div class="d-flex justify-content-between align-items-center ">
+            <h5>Liquidación de {{ nombredecliente }}</h5> 
+            <a href="{% url 'cobranzas:listacobranzaspendientesliquidar' %}" 
+                class="btn btn-sm ">
+                <i class="fa fa-times"></i>
+            </a>
+            </div>            
+        </div>
+        <div class="card-body card-block">
+            <!-- detalle de cargos -->
+            <div class="row form-group">
+                <div class="col-12">
+                    <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header"style="background-color: white;">
+                            <h6 class="heading-title mb-1 text-secondary">Detalle de cobranzas a liquidar</h6>
                         </div>
+                        <div class="body" style="overflow-x: auto;">
+                            <table id="table"  class="table table-hover table-bordered">
+                                <thead>
+                                    <tr>
+                                    <th data-field="cobranza">Cobranza</th>
+                                    <th data-field="asignacion">Asignación</th>
+                                    <th data-field="documento">Documento</th>
+                                    <th data-field="dias_vencidos">Días vencidos</th>
+                                    <th data-field="dias_negociados">Días negociados</th>
+                                    <th data-field="valor_cobrado">Aplicado a cartera</th>
+                                    {% if total_dc > 0 %}
+                                        <th data-field="dc_combined" class="combined-dc-column">{{nombre_dc}}<br> negociado
+                                            <!-- <small>Tasa % / Valor</small> -->
+                                        </th>
+                                    {% endif %}
+                                    {% if total_dcv > 0 %}
+                                        <th data-field="dcv_combined" class="combined-dcv-column">{{nombre_dc}}<br> vencido
+                                        <!-- <th data-field="tasa_dcv">Tasa mora %</th>
+                                        <th data-field="dcv">{{nombre_dc}} vencido</th> -->
+                                    {% endif %}
+                                    {% if total_gao > 0 %}
+                                        <th data-field="gao_combined" class="combined-gao-column">{{nombre_gao}}<br>
+                                        <!-- <th data-field="tasa_gao">Tasa GAO</th>
+                                        <th data-field="gao">{{ nombre_gao }}</th> -->
+                                    {% endif %}
+                                    {% if total_gaoa > 0 %}
+                                        <th data-field="gaoa_combined" class="combined-gaoa-column">{{nombre_gaoa}}<br>
+                                        <!-- <th data-field="tasa_gaoa">Tasa GAOA</th>
+                                        <th data-field="gaoa">{{nombre_gaoa}}</th> -->
+                                    {% endif %}
+                                    {% if total_cargoretenciones > 0 %}
+                                        <th data-field="retenciones">Retenciones</th>
+                                    {% endif %}
+                                    {% if total_cargobajas > 0 %}
+                                        <th data-field="bajas">Bajas</th>
+                                    {% endif %}
+                                    </tr>
+                                </thead>
+                            </table>
+
+                        </div>
+                        <!-- <small> -->
+
+
+                        <!-- </small> -->
+                        
                     </div>
-                    {% if total_sobrepagos > 0 %}
-                    <div class="row form-group">
-                        <div class="col col-xs-9">
-                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
-                            + Sobrepagos</h5></div>
-                        <div class="col col-md-3 text-right">
-                            {{ total_sobrepagos|floatformat:"2g" }}
-                        </div>
-                    </div>  
-                    {% endif %}
-                    <div class="row form-group">
-                        <div class="col col-xs-9">
-                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
-                            - Cargos por liquidación</h5></div>
-                        <div class="col col-md-3 text-right" id="divCargos">
-                            {{ total_cargos |floatformat:"2g"}}
-                        </div>
-                    </div>  
-                    {% if total_dc != 0 %}
-                    <div class="row form-group">
-                        <div class="col-md-1"></div>
-                        <div class="col col-md-6"><label for="id_nvalor" class=" form-control-label">
-                            {{ nombre_dc }}
-                        </label></div>
-                        <div class="col col-md-3 text-right">
-                            {{ total_dc |floatformat:"2g" }}
-                        </div>
-                    </div>  
-                    {% endif %}
-                    {% if total_dcv > 0 %}
-                    <div class="row form-group">
-                        <div class="col-md-1"></div>
-                        <div class="col col-md-6"><label for="id_nvalor" class=" form-control-label">
-                            {{ nombre_dc }} vencido
-                        </label></div>
-                        <div class="col col-md-3 text-right">
-                            {{ total_dcv |floatformat:"2g"}}
-                        </div>
-                    </div>  
-                    {% endif %}
-                    {% if total_gao != 0 %}
-                    <div class="row form-group">
-                        <div class="col-md-1"></div>
-                        <div class="col col-md-6"><label for="id_nvalor" class=" form-control-label">
-                            {{ nombre_gao }}
-                        </label></div>
-                        <div class="col col-md-3 text-right">
-                            {{ total_gao |floatformat:"2g"}}
-                        </div>
-                    </div>  
-                    {% endif %}
-                    {% if total_gaoa > 0 %}
-                    <div class="row form-group">
-                        <div class="col-md-1"></div>
-                        <div class="col col-md-6"><label for="id_nvalor" class=" form-control-label">
-                            {{ nombre_gaoa }}
-                        </label></div>
-                        <div class="col col-md-3 text-right">
-                            {{ total_gaoa |floatformat:"2g"}}
-                        </div>
-                    </div>  
-                    {% endif %}
-                    {% if total_cargobajas > 0%}
-                    <div class="row form-group">
-                        <div class="col-md-1"></div>
-                        <div class="col col-md-6"><label for="id_nvalor" class=" form-control-label">
-                            Baja de documentos
-                        </label></div>
-                        <div class="col col-md-3 text-right">
-                            {{ total_cargobajas |floatformat:"2g"}}
-                        </div>
-                    </div>  
-                    {% endif %}
-                    {% if total_cargoretenciones > 0%}
-                    <div class="row form-group">
-                        <div class="col-md-1"></div>
-                        <div class="col col-md-6"><label for="id_nvalor" class=" form-control-label">
-                            Retenciones en cobranzas
-                        </label></div>
-                        <div class="col col-md-3 text-right">
-                            {{ total_cargoretenciones |floatformat:"2g"}}
-                        </div>
-                    </div>  
-                    {% endif %}
-                    {% for item in otros_cargos %}
-                    <div class="row form-group">
-                        <div class="col-md-1"></div>
-                        <div class="col col-md-6">
-                            <label for="id_notroscargos" class=" form-control-label">{{item}}</label></div>
-                        <div class="col-3 col-md-3">
-                            <input type="number" step="1" class="otros_cargos form-control " value="{{item.nvalor}}" 
-                                data-cargo="{{item}}"
-                                data-cargaiva = {{item.lcargaiva}} min="0" data-idmovimiento="{{item.movimiento.id}}">
-                        </div>
-                    </div>  
-                    {% endfor %}
-
-                    {% if total_iva != 0 %}
-                    <div class="row form-group">
-                        <div class="col col-xs-9">
-                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
-                            - IVA</h5></div>
-                        <div class="col col-md-3 text-right" id = "divIVA">
-                            {{ total_iva|floatformat:"2u" }}
-                        </div>
-                    </div>  
-                    {% endif %}
-                    {% if total_otros_cargos > 0%}
-                    <div class="row form-group">
-                        <div class="col col-xs-9">
-                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
-                            - Cargos previos</h5></div>
-                        <div class="col col-md-3 text-right">
-                            {{ total_otros_cargos }}
-                        </div>
-                    </div>  
-                    {% endif %}
-                    <div class="row form-group">
-                        <div class="col col-md-9">
-                            <h5 for="id_nvalor" class=" form-control-label">
-                            = {{form.nneto.label}}
-                            </h5></div>
-                        <div class="col col-md-3 text-right" id="divNeto">
-                            {{ neto |floatformat:"2g"}}
-                        </div>
-                    </div>  
-                    <div class="dropdown-divider"></div>
-                    <h5 class="heading-title mb-1 text-secondary">Datos del cliente</h5>
-                    <div class="row form-group">
-                        <div class="col-md-4"><label for="id_nvalor" class=" form-control-label">
-                            Cuenta de transferencia
-                        </label></div>
-                        <div class="col-md-6">
-                            {{ cuenta_transferencia}}
-                        </div>
-                    </div>  
-                    <div class="row form-group">
-                        <div class="col col-md-4"><label for="id_nvalor" class=" form-control-label">
-                            Beneficiario de cheque
-                        </label></div>
-                        <div class="col-md-6">
-                            {{ beneficiario}}
-                        </div>
-                    </div>  
                 </div>
-                <div class="col-md-7">
-                    <h5 class="heading-title mb-1 text-secondary">Detalle de cargos por liquidación</h5>
-
-                    <small>
-
-                    <!-- <input type="text" hidden id="data_cargos" value="{{ data }}"> -->
-                    <table id="table"  class="table table-striped table-bordered">
-                        <thead>
-                            <tr>
-                            <th data-field="cobranza">Cobranza</th>
-                            <th data-field="asignacion">Asignación</th>
-                            <th data-field="documento">Documento</th>
-                            <th data-field="dias_vencidos">Días vencidos</th>
-                            <th data-field="dias_negociados">Días negociados</th>
-                            <th data-field="valor_cobrado">Aplicado a cartera</th>
-                            {% if total_dc > 0 %}
-                                <th data-field="tasa_dc">Tasa DC %</th>
-                                <th data-field="dc">{{nombre_dc}} negociado</th>
+            </div>
+            <div class="row form-group">
+                <!-- liquidacion -->
+                <div class="col-4">
+                    <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header" style="background-color: white;">
+                                <h6 class="heading-title mb-1 text-secondary">Liquidación de cobranzas</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row form-group">
+                                <div class="col-md-8">
+                                    <h6 for="id_ctinstrucciondepago" class=" form-control-label">
+                                    Reserva</h6></div>
+                                <div class="col col-md-4 text-right">
+                                    {{ total_vuelto |floatformat:"2g"}}
+                                </div>
+                            </div>
+                            {% if total_sobrepagos > 0 %}
+                            <div class="row form-group">
+                                <div class="col-md-8">
+                                    <h6 class=" form-control-label">
+                                    + Sobrepagos</h6></div>
+                                <div class="col col-md-4 text-right">
+                                    {{ total_sobrepagos|floatformat:"2g" }}
+                                </div>
+                            </div>  
+                            {% endif %}
+                            <div class="row form-group">
+                                <div class="col col-md-8">
+                                    <h6 class=" form-control-label">
+                                    - Cargos por liquidación</h6></div>
+                                <div class="col col-md-4 text-right" id="divCargos">
+                                    {{ total_cargos |floatformat:"2g"}}
+                                </div>
+                            </div>  
+                            {% if total_dc != 0 %}
+                            <div class="row form-group">
+                                <div class="col-md-1"></div>
+                                <div class="col col-md-6"><label class=" form-control-label">
+                                    {{ nombre_dc }}
+                                </label></div>
+                                <div class="col col-md-3 text-right">
+                                    {{ total_dc |floatformat:"2g" }}
+                                </div>
+                            </div>  
                             {% endif %}
                             {% if total_dcv > 0 %}
-                                <th data-field="tasa_dcv">Tasa mora %</th>
-                                <th data-field="dcv">{{nombre_dc}} vencido</th>
+                            <div class="row form-group">
+                                <div class="col-md-1"></div>
+                                <div class="col col-md-6"><label class=" form-control-label">
+                                    {{ nombre_dc }} vencido
+                                </label></div>
+                                <div class="col col-md-3 text-right">
+                                    {{ total_dcv |floatformat:"2g"}}
+                                </div>
+                            </div>  
                             {% endif %}
-                            {% if total_gao > 0 %}
-                                <th data-field="tasa_gao">Tasa GAO</th>
-                                <th data-field="gao">{{ nombre_gao }}</th>
+                            {% if total_gao != 0 %}
+                            <div class="row form-group">
+                                <div class="col-md-1"></div>
+                                <div class="col col-md-6"><label class=" form-control-label">
+                                    {{ nombre_gao }}
+                                </label></div>
+                                <div class="col col-md-3 text-right">
+                                    {{ total_gao |floatformat:"2g"}}
+                                </div>
+                            </div>  
                             {% endif %}
                             {% if total_gaoa > 0 %}
-                                <th data-field="tasa_gaoa">Tasa GAOA</th>
-                                <th data-field="gaoa">{{nombre_gaoa}}</th>
+                            <div class="row form-group">
+                                <div class="col-md-1"></div>
+                                <div class="col col-md-6"><label class=" form-control-label">
+                                    {{ nombre_gaoa }}
+                                </label></div>
+                                <div class="col col-md-3 text-right">
+                                    {{ total_gaoa |floatformat:"2g"}}
+                                </div>
+                            </div>  
                             {% endif %}
-                            {% if total_cargoretenciones > 0 %}
-                                <th data-field="retenciones">Retenciones</th>
+                            {% if total_cargobajas > 0%}
+                            <div class="row form-group">
+                                <div class="col-md-1"></div>
+                                <div class="col col-md-6"><label class=" form-control-label">
+                                    Baja de documentos
+                                </label></div>
+                                <div class="col col-md-3 text-right">
+                                    {{ total_cargobajas |floatformat:"2g"}}
+                                </div>
+                            </div>  
                             {% endif %}
-                            {% if total_cargobajas > 0 %}
-                                <th data-field="bajas">Bajas</th>
+                            {% if total_cargoretenciones > 0%}
+                            <div class="row form-group">
+                                <div class="col-md-1"></div>
+                                <div class="col col-md-6"><label for="id_nvalor" class=" form-control-label">
+                                    Retenciones en cobranzas
+                                </label></div>
+                                <div class="col col-md-3 text-right">
+                                    {{ total_cargoretenciones |floatformat:"2g"}}
+                                </div>
+                            </div>  
                             {% endif %}
-                            </tr>
-                        </thead>
-                    </table>
+                            {% for item in otros_cargos %}
+                            <div class="row form-group">
+                                <div class="col-md-1"></div>
+                                <div class="col col-md-6">
+                                    <label for="id_notroscargos" class=" form-control-label">{{item}}</label></div>
+                                <div class="col-3 col-md-4">
+                                    <input type="number" step="1" class="otros_cargos form-control " value="{{item.nvalor}}" 
+                                        data-cargo="{{item}}"
+                                        data-cargaiva = {{item.lcargaiva}} min="0" data-idmovimiento="{{item.movimiento.id}}">
+                                </div>
+                            </div>  
+                            {% endfor %}
+                            {# if total_iva != 0 #}
+                            <div class="row form-group">
+                                <div class="col col-md-8">
+                                    <h6 for="id_ctinstrucciondepago" class=" form-control-label">
+                                    - IVA</h6></div>
+                                <div class="col col-md-4 text-right" id = "divIVA">
+                                    {{ total_iva|floatformat:"2u" }}
+                                </div>
+                            </div>  
+                            {# endif #}
+                            {% if total_otros_cargos > 0%}
+                            <div class="row form-group">
+                                <div class="col col-md-8">
+                                    <h6 for="id_ctinstrucciondepago" class=" form-control-label">
+                                    - Cargos previos</h6></div>
+                                <div class="col col-md-4 text-right">
+                                    {{ total_otros_cargos|floatformat:"2g" }}
+                                </div>
+                            </div>  
+                            {% endif %}
 
-                    </small>
-                    
-                    <div {%  if total_otros_cargos == 0 %} hidden {% endif %}>
-                        <br>
-                        <h5 class="heading-title mb-1 text-secondary">Detalle de cargos previos</h5>
-                        <small>
-                            <!-- <input type="text" hidden id="data_otros_cargos" value="{{ cargos_no_operativos }}"> -->
-                            <table id="table_otros"  class="table table-striped table-bordered">
-                            <thead>
-                                <tr>
-                                <th data-field="descripcion">Cargo</th>
-                                <th data-field="codigo_cobranza">Operación</th>
-                                <th data-field="fecha">Fecha</th>
-                                <th data-field="valor">Valor</th>
-                                </tr>
-                            </thead>
-                            </table>
-                        </small>
+                        </div>
+                        <div class="card-footer"style="background-color: white;">
+                            <div class="row form-group">
+                                <div class="col col-md-7">
+                                    <h6>{{form.nneto.label}}</h6>
+                                </div>
+                                <div class="col col-md-5 text-right" id="divNeto">
+                                    <h6>{{ neto |floatformat:"2g"}}</h6>
+                                </div>
+                            </div>  
+
+                        </div>
                     </div>
 
-                    <div class="dropdown-divider"></div>
-                    <h5 class="heading-title mb-1 text-secondary">Datos para el pago</h5>
+                </div>
+                <div class="col-8">
+                    <!-- datos de cliente -->
                     <div class="row form-group">
-                        <div class="col col-md-2"><label for="id_ctinstrucciondepago" class=" form-control-label">
-                            {{ form.ctinstrucciondepago.label}}</label></div>
-                        <div class="col-9 col-md-10">
-                            {{ form.ctinstrucciondepago}}
+                        <div class="col-12">
+                            <div class ="card"style="border:1px solid #ddd; border-radius:8px; position:relative; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <div class="card-header" style="background-color: white;">
+                                        <h6 class="heading-title mb-1 text-secondary">Datos del cliente</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row form-group ">
+                                        <div class="col-6">
+                                            <label class="form-control-label"><h6>
+                                                Beneficiario de cheque:</h6>
+                                            </label>
+                                            <div>{{ beneficiario|default:'No registrado' }}</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-control-label"><h6>
+                                                Cuenta de transferencia:</h6>
+                                            </label>
+                                            <div>{{ cuenta_transferencia|default:'No registrada' }}</div>
+                                        </div>  
+                                    </div>
+
+                                </div>
+                            </div>
+                           
                         </div>
-                    </div>  
+                    </div>
+                    <!-- datos para el pago -->
                     <div class="row form-group">
-                        <div class="col-md-2"><label for="id_dliquidacion" class=" form-control-label">
-                        {{ form.dliquidacion.label}}
-                        </label></div>
-                        <div class="col-md-4">
-                            {{ form.dliquidacion}}
-                        </div>
-                        <div class="col-md-2"><label for="id_ddesembolso" class=" form-control-label">
-                        {{ form.ddesembolso.label}}
-                        </label></div>
-                        <div class="col-md-4">
-                            {{ form.ddesembolso}}
+                        <div class="col-12">
+                            <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <div class="card-header">
+                                        <h6>Datos para el pago</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row form-group">
+                                        <div class="col-md-2"><label for="id_dliquidacion" class=" form-control-label">
+                                        {{ form.dliquidacion.label}}
+                                        </label></div>
+                                        <div class="col-md-3">
+                                            {{ form.dliquidacion}}
+                                        </div>
+                                        <div class="col-2"></div>
+                                        <div class="col-md-2"><label for="id_ddesembolso" class=" form-control-label">
+                                        {{ form.ddesembolso.label}}
+                                        </label></div>
+                                        <div class="col-md-3">
+                                            {{ form.ddesembolso}}
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="id_ctinstrucciondepago" class=" form-control-label">
+                                            {{ form.ctinstrucciondepago.label}}</label></div>
+                                        <div class="col-md-10">
+                                            {{ form.ctinstrucciondepago}}
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="card-footer">
+                                    <div class="text-right">
+                                    <button type="button" onclick="LiquidarCobranza()" id="btnAceptar" class="btn btn-secondary btn-sm">
+                                        <i class="fa fa-dot-circle-o"></i> Aceptar
+                                    </button>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
-            </div>    
-            <div class="card-footer">
-                <a href="{% url 'cobranzas:listacobranzaspendientesliquidar' %}" class="btn btn-danger btn-sm ">
-                    <i class="fa fa-ban"></i> Cancelar
-                </a>
-                <button type="button" onclick="LiquidarCobranza()" id="btnAceptar" class="btn btn-primary btn-sm">
-                    <i class="fa fa-dot-circle-o"></i> Aceptar
-                </button>
             </div>
-        </div>
+            <div class="row form-group">
+                <div class="col-md-12">
+                    <div {%  if total_otros_cargos == 0 %} hidden {% endif %}>
+                        <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <div class="card-header"style="background-color: white;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="heading-title mb-1 text-secondary">Detalle de cargos previos</h6>
+                                    <h6 class="heading-title text-secondary">Total: <span>{{ total_otros_cargos|floatformat:"2" }}</span></h6>
+                                </div>
+                            </div>
+                            <div class="body">
+                                <!-- <input type="text" hidden id="data_otros_cargos" value="{{ cargos_no_operativos }}"> -->
+                                <table id="table_otros"  class="table table-hover table-bordered">
+                                <!-- <thead>
+                                    <tr>
+                                    <th data-field="descripcion">Cargo</th>
+                                    <th data-field="codigo_cobranza">Operación / Factura</th>
+                                    <th data-field="fecha">Fecha</th>
+                                    <th data-field="valor">Valor</th>
+                                    </tr>
+                                </thead> -->
+                                </table>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>    
     </div>
+    <!-- </div> -->
 </form>
 {% endblock %}
 {% block js_page %}
 <!-- <script type="text/javascript" src="{% static 'factorweb/js/datosliquidacioncobranzas.js' %}"></script> -->
 <script>
 var $table = jQuery('#table')
-// data_cargos y data_cargos se cargan desde elementos tipo json.dumps que vienen 
-// en el contexto
 const cobranzastxt =capturaValor("data_cobranzas")
+// const cobranzastxt ="{{ cobranzas }}"
 const cargostxt ="{{data|escapejs}}"
 const otroscargostxt ="{{ cargos_no_operativos|escapejs }}"
 const tipo_operacion = "{{ tipo_operacion }}"
@@ -322,17 +386,54 @@ window.onload= function(){
     // para cargar la data en la tabla se necesita convertir, se usa JSON.parse
     data = JSON.parse(cargostxt)
 
+    // Process data to combine tasa_dc and dc columns
+    if (data && data.length > 0) {
+        data = data.map(function(row) {
+            if (row.tasa_dc !== undefined && row.dc !== undefined) {
+                row.dc_combined = '<div class="combined-dc-column"><div class="tasa-value">$' + 
+                                 parseFloat(row.dc).toFixed(2) + '</div><div class="dc-value"><span class="badge badge-info">Tasa: ' + 
+                                 parseFloat(row.tasa_dc).toFixed(2) + '%</span></div></div>'
+                                 ;
+            }
+            if (row.tasa_dcv !== undefined && row.dcv !== undefined) {
+                row.dcv_combined = '<div class="combined-dcv-column"><div class="tasa-value">$' + 
+                                 parseFloat(row.dcv).toFixed(2) + '</div><div class="dc-value"><span class="badge badge-info">Tasa: ' + 
+                                 parseFloat(row.tasa_dcv).toFixed(2) + '%</span></div></div>'
+                                 ;
+            }
+            if (row.tasa_gao !== undefined && row.gao !== undefined) {
+                row.gao_combined = '<div class="combined-gao-column"><div class="tasa-value">$' + 
+                                 parseFloat(row.gao).toFixed(2) + '</div><div class="dc-value"><span class="badge badge-info">Tasa: ' + 
+                                 parseFloat(row.tasa_gao).toFixed(2) + '%</span></div></div>'
+                                 ;
+            }
+            if (row.tasa_gaoa !== undefined && row.gaoa !== undefined) {
+                row.gaoa_combined = '<div class="combined-gaoa-column"><div class="tasa-value">$' + 
+                                 parseFloat(row.gaoa).toFixed(2) + '</div><div class="dc-value"><span class="badge badge-info">Tasa: ' + 
+                                 parseFloat(row.tasa_gaoa).toFixed(2) + '%</span></div></div>'
+                                 ;
+            }
+            return row;
+        });
+    }
+    
     $table.bootstrapTable('destroy').bootstrapTable({
         data: data,
         fixedColumns: true,
-        fixedNumber: 3
+        fixedNumber: 6
     })
     // para cargar la data en la tabla se necesita convertir, se usa JSON.parse
     otros = JSON.parse(otroscargostxt)
 
     $tableotros.bootstrapTable('destroy').bootstrapTable({
         data: otros,
-    })
+        columns: [
+            {field: 'descripcion', title: 'Cargo'},
+            {field: 'codigo_cobranza', title: 'Operación / Factura'},
+            {field: 'fecha', title: 'Fecha'},
+            {field: 'valor', title: 'Saldo'}
+        ]
+    });
     // calcular con los valores iniciales de otros cargos
     agregaOtrosCargos(vuelto
             , sobrepago
@@ -341,14 +442,17 @@ window.onload= function(){
         )
     // si neto es 0 cargar el texto Liquidacion en cero en instruccion de pago
     if (parseFloat(neto) == 0){
-        inicializaValor("id_ctinstrucciondepago","Liquidación en cero")
+        inicializaValor("id_ctinstrucciondepago","Liquidación en cero.")
+    }
+    if (parseFloat(neto) < 0){
+        inicializaValor("id_ctinstrucciondepago","Liquidación en negativo.")
     }
 };
 
 document.addEventListener('DOMContentLoaded', function() {
     // Selecciona todos los inputs con la clase 'otros_cargos'
     const inputs = document.querySelectorAll('.otros_cargos');
-
+    console.log('Inputs seleccionados:', inputs); // Verifica que los inputs se seleccionen correctamente
     // Función que se ejecutará cuando el valor de un input cambie
     function onInputChange(event) {
         console.log('Nuevo valor:', event.target.value);
@@ -389,7 +493,7 @@ function agregaOtrosCargos(vuelto, sobrepago, total_cargos_operativos, total_car
         - base_noiva_otros 
         - iva).toFixed(2)
 
-    inicializarInner("divNeto",neto)    
+    inicializarInner("divNeto",'<h6>' + neto + '</h6>')    
 }
 
 function obtenerAcumuladoBaseIVAOtrosCargos() {

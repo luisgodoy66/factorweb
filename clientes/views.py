@@ -857,17 +857,17 @@ def DatosClienteJuridico(request, cliente_id=None):
         form_submitted = False
 
         if datoscliente:
-            formulario = PersonaJuridicaForm(instance=datoscliente, )
+            formulario = PersonaJuridicaForm(instance=datoscliente, empresa=id_empresa.empresa)
         else:
-            formulario=PersonaJuridicaForm()
+            formulario=PersonaJuridicaForm(empresa=id_empresa.empresa)
 
     if request.method=='POST':
         form_submitted = True
 
         if not datoscliente:
-            formulario = PersonaJuridicaForm(request.POST,  )
+            formulario = PersonaJuridicaForm(request.POST, empresa=id_empresa.empresa )
         else:
-            formulario = PersonaJuridicaForm(request.POST, instance=datoscliente, )
+            formulario = PersonaJuridicaForm(request.POST, instance=datoscliente, empresa=id_empresa.empresa )
             
         if formulario.is_valid():
 

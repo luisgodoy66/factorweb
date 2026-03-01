@@ -42,7 +42,8 @@
 </div> -->
 <div class="content mt-3">
     <!-- totales -->
-        <div class="col-md-12 col-lg-12">
+     <div class="row">
+        <!-- <div class="col-md-12"> -->
             <!-- total cartera y protestos -->
             <div class="col-md-3">
                 <div class="card">
@@ -53,7 +54,7 @@
                                 {{total_cartera_protestos|floatformat:"2g"}}
                             </div>
                             <div class="text-muted text-uppercase font-weight-bold font-xs small">
-                                facturas y protestos</div>
+                                <h6>facturas y protestos</h6></div>
                         </div>
                         <div class="b-b-1 pt-3"></div>
                         <hr>
@@ -61,8 +62,8 @@
                             <a class="font-weight-bold font-xs btn-block text-muted small" 
                             href="{% url 'operaciones:antigüedad_por_cliente_corte' corte_historico.id %}" 
                             target="cartera_corte" name="cartera_corte" id="linkCarteraCorte">
-                            Antigüedad por cliente
-                            <i class="fa fa-angle-right float-right font-lg"></i></a>
+                            <h6>Antigüedad por cliente
+                            <i class="fa fa-angle-right float-right font-lg"></i></h6></a>
                         </div>
                     </div>
                 </div>
@@ -77,15 +78,15 @@
                                 {{total_protestos|floatformat:"2g"}}
                             </div>
                             <div class="text-muted text-uppercase font-weight-bold font-xs small">
-                                Protestos</div>
+                                <h6>Protestos</h6></div>
                         </div>
                         <div class="b-b-1 pt-3"></div>
                         <hr>
                         <div class="more-info pt-2" style="margin-bottom:-10px;">
                             <a class="font-weight-bold font-xs btn-block text-muted small" 
                             href="{% url 'cobranzas:protestos_pendientes_corte' corte_historico.id %}" target="protestos">
-                                Listado de cheques protestados
-                            <i class="fa fa-angle-right float-right font-lg"></i></a>
+                                <h6>Listado de cheques protestados
+                            <i class="fa fa-angle-right float-right font-lg"></i></h6></a>
                         </div>
                     </div>
                 </div>
@@ -101,38 +102,40 @@
                                 {{total_cartera|floatformat:"2g"}}
                             </div>
                             <div class="text-muted text-uppercase font-weight-bold font-xs small">
-                                facturas</div>
+                                <h6>facturas</h6></div>
                         </div>
                         <div class="b-b-1 pt-3"></div>
                         <hr>
                         <div class="more-info pt-2" style="margin-bottom:-10px;">
                             <a class="font-weight-bold font-xs btn-block text-muted small" 
                             href="{% url 'operaciones:detalle_facturas_pendientes_corte' corte_historico.id %}" target="detalle_facturas">
-                                Detalle de facturas pendientes
-                            <i class="fa fa-angle-right float-right font-lg"></i></a>
+                                <h6>Facturas pendientes
+                            <i class="fa fa-angle-right float-right font-lg"></i></h6></a>
                         </div>
                         <div class="more-info pt-2" style="margin-bottom:-10px;">
                             <a class="font-weight-bold font-xs btn-block text-muted small" 
                             href="{% url 'operaciones:detalle_cheques_pendientes_corte' corte_historico.id %}"  target="cheques">
-                            Detalle de cheques pendientes
-                            <i class="fa fa-angle-right float-right font-lg"></i></a>
+                            <h6>Cheques pendientes
+                            <i class="fa fa-angle-right float-right font-lg"></i></h6></a>
                         </div>
                     </div>
                 </div>
             
             </div>
-        </div>
+        <!-- </div> -->
+        
+     </div>
     <!-- <div class="animated fadeIn"> -->
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="mb-3">Antigüedad de la cartera</h4>
-                        <canvas id="singelBarChart"></canvas>
-                    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-3">Antigüedad de la cartera</h4>
+                    <canvas id="singelBarChart"></canvas>
                 </div>
-            </div><!-- /# column -->
-        </div>
+            </div>
+        </div><!-- /# column -->
+    </div>
 </div>        
 {% endblock %}
 {% block js_page %}

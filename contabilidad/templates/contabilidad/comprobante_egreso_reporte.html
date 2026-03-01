@@ -80,7 +80,8 @@
                             {% endif %}
                             {% if diario.asiento_egreso.cxformapago == 'TRA' %}                            
                             <td style="width: 15%; "><strong>Transferencia a:</strong></td>
-                            <td style="width: 30%; ">{{ diario.asiento_egreso.cxcuentadestino }}</td>
+                            <!-- <td style="width: 30%; ">{{ diario.asiento_egreso.cxcuentadestino }}</td> -->
+                            <td style="width: 30%; ">{{ diario.asiento_egreso.ctcuentadestino }}</td>
                             {% elif diario.asiento_egreso.cxformapago == 'TRN' %}
                             <td style="width: 15%; "><strong>Transferencia a:</strong></td>
                             <td style="width: 30%; ">{{ diario.asiento_egreso.ctcuentadestino }}</td>

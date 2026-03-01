@@ -15,20 +15,23 @@
 {% endblock breadcrumbs %}
 {% block content %}
     <div class="card bg-flat-color-0">
-        <div class="card-body">
+        <div class="card-header" style="background-color: white;">
             <div class="dropdown float-right">
                 <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
                     <i class="fa fa-bars"></i>
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                     <div class="dropdown-menu-content">
-                        <a class="dropdown-item" href="{% url 'cuentasconjuntas:debitobancario_nuevo'%}">Nuevo cargo sin cobranza</a>
+                        <a class="dropdown-item" href="#">Imprimir</a>
                     </div>
                 </div>
             </div>
             <h4 class="mb-0">
-                <span class="count">{{ consulta.count }}</span>
+                <span class="count">{{ consulta.count }} encontrados</span>
             </h4>
+
+        </div>
+        <div class="card-body">
 
             {% if not consulta %}
             <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
@@ -44,9 +47,9 @@
             </div>
             {% endif %}
 
-            <!-- <div class="content"> -->
+            <div>
 
-                <table class="table table-striped table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
                     <thead>
                         <th>Nombre de cliente</th>
                         <th>Número</th>
@@ -75,10 +78,10 @@
                                 {% if item.nvalor == item.notadedebito.nsaldo and not item.cobranza_liquidada %}
                                 <a 
                                     href="{% url 'cuentasconjuntas:debitobancario_editar' item.id %}" 
-                                    class="btn btn-warning btn-sm" role="button" title="Editar"><i class="fa fa-edit"></i>
+                                    class="btn  btn-sm" role="button" title="Editar"><i class="fa fa-edit"></i>
                                 </a>
                                 <button onclick="EliminarDebitoCuentaCompartida( {{item.id}})" 
-                                    class="btn btn-danger btn-sm"
+                                    class="btn  btn-sm"
                                     role="button">
                                     <i class="fa fa-rotate-left"></i>
                                 </button>
@@ -88,7 +91,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
-            <!-- </div> -->
+            </div>
 
         </div>
 

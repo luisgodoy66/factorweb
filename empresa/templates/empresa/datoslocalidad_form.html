@@ -14,30 +14,34 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
+    <div class="col-lg-6">
 <form  method="post"  class="form-horizontal"
     onsubmit="return checkSubmit();">
-    <div class="col-lg-6">
         <div class="card">
-            <div class="card-header">
-                <strong>Datos</strong> 
-                de {% if localidad %}  {{ localidad }} {% else %}  nueva localidad {% endif %} 
+            <div class="card-header" style="background-color: white;">
+                <div class="d-flex justify-content-between align-items-center ">
+                    <h5>Datos de {% if localidad %}  {{ localidad }} {% else %}  nueva localidad {% endif %} </h5>
+                    <a href="{% url 'empresa:listalocalidades' %}" class="btn  btn-sm">
+                        <i class="fa fa-times"></i> 
+                    </a>
+                </div>
             </div>
                 {% csrf_token %}
             <div class="card-body card-block">
 
                     <div class="row form-group">
-                        <div class="col-12 col-md-6"><label for="id_cxtipoid" class=" form-control-label">
+                        <div class="col-12 col-md-4"><label for="id_ctlocalidad" class=" form-control-label">
                             {{ form.ctlocalidad.label}}
                         </label></div>
-                        <div class="col col-md-6">
+                        <div class="col col-md-8">
                             {{ form.ctlocalidad}}
                         </div>
                     </div>  
                     <div class="row form-group">
-                        <div class="col-12 col-md-6"><label for="id_cxtipoid" class=" form-control-label">
+                        <div class="col-12 col-md-4"><label for="id_lactiva" class=" form-control-label">
                             {{ form.lactiva.label}}
                         </label></div>
-                        <div class="col col-md-6">
+                        <div class="col col-md-8">
                             <label class="switch switch-3d switch-success mr-3">
                                 <input type="checkbox" class="switch-input" 
                                 {% if  localidad.lactiva %} checked {% endif %} 
@@ -51,17 +55,17 @@
             </div>    
 
             <div class="card-footer">
-                <a href="{% url 'empresa:listalocalidades' %}" class="btn btn-danger btn-sm">
-                    <i class="fa fa-ban"></i> Cancelar
-                </a>
-                <button type="submit" class="btn btn-primary btn-sm">
-                    <span class="fa fa-dot-circle-o"></span> Grabar
-                </button>
-                    {{ form.errors}}
+                <div class="text-right">
+                    <button type="submit" class="btn btn-secondary btn-sm">
+                        <span class="fa fa-dot-circle-o"></span> Grabar
+                    </button>
+
+                </div>
+                {{ form.errors}}
             </div>
         </div>
-    </div>
 </form>
+    </div>
 {% endblock %}
 {% block js_page %}
 <script>

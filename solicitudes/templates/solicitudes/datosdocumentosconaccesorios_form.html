@@ -23,187 +23,223 @@
 {% endblock breadcrumbs %}
 {% block content %}
 
-<form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal"
-    >
 <div class="col-md-9">
     <div class="card">
-        {% csrf_token %}
-        <div class="card-header">
-            <strong>Detalle de factura</strong> de {{cliente_nombre}}
+        <div class="card-header" style="background-color: white;">
+            <div class="d-flex justify-content-between align-items-center ">
+                <h5>Factura de {{cliente_nombre}}</h5>
+                <a class="btn  btn-sm "
+                    {% if asignacion_id %}
+                        href="{% url 'solicitudes:asignacionconaccesorios_editar' asignacion_id %}" 
+                    {% else %}
+                        href="{% url 'solicitudes:asignacionconaccesorios_nueva' %}" 
+                    {% endif %}
+                    ><i class="fa fa-times"></i>
+                </a>
+            </div>  
         </div>        
-        <div class="card-body">
-            <!-- datos de factura texto y fecha -->
-            <div class="col-md-6 col-sm-6">
-                <div class="row form-group">
-                    <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
-                        {{ form_documento.cxautorizacion_ec.label}}</label>
+        <form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal"
+            >
+            {% csrf_token %}
+            <div class="card-body">
+                <div class="row">
+                    <!-- datos de factura texto y fecha -->
+                    <div class="col-md-6 col-sm-6">
+                        <div class="row form-group">
+                            <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
+                                {{ form_documento.cxautorizacion_ec.label}}</label>
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_documento.cxautorizacion_ec}}
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-sm" title="Cargar datos de la factura desde el SRI"
+                                    onclick="return CargarDatosFactura(document.getElementById('id_cxautorizacion_ec').value)"
+                                    style="background-color: white;">
+                                <i class="fa fa-search"></i>
+                                </button>
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-4">
+                                <select name="cxtipoid" class="form-control" required id="cxtipoid">
+                                    <option value="" >---------</option>                                            
+                                    <option value="R" selected>RUC</option>                                            
+                                    <option value="C">CEDULA</option>                                            
+                                    <option value="P">PASAPORTE</option>                                            
+                                    <option value="O">OTRO</option>                                            
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                {{ form_documento.cxcomprador}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
+                                {{ form_documento.ctcomprador.label}}</label></div>
+                            <div class="col-md-8">
+                                {{ form_documento.ctcomprador}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
+                                {{form_documento.ctserie1.label}}</label></div>
+                            <div class="col-md-3">
+                                {{ form_documento.ctserie1}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
+                                {{form_documento.ctserie2.label}}</label></div>
+                            <div class="col-md-3">
+                                {{ form_documento.ctserie2}}
+                            </div>
+                        </div> 
+                        <div class="row form-group">
+                            <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
+                                {{ form_documento.ctdocumento.label}}</label></div>
+                            <div class="col-md-8">
+                                {{ form_documento.ctdocumento}}
+                            </div>
+                        </div>  
+
                     </div>
+                    <!-- datos de factura valores -->
                     <div class="col-md-6">
-                        {{ form_documento.cxautorizacion_ec}}
-                    </div>
-                    <div class="col-md-2">
-                        <button type="button" class="btn btn-success btn-sm" title="Cargar datos de la factura desde el SRI"
-                        onclick="return CargarDatosFactura(document.getElementById('id_cxautorizacion_ec').value)">
-                        <i class="fa fa-search"></i>
-                        </button>
-                    </div>
-                </div>  
-                <div class="row form-group">
-                    <div class="col col-md-4">
-                        <select name="cxtipoid" class="form-control" required id="cxtipoid">
-                            <option value="" >---------</option>                                            
-                            <option value="R" selected>RUC</option>                                            
-                            <option value="C">CEDULA</option>                                            
-                            <option value="P">PASAPORTE</option>                                            
-                            <option value="O">OTRO</option>                                            
-                        </select>
-                    </div>
-                    <div class="col-md-8">
-                        {{ form_documento.cxcomprador}}
-                    </div>
-                </div>  
-                <div class="row form-group">
-                    <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
-                        {{ form_documento.ctcomprador.label}}</label></div>
-                    <div class="col-md-8">
-                        {{ form_documento.ctcomprador}}
-                    </div>
-                </div>  
-                <div class="row form-group">
-                    <div class="col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
-                        {{form_documento.ctserie1.label}}</label></div>
-                    <div class="col-md-3">
-                        {{ form_documento.ctserie1}}
-                    </div>
-                </div>  
-                <div class="row form-group">
-                    <div class="col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
-                        {{form_documento.ctserie2.label}}</label></div>
-                    <div class="col-md-3">
-                        {{ form_documento.ctserie2}}
-                    </div>
-                </div> 
-                <div class="row form-group">
-                    <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
-                        {{ form_documento.ctdocumento.label}}</label></div>
-                    <div class="col-md-8">
-                        {{ form_documento.ctdocumento}}
-                    </div>
-                </div>  
-                <div class="row form-group">
-                    <div class="col col-md-4"><label for="id_cxtipocliente" class=" form-control-label">
-                        {{ form_documento.demision.label}}</label></div>
-                    <div class="col-md-8">
-                        {{ form_documento.demision}}
-                    </div>
-                </div>  
+                        <div class="row form-group">
+                            <div class="col">
+                                <input type="file" id="xmlFile" accept=".xml">
+                            </div>
 
-            </div>
-            <!-- datos de factura valores -->
-            <div class="col-md-6">
-                <div class="row form-group">
-                    <div class="col">
-                        <input type="file" id="xmlFile" accept=".xml">
+                        </div>
+                        <div class="row form-group">
+                            <div class="col col-md-7"><label for="id_cxtipocliente" class=" form-control-label">
+                                {{ form_documento.demision.label}}</label></div>
+                            <div class="col-md-5">
+                                {{ form_documento.demision}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col-md-7 col-xs-6"><label for="id_nvalorantesdeiva" class=" form-control-label">
+                                {{ form_documento.nvalorantesiva.label}}</label></div>
+                            <div class="col-md-5">
+                                {{ form_documento.nvalorantesiva}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-7"><label for="id_niva" class=" form-control-label">
+                                {{ form_documento.niva.label}}</label></div>
+                            <div class="col-md-5">
+                                {{ form_documento.niva}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-7"><label for="id_cxtipocliente" class=" form-control-label">
+                                {{ form_documento.nretencioniva.label}}</label></div>
+                            <div class="col-md-5">
+                                {{ form_documento.nretencioniva}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-7"><label for="id_cxtipocliente" class=" form-control-label">
+                                {{ form_documento.nretencionrenta.label}}</label></div>
+                            <div class="col-md-5">
+                                {{ form_documento.nretencionrenta}}
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col col-md-7"><label for="id_nvalornonegociado" class=" form-control-label">
+                                {{ form_documento.nvalornonegociado.label}}</label></div>
+                            <div class="col-md-5">
+                                {{ form_documento.nvalornonegociado}}
+            
+                            </div>
+                        </div>  
+                        <div class="row form-group">
+                            <div class="col-md-7"><label for="id_cxtipocliente" class=" form-control-label">
+                                {{ form_documento.ntotal.label}}</label></div>
+                            <div class="col-md-5">
+                                {{ form_documento.ntotal}}
+            
+                            </div>
+                        </div>  
                     </div>
 
                 </div>
-                <div class="row form-group">
-                    <div class="col-md-7 col-xs-6"><label for="id_nvalorantesdeiva" class=" form-control-label">
-                        {{ form_documento.nvalorantesiva.label}}</label></div>
-                    <div class="col-md-5">
-                        {{ form_documento.nvalorantesiva}}
-                    </div>
-                </div>  
-                <div class="row form-group">
-                    <div class="col col-md-7"><label for="id_niva" class=" form-control-label">
-                        {{ form_documento.niva.label}}</label></div>
-                    <div class="col-md-5">
-                        {{ form_documento.niva}}
-                    </div>
-                </div>  
-                <div class="row form-group">
-                    <div class="col col-md-7"><label for="id_cxtipocliente" class=" form-control-label">
-                        {{ form_documento.nretencioniva.label}}</label></div>
-                    <div class="col-md-5">
-                        {{ form_documento.nretencioniva}}
-                    </div>
-                </div>  
-                <div class="row form-group">
-                    <div class="col col-md-7"><label for="id_cxtipocliente" class=" form-control-label">
-                        {{ form_documento.nretencionrenta.label}}</label></div>
-                    <div class="col-md-5">
-                        {{ form_documento.nretencionrenta}}
-                    </div>
-                </div>  
-                <div class="row form-group">
-                    <div class="col col-md-7"><label for="id_nvalornonegociado" class=" form-control-label">
-                        {{ form_documento.nvalornonegociado.label}}</label></div>
-                    <div class="col-md-5">
-                        {{ form_documento.nvalornonegociado}}
-    
-                    </div>
-                </div>  
-                <div class="row form-group">
-                    <div class="col-md-7"><label for="id_cxtipocliente" class=" form-control-label">
-                        {{ form_documento.ntotal.label}}</label></div>
-                    <div class="col-md-5">
-                        {{ form_documento.ntotal}}
-    
-                    </div>
-                </div>  
-                <div class="row form-group">
-                    <div class="col-md-12">
-                    <button type="button" class="btn btn-success btn-sm float-right" 
-                        onclick="AbrirModal('/solicitudes/editarchequeaccesorio/{{tipo_factoring}}')">                                        
-                        <i class="fa fa-dot-circle-o"></i> Agregar cheque accesorio
-                    </button>
-                    </div>
-                </div>  
-            </div>
-            <div class="dropdown-divider"></div>
-            <small>
+                <!-- tabla de cheques accesorios -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6>Cheques accesorios</h6>
 
-            <div class="container mt-3">
-                <div id="divTabla">
-                    <table class="table table-striped table-bordered" id="tabla_cheques" data-propiedadId="Id">
-                        <thead>
-                            <tr>
-                                <td data-cabecera="cxbanco">Id. Banco</td>
-                                <td data-cabecera="banco">Banco</td>
-                                <td data-cabecera="ctcuenta">Cuenta</td>
-                                <td data-cabecera="cxcheque">Cheque</td>
-                                <td data-cabecera="ctgirador">Girador</td>
-                                <td data-cabecera="dvencimiento">Vencimiento</td>
-                                <td data-cabecera="nvalor">Valor</td>
-                                <td data-cabecera="cxpropietariocuenta">Propietario</td>
-                                <td data-cabecera="Acciones"class="all">Acciones</td>
-                            </tr>
-                        </thead>
-                    </table>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm float-right" 
+                                        onclick="AbrirModal('/solicitudes/editarchequeaccesorio/{{tipo_factoring}}')">                                        
+                                        <i class="fa fa-plus"></i> Agregar cheque accesorio
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="body">
+                            <!-- <small> -->
+                                <div id="divTabla">
+                                    <table class="table table-striped table-bordered" id="tabla_cheques" data-propiedadId="Id">
+                                        <thead>
+                                            <tr>
+                                                <td data-cabecera="cxbanco">Id. Banco</td>
+                                                <td data-cabecera="banco">Banco</td>
+                                                <td data-cabecera="ctcuenta">Cuenta</td>
+                                                <td data-cabecera="cxcheque">Cheque</td>
+                                                <td data-cabecera="ctgirador">Girador</td>
+                                                <td data-cabecera="dvencimiento">Vencimiento</td>
+                                                <td data-cabecera="nvalor">Valor</td>
+                                                <td data-cabecera="cxpropietariocuenta">Propietario</td>
+                                                <td data-cabecera="Acciones"class="all">Acciones</td>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            <!-- </small> -->
+
+                            </div>
+                        </div>
+
+                    </div>
+
                 </div>
             </div>
-            </small>
-        </div>
+        </form>
         <div class="card-footer">
-            <a class="btn btn-danger btn-sm "
-            {% if asignacion_id %}
-                href="{% url 'solicitudes:asignacionconaccesorios_editar' asignacion_id %}" 
-            {% else %}
-                href="{% url 'solicitudes:asignacionconaccesorios_nueva' %}" 
-            {% endif %}
-            ><i class="fa fa-ban"></i> Cancelar
-            </a>
-            <button type="submit" class="btn btn-primary btn-sm">
-                <i class="fa fa-dot-circle-o"></i> Agregar
-            </button>
+            <div class="text-right">
+                <button type="submit" class="btn btn-secondary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Agregar
+                </button>
+            </div>
             <!-- Sección para mostrar errores del formulario -->
             <div id="form-errors" class="alert alert-danger" style="display:none;"></div>
-
+                {% if form.errors %}
+                <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                    <span class="badge badge-pill badge-danger">Error</span>
+                    Por favor corrija los errores en el formulario.
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <!-- mostrar los errores -->
+                    <div class="mt-2">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <div><strong>{{ field.label }}:</strong> {{ error }}</div>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                </div>
+                {% endif %}
         </div>
     </div>
 </div>
 
-</form>
 {% endblock %}
 {% block js_page %}
 <!-- <script type="text/javascript" src="{% static 'factorweb/js/datosdocumentosconaccesorios.js' %}"></script> -->

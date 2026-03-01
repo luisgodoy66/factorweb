@@ -42,17 +42,17 @@ window.operateEvents = {
 };
 
 function operateFormatter(value, row, index) {
-return [
-  '<a class="condonar" href="javascript:void(0)" title="Días a condonar">',
-  '<i class="fa fa-gift"></i>',
-  '</a>  ',
-  '<a class="revertir" href="javascript:void(0)" title="Reverso de confirmación">',
-  '<i class="fa fa-rotate-left"></i>',
-  '</a>  ',
-  '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
-  '<i class="fa fa-print"></i>',
-  '</a>  ',
-].join('')
+  return [
+    '<a class="condonar" href="javascript:void(0)" title="Días a condonar">',
+    '<i class="fa fa-gift"></i>',
+    '</a>&nbsp;&nbsp;',
+    '<a class="revertir" href="javascript:void(0)" title="Reverso de confirmación">',
+    '<i class="fa fa-rotate-left"></i>',
+    '</a>&nbsp;&nbsp;',
+    '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
+    '<i class="fa fa-print"></i>',
+    '</a>&nbsp;&nbsp;',
+  ].join('')
 }
 
 function ReversaConfirmacion(cobranza_id, tipo_operacion, cliente, forma_cobro){

@@ -54,15 +54,15 @@ class DatosOperativosForm(forms.ModelForm):
             'ctbeneficiarioasignacion': forms.Textarea(attrs={'rows': '1'}),
             'ctbeneficiariocobranzas': forms.Textarea(attrs={'rows': '1'}),
             'dalta': forms.DateInput(
-                format=('%Y-%m-%d'),
-                attrs={
-                        'class': 'form-control',
-                        'placeholder': 'Seleccione una fecha',
-                        'type': 'date'
-                    }
-                ),
+            format=('%Y-%m-%d'),
+            attrs={
+                'class': 'form-control',
+                'placeholder': 'Seleccione una fecha',
+                'type': 'date'
+                }
+            ),
             **{
-            field: forms.NumberInput(attrs={'step': '0.25', 'class': 'form-control'})
+            field: forms.NumberInput(attrs={'step': '0.25', 'class': 'form-control', 'min': '0'})
             for field in ['ntasacomision', 'ntasadescuentocartera', 'ntasagaoa', 'ntasamora']
             }
         }
@@ -92,26 +92,32 @@ class AsignacionesForm(forms.ModelForm):
             # , 'notrocargo'
         ]
         labels={'cxcliente':'Cliente', 'nanticipo':'Anticipo'
-            , 'nvalor':'Total negociado', 'ngao':'Comisión'
+            , 'nvalor':'Total', 'ngao':'Comisión'
             , 'ndescuentodecartera':'Descuento de cartera'
             , 'dnegociacion':'Negociación', 'ddesembolso':'Desembolso'
             , 'ctinstrucciondepago':'Instrucción de pago', 'niva':'IVA'
         }
-        widgets={'ctinstrucciondepago': forms.Textarea(attrs={'rows': '2'}), 
+        widgets={'ctinstrucciondepago': forms.Textarea(
+            attrs={'rows': '2'
+                #    , 'style': 'background-color: #f9f9f9;'
+                   , 'placeholder': 'Ingrese instrucción de pago'}
+            ), 
             'dnegociacion': forms.DateInput(
-                format=('%Y-%m-%d'),
-                attrs={'class': 'datepicker', 
-                    'placeholder': 'Seleccione una fecha',
-                    'type': 'date'
-                    }
-                    ),
+            format=('%Y-%m-%d'),
+            attrs={'class': 'datepicker', 
+            'placeholder': 'Seleccione una fecha',
+            'type': 'date',
+            # 'style': 'background-color: #f9f9f9;'
+            }
+            ),
             'ddesembolso': forms.DateInput(
-                format=('%Y-%m-%d'),
-                attrs={'class': 'datepicker', 
-                    'placeholder': 'Seleccione una fecha',
-                    'type': 'date'
-                    }
-                    ),
+            format=('%Y-%m-%d'),
+            attrs={'class': 'datepicker', 
+            'placeholder': 'Seleccione una fecha',
+            'type': 'date',
+            # 'style': 'background-color: #f9f9f9;'
+            }
+            ),
         }
 
     def __init__(self, *args, **kwargs):
@@ -121,7 +127,6 @@ class AsignacionesForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        # self.fields['ncantidaddocumentos'].widget.attrs['readonly']=True
         self.fields['nvalor'].widget.attrs['readonly']=True
         self.fields['ngao'].widget.attrs['readonly']=True
         self.fields['niva'].widget.attrs['readonly']=True
@@ -130,7 +135,6 @@ class AsignacionesForm(forms.ModelForm):
         self.fields['dnegociacion'].widget.attrs['value']=date.today
         self.fields['dnegociacion'].widget.attrs['readonly']=True
         self.fields['ddesembolso'].widget.attrs['value']=date.today
-        # self.fields['ddesembolso'].widget.attrs['readonly']=True
 
 class DesembolsarForm(forms.ModelForm):
     class Meta:
@@ -220,10 +224,10 @@ class MaestroMovimientosForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        if nuevo:
-            self.fields['cxmovimiento'].widget.attrs['readonly']=False
-        else:
-            self.fields['cxmovimiento'].widget.attrs['readonly']=True
+        # if nuevo:
+        self.fields['cxmovimiento'].widget.attrs['readonly']=not nuevo
+        # else:
+        #     self.fields['cxmovimiento'].widget.attrs['readonly']=True
 
 class CondicionesOperativasForm(forms.ModelForm):
     class Meta:

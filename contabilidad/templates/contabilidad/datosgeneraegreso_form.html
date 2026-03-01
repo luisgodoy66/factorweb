@@ -16,12 +16,21 @@
 {% endblock breadcrumbs %}
 {% block content %}
 
-<form  method="post" id="frmGenera" enctype="multipart/form-data" class="form-horizontal">
-    <div class="col-lg-8">
-        <div class="card">
+<!-- <div class="col-lg-10"> -->
+    <form  method="post" id="frmGenera" enctype="multipart/form-data" class="form-horizontal">
             {% csrf_token %}
-            <div class="card-header">
-                <strong>Generar comprobante de egreso</strong> para {{cliente}}
+        <div hidden>
+                        {{form.nvalor}}
+        </div>
+        <div class="card">
+            <div class="card-header" style="background-color: white;">
+                <div class="d-flex justify-content-between align-items-center ">
+                    <H5>Generar comprobante de egreso para {{cliente}}</H5>
+                    <a href="{% url 'contabilidad:listadesembolsospendientes' %}" 
+                    class="btn  btn-sm">
+                        <i class="fa fa-times"></i>
+                    </a>
+                </div>
             </div>
             <div class="card-body card-block">
                 <!-- columna izquierda -->
@@ -29,14 +38,14 @@
                     {% if forma_pago != 'MOV' %}
                     <div class="row form-group">
                         <div class="col-md-4">
-                            <label for="id_puntoemision" class=" form-control-label">
+                            <label for="id_cxbeneficiario" class=" form-control-label">
                                {{form.cxbeneficiario.label}}</label></div>
                         <div class="col-md-8">{{form.cxbeneficiario}}</div>
                     </div>
 
                     <div class="row form-group">
                         <div class="col-md-4">
-                            <label for="id_cxnumerofactura" class=" form-control-label">
+                            <label for="id_ctrecibidopor" class=" form-control-label">
                                {{form.ctrecibidopor.label}}</label></div>
                         <div class="col-md-8">{{form.ctrecibidopor}}</div>
                     </div>
@@ -50,7 +59,7 @@
 
                     <div class="row form-group">
                         <div class="col-md-4">
-                            <label for="id_ctconcepto" class=" form-control-label">
+                            <label for="concepto" class=" form-control-label">
                                Concepto de diario</label></div>
                         <div class="col-md-8">
                             <textarea type="text" class="form-control" 
@@ -62,7 +71,7 @@
                     {% if forma_pago != 'EFE' and forma_pago != 'MOV' %}
                     <div class="row form-group">
                         <div class="col-md-4">
-                            <label for="id_nvalor" class=" form-control-label">
+                            <label for="id_cxcuentapago" class=" form-control-label">
                                {{form.cxcuentapago.label}}</label></div>
                         <div class="col-md-8">{{form.cxcuentapago}}</div>
                     </div>
@@ -70,7 +79,7 @@
                     {% if forma_pago == 'CHE' %}
                     <div class="row form-group">
                         <div class="col-md-4">
-                            <label for="id_nvalor" class=" form-control-label">
+                            <label for="id_ctcheque" class=" form-control-label">
                                {{form.ctcheque.label}}</label></div>
                         <div class="col-md-8">{{form.ctcheque}}</div>
                     </div>
@@ -78,7 +87,7 @@
                     {% if forma_pago == 'TRA' %}
                     <div class="row form-group">
                         <div class="col-md-4">
-                            <label for="id_nvalor" class=" form-control-label">
+                            <label for="id_cxcuentadestino" class=" form-control-label">
                                {{form.cxcuentadestino.label}}</label></div>
                         <div class="col-md-8">{{form.cxcuentadestino}}</div>
                     </div>
@@ -87,7 +96,7 @@
                         <div class="col-md-4">
                             <label for="id_nvalor" class=" form-control-label">
                                {{form.nvalor.label}}</label></div>
-                        <div class="col-md-8">{{form.nvalor}}</div>
+                        <div class="col-md-8" id="divValor"><h5>{{valor}}</h5></div>
                     </div>
 
 
@@ -95,18 +104,17 @@
             </div>    
             
             <div class="card-footer">
-                <a href="{% url 'contabilidad:listadesembolsospendientes' %}" 
-                class="btn btn-danger btn-sm">
-                    <i class="fa fa-ban"></i> Cancelar
-                </a>
-                <button type="button" onclick="GenerarEgreso()" 
-                class="btn btn-primary btn-sm ">
-                    <i class="fa fa-dot-circle-o"></i> Aceptar
-                </button>
+                <div class="text-right">
+                    <button type="button" onclick="GenerarEgreso()" 
+                    class="btn btn-secondary btn-sm ">
+                        <i class="fa fa-dot-circle-o"></i> Aceptar
+                    </button>
+
+                </div>
             </div>
         </div>
-    </div>
-</form>
+    </form>
+<!-- </div> -->
 {% endblock %}
 {% block js_page %}
 <!-- <script type="text/javascript" src="{% static 'factorweb/js/datosgeneraegreso.js' %}"></script> -->
@@ -116,9 +124,6 @@
     const forma_pago = "{{forma_pago}}";
 
 window.onload=function(){
-
-    // deshabilitar el objeto nvalor
-    jQuery("#id_nvalor").attr("disabled",true);
 
     jQuery("#frmGenera").submit(function(e){
         e.preventDefault();
@@ -146,56 +151,56 @@ window.onload=function(){
 }
 
 function GenerarEgreso(){
-cuenta_pago = 'null'
-cuenta_destino = 'null'
-numero_cheque = ''
-id_beneficiario = ''
-recibido_por = ''
+    cuenta_pago = 'null'
+    cuenta_destino = 'null'
+    numero_cheque = ''
+    id_beneficiario = ''
+    recibido_por = ''
 
-if (forma_pago !='MOV') {
-    id_beneficiario = capturaValor("id_cxbeneficiario")
-    recibido_por = capturaValor("id_ctrecibidopor")
-}
-if (forma_pago == 'CHE') {
-    numero_cheque = capturaValor("id_ctcheque")
-}
-if (forma_pago == 'TRA') {
-    cuenta_destino=capturaValor("id_cxcuentadestino")
-    if (cuenta_destino==''){
-        alert('Se especificó transferencia pero no se ha determinado cuenta de destino')
-        return false;
+    if (forma_pago !='MOV') {
+        id_beneficiario = capturaValor("id_cxbeneficiario")
+        recibido_por = capturaValor("id_ctrecibidopor")
     }
-}
-if (forma_pago != 'EFE' && forma_pago != 'MOV') {
-    cuenta_pago = capturaValor("id_cxcuentapago")
-}
-
-MensajeConfirmacion("Aceptar generación de egreso ?",function(){
-
-var objeto={
-    "pscxbeneficiario" :id_beneficiario,
-    "psrecibidopor" :recibido_por,
-    "pid_cuentapago": cuenta_pago,
-    "pscheque": numero_cheque,
-    "pid_cuentadestino": cuenta_destino,
-    "concepto" : capturaValor("concepto"), 
-    "pdemision" :capturaValor("id_demision"),
-    "pnvalor" :capturaValor("id_nvalor"),
-    "pid_factura" :id_factura,
-    "pid_desembolso" :id_desembolso,
-    "psforma_pago": forma_pago,
+    if (forma_pago == 'CHE') {
+        numero_cheque = capturaValor("id_ctcheque")
+    }
+    if (forma_pago == 'TRA') {
+        cuenta_destino=capturaValor("id_cxcuentadestino")
+        if (cuenta_destino==''){
+            alert('Se especificó transferencia pero no se ha determinado cuenta de destino')
+            return false;
         }
+    }
+    if (forma_pago != 'EFE' && forma_pago != 'MOV') {
+        cuenta_pago = capturaValor("id_cxcuentapago")
+    }
+
+    MensajeConfirmacion("Aceptar generación de egreso ?",function(){
+
+    var objeto={
+        "pscxbeneficiario" :id_beneficiario,
+        "psrecibidopor" :recibido_por,
+        "pid_cuentapago": cuenta_pago,
+        "pscheque": numero_cheque,
+        "pid_cuentadestino": cuenta_destino,
+        "concepto" : capturaValor("concepto"), 
+        "pdemision" :capturaValor("id_demision"),
+        "pnvalor" :capturaValor("id_nvalor"),
+        "pid_factura" :id_factura,
+        "pid_desembolso" :id_desembolso,
+        "psforma_pago": forma_pago,
+            }
+            
+    fetchPostear("/contabilidad/generaregresodiario/", objeto, function(data){
+        // regresar a la lista de generar factura
+        window.location.href = "/contabilidad/listadesembolsospendientes";
+        // en una nueva ventana abrir el reporte de asiento
+        url = window.location.origin
+        url = url + "/contabilidad/imprimircomprobanteegreso/"+data;
+        window.open( url);
         
-fetchPostear("/contabilidad/generaregresodiario/", objeto, function(data){
-    // regresar a la lista de generar factura
-    window.location.href = "/contabilidad/listadesembolsospendientes";
-    // en una nueva ventana abrir el reporte de asiento
-    url = window.location.origin
-    url = url + "/contabilidad/imprimircomprobanteegreso/"+data;
-    window.open( url);
-    
-  })
-})
+    })
+    })
 
 }
 

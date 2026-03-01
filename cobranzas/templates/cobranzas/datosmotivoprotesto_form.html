@@ -15,19 +15,23 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
-<form  method="post"  class="form-horizontal">
-    <div class="col-lg-6">
-        <div class="card">
-            <div class="card-header">
-                <strong>Datos</strong> 
-                de {% if motivo %}  {{ motivo }} {% else %}  nuevo motivo {% endif %} 
-            </div>
+<div class="col-lg-6">
+    <form  method="post"  class="form-horizontal">
                 {% csrf_token %}
+        <div class="card">
+            <div class="card-header" style="background-color: white;">
+                <div class="d-flex justify-content-between align-items-center ">
+                    <h5>Datos de {% if motivo %}  {{ motivo }} {% else %}  nuevo motivo {% endif %} </h5> 
+                    <a href="{% url 'cobranzas:listamotivosprotesto' %}" class="btn  btn-sm">
+                        <i class="fa fa-times"></i>
+                    </a>
+                </div>
+            </div>
             <div class="card-body card-block">
 
                     <div class="row form-group">
                         <div class="col-12 col-md-6">
-                            <label for="id_cxtipoid" class=" form-control-label">
+                            <label for="id_ctmotivoprotesto" class=" form-control-label">
                                 {{ form.ctmotivoprotesto.label}}</label></div>
                         <div class="col col-md-6">
                             {{ form.ctmotivoprotesto}}
@@ -35,7 +39,7 @@
                     </div>  
                     <div class="row form-group">
                         <div class="col-12 col-md-6">
-                            <label for="id_cxtipoid" class=" form-control-label">
+                            <label for="id_ctabreviacion" class=" form-control-label">
                                 {{ form.ctabreviacion.label}}</label></div>
                         <div class="col col-md-6">
                             {{ form.ctabreviacion}}
@@ -44,7 +48,7 @@
 
                     <div class="row form-group">
                         <div class="col col-md-6">
-                            {{form.lresponsabilidadgirador.label}}
+                            <label for="id_lresponsabilidadgirador">{{form.lresponsabilidadgirador.label}}</label>                            
                         </div>
                         <div class="col ">
                             <label class="switch switch-3d switch-success mr-3">
@@ -60,17 +64,17 @@
             </div>    
 
             <div class="card-footer">
-                <a href="{% url 'cobranzas:listamotivosprotesto' %}" class="btn btn-danger btn-sm">
-                    <i class="fa fa-ban"></i> Cancelar
-                </a>
-                <button type="submit" class="btn btn-primary btn-sm">
-                    <span class="fa fa-dot-circle-o"></span> Grabar
-                </button>
+                <div class="text-right">
+                    <button type="submit" class="btn btn-secondary btn-sm">
+                        <span class="fa fa-dot-circle-o"></span> Grabar
+                    </button>
+
+                </div>
                     {{ form.errors}}
             </div>
         </div>
-    </div>
-</form>
+    </form>
+</div>
 {% endblock %}
 {% block js_page %}
 {% endblock %}

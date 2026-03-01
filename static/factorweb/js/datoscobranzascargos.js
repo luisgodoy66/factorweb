@@ -31,8 +31,17 @@ function operateFormatter(value, row, index) {
 
 function initTable() {
     $table.bootstrapTable('destroy').bootstrapTable({
-      height: 300,
+      // height: 300,
       locale: "es-EC",
+        footerStyle: function() {
+            return {
+                css: {
+                    'background-color': '#f0f8f0',
+                    'border-top': '2px solid #dee2e6',
+                    'font-weight': 'bold'
+                }
+            }
+        },
       columns: [
         [{  title: 'Ref.', field: 'id', rowspan: 2
         , align: 'center', valign: 'middle', sortable: true,
@@ -76,7 +85,8 @@ function calcular_sobrepago(){
           
   var sobrepago = capturaValor('id_nvalor') - total_cobrado
 
-  inicializaValor('id_nsobrepago',sobrepago);
+  // inicializaValor('id_nsobrepago',sobrepago);
+  inicializarInner("divSobrepago", sobrepago.toFixed(2))
 
 }
 
@@ -115,7 +125,8 @@ function AceptarCobranza(){
       "forma_cobro":forma_de_cobro,
       "fecha_cobro":capturaValor("id_dcobranza"),
       "valor_recibido": capturaValor("id_nvalor"), 
-      "sobrepago":capturaValor("id_nsobrepago"), 
+      // "sobrepago":capturaValor("id_nsobrepago"), 
+      "sobrepago":document.getElementById('divSobrepago').innerText, 
       "cuenta_bancaria": cuenta_bancaria,
       "arr_documentos_cobrados": JSONdocumentos,
       "arr_cheque": JSONcheque,

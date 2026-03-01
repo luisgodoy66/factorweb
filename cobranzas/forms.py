@@ -17,14 +17,16 @@ class CobranzasDocumentosForm(forms.ModelForm):
         fields=['cxcliente', 'cxtipofactoring', 'cxformapago'
             , 'nvalor', 'dcobranza', 'nsobrepago', 'cxcuentadeposito'
             , 'ddeposito', 'cxcuentatransferencia', 'cxcuentaconjunta'
+            , 'ctcomentario'
         ]
         labels={'cxcliente':'Cliente', 'cxtipofactoring':'Tipo de factoring'
             , 'cxformapago':'Forma de cobro','nvalor':'Valor recibido'
-            , 'dcobranza':'Fecha de cobro', 'nsobrepago':'Sobrepago'
+            , 'dcobranza':'Cobro', 'nsobrepago':'Sobrepago'
             , 'cxcuentadeposito':'Cuenta de la empresa'
             , 'ddeposito': 'Fecha de depósito'
             , 'cxcuentatransferencia': 'Cuenta de origen de transferencia'
             , 'cxcuentaconjunta': 'Cuenta compartida'
+            , 'ctcomentario': 'Comentarios internos'
         }
         widgets = {
             'dcobranza': forms.DateInput(
@@ -41,6 +43,8 @@ class CobranzasDocumentosForm(forms.ModelForm):
                     'type': 'date'
                     }
                     ),
+            'ctcomentario': forms.Textarea(attrs={'rows': '2', 
+                                                   'placeholder': 'Indique el motivo del atraso (si existe). Esta información no se imprime en el reporte de cobranzas'}), 
         }
 
     def __init__(self, *args, **kwargs):
@@ -49,11 +53,12 @@ class CobranzasDocumentosForm(forms.ModelForm):
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
-                'class':'form-control'
+                'class':'form-control',
+                # 'style': 'background-color: #f9f9f9;'
             })
         self.fields['nsobrepago'].widget.attrs['readonly']=True
-        self.fields['dcobranza'].widget.attrs['value']=date.today
-        self.fields['ddeposito'].widget.attrs['value']=date.today
+        self.fields['dcobranza'].widget.attrs['value']=date.today()
+        self.fields['ddeposito'].widget.attrs['value']=date.today()
 
         if empresa:
             self.fields['cxcuentadeposito'].queryset = Cuentas_bancarias.objects\
@@ -91,7 +96,8 @@ class ChequesForm(forms.ModelForm):
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
-                'class':'form-control'
+                'class':'form-control',
+                # 'style': 'background-color: #f9f9f9;'
             })
 
 class LiquidarForm(forms.ModelForm):
@@ -125,7 +131,8 @@ class LiquidarForm(forms.ModelForm):
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
-                'class':'form-control'
+                'class':'form-control',
+                # 'style': 'background-color: #f9f9f9;'
             })
         # self.fields['ddesembolso'].widget.attrs['readonly']=True
         self.fields['ddesembolso'].widget.attrs['value']=date.today
@@ -148,7 +155,8 @@ class MotivoProtestoForm(forms.ModelForm):
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
-                'class':'form-control'
+                'class':'form-control',
+                # 'style': 'background-color: #f9f9f9;'
             })
 
 class ProtestoForm(forms.ModelForm):
@@ -179,7 +187,8 @@ class ProtestoForm(forms.ModelForm):
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
-                'class':'form-control'
+                'class':'form-control',
+                # 'style': 'background-color: #f9f9f9;'
             })
         # self.fields['dprotesto'].widget.attrs['readonly']=True
         self.fields['dprotesto'].widget.attrs['value']=date.today
@@ -195,30 +204,34 @@ class RecuperacionesProtestosForm(forms.ModelForm):
         fields=['cxcliente', 'cxtipofactoring','cxformacobro', 'nvalor'
             , 'dcobranza', 'nsobrepago', 'cxcuentadeposito', 'ddeposito'
             , 'cxcuentatransferencia', 'cxcuentaconjunta'
+            , 'ctcomentario'
         ]
         labels={'cxcliente':'Cliente', 'cxtipofactoring':'Tipo de factoring'
             , 'cxformacobro':'Forma de cobro','nvalor':'Valor recibido'
-            , 'dcobranza':'Fecha de recuperación', 'nsobrepago':'Sobrepago'
+            , 'dcobranza':'Recuperación', 'nsobrepago':'Sobrepago'
             , 'cxcuentadeposito':'Cuenta de la empresa'
             , 'ddeposito': 'Fecha de depósito'
             , 'cxcuentatransferencia': 'Cuenta de origen de transferencia'
             , 'cxcuentaconjunta': 'Cuenta compartida'
+            , 'ctcomentario': 'Comentarios internos'
         }
         widgets = {
             'ddeposito': forms.DateInput(
                 format=('%Y-%m-%d'),
                 attrs={'class': 'form-control', 
-                    'placeholder': 'Select a date',
+                    'placeholder': 'Seleccione una fecha',
                     'type': 'date'
                     }
                     ),
             'dcobranza': forms.DateInput(
                 format=('%Y-%m-%d'),
                 attrs={'class': 'form-control', 
-                    'placeholder': 'Select a date',
+                    'placeholder': 'Seleccione una fecha',
                     'type': 'date'
                     }
                     ),
+            'ctcomentario': forms.Textarea(attrs={'rows': '2', 
+                                                   'placeholder': 'Indique el motivo del atraso (si existe). Esta información no se imprime en el reporte de recuperación'}), 
         }
 
     def __init__(self, *args, **kwargs):
@@ -227,7 +240,8 @@ class RecuperacionesProtestosForm(forms.ModelForm):
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
-                'class':'form-control'
+                'class':'form-control',
+                # 'style': 'background-color: #f9f9f9;'
             })
         self.fields['nsobrepago'].widget.attrs['readonly']=True
         self.fields['dcobranza'].widget.attrs['value']=date.today
@@ -251,7 +265,7 @@ class CobranzasCargosForm(forms.ModelForm):
         labels={'cxcliente':'Cliente', 'cxtipofactoring':'Tipo de factoring'
             , 'cxformapago':'Forma de cobro','nvalor':'Valor recibido'
             , 'dcobranza':'Fecha de cobro', 'nsobrepago':'Sobrepago'
-            , 'cxcuentadeposito':'Cuenta de la empresa'
+            , 'cxcuentadeposito':'Cuenta de depósito'
             , 'ddeposito': 'Fecha de depósito'
             , 'cxcuentatransferencia': 'Cuenta de origen de transferencia'
         }
@@ -278,11 +292,12 @@ class CobranzasCargosForm(forms.ModelForm):
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
-                'class':'form-control'
+                'class':'form-control',
+                # 'style': 'background-color: #f9f9f9;'
             })
         self.fields['nsobrepago'].widget.attrs['readonly']=True
-        self.fields['dcobranza'].widget.attrs['value']=date.today
-        self.fields['ddeposito'].widget.attrs['value']=date.today
+        self.fields['dcobranza'].widget.attrs['value']=date.today()
+        self.fields['ddeposito'].widget.attrs['value']=date.today()
 
         if empresa:
             self.fields['cxcuentadeposito'].queryset = Cuentas_bancarias.objects\
@@ -305,7 +320,8 @@ class AccesoriosForm(forms.ModelForm):
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
-                'class':'form-control'
+                'class':'form-control',
+                # 'style': 'background-color: #f9f9f9;'
             })
 
 class CobranzasPagareForm(forms.ModelForm):
@@ -319,7 +335,7 @@ class CobranzasPagareForm(forms.ModelForm):
         labels={'cxcliente':'Cliente'
             , 'cxformapago':'Forma de cobro','nvalor':'Valor recibido'
             , 'dcobranza':'Fecha de cobro', 'nsobrepago':'Sobrepago'
-            , 'cxcuentadeposito':'Cuenta de la empresa'
+            , 'cxcuentadeposito':'Cuenta de depósito'
             , 'ddeposito': 'Fecha de depósito'
             , 'cxcuentatransferencia': 'Cuenta de origen de transferencia'
         }
@@ -346,11 +362,12 @@ class CobranzasPagareForm(forms.ModelForm):
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
-                'class':'form-control'
+                'class':'form-control',
+                # 'style': 'background-color: #f9f9f9;'
             })
         self.fields['nsobrepago'].widget.attrs['readonly']=True
-        self.fields['dcobranza'].widget.attrs['value']=date.today
-        self.fields['ddeposito'].widget.attrs['value']=date.today
+        self.fields['dcobranza'].widget.attrs['value']=date.today()
+        self.fields['ddeposito'].widget.attrs['value']=date.today()
 
         if empresa:
             self.fields['cxcuentadeposito'].queryset = Cuentas_bancarias.objects\

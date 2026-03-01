@@ -15,20 +15,20 @@
 {% endblock breadcrumbs %}
 {% block content %}
 
+            <div hidden><input id="ambiente" value='{{ambiente}}'></div>
 <form  method="post" id="frmGenera" enctype="multipart/form-data" class="form-horizontal">
     <!-- <div class="col-lg-6"> -->
         <div class="card">
             {% csrf_token %}
-            <div class="card-header">
-                <strong>generar factura</strong> 
+            <div class="card-header" style="background-color: white;">
+                <h5>Generar facturas al vencimiento</h5> 
             </div>
-            <div hidden><input id="ambiente" value='{{ambiente}}'></div>
              <div class="card-body card-block">
                     <!-- columna izquierda -->
-                <div class="col-lg-7">
+                <div class="col-lg-5">
                     <div class="row form-group " id="filtro" >
                         <div class="col-md-5">
-                            <label for="fechacorte">Perìodo:</label>
+                            <label for="añocorte">Perìodo:</label>
                         </div>
                         <div class="col-md-3">
                             <input type="text" class="form-control" name="añocorte"  
@@ -56,7 +56,7 @@
                     </div>
                     <div class="row form-group">
                         <div class="col-md-5">
-                            <label for="fechacorte">Tipo de factoring:</label>
+                            <label for="id_factoring">Tipo de factoring:</label>
                         </div>
                         <div class="col-md-7">
                             <select data-placeholder="Seleccione un tipo de factoring..." 
@@ -93,11 +93,19 @@
                         <div class="col-md-7">{{form.demision}}</div>
                     </div>
 
+
+                </div>
+                <div class="col-lg-7">
+                    <div class="alert alert-info" role="alert">
+                        En el concepto de diario puede usar las etiquetas { { cliente } } { { operacion } } y { { documento } }
+                        para mostrar, en el lugar que en ellas se encuentren, el nombre del cliente
+                        , el código de la negociación y el número de factura generada respectivamente.
+                    </div>
                     <div class="row form-group">
-                        <div class="col-md-5">
-                            <label for="id_ctconcepto" class=" form-control-label">
+                        <div class="col-md-2">
+                            <label for="concepto" class=" form-control-label">
                                Concepto de diario</label></div>
-                        <div class="col-md-7">
+                        <div class="col-md-10">
                             <textarea type="text" class="form-control" 
                             required id="concepto" rows="3" 
                             name="concepto">{{concepto}}</textarea>
@@ -106,24 +114,19 @@
 
 
                 </div>
-                <div class="col-lg-5">
-                    <div class="alert alert-info" role="alert">
-                        En el concepto de diario puede usar las etiquetas { { cliente } } { { operacion } } y { { documento } }
-                        para mostrar, en el lugar que en ellas se encuentren, el nombre del cliente
-                        , el código de la negociación y el número de documento respectivamente.
-                    </div>
-
-                </div>
             </div>    
             
             <div class="card-footer">
-                <a href="{% url 'contabilidad:listapendientesgenerarfactura' %}" class="btn btn-danger btn-sm">
+                <!-- <a href="{% url 'contabilidad:listapendientesgenerarfactura' %}" class="btn btn-danger btn-sm">
                     <i class="fa fa-ban"></i> Cancelar
-                </a>
-                <button type="button" onclick="GenerarFacturas()" class="btn btn-primary btn-sm ">
-                    <i class="fa fa-dot-circle-o"></i> Aceptar
-                </button>
+                </a> -->
+                <div class="text-right">
+
+                    <button type="button" onclick="GenerarFacturas()" class="btn btn-secondary btn-sm ">
+                        <i class="fa fa-dot-circle-o"></i> Aceptar
+                    </button>
                 </div>
+            </div>
         </div>
     <!-- </div> -->
 </form>

@@ -125,23 +125,23 @@
                                 <tr class="caja">
                                     <td colspan="4">{{ protesto.nombre }}</td>
                                     <td > {{ protesto.fecha|date:"Y-m-d"  }}</td>
-                                    <td class="numero"> {{ protesto.valor_protesto }}</td>
+                                    <td class="numero"> {{ protesto.valor_protesto|intcomma }}</td>
                                     <td colspan="2"> {{ protesto.motivo }}</td>
-                                    <td class="numero"> {{ protesto.valor_aplicado }}</td>
-                                    <td class="numero"> {{ protesto.saldo_protesto }}</td>
+                                    <td class="numero"> {{ protesto.valor_aplicado|intcomma }}</td>
+                                    <td class="numero"> {{ protesto.saldo_protesto|intcomma }}</td>
                                 </tr>
                                 <tr></tr>
                                 {% for item in protesto.detalle %}
                                     <tr>
                                         <td>{{ item.asignacion }}</td>
                                         <td>{{ item.documento }}</td>
-                                        <td class="numero">{{ item.saldo_al_dia_protesto }}</td>
+                                        <td class="numero">{{ item.saldo_al_dia_protesto|intcomma }}</td>
                                         <td class="centrado">{{ item.vencimiento|date:"Y-m-d" }}</td>
                                         <td class="numero">{{ item.dias_vencidos }}</td>
-                                        <td class="numero">{{ item.valor_recuperado }}</td>
-                                        <td class="numero">{{ item.valor_baja }}</td>
-                                        <td class="numero">{{ item.saldo_al_dia_baja_cobranza }}</td>
-                                        <td class="numero">{{ item.total_aplicado }}</td>
+                                        <td class="numero">{{ item.valor_recuperado|intcomma }}</td>
+                                        <td class="numero">{{ item.valor_baja|intcomma }}</td>
+                                        <td class="numero">{{ item.saldo_al_dia_baja_cobranza|intcomma }}</td>
+                                        <td class="numero">{{ item.total_aplicado|intcomma }}</td>
                                         <td class="numero">{{ item.saldo_actual_protesto }}</td>
                                     </tr>
                                 {% endfor %}
@@ -153,10 +153,10 @@
                             <!-- totales -->
                             <tr></tr>
                             <tr>
-                                <td colspan="6"class="numero"><h4>{{ totales.cobrado }}</h4></td>
-                                <td class="numero"><h4>{{ totales.bajas }}</h4></td>
-                                <td class="numero"><h4>{{ totales.bajas_cobranza }}</h4></td>
-                                <td class="numero"><h4>{{ totales.aplicado }}</h4></td>
+                                <td colspan="6"class="numero"><h4>{{ totales.cobrado|intcomma }}</h4></td>
+                                <td class="numero"><h4>{{ totales.bajas|intcomma }}</h4></td>
+                                <td class="numero"><h4>{{ totales.bajas_cobranza|intcomma }}</h4></td>
+                                <td class="numero"><h4>{{ totales.aplicado|intcomma }}</h4></td>
                             </tr>
                         </tbody>
                     </table>

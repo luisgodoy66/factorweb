@@ -33,7 +33,9 @@ def enviar_mensaje_whatsapp(request, whatsapp_destino ):
         if not configuracion_twilio:
             return HttpResponse("Configuración de Twilio no encontrada.")
         
-        gestion_cobro = Gestion_cobro.objects.get(id=gestion_cobro_id)
+        gestion_cobro = Gestion_cobro.objects\
+            .get(id=gestion_cobro_id, empresa=id_empresa.empresa)
+        
         if not gestion_cobro:
             raise HttpResponse("Gestión de cobro no encontrada.")
 

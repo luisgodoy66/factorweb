@@ -7,9 +7,9 @@
                 action="{% url 'operaciones:condicionoperativa_nueva' tipo_factoring %}"
             {% else %}
                 {% if doc_id %}
-                    action="{% url 'solicitudes:facturaspuras_editar' asignacion_id cliente tipo_factoring doc_id %}"
+                    action="{% url 'operaciones:condicionoperativa_editar' tipo_factoring condicion_id doc_id %}"
                 {% else %}
-                    action="{% url 'operaciones:condicionoperativa_editar' condicion_id tipo_factoring %}"
+                    action="{% url 'operaciones:condicionoperativa_editar' tipo_factoring condicion_id %}"
                 {% endif %}
             {% endif %}
             >

@@ -121,28 +121,36 @@ class CobranzasPorConfirmarView(SinPrivilegios, generic.ListView):
 
     def get_queryset(self):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        
-        cobranzas = Documentos_cabecera.objects.filter(cxestado='A'\
-            , leliminado = False\
-            , empresa = id_empresa.empresa
-            , ldepositoencuentaconjunta = True\
-            , cxtipofactoring__lanticipatotalnegociado = False )\
-                .values('cxcliente__cxcliente__ctnombre','ddeposito', 'cxcheque_id'
-                ,'cxtipofactoring__ctabreviacion', 'cxcuentaconjunta__cxcuenta'
-                ,'cxcobranza','cxformapago','nvalor', 'id', 'cxcuentaconjunta_id'
-                , 'cxcuentaconjunta__cxbanco__ctbanco').annotate(tipo=RawSQL("select 'C'",'')
+        # no sé por qué tenía la cdición de no anticipa total negociado 
+        cobranzas = Documentos_cabecera.objects\
+            .filter(cxestado='A', leliminado = False
+                    , empresa = id_empresa.empresa
+                    , ldepositoencuentaconjunta = True\
+            # , cxtipofactoring__lanticipatotalnegociado = False 
+            )\
+            .values('cxcliente__cxcliente__ctnombre','ddeposito'
+                    , 'cxcheque_id','cxtipofactoring__ctabreviacion'
+                    , 'cxcuentaconjunta__cxcuenta','cxcobranza'
+                    ,'cxformapago','nvalor', 'id'
+                    , 'cxcuentaconjunta_id'
+                    , 'cxcuentaconjunta__cxbanco__ctbanco')\
+            .annotate(tipo=RawSQL("select 'C'",'')
                 )
                 
-        recuperaciones = Recuperaciones_cabecera.objects.filter(cxestado='A'\
-            , leliminado = False\
-            , empresa = id_empresa.empresa
-            , ldepositoencuentaconjunta = True\
-            , cxtipofactoring__lanticipatotalnegociado = False )\
-                .values('cxcliente__cxcliente__ctnombre','ddeposito', 'cxcheque_id'
-                ,'cxtipofactoring__ctabreviacion', 'cxcuentaconjunta__cxcuenta'
-                ,'cxrecuperacion','cxformacobro','nvalor', 'id', 'cxcuentaconjunta_id'
-                , 'cxcuentaconjunta__cxbanco__ctbanco').annotate(tipo=RawSQL("select 'R'",'')
-                )
+        recuperaciones = Recuperaciones_cabecera.objects\
+            .filter(cxestado='A', leliminado = False
+                    , empresa = id_empresa.empresa
+                    , ldepositoencuentaconjunta = True
+                    # , cxtipofactoring__lanticipatotalnegociado = False 
+                    )\
+            .values('cxcliente__cxcliente__ctnombre','ddeposito'
+                    , 'cxcheque_id','cxtipofactoring__ctabreviacion'
+                    , 'cxcuentaconjunta__cxcuenta','cxrecuperacion'
+                    ,'cxformacobro','nvalor', 'id'
+                    , 'cxcuentaconjunta_id'
+                    , 'cxcuentaconjunta__cxbanco__ctbanco')\
+            .annotate(tipo=RawSQL("select 'R'",'')
+            )
         return cobranzas.union(recuperaciones)
 
     def get_context_data(self, **kwargs):
@@ -367,23 +375,35 @@ def AceptarConfirmacion(request):
         , valor_transferencia, valor_devolucion, id_cuentadestino, id_cuentaorigen
         ,fecha_transferencia,hay_cargo,valor_cargo, motivo_cargo, fecha_cargo))
 
+    if resultado!='OK':
+        return HttpResponse(resultado[0])
     return HttpResponse(resultado)
 
 @login_required(login_url='/login/')
 @permission_required('operaciones.add_notas_debito_cabecera', login_url='bases:sin_permisos')
-def DebitoBancarioSinCobranza(request):
+def DebitoBancarioSinCobranza(request, cuenta_conjunta):
     template_name = "cuentasconjuntas/datosdebitobancario_form.html"
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     sp = Asignacion.objects\
         .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
 
-    contexto={ "form" : DebitosNuevosForm
-              , "solicitudes_pendientes" : sp    }
+    if request.method =='GET':
+        cc = Cuentas_bancarias.objects\
+            .filter(pk = cuenta_conjunta
+                , empresa = id_empresa.empresa).first()
+        if not cc:
+            return HttpResponse("Cuenta conjunta no encontrada")
+        form = DebitosNuevosForm(empresa = id_empresa.empresa, initial={'cuentabancaria': cc})
+        contexto={ "form" : form
+            , "solicitudes_pendientes" : sp    }
 
+        return render(request, template_name, contexto)
+    
     if request.method =='POST':
         resultado = 'OK'
 
-        id_cuentaorigen = request.POST.get("cuentabancaria")
+        # id_cuentaorigen = request.POST.get("cuentabancaria")
+        id_cuentaorigen = cuenta_conjunta
 
         cuenta = Cuentas_bancarias.objects.filter(pk = id_cuentaorigen).first()
 
@@ -400,11 +420,11 @@ def DebitoBancarioSinCobranza(request):
 
 
         if resultado=='OK':
-            return redirect('cuentas_conjuntas:listacargospendientes')
+            return redirect('cuentasconjuntas:listacargospendientes')
 
         return HttpResponse(resultado)
 
-    return render(request, template_name, contexto)
+    # return render(request, template_name, contexto)
 
 @login_required(login_url='/login/')
 @permission_required('cobranzas.change_debitoscuentasconjuntas', login_url='bases:sin_permisos')

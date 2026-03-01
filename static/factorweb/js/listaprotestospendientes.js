@@ -73,7 +73,7 @@ function operateFormatter(value, row, index) {
 return [
   '<a class="revertir" href="javascript:void(0)" title="Reverso de protesto">',
   '<i class="fa fa-rotate-left"></i>',
-  '</a>  ',
+  '</a>&nbsp;&nbsp;',
   '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
   '<i class="fa fa-print"></i>',
   '</a>  ',

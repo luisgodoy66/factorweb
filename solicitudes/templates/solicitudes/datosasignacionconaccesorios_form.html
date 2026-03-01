@@ -22,112 +22,146 @@
 {% endblock breadcrumbs %}
 {% block content %}
 
-<form  method="POST" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal"
-    onsubmit="return checkSubmit();">
-
     <!-- <div class="col-lg-6"> -->
-    <div class="card">
-            {% csrf_token %}
-        <div class="card-header">
-            <strong>Solicitud de factoring con accesorios</strong> 
-            {% if asignacion.id %} de  {{ asignacion.cxcliente }}  
-            {% else %}  nueva {% endif %} 
-        </div>
-        <div class="card-body card-block">
-                <!-- lista de clientes -->
-            <div class="row form-group">
-                <!-- cliente -->
-                <div class="col-md-2">
-                    <label for="id_cxtipocliente" 
-                        class=" form-control-label">
-                    {{ form.cxcliente.label}}</label>
-                </div>
-                <div class="col-md-5">
-                    {{ form.cxcliente}}
-                </div>
-                <div class="col-md-2">
-                    <label for="id_cxtipocliente" 
-                        class=" form-control-label">
-                    {{ form.cxtipofactoring.label}}</label>
-                </div>
-                <div class="col-md-3">
-                    {{ form.cxtipofactoring}}
-                </div>
-            </div>
-            <div class="row form-group">
-                <div class="col-md-2">
-                    <label for="id_cxactividad" 
-                        class=" form-control-label">
-                    {{form.ncantidaddocumentos.label}}</label>
-                </div>
-                <div class="col-md-1">
-                    {{form.ncantidaddocumentos}}
-                </div>
-                <div class="col-md-2">
-                    <label for="id_cxactividad" class=" form-control-label">
-                    {{form.nvalor.label}}</label>
-                </div>
-                <div class="col-md-2">
-                    {{form.nvalor}}
-                </div>
-                <div class="col-md-5">
-                    {% if asignacion.id %}
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            <i class="fa fa-dot-circle-o"></i> Actualizar cliente y tipo de factoring
-                        </button>
-                    {% endif %}
-                </div>
-            </div>
-            <!-- parte inferior -->
-            <div class="row">
-                <div class="col ">
-                    <small>
-                    <table id="table"                      
-                        data-show-columns-toggle-all="true"
-                        data-show-export="true"
-                        data-detail-formatter="detailFormatter"
-                        data-minimum-count-columns="2"
-                        data-pagination="false"
-                        data-id-field="id"
-                        data-page-list="[10, 50, all]"
-                        data-show-footer="true"
-                        data-side-pagination="server"
-                        data-sortable="true"
-                        {% if asignacion.id %} 
-                        data-url="{% url 'solicitudes:detallesolicitudconaccesorios' asignacion.id %}"
-                        {% endif %} 
-                        >
-                    </table>
-                    </small>
-
-                </div>
-
-            </div>
-        </div>    
-        <div class="card-footer">
-            <div class="col-md-6">
-                <a href="{% url 'solicitudes:listasolicitudes' %}" 
-                    class="btn btn-danger btn-sm">
-                    <i class="fa fa-ban"></i> Salir
-                </a>
-                {% if asignacion.id %}
-                    <a href="{% url 'solicitudes:documentoconaccesorios_editar' asignacion.id asignacion.cxcliente_id asignacion.cxtipofactoring_id %}"
-                    class="btn btn-success btn-sm">
-                        <i class="fa fa-plus-circle"></i> Agregar factura
-                    </a>
-                {% else %}
-                    <button class="btn btn-success btn-sm"  role="button"
-                        onclick="return NuevaAsignacion()">  
-                        <i class="fa fa-plus-circle"></i> Agregar factura
-                    </button>
-                {% endif %}
-
-            </div>
-        
+<div class="card">
+    <div class="card-header" style="background-color: white;">
+        <div class="d-flex justify-content-between align-items-center ">
+            <h5 class="heading-title mb-3">{% if asignacion.id %} {% else %}  Nueva {% endif %}Solicitud de factoring</h5>
+            <a href="{% url 'solicitudes:listasolicitudes' %}" title="Salir"
+            class="btn btn-sm">
+                <i class="fa fa-times"></i>
+            </a>
         </div>
     </div>
+    <div class="card-body card-block">
+        <div class="row form-group">
+            <div class="col-md-12">
+                <form  method="POST" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal"
+                    onsubmit="return checkSubmit();">
+                            {% csrf_token %}
+                    <div hidden>
+                        {{ form.ncantidaddocumentos }}
+                        {{ form.nvalor }}
+                    </div>
+
+                    <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center ">
+                                <h6>Cliente y tipo de factoring</h6>
+                                <!-- <div class="col-md-5"> -->
+                                    {% if asignacion.id %}
+                                        <button type="submit"style="border: 1px solid #ddd; border-radius: 8px; padding: 10px;" class="btn btn-primary btn-sm">
+                                            <i class="fa fa-dot-circle-o"></i> Actualizar cambios
+                                        </button>
+                                    {% endif %}
+                                <!-- </div> -->
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row form-group">
+                                <!-- numero de documentos -->
+                                <div class="col-md-3">
+                                    <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                        <div id="divCantidad"></div>
+                                        <label for="id_ncantidaddocumentos" 
+                                        class=" form-control-label">
+                                        {{form.ncantidaddocumentos.label}}
+                                    </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                        <div id="divValor"></div>
+                                        <label for="id_nvalor" class="form-control-label">
+                                            {{form.nvalor.label}}
+                                        
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!-- lista de clientes -->
+                            <div class="row form-group">
+                                <!-- cliente -->
+                                <div class="col-md-1">
+                                    <label for="id_cxcliente" 
+                                        class=" form-control-label">
+                                    {{ form.cxcliente.label}}</label>
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.cxcliente}}
+                                </div>
+                                <div class="col-md-1">
+                                    <label for="id_cxtipofactoring" 
+                                        class=" form-control-label">
+                                    {{ form.cxtipofactoring.label}}</label>
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.cxtipofactoring}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- parte inferior -->
+        <div class="row form-group">
+            <div class="col ">
+                <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6>Documentos en la solicitud</h6>
+                            {% if asignacion.id %}
+                                <a href="{% url 'solicitudes:documentoconaccesorios_editar' asignacion.id asignacion.cxcliente_id asignacion.cxtipofactoring_id %}"
+                                class="btn btn-outline-secondary btn-sm">
+                                    <i class="fa fa-plus"></i> Agregar factura
+                                </a>
+                            {% else %}
+                                <button class="btn btn-outline-secondary btn-sm"  role="button"
+                                    onclick="return NuevaAsignacion()">  
+                                    <i class="fa fa-plus"></i> Agregar factura
+                                </button>
+                            {% endif %}
+                        </div> 
+                    </div>
+                    <div class="body">
+                        <!-- <small> -->
+                        <table id="table"                      
+                            data-show-columns-toggle-all="true"
+                            data-detail-formatter="detailFormatter"
+                            data-minimum-count-columns="2"
+                            data-pagination="false"
+                            data-id-field="id"
+                            data-page-list="[10, 50, all]"
+                            data-show-footer="true"
+                            data-side-pagination="server"
+                            data-sortable="true"
+                            {% if asignacion.id %} 
+                            data-url="{% url 'solicitudes:detallesolicitudconaccesorios' asignacion.id %}"
+                            {% endif %} 
+                            >
+                        </table>
+                            <!-- data-show-export="true" -->
+                        <!-- </small> -->
+                    </div>
+                </div> 
+            </div>
+
+        </div>
+    </div>    
+    <!-- <div class="card-footer">
+        <div class="col-md-6">
+            <a href="{% url 'solicitudes:listasolicitudes' %}" 
+                class="btn btn-danger btn-sm">
+                <i class="fa fa-times"></i> Salir
+            </a>
+
+        </div>
+    
+    </div> -->
+</div>
     <!-- </div> -->
-</form>
 {% endblock %}
 {% block js_page %}
 <!-- <script src="{% static 'factorweb/vendors/chosen/chosen.jquery.min.js' %}"></script> -->
@@ -168,7 +202,7 @@ function operateFormatter(value, row, index) {
     return [
         '<a class="editar" href="javascript:void(0)" title="Editar cheque">',
         '<i class="fa fa-edit"></i>',
-        '</a>',
+        '</a>&nbsp;&nbsp;',
         '<a class="' + eliminarClass + '" href="javascript:void(0)" title="' + eliminarTitle + '">',
         '<i class="' + eliminarIcon + '"></i>',
         '</a>'
@@ -180,6 +214,15 @@ function initTable() {
     $table.bootstrapTable('destroy').bootstrapTable({
     //   height: 400,
       locale: "es-EC",
+        footerStyle: function() {
+            return {
+                css: {
+                    'background-color': '#f0f8f0',
+                    'border-top': '2px solid #dee2e6',
+                    'font-weight': 'bold'
+                }
+            }
+        },
       columns: [
         [{title: 'Ref.', field: 'id', rowspan: 2, align: 'center',
           valign: 'middle', sortable: true,

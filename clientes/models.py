@@ -26,22 +26,30 @@ class Datos_compradores(ClaseModelo):
     def estado(self):
         return self.get_cxestado_display()
 
-    def reporte_ultimas_cobranzas(self):
+    def reporte_ultimas_cobranzas(self, cantidad=None):
         # devolver la fecha de pago y los días de demora de las últimas 5 cobranzas en formato JSON
         # uitilizado para el análisis de riesgo con IA
         from cobranzas.models import Documentos_detalle
         
-        ultimas_cobranzas = Documentos_detalle.objects.filter(
-            leliminado=False,
-            cxdocumento__cxcomprador=self.id,
-            cxcobranza__lpagadoporelcliente = False
-        ).order_by('-cxcobranza__dcobranza')[:5]
+        if cantidad :
+            ultimas_cobranzas = Documentos_detalle.objects.filter(
+                leliminado=False,
+                cxdocumento__cxcomprador=self.id,
+                cxcobranza__lpagadoporelcliente = False
+            ).order_by('-cxcobranza__dcobranza')[:cantidad ]
+        else:
+            ultimas_cobranzas = Documentos_detalle.objects.filter(
+                leliminado=False,
+                cxdocumento__cxcomprador=self.id,
+                cxcobranza__lpagadoporelcliente = False
+            ).order_by('-cxcobranza__dcobranza')
         
         cobranzas_data = []
         for cobranza in ultimas_cobranzas:
             cobranzas_data.append({
-            'fecha_pago': cobranza.cxcobranza.dcobranza.strftime('%Y-%m-%d') if cobranza.cxcobranza.dcobranza else None,
-            'dias_vencidos': cobranza.dias_vencidos()
+            'fecha de pago': cobranza.cxcobranza.dcobranza.strftime('%Y-%m-%d') if cobranza.cxcobranza.dcobranza else None,
+            'dias vencidos': cobranza.dias_vencidos(),
+            'comentarios': cobranza.cxcobranza.ctcomentario,
             })
         
         return json.dumps(cobranzas_data)
@@ -115,6 +123,34 @@ class Datos_generales(ClaseModelo):
         ).aggregate(total_facturado=Sum('ntotal'))['total_facturado']
         return total if total else 0
     
+    def reporte_ultimas_cobranzas(self, cantidad=None):
+        # devolver la fecha de pago y los días de demora de las últimas 5 cobranzas en formato JSON
+        # uitilizado para el análisis de riesgo con IA
+        from cobranzas.models import Documentos_detalle
+        
+        if cantidad :
+            ultimas_cobranzas = Documentos_detalle.objects.filter(
+                leliminado=False,
+                cxdocumento__cxcliente=self.id,
+                cxcobranza__lpagadoporelcliente = True
+            ).order_by('-cxcobranza__dcobranza')[:cantidad ]
+        else:
+            ultimas_cobranzas = Documentos_detalle.objects.filter(
+                leliminado=False,
+                cxdocumento__cxcliente=self.id,
+                cxcobranza__lpagadoporelcliente = True
+            ).order_by('-cxcobranza__dcobranza')
+        
+        cobranzas_data = []
+        for cobranza in ultimas_cobranzas:
+            cobranzas_data.append({
+            'fecha de pago': cobranza.cxcobranza.dcobranza.strftime('%Y-%m-%d') if cobranza.cxcobranza.dcobranza else None,
+            'dias vencidos': cobranza.dias_vencidos(),
+            'comentarios': cobranza.cxcobranza.ctcomentario,
+            })
+        
+        return json.dumps(cobranzas_data)
+    
     class Meta:
         ordering = [
             'cxcliente__ctnombre'
@@ -171,7 +207,7 @@ class Cuenta_transferencia(ClaseModelo):
         , related_name="cuenta_transferencia")
 
     def __str__(self):
-        return '{}-{}#{}'.format(self.cxcuenta.cxbanco
+        return '{} C.{}. N°{}'.format(self.cxcuenta.cxbanco
         ,self.cxcuenta.cxtipocuenta,self.cxcuenta.cxcuenta)
 
     objects= Cuenta_transferencia_Manager()

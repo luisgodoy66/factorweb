@@ -15,7 +15,7 @@
 {% endblock breadcrumbs %}
 {% block content %}
     <div class="card bg-flat-color-0">
-        <div class="card-body">
+        <div class="card-header" style="background-color: white;">
             <div class="dropdown float-right">
                 <button class="btn bg-transparent dropdown-toggle theme-toggle " 
                     type="button" id="dropdownMenuButton1" data-toggle="dropdown">
@@ -30,8 +30,11 @@
                 </div>
             </div>
             <h4 class="mb-0">
-                <span class="count">{{ consulta.count }}</span>
+                <span class="count">{{ consulta.count }} encontrados</span>
             </h4>
+
+        </div>
+        <div class="card-body">
 
             {% if not consulta %}
             <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
@@ -47,9 +50,9 @@
             </div>
             {% endif %}
 
-            <!-- <div class="content"> -->
+            <div>
 
-                <table class="table table-striped table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
                     <thead>
                         <th>Id</th>
                         <th>Cliente</th>
@@ -73,12 +76,11 @@
                             <td>
                                 {% if not item.lcontabilizada %}
                                     <a href="{% url 'cuentasconjuntas:transferencia_editar' item.id %}"
-                                    class="btn btn-warning btn-sm"  title="Editar"
-                                    >
+                                        class="btn  btn-sm"  title="Editar">
                                     <i class="fa fa-edit"></i>
                                     </a>
                                 {% endif %}
-                                <button class="btn btn-danger btn-sm"  title="Eliminar"
+                                <button class="btn  btn-sm"  title="Eliminar"
                                         onclick="EliminarTransferencia({{item.id}})"
                                     role="button">
                                     <i class="fa fa-trash"></i>

@@ -73,7 +73,7 @@ class DebitosForm(forms.ModelForm):
     class Meta:
         model=DebitosCuentasConjuntas
         fields = ['ctmotivo', 'nvalor', 'dmovimiento']
-        labels = {'ctmotivo':'Motivo', 'nvalor':'Valor', 'dmovimiento':'Fecha'}
+        labels = {'ctmotivo':'Motivos', 'nvalor':'Valores', 'dmovimiento':'Fecha'}
         # Lo importante es el formato
         widgets = {
             'dmovimiento': forms.DateInput(
@@ -100,7 +100,7 @@ class DebitosNuevosForm(forms.ModelForm):
     class Meta:
         model=DebitosCuentasConjuntas
         fields = ['ctmotivo', 'nvalor', 'dmovimiento', 'cuentabancaria']
-        labels = {'ctmotivo':'Motivo', 'nvalor':'Valor', 'dmovimiento':'Fecha'
+        labels = {'ctmotivo':'Motivos', 'nvalor':'Valores', 'dmovimiento':'Fecha'
             , 'cuentabancaria':'Cuenta bancaria'}
         # Lo importante es el formato
         widgets = {
@@ -114,6 +114,7 @@ class DebitosNuevosForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
@@ -121,3 +122,7 @@ class DebitosNuevosForm(forms.ModelForm):
                 'class':'form-control'
             })
         self.fields['dmovimiento'].widget.attrs['value']=date.today
+
+        if empresa:
+            self.fields['cuentabancaria'].queryset = Cuentas_bancarias\
+                .objects.filter(empresa=empresa, leliminado = False)

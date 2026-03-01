@@ -21,8 +21,10 @@ urlpatterns = [
         , name="listacargospendientes"),
     path('datosdebitoeditar/<int:pk>',DebitoBancarioEdit.as_view()
          , name="debitobancario_editar"),
-    path('debitoeliminar/<int:pk>',EliminarNotaDebito, name="debitobancario_eliminar"),
-    path('datosdebitonuevo',DebitoBancarioSinCobranza, name="debitobancario_nuevo"),
+    path('debitoeliminar/<int:pk>',EliminarNotaDebito
+         , name="debitobancario_eliminar"),
+    path('datosdebitonuevo/<int:cuenta_conjunta>',DebitoBancarioSinCobranza
+         , name="debitobancario_nuevo"),
     path('listatransferencias/',TransferenciasView.as_view()
         , name="listatransferencias"),
     path('transferencianueva/',DatosTransferencia, name="transferencia_nueva"),

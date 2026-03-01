@@ -16,51 +16,73 @@
 {% endblock breadcrumbs %}
 {% block content %}
 
-<form  method="post" id="frmSolicitud" enctype="multipart/form-data" 
+<!-- <form  method="post" id="frmSolicitud" enctype="multipart/form-data" 
         class="form-horizontal">
+            {% csrf_token %} -->
     <!-- <div class="col-lg-6"> -->
-    <div class="card">
-            {% csrf_token %}
-        <div class="card-header">
-            <strong>Cobranza</strong> 
-            {{ operacion }} de  {{ operacion.cxcliente }}  
-        </div>
         <div class="col-md-6" hidden>
             <input type="number" id="id_cobranza" value={{ operacion.id }}>
             <input id="tipo_operacion" value={{ tipo_operacion }}>
             <input type="text" id="id_dcobranza" value="{{ operacion.dcobranza |date:'Y-m-d' }}">
         </div>
-        <div class="card-body card-block">
-                <!-- numero de documentos -->
-                <div class="row form-group">
-                    <div class="col-md-2">
-                        <label for="id_fechacobro" class=" form-control-label">
-                        Fecha de cobro</label>
+<div class="card">
+    <div class="card-header" style="background-color: white;">
+        <div class="d-flex justify-content-between align-items-center ">
+            <h5>Condonación de días a {{ operacion.cxcliente }} </h5>             
+            <a href="{% url 'cobranzas:listacobranzaspendientesliquidar' %}" class="btn btn-sm">
+                <i class="fa fa-times"></i> 
+            </a>
+        </div>
+    </div>
+    <div class="card-body card-block">
+        <!-- numero de documentos -->
+        <div class="row form-group">
+            <div class="col">
+                <div class="card" style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    <div class="card-header"style="background-color: white;">
+                        <h6 class="heading-title mb-1 text-secondary">Datos de la cobranza {{ operacion }}</h6>
                     </div>
-                    <div class="col-md-2" >
-                        {{operacion.dcobranza |date:'Y-m-d'}}
+                    <div class="card-body">
+                        <div class="row form-group ">
+                            <div class="col-md-3">
+                                <label for="id_fechacobro" class=" form-control-label">
+                                <h6>Fecha de cobro</h6></label>
+                                <div>{{operacion.dcobranza |date:'Y-m-d'}}</div>
+                            </div>
+                            <div class="col-md-9" >
+                                <label for="id_fechacobro" class=" form-control-label">
+                                <h6>Comentario interno</h6></label>
+                                <div>{{operacion.ctcomentario | default:"No registrado"}}</div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            <!-- parte inferior -->
-            <div class="row">
-                <div class="col ">
-                    <small>
 
+                </div>
+            </div>
+        </div>
+        <!-- parte inferior -->
+        <div class="row form-group">
+            <div class="col-12 ">
+                <!-- <small> -->
+                <div class="card" style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    <div class="card-header">
+                        <h6>Documentos</h6>
+                    </div>
+                    <div class="body">
                     <table id="table"                      
                         data-show-columns-toggle-all="true"
-                        data-show-export="true"
                         data-detail-formatter="detailFormatter"
                         data-minimum-count-columns="2"
-                        data-pagination="true"
                         data-id-field="id"
                         data-page-list="[10, 50, all]"
-                        data-show-footer="true"
                         data-side-pagination="server"
                         data-url="{% url 'cobranzas:detalledocumentoscobrados' operacion.id tipo_operacion %}"
                         >
+                        <!-- data-show-export="true" -->
+                        <!-- data-pagination="true" -->
                     <thead>
                         <tr>
-                        <th data-field="id" ></th>
+                        <!-- <th data-field="id" ></th> -->
                         <th data-field="Comprador" data-sortable="true" >Deudor</th>
                         <th data-field="Asignacion" data-sortable="true" >Asignación</th>
                         <th data-field="Documento" data-sortable="true" >Documento</th>
@@ -74,22 +96,18 @@
                         </tr>
                     </thead>
                     </table>
-                    </small>
 
+                    </div>
                 </div>
+                <!-- </small> -->
 
             </div>
-        </div>    
-        <!-- pie de card -->
-        <div class="card-footer">
-        <a href="{% url 'cobranzas:listacobranzaspendientesliquidar' %}" class="btn btn-danger btn-sm">
-            <i class="fa fa-ban"></i> Cerrar
-        </a>
-        </div>
 
-    </div>
+        </div>
+    </div>    
+</div>
     <!-- </div> -->
-</form>
+<!-- </form> -->
 {% endblock %}
 {% block js_page %}
 <script type="text/javascript" src="{% static 'factorweb/js/detallecobroporcondonar.js' %}"></script>

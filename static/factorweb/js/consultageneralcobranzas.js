@@ -45,22 +45,22 @@ window.operateEvents = {
       ImprimirCobranza( row.id, row.TipoOperacion)
     },
     'click .editar': function (e, value, row, index) {
-      ModificarCobranza( row.id, row.TipoOperacion, row.Contabilizada)
+      ModificarCobranza( row.id, row.TipoOperacion, row.Contabilizada, row.Estado)
     },
   };
     
 function operateFormatter(value, row, index) {
-    return [
-        '<a class="editar" href="javascript:void(0)" title="modificar cobranza">',
-        '<i class="fa fa-edit"></i>',
-        '</a>  ',
-        '<a class="revertir" href="javascript:void(0)" title="Reverso de cobranza">',
-        '<i class="fa fa-rotate-left"></i>',
-        '</a>  ',
-        '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
-        '<i class="fa fa-print"></i>',
-        '</a>  ',
-      ].join('')
+  return [
+      '<a class="editar" href="javascript:void(0)" title="modificar cobranza">',
+      '<i class="fa fa-edit"></i>',
+    '</a>&nbsp;&nbsp;',
+      '<a class="revertir" href="javascript:void(0)" title="Reverso de cobranza">',
+      '<i class="fa fa-rotate-left"></i>',
+    '</a>&nbsp;&nbsp;',
+      '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
+      '<i class="fa fa-print"></i>',
+      '</a>  ',
+    ].join('')
 }
   
 function imprimeCobranzas(){

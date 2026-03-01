@@ -282,7 +282,7 @@ class Exceso_temporal(ClaseModelo):
         linea = self.cliente.linea_factoring.first()
         
         if not linea:
-            return "{} (Sin línea configurada)".format(self.nvalor)
+            return "{:,.2f} (Sin línea configurada)".format(self.nvalor)
         
         porcentaje = (self.nvalor / linea.valor()) * 100 if linea.valor() else 0
-        return "{} ({:.2f}%)".format(self.nvalor, porcentaje)
+        return "{:,.2f} ({:.2f}%)".format(self.nvalor, porcentaje)

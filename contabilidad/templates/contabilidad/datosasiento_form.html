@@ -8,7 +8,7 @@
                     <li><a href="#">contabilidad</a></li>
                     <li><a href="#">asientos</a></li>
                     <li><a href="{% url 'contabilidad:listaasientoscontables' %}">registro de asientos</a></li>
-                    <li class="active">{{diario|default:'nuevo'}}</li>
+                    <li class="active">{{diario.cxtransaccion|default:'nuevo'}}</li>
                 </ol>
             </div>
         </div>
@@ -18,63 +18,88 @@
 
 <form  method="post" id="frmAsiento" enctype="multipart/form-data" 
     class="form-horizontal" onsubmit="return checkSubmit();">
-<div class="col-md-12">
-    <div class="card">
         {% csrf_token %}
-        <div class="card-header">
-            <strong>Detalle de asiento</strong> 
+<!-- <div class="col-md-12"> -->
+    <div class="card">
+        <div class="card-header" style="background-color: white;">
+            <div class="d-flex justify-content-between align-items-center ">
+                <h5>Detalle de asiento {{diario.cxtransaccion|default:'nuevo'}}</h5> 
+                <a class="btn  btn-sm "
+                    {% if desde_consulta %}
+                        href="{% url 'contabilidad:consulta_diarios' %}"
+                    {% else %}
+                        href="{% url 'contabilidad:listaasientoscontables' %}"
+                    {% endif %}
+                ><i class="fa fa-times"></i>
+                </a>
+            </div>
         </div>
         <div class="card-body">
+            <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <div class="card-header">
+                    <h6>Datos del asiento</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row form-group">
+                        <div class="col-md-3">
+                            <div class="row form-group">
+                                <div class="col-md-4"><label for="id_cxbanco" class=" form-control-label">
+                                    {{ form_diario.dcontabilizado.label}}</label></div>
+                                <div class="col-md-8">
+                                    {{ form_diario.dcontabilizado}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row form-group">
+                                <div class="col-md-2"><label for="id_cxbanco" class=" form-control-label">
+                                    {{ form_diario.ctconcepto.label}}</label></div>
+                                <div class="col-md-10">
+                                    {{ form_diario.ctconcepto}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
 
-            <div class="col-md-3">
-                <div class="row form-group">
-                    <div class="col-md-4"><label for="id_cxbanco" class=" form-control-label">
-                        {{ form_diario.dcontabilizado.label}}</label></div>
-                    <div class="col-md-8">
-                        {{ form_diario.dcontabilizado}}
-                    </div>
-                </div>
-                <div class="row form-group">
-                    <div class="col-md-12">
-                    <button type="button" class="btn btn-success btn-sm float-right" 
-                        onclick="AbrirModal('/contabilidad/editarlineadeasiento/')">  
-                        <i class="fa fa-plus-circle"></i> Agregar detalle
-                    </button>
-                    </div>
-                </div>  
-            </div>
-            <div class="col-md-6">
-                <div class="row form-group">
-                    <div class="col-md-2"><label for="id_cxbanco" class=" form-control-label">
-                        {{ form_diario.ctconcepto.label}}</label></div>
-                    <div class="col-md-10">
-                        {{ form_diario.ctconcepto}}
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
+                            <div class="row form-group">
+                                <div class="col-md-2"><label for="id_cxbanco" class=" form-control-label">
+                                    Debe</label></div>
+                                <div class="col-md-10">
+                                    <!-- <input id="total_debe" name="total_debe" value="0.00" class="form-control" disabled> -->
+                                     <div id="divDebe"></div>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-2"><label for="id_cxbanco" class=" form-control-label">
+                                    Haber</label></div>
+                                <div class="col-md-10">
+                                    <!-- <input id="total_haber" name="total_haber" value="0.00" class="form-control" disabled> -->
+                                     <div id="divHaber"></div>
+                                </div>
+                            </div>
+                        </div>
 
-                <div class="row form-group">
-                    <div class="col-md-2"><label for="id_cxbanco" class=" form-control-label">
-                        Debe</label></div>
-                    <div class="col-md-10">
-                        <input id="total_debe" name="total_debe" value="0.00" class="form-control" disabled>
                     </div>
-                </div>
-                <div class="row form-group">
-                    <div class="col-md-2"><label for="id_cxbanco" class=" form-control-label">
-                        Haber</label></div>
-                    <div class="col-md-10">
-                        <input id="total_haber" name="total_haber" value="0.00" class="form-control" disabled>
-                    </div>
-                </div>
-            </div>
 
+                </div>
+                
+            </div>
+            <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6>Detalle del asiento</h6>
+                        <button type="button" class="btn btn-outline-secondary btn-sm float-right" 
+                            onclick="AbrirModal('/contabilidad/editarlineadeasiento/')">  
+                            <i class="fa fa-plus"></i> Agregar detalle
+                        </button>
+                    </div>  
+
+                </div>
             <!-- <small> -->
 
             <!-- <div class="container mt-3"> -->
                 <div id="divTabla">
-                    <table class="table table-striped table-bordered" id="tabla_diario" data-propiedadId="Id">
+                    <table class="table table-hover table-bordered" id="tabla_diario" data-propiedadId="Id">
                         <thead>
                             <tr>
                                 <td data-cabecera="cxcuenta">Cuenta</td>
@@ -90,19 +115,20 @@
                 </div>
             <!-- </div> -->
             <!-- </small> -->
-    </div>
+
+            </div>
+        </div>
         <div class="card-footer">
-            <a class="btn btn-danger btn-sm "
-                href="{% url 'contabilidad:listaasientoscontables' %}" 
-            ><i class="fa fa-ban"></i> Cancelar
-            </a>
-            <button type="submit" class="btn btn-primary btn-sm">
-                <i class="fa fa-dot-circle-o"></i> Grabar
-            </button>
+            <div class="text-right">
+                <button type="submit" class="btn btn-secondary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Grabar
+                </button>
+
+            </div>
             
         </div>
     </div>
-</div>
+<!-- </div> -->
 
 </form>
 {% endblock %}
@@ -110,7 +136,8 @@
 <script type="text/javascript" src="{% static 'factorweb/js/datosasiento.js' %}"></script>
 <script>
     enviando = false; //Obligaremos a entrar el if en el primer submit
-    var diario = '{{diario}}'    
+    var diario = '{{diario.id}}'    
+    const comprobante_egreso = false
 </script>
 {% endblock %}
 

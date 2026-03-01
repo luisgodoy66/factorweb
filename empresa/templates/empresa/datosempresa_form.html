@@ -15,10 +15,16 @@
 {% endblock breadcrumbs %}
 {% block content %}
 <form  method="post" id="frmConfirmacion" enctype="multipart/form-data" class="form-horizontal">
-    <div class="card bg-flat-color-0">
         {% csrf_token %}
-        <div class="card-header">
-            <strong>Datos de la empresa</strong> 
+    <div class="card bg-flat-color-0">
+        <div class="card-header" style="background-color: white;">
+            <div class="d-flex justify-content-between align-items-center ">
+                <h5>Datos de la empresa</h5> 
+                <a href="{% url 'bases:home' %}" 
+                    class="btn  btn-sm">
+                    <i class="fa fa-times"></i>
+                </a>
+            </div>
         </div>
         <div class="card-body">
             <!-- cargos -->
@@ -82,7 +88,7 @@
                     <div class="row form-group">
         
                         <div class="col-md-2">
-                            <label for="id_ctcontribuyenteespecial" class=" form-control-label">
+                            <label for="id_ambientesri" class=" form-control-label">
                             {{ form.ambientesri.label}}</label>
                         </div>
                         <div class="col-md-4">
@@ -90,7 +96,7 @@
                         </div>                        
         
                         <div class="col-md-2">
-                            <label for="id_ctcontribuyenteespecial" class=" form-control-label">
+                            <label for="id_nporcentajeiva" class=" form-control-label">
                             {{ form.nporcentajeiva.label}}</label>
                         </div>
                         <div class="col-md-4">
@@ -100,13 +106,13 @@
 
                     <div class="row form-group">
                         <div class="col-md-2">
-                            <label for="id_logo1" class="form-control-label">{{ form.ilogolargo.label }}</label>
+                            <label for="id_ilogolargo" class="form-control-label">{{ form.ilogolargo.label }}</label>
                         </div>
                         <div class="col-md-4">
                             {{ form.ilogolargo }}
                         </div>
                         <div class="col-md-2">
-                            <label for="id_logo2" class="form-control-label">{{ form.ilogocorto.label }}</label>
+                            <label for="id_ilogocorto" class="form-control-label">{{ form.ilogocorto.label }}</label>
                         </div>
                         <div class="col-md-4">
                             {{ form.ilogocorto }}
@@ -135,13 +141,12 @@
         </div>
 
         <div class="card-footer">
-            <a href="{% url 'bases:home' %}" 
-                class="btn btn-danger btn-sm">
-                <i class="fa fa-ban"></i> Cancelar
-            </a>
-            <button type="submit" class="btn btn-primary btn-sm">
-                <i class="fa fa-dot-circle-o"></i> Grabar
-            </button>
+            <div class="text-right">
+                <button type="submit" class="btn btn-secondary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Grabar
+                </button>
+
+            </div>
         </div>
         {% if form.errors %}
         <div class="alert alert-danger" role="alert">

@@ -7,7 +7,11 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">contabilidad</a></li>
                     <li><a href="{% url 'contabilidad:listacuentascontables' %}">cuentas</a></li>
+                    {% if cuenta %} 
+                        <li class="active">editar</li>
+                    {% else %}
                     <li class="active">nueva</li>
+                    {% endif %}
                 </ol>
             </div>
         </div>
@@ -15,19 +19,25 @@
 {% endblock breadcrumbs %}
 {% block content %}
 <form  method="post" id="frmConfirmacion" enctype="multipart/form-data" class="form-horizontal">
-    <div class="col-lg-6">
-        <div class="card ">
         {% csrf_token %}
-        <div class="card-header">
-            <strong>Datos de la cuenta</strong> 
+    <!-- <div class="col-lg-6"> -->
+    <div class="card ">
+        <div class="card-header" style="background-color: white;">
+            <div class="d-flex justify-content-between align-items-center ">
+                <h5>Datos de la cuenta {{ cuenta }}</h5> 
+                <a href="{% url 'contabilidad:listacuentascontables' %}" 
+                    class="btn  btn-sm">
+                    <i class="fa fa-times"></i>
+                </a>
+            </div>
         </div>
         <div class="card-body">
             <!-- cargos -->
-            <div class="col-lg-12">
+            <div class="col-md-7">
                     <div class="row form-group">
         
                         <div class="col-md-3">
-                            <label for="id_nvalor" class=" form-control-label">
+                            <label for="id_cxcuenta" class=" form-control-label">
                             {{ form.cxcuenta.label}}</label>
                         </div>
                         <div class="col-md-9">
@@ -38,7 +48,7 @@
                     <div class="row form-group">
         
                         <div class="col-md-3">
-                            <label for="id_nvalor" class=" form-control-label">
+                            <label for="id_ctcuenta" class=" form-control-label">
                             {{ form.ctcuenta.label}}</label>
                         </div>
                         <div class="col-md-9">
@@ -47,10 +57,12 @@
                             
                     </div>
 
+            </div>
+            <div class="col-md-5">
                     <div class="row form-group">
         
                         <div class="col-md-3">
-                            <label for="id_nvalor" class=" form-control-label">
+                            <label for="id_nnivel" class=" form-control-label">
                             {{ form.nnivel.label}}</label>
                         </div>
                         <div class="col-md-9">
@@ -61,14 +73,14 @@
                     <div class="row form-group">
         
                         <div class="col-md-3">
-                            <label for="id_nvalor" class=" form-control-label">
+                            <label for="id_ldetalle" class=" form-control-label">
                             {{ form.ldetalle.label}}</label>
                         </div>
                         <div class="col-md-9">
                             <!-- {{ form.ldetalle}} -->
                             <label class="switch switch-3d switch-success mr-3">
                                 <input type="checkbox" class="switch-input" 
-                                {% if  cuentas.ldetalle %} checked {% endif %} 
+                                {% if  cuenta.ldetalle %} checked {% endif %} 
                                 id = "id_ldetalle" name = "ldetalle"> 
                                 <span class="switch-label"></span> 
                                 <span class="switch-handle"></span>
@@ -76,22 +88,22 @@
                         </div>                        
                     </div>
 
+
             </div>
         </div>
 
         <div class="card-footer">
-            <a href="{% url 'contabilidad:listacuentascontables' %}" 
-                class="btn btn-danger btn-sm">
-                <i class="fa fa-ban"></i> Cancelar
-            </a>
-            <button type="submit" class="btn btn-primary btn-sm">
-                <i class="fa fa-dot-circle-o"></i> Grabar
-            </button>
+            <div class="text-right">
+                <button type="submit" class="btn btn-secondary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Grabar
+                </button>
+
+            </div>
 
         </div>
 
     </div>
-    </div>
+    <!-- </div> -->
  
 </form>
 {% endblock %}

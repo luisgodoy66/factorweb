@@ -1,4 +1,6 @@
 var linea 
+  var total_debe = 0
+  var total_haber = 0
 
 window.onload=function(){
 
@@ -10,25 +12,30 @@ window.onload=function(){
   // validar antes de enviar
   jQuery("#frmAsiento").submit(function(e){
 
-      var total_debe = 0
-      var total_haber = 0
+      var suma_debe = 0
+      var suma_haber = 0
 
       e.preventDefault();
       
       jQuery("#body_asiento tr").each(function (i,row) {
             var valordebe = row.children[2].innerText
             var valorhaber = row.children[3].innerText
-            total_debe += parseFloat( valordebe)
-            total_haber += parseFloat( valorhaber)
+            suma_debe += parseFloat( valordebe)
+            suma_haber += parseFloat( valorhaber)
       });
-    
+      total_debe = suma_debe.toFixed(2)
+      total_haber = suma_haber.toFixed(2)
+
       if (total_debe != total_haber){
-          alert("Totales de debe y haber no cuadran: " )
+          alert("Totales de debe y haber no cuadran: " + total_debe + " - " + total_haber)
+          enviando = false
           return false;
       };
 
-      inicializaValor("total_debe", total_debe)
-      inicializaValor("total_haber", total_haber)
+      // inicializaValor("total_debe", total_debe)
+      // inicializaValor("total_haber", total_haber)
+      inicializarInner('divDebe', '<H5>' + total_debe + '</H5>')
+      inicializarInner('divHaber', '<H5>' + total_haber + '</H5>')
 
       // validar que el mes no este cerrado
       var fecha = document.getElementById("id_dcontabilizado").value
@@ -67,7 +74,7 @@ window.onload=function(){
           // para agregar el diario al contexto estos se deben agregar a
           // la data usando la siguiente formula
           formData.push({name:"Diario",value:JSON.stringify(DicDiario)});
-          formData.push({name:"total_debe",value:JSON.stringify(total_debe)});
+          formData.push({name:"total_debe",value:(total_debe)});
 
           jQuery.ajax({
             method:"POST",
@@ -79,7 +86,11 @@ window.onload=function(){
                 location.href="/contabilidad/listaasientoscontables/";
                 // en una nueva ventana abrir el reporte 
                 url = window.location.origin
-                url = url + "/contabilidad/imprimirdiariocontable/"+xhr.responseText;
+                if (comprobante_egreso) {
+                  url = url + "/contabilidad/imprimircomprobanteegreso/"+xhr.responseText;
+                } else {
+                  url = url + "/contabilidad/imprimirdiariocontable/"+xhr.responseText;
+                }
                 window.open( url);
                   MensajeOk()
               }
@@ -192,23 +203,31 @@ function agregarFilaTabla(cuenta, nombre_cuenta, tipo, referencia, valor, id_lin
 }
 
 function sumarTotales(valordebe, valorhaber){
-  totaldebe=capturaValor("total_debe")
-  totalhaber=capturaValor("total_haber")
-  sumadebe = parseFloat(totaldebe) + parseFloat(valordebe)
-  sumahaber = parseFloat(totalhaber) + parseFloat(valorhaber)
+  // totaldebe=capturaValor("total_debe")
+  // totalhaber=capturaValor("total_haber")
+  // sumadebe = parseFloat(totaldebe) + parseFloat(valordebe)
+  // sumahaber = parseFloat(totalhaber) + parseFloat(valorhaber)
+  total_debe = total_debe + parseFloat(valordebe)
+  total_haber = total_haber + parseFloat(valorhaber)
   
-  inicializaValor("total_debe", sumadebe)
-  inicializaValor("total_haber", sumahaber)
+  // inicializaValor("total_debe", parseFloat(sumadebe.toFixed(2)))
+  // inicializaValor("total_haber", parseFloat(sumahaber.toFixed(2)))
+  inicializarInner('divDebe', '<H5>' + parseFloat(total_debe.toFixed(2)) + '</H5>')
+  inicializarInner('divHaber', '<H5>' + parseFloat(total_haber.toFixed(2)) + '</H5>')
 }
 
 function restarTotales(valordebe, valorhaber){
-  totaldebe=capturaValor("total_debe")
-  totalhaber=capturaValor("total_haber")
-  sumadebe = parseFloat(totaldebe) - parseFloat(valordebe)
-  sumahaber = parseFloat(totalhaber) - parseFloat(valorhaber)
+  // totaldebe=capturaValor("total_debe")
+  // totalhaber=capturaValor("total_haber")
+  // sumadebe = parseFloat(totaldebe) - parseFloat(valordebe)
+  // sumahaber = parseFloat(totalhaber) - parseFloat(valorhaber)
+  total_debe = total_debe - parseFloat(valordebe)
+  total_haber = total_haber - parseFloat(valorhaber)
   
-  inicializaValor("total_debe", sumadebe)
-  inicializaValor("total_haber", sumahaber)
+  // inicializaValor("total_debe", parseFloat(sumadebe.toFixed(2)))
+  // inicializaValor("total_haber", parseFloat(sumahaber.toFixed(2)))
+  inicializarInner('divDebe', '<H5>' + parseFloat(total_debe.toFixed(2)) + '</H5>')
+  inicializarInner('divHaber', '<H5>' + parseFloat(total_haber.toFixed(2)) + '</H5>')
 }
 
 function eliminarFila(btn){

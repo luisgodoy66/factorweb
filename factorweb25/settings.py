@@ -1,7 +1,14 @@
 from pathlib import Path
 import os   
 import locale
-locale.setlocale(locale.LC_TIME, '')
+# Configurar locale para español
+try:
+    locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # Para Linux/Mac
+except locale.Error:
+    try:
+        locale.setlocale(locale.LC_TIME, 'Spanish_Spain.1252')  # Para Windows
+    except locale.Error:
+        locale.setlocale(locale.LC_TIME, 'C')  # Fallback
 # from decouple import config
 # # 06-ene-23 l.g.    cambiar de decouple a dotenv
 # 09-ene-23 l.g.    usar environ y el archivo de configuracion de elasticbeanstalk
@@ -68,6 +75,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',  # Middleware para localización
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -144,11 +152,28 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'es-ec'
 
+# Idiomas disponibles
+LANGUAGES = [
+    ('es', 'Español'),
+    ('en', 'English'),
+]
+
+# Directorio de traducciones
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
+
 TIME_ZONE = 'America/Guayaquil'
 
 USE_I18N = True
+USE_L10N = True  # Habilita formato de fechas localizado
 
 USE_TZ = False
+
+# Configuraciones adicionales de formato
+DATE_FORMAT = 'l, d \\de F \\de Y'
+DATETIME_FORMAT = 'd/m/Y H:i:s'
+SHORT_DATE_FORMAT = 'd/m/Y'
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -187,6 +212,7 @@ CSRF_COOKIE_SECURE = True
 
 # estaticos en la carpeta del proyecto
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Para collectstatic
 STATICFILES_DIRS = (os.path.join(BASE_DIR,'static'),)
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 MEDIA_ROOT = '/var/www/uploads'

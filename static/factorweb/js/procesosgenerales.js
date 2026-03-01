@@ -36,6 +36,8 @@ function calcularTotalesSolicitud() {
   });
   inicializaValor("id_nvalor", totalValor.toFixed(2));
   inicializaValor("id_ncantidaddocumentos", cnt);
+  inicializarInner("divCantidad", '<h6>' + cnt + '</h6>');    
+  inicializarInner("divValor", '<h6>' + totalValor.toFixed(2) + '</h6>');    
 }
 
 function ImprimirCobranza(cobranza_id, tipo_operacion){
@@ -72,15 +74,15 @@ function ReversarCobranza(operacion_id, tipo_operacion, nombre_cliente = null){
   else{
     id_operacion =  operacion_id
   }
-    if (tipo_operacion!= 'L'){
+    if (tipo_operacion == 'L'){
+      ReversarliquidacionCobranza(operacion_id)
+    }else{
       MensajeConfirmacion("Reversar cobranza " +  id_operacion +"?",function(){
           fetchProcesar("/cobranzas/reversarcobranza/" +  operacion_id + "/"
             + tipo_operacion,  function(){
               location.reload();
           })
       })
-    }else{
-      ReversarliquidacionCobranza(operacion_id)
     }
       
 }
@@ -330,11 +332,15 @@ function ReversarAsientoDiario(asiento_id, asiento){
 })
 }
 
-function ModificarCobranza(cobranza_id, tipo_operacion, contabilizada){
+function ModificarCobranza(cobranza_id, tipo_operacion, contabilizada, estado = null){
   if (contabilizada){
     MensajeError("Cobranza ya está contabilizada. No se puede modificar.")
   }
   else{
+    if (estado && estado.trim() == 'E'){
+      MensajeError("Cobranza ya está eliminada.")
+      return false
+    }
     if (tipo_operacion == 'C' || tipo_operacion =='R'){
       AbrirModal("/cobranzas/modificarcobranza/"+ cobranza_id + '/' + tipo_operacion)
     }
@@ -1030,9 +1036,12 @@ function saldoPorCliente(url) {
     });
 }
 
-function EditarAsientoDiario(asiento_id){
+function EditarAsientoDiario(asiento_id, tipo, desde_consulta = false){
   // en una nueva ventana abrir el reporte de asignación
-    url = '/contabilidad/asientodiarioeditar/'+asiento_id
+  if (tipo == 'D')
+    url = '/contabilidad/asientodiarioeditar/'+asiento_id+'/'+desde_consulta
+  else
+    url = "/contabilidad/comprobanteegresoeditar/"+asiento_id+'/' + desde_consulta;
     
     location.href=url
 }

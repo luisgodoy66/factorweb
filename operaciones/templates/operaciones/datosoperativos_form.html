@@ -16,129 +16,168 @@
 {% endblock breadcrumbs %}
 {% block content %}
 <form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal">
+            {% csrf_token %}
     <!-- <div class="col-lg-6"> -->
         <div class="card">
-            {% csrf_token %}
-            <div class="card-header">
-                <strong>Datos operativos</strong> 
-                de  {{ nombrecliente }}
+            <div class="card-header" style="background-color: white;">
+                <div class="d-flex justify-content-between align-items-center ">
+                    <h5>Datos operativos de  {{ nombrecliente }}</h5> 
+                    <a href="{% url 'operaciones:listadatosoperativos' %}" class="btn  btn-sm">
+                        <i class="fa fa-times"></i>
+                    </a>
+                </div>
             </div>
-            <div class="card-body card-block">
                 <!-- columna izquierda -->
+            <div class="card-body card-block">
                 <div class="col-lg-6">
-                    
-                    <div class="row form-group">
-                        <div class="col col-md-4"><label for="id_cxparticipante" 
-                            class=" form-control-label">{{form_cliente.dalta.label}}</label></div>
-                        <div class="col-md-8">
-                            {{form_cliente.dalta}}
-                            <!-- <small class="form-text text-muted">Máximo 13 caracteres</small> -->
+                    <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header" >
+                            <h6>Clase y estado</h6>
                         </div>
-                    </div>
+                        <div class="card-body">
+                            <div class="row form-group">
+                                <div class="col col-md-4"><label for="id_dalta" 
+                                    class=" form-control-label">{{form_cliente.dalta.label}}</label></div>
+                                <div class="col-md-8">
+                                    {{form_cliente.dalta}}
+                                    <!-- <small class="form-text text-muted">Máximo 13 caracteres</small> -->
+                                </div>
+                            </div>
+                            <!-- clase -->
+                            <div class="row form-group">
+                                <div class="col col-md-4"><label for="id_cxclase" 
+                                    class=" form-control-label">{{form_cliente.cxclase.label}}</label></div>
+                                <div class="col-md-8">
+                                    {{form_cliente.cxclase}}
+                                </div>
+                            </div>
+                            <!-- estado -->
+                            <div class="row form-group">
+                                <div class="col col-md-4"><label for="id_cxestado" 
+                                    class=" form-control-label">{{form_cliente.cxestado.label}}</label></div>
+                                <div class="col-md-8">
+                                    {{form_cliente.cxestado}}
+                                    <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
+                                </div>
+                            </div>
 
-                    <div class="row form-group">
-                        <div class="col col-md-4"><label for="id_ctnombre" 
-                            class=" form-control-label">{{form_cliente.cxclase.label}}</label></div>
-                        <div class="col-md-8">
-                            {{form_cliente.cxclase}}
                         </div>
-                    </div>
+                        <!-- fecha de alta -->
 
-                    <div class="row form-group">
-                        <div class="col col-md-4"><label for="id_cxlocalidad" 
-                            class=" form-control-label">{{form_cliente.nporcentajeanticipo.label}}</label></div>
-                        <div class="col-md-8">
-                            {{form_cliente.nporcentajeanticipo}}
-                            <!-- <small class="form-text text-muted">Máximo 10 caracteres.</small> -->
-                        </div>
                     </div>
-                    <div class="row form-group">
-                        <div class="col col-md-4"><label for="id_ctdireccion" 
-                            class=" form-control-label">{{form_cliente.ntasacomision.label}}</label></div>
-                        <div class="col-md-8">
-                            {{form_cliente.ntasacomision}}
-                            <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
+                    <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header">
+                            <h6>Tasas de negociación</h6>
                         </div>
-                    </div>
+                        <div class="card-body">
+                            <div class="row form-group">
+                                <div class="col-md-12">
+                                <div class="alert alert-info" role="alert">
+                                    Si establece valores en el porcentaje de anticipo y las tasas operativas, estos valores tendrán precedencia sobre las tasas
+                                    que retorne las <a href="{% url 'operaciones:listacondicionesoperativas' %}" class="alert-link">condiciones operativas</a>, si el tipo de factoring las usa.
+                                </div>
+                                </div>
+                            </div>
+                            <!-- porcentaje de anticipoi -->
+                            <div class="row form-group">
+                                <div class="col col-md-5"><label for="id_nporcentajeanticipo" 
+                                    class=" form-control-label">{{form_cliente.nporcentajeanticipo.label}}</label></div>
+                                <div class="col-md-7">
+                                    {{form_cliente.nporcentajeanticipo}}
+                                    <!-- <small class="form-text text-muted">Máximo 10 caracteres.</small> -->
+                                </div>
+                            </div>
+                            <!-- tasa de comisión -->
+                            <div class="row form-group">
+                                <div class="col col-md-5"><label for="id_ntasacomision" 
+                                    class=" form-control-label">{{form_cliente.ntasacomision.label}}</label></div>
+                                <div class="col-md-7">
+                                    {{form_cliente.ntasacomision}}
+                                    <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
+                                </div>
+                            </div>
+                            <!-- tasa de descuento -->
+                            <div class="row form-group">
+                                <div class="col col-md-5"><label for="id_ntasadescuentocartera"
+                                    class=" form-control-label">{{form_cliente.ntasadescuentocartera.label}}</label></div>
+                                <div class="col-md-7">
+                                    {{form_cliente.ntasadescuentocartera}}
+                                    <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
+                                </div>
+                            </div>
 
-                    <div class="row form-group">
-                        <div class="col col-md-4"><label for="id_ntasadescuentocartera"
-                            class=" form-control-label">{{form_cliente.ntasadescuentocartera.label}}</label></div>
-                        <div class="col-md-8">
-                            {{form_cliente.ntasadescuentocartera}}
-                            <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-4"><label for="id_ntasagaoa" 
-                            class=" form-control-label">{{form_cliente.ntasagaoa.label}}</label></div>
-                        <div class="col-md-8">
-                            {{form_cliente.ntasagaoa}}
-                            <small class="form-text text-muted">{{form_cliente.ntasagaoa.help_text}}</small>
-                        </div>
-                    </div>
-                    <div class="row form-group">
-                        <div class="col col-md-4"><label for="id_ntasamora" 
-                            class=" form-control-label">{{form_cliente.ntasamora.label}}</label></div>
-                        <div class="col-md-8">
-                            {{form_cliente.ntasamora}}
-                            <small class="form-text text-muted">{{form_cliente.ntasamora.help_text}}</small>
-                        </div>
-                    </div>
-                    <div class="row form-group">
-                        <div class="col col-md-4"><label for="id_cxestado" 
-                            class=" form-control-label">{{form_cliente.cxestado.label}}</label></div>
-                        <div class="col-md-8">
-                            {{form_cliente.cxestado}}
-                            <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <div class="row form-group">
-                        <div class="col-md-12">
-                        <div class="alert alert-info" role="alert">
-                            Si establece valores en el porcentaje de anticipo y las tasas operativas, 
-                            estos valores tendrán precedencia sobre las tasas
-                            que retorne las condiciones operativas, si el tipo de factoring las usa.
+                    <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header" >
+                            <h6>Tasas para documentos vencidos</h6>
                         </div>
-                        </div>
-                    </div>
-                    <h5 class="heading-title mb-1 text-secondary">Beneficiario de Liquidación de asignación</h5>
+                        <div class="card-body">
+                            <div class="row form-group">
+                                <div class="col-md-12">
+                                <div class="alert alert-info" role="alert">
+                                    Estas tasas se pueden sumar a las tasas de negociación del documento para el cálculo de los cargos por documento vencido.
+                                    Defina esto en la pantalla del tipo de factoring.
+                                </div>
+                                </div>
+                            </div>
+                            <!-- tasa de gaoa adicional -->
+                            <div class="row form-group">
+                                <div class="col col-md-5"><label for="id_ntasagaoa" 
+                                    class=" form-control-label">{{form_cliente.ntasagaoa.label}}</label></div>
+                                <div class="col-md-7">
+                                    {{form_cliente.ntasagaoa}}
+                                    <!-- <small class="form-text text-muted">{{form_cliente.ntasagaoa.help_text}}</small> -->
+                                </div>
+                            </div>
+                            <!-- tasa de descuento de cartera vencido -->
+                            <div class="row form-group">
+                                <div class="col col-md-5"><label for="id_ntasamora" 
+                                    class=" form-control-label">{{form_cliente.ntasamora.label}}</label></div>
+                                <div class="col-md-7">
+                                    {{form_cliente.ntasamora}}
+                                    <!-- <small class="form-text text-muted">{{form_cliente.ntasamora.help_text}}</small> -->
+                                </div>
+                            </div>
 
-                    <div class="row form-group">
-                        <div class="col col-md-4"><label for="id_cttelefono2" 
-                            class=" form-control-label">{{form_cliente.cxbeneficiarioasignacion.label}}</label></div>
-                        <div class="col-md-8">
-                            {{form_cliente.cxbeneficiarioasignacion}}
-                            <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
                         </div>
                     </div>
-                    <div class="row form-group">
-                        <div class="col col-md-4"><label for="id_cttelefono2" 
-                            class=" form-control-label">{{form_cliente.ctbeneficiarioasignacion.label}}</label></div>
-                        <div class="col-md-8">
-                            {{form_cliente.ctbeneficiarioasignacion}}
-                            <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
+                    <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header">
+                            <h6>Beneficiarios de pago en cheques por liquidaciones</h6>
                         </div>
-                    </div>
+                        <div class="card-body">
+                            <h6 class="heading-title mb-1 text-secondary">Liquidación de asignación</h6>
 
-                    <h5 class="heading-title mb-1 text-secondary">Beneficiario de Liquidación de cobranzas</h5>
-                    <div class="row form-group">
-                        <div class="col col-md-4"><label for="id_cttelefono2" 
-                            class=" form-control-label">{{form_cliente.cxbeneficiariocobranzas.label}}</label></div>
-                        <div class="col-md-8">
-                            {{form_cliente.cxbeneficiariocobranzas}}
-                            <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
-                        </div>
-                    </div>
-                    <div class="row form-group">
-                        <div class="col col-md-4"><label for="id_cttelefono2" 
-                            class=" form-control-label">{{form_cliente.ctbeneficiariocobranzas.label}}</label></div>
-                        <div class="col-md-8">
-                            {{form_cliente.ctbeneficiariocobranzas}}
-                            <!-- <small class="form-text text-muted">Máximo 60 caracteres.</small> -->
+                            <div class="row form-group">
+                                <div class="col col-md-4">
+                                    <label for="id_cxbeneficiarioasignacion" 
+                                    class=" form-control-label">Identificación</label>
+                                    {{form_cliente.cxbeneficiarioasignacion}}
+                                </div>
+                                <div class="col-md-8">
+                                    <label for="id_ctbeneficiarioasignacion" 
+                                    class=" form-control-label">{{form_cliente.ctbeneficiarioasignacion.label}}</label>
+                                    {{form_cliente.ctbeneficiarioasignacion}}
+                                </div>
+                            </div>
+
+                            <h6 class="heading-title mb-1 text-secondary">Liquidación de cobranzas</h6>
+                            <div class="row form-group">
+                                <div class="col col-md-4">
+                                    <label for="id_cxbeneficiariocobranzas" 
+                                    class=" form-control-label">Identificación</label>
+                                    {{form_cliente.cxbeneficiariocobranzas}}
+                                </div>
+                                <div class="col-md-8">
+                                    <label for="id_ctbeneficiariocobranzas" 
+                                    class=" form-control-label">{{form_cliente.ctbeneficiariocobranzas.label}}</label>
+                                    {{form_cliente.ctbeneficiariocobranzas}}
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -146,12 +185,12 @@
             </div>    
             
             <div class="card-footer">
-                <a href="{% url 'operaciones:listadatosoperativos' %}" class="btn btn-danger btn-sm">
-                    <i class="fa fa-ban"></i> Cancelar
-                </a>
-                <button type="submit" class="btn btn-primary btn-sm">
-                    <i class="fa fa-dot-circle-o"></i> Grabar
-                </button>
+                <div class="text-right">
+                    <button type="submit" class="btn btn-secondary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+
+                </div>
             </div>
         </div>
     <!-- </div> -->

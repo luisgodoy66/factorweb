@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from .models import  Cuentas_bancarias, Datos_generales, Linea_Factoring\
     , Personas_juridicas , Personas_naturales, Cupos_compradores\
     , Datos_compradores, Clases_cliente
-from empresa.models import Localidades, Datos_participantes
+from empresa.models import Localidades, Datos_participantes, Tipos_empresas
 from pais.models import Bancos
 
 from datetime import date
@@ -163,15 +163,19 @@ class PersonaJuridicaForm(forms.ModelForm):
 
                 
     def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
-        self.fields['dvencimientocargorepresentante1'].widget.attrs['value']=date.today
-        self.fields['dvencimientocargorepresentante2'].widget.attrs['value']=date.today
-        self.fields['dvencimientocargorepresentante3'].widget.attrs['value']=date.today
+        self.fields['dvencimientocargorepresentante1'].widget.attrs['value']=date.today()
+        self.fields['dvencimientocargorepresentante2'].widget.attrs['value']=date.today()
+        self.fields['dvencimientocargorepresentante3'].widget.attrs['value']=date.today()
+        if empresa:
+            self.fields['tipoempresa'].queryset = Tipos_empresas.objects\
+                .filter(empresa=empresa, leliminado = False)
 
 class LineaFactoringForm(forms.ModelForm):
     class Meta:
@@ -265,5 +269,6 @@ class CuentasBancariasForm(forms.ModelForm):
             deudores = Datos_compradores.objects\
                 .filter(empresa = empresa).values_list('cxcomprador__id')
             self.fields['cxparticipante'].queryset = Datos_participantes.objects\
-                .filter(empresa=empresa, leliminado = False, id__in = deudores)
+                .filter(empresa=empresa, leliminado = False, id__in = deudores)\
+                .order_by('ctnombre')
 

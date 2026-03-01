@@ -221,7 +221,7 @@ class ClientesForm(forms.ModelForm):
         }
 
         widgets={
-            'ctdireccion': forms.Textarea(attrs={'rows': '6'}),
+            'ctdireccion': forms.Textarea(attrs={'rows': '5'}),
             'ctgirocomercial':forms.Textarea(attrs={'rows': '5'}),
             'dinicioactividades': forms.DateInput(
                 format=('%Y-%m-%d'),

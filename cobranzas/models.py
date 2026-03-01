@@ -88,7 +88,6 @@ class Documentos_cabecera(ClaseModelo):
         , null=True, on_delete = models.RESTRICT)
     cxcuentadeposito = models.ForeignKey(Cuentas_bancarias, on_delete=models.RESTRICT
         , null = True, related_name="banco_deposito")
-    # ctreferenciadeposito = models.CharField(max_length=15)
     ddeposito = models.DateTimeField(null=True) 
     lpagadoporelcliente = models.BooleanField(default=False)
     ldepositoencuentaconjunta = models.BooleanField(default=False)
@@ -100,6 +99,7 @@ class Documentos_cabecera(ClaseModelo):
     asiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
                                      , related_name="asiento_cobranza"
                                      , null=True)
+    ctcomentario = models.TextField(blank=True, default='')
 
     objects = Documentos_cabecera_Manager()
     
@@ -302,6 +302,7 @@ class Liquidacion_cabecera(ClaseModelo):
     cxestado = models.CharField(max_length=1, default='A')
     lfacturagenerada = models.BooleanField(default=False)
     nporcentajeiva = models.DecimalField(max_digits=5, decimal_places=2, default=12)
+    lincluyecargosprevios = models.BooleanField(default=False)
 
     def __str__(self):
         return self.cxliquidacion
@@ -1022,8 +1023,10 @@ class Documentos_protestados_Manager(models.Manager):
         )
 
         # Anotación para dc negociado y vencido
+        # no generar si se factura al vencimiento (lgenerafacturaenaceptacion=False)
         factor_calcular_expr = Case(
-            When(documento__cxtipofactoring__lgeneradcenaceptacion=True, then=0),
+            When(Q(documento__cxtipofactoring__lgeneradcenaceptacion=True) 
+                 | Q(documento__cxtipofactoring__lgenerafacturaenaceptacion=False), then=0),
             default=1,
             output_field=DecimalField()
         )
@@ -1306,6 +1309,7 @@ class Recuperaciones_cabecera(ClaseModelo):
     asiento = models.OneToOneField(Diario_cabecera, on_delete=models.RESTRICT
                                      , related_name="asiento_recuperacion"
                                      , null=True)
+    ctcomentario = models.TextField(blank=True, default='')
 
     def __str__(self):
         return self.cxrecuperacion

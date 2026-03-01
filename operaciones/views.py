@@ -40,6 +40,7 @@ from clientes import models as ModeloCliente
 from contabilidad.models import Factura_venta
 
 from bases.views import SinPrivilegios
+from .reportes import ImpresionAsignacionDesdeSolicitud
 
 from datetime import date, timedelta, datetime
 from decimal import Decimal
@@ -403,8 +404,8 @@ class DatosOperativosHistoricoView(SinPrivilegios, generic.ListView):
 
     def get_queryset(self) :
         id_cliente = self.kwargs.get('id_cliente')
-        qs=ModeloCliente.Datos_operativos_hist.objects.filter(leliminado = False
-                                                              , cxcliente = id_cliente)
+        qs=ModeloCliente.Datos_operativos_hist.objects\
+            .filter(leliminado = False, cxcliente = id_cliente)
         return qs
 
     def get_context_data(self, **kwargs):
@@ -780,6 +781,9 @@ def DesembolsarAsignacion(request, pk, cliente_id):
         , 'solicitudes_pendientes':sp
         , "form":formulario
         , 'form_submitted': form_submitted
+        , 'valor': asignacion.neto()
+        , 'beneficiario': datosoperativos.ctbeneficiarioasignacion
+        , 'cuenta_transferencia': cuenta_transferencia
     })
 
     return render(request, template_name, contexto)
@@ -936,9 +940,6 @@ def AceptarAsignacion(request, asignacion_id=None):
     if asignacion.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
     
-    cuenta_transferencia = ModeloCliente.Cuenta_transferencia\
-            .objects.cuenta_default(asignacion.cxcliente.id).first()
-            
     # buscar el tipo de factoring 
     tipo_factoring = Tipos_factoring.objects.get(pk=asignacion.cxtipofactoring_id)
     if not tipo_factoring:
@@ -1011,19 +1012,22 @@ def AceptarAsignacion(request, asignacion_id=None):
 
     try:
         x= cliente.datos_generales.id
+
+        # buscar en datos operativos el beneficiario del cheque
+        datos_operativos = Datos_operativos.objects\
+                    .filter(cxcliente = x).first()
+
+        if datos_operativos:
+            beneficiario=datos_operativos.ctbeneficiarioasignacion
+        else:
+            return HttpResponse("No se ha encontrado datos operativos del cliente.")
+
+        cuenta_transferencia = ModeloCliente.Cuenta_transferencia\
+                .objects.cuenta_default(x).first()
     except ObjectDoesNotExist:
     # Handle the error here
         return HttpResponse("El solicitante no fue encontrado en la lista de clientes")
-
-    # buscar en datos operativos el beneficiario del cheque
-    datos_operativos = Datos_operativos.objects\
-                .filter(cxcliente = cliente.datos_generales.id).first()
-
-    if datos_operativos:
-        beneficiario=datos_operativos.ctbeneficiarioasignacion
-    else:
-        return HttpResponse("No se ha encontrado datos operativos del cliente.")
-
+            
     sp = ModelosSolicitud.Asignacion.objects\
         .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
     
@@ -1040,7 +1044,10 @@ def AceptarAsignacion(request, asignacion_id=None):
         'solicitudes_pendientes':sp,
         'otros_cargos':otros_cargos,
         'usa_otros_cargos':tipo_factoring.laplicaotroscargos,
-        'tipo_factoring': tipo_factoring.cttipofactoring
+        'tipo_factoring': tipo_factoring.cttipofactoring,
+        'clase_cliente': datos_operativos.cxclase,
+        'estado_cliente': datos_operativos.estado(),
+        'id_cliente': cliente.id
     }
 
     return render(request, template_name, contexto)
@@ -1539,63 +1546,49 @@ def DatosCondicionOperativaNueva(request):
 
 @login_required(login_url='/login/')
 @permission_required('operaciones.change_condiciones_operativas_cabecera', login_url='bases:sin_permisos')
-def DatosCondicionesOperativas(request, condicion_id=None
-                               , tipo_factoring_id = None):
+def DatosCondicionesOperativas(request, tipo_factoring_id
+                               , condicion_id=None, detalle_id=None):
     template_name='operaciones/datoscondicionesoperativas_modal.html'
     condicion={}
-
+    print("condicion id: " + str(condicion_id))
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    if request.method=='GET':
-        condicion = Condiciones_operativas_cabecera.objects.filter(pk=condicion_id).first()
-    
+    if condicion_id:
+        condicion = Condiciones_operativas_cabecera.objects\
+            .filter(pk=condicion_id).first()
+
         if condicion.empresa != id_empresa.empresa:
             return redirect("bases:sin_permisos")
+    
+    if detalle_id:
+        detalle = Condiciones_operativas_detalle.objects\
+            .filter(pk=detalle_id).first()
 
-    sp = ModelosSolicitud.Asignacion.objects\
-        .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
-
-    contexto={'form_detalle': DetalleCondicionesOperativasForm(empresa=id_empresa.empresa),
-              'condicion_id':condicion_id,
-              'tipo_factoring': tipo_factoring_id,
-              'solicitudes_pendientes':sp,
-    }
-    if request.method=='POST':
-
-        ctcondicion = request.POST.get("nombre_condicion")
-        laplicaafacturaspuras = request.POST.get("para_facturas_puras")
-        laplicaaaccesorios = request.POST.get("para_accesorios")
-        aplica_facturaspuras_on=False;aplica_accesorios_on=False
-      
-        if laplicaafacturaspuras == 'true': aplica_facturaspuras_on = True
-        if laplicaaaccesorios == 'true': aplica_accesorios_on = True
-
-        tipo_factoring = Tipos_factoring.objects.filter(pk=tipo_factoring_id).first()
-
-        if not condicion_id:
-            condicion = Condiciones_operativas_cabecera(
-                ctcondicion =ctcondicion,
-                cxtipofactoring=tipo_factoring,
-                laplicaafacturaspuras=aplica_facturaspuras_on,
-                laplicaaaccesorios=aplica_accesorios_on,
-                cxusuariocrea = request.user,
-                empresa = id_empresa.empresa,
-            )
-            if condicion:
-                condicion.save()
-                condicion_id = condicion.id
+    if request.method=='GET':
+        if detalle_id and detalle:
+            e={ 
+                'cxclasecliente':detalle.cxclasecliente.id,
+                'cxclasecomprador':detalle.cxclasecomprador.id,
+                'nplazodesde':detalle.nplazodesde,
+                'nplazohasta':detalle.nplazohasta,
+                'nporcentajeanticipo':detalle.nporcentajeanticipo,
+                'ntasadescuento':detalle.ntasadescuento,
+                'ntasagao':detalle.ntasagao,
+            }
+            form_detalle= DetalleCondicionesOperativasForm(empresa=id_empresa.empresa, initial=e)
         else:
-            condicion = Condiciones_operativas_cabecera.objects.filter(pk=condicion_id).first()
-            if condicion:
-                condicion.ctcondicion =ctcondicion
-                condicion.laplicaafacturaspuras = aplica_facturaspuras_on
-                condicion.laplicaaaccesorios = aplica_accesorios_on
-                condicion.cxtipofactoring=tipo_factoring
-                condicion.cxusuariomodifica = request.user.id
-                condicion.save()
-        
-        if not condicion_id:
-            return redirect("operaciones:listacondicionesoperativas")
+            form_detalle= DetalleCondicionesOperativasForm(empresa=id_empresa.empresa)
+
+        sp = ModelosSolicitud.Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+
+        contexto={'form_detalle': form_detalle,
+                'condicion_id':condicion_id,
+                'tipo_factoring': tipo_factoring_id,
+                'solicitudes_pendientes':sp,
+                'doc_id': detalle_id,
+        }
+    if request.method=='POST':
         
         cxclasecliente=request.POST.get("cxclasecliente")
         cxclasecomprador=request.POST.get("cxclasecomprador")
@@ -1604,9 +1597,39 @@ def DatosCondicionesOperativas(request, condicion_id=None
         nporcentajeanticipo = request.POST.get("nporcentajeanticipo")
         ntasadescuento =request.POST.get("ntasadescuento")
         ntasagao =request.POST.get("ntasagao")
-       
         clase_cliente = Clases_cliente.objects.filter(pk=cxclasecliente).first()
         clase_comprador = Clases_cliente.objects.filter(pk=cxclasecomprador).first()
+
+        nombre = request.POST.get("nombre_condicion")
+        aplica_a_facturas_puras = request.POST.get("para_facturas_puras") == "true"
+        aplica_a_accesorios = request.POST.get("para_accesorios") == "true"
+
+        if detalle_id and detalle:
+            # editar detalle
+            detalle.cxclasecliente = clase_cliente
+            detalle.cxclasecomprador = clase_comprador
+            detalle.nplazodesde = nplazodesde
+            detalle.nplazohasta = nplazohasta
+            detalle.nporcentajeanticipo = nporcentajeanticipo
+            detalle.ntasadescuento = ntasadescuento
+            detalle.ntasagao = ntasagao
+            detalle.dmodificacion = datetime.now()
+            detalle.cxusuariomodifica = request.user.id
+            detalle.save()
+
+            return redirect("operaciones:condicionesoperativas_editar", pk = condicion_id)
+        
+        if not condicion_id:
+            condicion = Condiciones_operativas_cabecera(
+                cxtipofactoring_id = tipo_factoring_id,
+                ctcondicion = nombre,
+                laplicaafacturaspuras = aplica_a_facturas_puras,
+                laplicaaaccesorios = aplica_a_accesorios,
+                cxusuariocrea = request.user,
+                empresa = id_empresa.empresa,
+            )
+            condicion.save()
+            condicion_id = condicion.id
 
         det = Condiciones_operativas_detalle(
             cxcondicion = condicion,
@@ -2142,7 +2165,7 @@ def GeneraListaCargosPendientesClienteJSON(request, cliente_id):
 def GeneraListaCargosPendientesClienteJSONSalida(transaccion):
     output = {}
     output["ND"] = transaccion.cxnotadebito
-    output["Fecha"] = transaccion.dnotadebito.strftime("%Y-%m-%d")
+    output["Fecha"] = transaccion.dnotadebito.strftime("%Y-%b-%d")
     output["Saldo"] = transaccion.nsaldo
     output["Tipo"] = transaccion.cxtipooperacion
     opx = None
@@ -2212,7 +2235,7 @@ def GeneraListaProtestosPendientesClienteJSONSalida(doc):
     output = {}
     output["Girador"] = doc.cheque.ctgirador
     output["Cheque"] = doc.cheque.__str__()    
-    output["Protesto"] = doc.dprotesto
+    output["Protesto"] = doc.dprotesto.strftime("%Y-%b-%d")
     output["Saldo"] = doc.nsaldocartera
     output["Motivo"] = doc.motivoprotesto.ctmotivoprotesto
     # determinar si cheque fue pagado por comprador 
@@ -2248,7 +2271,7 @@ def GeneraListaCanjesClienteJSON(request, cliente_id):
 
 def GeneraListaCanjesClienteJSONSalida(doc):
     output = {}
-    output["Fecha"] = doc.dregistro
+    output["Fecha"] = doc.dregistro.strftime("%Y-%b-%d")
     output["Asignacion"] = doc.accesoriooriginal.documento.cxasignacion.cxasignacion
     output["Original"] = doc.accesoriooriginal.__str__()    
     output["Nuevo"] = doc.accesorionuevo.__str__()
@@ -2813,7 +2836,7 @@ def GeneraListaMovimientosClienteJSON(request, cliente_id, registros = 10):
 def GeneraListaMovimientosClienteJSONSalida(doc):
     output = {}
 
-    output["Fecha"] = doc.dmovimiento.strftime("%Y-%m-%d")
+    output["Fecha"] = doc.dmovimiento.strftime("%Y-%b-%d")
     output["Movimiento"] = doc.cxmovimiento.ctmovimiento
     output["Operacion"] = doc.cxoperacion
     output["Valor"] = doc.nvalor

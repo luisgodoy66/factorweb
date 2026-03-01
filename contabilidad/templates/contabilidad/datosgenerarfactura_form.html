@@ -15,102 +15,120 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
+            <div hidden>
+               {{form.cliente}}{{form.niva}}{{form.nvalor}}
+               {{form.nporcentajeiva}}{{form.nbaseiva}}{{form.nbasenoiva}}
+            </div>
 
 <form  method="post" id="frmGenera" enctype="multipart/form-data" class="form-horizontal">
     <!-- <div class="col-lg-6"> -->
-        <div class="card">
-            {% csrf_token %}
-            <div class="card-header">
-                <strong>Generar factura</strong> 
+    <div class="card">
+        {% csrf_token %}
+        <div class="card-header" style="background-color: white;">
+            <div class="d-flex justify-content-between align-items-center ">
+                <h5>Generar factura a {{cliente}}</h5> 
+                <a href="{% url 'contabilidad:listapendientesgenerarfactura' %}" class="btn  btn-sm">
+                    <i class="fa fa-times"></i>
+                </a>
             </div>
-            <div hidden>
-               {{form.cliente}}
-               {{form.nporcentajeiva}}
-            </div>
-            <div class="card-body card-block">
-                <!-- columna izquierda -->
-                <div class="col-lg-6">
-                    <div class="row form-group">
-                        <div class="col-md-5">
-                            <label for="id_puntoemision" class=" form-control-label">
-                               {{form.puntoemision.label}}</label></div>
-                        <div class="col-md-7">{{form.puntoemision}}</div>
-                    </div>
+        </div>
+        <div class="card-body card-block">
+            <div class="col-md-6">
 
-                    <div class="row form-group">
-                        <div class="col-md-5">
-                            <label for="id_cxnumerofactura" class=" form-control-label">
-                               {{form.cxnumerofactura.label}}</label></div>
-                        <div class="col-md-7">{{form.cxnumerofactura}}</div>
+                <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    <div class="card-header" style="background-color: white;">
+                        <h6 class="heading-title mb-1 text-secondary">Resumen de valores</h6>
                     </div>
+                    <div class="card-body">
+                        <div class="row form-group">
+                            <div class="col-md-5">
+                                <label for="id_nbaseiva" class=" form-control-label">
+                                    {{form.nbaseiva.label}}</label></div>
+                            <div class="col-md-7">{{base_iva}}</div>
+                        </div>
 
-                    <div class="row form-group">
-                        <div class="col-md-5">
-                            <label for="id_demision" class=" form-control-label">
-                               {{form.demision.label}}</label></div>
-                        <div class="col-md-7">{{form.demision}}</div>
-                    </div>
+                        <div class="row form-group">
+                            <div class="col-md-5">
+                                <label for="id_nbasenoiva" class=" form-control-label">
+                                    {{form.nbasenoiva.label}}</label></div>
+                            <div class="col-md-7">{{base_no_iva}}</div>
+                        </div>
 
-                    <div class="row form-group">
-                        <div class="col-md-5">
-                            <label for="id_ctconcepto" class=" form-control-label">
-                               Concepto de diario</label></div>
-                        <div class="col-md-7">
-                            <textarea type="text" class="form-control" 
-                            required id="concepto" rows="3" 
-                            name="concepto">{{concepto}}</textarea>
+                        <div class="row form-group">
+                            <div class="col-md-5">
+                                <label for="id_niva" class=" form-control-label">
+                                    {{form.niva.label}}</label></div>
+                            <div class="col-md-7">{{valor_iva}}</div>
+                        </div>
+
+                        <div class="row form-group">
+                            <div class="col-md-5">
+                                <label for="id_nvalor" class=" form-control-label">
+                                    {{form.nvalor.label}}</label></div>
+                            <div class="col-md-7"><h5>{{total}}</h5></div>
                         </div>
                     </div>
-
-                    <div class="row form-group">
-                        <div class="col-md-5">
-                            <label for="id_nvalor" class=" form-control-label">
-                               {{form.nbaseiva.label}}</label></div>
-                        <div class="col-md-7">{{form.nbaseiva}}</div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col-md-5">
-                            <label for="id_nvalor" class=" form-control-label">
-                               {{form.nbasenoiva.label}}</label></div>
-                        <div class="col-md-7">{{form.nbasenoiva}}</div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col-md-5">
-                            <label for="id_nvalor" class=" form-control-label">
-                               {{form.niva.label}}</label></div>
-                        <div class="col-md-7">{{form.niva}}</div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col-md-5">
-                            <label for="id_nvalor" class=" form-control-label">
-                               {{form.nvalor.label}}</label></div>
-                        <div class="col-md-7">{{form.nvalor}}</div>
-                    </div>
-
-
                 </div>
-                <div class="col-lg-6">
-                    <div class="alert alert-info" role="alert">
-                        Si está marcada la generación del XML de la factura para el punto de emisión, al confirmar la aceptación, el sistema creará un archivo XML con los datos de la factura
-                        para su firma y autorización y lo guardará en la carpeta Descargas con el nombre 
-                        correspondiente al número de autorización.
+                <div class="alert alert-info" role="alert">
+                    Si está marcada la generación del XML de la factura para el punto de emisión, al confirmar la aceptación, el sistema creará un archivo XML con los datos de la factura
+                    para su firma y autorización y lo guardará en la carpeta Descargas con el nombre 
+                    correspondiente al número de autorización.
+                </div>
+            </div>
+            <!-- columna izquierda -->
+            <div class="col-md-6">
+                <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    <div class="card-header">
+                        <h6>Datos de factura</h6>
                     </div>
+                    <div class="card-body">
+                        <div class="row form-group">
+                            <div class="col-md-5">
+                                <label for="id_puntoemision" class=" form-control-label">
+                                    {{form.puntoemision.label}}</label></div>
+                            <div class="col-md-7">{{form.puntoemision}}</div>
+                        </div>
 
+                        <div class="row form-group">
+                            <div class="col-md-5">
+                                <label for="id_cxnumerofactura" class=" form-control-label">
+                                    {{form.cxnumerofactura.label}}</label></div>
+                            <div class="col-md-7">{{form.cxnumerofactura}}</div>
+                        </div>
+
+                        <div class="row form-group">
+                            <div class="col-md-5">
+                                <label for="id_demision" class=" form-control-label">
+                                    {{form.demision.label}}</label></div>
+                            <div class="col-md-7">{{form.demision}}</div>
+                        </div>
+
+                        <div class="row form-group">
+                            <div class="col-md-5">
+                                <label for="concepto" class=" form-control-label">
+                                    Concepto de diario</label></div>
+                            <div class="col-md-7">
+                                <textarea type="text" class="form-control" 
+                                required id="concepto" rows="3" 
+                                name="concepto">{{concepto}}</textarea>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer">
+                        <div class="text-right">
+                            <button type="button" onclick="GenerarFactura()" class="btn btn-secondary btn-sm ">
+                                <i class="fa fa-dot-circle-o"></i> Aceptar
+                            </button>
+
+                        </div>
+                    </div>
                 </div>
-            </div>    
-            
-            <div class="card-footer">
-                <a href="{% url 'contabilidad:listapendientesgenerarfactura' %}" class="btn btn-danger btn-sm">
-                    <i class="fa fa-ban"></i> Cancelar
-                </a>
-                <button type="button" onclick="GenerarFactura()" class="btn btn-primary btn-sm ">
-                    <i class="fa fa-dot-circle-o"></i> Aceptar
-                </button>
-                </div>
-        </div>
+
+            </div>
+        </div>    
+        
+    </div>
     <!-- </div> -->
 </form>
 {% endblock %}
@@ -122,6 +140,7 @@
 // se cambia la generacion del xml a la ventana de conbsultas , por ahora. debe
 // haber una lista de facturas pendientes por generar XML
 const ambiente = '{{ambiente}}';
+var genera_xml = false;
 
 window.onload=function(){
     jQuery('#id_puntoemision')
@@ -140,7 +159,7 @@ function SecuenciaPorPuntoEmision( punto_emision){
         success: function (data) {
             if (data.success) {
                 jQuery("#id_cxnumerofactura").val(data.secuencia);
-
+                genera_xml = data.genera_xml;
             } else {
                     jQuery("#id_cxnumerofactura").val("Error");
                 }
@@ -177,8 +196,10 @@ function GenerarFactura(){
     fetchPostear("/contabilidad/generarfacturadiario/", objeto, function(factura){
         url = window.location.origin
         // url = url + "/contabilidad/imprimirdiariocontable/"+asiento;
-        url = url + "/contabilidad/generarxmlfactura/"+factura+"/" + ambiente;
-        window.open( url);
+        if (genera_xml){
+            url = url + "/contabilidad/generarxmlfactura/"+factura+"/" + ambiente;
+            window.open( url);
+        }
 
         // regresar a la lista de generar factura
         window.location.href = "/contabilidad/listapendientesgenerarfactura";

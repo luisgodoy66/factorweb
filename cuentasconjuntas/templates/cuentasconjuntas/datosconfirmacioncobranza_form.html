@@ -15,29 +15,45 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
-<form  method="post" id="frmConfirmacion" enctype="multipart/form-data" class="form-horizontal">
-    <div class="card bg-flat-color-0">
-        {% csrf_token %}
-        <div class="card-header">
-            <strong>Confirmación de cobranza</strong> 
-            {{cuenta_conjunta}}
-        </div>
         <div hidden>
             <input type="text" value={{id_cuenta_conjunta}} id="cuentaconjunta">
+        </div>
+<form  method="post" id="frmConfirmacion" enctype="multipart/form-data" class="form-horizontal">
+        {% csrf_token %}
+    <div class="card bg-flat-color-0">
+        <div class="card-header" style="background-color: white;">
+            <div class="d-flex justify-content-between align-items-center ">
+                <h5>Confirmación de cobranza {{cuenta_conjunta}}</h5> 
+                <a href="{% url 'cuentasconjuntas:listacobranzasporconfirmar' %}" 
+                class="btn  btn-sm">
+                    <i class="fa fa-times"></i>
+                </a>
+            </div>
         </div>
         <div class="card-body">
             <!-- cargos -->
             <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="switch switch-3d switch-info mr-3">
-                            <input type="checkbox" class="switch-input" checked
-                                name="cargo" id="cargo">
-                            <span class="switch-label"></span> 
-                            <span class="switch-handle"></span>
-                        </label>
-                        Registo de cargos
+                <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    <div class="card-header">
+
+                        <div class="form-group">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group">
+                                    <label for="cargo">Registro de nuevo cargo</label>
+                                    <label class="switch switch-3d switch-info ml-3">
+                                        <input type="checkbox" class="switch-input" 
+                                            name="cargo" id="cargo">
+                                        <span class="switch-label"></span> 
+                                        <span class="switch-handle"></span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <h6 class="heading-title text-secondary">Débitos pendientes: <span>{{ cuenta_conjunta.debitos_pendientes|floatformat:"2" }}</span></h6>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div id="div_datos_cargo">
+                    <div class="card-body" id="div_datos_cargo" hidden>
                         <div class="row form-group">
                             <div class="col-md-4"><label for="id_dcobranza" 
                                 class=" form-control-label">
@@ -71,17 +87,25 @@
                         </div>
 
                     </div>
+                </div>
                 <!-- transferencia -->
-                    <div class="form-group">
-                        <label class="switch switch-3d switch-info mr-3">
-                            <input type="checkbox" class="switch-input" checked="true" 
-                                name="transferencia"> 
-                            <span class="switch-label"></span> 
-                            <span class="switch-handle"></span>
-                        </label>
-                        Registo de transferencia
+                <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    <div class="card-header">
+                        <div class="form-group">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group">
+                                    <label for="transferencia">Registro de transferencia</label>
+                                    <label class="switch switch-3d switch-info ml-3">
+                                        <input type="checkbox" class="switch-input" checked="true" 
+                                            name="transferencia" id="transferencia"> 
+                                        <span class="switch-label"></span> 
+                                        <span class="switch-handle"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div id="div_datos_transferencia">
+                    <div class="card-body" id="div_datos_transferencia">
                         <div class="row form-group">
                             <div class="col-md-4"><label for="id_dcobranza" 
                                 class=" form-control-label">
@@ -130,11 +154,12 @@
 
 
                     </div>
+                </div>
             </div>
             <div class="col-md-6">
                 <div class="alert alert-info" role="alert">
                     Si no hay cargos que registrar en la cuenta apague el control
-                    Registro de cargos. Si no va a registrar en este momento la 
+                    Registro de nuevo cargo. Si no va a registrar en este momento la 
                     transferencia apague el control Registro de transferencia, siempre
                     podrá registrar la transferencia luego en la opción 
                     Operaciones / Cuentas compartidas / Transferencias.
@@ -144,14 +169,13 @@
         </div>
 
         <div class="card-footer">
-            <a href="{% url 'cuentasconjuntas:listacobranzasporconfirmar' %}" 
-            class="btn btn-danger btn-sm">
-                <i class="fa fa-ban"></i> Cancelar
-            </a>
-            <button class="btn btn-primary btn-sm"  type="button" 
-                onclick="ConfirmarCobranza({{id_operacion}},'{{tipo_operacion}}')">  
-                <i class="fa fa-dot-circle-o"></i> Confirmar
-            </button>
+            <div class="text-right">
+                <button class="btn btn-secondary btn-sm"  type="button" 
+                    onclick="ConfirmarCobranza({{id_operacion}},'{{tipo_operacion}}')">  
+                    <i class="fa fa-dot-circle-o"></i> Confirmar
+                </button>
+
+            </div>
 
         </div>
 

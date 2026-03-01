@@ -1,3 +1,4 @@
+from django.db.models.functions import Concat
 from django.shortcuts import redirect, render
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
@@ -5,8 +6,8 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db import transaction
 from django.urls import reverse_lazy
-from django.db.models import Count, Sum, Q, F, ExpressionWrapper, DateField
-from django.db.models.expressions import RawSQL 
+from django.db.models import Count, Sum, Q, F, ExpressionWrapper, DateField, CharField
+from django.db.models.expressions import RawSQL , Value
 
 from .models import Documentos_cabecera, Documentos_detalle\
     , Liquidacion_cabecera, Cheques_protestados, Cheques\
@@ -54,8 +55,10 @@ class DocumentosVencidosView(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_documentos"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        qs=Documentos.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
+        qs=Documentos.objects\
+            .filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self,*args, **kwargs): 
@@ -63,7 +66,8 @@ class DocumentosVencidosView(SinPrivilegios, generic.ListView):
         fecha_corte = date.today() 
         context['fecha_corte'] =  fecha_corte
         context['por_vencer'] = 'No'
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -78,8 +82,10 @@ class DocumentosPorVencerView(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_documentos"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        qs=Documentos.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
+        qs=Documentos.objects\
+            .filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self,*args, **kwargs): 
@@ -87,7 +93,8 @@ class DocumentosPorVencerView(SinPrivilegios, generic.ListView):
         fecha_corte = date.today() + timedelta(days=7)
         context['fecha_corte'] =  fecha_corte
         context['por_vencer'] = 'Si'
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -251,11 +258,16 @@ class CobranzasPorConfirmarView(SinPrivilegios, generic.ListView):
             , cxformapago__in = ['TRA','CHE','DEP']\
             , empresa = id_empresa.empresa
             , cxtipofactoring__lanticipatotalnegociado = False )\
-                .values('cxcliente__cxcliente__ctnombre','ddeposito'
-                ,'cxtipofactoring__ctabreviacion','ldepositoencuentaconjunta'
-                ,'cxcobranza','cxformapago','nvalor', 'cxcuentadeposito__cxcuenta'
-                , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'C'",'')
-                )
+            .values('cxcliente__cxcliente__ctnombre','ddeposito'
+            ,'cxtipofactoring__ctabreviacion','ldepositoencuentaconjunta'
+            ,'cxcobranza','cxformapago','nvalor', 'cxcuentadeposito__cxcuenta'
+            , 'id', 'cxcheque_id', 'cxcheque__ctgirador')\
+            .annotate(tipo=RawSQL("select 'C'",'')
+                  , cuenta_deposito = Concat(F('cxcuentadeposito__cxbanco__ctbanco')
+                                             , Value(' Cta. #')
+                                             , F('cxcuentadeposito__cxcuenta')
+                                 , output_field=CharField())
+                    )
                 
         recuperaciones = Recuperaciones_cabecera.objects.filter(cxestado='A'\
             , leliminado = False\
@@ -265,8 +277,13 @@ class CobranzasPorConfirmarView(SinPrivilegios, generic.ListView):
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion','ldepositoencuentaconjunta'
                 ,'cxrecuperacion','cxformacobro','nvalor', 'cxcuentadeposito__cxcuenta'
-                , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'R'",'')
-                )
+                , 'id', 'cxcheque_id', 'cxcheque__ctgirador')\
+                .annotate(tipo=RawSQL("select 'R'",'')                
+                          , cuenta_deposito = Concat(F('cxcuentadeposito__cxbanco__ctbanco')
+                                                     , Value(' Cta. #')
+                                                     , F('cxcuentadeposito__cxcuenta')
+                                                     , output_field=CharField())
+                        )
 
         return cobranzas.union(recuperaciones)
 
@@ -289,20 +306,28 @@ class CobranzasPendientesLiquidarView(SinPrivilegios, generic.ListView):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
 
         cobranzas= Documentos_cabecera.objects\
-            .filter( leliminado = False , empresa = id_empresa.empresa)\
+            .filter( leliminado = False 
+                    , empresa = id_empresa.empresa
+                    , cxtipofactoring__lanticipatotalnegociado = False
+                    )\
             .filter(Q(cxestado='C' ) | Q(cxformapago__in=["EFE", "MOV"], cxestado='A'))\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion'
                 ,'cxcobranza','cxformapago','nvalor', 'cxcuentadeposito__cxcuenta'
-                , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'C'",''))
+                , 'id', 'cxcheque_id')\
+            .annotate(tipo=RawSQL("select 'C'",''))
 
         recuperaciones = Recuperaciones_cabecera.objects\
-            .filter( leliminado = False , empresa = id_empresa.empresa)\
+            .filter( leliminado = False 
+                    , empresa = id_empresa.empresa
+                    , cxtipofactoring__lanticipatotalnegociado = False
+                    )\
             .filter(Q(cxestado='C')| Q(cxformacobro__in=["EFE", "MOV"], cxestado='A'))\
                 .values('cxcliente__cxcliente__ctnombre','ddeposito'
                 ,'cxtipofactoring__ctabreviacion'
                 ,'cxrecuperacion','cxformacobro','nvalor', 'cxcuentadeposito__cxcuenta'
-                , 'id', 'cxcheque_id').annotate(tipo=RawSQL("select 'R'",''))
+                , 'id', 'cxcheque_id')\
+            .annotate(tipo=RawSQL("select 'R'",''))
 
         return cobranzas.union(recuperaciones)
 
@@ -465,13 +490,16 @@ class ProtestosPendientesView(SinPrivilegios, generic.ListView):
     permission_required="cobranzas.view_cheques_protestados"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        qs=Cheques_protestados.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
+        qs=Cheques_protestados.objects\
+            .filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self, **kwargs):
         context = super(ProtestosPendientesView, self).get_context_data(**kwargs)
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -920,18 +948,21 @@ def GeneraListaCarteraPorVencerJSON(request, fecha_corte = None):
     #     fecha = date.today()
     #     fecha = fecha + timedelta(days=7)
     # Se incluyen los registros de cheques a los que se le quitó el acesorio
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
 
     tempBlogs = []
-    documentos = Documentos.objects.detalle_facturas_pendientes(fecha_corte
-                                                        , id_empresa.empresa).all()
+    documentos = Documentos.objects\
+            .detalle_facturas_pendientes(fecha_corte
+                                         , id_empresa.empresa).all()
 
     for i in range(len(documentos)):
         tempBlogs.append(GeneraListaCarterPorVencerJSONSalida(documentos[i])) 
 
     # los accesorios que fueron quitados se convierten en facturas pendientes
-    quitados = ChequesAccesorios.objects.detalle_facturas_pendientes(fecha_corte
-                                                             , id_empresa.empresa).all()
+    quitados = ChequesAccesorios.objects\
+            .detalle_facturas_pendientes(fecha_corte
+                                         , id_empresa.empresa).all()
 
     for i in range(len(quitados)):
         tempBlogs.append(GeneraListaAccesoriosQuitadosJSONSalida(quitados[i])) 
@@ -1144,6 +1175,7 @@ def AceptarCobranza(request):
     cheque = json.loads(objeto["arr_cheque"])         
     deposito=json.loads(objeto["arr_deposito"]) 
     documentos_cobrados=objeto["arr_documentos_cobrados"]
+    comentario=objeto["comentario"]
 
     if cheque:
         nc = cheque["numero_cheque"]
@@ -1155,8 +1187,8 @@ def AceptarCobranza(request):
         cc = deposito["cuenta_conjunta"]
         fd = "'"  + deposito["fecha_deposito"] + "'"
 
-        if not cd :
-            if es_cc :
+        if es_cc :
+            if cc:
                 cd = 'Null'
             else:
                 return HttpResponse("Debe especificar la cuenta de depósito")
@@ -1167,15 +1199,25 @@ def AceptarCobranza(request):
         cuenta_bancaria='Null'
     
     # Los 2 ultimos parametros son el id de cheque accesorio y el mensaje de error
-    resultado=enviarPost("CALL uspAceptarCobranzaCartera( '{0}','{1}','{2}','{3}'\
+    resultado=enviarPost("CALL uspAceptarCobranzaCartera( {0},{1},'{2}','{3}'\
         ,{4},{5},{6},{7}\
         ,'{8}','{9}',{10},{11},{12}\
-        ,'{13}', '{14}',{15},Null,{16},'',0)"
+        ,'{13}', {14}, {15},Null,{16},'{17}','',0)"
         .format(id_cliente, tipo_factoring, forma_cobro, fecha_cobro
         , valor_recibido, pagador_por_cliente, sobrepago, cuenta_bancaria
-        ,nc,gi,es_cc, cd, fd
-        ,documentos_cobrados, id_deudor,nusuario, cc))
+        , nc, gi, es_cc, cd, fd
+        , documentos_cobrados, id_deudor, nusuario, cc, comentario))
+    print("CALL uspAceptarCobranzaCartera( {0},{1},'{2}','{3}'\
+        ,{4},{5},{6},{7}\
+        ,'{8}','{9}',{10},{11},{12}\
+        ,'{13}', {14}, {15},Null,{16},'{17}','',0)"
+        .format(id_cliente, tipo_factoring, forma_cobro, fecha_cobro
+        , valor_recibido, pagador_por_cliente, sobrepago, cuenta_bancaria
+        , nc, gi, es_cc, cd, fd
+        , documentos_cobrados, id_deudor, nusuario, cc, comentario))
 
+    if resultado[0] !='OK':
+        return HttpResponse(resultado[0])
     return HttpResponse(resultado)
 
 def GeneraListaChequesADepositarJSON(request, fecha_corte):
@@ -1240,7 +1282,7 @@ def DepositoCheques(request, ids_cheques, total_cartera, cuenta_destino
             .values( 'documento__cxcliente__cxcliente__ctnombre')
             .annotate(pcount=Count('documento'))
             .annotate(total = Sum('ntotal'))
-            .order_by()
+            .order_by('-dvencimiento')
         )        
         if cuenta_destino=='CC':
             cuentas_conjuntas = CuentasConjuntasModels.Cuentas_bancarias\
@@ -1273,10 +1315,11 @@ def DepositoCheques(request, ids_cheques, total_cartera, cuenta_destino
 
         resultado=enviarPost("CALL uspDepositarChequesAccesorios( '{0}',{1},'{2}'\
             ,{3},{4},'')"
-            .format(ids_cheques,cd, fd, request.user.id, cc))
+            .format(ids_cheques, cd, fd
+                    , request.user.id, cc))
 
         if resultado[0] !='OK':
-            return HttpResponse(resultado)
+            return HttpResponse(resultado[0])
 
         return redirect("cobranzas:listachequesadepositar")
 
@@ -1306,7 +1349,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None)
                 , 'lcontabilizada'
                 ,'cxtipofactoring__ctabreviacion'
                 )\
-                    .annotate(tipo=RawSQL("select 'C'",''))
+                .annotate(tipo=RawSQL("select 'C'",'')
+                          , dato = F('cxcheque'))
                 
         recuperaciones = Recuperaciones_cabecera.objects\
             .filter(dcobranza__gte = desde
@@ -1320,8 +1364,9 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None)
                 , 'lcontabilizada'
                 ,'cxtipofactoring__ctabreviacion'
                 )\
-                    .annotate(tipo=RawSQL("select 'R'",''))
-
+                .annotate(tipo=RawSQL("select 'R'",'')
+                          , dato = F('cxcheque'))
+                    
         protestos_cobranzas = Documentos_cabecera.objects\
             .filter(dcobranza__gte = desde, dcobranza__lte = hasta
                     , empresa = id_empresa.empresa
@@ -1335,7 +1380,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None)
                 , 'lcontabilizada'
                 ,'cxtipofactoring__ctabreviacion'
                 )\
-                    .annotate(tipo=RawSQL("select 'C protestada'",''))
+                .annotate(tipo=RawSQL("select 'C protestada'",'')
+                          , dato = F('cxcheque__cheque_protestado__id'))
                     
         protestos_recuperaciones = Recuperaciones_cabecera.objects\
             .filter(dcobranza__gte = desde, dcobranza__lte = hasta
@@ -1350,7 +1396,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None)
                 , 'lcontabilizada'
                 ,'cxtipofactoring__ctabreviacion'
                 )\
-                    .annotate(tipo=RawSQL("select 'R protestada'",''))
+                .annotate(tipo=RawSQL("select 'R protestada'",'')
+                              , dato = F('cxcheque__cheque_protestado__id'))
 
         cargos = Cargos_cabecera.objects\
             .filter(dcobranza__gte = desde, dcobranza__lte = hasta
@@ -1365,7 +1412,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None)
                 , 'lcontabilizada'
                 ,'cxtipofactoring__ctabreviacion'
                 )\
-                    .annotate(tipo=RawSQL("select 'CC'",''))
+                .annotate(tipo=RawSQL("select 'CC'",'')
+                              , dato = F('cxcheque'))
 
         liquidaciones = Liquidacion_cabecera.objects\
             .filter(dliquidacion__gte = desde, dliquidacion__lte = hasta
@@ -1380,7 +1428,7 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None)
                 , 'lfacturagenerada'
                 ,'cxtipofactoring__ctabreviacion'
                 )\
-                    .annotate(tipo=RawSQL("select 'L'",''), )
+                    .annotate(tipo=RawSQL("select 'L'",''), dato = F('id'))
         
         pagares = Pagare_cabecera.objects\
             .filter(dcobranza__gte = desde
@@ -1394,7 +1442,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None)
             , 'lcontabilizada'
             )\
             .annotate(nombre_operacion = RawSQL("select 'PAGARE'",'')
-                        ,tipo=RawSQL("select 'P'",'')
+                      ,tipo=RawSQL("select 'P'",'')
+                    , dato = F('id')
                         )
     else:
 
@@ -1411,7 +1460,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None)
             , 'lcontabilizada'
             ,'cxtipofactoring__ctabreviacion'
             )\
-            .annotate(tipo=RawSQL("select 'C'",''))
+            .annotate(tipo=RawSQL("select 'C'",'')
+                      , dato = F('cxcheque'))
                 
         recuperaciones = Recuperaciones_cabecera.objects\
             .filter(dcobranza__gte = desde
@@ -1426,7 +1476,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None)
             , 'lcontabilizada'
             ,'cxtipofactoring__ctabreviacion'
             )\
-            .annotate(tipo=RawSQL("select 'R'",''))
+            .annotate(tipo=RawSQL("select 'R'",'')
+                      , dato = F('cxcheque'))
 
         protestos_cobranzas = Documentos_cabecera.objects\
             .filter(dcobranza__gte = desde, dcobranza__lte = hasta
@@ -1442,7 +1493,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None)
             , 'lcontabilizada'
             ,'cxtipofactoring__ctabreviacion'
             )\
-            .annotate(tipo=RawSQL("select 'C protestada'",''))
+            .annotate(tipo=RawSQL("select 'C protestada'",'')
+                      , dato = F('cxcheque__cheque_protestado__id'))
                     
         protestos_recuperaciones = Recuperaciones_cabecera.objects\
             .filter(dcobranza__gte = desde, dcobranza__lte = hasta
@@ -1458,7 +1510,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None)
             , 'lcontabilizada'
             ,'cxtipofactoring__ctabreviacion'
             )\
-            .annotate(tipo=RawSQL("select 'R protestada'",''))
+            .annotate(tipo=RawSQL("select 'R protestada'",'')
+                      , dato = F('cxcheque__cheque_protestado__id'))
 
         cargos = Cargos_cabecera.objects\
             .filter(dcobranza__gte = desde, dcobranza__lte = hasta
@@ -1474,7 +1527,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None)
             , 'lcontabilizada'
             ,'cxtipofactoring__ctabreviacion'
             )\
-            .annotate(tipo=RawSQL("select 'CC'",''))
+            .annotate(tipo=RawSQL("select 'CC'",'')
+                      , dato = F('cxcheque'))
 
         liquidaciones = Liquidacion_cabecera.objects\
             .filter(dliquidacion__gte = desde, dliquidacion__lte = hasta
@@ -1490,7 +1544,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None)
             , 'lfacturagenerada'
             ,'cxtipofactoring__ctabreviacion'
             )\
-            .annotate(tipo=RawSQL("select 'L'",''), )
+            .annotate(tipo=RawSQL("select 'L'",'')
+                      , dato = F('id'))
 
         pagares = Pagare_cabecera.objects\
             .filter(dcobranza__gte = desde
@@ -1506,6 +1561,7 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None)
             )\
             .annotate(nombre_operacion = RawSQL("select 'PAGARE'",'')
                         ,tipo=RawSQL("select 'P'",'')
+                        , dato = F('id')
                         )
                 
     movimiento = cobranzas.union(recuperaciones, protestos_cobranzas
@@ -1575,6 +1631,7 @@ def GeneraListaCobranzasJSONSalida(transaccion):
     # se necesita el tipo de operacion para saber que va a imprimir o reversar
     output["TipoOperacion"] = transaccion["tipo"]
     output["Contabilizada"] = transaccion["lcontabilizada"]
+    output["cheque"] = transaccion['dato']
 
     return output
 
@@ -1610,12 +1667,15 @@ def DetalleDocumentosCobrados(request, cobranza_id, tipo_operacion):
 
     if tipo_operacion=='C':
         detalle = Documentos_detalle.objects\
-            .filter(cxcobranza = cobranza_id, leliminado = False)
+            .filter(cxcobranza = cobranza_id
+                    , leliminado = False)
     else:
         detalle = Recuperaciones_detalle.objects\
-            .filter(recuperacion = cobranza_id, leliminado = False)
+            .filter(recuperacion = cobranza_id
+                    , leliminado = False)
 
-    if detalle.empresa != Usuario_empresa.objects.filter(user = request.user).first().empresa:
+    if detalle.first().empresa != Usuario_empresa.objects\
+        .filter(user = request.user).first().empresa:
         return redirect("bases:sin_permisos")
     
     # Converting `QuerySet` to a Python Dictionary
@@ -1763,7 +1823,9 @@ def GeneraListaCobranzasPendientesProcesarJSON(request):
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     cobranzas= Documentos_cabecera.objects\
-        .filter( leliminado = False , empresa = id_empresa.empresa)\
+        .filter( leliminado = False 
+                , empresa = id_empresa.empresa
+                , cxtipofactoring__lanticipatotalnegociado = False)\
         .filter(Q(cxestado='C' ) | Q(cxformapago__in=["EFE", "MOV"], cxestado='A'))\
             .values('cxcliente__cxcliente__ctnombre','ddeposito'
             ,'cxtipofactoring__ctabreviacion', 'dcobranza', 'nsobrepago'
@@ -1771,7 +1833,9 @@ def GeneraListaCobranzasPendientesProcesarJSON(request):
             , 'id', 'cxcheque_id','cxcliente').annotate(tipo=RawSQL("select 'C'",''))
 
     recuperaciones = Recuperaciones_cabecera.objects\
-        .filter( leliminado = False , empresa = id_empresa.empresa)\
+        .filter( leliminado = False 
+                , empresa = id_empresa.empresa
+                , cxtipofactoring__lanticipatotalnegociado = False)\
         .filter(Q(cxestado='C')| Q(cxformacobro__in=["EFE", "MOV"], cxestado='A'))\
             .values('cxcliente__cxcliente__ctnombre','ddeposito'
             ,'cxtipofactoring__ctabreviacion', 'dcobranza', 'nsobrepago'
@@ -1799,7 +1863,7 @@ def GeneraListaCobranzasPendientesProcesarJSONSalida(transaccion):
     output["IdCliente"] = transaccion["cxcliente"]
     output["Cliente"] = transaccion["cxcliente__cxcliente__ctnombre"]
     output["Cobranza"] = transaccion["cxcobranza"]
-    output["FechaCobro"] = transaccion["dcobranza"].strftime("%Y-%m-%d")
+    output["FechaCobro"] = transaccion["dcobranza"].strftime("%Y-%b-%d")
     output["Valor"] =  transaccion["nvalor"]
     output["AplicadoCartera"] = transaccion["nvalor"] - transaccion["nsobrepago"]
     output["FormaCobro"] = transaccion["cxformapago"]
@@ -1890,7 +1954,9 @@ def Liquidacion(request, tipo_operacion):
          ,pnbajas ,pnotros ,pnneto,pnbaseiva ,pnporcentajeiva ,pniva ,psinstruccionpago
          ,nusuario ,padocumentos, pjcobranzas, tipo_operacion, pjotroscargosnooperativos
          ,pndescuentodecarteravencido, base_noiva))
-    print(resultado)
+
+    if resultado[0] !='OK':
+        return HttpResponse(resultado[0])
     return HttpResponse(resultado)
 
 @login_required(login_url='/login/')
@@ -1906,6 +1972,9 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
     liquidacion = Liquidacion_cabecera.objects\
         .filter(pk=pk).first()
 
+    if liquidacion.ldesembolsada:
+        return HttpResponse("La liquidación ya ha sido desembolsada")
+    
     if liquidacion.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
     
@@ -1984,6 +2053,9 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
         , 'solicitudes_pendientes':sp
         , "form":formulario
         , 'form_submitted': form_submitted
+        , 'valor': liquidacion.neto()
+        , 'beneficiario': datosoperativos.ctbeneficiariocobranzas
+        , 'cuenta_transferencia': cuenta_transferencia
     }
 
     return render(request, template_name, contexto)
@@ -2021,6 +2093,8 @@ def AceptarProtesto(request):
         .format(id_cobranza, codigo_cobranza, id_cheque, id_cliente, tipo_factoring
         , forma_cobro, fecha_protesto, valor, valor_nd, motivoprotesto, nusuario
         , tipo_emisor, id_accesorio, tipo_operacion))
+    if resultado[0] !='OK':
+        return HttpResponse(resultado)
 
     return HttpResponse(resultado)
 
@@ -2190,6 +2264,7 @@ def AceptarRecuperacion(request):
     cheque = json.loads(objeto["arr_cheque"])         
     deposito=json.loads(objeto["arr_deposito"]) 
     documentos_cobrados=objeto["arr_documentos_cobrados"]
+    comentario=objeto["comentario"]
 
     if cheque:
         nc = cheque["numero_cheque"]
@@ -2216,11 +2291,13 @@ def AceptarRecuperacion(request):
     resultado=enviarPost("CALL uspAceptarRecuperacionProtesto( '{0}','{1}','{2}'\
         ,'{3}',{4},'{5}',{6},{7}\
         ,'{8}','{9}',{10},{11}\
-        ,{12},{13},'{14}',{15},{16},'',0)"
+        ,{12},{13},'{14}',{15},{16},'{17}','',0)"
         .format(id_cliente, tipo_factoring, forma_cobro
         , fecha_cobro, valor_recibido,documentos_cobrados,sobrepago,cuenta_bancaria
         ,nc, gi, cd, fd
-        , nusuario,pagador_por_cliente,id_deudor,es_cc,cc))
+        , nusuario,pagador_por_cliente,id_deudor,es_cc,cc, comentario))
+    if resultado[0] !='OK':
+        return HttpResponse(resultado[0])
 
     return HttpResponse(resultado)
 
@@ -2606,8 +2683,17 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
 
         neto = (total_vuelto 
                 + total_sobrepagos 
-                - total_cargos - total_iva
-                - total_otroscargos_no_operativos)
+                - total_cargos - total_iva)
+        # si es liquidación y es negativo con los cargos propios de la liquidación de cobranza, 
+        # no debería cargar los cargos no operativos, porque no se van a cobrar.
+        # Si es proceso de liquidación en cero deberían incluirse todos los cargos para mostrar el impacto total de la cobranza.
+        if cobranza_liquidacion_0 is not None :
+            neto = neto - total_otroscargos_no_operativos
+        elif neto > 0:
+            neto = neto - total_otroscargos_no_operativos
+        else:
+            total_otroscargos_no_operativos = 0
+            lista_otroscargos_no_operativos = []
 
         # cargar los cargos
         if tipo_factoring.laplicaotroscargos:
@@ -2776,6 +2862,8 @@ def ReversaCobranza(request, pid_cobranza, tipo_operacion):
         resultado=enviarPost("CALL uspReversarCobranzaPagare( {0},{1},'')"
         .format(pid_cobranza, nusuario))
     
+    if resultado[0] !='OK':
+        return HttpResponse(resultado)
     return HttpResponse(resultado)
 
 def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
@@ -3066,6 +3154,8 @@ def AceptarCobranzaNotasDebito(request):
         ,sobrepago,cuenta_bancaria
         ,nc,gi, cd, fd
         ,documentos_cobrados, nusuario))
+    if resultado[0] !='OK':
+        return HttpResponse(resultado[0])
 
     return HttpResponse(resultado)
 
@@ -3249,14 +3339,25 @@ def ObtenerOtrosCargosDeDocumento(id_documento, listaotroscargos):
                 # Cargos que no han sido cobrados, podrían ser GAO, DC, en facturas generadas
                 # al vencimiento. SOLO FILTRAR OTROS CARGOS (con nota de debito)
                 nd = cargo.cargo_detalle_nd.notadebito
-                doc = nd.factura_notadedebito.__str__() if nd.factura_notadedebito else nd.__str__()
-                listaotroscargos.append(GeneraOtroCargoJSONSalida(
-                    cargo.id, cargo.cxmovimiento.ctmovimiento
-                    , cargo.dultimageneracioncargos, cargo.nsaldo
-                    , nd.id
-                    , doc, 'F'))
+                factura = Factura_venta.objects\
+                    .filter(notadebito = nd.id).first()
+                if factura:
+                # if nd.factura_notadedebito:
+                    doc = nd.factura_notadedebito.__str__() 
+                    listaotroscargos.append(GeneraOtroCargoJSONSalida(
+                        cargo.id, cargo.cxmovimiento.ctmovimiento
+                        , cargo.dultimageneracioncargos, cargo.nsaldo
+                        , nd.id
+                        , doc, 'F'))
+                else:
+                    # si no se encuentra la factura, se asume que es un cargo generado por liquidación en negativo que no se factura
+                    # print(f"Cargo {cargo.cxmovimiento.ctmovimiento} con ND {nd.id} por {cargo.nsaldo} no tiene factura asociada")
+                    listaotroscargos.append(GeneraOtroCargoJSONSalida(
+                        cargo.id, cargo.cxmovimiento.ctmovimiento
+                        , cargo.dultimageneracioncargos, cargo.nsaldo
+                        , nd.id
+                        , nd.origen(), 'ND'))
             else:
-                print('cargo blanco')
                 listaotroscargos.append(GeneraOtroCargoJSONSalida(
                     cargo.id, cargo.cxmovimiento.ctmovimiento
                     , cargo.dultimageneracioncargos, cargo.nsaldo, None
@@ -3285,8 +3386,10 @@ def ReversaProtesto(request, id_cobranza, tipo_operacion, id_protesto, cobranza
         
     resultado=enviarPost("CALL uspReversaProtesto( '{0}',{1},{2},'{3}',{4}\
         ,{5},{6},'')"
-    .format(tipo_operacion,id_cobranza,id_protesto, cobranza,cliente_id
+    .format(tipo_operacion, id_cobranza, id_protesto, cobranza, cliente_id
         ,factoring_id, nusuario))
+    if resultado[0] !='OK':
+        return HttpResponse(resultado[0])
 
     return HttpResponse(resultado)
 
@@ -3942,6 +4045,8 @@ def AceptarAmpliacionDePlazo(request):
         .format(id_cliente, id_factoring, fecha_emision
                 , fecha_ampliacion, valor, pngao, pndescuentocartera
                 , porcentaje_iva, base_iva, nusuario, documentos))
+    if resultado[0] !='OK':
+        return HttpResponse(resultado[0])
 
     return HttpResponse(resultado)
 
@@ -4235,6 +4340,8 @@ def AceptarCobranzaCuota(request):
         .format(id_cliente, documentos_cobrados, forma_cobro, fecha_cobro
         , valor_recibido, nusuario, sobrepago, cuenta_bancaria
         ,nc, gi, es_cc, cd, fd))
+    if resultado[0] !='OK':
+        return HttpResponse(resultado[0])
 
     return HttpResponse(resultado)
 
@@ -4294,6 +4401,8 @@ def ReversaAmpliacion(request, id_nd):
 
     resultado=enviarPost("CALL uspReversarAmpliacionDePlazo( {0},{1},'')"
     .format(id_nd, nusuario))
+    if resultado[0] !='OK':
+        return HttpResponse(resultado[0])
 
     return HttpResponse(resultado)
 

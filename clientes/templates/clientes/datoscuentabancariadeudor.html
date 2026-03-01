@@ -21,14 +21,19 @@
 
         <div class="card">
             {% csrf_token %}
-            <div class="card-header">
-                <strong>Detalle de cuenta</strong> 
+            <div class="card-header" style="background-color: white;">
+                <div class="d-flex justify-content-between align-items-center ">
+                    <h5>Detalle de cuenta</h5> 
+                    <a href="{% url 'clientes:listacuentasbancarias_deudores' %}" class="btn  btn-sm">
+                        <i class="fa fa-times"></i>
+                    </a>
+                </div>
             </div>
             <div class="card-body">
             <!-- datos de factura texto y fecha -->
             <!-- <div class="col-md-6"> -->
                 <div class="row form-group">
-                    <div class="col col-md-4"><label for="id_cxtipocliente" 
+                    <div class="col col-md-4"><label for="id_cxparticipante" 
                         class=" form-control-label">
                         Deudor</label></div>
                     <div class="col-8 col-md-8">
@@ -36,7 +41,7 @@
                     </div>
                 </div>
                 <div class="row form-group">
-                    <div class="col col-md-4"><label for="id_cxtipocliente" 
+                    <div class="col col-md-4"><label for="id_cxbanco" 
                         class=" form-control-label">
                         {{ form.cxbanco.label}}</label></div>
                     <div class="col-8 col-md-8">
@@ -44,7 +49,7 @@
                     </div>
                 </div>  
                 <div class="row form-group">
-                    <div class="col col-md-4"><label for="id_cxtipocliente" 
+                    <div class="col col-md-4"><label for="id_cxtipocuenta" 
                         class=" form-control-label">
                         {{ form.cxtipocuenta.label}}</label></div>
                     <div class="col-8 col-md-8">
@@ -52,7 +57,7 @@
                     </div>
                 </div>  
                 <div class="row form-group">
-                    <div class="col col-md-4"><label for="id_cxtipocliente" 
+                    <div class="col col-md-4"><label for="id_cxcuenta" 
                         class=" form-control-label">
                         {{ form.cxcuenta.label}}</label></div>
                     <div class="col-8 col-md-8">
@@ -60,7 +65,7 @@
                     </div>
                 </div>  
                 <div class="row form-group">
-                    <div class="col col-md-4"><label for="id_cxtipocliente" 
+                    <div class="col col-md-4"><label for="id_lpropia" 
                         class=" form-control-label">
                         {{ form.lpropia.label}}</label>
                     </div>
@@ -75,7 +80,7 @@
                     </div>
             </div>  
                 <div class="row form-group">
-                    <div class="col col-md-4"><label for="id_cxtipocliente" 
+                    <div class="col col-md-4"><label for="id_lactiva" 
                         class=" form-control-label">
                         {{ form.lactiva.label}}</label>
                     </div>
@@ -92,12 +97,12 @@
         <!-- </div> -->
             </div>
             <div class="card-footer">
-                <a href="{% url 'clientes:listacuentasbancarias_deudores' %}" class="btn btn-danger btn-sm">
-                    <i class="fa fa-ban"></i> Cancelar
-                </a>
-            <button type="submit" class="btn btn-primary btn-sm ">
-                    <i class="fa fa-dot-circle-o"></i> Grabar
-                </button>
+                <div class="text-right">
+                    <button type="submit" class="btn btn-secondary btn-sm ">
+                            <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+
+                </div>
 
             </div>
         </div>

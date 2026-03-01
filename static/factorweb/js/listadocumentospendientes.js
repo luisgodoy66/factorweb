@@ -158,10 +158,10 @@ function operateFormatter(value, row, index) {
   return [
     '<a class="prorroga" href="javascript:void(0)" title="Prorroga">',
     '<i class="fa fa-mail-forward"></i>',
-    '</a>  ',
+    '</a>&nbsp;&nbsp;',
     '<a class="evento" href="javascript:void(0)" title="Registrar evento">',
     '<i class="fa fa-calendar"></i>',
-    '</a>  ',
+    '</a>&nbsp;&nbsp;',
   ].join('')
   }
 

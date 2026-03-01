@@ -192,7 +192,8 @@ class Documentos_Manager(models.Manager):
                 , leliminado = False, nsaldo__gt = 0
                 , empresa = id_empresa
                 , cxasignacion__in = Asignacion.objects
-                    .filter(cxtipo = "F", cxestado = "P", leliminado = False))\
+                    .filter(cxtipo = "F", cxestado = "P"
+                            , leliminado = False))\
                     .order_by('dvencimiento')
 
     def facturas_pendientes_vencimiento_original(self, fecha_corte, id_empresa):
@@ -202,7 +203,8 @@ class Documentos_Manager(models.Manager):
                 , leliminado = False, nsaldo__gt = 0
                 , empresa = id_empresa
                 , cxasignacion__in = Asignacion.objects
-                    .filter(cxtipo = "F", cxestado = "P", leliminado = False))\
+                    .filter(cxtipo = "F", cxestado = "P"
+                            , leliminado = False))\
                     .order_by('dvencimiento')
 
     def antigüedad_cartera(self, id_empresa, id_cliente=None):
@@ -1864,23 +1866,23 @@ class Notas_debito_cabecera(ClaseModelo):
         return self.cxnotadebito
     
     def origen(self):
+        from cobranzas.models import Liquidacion_cabecera
         if (self.cxtipooperacion == "A"):
             ap = Ampliaciones_plazo_cabecera.objects.filter(pk=self.operacion).first()
             return ap.__str__()
-        else:
-        # if (self.cxtipooperacion == "L"):
-        #     ap = Liquidacion_cabecera.objects.filter(pk=self.operacion).first()
-        #     return ap.__str__()
+        elif (self.cxtipooperacion == "L"):
+            ap = Liquidacion_cabecera.objects.filter(pk=self.operacion).first()
+            return ap.__str__()
         # if (self.cxtipooperacion == "C"):
         #     ap = Documentos_cabecera.objects.filter(pk=self.operacion).first()
         #     return ap.__str__()
         # if (self.cxtipooperacion == "R"):
         #     ap = Recuperaciones_cabecera.objects.filter(pk=self.operacion).first()
         #     return ap.__str__()
-            if (self.cxtipooperacion == "B"):
-                return 'Cargo efectuado por el banco'
-            else:
-                return self.operacion
+        elif (self.cxtipooperacion == "B"):
+            return 'Cargo efectuado por el banco'
+        else:
+            return self.operacion
     
     def estado(self):
         return self.get_cxestado_display()
@@ -2143,7 +2145,7 @@ class Revision_cartera(ClaseModelo):
                                           choices=TIPOS_DE_PARTICIPANTE)
 
     def __str__(self):
-        return self.dregistro.strftime('%A, %d de %B %H:%M')
+        return self.dregistro.strftime('%A, %d de %B de %Y a las %H:%M')
 
 class Revision_cartera_detalle(ClaseModelo):
     revision = models.ForeignKey(Revision_cartera, on_delete=models.CASCADE)

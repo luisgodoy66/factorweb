@@ -14,42 +14,46 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
-<form  method="post"  class="form-horizontal">
-    <div class="col-lg-7">
-        <div class="card">
-            <div class="card-header">
-                <strong>Datos</strong> 
-                de {{ nombre }} 
-            </div>
+<div class="col-lg-7">
+    <form  method="post"  class="form-horizontal">
                 {% csrf_token %}
+        <div class="card">
+            <div class="card-header" style="background-color: white;">
+                <div class="d-flex justify-content-between align-items-center ">
+                    <h5>Datos de {{ nombre }} </h5> 
+                    <a href="{% url 'empresa:listaotroscargos' %}" class="btn  btn-sm">
+                        <i class="fa fa-times"></i>
+                    </a>
+                </div>
+            </div>
             <div class="card-body card-block">
 
                     <div class="row form-group" hidden>
                         <div class="col col-md-5"><label for="id_movimiento" 
                             class=" form-control-label">Código de movimiento en maestro</label></div>
-                        <div class="col-md-7">
+                        <div class="col col-md-7">
                             {{ form.movimiento}}
                         </div>
                     </div>
                     <div class="row form-group">
                         <div class="col col-md-5"><label for="id_ctabreviacion" 
                             class=" form-control-label">{{form.ctabreviacion.label}}</label></div>
-                        <div class="col-md-7">
+                        <div class="col col-md-7">
                             {{ form.ctabreviacion}}
                             <small class="form-text text-muted">Máximo 30 caracteres</small>
                         </div>
                     </div>
                     <div class="row form-group">
-                        <div class="col col-md-5"><label for="id_ctabreviacion" 
+                        <div class="col col-md-5"><label for="id_nvalor" 
                             class=" form-control-label">{{form.nvalor.label}}</label></div>
-                        <div class="col-md-7">
+                        <div class="col col-md-7">
                             {{ form.nvalor}}
                         </div>
                     </div>
                     <div class="row form-group">
                         <div class="col col-md-5"><label for="id_lcargaenliquidacionasignacion" 
                             class=" form-control-label">{{ form.lcargaenliquidacionasignacion.label}}</label></div>
-                        <div class="col-md-7 ">
+                        <div class="col col-md-7">
                             <label class="switch switch-3d switch-success mr-3">
                                 <input type="checkbox" class="switch-input" 
                                 {% if  otrocargo.lcargaenliquidacionasignacion %} checked {% endif %} 
@@ -63,7 +67,7 @@
                     <div class="row form-group">
                         <div class="col col-md-5"><label for="id_lcargaenliquidacioncobranza" 
                             class=" form-control-label">{{ form.lcargaenliquidacioncobranza.label}}</label></div>
-                        <div class="col-md-7 ">
+                        <div class="col col-md-7">
                             <label class="switch switch-3d switch-success mr-3">
                                 <input type="checkbox" class="switch-input" 
                                 {% if  otrocargo.lcargaenliquidacioncobranza %} checked {% endif %} 
@@ -77,7 +81,7 @@
                     <div class="row form-group">
                         <div class="col col-md-5 "><label for="id_lcargaiva" 
                             class=" form-control-label">{{ form.lcargaiva.label}}</label></div>
-                        <div class="col">
+                        <div class="col col-md-7">
                             <label class="switch switch-3d switch-success mr-3">
                                 <input type="checkbox" class="switch-input" 
                                 {% if  otrocargo.lcargaiva %} checked {% endif %} 
@@ -89,9 +93,9 @@
                     </div>
 
                     <div class="row form-group">
-                        <div class="col col-md-5 "><label for="id_activo" 
+                        <div class="col col-md-5 "><label for="id_lactivo" 
                             class=" form-control-label">{{ form.lactivo.label}}</label></div>
-                        <div class="col">
+                        <div class="col col-md-7">
                             <label class="switch switch-3d switch-success mr-3">
                                 <input type="checkbox" class="switch-input" 
                                 {% if  otrocargo.lactivo %} checked {% endif %} 
@@ -106,16 +110,16 @@
             </div>    
 
             <div class="card-footer">
-                <a href="{% url 'empresa:listaotroscargos' %}" class="btn btn-danger btn-sm">
-                    <i class="fa fa-ban"></i> Cancelar
-                </a>
-                <button type="submit" class="btn btn-primary btn-sm">
-                    <span class="fa fa-dot-circle-o"></span> Grabar
-                </button>
+                <div class="text-right">
+                    <button type="submit" class="btn btn-secondary btn-sm">
+                        <span class="fa fa-dot-circle-o"></span> Grabar
+                    </button>
+
+                </div>
             </div>
         </div>
-    </div>
-</form>
+    </form>
+</div>
 {% endblock %}
 {% block js_page %}
 <script>

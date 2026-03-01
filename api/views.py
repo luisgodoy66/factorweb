@@ -1,20 +1,12 @@
 from django.shortcuts import render
 
-# Create your views here.
-# from rest_framework.views import APIView
-# from rest_framework.response import Response
-# from rest_framework import status
-# from django.shortcuts import get_object_or_404
-
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .serializers import EstadoOperativoClienteSerializer
-# factoring/api/views.py
-
 from rest_framework.views import APIView
-# from rest_framework.response import Response
 from rest_framework import status
+
+from .serializers import EstadoOperativoClienteSerializer
 
 from .models import  InvoiceAIAnalysis
 # from solicitudes.models import Documentos as Invoice, Asignacion
@@ -25,11 +17,11 @@ from datetime import date, timedelta
 
 from operaciones.models import Datos_operativos, Documentos, Pagares
 from cobranzas.models import Cheques_protestados
+from cobranzas.models import Documentos_detalle as CobranzasDocumentosDetalle
 from bases.models import Usuario_empresa, Empresas
 from solicitudes import models as ModelosSolicitud
 from clientes import models as ModeloCliente
 from .models import Configuracion_slack, Configuracion_twilio_whatsapp
-from cobranzas.models import Documentos_detalle as CobranzasDocumentosDetalle
 
 from django.http import JsonResponse, HttpResponse
 from django.urls import reverse_lazy
@@ -272,7 +264,7 @@ class InvoiceAIAnalysisView(APIView):
 
         # 🔹 Construir historial resumido del solciitante/cliente
         solicitante = invoice.cxasignacion.cxcliente
-        facturas_previas = ModelosSolicitud.Documentos.objects\
+        facturas_negociadas = ModelosSolicitud.Documentos.objects\
             .filter( leliminado=False,
                     cxasignacion__cxestado = 'A',
                     cxasignacion__cxcliente=solicitante.id
@@ -283,11 +275,11 @@ class InvoiceAIAnalysisView(APIView):
             .filter(
                 cxcliente=solicitante, cliente__isnull = False, leliminado=False
                 )\
-            .first().cliente
+            .first()
         if es_cliente:
             cliente = ModeloCliente.Datos_generales.objects\
                 .filter(
-                    id=es_cliente.id
+                    id=es_cliente.cliente.id
                     )\
                 .first()
             
@@ -296,22 +288,25 @@ class InvoiceAIAnalysisView(APIView):
             actividad_economica = cliente.cxcliente.actividad.ctactividad if cliente.cxcliente.actividad.ctactividad else 'N/A'
             inicio_actividades = cliente.cxcliente.dinicioactividades.strftime("%Y-%m-%d") if cliente.cxcliente.dinicioactividades else 'N/A'
 
-            # relacion cliente 
             promedio_demora_pago_deudor = CobranzasDocumentosDetalle.objects\
                 .promedio_ponderado_demora_por_deudor(cliente.id, invoice.comprador.id)
+            
+            ultimas_cobranzas = cliente.reporte_ultimas_cobranzas()
         else:
             promedio_demora_pago = 'N/A'
+            total_negociado = 'N/A'
             inicio_actividades = solicitante.dinicioactividades.strftime("%Y-%m-%d") if solicitante.dinicioactividades else 'N/A'
             actividad_economica = solicitante.ctgirocomercial if solicitante.ctgirocomercial  else 'N/A'
-
+            ultimas_cobranzas = 'N/A'
 
         client_history = f"""
 - Cliente: {solicitante.ctnombre}
-- Facturas previas: {facturas_previas - 1}
-- Monto total negociado: {total_negociado if total_negociado else 'N/A'}
+- Facturas negociadas: {facturas_negociadas}
+- Monto total negociado: {total_negociado}
 - Promedio demora de pago: {promedio_demora_pago}
 - Actividad económica: {actividad_economica}
 - Inicio de actividades: {inicio_actividades}
+- Ultimas cobranzas: {ultimas_cobranzas}
 """
 
         # 🔹 Construir historial del deudor/comprador

@@ -15,7 +15,7 @@
 {% endblock breadcrumbs %}
 {% block content %}
     <div class="card bg-flat-color-0">
-        <div class="card-body">
+        <div class="card-header" style="background-color: white;">
             <div class="row form-group ">
                 <div class="col-md-1">Revisiones:</div>
                 <div class="col-md-5">
@@ -49,9 +49,12 @@
                 </div>
 
             </div>
-            <small>
 
-                <table id="table"  class="table table-striped table-bordered"
+        </div>
+        <div class="body">
+            <!-- <small> -->
+
+                <table id="table"  class="table table-hover table-bordered"
                     data-filter-control="true"
                     data-show-search-clear-button="true"
                     data-show-refresh="true"
@@ -91,7 +94,7 @@
                         </tr>
                     </thead>
                 </table>
-            </small>
+            <!-- </small> -->
 
         </div>
 
@@ -166,28 +169,28 @@ function operateFormatter(value, row, index) {
         return [
             '<a class="comentario" href="javascript:void(0)" title="Comentario">',
             '<i class="fa fa-pencil"></i>',
-            '</a>  ',
+            '</a>&nbsp;  ',
             '<a class="cartera" href="javascript:void(0)" title="Detalle por deudor">',
             '<i class="fa fa-shopping-cart"></i>',
-            '</a>  ',
+            '</a>&nbsp;  ',
             '<a class="gestion" href="javascript:void(0)" title="Seguimiento">',
             '<i class="fa fa-eye"></i>',
-            '</a>  ',
+            '</a>&nbsp;  ',
             '<a class="evento" href="javascript:void(0)" title="Registrar evento">',
             '<i class="fa fa-calendar"></i>',
-            '</a>  ',
+            '</a>&nbsp;  ',
         ].join('')
     }
     return [
         '<a class="comentario" href="javascript:void(0)" title="Comentario">',
         '<i class="fa fa-pencil"></i>',
-        '</a>  ',
+        '</a>&nbsp;&nbsp;  ',
         '<a class="cartera" href="javascript:void(0)" title="Detalle por deudor">',
         '<i class="fa fa-shopping-cart"></i>',
-        '</a>  ',
+        '</a>&nbsp;&nbsp;  ',
         '<a class="evento" href="javascript:void(0)" title="Registrar evento">',
         '<i class="fa fa-calendar"></i>',
-        '</a>  ',
+        '</a>&nbsp;  ',
       ].join('')
 }
 

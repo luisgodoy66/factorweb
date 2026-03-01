@@ -15,7 +15,7 @@
 {% endblock breadcrumbs %}
 {% block content %}
 <div class="card bg-flat-color-0">
-    <div class="card-body">
+    <div class="card-header" style="background-color: white;">
         <div class="row form-group ">
             <div class="col-md-1">Mes:</div>
             <div class="col-md-3">
@@ -23,74 +23,79 @@
                 id="fechadesde" placeholder="Desde" >
             </div>
             <div class="col-md-1">
-                <button class="btn btn-success btn-sm"  role="button" id="btnFiltrar">  
+                <button class="btn btn-primary btn-sm"  role="button" id="btnFiltrar">  
                     <i class="fa fa-filter"></i> Consultar
                 </button>
             </div>
 
         </div>
+
     </div>
-</div>
-<div class="content mt-3">
+    <div class="card-body">
+<!-- </div>
+<div class="content mt-3"> -->
     <!-- totales -->
-        <div class="col-md-12 col-lg-12">
-            <!-- total cartera y protestos -->
-            <!-- total negociado -->
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="stat-widget-one">
-                            <div class="stat-icon dib"><i class="ti-file text-success border-success"></i></div>
-                            <div class="stat-content dib">
-                                <div class="stat-text">Total negociado</div>
-                                <div class="stat-digit">{{ acumulado_montos|floatformat:"2g"}}</div>
+        <div class="row form-group ">
+            <!-- <div class="col-md-12 col-lg-12"> -->
+                <!-- total cartera y protestos -->
+                <!-- total negociado -->
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-file text-success border-success"></i></div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Total negociado</div>
+                                    <div class="stat-digit">{{ acumulado_montos|floatformat:"2g"}}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- total ingresos año -->
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="stat-widget-one">
-                            <div class="stat-icon dib"><i class="ti-files text-primary border-primary"></i></div>
-                            <div class="stat-content dib">
-                                <div class="stat-text">Total operaciones</div>
-                                <div class="stat-digit">{{ acumulado_cantidades|floatformat:"g"}}</div>
+                <!-- total ingresos año -->
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-files text-primary border-primary"></i></div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Total operaciones</div>
+                                    <div class="stat-digit">{{ acumulado_cantidades|floatformat:"g"}}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- total ingresos año -->
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="stat-widget-one">
-                            <div class="stat-icon dib"><i class="ti-user text-info border-info"></i></div>
-                            <div class="stat-content dib">
-                                <div class="stat-text">Clientes nuevos</div>
-                                <div class="stat-digit">{{ clientes_nuevos|floatformat:"g"}}</div>
+                <!-- total ingresos año -->
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-user text-info border-info"></i></div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Clientes nuevos</div>
+                                    <div class="stat-digit">{{ clientes_nuevos|floatformat:"g"}}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- total ingresos año -->
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="stat-widget-one">
-                            <div class="stat-icon dib"><i class="ti-money text-danger border-danger"></i></div>
-                            <div class="stat-content dib">
-                                <div class="stat-text">Cobros realizados</div>
-                                <div class="stat-digit">{{ acumulado_cobros|floatformat:"2g"}}</div>
+                <!-- total ingresos año -->
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-money text-danger border-danger"></i></div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Cobros realizados</div>
+                                    <div class="stat-digit">{{ acumulado_cobros|floatformat:"2g"}}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            <!-- </div> -->
+
         </div>
         <div class="row">
             <!-- grafico cartera negociada -->
@@ -115,6 +120,7 @@
                 </div>
             </div>
         </div>
+    </div>
 </div>        
 {% endblock %}
 {% block js_page %}

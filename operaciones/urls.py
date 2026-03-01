@@ -87,16 +87,23 @@ urlpatterns = [
          name='condicionesoperativas_editar'),
     path('nuevacondicionesoperativas/',DatosCondicionOperativaNueva, \
         name='condicionesoperativas_nueva'),
-    path('editarcondicionoperativa/<int:condicion_id>/<tipo_factoring_id>',\
-        DatosCondicionesOperativas, name='condicionoperativa_editar'),
-    path('nuevacondicionoperativa/<tipo_factoring_id>',
-        DatosCondicionesOperativas, name='condicionoperativa_nueva'),
+    path('editarcondicionoperativa/<int:tipo_factoring_id>/<int:condicion_id>',\
+        DatosCondicionesOperativas, 
+        name='condicionoperativa_editar'),
+    path('editarcondicionoperativa/<int:tipo_factoring_id>/<int:condicion_id>/<int:detalle_id>',\
+        DatosCondicionesOperativas, 
+        name='condicionoperativa_editar'),
+    path('nuevacondicionoperativa/<int:tipo_factoring_id>',
+        DatosCondicionesOperativas, 
+        name='condicionoperativa_nueva'),
     path('detallecondicionoperativa/<int:condicion_id>',\
-        DetalleCondicionOperativa, name='detallecondicionoperativa'),
+        DetalleCondicionOperativa, 
+        name='detallecondicionoperativa'),
     path('eliminardetallecondicionoperativa/<int:detalle_id>',\
-        EliminarDetalleCondicionOperativa, name='eliminardetallecondicionoperativa'),
+        EliminarDetalleCondicionOperativa, 
+        name='eliminardetallecondicionoperativa'),
     path('estadocondicionoperativa/<int:id>', CondicionesOperativasInactivar, \
-         name='condicionesoerativas_estado'),
+        name='condicionesoperativas_estado'),
 # asignaciones
     path('listaasignaciones/',AsignacionesView.as_view(), \
         name='listaasignaciones'),
@@ -122,7 +129,8 @@ urlpatterns = [
     path("reporteliquidacion/<int:solicitud_id>/<crear_pdf>",ImpresionLiquidacion, 
         name='reporteliquidacion'),
     path("reporteasignaciondesdesolicitud/<int:asignacion_id>",
-        ImpresionAsignacionDesdeSolicitud ),
+        ImpresionAsignacionDesdeSolicitud,
+         name='reporte_asignacion_desde_solicitud'),
     path('listaanexos/',AnexosView.as_view(), name='listaanexos'),
     path('nuevoanexo/',AnexosNew.as_view(), name='anexo_nuevo'),
     path('editaranexo/<int:pk>',AnexosEdit.as_view(), name='anexo_editar'),

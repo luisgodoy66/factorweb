@@ -19,8 +19,13 @@
 <form method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal" onsubmit="return checkSubmit();">
         {% csrf_token %}
     <div class="card">
-        <div class="card-header">
-            <strong>Ficha general</strong> de {% if datosparticipante %} {{ datosparticipante }} {% else %}  nuevo solicitante {% endif %} 
+        <div class="card-header" style="background-color: white;">
+            <div class="d-flex justify-content-between align-items-center ">
+                <h5>{% if datosparticipante %} {{ datosparticipante }} {% else %}Nueva ficha general{% endif %}</h5>
+                <a href="{% url 'solicitudes:listasolicitudes' %}" class="btn btn-sm">
+                    <i class="fa fa-times"></i> 
+                </a>
+            </div>
         </div>
         <div class="card-body">
             <!-- columna izquierda -->
@@ -37,8 +42,9 @@
                         <small class="form-text text-muted">Máximo 13 caracteres</small>
                     </div>
                     <div class="col-md-1">
-                        <button type="button" class="btn btn-success btn-sm" title="Cargar datos del solicitante desde el SRI"
-                        onclick="return obtener_datos_contribuyente(document.getElementById('id_cxcliente').value)">
+                        <button type="button" class="btn btn-sm" title="Cargar datos del solicitante desde el SRI"
+                            onclick="return obtener_datos_contribuyente(document.getElementById('id_cxcliente').value)"
+                            style="background-color: white;">
                         <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -118,16 +124,14 @@
             </div>
         </div>    
         <div class="card-footer">
-            <!-- mostrar los errores del formulario ? -->
- 
-            <a href="{% url 'solicitudes:listasolicitudes' %}" class="btn btn-danger btn-sm">
-                <i class="fa fa-ban"></i> Cancelar
-            </a>
-            <button type="submit" class="btn btn-primary btn-sm">
-                <i class="fa fa-dot-circle-o"></i> Grabar
-            </button>
+            <div class="text-right">
+                <button type="submit" class="btn btn-secondary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Grabar
+                </button>
+            </div> 
         </div>
         {% if form.errors %}
+            <!-- mostrar los errores del formulario ? -->
         <div class="alert alert-danger" role="alert">
             <ul>
                 {% for field in form %}
@@ -147,11 +151,11 @@
         </div>
         {% endif %}
 
-        <div>
+        <!-- <div>
             <small class="text-danger">
 
             </small>
-        </div>
+        </div> -->
     </div>
 </form>
 {% endblock %}

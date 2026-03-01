@@ -21,14 +21,23 @@
 {% endblock breadcrumbs %}
 {% block content %}
 <form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal">
+            {% csrf_token %}
     <!-- <div class="col-lg-6"> -->
     <div class="card">
-            {% csrf_token %}
         <div class="card-header">
-            <strong>Ampliación de plazo</strong> 
-            de  {{ cliente }} 
+            <div class="d-flex justify-content-between align-items-center ">
+                <h5>Ampliación de plazo de  {{ cliente }} </h5> 
+                <a 
+                {% if tipo_asignacion == 'A' %}
+                href="{% url 'cobranzas:listachequesadepositar' %}" 
+                {% else %}
+                    href="{% url 'cobranzas:listadocumentosvencidos' %}" 
+                {% endif %}
+                    class="btn  btn-sm "><i class="fa fa-times"></i>
+                </a>
+            </div>
         </div>
-        <div class="col-6 col-md-6" hidden>
+        <div hidden>
             <input id="acumula_gao" name="acumula_gao" value="{{ gaoa.acumula_gao }}" >
             <input id="carga_dc" name="carga_dc" value="{{ dc.generar }}" >
             <input id="tipo_asignacion" name="tipo_asignacion" value="{{ tipo_asignacion }}" >
@@ -40,107 +49,135 @@
             <input id="iniciales_dc" name="iniciales_dc" value="{{ dc.iniciales }}" >
             <input id="iniciales_gaoa" name="iniciales_gaoa" value="{{ gaoa.iniciales }}" >
         </div>
-            <div class="card-body card-block">
+        <div class="card-body card-block">
+            <div class="row form-group">
                 <!-- columna izquierda -->
-                <div class="col-5">
-                        <!-- fechas -->
-                    <div class="row form-group">
-                        <div class="col-md-6"><label for="fechacorte" class=" form-control-label">
-                            Ampliar hasta:
-                        </label></div>
-                        <div class="col-md-6">
-                            <input type="date" class="form-control" name="fechacorte"  
-                            id="fechacorte" placeholder="Ingrese fecha de corte" 
-                            value="{% now 'Y-m-d' %}">
+                <div class="col-md-6">
+                    <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header">
+                            <h6>Datos de la ampliación</h6>
                         </div>
-                    </div>  
-                       
-                    <div class="row form-group">
-                        <div class="col-md-6"><label for="fechacorte" class=" form-control-label">
-                            Emisión de nota de débito:
-                        </label></div>
-                        <div class="col-md-6">
-                            <input type="date" class="form-control" name="emision_nd"  
-                            id="emision_nd" readonly
-                            value="{% now 'Y-m-d' %}">
-                        </div>
-                    </div>  
+                        <div class="card-body">
+                            <div class="row form-group">
+                                <div class="col-md-6"><label for="fechacorte" class=" form-control-label">
+                                    Ampliar hasta:
+                                </label></div>
+                                <div class="col-md-6">
+                                    <input type="date" class="form-control" name="fechacorte"  
+                                    id="fechacorte" placeholder="Ingrese fecha de corte" 
+                                    value="{% now 'Y-m-d' %}">
+                                </div>
+                            </div>  
+                            
+                            <div class="row form-group">
+                                <div class="col-md-6"><label for="fechacorte" class=" form-control-label">
+                                    Emisión de nota de débito:
+                                </label></div>
+                                <div class="col-md-6">
+                                    <!-- <input type="date" class="form-control" name="emision_nd"  
+                                    id="emision_nd" readonly
+                                    value="{% now 'Y-m-d' %}"> -->
+                                    {% now "l, j \d\e F \d\e Y" %}
+                                </div>
+                            </div>  
 
-                    <div class="col-md-12">
-                        <div class="alert alert-info" role="alert">
-                            La ampliación de plazo genera una nota de débito que debe convertirse en factura.
-                            Para el cobro vaya a la opción 
-                            OPERACIONES / Cobranzas / Cargos pendientes.
+                            <div class="col-md-12">
+                                <div class="alert alert-info" role="alert">
+                                    La ampliación de plazo genera una nota de débito que debe convertirse en factura.
+                                    Para el cobro vaya a la opción 
+                                    OPERACIONES / Cobranzas / Cargos pendientes.
+                                </div>
+                            </div>
+
                         </div>
-                     </div>
-                       
+                    </div>
                 </div>
                 <!-- columna derecha -->
-                <div class="col-7">
-                    <h5 class="heading-title mb-1 text-secondary">Valores por ampliación</h5>
-                    <div class="row form-group">
-                        <div class="col col-md-12">
-                            <h5 for="id_ctinstrucciondepago" class=" form-control-label">
-                            Cargos</h5></div>
-                    </div>  
-                    <div class="row form-group">
-                        <div class="col-md-1"></div>
-                        <div class="col col-xs-3">
-                            <label for="id_ngao" class=" form-control-label">
-                                {{gaoa.descripcion}}</label></div>
-                        <div class="col-6 col-md-6">
-                            <input type="text" id="id_ngaoa" name="id_ngaoa" readonly
-                            class="form-control">                                        
+                <div class="col-md-6">
+                    <div class="card" style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header"style="background-color: white;">
+                            <h6 class="heading-title mb-1 text-secondary">Valores por ampliación</h6>
                         </div>
-                    </div>  
-                    <div class="row form-group">
-                        <div class="col-md-1"></div>
-                        <div class="col col-xs-3">
-                            <label for="id_ndescuentodecartera" class=" form-control-label">
-                                {{dc.descripcion}}</label></div>
-                        <div class="col-6 col-md-6">
-                            <input type="text" id="id_ndescuentodecartera" name="id_ndescuentodecartera" 
-                            class="form-control" readonly>      
-                        </div>
-                    </div>  
-                    <div class="row form-group">
-                        <div class="col-md-1"></div>
-                        <div class="col-md-1">
-                            <label for="id_niva" class=" form-control-label">
-                            IVA
-                        </label></div>
-                        <div class="col-md-3">
-                            <input type="number" name="neto" step="0.01" class="form-control" 
-                            readonly id="porcentaje_iva" value="{{ porcentaje_iva }}">
-                        </div>
-                        <div class="col-md-1"></div>
-                        <div class="col-6 col-md-6">
-                            <input type="text" id="id_niva" name="id_niva" readonly
-                            class="form-control">      
-                        </div>
-                    </div>  
-                    <div class="row form-group">
-                        <!-- <div class="col col-xs-3"><label for="id_cxtipocliente" 
-                            class=" form-control-label">= Neto</label></div> -->
-                        <div class="col col-md-6">
-                            <h5 for="id_nvalor" class=" form-control-label">
-                            Total
-                            </h5></div>
-                        <div class="col-6 col-md-6">
-                            <input type="number" name="total" step="0.01" 
-                            class="form-control" readonly id="total">
-                        </div>
-                    </div>  
-                </div>
-                <!-- parte inferior -->
-                <div class="row form-group">
-                    <!-- <small> -->
+                        <div class="card-body">
+                            <div class="row form-group">
+                                <div class="col col-md-12">
+                                    <h6 class=" form-control-label">
+                                        Cargos</h6></div>
+                            </div>  
+                            <div class="row form-group">
+                                <div class="col-md-1"></div>
+                                <div class="col col-md-7">
+                                    <label class=" form-control-label">
+                                        {{dc.descripcion}}</label></div>
+                                <!-- <div class="col-6 col-md-6">
+                                    <input type="text" id="id_ndescuentodecartera" name="id_ndescuentodecartera" 
+                                    class="form-control" readonly>      
+                                </div> -->
+                                <div class="col col-md-4 text-right" id="divDC">
+                                </div>
+                            </div>  
+                            <div class="row form-group">
+                                <div class="col-md-1"></div>
+                                <div class="col col-md-7">
+                                    <label for="id_ngao" class=" form-control-label">
+                                        {{gaoa.descripcion}}</label></div>
+                                <!-- <div class="col-6 col-md-6">
+                                    <input type="text" id="id_ngaoa" name="id_ngaoa" readonly
+                                    class="form-control">                                        
+                                </div> -->
+                                <div class="col col-md-4 text-right" id="divGAOA"></div>
+                            </div>  
+                            <div class="row form-group">
+                                <!-- <div class="col-md-1"></div> -->
+                                <div class="col-md-2">
+                                    <h6 for="id_niva" class=" form-control-label">
+                                    IVA
+                                    </h6></div>
+                                <!-- <div class="col-md-3">
+                                    <input type="number" name="neto" step="0.01" class="form-control" 
+                                    readonly id="porcentaje_iva" value="{{ porcentaje_iva }}">
+                                </div> -->
+                                <div class="col col-md-2 text-right">{{ porcentaje_iva }}%</div>
+                                <div class="col-md-4"></div>
+                                <!-- <div class="col-6 col-md-6">
+                                    <input type="text" id="id_niva" name="id_niva" readonly
+                                    class="form-control">      
+                                </div> -->
+                                <div class="col col-md-4 text-right" id="divIVA"></div>
+                            </div>  
 
-                    <div class="col-md-12">
-                          
+                        </div>
+                        <div class="card-footer"style="background-color: white;">
+                            <div class="row form-group">
+                                <!-- <div class="col col-xs-3"><label for="id_cxtipocliente" 
+                                    class=" form-control-label">= Neto</label></div> -->
+                                <div class="col col-md-8">
+                                    <h6>Total</h6></div>
+                                <!-- <div class="col-6 col-md-6">
+                                    <input type="number" name="total" step="0.01" 
+                                    class="form-control" readonly id="total">
+                                </div> -->
+                                <div class="col col-md-4 text-right" id="divNeto"></div>
+                            </div>  
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <!-- parte inferior -->
+            <div class="row form-group">
+                <!-- <small> -->
+
+                <div class="col-md-12">
+                        
+                    <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header">
+                            <h6>Documentos</h6>
+                        </div>
+                        <div class="body">
                         <table id="table"                      
                             data-show-columns-toggle-all="true"
-                            data-show-export="true"
                             data-detail-formatter="detailFormatter"
                             data-minimum-count-columns="2"
                             data-pagination="false"
@@ -148,27 +185,24 @@
                             data-page-list="[10, 50, all]"
                             data-show-footer="true"
                             data-side-pagination="server"
-                            data-search="true"
                             >
                         </table>
-
+                        </div>
+                        <!-- data-search="true"
+                        data-show-export="true" -->
                     </div>
+                </div>
 
-                    <!-- </small> -->
-               </div>
-            </div>    
+                <!-- </small> -->
+            </div>
+        </div>    
         <div class="card-footer">
-            <a 
-            {% if tipo_asignacion == 'A' %}
-               href="{% url 'cobranzas:listachequesadepositar' %}" 
-            {% else %}
-                href="{% url 'cobranzas:listadocumentosvencidos' %}" 
-            {% endif %}
-                class="btn btn-danger btn-sm "><i class="fa fa-ban"></i> Cancelar
-            </a>
-            <button type="button" onclick="AceptarAmpliacionPlazo()" class="btn btn-primary btn-sm ">
-                <i class="fa fa-dot-circle-o"></i> Aceptar
-            </button>
+            <div class="text-right">
+                <button type="button" onclick="AceptarAmpliacionPlazo()" class="btn btn-secondary btn-sm ">
+                    <i class="fa fa-dot-circle-o"></i> Aceptar
+                </button>
+
+            </div>
         </div>
     </div>
     <!-- </div> -->
@@ -181,7 +215,8 @@ const $table = jQuery('#table')
 const acumula_gao = capturaValor("acumula_gao")
 const carga_dc = capturaValor("carga_dc")
 const tipo_asignacion = capturaValor("tipo_asignacion")
-const porcentaje_iva = capturaValor("porcentaje_iva")
+// const porcentaje_iva = capturaValor("porcentaje_iva")
+const porcentaje_iva = "{{ porcentaje_iva }}"
 const iva_gaoa = capturaValor("iva_gaoa")
 const iva_dc = capturaValor("iva_dc")
 const ids = capturaValor("ids")
@@ -254,11 +289,15 @@ function Suma_Cargos(ids, iva_gaoa, iva_dc, porcentaje_iva){
               +iva_dc+"/"+porcentaje_iva
     , function(data){
     if (data){
-      jQuery("#id_ndescuentodecartera").val(data['dc'])
-      jQuery("#id_ngaoa").val(data['gaoa'])    
-      jQuery("#id_niva").val(data['iva'])    
-      jQuery("#total").val(data['total'])   
-      base_iva = data['base_iva'] 
+      // jQuery("#id_ndescuentodecartera").val(data['dc'])
+    //   jQuery("#id_ngaoa").val(data['gaoa'])    
+    //   jQuery("#id_niva").val(data['iva'])    
+    //   jQuery("#total").val(data['total'])   
+        base_iva = data['base_iva'] 
+        inicializarInner("divDC", data['dc'] )
+        inicializarInner("divGAOA", data['gaoa'] )
+        inicializarInner("divIVA", data['iva'] )
+        inicializarInner("divNeto", '<h6>' + data['total'] + '</h6>')
     }
   })
 }
@@ -267,6 +306,16 @@ function initTable(iniciales_GAOA, iniciales_DC) {
 
     $table.bootstrapTable('destroy').bootstrapTable({
       locale: "es-EC",
+        footerStyle: function() {
+            return {
+                css: {
+                    'background-color': '#f8f9fa',
+                    'color': '#000000',
+                    'border-top': '2px solid #dee2e6',
+                    'font-weight': 'bold'
+                }
+            }
+        },
       columns: [
         [{title: 'Ref.', field: 'id', rowspan: 2, align: 'center', valign: 'middle', 
           sortable: true, footerFormatter: LineaTotalEnPieDePaginaDeTabla
@@ -305,7 +354,9 @@ function CambiarTasasDocumento(doc_id, fecha_ampliacion, tipo_asignacion, callba
 }
 
 function AceptarAmpliacionPlazo(){
-  var JSONdocumentos= JSON.stringify($table.bootstrapTable('getData'));
+    // mostrar valores
+    RecalcularCargos( ids, capturaValor("fechacorte"));
+    var JSONdocumentos= JSON.stringify($table.bootstrapTable('getData'));
 
   MensajeConfirmacion("Aceptar ampliación de plazo para el " 
     + capturaValor("fechacorte") +"?",function(){
@@ -313,12 +364,16 @@ function AceptarAmpliacionPlazo(){
         "id_cliente":id_cliente,
         "tipo_factoring":capturaValor("tipo_factoring"),
         "tipo_asignacion":tipo_asignacion,
-        "emision_nd":capturaValor("emision_nd"),
+        "emision_nd": new Date().toISOString().split('T')[0],
         "fecha_corte": capturaValor("fechacorte"), 
-        "ngao":capturaValor("id_ngaoa"), 
-        "ndescuentocartera": capturaValor("id_ndescuentodecartera"),
-        "niva": capturaValor("id_niva"),
-        "valor_ampliacion": capturaValor("total"),
+        // "ngao":capturaValor("id_ngaoa"), 
+        "ngao":document.getElementById('divGAOA').innerText,
+        // "ndescuentocartera": capturaValor("id_ndescuentodecartera"),
+        "ndescuentocartera": document.getElementById('divDC').innerText,
+        // "niva": capturaValor("id_niva"),
+        "niva": document.getElementById('divIVA').innerText,
+        // "valor_ampliacion": capturaValor("total"),
+        "valor_ampliacion": document.getElementById('divNeto').innerText,
         "porcentaje_iva":porcentaje_iva,
         "arr_documentos_ampliados": JSONdocumentos,
         "base_iva": base_iva

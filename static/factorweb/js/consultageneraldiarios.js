@@ -33,7 +33,8 @@ window.operateEvents = {
         ImprimirAsientoDiario( row.id, row.Tipo)
       },
       'click .editar': function (e, value, row, index) {
-        EditarAsientoDiario( row.id)
+        alert("Editar asiento diario: " + row.tipo)
+        EditarAsientoDiario( row.id, row.tipo, true)
       },
     };
       

@@ -15,8 +15,8 @@
 {% endblock breadcrumbs %}
 {% block content %}
     <div class="card bg-flat-color-0">
-        <div class="card-body">
-            <div class="row form-group " id="filtro_por_vencer" >
+        <div class="card-header" style="background-color: white;">
+            <div class="row form-group " >
                 <div class="col-md-2">
                     <label for="fechacorte">Perìodo:</label>
                 </div>
@@ -45,6 +45,7 @@
 
                 <div class="col-md-2">
                     <button class="btn btn-success btn-sm"  role="button" 
+                        {% if año == None %} disabled {% endif %}
                         id="btnBloquear">  
                         <i class="fa fa-lock"></i> Desbloquear
                     </button>
@@ -52,6 +53,9 @@
             </div>
 
         </div>
+        <!-- <div class="card-body">
+
+        </div> -->
 
     </div>
  

@@ -7,107 +7,175 @@
         <div class="page-header float-right">
             <div class="page-title">
                 <ol class="breadcrumb text-right">
+                    <li><a href="#">participantes</a></li>
                     <li><a href="#">clientes</a></li>
-                    <li><a href="{% url 'operaciones:listaestadosoperativos' %}">estados operativos</a></li>
-                    <li class="active">{{nombre_cliente}}</li>
+                    <li class="active">estados operativos</li>
                 </ol>
             </div>
         </div>
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
-<div class="content mt-3">
     <div hidden>
         <input id="id_cliente" name="id_cliente" value="{{ cliente_id }}" >
         <input id="porc_disponible" name="porc_disponible" value="{{ porc_disponible }}" >
         <input id="dias_ultima_operacion" name="dias_ultima_operacion" value="{{ dias_ultima_operacion }}" >
     </div>
 
-    <div class="col-lg-12 col-md-12">
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="stat-widget-one">
-                        <div class="stat-icon dib"><i class="ti-money text-success border-success"></i></div>
-                        <div class="stat-content dib">
-                            <div class="stat-text">Monto de línea</div>
-                            <div class="stat-digit">{{ valor_linea|floatformat:"0g"}}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="card">
+    <div class="card-header" style="background-color: white;">
+        <div class="d-flex justify-content-between align-items-center ">
+            <h5>Estado operativo de {{nombre_cliente}}</h5>
+            <a href="{% url 'operaciones:listaestadosoperativos' %}" 
+            class="btn  btn-sm">
+                <i class="fa fa-times"></i>
+            </a>
         </div>
-
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="stat-widget-one">
-                        <div class="stat-icon dib"><i class="ti-thumb-up text-primary border-primary"></i></div>
-                        <div class="stat-content dib">
-                            <div class="stat-text">Disponible</div>
-                            <div class="stat-digit">{{ porc_disponible }}%</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="stat-widget-one">
-                        <div class="stat-icon dib"><i class="ti-time text-warning border-warning"></i></div>
-                        <div class="stat-content dib">
-                            <div class="stat-text">Días sin operar</div>
-                            <div class="stat-digit">{{ dias_ultima_operacion }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="stat-widget-one">
-                        <div class="stat-icon dib"><i class="ti-user text-info border-info"></i></div>
-                        <div class="stat-content dib">
-                            <div class="stat-text">Clase</div>
-                            <div class="stat-digit">{{clase}}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-   </div>
-    <div class="row">
-        <!-- grafico cartera negociada -->
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="mb-3">Cartera negociada </h4>
-                    <canvas id="lineChart"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="mb-3">Antigüedad de la cartera y protestos</h4>
-                    <canvas id="singelBarChart"></canvas>
-                </div>
-            </div>
-        </div><!-- /# column -->
     </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-money text-success border-success"></i></div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Monto de línea</div>
+                                    <div class="stat-digit">{{ valor_linea|floatformat:"0g"}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    <div class="row">
-    <div class="col-lg-12 col-md-12">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-thumb-up text-primary border-primary"></i></div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Disponible</div>
+                                    <div class="stat-digit">{{ porc_disponible }}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="col-md-3 col-lg-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="clearfix">
-                        <i class="fa fa-dollar 
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-time text-warning border-warning"></i></div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Días sin operar</div>
+                                    <div class="stat-digit">{{ dias_ultima_operacion }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-user text-info border-info"></i></div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Clase</div>
+                                    <div class="stat-digit">{{clase}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <!-- grafico cartera negociada -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="mb-3">Cartera negociada </h4>
+                            <canvas id="lineChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="mb-3">Antigüedad de la cartera y protestos</h4>
+                            <canvas id="singelBarChart"></canvas>
+                        </div>
+                    </div>
+                </div><!-- /# column -->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+
+                <div class="col-md-3 col-lg-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <i class="fa fa-dollar 
+                                {% if color_estado == 1 %} 
+                                    bg-flat-color-1
+                                {% elif color_estado == 2 %}
+                                    bg-flat-color-2
+                                {% elif color_estado == 3 %}
+                                    bg-flat-color-3
+                                {% elif color_estado == 4 %}
+                                    bg-flat-color-4
+                                {% elif color_estado == 5 %}
+                                    bg-flat-color-5
+                                {% endif %}                           
+                                p-3 font-2xl mr-3 float-left text-light"></i>
+                                <div class="h5 text-secondary mb-0 mt-1">{{ total_cartera_protestos|floatformat:"2g" }}</div>
+                                <div class="text-muted text-uppercase font-weight-bold font-xs small">
+                                    <h6>Facturas y protestos</h6></div>
+                            </div>
+                            <div class="b-b-1 pt-3"></div>
+                            <hr>
+                            <div class="more-info pt-2" style="margin-bottom:-10px;">
+                                <a class="font-weight-bold font-xs btn-block text-muted small" 
+                                href="{% url 'operaciones:detalle_facturas_pendientes' cliente_id %}"  target="cartera">
+                                <h6>Facturas pendientes
+                                <i class="fa fa-angle-right float-right font-lg"></i></h6></a>
+                            </div>
+                            <div class="more-info pt-2" style="margin-bottom:-10px;">
+                                <a class="font-weight-bold font-xs btn-block text-muted small" 
+                                href="{% url 'operaciones:detalle_cheques_pendientes' cliente_id %}"  target="cheques">
+                                <h6>Cheques pendientes
+                                <i class="fa fa-angle-right float-right font-lg"></i></h6></a>
+                            </div>
+                            <div class="more-info pt-2" style="margin-bottom:-10px;">
+                                <a class="font-weight-bold font-xs btn-block text-muted small" 
+                                href="{% url 'cobranzas:protestos_pendientes' cliente_id %}"  target="protestos">
+                                <h6>Protestos
+                                <i class="fa fa-angle-right float-right font-lg"></i></h6></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-lg-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-time text-success border-success"></i></div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Demora de pago</div>
+                                    <div class="stat-digit">{{ promedio_ponderado_demora|floatformat:"2g"}} días</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-lg-3">
+                    <div class="card
                         {% if color_estado == 1 %} 
                             bg-flat-color-1
                         {% elif color_estado == 2 %}
@@ -118,299 +186,248 @@
                             bg-flat-color-4
                         {% elif color_estado == 5 %}
                             bg-flat-color-5
-                        {% endif %}                           
-                        p-3 font-2xl mr-3 float-left text-light"></i>
-                        <div class="h5 text-secondary mb-0 mt-1">{{ total_cartera_protestos|floatformat:"2g" }}</div>
-                        <div class="text-muted text-uppercase font-weight-bold font-xs small">
-                            Cartera y protestos</div>
-                    </div>
-                    <div class="b-b-1 pt-3"></div>
-                    <hr>
-                    <div class="more-info pt-2" style="margin-bottom:-10px;">
-                        <a class="font-weight-bold font-xs btn-block text-muted small" 
-                        href="{% url 'operaciones:detalle_facturas_pendientes' cliente_id %}"  target="cartera">
-                        Detalle de facturas pendientes
-                        <i class="fa fa-angle-right float-right font-lg"></i></a>
-                    </div>
-                    <div class="more-info pt-2" style="margin-bottom:-10px;">
-                        <a class="font-weight-bold font-xs btn-block text-muted small" 
-                        href="{% url 'operaciones:detalle_cheques_pendientes' cliente_id %}"  target="cheques">
-                        Detalle de cheques pendientes
-                        <i class="fa fa-angle-right float-right font-lg"></i></a>
-                    </div>
-                    <div class="more-info pt-2" style="margin-bottom:-10px;">
-                        <a class="font-weight-bold font-xs btn-block text-muted small" 
-                        href="{% url 'cobranzas:protestos_pendientes' cliente_id %}"  target="protestos">
-                        Detalle de protestos
-                        <i class="fa fa-angle-right float-right font-lg"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-lg-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="stat-widget-one">
-                        <div class="stat-icon dib"><i class="ti-time text-success border-success"></i></div>
-                        <div class="stat-content dib">
-                            <div class="stat-text">Demora de pago</div>
-                            <div class="stat-digit">{{ promedio_ponderado_demora|floatformat:"2g"}} días</div>
+                        {% endif %}
+                        text-light">
+                        <div class="card-body">
+                            <div class="h4 m-0">{{estado}}</div>
+                            <div>Estado</div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-lg-3">
-            <div class="card
-                {% if color_estado == 1 %} 
-                    bg-flat-color-1
-                {% elif color_estado == 2 %}
-                    bg-flat-color-2
-                {% elif color_estado == 3 %}
-                    bg-flat-color-3
-                {% elif color_estado == 4 %}
-                    bg-flat-color-4
-                {% elif color_estado == 5 %}
-                    bg-flat-color-5
+                <div class="col-md-3 col-lg-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-calendar text-danger border-danger"></i></div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Opera desde</div>
+                                    <div class="stat-digit">{{ cliente.dprimeraoperacion|date:"b/Y" }} </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if total_reestructuracion > 0 %}
+                <div class="col-md-3 col-lg-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <i class="fa fa-dollar bg-flat-color-4 p-3 font-2xl mr-3 float-left text-light"></i>
+                                <div class="h5 text-secondary mb-0 mt-1">{{total_reestructuracion|floatformat:"2g"}}</div>
+                                <div class="text-muted text-uppercase font-weight-bold font-xs small">
+                                    <h6>Reestructuración</h6></div>
+                            </div>
+                            <div class="b-b-1 pt-3"></div>
+                            <hr>
+                            <div class="more-info pt-2" style="margin-bottom:-10px;">
+                                <a class="font-weight-bold font-xs btn-block text-muted small" 
+                                href="{% url 'operaciones:detalle_pagares_pendientes' cliente_id %}"  target="cartera">
+                                <h6>Detalle de pagarés pendientes
+                                <i class="fa fa-angle-right float-right font-lg"></i></h6></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 {% endif %}
-                text-light">
-                <div class="card-body">
-                    <div class="h4 m-0">{{estado}}</div>
-                    <div>Estado</div>
-                </div>
             </div>
         </div>
-        <div class="col-md-3 col-lg-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="stat-widget-one">
-                        <div class="stat-icon dib"><i class="ti-calendar text-danger border-danger"></i></div>
-                        <div class="stat-content dib">
-                            <div class="stat-text">Opera desde</div>
-                            <div class="stat-digit">{{ cliente.dprimeraoperacion|date:"b/Y" }} </div>
-                        </div>
+        <div class="col-xl-6">
+            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <div class="card-header" style="background-color: white;">
+                    <h6>Documentos vencidos</h6>
+                </div>
+                <!-- <small> -->
+                    <div>
+                        <table id="table"  class="table table-hover table-bordered"
+                            data-url="{% url 'operaciones:carteracliente_json' cliente_id hoy %}"
+                            data-id-field="id"
+                            >
+                            <thead>
+                                <tr>
+                                <th data-field="Comprador" data-filter-control="input"
+                                data-sortable="true" >Deudor</th>
+                                <th data-field="Asignacion" data-filter-control="input"
+                                data-sortable="true" >Asignación</th>
+                                <th data-field="Documento" data-filter-control="input"
+                                data-sortable="true" >Documento</th>
+                                <th data-field="Vencimiento" data-sortable="true" >Vencidos</th>
+                                <th data-field="Saldo" data-sortable="true" >Saldo</th>
+                                </tr>
+                            </thead>
+                        </table>             
                     </div>
-                </div>
+                <!-- </small> -->
             </div>
         </div>
-   </div>
-        {% if total_reestructuracion > 0 %}
-        <div class="col-md-3 col-lg-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="clearfix">
-                        <i class="fa fa-dollar bg-flat-color-4 p-3 font-2xl mr-3 float-left text-light"></i>
-                        <div class="h5 text-secondary mb-0 mt-1">{{total_reestructuracion|floatformat:"2g"}}</div>
-                        <div class="text-muted text-uppercase font-weight-bold font-xs small">
-                            Reestructuración</div>
+        <div class="col-xl-6">
+            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <div class="card-header" style="background-color: white;">
+                    <h6>Accesorios vencidos</h6>
+                </div>
+                <!-- <small> -->
+                    <div>
+                        <table id="tbcheques"  class="table table-hover table-bordered"
+                        data-url="{% url 'operaciones:chequesadepositarcliente_json' cliente_id hoy %}"
+                            data-id-field="id"
+                            >
+                            <thead>
+                                <tr>
+                                <th data-field="Comprador" data-filter-control="input"
+                                data-sortable="true" >Deudor</th>
+                                <th data-field="Asignacion" data-filter-control="input"
+                                data-sortable="true" >Asignación</th>
+                                <th data-field="Datos" data-filter-control="input"
+                                data-sortable="true" >Datos</th>
+                                <th data-field="Vencimiento" data-sortable="true" >Vencidos</th>
+                                <th data-field="Valor" data-sortable="true" >Saldo</th>
+                                </tr>
+                            </thead>
+                        </table>             
                     </div>
-                    <div class="b-b-1 pt-3"></div>
-                    <hr>
-                    <div class="more-info pt-2" style="margin-bottom:-10px;">
-                        <a class="font-weight-bold font-xs btn-block text-muted small" 
-                        href="{% url 'operaciones:detalle_pagares_pendientes' cliente_id %}"  target="cartera">
-                        Detalle de pagarés pendientes
-                        <i class="fa fa-angle-right float-right font-lg"></i></a>
+                <!-- </small> -->
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <div class="card-header" style="background-color: white;">
+                    <h6>Protestos pendientes</h6>
+                </div>
+                <!-- <small> -->
+                    <div>
+                        <table id="tbprotestos"  class="table table-hover table-bordered"
+                        data-url="{% url 'operaciones:protestospendientescliente_json' cliente_id %}"
+                            data-id-field="id"
+                            >
+                            <thead>
+                                <tr>
+                                <th data-field="Girador" data-filter-control="input"
+                                data-sortable="true" >Girador</th>
+                                <th data-field="Cheque" data-filter-control="input"
+                                data-sortable="true" >Cheque</th>
+                                <th data-field="Protesto" data-filter-control="input"
+                                data-sortable="true" >Fecha</th>
+                                <th data-field="Motivo" data-sortable="true" >Motivo</th>
+                                <th data-field="Saldo" data-sortable="true" >Saldo</th>
+                                </tr>
+                            </thead>
+                        </table>             
                     </div>
+                <!-- </small> -->
+            </div>
+        </div>    
+        <div class="col-xl-6">
+            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <div class="card-header" style="background-color: white;">
+                    <h6>Canjes</h6>
                 </div>
+                <!-- <small> -->
+                    <div>
+                        <table id="tbcanjes"  class="table table-hover table-bordered"
+                        data-url="{% url 'operaciones:listacanjescliente_json' cliente_id %}"
+                            data-id-field="id"
+                            >
+                            <thead>
+                                <tr>
+                                <th data-field="Fecha" data-filter-control="input"
+                                data-sortable="true" >Fecha</th>
+                                <th data-field="Asignacion" data-filter-control="input"
+                                data-sortable="true" >Asignación</th>
+                                <th data-field="Original" data-filter-control="input"
+                                data-sortable="true" >Original</th>
+                                <th data-field="Nuevo" data-filter-control="input"
+                                data-sortable="true" >Nuevo</th>
+                                <th data-field="Motivo" 
+                                data-sortable="true" >Motivo</th>
+                                </tr>
+                            </thead>
+                        </table>             
+                    </div>
+                <!-- </small> -->
             </div>
         </div>
-        {% endif %}
-    <div class="col-xl-6">
-        <div class="card">
-            <div class="card-header">
-                <strong>Documentos vencidos</strong>
-            </div>
-            <small>
-                <div>
-                    <table id="table"  class="table table-striped table-bordered"
-                        data-url="{% url 'operaciones:carteracliente_json' cliente_id hoy %}"
-                        data-id-field="id"
-                        >
-                        <thead>
-                            <tr>
-                            <th data-field="Comprador" data-filter-control="input"
-                            data-sortable="true" >Deudor</th>
-                            <th data-field="Asignacion" data-filter-control="input"
-                            data-sortable="true" >Asignación</th>
-                            <th data-field="Documento" data-filter-control="input"
-                            data-sortable="true" >Documento</th>
-                            <th data-field="Vencimiento" data-sortable="true" >Vencidos</th>
-                            <th data-field="Saldo" data-sortable="true" >Saldo</th>
-                            </tr>
-                        </thead>
-                    </table>             
+        <div class="col-xl-6">
+            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <div class="card-header" style="background-color: white;">
+                    <h6>Accesorios quitados</h6>
                 </div>
-            </small>
-        </div>
-    </div>
-    <div class="col-xl-6">
-        <div class="card">
-            <div class="card-header">
-                <strong>Accesorios vencidos</strong>
+                <!-- <small> -->
+                    <div>
+                        <table id="tbquitados"  class="table table-hover table-bordered"
+                        data-url="{% url 'operaciones:listachequesquitadoscliente_json' cliente_id %}"
+                            data-id-field="id"
+                            >
+                            <thead>
+                                <tr>
+                                <th data-field="Registro" data-filter-control="input"
+                                data-sortable="true" >Registro</th>
+                                <th data-field="Asignacion" data-filter-control="input"
+                                data-sortable="true" >Asignación</th>
+                                <th data-field="Cheque" data-filter-control="input"
+                                data-sortable="true" >Cheque</th>
+                                <th data-field="Saldo" data-filter-control="input"
+                                data-sortable="true" >Saldo</th>
+                                <th data-field="Motivo" 
+                                data-sortable="true" >Motivo</th>
+                                </tr>
+                            </thead>
+                        </table>             
+                    </div>
+                <!-- </small> -->
             </div>
-            <small>
-                <div>
-                    <table id="tbcheques"  class="table table-striped table-bordered"
-                    data-url="{% url 'operaciones:chequesadepositarcliente_json' cliente_id hoy %}"
-                        data-id-field="id"
-                        >
-                        <thead>
-                            <tr>
-                            <th data-field="Comprador" data-filter-control="input"
-                            data-sortable="true" >Deudor</th>
-                            <th data-field="Asignacion" data-filter-control="input"
-                            data-sortable="true" >Asignación</th>
-                            <th data-field="Datos" data-filter-control="input"
-                            data-sortable="true" >Datos</th>
-                            <th data-field="Vencimiento" data-sortable="true" >Vencidos</th>
-                            <th data-field="Valor" data-sortable="true" >Saldo</th>
-                            </tr>
-                        </thead>
-                    </table>             
-                </div>
-            </small>
         </div>
-    </div>
-    <div class="col-xl-6">
-        <div class="card">
-            <div class="card-header">
-                <strong>Protestos pendientes</strong>
+        <div class="col-xl-6">
+            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <div class="card-header" style="background-color: white;">
+                    <h6>Cargos pendientes</h6>
+                </div>
+                <!-- <small> -->
+                    <div>
+                        <table id="tbcargos"  class="table table-hover table-bordered"
+                        data-url="{% url 'operaciones:listacargospendientescliente_json' cliente_id %}"
+                            data-id-field="id"
+                            >
+                            <thead>
+                                <tr>
+                                <th data-field="ND" data-filter-control="input"
+                                data-sortable="true" >ND</th>
+                                <th data-field="Fecha" data-filter-control="input"
+                                data-sortable="true" >Fecha</th>
+                                <th data-field="Operacion" data-filter-control="input"
+                                data-sortable="true" >Operacion</th>
+                                <th data-field="Saldo" data-sortable="true" >Saldo</th>
+                                </tr>
+                            </thead>
+                        </table>             
+                    </div>
+                <!-- </small> -->
             </div>
-            <small>
-                <div>
-                    <table id="tbprotestos"  class="table table-striped table-bordered"
-                    data-url="{% url 'operaciones:protestospendientescliente_json' cliente_id %}"
-                        data-id-field="id"
-                        >
-                        <thead>
-                            <tr>
-                            <th data-field="Girador" data-filter-control="input"
-                            data-sortable="true" >Girador</th>
-                            <th data-field="Cheque" data-filter-control="input"
-                            data-sortable="true" >Cheque</th>
-                            <th data-field="Protesto" data-filter-control="input"
-                            data-sortable="true" >Fecha</th>
-                            <th data-field="Motivo" data-sortable="true" >Motivo</th>
-                            <th data-field="Saldo" data-sortable="true" >Saldo</th>
-                            </tr>
-                        </thead>
-                    </table>             
-                </div>
-            </small>
         </div>
-    </div>    
-    <div class="col-xl-6">
-        <div class="card">
-            <div class="card-header">
-                <strong>Canjes</strong>
+        <div class="col-xl-6">
+            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <div class="card-header" style="background-color: white;">
+                    <h6>{{cantidad_movimientos}} últimos movimientos</h6>
+                </div>
+                <!-- <small> -->
+                    <div>
+                        <table id="tbmovimientos"  class="table table-hover table-bordered"
+                            data-url="{% url 'operaciones:movimientoscliente_json' cliente_id cantidad_movimientos %}"
+                            data-id-field="id"
+                            >
+                            <thead>
+                                <tr>
+                                <th data-field="Fecha" data-sortable="true" >Fecha</th>
+                                <th data-field="Operacion" data-sortable="true" >Operación</th>
+                                <th data-field="Movimiento" data-sortable="true" >Movimiento</th>
+                                <th data-field="Valor" data-sortable="true" >Valor</th>
+                                <th data-field="Usuario" data-sortable="true" >Usuario</th>
+                                </tr>
+                            </thead>
+                        </table>             
+                    </div>
+                <!-- </small> -->
             </div>
-            <small>
-                <div>
-                    <table id="tbcanjes"  class="table table-striped table-bordered"
-                    data-url="{% url 'operaciones:listacanjescliente_json' cliente_id %}"
-                        data-id-field="id"
-                        >
-                        <thead>
-                            <tr>
-                            <th data-field="Fecha" data-filter-control="input"
-                            data-sortable="true" >Fecha</th>
-                            <th data-field="Asignacion" data-filter-control="input"
-                            data-sortable="true" >Asignación</th>
-                            <th data-field="Original" data-filter-control="input"
-                            data-sortable="true" >Original</th>
-                            <th data-field="Nuevo" data-filter-control="input"
-                            data-sortable="true" >Nuevo</th>
-                            <th data-field="Motivo" 
-                            data-sortable="true" >Motivo</th>
-                            </tr>
-                        </thead>
-                    </table>             
-                </div>
-            </small>
         </div>
-    </div>
-    <div class="col-xl-6">
-        <div class="card">
-            <div class="card-header">
-                <strong>Accesorios quitados</strong>
-            </div>
-            <small>
-                <div>
-                    <table id="tbquitados"  class="table table-striped table-bordered"
-                    data-url="{% url 'operaciones:listachequesquitadoscliente_json' cliente_id %}"
-                        data-id-field="id"
-                        >
-                        <thead>
-                            <tr>
-                            <th data-field="Registro" data-filter-control="input"
-                            data-sortable="true" >Registro</th>
-                            <th data-field="Asignacion" data-filter-control="input"
-                            data-sortable="true" >Asignación</th>
-                            <th data-field="Cheque" data-filter-control="input"
-                            data-sortable="true" >Cheque</th>
-                            <th data-field="Saldo" data-filter-control="input"
-                            data-sortable="true" >Saldo</th>
-                            <th data-field="Motivo" 
-                            data-sortable="true" >Motivo</th>
-                            </tr>
-                        </thead>
-                    </table>             
-                </div>
-            </small>
-        </div>
-    </div>
-    <div class="col-xl-6">
-        <div class="card">
-            <div class="card-header">
-                <strong>Cargos pendientes</strong>
-            </div>
-            <small>
-                <div>
-                    <table id="tbcargos"  class="table table-striped table-bordered"
-                    data-url="{% url 'operaciones:listacargospendientescliente_json' cliente_id %}"
-                        data-id-field="id"
-                        >
-                        <thead>
-                            <tr>
-                            <th data-field="ND" data-filter-control="input"
-                            data-sortable="true" >ND</th>
-                            <th data-field="Fecha" data-filter-control="input"
-                            data-sortable="true" >Fecha</th>
-                            <th data-field="Operacion" data-filter-control="input"
-                            data-sortable="true" >Operacion</th>
-                            <th data-field="Saldo" data-sortable="true" >Saldo</th>
-                            </tr>
-                        </thead>
-                    </table>             
-                </div>
-            </small>
-        </div>
-    </div>
-    <div class="col-xl-6">
-        <div class="card">
-            <div class="card-header">
-                <strong>{{cantidad_movimientos}} últimos movimientos</strong>
-            </div>
-            <small>
-                <div>
-                    <table id="tbmovimientos"  class="table table-striped table-bordered"
-                        data-url="{% url 'operaciones:movimientoscliente_json' cliente_id cantidad_movimientos %}"
-                        data-id-field="id"
-                        >
-                        <thead>
-                            <tr>
-                            <th data-field="Fecha" data-sortable="true" >Fecha</th>
-                            <th data-field="Operacion" data-sortable="true" >Operación</th>
-                            <th data-field="Movimiento" data-sortable="true" >Movimiento</th>
-                            <th data-field="Valor" data-sortable="true" >Valor</th>
-                            <th data-field="Usuario" data-sortable="true" >Usuario</th>
-                            </tr>
-                        </thead>
-                    </table>             
-                </div>
-            </small>
-        </div>
+
     </div>
 </div>
 
