@@ -192,9 +192,18 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
                             <i class="menu-icon fa fa-print"></i>Reportes</a>
                         <ul class="sub-menu children dropdown-menu">
-                            <li><i class="menu-icon fa fa-print"></i><a href="{% url 'operaciones:consulta_cartera_por_cliente' %}">Por cliente</a></li>
-                            <li><i class="menu-icon fa fa-print"></i><a href="{% url 'operaciones:consulta_cartera_por_deudor' %}">Por deudor</a></li>
-                            <li><i class="menu-icon fa fa-print"></i><a href="{% url 'operaciones:consulta_cartera_vencida' %}">Cargos por cartera</a></li>
+                            <li><i class="menu-icon fa fa-print"></i>
+                                <a href="{% url 'operaciones:consulta_cartera_por_cliente' %}">Por cliente</a></li>
+                            <li><i class="menu-icon fa fa-print"></i>
+                                <a href="{% url 'operaciones:consulta_cartera_por_deudor' %}">Por deudor</a></li>
+                            <li><i class="menu-icon fa fa-print"></i>
+                                <a href="{% url 'operaciones:detalle_facturas_pendientes' %}"target="facturas pendientes">Facturas pendientes</a></li>
+                            <li><i class="menu-icon fa fa-print"></i>
+                                <a href="{% url 'operaciones:detalle_cheques_pendientes' %}"target="cheques pendientes">Accesorios pendientes</a></li>
+                            <li><i class="menu-icon fa fa-print"></i>
+                                <a href="{% url 'cobranzas:protestos_pendientes' %}"target="facturas pendientes">Protestos pendientes</a></li>
+                            <li><i class="menu-icon fa fa-print"></i>
+                                <a href="{% url 'operaciones:consulta_cartera_vencida' %}">Cargos por cartera</a></li>
                         </ul>
                     </li>
                     {% if user.id == 1 %}

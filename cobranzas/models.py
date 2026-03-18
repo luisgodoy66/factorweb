@@ -68,6 +68,14 @@ class Documentos_cabecera(ClaseModelo):
         ('TRA', 'Transferencia'),
         ('DEP', 'Deposito de accesorio'),
     )
+
+    ESTADO = (
+        ('A',''),
+        ('C', 'Confirmada'),
+        ('P', 'Protestada'),
+        ('L', 'Liquidada'),
+        ('E', 'Eliminada'),
+    )
     cxcobranza = models.CharField(max_length=8, )
     cxcliente=models.ForeignKey(Cliente_models.Datos_generales
         , on_delete=models.CASCADE
@@ -81,7 +89,7 @@ class Documentos_cabecera(ClaseModelo):
     dliquidacion = models.DateTimeField(null=True) 
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     nsobrepago = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    cxestado = models.CharField(max_length=1, default='A')
+    cxestado = models.CharField(max_length=1, choices=ESTADO, default='A')
     cxcheque = models.ForeignKey(Cheques, on_delete=models.RESTRICT
         , null=True, related_name='cheque_cobranza')
     cxcuentatransferencia = models.ForeignKey(Cliente_models.Cuentas_bancarias

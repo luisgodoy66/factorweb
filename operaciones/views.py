@@ -1436,6 +1436,7 @@ def EditarTasasDocumentoSolicitud(request, documento_id, fecha_desembolso, asign
         documento = ModelosSolicitud.ChequesAccesorios.objects.filter(pk=documento_id).first()
         es_facturas_puras = False
 
+    anticipa_total_negociado = asignacion.cxtipofactoring.lanticipatotalnegociado
 
     if request.method=='GET':
         if documento:
@@ -1445,22 +1446,24 @@ def EditarTasasDocumentoSolicitud(request, documento_id, fecha_desembolso, asign
                 'ntasadescuento':documento.ntasadescuento,
             }
             if es_facturas_puras:
-                formulario=TasasDocumentosForm(e)
+                formulario=TasasDocumentosForm(e, anticipa_100 = anticipa_total_negociado)
                 numero_documento=documento.ctdocumento
             else:
-                formulario= TasasAccesoriosForm(e)
+                formulario= TasasAccesoriosForm(e, anticipa_100 = anticipa_total_negociado)
                 numero_documento=documento.documento.ctdocumento
         else:
             if es_facturas_puras:
-                formulario=TasasDocumentosForm()
+                formulario=TasasDocumentosForm(anticipa_100 = anticipa_total_negociado)
             else:
-                formulario= TasasAccesoriosForm()
+                formulario= TasasAccesoriosForm(anticipa_100 = anticipa_total_negociado)
 
     contexto={'form_documento':formulario
         , 'documento_id':documento_id
         , 'documento':numero_documento
         , 'fecha_desembolso': fecha_desembolso
-        , 'asignacion':asignacion_id }
+        , 'asignacion':asignacion_id 
+        , 'anticipa_total_negociado': anticipa_total_negociado
+        }
 
     if request.method=='POST':
 

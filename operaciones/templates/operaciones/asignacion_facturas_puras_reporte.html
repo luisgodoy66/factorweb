@@ -101,7 +101,11 @@
                             <td style="width: 25%; ">{{ asignacion.ddesembolso|custom_date_format }}</td>
                         </tr>
                         <tr>
+                            {% if fuente == 'operacion' %}
                             <td style="width: 10%; "><strong>Asignación:</strong></td>
+                            {% else %}
+                            <td style="width: 10%; "><strong>Solicitud:</strong></td>
+                            {% endif %}
                             <td style="width: 30%; ">{{ asignacion.cxasignacion }}</td>
                             <td style="width: 20%; "></td>
                             <td style="width: 15%; "><strong>Tipo de factoring:</strong></td>
@@ -265,8 +269,10 @@
                                 <td><strong>Elaborado por: </strong>{{ asignacion.cxusuariocrea}}</td>
                             {% endif %}
                             <td><strong>Revisado por:</strong></td>
-                            <td><strong>Recibido por:</strong></td>
-                            {% if asignacion.cxestado == 'E' %}
+                            {% if fuente == 'operacion' %}
+                                <td><strong>Recibido por:</strong></td>
+                            {% endif %}
+                            {% if asignacion.cxestado == 'R' %}
                                 <td class="alerta"><strong>Reversada</strong></td>
                             {% endif %}
                         </tr>

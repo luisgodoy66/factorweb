@@ -25,22 +25,22 @@
 
 <div class="col-md-9">
     <div class="card">
-        <div class="card-header" style="background-color: white;">
-            <div class="d-flex justify-content-between align-items-center ">
-                <h5>Factura de {{cliente_nombre}}</h5>
-                <a class="btn  btn-sm "
-                    {% if asignacion_id %}
-                        href="{% url 'solicitudes:asignacionconaccesorios_editar' asignacion_id %}" 
-                    {% else %}
-                        href="{% url 'solicitudes:asignacionconaccesorios_nueva' %}" 
-                    {% endif %}
-                    ><i class="fa fa-times"></i>
-                </a>
-            </div>  
-        </div>        
         <form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal"
             >
             {% csrf_token %}
+            <div class="card-header" style="background-color: white;">
+                <div class="d-flex justify-content-between align-items-center ">
+                    <h5>Factura de {{cliente_nombre}}</h5>
+                    <a class="btn  btn-sm "
+                        {% if asignacion_id %}
+                            href="{% url 'solicitudes:asignacionconaccesorios_editar' asignacion_id %}" 
+                        {% else %}
+                            href="{% url 'solicitudes:asignacionconaccesorios_nueva' %}" 
+                        {% endif %}
+                        ><i class="fa fa-times"></i>
+                    </a>
+                </div>  
+            </div>        
             <div class="card-body">
                 <div class="row">
                     <!-- datos de factura texto y fecha -->
@@ -208,35 +208,36 @@
 
                 </div>
             </div>
-        </form>
-        <div class="card-footer">
-            <div class="text-right">
-                <button type="submit" class="btn btn-secondary btn-sm">
-                    <i class="fa fa-dot-circle-o"></i> Agregar
-                </button>
-            </div>
-            <!-- Sección para mostrar errores del formulario -->
-            <div id="form-errors" class="alert alert-danger" style="display:none;"></div>
-                {% if form.errors %}
-                <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
-                    <span class="badge badge-pill badge-danger">Error</span>
-                    Por favor corrija los errores en el formulario.
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+            <div class="card-footer">
+                <div class="text-right">
+                    <button type="submit" class="btn btn-secondary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Agregar
                     </button>
-                    <!-- mostrar los errores -->
-                    <div class="mt-2">
-                        {% for field in form %}
-                            {% for error in field.errors %}
-                                <div><strong>{{ field.label }}:</strong> {{ error }}</div>
-                            {% endfor %}
-                        {% endfor %}
-                        {% for error in form.non_field_errors %}
-                            <div>{{ error }}</div>
-                        {% endfor %}
                 </div>
-                {% endif %}
-        </div>
+                <!-- Sección para mostrar errores del formulario -->
+                <div id="form-errors" class="alert alert-danger" style="display:none;"></div>
+                    {% if form.errors %}
+                    <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                        <span class="badge badge-pill badge-danger">Error</span>
+                        Por favor corrija los errores en el formulario.
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <!-- mostrar los errores -->
+                        <div class="mt-2">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <div><strong>{{ field.label }}:</strong> {{ error }}</div>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -287,6 +288,7 @@ window.onload=function(){
           +total_cheques 
           +", no coincide con el neto a negociar: "
           +capturaValor("id_ntotal"))
+          enviando = false;
           return false;
       };
 

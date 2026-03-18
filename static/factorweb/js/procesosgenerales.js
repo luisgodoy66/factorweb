@@ -530,7 +530,7 @@ function CargarFacturaDesdeComprobante(comprobante){
                 }
             }
         }
-        inicializaValor("id_niva",valorIva)
+        inicializaValor("id_niva",valorIva.toFixed(2))
         total=jQuery("#id_nvalorantesiva").val()
         total = +total+valorIva;
         inicializaValor("id_ntotal",total.toFixed(2))

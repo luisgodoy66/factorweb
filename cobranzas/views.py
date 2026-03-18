@@ -1207,14 +1207,6 @@ def AceptarCobranza(request):
         , valor_recibido, pagador_por_cliente, sobrepago, cuenta_bancaria
         , nc, gi, es_cc, cd, fd
         , documentos_cobrados, id_deudor, nusuario, cc, comentario))
-    print("CALL uspAceptarCobranzaCartera( {0},{1},'{2}','{3}'\
-        ,{4},{5},{6},{7}\
-        ,'{8}','{9}',{10},{11},{12}\
-        ,'{13}', {14}, {15},Null,{16},'{17}','',0)"
-        .format(id_cliente, tipo_factoring, forma_cobro, fecha_cobro
-        , valor_recibido, pagador_por_cliente, sobrepago, cuenta_bancaria
-        , nc, gi, es_cc, cd, fd
-        , documentos_cobrados, id_deudor, nusuario, cc, comentario))
 
     if resultado[0] !='OK':
         return HttpResponse(resultado[0])
@@ -1326,7 +1318,8 @@ def DepositoCheques(request, ids_cheques, total_cartera, cuenta_destino
 
     return render(request, template_name, contexto)
 
-def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None):
+def GeneraListaCobranzasJSON(request, desde = None, hasta= None
+                             , clientes =None):
     # Es invocado desde la url de una tabla bt
     arr_clientes = []
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
@@ -1428,7 +1421,8 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None)
                 , 'lfacturagenerada'
                 ,'cxtipofactoring__ctabreviacion'
                 )\
-                    .annotate(tipo=RawSQL("select 'L'",''), dato = F('id'))
+                .annotate(tipo=RawSQL("select 'L'",'')
+                          , dato = F('id'))
         
         pagares = Pagare_cabecera.objects\
             .filter(dcobranza__gte = desde
@@ -1565,7 +1559,9 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None, clientes =None)
                         )
                 
     movimiento = cobranzas.union(recuperaciones, protestos_cobranzas
-        , protestos_recuperaciones, cargos, liquidaciones, pagares).order_by('dcobranza')
+                                 , protestos_recuperaciones, cargos
+                                 , liquidaciones, pagares)\
+                            .order_by('dcobranza')
 
     tempBlogs = []
     for i in range(len(movimiento)):
@@ -2866,77 +2862,52 @@ def ReversaCobranza(request, pid_cobranza, tipo_operacion):
         return HttpResponse(resultado)
     return HttpResponse(resultado)
 
-def GeneraListaCobranzasRegistradasJSON(request, desde = None, hasta= None):
+def GeneraListaCobranzasRegistradasJSON(request, desde , hasta):
     # Es invocado desde la url de una tabla bt
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    if desde == 'None':
-        cobranzas = Documentos_cabecera.objects\
-            .filter(empresa = id_empresa.empresa)\
-                .values('cxcliente__cxcliente__ctnombre','ddeposito'
-                ,'cxtipofactoring__ctabreviacion'
-                ,'cxcobranza'
-                ,'cxformapago'
-                ,'nvalor', 'dcobranza'
-                ,'cxcheque', 'cxestado', 'dregistro'
-                , 'id', 'cxcuentatransferencia','nsobrepago'
-                , 'lcontabilizada'
-                )\
-            .annotate(tipo=RawSQL("select 'C'",''))
-        
-        recuperaciones = Recuperaciones_cabecera.objects\
-            .filter(empresa = id_empresa.empresa)\
-                .values('cxcliente__cxcliente__ctnombre','ddeposito'
-                ,'cxtipofactoring__ctabreviacion'
-                ,'cxrecuperacion'
-                ,'cxformacobro'
-                ,'nvalor', 'dcobranza'
-                , 'cxcheque', 'cxestado','dregistro'
-                , 'id', 'cxcuentatransferencia','nsobrepago'
-                , 'lcontabilizada'
-                )\
-            .annotate(tipo=RawSQL("select 'R'",''))
-    else:
+    cobranzas = Documentos_cabecera.objects\
+        .filter(dregistro__gte = desde, dregistro__lte = hasta
+                , empresa = id_empresa.empresa)\
+            .values('cxcliente__cxcliente__ctnombre','ddeposito'
+            ,'cxcobranza'
+            ,'cxformapago','nvalor', 'dcobranza'
+            , 'cxcheque', 'cxestado','dregistro'
+            , 'id', 'cxcuentatransferencia','nsobrepago'
+            , 'lcontabilizada'
+            ,'cxtipofactoring__ctabreviacion'
+            )\
+        .annotate(tipo=RawSQL("select 'C'",'')
+                    , dato = F('cxcheque'))
+            
+    recuperaciones = Recuperaciones_cabecera.objects\
+        .filter(dregistro__gte = desde, dregistro__lte = hasta
+                , empresa = id_empresa.empresa)\
+            .values('cxcliente__cxcliente__ctnombre','ddeposito'
+            ,'cxrecuperacion'
+            ,'cxformacobro','nvalor', 'dcobranza'
+            , 'cxcheque', 'cxestado','dregistro'
+            , 'id', 'cxcuentatransferencia','nsobrepago'
+            , 'lcontabilizada'
+            ,'cxtipofactoring__ctabreviacion'
+            )\
+        .annotate(tipo=RawSQL("select 'R'",'')
+                    , dato = F('cxcheque'))
 
-        cobranzas = Documentos_cabecera.objects\
-            .filter(dregistro__gte = desde, dregistro__lte = hasta
-                    , empresa = id_empresa.empresa)\
-                .values('cxcliente__cxcliente__ctnombre','ddeposito'
-                ,'cxcobranza'
-                ,'cxformapago','nvalor', 'dcobranza'
-                , 'cxcheque', 'cxestado','dregistro'
-                , 'id', 'cxcuentatransferencia','nsobrepago'
-                , 'lcontabilizada'
-                ,'cxtipofactoring__ctabreviacion'
-                )\
-                    .annotate(tipo=RawSQL("select 'C'",''))
-                
-        recuperaciones = Recuperaciones_cabecera.objects\
-            .filter(dregistro__gte = desde, dregistro__lte = hasta
-                    , empresa = id_empresa.empresa)\
-                .values('cxcliente__cxcliente__ctnombre','ddeposito'
-                ,'cxrecuperacion'
-                ,'cxformacobro','nvalor', 'dcobranza'
-                , 'cxcheque', 'cxestado','dregistro'
-                , 'id', 'cxcuentatransferencia','nsobrepago'
-                , 'lcontabilizada'
-                ,'cxtipofactoring__ctabreviacion'
-                )\
-                    .annotate(tipo=RawSQL("select 'R'",''))
-
-        pagares = Pagare_cabecera.objects\
-            .filter(dregistro__gte = desde, dregistro__lte = hasta
-                    , empresa = id_empresa.empresa)\
-                .values('cxcliente__cxcliente__ctnombre','ddeposito'
-                ,'cxcobranza'
-                ,'cxformapago','nvalor', 'dcobranza'
-                , 'cxcheque', 'cxestado','dregistro'
-                , 'id', 'cxcuentatransferencia','nsobrepago'
-                , 'lcontabilizada'
-                )\
-                    .annotate(nombre_operacion = RawSQL("select 'PAGARE'",'')
-                              ,tipo=RawSQL("select 'P'",'')
-                              )
+    pagares = Pagare_cabecera.objects\
+        .filter(dregistro__gte = desde, dregistro__lte = hasta
+                , empresa = id_empresa.empresa)\
+            .values('cxcliente__cxcliente__ctnombre','ddeposito'
+            ,'cxcobranza'
+            ,'cxformapago','nvalor', 'dcobranza'
+            , 'cxcheque', 'cxestado','dregistro'
+            , 'id', 'cxcuentatransferencia','nsobrepago'
+            , 'lcontabilizada'
+            )\
+        .annotate(nombre_operacion = RawSQL("select 'PAGARE'",'')
+                    ,tipo=RawSQL("select 'P'",'')
+                , dato = F('id')
+                    )
 
     movimiento = cobranzas.union(recuperaciones, pagares)
             
@@ -2995,7 +2966,7 @@ def GeneraListaNotasDeDebitoPendientesJSONSalida(transaccion):
         opx = op.cxliquidacion
     if transaccion.cxtipooperacion=='C':
         op = Documentos_cabecera.objects.filter(pk = transaccion.operacion).first()
-        opx = op.cxcobranza
+        opx = op.cxcobranza + ' ' + op.estado()
     if transaccion.cxtipooperacion=='R':
         op = Recuperaciones_cabecera.objects.filter(pk = transaccion.operacion).first()
         opx = op.cxrecuperacion
@@ -3065,7 +3036,7 @@ def DetalleNotasDebitoPendientesJSONSalida(doc):
         opx = op.cxliquidacion
     if doc.cxtipooperacion=='C':
         op = Documentos_cabecera.objects.filter(pk = doc.operacion).first()
-        opx = op.cxcobranza
+        opx = op.cxcobranza + ' ' + op.estado()
     if doc.cxtipooperacion=='R':
         op = Recuperaciones_cabecera.objects.filter(pk = doc.operacion).first()
         opx = op.cxrecuperacion
@@ -3351,7 +3322,6 @@ def ObtenerOtrosCargosDeDocumento(id_documento, listaotroscargos):
                         , doc, 'F'))
                 else:
                     # si no se encuentra la factura, se asume que es un cargo generado por liquidación en negativo que no se factura
-                    # print(f"Cargo {cargo.cxmovimiento.ctmovimiento} con ND {nd.id} por {cargo.nsaldo} no tiene factura asociada")
                     listaotroscargos.append(GeneraOtroCargoJSONSalida(
                         cargo.id, cargo.cxmovimiento.ctmovimiento
                         , cargo.dultimageneracioncargos, cargo.nsaldo

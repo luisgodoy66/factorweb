@@ -81,13 +81,6 @@
                             aria-label="Ingrese fecha corte" >
                         </div>
                         <div class="col-md-3"></div>
-                        <!-- <div class="col-md-1">
-                            <label for="id_nvalor" class=" form-control-label">
-                            Valor de cobranza</label>
-                        </div>
-                        <div class="col-md-2">
-                            <div id="divValor"></div>
-                        </div> -->
                         <div class="col-md-3">
                             <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                 <div id="divValor"></div>
@@ -97,13 +90,6 @@
                             </div>
                         </div>
                     
-                        <!-- <div class="col-md-1 "><label for="id_nvalor" 
-                            class=" form-control-label">
-                            Sobrepago</label>
-                        </div>
-                        <div class="col-md-2">
-                            <div id="divSobrepago"></div>
-                        </div> -->
                         <div class="col-md-3">
                             <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                 <div id="divSobrepago"></div>
@@ -230,22 +216,9 @@
                         <h6 class="heading-title text-secondary">Total: <span id="divOtrosCargos"></span></h6>
                     </div>
                 </div>
-                <!-- <div class="row form-group mb-3">
-                    <div class="col-md-9">
-                        <h6 class="heading-title text-secondary">Detalle de cargos previos</h6>
-                    </div>
-                </div> -->
                 <div class="body">
                 <!-- <small> -->
                     <table id="table_otros"  class="table table-hover table-bordered">
-                    <!-- <thead>
-                        <tr>
-                        <th data-field="descripcion">Cargo</th>
-                        <th data-field="codigo_cobranza">Operación / Factura</th>
-                        <th data-field="fecha">Fecha</th>
-                        <th data-field="valor">Saldo</th>
-                        </tr>
-                    </thead> -->
                     </table>
                 <!-- </small> -->
 
@@ -297,18 +270,17 @@ function initTable() {
         }, {title: 'Vencimiento', field: 'Vencimiento'
         , rowspan: 2, align: 'center', valign: 'middle', sortable: true,
         }, {title: 'Saldo actual', field: 'SaldoActual'
-        , rowspan: 2, align: 'right', valign: 'middle', sortable: true,
+        , rowspan: 2, align: 'right', valign: 'middle', sortable: true, formatter: numberFormatter
         }, {title: 'Valores a cobrar', colspan: 3, align: 'center',
-        }, {title: 'Saldo', field: 'SaldoFinal',rowspan: 2, align: 'center'
-        }
+        }, {title: 'Saldo', field: 'SaldoFinal', rowspan: 2, align: 'right' }
     ],
         [
         {field: 'Cobro', title: 'Recibido', sortable: true, align: 'right'
-            ,footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+            ,footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla, formatter: numberFormatter
         }, {field: 'Retenido', title: 'Retenciones', sortable: true, align: 'right'
         ,footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
         }, {field: 'Bajas', title: 'Bajas', sortable: true, align: 'right'
-            ,footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+            ,footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla, formatter: numberFormatter
         }]
     ]
     

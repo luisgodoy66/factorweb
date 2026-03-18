@@ -43,8 +43,6 @@
                     onsubmit="return checkSubmit();">
                     {% csrf_token %}
                     <div hidden>
-                        <!-- <input id="asignacion_id" name="asignacion_id" value="{{ asignacion.id }}"> -->
-                        <!-- <input id="id_cliente" name="id_cliente" value="{{ asignacion.cxcliente_id }}"> -->
                         {{ form.ncantidaddocumentos }}
                         {{ form.nvalor }}
                     </div>
@@ -195,9 +193,7 @@
 var enviando = false; //Obligaremos a entrar el if en el primer submit
 var $table = jQuery('#table')
 var selections = []
-// var cliente_id = capturaValor("id_cliente")
-// var asignacion_id = capturaValor("asignacion_id")
-const cliente_id = "{{ asignacion.cxcliente_id }}"
+var cliente_id = "{{ asignacion.cxcliente_id }}"
 const asignacion_id = "{{ asignacion.id }}"
 
 window.onload=function(){

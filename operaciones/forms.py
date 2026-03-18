@@ -300,12 +300,14 @@ class TasasDocumentosForm(forms.ModelForm):
             , 'ndescuentocartera':'Descuento'
         }
     def __init__(self, *args, **kwargs):
+        anticipa_100 = kwargs.pop('anticipa_100', None)
         super().__init__(*args, **kwargs)
         
         for f in iter(self.fields):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
+        self.fields['nporcentajeanticipo'].widget.attrs['readonly']= anticipa_100
 
 class TasasAccesoriosForm(forms.ModelForm):
     

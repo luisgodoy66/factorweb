@@ -1,27 +1,27 @@
-var $table = jQuery('#table')
+// var $table = jQuery('#table')
 
-window.onload=function(){
+// window.onload=function(){
 
-    inicializaValor("id_nvalor",capturaValor("total_cartera"))
+//     inicializaValor("id_nvalor",capturaValor("total_cartera"))
 
-    jQuery('#id_nvalor').change(function(){
-        calcular_sobrepago();
-    });
+//     jQuery('#id_nvalor').change(function(){
+//         calcular_sobrepago();
+//     });
 
-    jQuery('input[type=checkbox][name="pagadopor"]').change(function() {
-      mostrar_cuentas_origen();
-    });
+//     jQuery('input[type=checkbox][name="pagadopor"]').change(function() {
+//       mostrar_cuentas_origen();
+//     });
 
-    jQuery('input[type=checkbox][name="depositaren"]').change(function() {
-      mostrar_cuentas_destino();
-    });
+//     jQuery('input[type=checkbox][name="depositaren"]').change(function() {
+//       mostrar_cuentas_destino();
+//     });
 
-    $table.bootstrapTable({locale:"es-EC"});
+//     $table.bootstrapTable({locale:"es-EC"});
 
-    // inicializar tabla
-    initTable();
+//     // inicializar tabla
+//     initTable();
 
-};
+// };
 
 window.operateEvents = {
     'click .cobrar': function (e, value, row, index) {
@@ -30,13 +30,13 @@ window.operateEvents = {
     }
   };
   
-function operateFormatter(value, row, index) {
-    return [
-        '<a class="cobrar" href="javascript:void(0)" title="Cobro">',
-        '<i class="fa fa-edit"></i>',
-        '</a>'
-    ].join('')
-    }
+// function operateFormatter(value, row, index) {
+//     return [
+//         '<a class="cobrar" href="javascript:void(0)" title="Cobro">',
+//         '<i class="fa fa-edit"></i>',
+//         '</a>'
+//     ].join('')
+//     }
 
 function initTable() {
     $table.bootstrapTable('destroy').bootstrapTable({
@@ -62,21 +62,22 @@ function initTable() {
           , rowspan: 2, align: 'center', valign: 'middle', sortable: true,
           }, {title: 'Vencimiento', field: 'Vencimiento'
           , rowspan: 2, align: 'center', valign: 'middle', sortable: true,
-          }, {title: 'Saldo actual', field: 'SaldoActual'
-          , rowspan: 2, align: 'right', valign: 'middle', sortable: true,
+          }, {title: 'Saldo actual', field: 'SaldoActual',formatter: numberFormatter
+          , rowspan: 2, align: 'right', valign: 'middle', sortable: true
           }, {title: 'Valores cobrados', colspan: 3, align: 'center',
           }, {title: 'Saldo', field: 'SaldoFinal',rowspan: 2, align: 'center'
+            ,formatter: numberFormatter
           }, {field: 'operate', title: 'Acción',rowspan: 2
           , align: 'center', clickToSelect: false, 
           events: window.operateEvents, formatter: operateFormatter
           }],
         [
           {field: 'Cobro', title: 'Recibido', sortable: true, align: 'right'
-            ,footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+            ,footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla, formatter: numberFormatter
           }, {field: 'Retenido', title: 'Retenciones', sortable: true, align: 'right'
-          ,footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+          ,footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla, formatter: numberFormatter
         }, {field: 'Bajas', title: 'Bajas', sortable: true, align: 'right'
-            ,footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+            ,footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla, formatter: numberFormatter
         }]
       ]
       
@@ -89,60 +90,60 @@ function DatosCobro(index, asgn, doc, sdo, cobro, ret, bajas){
       +'/'+doc +'/'+sdo+'/'+cobro+'/'+ret+'/'+bajas )
   }
 
-function calcular_sobrepago(){
-  var seleccion = $table.bootstrapTable('getData');
+// function calcular_sobrepago(){
+//   var seleccion = $table.bootstrapTable('getData');
   
-  const total_cobrado = seleccion.map(function(row) {
-      return +row.Cobro.substring(0);
-  }).reduce(function (sum, i) {
-      return Math.round((sum + i + Number.EPSILON) * 100) / 100;
-  }, 0);
+//   const total_cobrado = seleccion.map(function(row) {
+//       return +row.Cobro.substring(0);
+//   }).reduce(function (sum, i) {
+//       return Math.round((sum + i + Number.EPSILON) * 100) / 100;
+//   }, 0);
           
-  var sobrepago = capturaValor('id_nvalor') - total_cobrado;
+//   var sobrepago = capturaValor('id_nvalor') - total_cobrado;
 
-  // Redondear sobrepago a dos decimales
-  sobrepago = Math.round((sobrepago + Number.EPSILON) * 100) / 100;
+//   // Redondear sobrepago a dos decimales
+//   sobrepago = Math.round((sobrepago + Number.EPSILON) * 100) / 100;
 
-  // inicializaValor('id_nsobrepago', sobrepago);
-  inicializarInner('divSobrepago', sobrepago);
-}
+//   // inicializaValor('id_nsobrepago', sobrepago);
+//   inicializarInner('divSobrepago', sobrepago);
+// }
 
-function mostrar_cuentas_origen(){
-// obtener el valor de checkbox button cliente
-// si es on, esconder las cuentas del deudor, mostrar la del cliente
-// si es off, esconder la cuentas del cliente, mostrar la del deudor
-  const div_c = document.querySelector('#div_cuentas_cliente');
-  const div_d = document.querySelector('#div_cuentas_deudor');
+// function mostrar_cuentas_origen(){
+// // obtener el valor de checkbox button cliente
+// // si es on, esconder las cuentas del deudor, mostrar la del cliente
+// // si es off, esconder la cuentas del cliente, mostrar la del deudor
+//   const div_c = document.querySelector('#div_cuentas_cliente');
+//   const div_d = document.querySelector('#div_cuentas_deudor');
 
-  let recibido_de_cliente = document.querySelector('input[name="pagadopor"]:checked');
+//   let recibido_de_cliente = document.querySelector('input[name="pagadopor"]:checked');
 
-  if (recibido_de_cliente != null){
-      div_d.setAttribute('hidden',true);
-      div_c.removeAttribute('hidden');
-      inicializaValor("id_ctgirador",nombre_cliente);
-  }else{
+//   if (recibido_de_cliente != null){
+//       div_d.setAttribute('hidden',true);
+//       div_c.removeAttribute('hidden');
+//       inicializaValor("id_ctgirador",nombre_cliente);
+//   }else{
     
-    div_d.removeAttribute('hidden');
-    div_c.setAttribute('hidden',true);
-    inicializaValor("id_ctgirador",nombre_deudor);
-  }
-}
+//     div_d.removeAttribute('hidden');
+//     div_c.setAttribute('hidden',true);
+//     inicializaValor("id_ctgirador",nombre_deudor);
+//   }
+// }
 
-function mostrar_cuentas_destino(){
-  const div_e = document.querySelector('#div_cuentas_empresa');
-  const div_c = document.querySelector('#div_cuentas_conjuntas');
+// function mostrar_cuentas_destino(){
+//   const div_e = document.querySelector('#div_cuentas_empresa');
+//   const div_c = document.querySelector('#div_cuentas_conjuntas');
 
-  let deposito_en = document.querySelector('input[name="depositaren"]:checked');
+//   let deposito_en = document.querySelector('input[name="depositaren"]:checked');
 
-  if (deposito_en != null){
-    div_e.setAttribute('hidden',true);
-    div_c.removeAttribute('hidden');
-    }
-  else{
-    div_e.removeAttribute('hidden');
-    div_c.setAttribute('hidden',true);
-  }
-}
+//   if (deposito_en != null){
+//     div_e.setAttribute('hidden',true);
+//     div_c.removeAttribute('hidden');
+//     }
+//   else{
+//     div_e.removeAttribute('hidden');
+//     div_c.setAttribute('hidden',true);
+//   }
+// }
 
 function AceptarCobranza(){
   const recibido_por = document.querySelector('input[name="pagadopor"]:checked');
@@ -151,7 +152,7 @@ function AceptarCobranza(){
   const pagado_por_cliente = recibido_por != null
   const deposito_cuenta_conjunta =  destino_deposito != null
   var cuenta_bancaria = null 
-  console.log("pagado_por_cliente:", pagado_por_cliente)
+
   mp_deposito = new Map()
   mp_cheque = new Map()
 
