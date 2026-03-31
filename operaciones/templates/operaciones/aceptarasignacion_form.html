@@ -510,10 +510,10 @@ function initTable(iniciales_GAO, iniciales_DC) {
                 }, {title: 'Vencimiento', field: 'Vencimiento', rowspan: 2, align: 'center', 
                 valign: 'middle', sortable: true,
                 }, {title: 'Negociado', field: 'Total', rowspan: 2, align: 'center', valign: 'middle', 
-                sortable: true, footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+                sortable: true, footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla, formatter: numberFormatter
                 }, {title: 'Plazo', field: 'Plazo', rowspan: 2, align: 'center', valign: 'middle', 
                 sortable: true, 
-                }, {title: 'Anticipo', colspan: 2, align: 'center'
+                }, {title: 'Anticipo', colspan: 2, align: 'center',
                 }, {title: iniciales_GAO, colspan: 2, align: 'center'
                 }, {title: iniciales_DC, colspan: 2, align: 'center'
                 
@@ -522,7 +522,7 @@ function initTable(iniciales_GAO, iniciales_DC) {
                 }],
             [{field: 'Porc_anticipo', title: '%', sortable: true
                 }, {field: 'Valor_anticipo', title: 'valor', sortable: true, align: 'center', 
-                footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
+                footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla, formatter: numberFormatter
                 }, {field: 'Porc_GAO', title: '%', sortable: true, align: 'center'
                 }, {field: 'Valor_GAO', title: 'valor', sortable: true, align: 'center', 
                 footerFormatter: LineaTotalValoresEnPieDepaginaDeTabla
@@ -620,6 +620,10 @@ function copiarLiquidacionAlPortapapeles() {
     let texto = "Liquidación de Asignación\n";
     texto += "========================\n";
     
+    const fechaDesembolsoLabel = document.querySelector('label[for="id_ddesembolso"]')?.innerText || 'Fecha de desembolso';
+    const fechaDesembolso = document.getElementById('id_ddesembolso').value;
+    texto += `${fechaDesembolsoLabel}: ${fechaDesembolso}\n\n`;
+
     const anticipoLabel = document.querySelector('label[for="id_nanticipo"]')?.innerText || 'Anticipo';
     const anticipoValor = document.getElementById('divAnticipo').innerText;
     texto += `${anticipoLabel}: ${anticipoValor}\n\n`;

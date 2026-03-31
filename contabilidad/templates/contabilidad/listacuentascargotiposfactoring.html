@@ -44,13 +44,24 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
-                    <thead>
-                        <th>Id</th>
-                        <th>Tipo de factoring</th>
-                        <th>Cuenta contable</th>
-                        <th class="all">Acciones</th>
-                    </thead>
+                <table class="table table-hover table-bordered" 
+       id="bootstrap-data-table-export"
+       data-search="true"
+       data-show-columns="true"
+       data-show-export="true"
+       data-show-refresh="true"
+       data-pagination="true"
+       data-page-size="10"
+       data-page-list="[10, 25, 50, 100, all]"
+       data-locale="es-EC">
+    <thead>
+        <tr>
+            <th data-field="campo1" data-sortable="true">Id</th>
+            <th data-field="campo2" data-sortable="true">Tipo de factoring</th>
+            <th data-field="campo3" data-sortable="true">Cuenta contable</th>
+            <th data-field="campo4" data-sortable="false">Acciones</th>
+        </tr>
+    </thead>
                     <tbody>
                         {% for item in consulta %}
                         <tr>

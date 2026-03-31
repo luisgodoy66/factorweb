@@ -49,13 +49,17 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" 
+                    id="bootstrap-data-table-export"
+                    >
                     <thead>
-                        <th>Id</th>
-                        <th>Descripción</th>
-                        <th>Abreviación</th>
-                        <th>Responsabilidad de girador</th>
-                        <th class="all">Acciones</th>
+                        <tr>
+                            <th data-field="campo1" data-sortable="true">Id</th>
+                            <th data-field="campo2" data-sortable="true">Descripción</th>
+                            <th data-field="campo3" data-sortable="true">Abreviación</th>
+                            <th data-field="campo4" data-sortable="true">Responsabilidad de girador</th>
+                            <th data-field="campo5" data-sortable="false">Acciones</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for item in consulta %}

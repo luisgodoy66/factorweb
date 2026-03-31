@@ -38,15 +38,19 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" 
+                    id="bootstrap-data-table-export"
+                    >
                     <thead>
-                        <th>Nombre</th>
-                        <th>Abreviación</th>
-                        <th>Valor</th>
-                        <th>Aplica en liquidación de asignación</th>
-                        <th>Aplica en liquidación de cobranzas</th>
-                        <th>Carga IVA</th>
-                        <th class="all">Acciones</th>
+                        <tr>
+                            <th data-field="campo1" data-sortable="true">Nombre</th>
+                            <th data-field="campo2" data-sortable="true">Abreviación</th>
+                            <th data-field="campo3" data-sortable="true">Valor</th>
+                            <th data-field="campo4" data-sortable="true">Aplica en liquidación <br>de asignación</th>
+                            <th data-field="campo5" data-sortable="true">Aplica en liquidación <br>de cobranzas</th>
+                            <th data-field="campo6" data-sortable="true">Carga IVA</th>
+                            <th data-field="campo7" data-sortable="false">Acciones</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for item in consulta %}

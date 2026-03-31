@@ -22,12 +22,12 @@
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                     <div class="dropdown-menu-content">
                         <a class="dropdown-item" href="{% url 'operaciones:anexo_nuevo' %}">Nuevo</a>
-                        <a class="dropdown-item" href="#">Imprimir</a>
+                        <!-- <a class="dropdown-item" href="#">Imprimir</a> -->
                     </div>
                 </div>
             </div>
             <h4 class="mb-0">
-                <span class="count">{{ consulta.count }} encontrados</span>
+                <span class="count">{{ consulta.count }} encontrado{% if consulta.count != 1 %}s{% endif %}</span>
             </h4>
            
         </div>
@@ -49,13 +49,17 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" 
+                    id="bootstrap-data-table-export"
+                    >
                     <thead>
-                        <th>Id</th>
-                        <th>Descripción</th>
-                        <th>Tipo de cliente</th>
-                        <th>Activo</th>
-                        <th class="all">Acciones</th>
+                        <tr>
+                            <th data-field="campo1" data-sortable="true">Id</th>
+                            <th data-field="campo2" data-sortable="true">Descripción</th>
+                            <th data-field="campo3" data-sortable="true">Tipo de cliente</th>
+                            <th data-field="campo4" data-sortable="true">Activo</th>
+                            <th data-field="campo5" data-sortable="false">Acciones</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for item in consulta %}

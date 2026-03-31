@@ -6,7 +6,7 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Participantes</a></li>
                     <li><a href="#">Clientes</a></li>
-                    <li class="active">Ficha general</li>
+                    <li class="active">lista</li>
                 </ol>
             </div>
         </div>
@@ -22,7 +22,6 @@
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                     <div class="dropdown-menu-content">
                         <a class="dropdown-item" href="{% url 'clientes:datoscliente_nuevo' %}">Nuevo</a>
-                        <a class="dropdown-item" href="#">Imprimir</a>
                     </div>
                 </div>
             </div>
@@ -49,15 +48,16 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" id="bootstrap-data-table-export"
+                >
                     <thead>
-                        <th>Id</th>
-                        <th>Nombre</th>
-                        <th>Dirección</th>
-                        <th>Telefonos</th>
-                        <th>Email</th>
+                        <th data-sortable="true">Id</th>
+                        <th data-sortable="true">Nombre</th>
+                        <th data-sortable="true">Dirección</th>
+                        <th data-sortable="true">Teléfonos</th>
+                        <th data-sortable="true">Email</th>
                         <!-- <th>Sucursal</th> -->
-                        <th>Registro</th>
+                        <th data-sortable="true">Registro</th>
                         <th class="all">Acciones</th>
                     </thead>
                     <tbody>
@@ -65,7 +65,7 @@
                         <tr>
                             <td>{{ item.cxcliente.cxparticipante }}</td>
                             <td>{{ item }}</td>
-                            <td>{{ item.cxcliente.ctdireccion }}</td>
+                            <td>{{item.cxcliente.provincia}} / {{item.cxcliente.canton}} / {{ item.cxcliente.ctdireccion }}</td>
                             <td>
                                 {{ item.cxcliente.cttelefono1|default:"" }}
                                 {{ item.cxcliente.cttelefono2|default:"" }}
@@ -75,8 +75,8 @@
                             <!-- <td>{{ item.cxlocalidad }}</td> -->
                             <td>{{ item.dregistro|date:"Y/m/d H:i:s" }}</td>
                             <td>
-                                <a href="{% url 'clientes:cliente_editar' item.cxcliente.id %}"  title="Editar"
-                                    class="btn  btn-sm" role="button"><i class="fa fa-edit"></i></a>
+                                <a href="{% url 'clientes:cliente_view' item.cxcliente.id %}"  title="Ver"
+                                    class="btn  btn-sm" role="button"><i class="fa fa-eye"></i></a>
                                 {% if not item.cxcliente.datos_generales_comprador %}
                                 <a href="#" onclick="ClienteEsComprador({{item.cxcliente.id}})" title="Registrar como deudor"
                                     class="btn  btn-sm" role="button"><i class="fa fa-shopping-cart"></i></a>
@@ -97,9 +97,6 @@
 
 {% block js_page %}
 <script>
-    // $(document).ready(function() {
-    //     $('#bootstrap-data-table-export').DataTable();
-    // });
     function ClienteEsComprador(cliente_id) {
         MensajeConfirmacion("Crear un registro de este cliente como deudor ?", function() {
             const url = "/clientes/declienteacomprador/" + cliente_id;

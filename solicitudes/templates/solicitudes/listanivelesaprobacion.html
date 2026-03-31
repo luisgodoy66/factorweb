@@ -29,7 +29,7 @@
             </div>
         </div>
         <h4 class="mb-0">
-            <span class="count">{{ consulta.count }} encontrados</span>
+            <span class="count">{{ consulta.count }} encontrado{% if consulta.count != 1 %}s{% endif %}</span>
         </h4>
 
     </div>
@@ -41,7 +41,7 @@
             {% if error %}
                 {{ error }}
             {% else %}
-                No hay niveles de aprobación registrados
+                No hay niveles de aprobación registrados.
             {% endif %}
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -51,13 +51,17 @@
 
         <!-- <div class="content"> -->
 
-            <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+            <table class="table table-hover table-bordered" 
+                id="bootstrap-data-table-export"
+                >
                 <thead>
-                    <th>Registro</th>
-                    <th>Monto desde</th>
-                    <!-- <th>Cantidad de aprobadores</th> -->
-                    <th>Configuración slack</th>
-                    <th class="all">Acciones</th>
+                    <tr>
+                        <th data-field="campo1" data-sortable="true">Registro</th>
+                        <th data-field="campo2" data-sortable="true">Monto desde</th>
+                        <th data-field="campo3" data-sortable="true">Cantidad de aprobadores</th>
+                        <th data-field="campo4" data-sortable="true">Configuración slack</th>
+                        <th data-field="campo5" data-sortable="false">Acciones</th>
+                    </tr>
                 </thead>
                 <tbody>
                     {% for item in consulta %}

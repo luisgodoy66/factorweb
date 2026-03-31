@@ -15,7 +15,7 @@
 {% block content %}
     <div class="card bg-flat-color-0">
         <div class="card-header" style="background-color: white;">
-            <div class="dropdown float-right">
+            <!-- <div class="dropdown float-right">
                 <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
                     <i class="fa fa-bars"></i>
                 </button>
@@ -24,7 +24,7 @@
                         <a class="dropdown-item" href="#">Imprimir</a>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <h4 class="mb-0">
                 <span class="count">{{ consulta.count }} registrada{{ consulta.count|pluralize:"s" }}</span>
             </h4>
@@ -48,13 +48,17 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" 
+                    id="bootstrap-data-table-export"
+                    >
                     <thead>
-                        <th>Id</th>
-                        <th>Nombre</th>
-                        <th>Cuenta que recibe transferencias</th>
-                        <th>Propia</th>
-                        <th class="all">Acciones</th>
+                        <tr>
+                            <th data-field="campo1" data-sortable="true">Id</th>
+                            <th data-field="campo2" data-sortable="true">Nombre</th>
+                            <th data-field="campo3" data-sortable="true">Cuenta que recibe transferencias</th>
+                            <th data-field="campo4" data-sortable="true">Propia</th>
+                            <th data-field="campo5" data-sortable="false">Acciones</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for item in consulta %}

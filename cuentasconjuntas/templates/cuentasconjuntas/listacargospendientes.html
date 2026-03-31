@@ -16,7 +16,7 @@
 {% block content %}
     <div class="card bg-flat-color-0">
         <div class="card-header" style="background-color: white;">
-            <div class="dropdown float-right">
+            <!-- <div class="dropdown float-right">
                 <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
                     <i class="fa fa-bars"></i>
                 </button>
@@ -25,9 +25,9 @@
                         <a class="dropdown-item" href="#">Imprimir</a>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <h4 class="mb-0">
-                <span class="count">{{ consulta.count }} encontrados</span>
+                <span class="count">{{ consulta.count }} encontrado{% if consulta.count != 1 %}s{% endif %}</span>
             </h4>
 
         </div>
@@ -39,7 +39,7 @@
                 {% if error %}
                     {{ error }}
                 {% else %}
-                 No hay débitos pendientes
+                 No hay débitos pendientes.
                {% endif %}
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -49,18 +49,22 @@
 
             <div>
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" 
+                    id="bootstrap-data-table-export"
+                    >
                     <thead>
-                        <th>Nombre de cliente</th>
-                        <th>Número</th>
-                        <th>Fecha</th>
-                        <th>Cobranza</th>
-                        <!-- <th>Tipo de factoring</th> -->
-                        <th>Cuenta de depósito</th>
-                        <th>Valor</th>
-                        <th>Motivo</th>
-                        <th>Saldo</th>
-                        <th class="all">Acciones</th>
+                        <tr>
+                            <th data-field="campo1" data-sortable="true">Nombre de cliente</th>
+                            <th data-field="campo2" data-sortable="true">Número</th>
+                            <th data-field="campo3" data-sortable="true">Fecha</th>
+                            <th data-field="campo4" data-sortable="true">Cobranza</th>
+                            <th data-field="campo5" data-sortable="true">Tipo de factoring</th>
+                            <th data-field="campo6" data-sortable="true">Cuenta de depósito</th>
+                            <th data-field="campo7" data-sortable="true">Valor</th>
+                            <th data-field="campo8" data-sortable="true">Motivo</th>
+                            <th data-field="campo9" data-sortable="true">Saldo</th>
+                            <th data-field="campo10" data-sortable="false">Acciones</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for item in consulta %}

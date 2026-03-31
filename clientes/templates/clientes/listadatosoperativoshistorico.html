@@ -53,18 +53,29 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
-                    <thead>
-                        <th>Fecha</th>
-                        <th>Clase</th>
-                        <th>% anticipo</th>
-                        <th>Tasa GAO</th>
-                        <th>Tasa de descuento </th>
-                        <th>Tasa de GAO adicional </th>
-                        <th>Beneficiario asignación </th>
-                        <th>Beneficiario cobranza </th>
-                        <th>Estado</th>
-                    </thead>
+                <table class="table table-hover table-bordered" 
+       id="bootstrap-data-table-export"
+       data-search="true"
+       data-show-columns="true"
+       data-show-export="true"
+       data-show-refresh="true"
+       data-pagination="true"
+       data-page-size="10"
+       data-page-list="[10, 25, 50, 100, all]"
+       data-locale="es-EC">
+    <thead>
+        <tr>
+            <th data-field="campo1" data-sortable="true">Fecha</th>
+            <th data-field="campo2" data-sortable="true">Clase</th>
+            <th data-field="campo3" data-sortable="true">% anticipo</th>
+            <th data-field="campo4" data-sortable="true">Tasa GAO</th>
+            <th data-field="campo5" data-sortable="true">Tasa de <br>descuento</th>
+            <th data-field="campo6" data-sortable="true">Tasa de GAO <br>adicional</th>
+            <th data-field="campo7" data-sortable="true">Beneficiario <br>asignación</th>
+            <th data-field="campo8" data-sortable="true">Beneficiario <br>cobranza</th>
+            <th data-field="campo9" data-sortable="true">Estado</th>
+        </tr>
+    </thead>
                     <tbody>
                         {% for item in consulta %}
                         <tr>

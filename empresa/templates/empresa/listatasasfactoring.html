@@ -15,7 +15,7 @@
 {% block content %}
     <div class="card bg-flat-color-0">
         <div class="card-header" style="background-color: white;">
-            <div class="dropdown float-right">
+            <!-- <div class="dropdown float-right">
                 <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
                     <i class="fa fa-bars"></i>
                 </button>
@@ -24,7 +24,7 @@
                         <a class="dropdown-item" href="#">Imprimir</a>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <h4 class="mb-0">
                 <span class="count">{{ consulta.count }} registrado{% if consulta.count != 1 %}s{% endif %}</span>
             </h4>
@@ -48,16 +48,20 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" 
+                    id="bootstrap-data-table-export"
+                    >
                     <thead>
-                        <th>Nombre</th>
-                        <th>Cálculo flat</th>
-                        <th>Cálculo sobre el valor anticipado</th>
-                        <th>Días de periodicidad</th>
-                        <th>Imprime tasa en reportes</th>
-                        <th>Descripción en reportes</th>
-                        <th>Carga IVA</th>
-                        <th class="all">Acciones</th>
+                        <tr>
+                            <th data-field="campo1" data-sortable="true">Nombre</th>
+                            <th data-field="campo2" data-sortable="true">Cálculo flat</th>
+                            <th data-field="campo3" data-sortable="true">Cálculo sobre el <br>valor anticipado</th>
+                            <th data-field="campo4" data-sortable="true">Días de <br>periodicidad</th>
+                            <th data-field="campo5" data-sortable="true">Imprime tasa <br>en reportes</th>
+                            <th data-field="campo6" data-sortable="true">Descripción <br>en reportes</th>
+                            <th data-field="campo7" data-sortable="true">Carga IVA</th>
+                            <th data-field="campo8" data-sortable="false">Acciones</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for item in consulta %}

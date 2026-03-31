@@ -212,11 +212,12 @@ def dashboard(request):
 
 @login_required(login_url='/login/')
 # @permission_required('???.change_user', login_url='bases:sin_permisos')
-def user_editar(request,pk=None):
+def user_editar(request):
     template_name = "bases/editar_usuario.html"
     context = {}
     form = None
     obj = None
+    pk = request.user.id
 
     if request.method == "GET":
         if not pk:
@@ -263,9 +264,10 @@ def user_editar(request,pk=None):
 
 @login_required(login_url='/login/')
 # @permission_required('???.change_user', login_url='bases:sin_permisos')
-def user_password(request,pk):
+def user_password(request):
     template_name = "bases/password_usuario.html"
     context = {}
+    pk = request.user.id
 
     obj = User.objects.filter(id=pk).first()
     form = UserPasswordForm(instance = obj)
@@ -275,8 +277,6 @@ def user_password(request,pk):
 
     if not obj:
         print("Error Usuario No Existe")
-
-    # if request.method == "GET":
     
     if request.method == "POST":
         data = request.POST
@@ -291,4 +291,42 @@ def user_password(request,pk):
     
     return render(request,template_name,context)
 
+
+@login_required(login_url='/login/')
+@permission_required('operaciones.view_documentos', login_url='bases:sin_permisos')
+def dashboard_ayerhoy(request):
+    template_name='bases/dashboard_ayerhoy.html'
+    # para que tome todo el día de hoy estoy poniendo hasta mañana
+    desde = date.today() + timedelta(days=-1)
+    hasta = date.today() + timedelta(days=1)
+    cartera = 0
+    protestos = 0
+    pagares = 0
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    docs = Documentos.objects.TotalCartera(id_empresa.empresa)
+    if docs['Total']:
+        cartera = docs['Total']
+        
+    prot = Cheques_protestados.objects.TotalProtestos(id_empresa.empresa)
+    if prot['Total']:
+        protestos = prot['Total']
+
+    pag = Pagares.objects.TotalPagares(id_empresa.empresa)
+    if pag['Total']:
+        pagares = pag['Total']
+
+    sp = Asignacion.objects\
+        .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+
+    # obtener el último año de proceso
+    datos = { 'desde':desde
+        , 'hasta':hasta
+        , 'total_cartera': cartera
+        , 'total_protestos':protestos
+        , 'total_cartera_protestos':cartera+protestos+pagares
+        , 'solicitudes_pendientes':sp
+    }
+    return render(request, template_name, datos)
 

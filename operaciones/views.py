@@ -405,7 +405,8 @@ class DatosOperativosHistoricoView(SinPrivilegios, generic.ListView):
     def get_queryset(self) :
         id_cliente = self.kwargs.get('id_cliente')
         qs=ModeloCliente.Datos_operativos_hist.objects\
-            .filter(leliminado = False, cxcliente = id_cliente)
+            .filter(leliminado = False, cxcliente = id_cliente)\
+            .order_by('-dregistro')
         return qs
 
     def get_context_data(self, **kwargs):
@@ -1823,7 +1824,7 @@ def GeneraListaAsignacionesJSONSalida(asignacion):
     output["id"] = asignacion.id
     output["Cliente"] = asignacion.cxcliente.cxcliente.ctnombre
     output["Asignacion"] = asignacion.cxasignacion
-    output["TipoFactoring"] = asignacion.cxtipofactoring.cttipofactoring
+    output["TipoFactoring"] = asignacion.cxtipofactoring.ctabreviacion
     if asignacion.cxtipo =='F':
         output["TipoAsignacion"] = "Facturas puras"
     else:
@@ -1838,7 +1839,7 @@ def GeneraListaAsignacionesJSONSalida(asignacion):
     output["Neto"] = neto
     output["Estado"] = asignacion.estado()
     output["Registro"] = asignacion.dregistro.strftime("%Y-%b-%d %H:%M")
-
+    output["Eliminado"] = asignacion.leliminado
     return output
 
 def GeneraResumenAntigüedadCarteraJSON(request):
@@ -1886,102 +1887,6 @@ def GeneraResumenAntigüedadCarteraJSON(request):
             
     
     return JsonResponse( data)
-
-@login_required(login_url='/login/')
-@permission_required('operaciones.view_datos_operativos', login_url='bases:sin_permisos')
-def EstadoOperativoCliente(request, cliente_id, nombre_cliente):
-    valor_linea=0
-    porc_disponible=0
-    dias_ultima_operacion  =None
-    estado_cliente=''
-    clase_cliente =''
-    color_estado = 1
-    cartera = 0
-    protestos=0
-    restructuracion=0
-    año = date.today().year
-
-    template_path = 'operaciones/estadooperativo_reporte.html'
-
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
-    
-    cliente = ModeloCliente.Datos_generales.objects\
-        .filter(pk=cliente_id).first()
-    if cliente.empresa != id_empresa.empresa:
-        return redirect("bases:sin_permisos")
-    
-    linea = ModeloCliente.Linea_Factoring.objects.filter(cxcliente = cliente_id).first()
-    
-    if linea:
-        valor_linea = linea.nvalor
-        porc_disponible = linea.porcentaje_disponible()
-
-    operativos = Datos_operativos.objects.filter(cxcliente=cliente_id).first()
-    if operativos:
-        estado_cliente = operativos.cxestado
-        clase_cliente = operativos.cxclase
-        if operativos.dultimanegociacion:
-            dias_ultima_operacion = (date.today() 
-                                     - operativos.dultimanegociacion)/timedelta(days=1)
-            año = operativos.dultimanegociacion.year
-
-    if estado_cliente=='A':
-        estado_cliente = 'Activo'
-        color_estado = 5
-    elif estado_cliente=='B':
-        estado_cliente = 'Baja'
-        color_estado = 2
-    elif estado_cliente=='I':
-        estado_cliente = 'Inactivo'
-        color_estado = 2
-    elif estado_cliente=='P':
-        estado_cliente = 'Pre legal'
-        color_estado = 3
-    elif estado_cliente=='L':
-        estado_cliente = 'Legal'
-        color_estado = 4
-    elif estado_cliente=='X':
-        estado_cliente = 'Bloqueado'
-        color_estado = 4
-
-    sp = ModelosSolicitud.Asignacion.objects\
-        .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
-
-    total_cartera = Documentos.objects\
-        .TotalCarteraCliente(cliente_id)
-    cartera = total_cartera['Total'] or 0
-
-    total_protesto = Cheques_protestados.objects\
-        .TotalProtestosCliente(cliente_id)
-    protestos = total_protesto['Total'] or 0
-
-    total_reestructuracion = Pagares.objects\
-        .TotalPagaresCliente(cliente_id)
-    restructuracion = total_reestructuracion['Total'] or 0
-
-    ppmp = Documentos_detalle.objects\
-        .promedio_ponderado_demora(cliente_id)
-
-    context={
-        'cliente_id':cliente_id,
-        'valor_linea':valor_linea,
-        'porc_disponible':porc_disponible,
-        'dias_ultima_operacion':dias_ultima_operacion,
-        'hoy' : date.today(),
-        'nombre_cliente': nombre_cliente,
-        'estado': estado_cliente,
-        'clase':clase_cliente,
-        'color_estado':color_estado,
-        'solicitudes_pendientes':sp,
-        'total_cartera_protestos': cartera + protestos,
-        'total_reestructuracion':restructuracion,
-        'promedio_ponderado_demora': ppmp,
-        'cliente': operativos.cxcliente,
-        'año': año,
-        'cantidad_movimientos': 10
-    }
-    return render(request, template_path, context)
 
 @login_required(login_url='/login/')
 @permission_required('operaciones.view_documentos', login_url='bases:sin_permisos')
@@ -2811,17 +2716,24 @@ def GeneraResumenNegociadPorActividadJSON(request):
     
     return JsonResponse( data, safe=False)
 
-def GeneraListaMovimientosClienteJSON(request, cliente_id, registros = 10):
+def GeneraListaMovimientosClienteJSON(request, cliente_id, registros = 10, ):
     # Es invocado desde la url de una tabla bt
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
-    documentos = Movimientos_clientes.objects\
-        .filter(cxcliente = cliente_id
-                , cxmovimiento__lcolateral = True
-                , leliminado = False
-                , empresa = id_empresa.empresa)\
-        .order_by('-dmovimiento')[:registros]
-        # .order_by('-dregistro')[:registros]
+    if registros == 0:
+        documentos = Movimientos_clientes.objects\
+            .filter(cxcliente = cliente_id
+                    , cxmovimiento__lcolateral = True
+                    , leliminado = False
+                    , empresa = id_empresa.empresa)\
+            .order_by('-dmovimiento')
+    else:
+        documentos = Movimientos_clientes.objects\
+            .filter(cxcliente = cliente_id
+                    , cxmovimiento__lcolateral = True
+                    , leliminado = False
+                    , empresa = id_empresa.empresa)\
+            .order_by('-dmovimiento')[:registros]
 
     tempBlogs = []
     for i in range(len(documentos)):

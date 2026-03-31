@@ -18,7 +18,7 @@
 <form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal"
     onsubmit="return checkSubmit();">
             {% csrf_token %}
-    <div class="col-lg-7">
+    <!-- <div class="col-md-12"> -->
         <div class="card">
             <div class="card-header" style="background-color: white;">
                 <div class="d-flex justify-content-between align-items-center ">
@@ -30,69 +30,95 @@
             </div>
             <div class="card-body card-block">
                 <!-- columna izquierda -->
-                <!-- <div class="col-lg-6"> -->
-                    
-                    <div class="row form-group">
-                        <div class="col col-md-4">
-                            <label for="id_ctprofesion" class=" form-control-label">
-                                {{form_cliente.ctprofesion.label}}</label></div>
-                        <div class="col-12 col-md-8">
-                            {{form_cliente.ctprofesion}}
-                            <small class="form-text text-muted">Máximo 60 caracteres.</small></div>
-                    </div>
-                    <div class="row form-group">
-                        <div class="col col-md-4">
-                            <label for="id_cxsexo" class=" form-control-label">
-                                {{form_cliente.cxsexo.label}}</label></div>
-                        <div class="col-12 col-md-8">
-                            {{ form_cliente.cxsexo}}
+                <div class="col-md-6">
+                    <div class="card mt-3"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header">
+                            <h6>Información personal</h6>
                         </div>
-                    </div>  
-    
-                    <div class="row form-group">
-                        <div class="col col-md-4">
-                            <label for="id_dnacimiento" class=" form-control-label">
-                               {{form_cliente.dnacimiento.label}}</label></div>
-                        <div class="col-12 col-md-8">
-                            {{form_cliente.dnacimiento}}
-                            <small class="form-text text-muted">Máximo 13 caracteres</small></div>
-                    </div>
+                        <div class="card-body">
+                            <div class="row form-group">
+                                <div class="col col-md-4">
+                                    <label for="id_cxsexo" class=" form-control-label">
+                                        {{form_cliente.cxsexo.label}}</label></div>
+                                <div class="col-12 col-md-8">
+                                    {{ form_cliente.cxsexo}}
+                                </div>
+                            </div>  
+            
+                            <div class="row form-group">
+                                <div class="col col-md-4">
+                                    <label for="id_dnacimiento" class=" form-control-label">
+                                    {{form_cliente.dnacimiento.label}}</label></div>
+                                <div class="col-12 col-md-8">
+                                    {{form_cliente.dnacimiento}}
+                                    <small class="form-text text-muted">Máximo 13 caracteres</small></div>
+                            </div>
 
-                    <div class="row form-group">
-                        <div class="col col-md-4">
-                            <label for="id_cxestadocivil" class=" form-control-label">
-                                {{form_cliente.cxestadocivil.label}}</label></div>
-                        <div class="col-12 col-md-8">
-                            {{form_cliente.cxestadocivil}}
                         </div>
                     </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mt-3"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header">
+                            <h6>Información adicional</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row form-group">
+                                <div class="col col-md-4">
+                                    <label for="id_cxestadocivil" class=" form-control-label">
+                                        {{form_cliente.cxestadocivil.label}}</label></div>
+                                <div class="col-12 col-md-8">
+                                    {{form_cliente.cxestadocivil}}
+                                </div>
+                            </div>
 
-                    <div class="row form-group">
-                        <div class="col col-md-4">
-                            <label for="id_cxconyuge" class=" form-control-label">
-                                {{form_cliente.cxconyuge.label}}</label></div>
-                        <div class="col-12 col-md-8">
-                            {{form_cliente.cxconyuge}}
-                            <small class="form-text text-muted">Máximo 10 caracteres.</small></div>
-                    </div>
-                    <div class="row form-group">
-                        <div class="col col-md-4">
-                            <label for="id_ctnombreconyuge" class=" form-control-label">
-                                {{form_cliente.ctnombreconyuge.label}}</label></div>
-                        <div class="col-12 col-md-8">
-                            {{form_cliente.ctnombreconyuge}}
-                            <small class="form-text text-muted">Máximo 60 caracteres.</small></div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-4">
-                            <label for="id_ctnombrenegocio" class=" form-control-label">
-                                {{form_cliente.ctnombrenegocio.label}}</label></div>
-                        <div class="col-12 col-md-8">
-                            {{form_cliente.ctnombrenegocio}}
-                            <small class="form-text text-muted">Máximo 60 caracteres.</small></div>
+                            <div class="row form-group">
+                                <div class="col col-md-4">
+                                    <label for="id_cxconyuge" class=" form-control-label">
+                                        {{form_cliente.cxconyuge.label}}</label></div>
+                                <div class="col-12 col-md-8">
+                                    {{form_cliente.cxconyuge}}
+                                    <!-- <small class="form-text text-muted">Máximo 10 caracteres.</small> -->
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-4">
+                                    <label for="id_ctnombreconyuge" class=" form-control-label">
+                                        {{form_cliente.ctnombreconyuge.label}}</label></div>
+                                <div class="col-12 col-md-8">
+                                    {{form_cliente.ctnombreconyuge}}
+                                    <small class="form-text text-muted">Máximo 60 caracteres.</small></div>
+                            </div>
+                        </div>
                     </div>
 
+                </div>
+                <div class="col-md-12">
+                    <div class="card mt-3"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header">
+                            <h6>Información laboral</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row form-group">
+                                <div class="col col-md-2">
+                                    <label for="id_ctprofesion" class=" form-control-label">
+                                        {{form_cliente.ctprofesion.label}}</label></div>
+                                <div class="col-12 col-md-10">
+                                    {{form_cliente.ctprofesion}}
+                                    <small class="form-text text-muted">Máximo 60 caracteres.</small></div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-2">
+                                    <label for="id_ctnombrenegocio" class=" form-control-label">
+                                        {{form_cliente.ctnombrenegocio.label}}</label></div>
+                                <div class="col-12 col-md-10">
+                                    {{form_cliente.ctnombrenegocio}}
+                                    <small class="form-text text-muted">Máximo 60 caracteres.</small></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>    
             
             <div class="card-footer">
@@ -104,7 +130,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    <!-- </div> -->
 </form>
 {% endblock %}
 {% block js_page %}

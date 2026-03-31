@@ -22,7 +22,7 @@
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                     <div class="dropdown-menu-content">
                         <a class="dropdown-item" href="{% url 'clientes:comprador_nuevo' %}">Nuevo</a>
-                        <a class="dropdown-item" href="#">Imprimir</a>
+                        <!-- <a class="dropdown-item" href="#">Imprimir</a> -->
                     </div>
                 </div>
             </div>
@@ -49,17 +49,21 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" 
+                       id="bootstrap-data-table-export"
+                       >
                     <thead>
-                        <th>Id</th>
-                        <th>Nombre</th>
-                        <th>Dirección</th>
-                        <th>Telefonos</th>
-                        <th>Email</th>
-                        <th>Clase</th>
-                        <th>Registro</th>
-                        <th>Estado</th>
-                        <th class="all">Acciones</th>
+                        <tr>
+                            <th data-field="id" data-sortable="true">Id</th>
+                            <th data-field="nombre" data-sortable="true">Nombre</th>
+                            <th data-field="direccion" data-sortable="true">Dirección</th>
+                            <th data-field="telefonos" data-sortable="true">Teléfonos</th>
+                            <th data-field="email" data-sortable="true">Email</th>
+                            <th data-field="clase" data-sortable="true">Clase</th>
+                            <th data-field="registro" data-sortable="true">Registro</th>
+                            <th data-field="estado" data-sortable="true">Estado</th>
+                            <th data-field="acciones" >Acciones</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for item in consulta %}

@@ -118,8 +118,8 @@
                             <!-- <a class="nav-link" href="#"><i class="fa fa-user"></i> Notifications <span class="count">13</span></a>
                             <a class="nav-link" href="#"><i class="fa fa-cog"></i> Settings</a> -->
 
-                            <a class="nav-link" href="{% url 'bases:usuario_editar' user.id %}"><i class="fa fa-edit"></i> Editar</a>
-                            <a class="nav-link" href="{% url 'bases:usuario_password' user.id %}"><i class="fa fa-key"></i> Password</a>
+                            <a class="nav-link" href="{% url 'bases:usuario_editar' %}"><i class="fa fa-edit"></i> Editar</a>
+                            <a class="nav-link" href="{% url 'bases:usuario_password' %}"><i class="fa fa-key"></i> Password</a>
                             <a class="nav-link" href="{% url 'bases:home' %}"><i class="fa fa-home"></i> Home</a>
                             <a class="nav-link" href="#" onclick="logingoogle()"><i class="fa fa-google"></i> Cuenta Google</a>
                             <form method="POST" action="{% url 'bases:logout' %}" style="display: inline;">

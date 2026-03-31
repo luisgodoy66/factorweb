@@ -15,7 +15,7 @@
 {% block content %}
     <div class="card bg-flat-color-0">
         <div class="card-header" style="background-color: white;">
-            <div class="dropdown float-right">
+            <!-- <div class="dropdown float-right">
                 <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
                     <i class="fa fa-bars"></i>
                 </button>
@@ -24,7 +24,7 @@
                         <a class="dropdown-item" href="#">Imprimir</a>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <h4 class="mb-0">
                 <span class="count">{{ consulta.count }} registro{{ consulta.count|pluralize }}</span>
             </h4>
@@ -48,23 +48,30 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" 
+                    id="bootstrap-data-table-export"
+                    data-filter-control="true"
+                    >
                     <thead>
-                        <th>Nombre</th>
-                        <!-- <th>Id</th> -->
-                        <th>Clase</th>
-                        <th>% anticipo</th>
-                        <th>Tasa GAO</th>
-                        <th>Tasa de descuento </th>
-                        <th>Tasa de GAO adicional </th>
-                        <th>Tasa de mora </th>
-                        <th>Estado</th>
-                        <th>Alta</th>
-                        <th class="all">Acciones</th>
+                        <tr>
+                            <th data-field="state" data-checkbox="true"></th>
+                            <th data-field="campo1" data-sortable="true" data-filter-control="input">Nombre</th>
+                            <!-- <th data-field="campo2" data-sortable="true">Id</th> -->
+                            <th data-field="campo3" data-sortable="true" data-filter-control="input">Clase</th>
+                            <th data-field="campo4" data-sortable="true" data-filter-control="input">% anticipo</th>
+                            <th data-field="campo5" data-sortable="true" data-filter-control="input">Tasa de <br>GAO</th>
+                            <th data-field="campo6" data-sortable="true" data-filter-control="input">Tasa de <br>descuento</th>
+                            <th data-field="campo7" data-sortable="true" data-filter-control="input">Tasa de GAO <br>adicional</th>
+                            <th data-field="campo8" data-sortable="true" data-filter-control="input">Tasa de <br>mora</th>
+                            <th data-field="campo9" data-sortable="true" data-filter-control="input">Estado</th>
+                            <th data-field="campo10" data-sortable="true" data-filter-control="input">Alta</th>
+                            <th data-field="campo11" data-sortable="false">Acciones</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for item in consulta %}
                         <tr>
+                            <td>{{ item.id }}</td>
                             <td>{{ item }}</td>
                             <!-- <td>{{ item.cxcliente.cxparticipante }}</td> -->
                             <td>{{ item.datos_operativos.get.cxclase }}</td>

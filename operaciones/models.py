@@ -1,14 +1,14 @@
 from random import choices
 from django.db import models
-from django.forms import BooleanField
+# from django.forms import BooleanField
 from django.db.models import Sum, Q, F, ExpressionWrapper\
     , DateField, CharField\
     , Value, Count, IntegerField, DecimalField, Case, When
 from django.db.models.functions import Cast, ExtractDay, Concat\
     , Floor, Mod, Ceil
 from django.utils.dateparse import parse_date
-from django.db.models import Subquery, OuterRef
-from django.contrib.postgres.aggregates import JSONBAgg
+# from django.db.models import Subquery, OuterRef
+# from django.contrib.postgres.aggregates import JSONBAgg
 
 from bases.models import ClaseModelo
 from empresa.models import Clases_cliente, Tasas_factoring, Tipos_factoring, Cuentas_bancarias\
@@ -105,9 +105,9 @@ class Asignacion_manager(models.Manager):
         return self.filter(cxestado="P",
                            leliminado=False,
                            empresa=id_empresa)\
-            .values('cxcliente__cxcliente__actividad__ctactividad')\
+            .values('cxcliente__cxcliente__sectoreconomico__ctactividad')\
             .annotate(total=Sum('nvalor'))\
-            .order_by('cxcliente__cxcliente__actividad__ctactividad')
+            .order_by('cxcliente__cxcliente__sectoreconomico__ctactividad')
 
     def negociaciones_por_mes(self, id_empresa, año, mes):
         return self.filter(

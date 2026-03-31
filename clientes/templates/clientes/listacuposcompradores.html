@@ -26,7 +26,7 @@
                         onclick="return AbrirModal('{% url 'clientes:cupo_nuevo' %}')"
                         >Nuevo
                         </a>
-                        <a class="dropdown-item" href="#">Imprimir</a>
+                        <!-- <a class="dropdown-item" href="#">Imprimir</a> -->
                     </div>
                 </div>
             </div>
@@ -53,17 +53,21 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" 
+                    id="bootstrap-data-table-export"
+                    >
                     <thead>
-                        <th>Id</th>
-                        <th>Deudor</th>
-                        <th>Cliente</th>
-                        <th class="text-right">Cupo</th>
-                        <th class="text-right">Utilizado</th>
-                        <th class="text-right">Disponible</th>
-                        <th>Activo</th>
-                        <th>Aprobación</th>
-                        <th class="all">Acciones</th>
+                        <tr>
+                            <th data-field="campo1" data-sortable="true">Id</th>
+                            <th data-field="campo2" data-sortable="true">Deudor</th>
+                            <th data-field="campo3" data-sortable="true">Cliente</th>
+                            <th data-field="campo4" data-sortable="true">Cupo</th>
+                            <th data-field="campo5" data-sortable="true">Utilizado</th>
+                            <th data-field="campo6" data-sortable="true">Disponible</th>
+                            <th data-field="campo7" data-sortable="true">Activo</th>
+                            <th data-field="campo8" data-sortable="true">Aprobación</th>
+                            <th data-field="campo9" data-sortable="false">Acciones</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for item in consulta %}

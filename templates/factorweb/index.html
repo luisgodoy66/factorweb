@@ -24,8 +24,8 @@
     <link rel="stylesheet" href="{% static 'factorweb/vendors/selectFX/css/cs-skin-elastic.css' %}">
     <!-- <link rel="stylesheet" href="{% static 'factorweb/vendors/jqvmap/dist/jqvmap.min.css' %}"> -->
     <!-- data tables -->
-    <link rel="stylesheet" href="{% static 'factorweb/vendors/datatables.net-bs4/css/dataTables.bootstrap4.min.css' %}">
-    <link rel="stylesheet" href="{% static 'factorweb/vendors/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'factorweb/vendors/datatables.net-bs4/css/dataTables.bootstrap4.min.css' %}">
+    <link rel="stylesheet" href="{% static 'factorweb/vendors/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css' %}"> -->
 
 
     <link rel="stylesheet" href="{% static 'factorweb/assets/css/style.css' %}">
@@ -75,8 +75,12 @@
 
             <div id="main-menu" class="main-menu collapse navbar-collapse">
                 <ul class="nav navbar-nav">
-                    <li class="active">
-                        <a href="{% url 'bases:dashboard' %}"> <i class="menu-icon fa fa-dashboard"></i>Dashboard </a>
+                    <li class="active menu-item-has-children dropdown">
+                        <a href="{% url 'bases:dashboard' %}" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fa fa-dashboard"></i>Dashboard </a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-briefcase"></i><a href="{% url 'bases:dashboard' %}">Negocio</a></li>
+                            <li><i class="menu-icon fa fa-calendar"></i><a href="{% url 'bases:dashboard_ayerhoy' %}">Ayer y hoy</a></li>
+                        </ul>
                     </li>
 
                     <h3 class="menu-title">Operaciones</h3><!-- /.menu-title -->
@@ -155,7 +159,7 @@
                             <i class="menu-icon fa fa-users"></i>Clientes</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-inbox"></i><a href="{% url 'clientes:listaclientessolicitudes' %}">Desde solicitudes</a></li>
-                            <li><i class="menu-icon fa fa-info-circle"></i><a href="{% url 'clientes:listaclientes' %}">Ficha general</a></li>
+                            <li><i class="menu-icon fa fa-info-circle"></i><a href="{% url 'clientes:listaclientes' %}">Lista</a></li>
                             <li><i class="menu-icon fa fa-folder"></i><a href="{% url 'operaciones:listadatosoperativos' %}">Datos operativos</a></li>
                             <li><i class="menu-icon fa fa-pencil"></i><a href="{% url 'clientes:listalineas' %}">Línea de factoring</a></li>
                             <li><i class="menu-icon fa fa-laptop"></i><a href="{% url 'clientes:listacuentasbancarias' %}">Cuentas bancarias</a></li>
@@ -199,7 +203,7 @@
                             <li><i class="menu-icon fa fa-print"></i>
                                 <a href="{% url 'operaciones:detalle_facturas_pendientes' %}"target="facturas pendientes">Facturas pendientes</a></li>
                             <li><i class="menu-icon fa fa-print"></i>
-                                <a href="{% url 'operaciones:detalle_cheques_pendientes' %}"target="cheques pendientes">Accesorios pendientes</a></li>
+                                <a href="{% url 'operaciones:detalle_cheques_pendientes' %}"target="cheques pendientes">Cheques pendientes</a></li>
                             <li><i class="menu-icon fa fa-print"></i>
                                 <a href="{% url 'cobranzas:protestos_pendientes' %}"target="facturas pendientes">Protestos pendientes</a></li>
                             <li><i class="menu-icon fa fa-print"></i>
@@ -353,18 +357,20 @@
  -->
 
     <!-- agregados para mostrar tablas -->
-    <script src="{% static 'factorweb/vendors/datatables.net/js/jquery.dataTables.min.js' %}"></script>
-    <script src="{% static 'factorweb/vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
-    <script src="{% static 'factorweb/vendors/datatables.net-buttons/js/dataTables.buttons.min.js' %}"></script>
-    <script src="{% static 'factorweb/vendors/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js' %}"></script>
-    <script src="{% static 'factorweb/vendors/jszip/dist/jszip.min.js' %}"></script>
-    <script src="{% static 'factorweb/vendors/pdfmake/build/pdfmake.min.js' %}"></script>
-    <script src="{% static 'factorweb/vendors/pdfmake/build/vfs_fonts.js' %}"></script>
-    <script src="{% static 'factorweb/vendors/datatables.net-buttons/js/buttons.html5.min.js' %}"></script>
-    <script src="{% static 'factorweb/vendors/datatables.net-buttons/js/buttons.print.min.js' %}"></script>
-    <script src="{% static 'factorweb/vendors/datatables.net-buttons/js/buttons.colVis.min.js' %}"></script>
+    <!-- Bootstrap Table (reemplaza DataTables) -->
+    <script src="https://unpkg.com/bootstrap-table@1.21.1/dist/bootstrap-table.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.21.1/dist/bootstrap-table-locale-all.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.21.1/dist/extensions/export/bootstrap-table-export.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.21.1/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
+    
+    <!-- Export dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/tableExport.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/libs/jsPDF/jspdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/libs/jsPDF-AutoTable/jspdf.plugin.autotable.js"></script>
+    
+    <!-- Inicialización de Bootstrap Table -->  
     <script src="{% static 'factorweb/assets/js/init-scripts/data-table/datatables-init.js' %}"></script>
-    <!-- /agregados para mostrar tablas -->
+    <!-- /Bootstrap Table -->
 
     <!-- agregado para datetime picker -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js" integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>      
@@ -374,19 +380,6 @@
      <script type="text/javascript" src="{% static 'factorweb/js/generic.js' %}"></script>
      <script type="text/javascript" src="{% static 'factorweb/js/procesosgenerales.js' %}"></script>
      <script type="text/javascript" src="{% static 'factorweb/js/sweetalert2.js' %}"></script>
-        
-    <!-- bootstrap table -->
-    <script src="https://unpkg.com/bootstrap-table@1.21.1/dist/bootstrap-table.min.js"></script>    
-     <!--bloque exportar  -->
-     <script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/tableExport.min.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/libs/jsPDF/jspdf.min.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/libs/jsPDF-AutoTable/jspdf.plugin.autotable.js"></script>
-     <!-- bloque exportar -->
-     <script src="https://unpkg.com/tableexport.jquery.plugin/tableExport.min.js"></script>
-     <script src="https://unpkg.com/bootstrap-table@1.21.1/dist/bootstrap-table-locale-all.min.js"></script>
-     <script src="https://unpkg.com/bootstrap-table@1.21.1/dist/extensions/export/bootstrap-table-export.min.js"></script>
-     <!--22-sep-22 agregado para colocar filtros en las columnas -->
-     <script src="https://unpkg.com/bootstrap-table@1.21.1/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
 
     <!-- <script>
 

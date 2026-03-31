@@ -23,7 +23,7 @@
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                     <div class="dropdown-menu-content">
                         <a class="dropdown-item" href="{% url 'empresa:cuentabancaria_nueva' %}">Nueva cuenta bancaria</a>
-                        <a class="dropdown-item" href="#">Imprimir</a>
+                        <!-- <a class="dropdown-item" href="#">Imprimir</a> -->
                     </div>
                 </div>
             </div>
@@ -50,19 +50,23 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" 
+                    id="bootstrap-data-table-export"
+                    >
                     <thead>
-                        <th>Banco</th>
-                        <th>Cuenta</th>
-                        <th>Activa</th>
-                        <th class="all">Acciones</th>
+                        <tr>
+                            <th data-field="campo1" data-sortable="true">Banco</th>
+                            <th data-field="campo2" data-sortable="true">Cuenta</th>
+                            <th data-field="campo3" data-sortable="true">Activa</th>
+                            <th data-field="campo4" data-sortable="false">Acciones</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for item in consulta %}
                         <tr>
                             <td>{{ item.cxbanco }}</td>
                             <td>{{ item.cxcuenta }}</td>
-                            <td>{{ item.lactiva }}</td>
+                            <td>{{ item.lactiva|yesno:"Si,No" }}</td>
                             <td>
                                 <a href="{% url 'empresa:cuentabancaria_editar' item.id %}"  title="Editar"
                                 class="btn  btn-sm" role="button"><i class="fa fa-edit"></i>

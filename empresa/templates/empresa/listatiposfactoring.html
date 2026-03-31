@@ -22,7 +22,7 @@
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                     <div class="dropdown-menu-content">
                         <a class="dropdown-item" href="{% url 'empresa:tipofactoring_nuevo' %}">Nuevo</a>
-                        <a class="dropdown-item" href="#">Imprimir</a>
+                        <!-- <a class="dropdown-item" href="#">Imprimir</a> -->
                     </div>
                 </div>
             </div>
@@ -49,16 +49,20 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" 
+                    id="bootstrap-data-table-export"
+                    >
                     <thead>
-                        <th>Nombre</th>
-                        <th>Corto</th>
-                        <th>Anticipa el total negociado</th>
-                        <th>Carga GAO en aceptación</th>
-                        <th>Carga descuento en aceptación</th>
-                        <th>Carga GAO adicional en documentos vencidos</th>
-                        <th>Días de gracia</th>
-                        <th class="all">Acciones</th>
+                        <tr>
+                            <th data-field="campo1" data-sortable="true">Nombre</th>
+                            <th data-field="campo2" data-sortable="true">Corto</th>
+                            <th data-field="campo3" data-sortable="true">Anticipa el<br>total negociado</th>
+                            <th data-field="campo4" data-sortable="true">Carga GAO <br> en aceptación</th>
+                            <th data-field="campo5" data-sortable="true">Carga descuento <br>en aceptación</th>
+                            <th data-field="campo6" data-sortable="true">Carga GAO adicional <br>en documentos vencidos</th>
+                            <th data-field="campo7" data-sortable="true">Días de gracia</th>
+                            <th data-field="campo8" data-sortable="false">Acciones</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for item in consulta %}

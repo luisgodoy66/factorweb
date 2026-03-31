@@ -11,12 +11,11 @@ from pais.models import Bancos
 from datetime import date
 
 class ClienteForm(forms.ModelForm):
-    # dinicioactividades = forms.DateInput()
     
     class Meta:
         model=Datos_generales
         fields=['cxtipocliente', 'cxlocalidad',]
-        labels={'cxtipocliente':'Tipo'
+        labels={'cxtipocliente':'Tipo de persona'
             , 'cxlocalidad':'Sucursal de atención'
         }
     def __init__(self, *args, **kwargs):

@@ -17,7 +17,7 @@
 {% block content %}
     <div class="card bg-flat-color-0">
         <div class="card-header" style="background-color: white;">
-            <div class="dropdown float-right">
+            <!-- <div class="dropdown float-right">
                 <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
                     <i class="fa fa-bars"></i>
                 </button>
@@ -26,9 +26,9 @@
                         <a class="dropdown-item" href="#">Imprimir</a>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <h4 class="mb-0">
-                <span class="count">{{ consulta.count }} encontrados</span>
+                <span class="count">{{ consulta.count }} encontrado{% if consulta.count != 1 %}s{% endif %}</span>
             </h4>
 
         </div>

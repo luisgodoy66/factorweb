@@ -49,12 +49,16 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" 
+                       id="bootstrap-data-table-export"
+                       >
                     <thead>
-                        <th>Id</th>
-                        <th>Nombre</th>
-                        <th>Banco local</th>
-                        <th class="all">Acciones</th>
+                        <tr>
+                            <th data-field="id" data-sortable="true">Id</th>
+                            <th data-field="nombre" data-sortable="true">Nombre</th>
+                            <th data-field="local" data-sortable="true">Banco local</th>
+                            <th data-field="acciones" data-sortable="false">Acciones</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for item in consulta %}

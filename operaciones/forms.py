@@ -29,10 +29,10 @@ class DatosOperativosForm(forms.ModelForm):
             ,'ntasacomision':'Tasa comisión'
             , 'ntasadescuentocartera':'Tasa de descuento de cartera'
             , 'ntasagaoa':'Tasa de comisión adicional'
-            , 'cxbeneficiarioasignacion': 'Id. de beneficiario de cheque'
-            , 'ctbeneficiarioasignacion': 'Nombre de beneficiario de cheque'
-            , 'cxbeneficiariocobranzas':'Id. de beneficiario de cheque'
-            , 'ctbeneficiariocobranzas': 'Nombre de beneficiario de cheque'
+            , 'cxbeneficiarioasignacion': 'Id. de beneficiario'
+            , 'ctbeneficiarioasignacion': 'Nombre de beneficiario'
+            , 'cxbeneficiariocobranzas':'Id. de beneficiario'
+            , 'ctbeneficiariocobranzas': 'Nombre de beneficiario'
             , 'cxestado':'Estado', 'ntasamora':'Tasa de mora'
         }
         help_texts = {

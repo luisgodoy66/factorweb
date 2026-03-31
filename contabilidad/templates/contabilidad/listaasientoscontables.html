@@ -51,17 +51,28 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
-                    <thead>
-                        <!-- <th>Id</th> -->
-                        <th>Registro</th>
-                        <th>Asiento</th>
-                        <th>Contabilizado</th>
-                        <th>Concepto</th>
-                        <th>Valor</th>
-                        <th>Estado</th>
-                        <th class="all">Acciones</th>
-                    </thead>
+                <table class="table table-hover table-bordered" 
+       id="bootstrap-data-table-export"
+       data-search="true"
+       data-show-columns="true"
+       data-show-export="true"
+       data-show-refresh="true"
+       data-pagination="true"
+       data-page-size="10"
+       data-page-list="[10, 25, 50, 100, all]"
+       data-locale="es-EC">
+    <thead>
+        <tr>
+            <th data-field="campo1" data-sortable="true">Id</th>
+            <th data-field="campo2" data-sortable="true">Registro</th>
+            <th data-field="campo3" data-sortable="true">Asiento</th>
+            <th data-field="campo4" data-sortable="true">Contabilizado</th>
+            <th data-field="campo5" data-sortable="true">Concepto</th>
+            <th data-field="campo6" data-sortable="true">Valor</th>
+            <th data-field="campo7" data-sortable="true">Estado</th>
+            <th data-field="campo8" data-sortable="false">Acciones</th>
+        </tr>
+    </thead>
                     <tbody>
                         {% for item in consulta %}
                         <tr>

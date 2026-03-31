@@ -1,6 +1,7 @@
 from django.db import models
 from bases.models import ClaseModelo
-from pais.models import Bancos, Actividades
+from pais.models import Bancos, Provincias, Cantones
+from bases.models import Actividades
 # Create your models here.
 
 class Clases_cliente(ClaseModelo):
@@ -54,7 +55,6 @@ class Datos_participantes(ClaseModelo):
     cxparticipante = models.CharField(max_length=13)
     ctnombre =models.CharField(max_length=100)
     cxzona =models.CharField(max_length=5, null=True)
-    # cxlocalidad =models.CharField(max_length=4, null=True)
     cxestado =models.CharField(max_length=1, default='A')
     # cxpais =models.ForeignKey('Pais',to_field="cxpais", on_delete=models.CASCADE)
     ctdireccion =models.TextField(null=True)
@@ -64,12 +64,16 @@ class Datos_participantes(ClaseModelo):
     cttelefono2 =models.CharField(max_length=30,null=True, blank=True)
     ctcelular =models.CharField(max_length=30,null=True, blank=True)
     ctgirocomercial =models.TextField(null=True)
-    # cxactividad=models.CharField( max_length=10, null=True,
-    #     help_text='actividad comercial segun código ciiu'    )
     dinicioactividades=models.DateField(null=True,
         help_text='fecha de inicio de actividades')
-    actividad = models.ForeignKey(Actividades, null=True,on_delete=models.RESTRICT) 
-
+    sectoreconomico = models.ForeignKey(Actividades, null=True
+                                        ,on_delete=models.RESTRICT
+                                        , related_name='participante_sector_economico') 
+    actividad = models.ForeignKey(Actividades, null=True,on_delete=models.RESTRICT
+                                  , related_name='participante_actividad') 
+    provincia = models.ForeignKey(Provincias, null=True,on_delete=models.RESTRICT)
+    canton = models.ForeignKey(Cantones, null=True,on_delete=models.RESTRICT)
+    
     def __str__(self):
         return self.ctnombre
 
@@ -77,6 +81,9 @@ class Datos_participantes(ClaseModelo):
         self.ctnombre=self.ctnombre.upper()
         # self.ctobjetosocial=self.ctobjetosocial.upper()
         return super(Datos_participantes, self).save()
+    
+    def tipo_identificacion(self):
+        return dict(self.TIPOS_DE_ID).get(self.cxtipoid, 'Desconocido')
 
 class Funcionarios(ClaseModelo):
     cxfuncionario = models.CharField(max_length=5)

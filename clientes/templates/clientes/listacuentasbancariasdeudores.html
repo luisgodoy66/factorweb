@@ -23,9 +23,9 @@
                     <div class="dropdown-menu-content">
                         <a class="dropdown-item" href="{% url 'clientes:cuentabancariadeudor_nueva' %}">Nuevo</a>
                     </div>
-                    <div class="dropdown-menu-content">
+                    <!-- <div class="dropdown-menu-content">
                         <a class="dropdown-item" href="#">Imprimir</a>
-                    </div>
+                    </div> -->
                 </div>
             </div>
             <h4 class="mb-0">
@@ -51,16 +51,19 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" 
+                    id="bootstrap-data-table-export"
+                    >
                     <thead>
-                        <th>Id</th>
-                        <th>Nombre</th>
-                        <th>Banco</th>
-                        <th>Cuenta</th>
-                        <th>Tipo</th>
-                        <th>Propia</th>
-                        <!-- <th>Propia</th> -->
-                        <th class="all">Acciones</th>
+                        <tr>
+                            <th data-field="campo1" data-sortable="true">Id</th>
+                            <th data-field="campo2" data-sortable="true">Nombre</th>
+                            <th data-field="campo3" data-sortable="true">Banco</th>
+                            <th data-field="campo4" data-sortable="true">Cuenta</th>
+                            <th data-field="campo5" data-sortable="true">Tipo</th>
+                            <th data-field="campo6" data-sortable="true">Propia</th>
+                            <th data-field="campo7" data-sortable="false">Acciones</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for item in consulta %}

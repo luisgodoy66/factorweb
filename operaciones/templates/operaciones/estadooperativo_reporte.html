@@ -16,11 +16,11 @@
     </div>
 {% endblock breadcrumbs %}
 {% block content %}
-    <div hidden>
+    <!-- <div hidden>
         <input id="id_cliente" name="id_cliente" value="{{ cliente_id }}" >
         <input id="porc_disponible" name="porc_disponible" value="{{ porc_disponible }}" >
         <input id="dias_ultima_operacion" name="dias_ultima_operacion" value="{{ dias_ultima_operacion }}" >
-    </div>
+    </div> -->
 
 <div class="card">
     <div class="card-header" style="background-color: white;">
@@ -201,7 +201,7 @@
                                 <div class="stat-icon dib"><i class="ti-calendar text-danger border-danger"></i></div>
                                 <div class="stat-content dib">
                                     <div class="stat-text">Opera desde</div>
-                                    <div class="stat-digit">{{ cliente.dprimeraoperacion|date:"b/Y" }} </div>
+                                    <div class="stat-digit">{{ primera_operacion|date:"b/Y" }} </div>
                                 </div>
                             </div>
                         </div>
@@ -446,7 +446,8 @@
     var $tbcanjes = jQuery('#tbcanjes')
     var $tbquitados = jQuery('#tbquitados')
     var $tbmovimientos = jQuery('#tbmovimientos')
-    const cliente_id = capturaValor("id_cliente")
+    // const cliente_id = capturaValor("id_cliente")
+    const cliente_id = "{{ cliente_id }}"
 
     window.onload=function(){
 

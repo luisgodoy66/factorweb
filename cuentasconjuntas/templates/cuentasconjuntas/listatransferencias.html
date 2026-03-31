@@ -16,7 +16,7 @@
 {% block content %}
     <div class="card bg-flat-color-0">
         <div class="card-header" style="background-color: white;">
-            <div class="dropdown float-right">
+            <!-- <div class="dropdown float-right">
                 <button class="btn bg-transparent dropdown-toggle theme-toggle " 
                     type="button" id="dropdownMenuButton1" data-toggle="dropdown">
                     <i class="fa fa-bars"></i>
@@ -27,10 +27,10 @@
                         href="{% url 'cuentasconjuntas:transferencia_nueva' %}">Nueva</a>
                         <a class="dropdown-item" href="#">Imprimir</a>
                     </div>
-                </div>
+                </div> -->
             </div>
             <h4 class="mb-0">
-                <span class="count">{{ consulta.count }} encontrados</span>
+                <span class="count">{{ consulta.count }} encontrado{% if consulta.count != 1 %}s{% endif %}</span>
             </h4>
 
         </div>
@@ -52,16 +52,20 @@
 
             <div>
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" 
+                    id="bootstrap-data-table-export"
+                    >
                     <thead>
-                        <th>Id</th>
-                        <th>Cliente</th>
-                        <th>Fecha</th>
-                        <th>Cuenta origen</th>
-                        <th>Cuenta destino</th>
-                        <!-- <th>Código</th> -->
-                        <th>Valor</th>
-                        <th class="all">Acciones</th>
+                        <tr>
+                            <th data-field="campo1" data-sortable="true">Id</th>
+                            <th data-field="campo2" data-sortable="true">Cliente</th>
+                            <th data-field="campo3" data-sortable="true">Fecha</th>
+                            <th data-field="campo4" data-sortable="true">Cuenta origen</th>
+                            <th data-field="campo5" data-sortable="true">Cuenta destino</th>
+                            <th data-field="campo6" data-sortable="true">Código</th>
+                            <th data-field="campo7" data-sortable="true">Valor</th>
+                            <th data-field="campo8" data-sortable="false">Acciones</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for item in consulta %}

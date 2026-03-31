@@ -48,16 +48,27 @@
 
             <!-- <div class="content"> -->
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
-                    <thead>
-                        <th>Participante</th>
-                        <th>Revisión</th>
-                        <th>Realizado por</th>
-                        <th>Comentario</th>
-                        <th>Clase/Estado de cliente</th>
-                        <th>Estado</th>
-                        <th class="all">Acciones</th>
-                    </thead>
+                <table class="table table-hover table-bordered" 
+       id="bootstrap-data-table-export"
+       data-search="true"
+       data-show-columns="true"
+       data-show-export="true"
+       data-show-refresh="true"
+       data-pagination="true"
+       data-page-size="10"
+       data-page-list="[10, 25, 50, 100, all]"
+       data-locale="es-EC">
+    <thead>
+        <tr>
+            <th data-field="campo1" data-sortable="true">Participante</th>
+            <th data-field="campo2" data-sortable="true">Revisión</th>
+            <th data-field="campo3" data-sortable="true">Realizado por</th>
+            <th data-field="campo4" data-sortable="true">Comentario</th>
+            <th data-field="campo5" data-sortable="true">Clase/Estado de cliente</th>
+            <th data-field="campo6" data-sortable="true">Estado</th>
+            <th data-field="campo7" data-sortable="false">Acciones</th>
+        </tr>
+    </thead>
                     <tbody>
                         {% for item in consulta %}
                         <tr>

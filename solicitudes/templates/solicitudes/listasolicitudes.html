@@ -32,7 +32,7 @@
             </div>
         </div>
         <h4 class="mb-0">
-            <span class="count">{{ consulta.count }} encontrados</span>
+            <span class="count">{{ consulta.count }} encontrado{% if consulta.count != 1 %}s{% endif %}</span>
         </h4>
 
     </div>
@@ -44,7 +44,7 @@
             {% if error %}
                 {{ error }}
             {% else %}
-                No hay solicitudes de asignación pendientes
+                No hay solicitudes de asignación pendientes.
             {% endif %}
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -54,15 +54,18 @@
 
         <!-- <div class="content"> -->
 
-            <table class="table table-bordered table-hover" id="bootstrap-data-table-export">
+            <table class="table table-bordered table-hover" 
+                   id="bootstrap-data-table-export"
+                   >
                 <thead>
-                    <th>Nombre de cliente</th>
-                    <th>Registro</th>
-                    <th>Tipo de solicitud</th>
-                    <!-- <th width="50">Cantidad de documentos</th> -->
-                    <th>Total negociado</th>
-                    <th>Estado</th>
-                    <th class="all">Acciones</th>
+                    <tr>
+                        <th data-field="cliente" data-sortable="true">Nombre de cliente</th>
+                        <th data-field="registro" data-sortable="true">Registro</th>
+                        <th data-field="tipo" data-sortable="true">Tipo de solicitud</th>
+                        <th data-field="total" data-sortable="true">Total negociado</th>
+                        <th data-field="estado" data-sortable="true">Estado</th>
+                        <th data-field="acciones" data-sortable="false">Acciones</th>
+                    </tr>
                 </thead>
                 <tbody>
                     {% for item in consulta %}

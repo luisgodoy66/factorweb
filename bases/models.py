@@ -69,3 +69,11 @@ class Version_detalle(models.Model):
     ctenlace = models.CharField(max_length=120, default='')
     def __str__(self):
         return self.ctmejora
+    
+class Actividades(models.Model):
+    cxactividad = models.CharField(max_length=10)
+    ctactividad = models.TextField()
+    nnivel = models.IntegerField(default=0)
+
+    def __str__(self):
+        return "{} {}".format(self.cxactividad, self.ctactividad)    

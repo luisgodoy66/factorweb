@@ -4,8 +4,9 @@ from django import forms
 from .models import Clases_cliente, Datos_participantes, Tipos_factoring, \
     Tasas_factoring, Cuentas_bancarias, Localidades, Puntos_emision, \
     Otros_cargos, Tipos_empresas
-from pais.models import Bancos, Actividades
-from datetime import datetime
+from pais.models import Bancos, Provincias, Cantones
+from bases.models import Actividades
+# from datetime import datetime
 
 class ParticipanteForm(forms.ModelForm):
     class Meta:
@@ -13,24 +14,25 @@ class ParticipanteForm(forms.ModelForm):
         fields = [
             'cxtipoid', 'cxparticipante', 'ctnombre', 'ctdireccion',
             'cttelefono1', 'cttelefono2', 'ctemail', 'ctemail2', 
-            'ctcelular',
-            'ctgirocomercial', 'dinicioactividades', 'actividad'
+            'ctcelular', "provincia", "canton",
+            'ctgirocomercial', 'dinicioactividades', 'sectoreconomico'
         ]
         labels = {
             'cxtipoid': 'Tipo de identificación', 
             'cxparticipante': 'Identificación',
             'ctnombre': 'Nombre completo', 'ctdireccion': 'Dirección',
-            'cttelefono1': 'Teléfono principal', 
+            'cttelefono1': 'Teléfonos', 
             'cttelefono2': 'Teléfono secundario',
             'ctemail': 'Email 1', 'ctemail2': 'Email 2', 
             'ctcelular': 'WhatsApp',
+            'provincia': 'Provincia', 'canton': 'Cantón',
             'ctgirocomercial': 'Giro comercial', 
             'dinicioactividades': 'Inicio de actividades',
-            'actividad': 'Actividad económica'
+            'sectoreconomico': 'Sector económico'
         }
         widgets = {
-            'ctdireccion': forms.Textarea(attrs={'rows': '6'}),
-            'ctgirocomercial': forms.Textarea(attrs={'rows': '5'}),
+            'ctdireccion': forms.Textarea(attrs={'rows': '4'}),
+            'ctgirocomercial': forms.Textarea(attrs={'rows': '3'}),
             'dinicioactividades': forms.DateInput(
                 format=('%Y-%m-%d'),
                 attrs={'class': 'form-control'
@@ -47,10 +49,17 @@ class ParticipanteForm(forms.ModelForm):
 
         self.fields['cxtipoid'].empty_label = "Seleccione tipo de identificación"
 
+        self.fields['sectoreconomico'].queryset = Actividades.objects\
+            .filter(nnivel__in=[1,], )\
+            .order_by('cxactividad')
+
         if self.empresa:
-            self.fields['actividad'].queryset = Actividades.objects\
+            self.fields['provincia'].queryset = Provincias.objects\
                 .filter(empresa=self.empresa, leliminado=False)\
-                .order_by('cxactividad')
+                .order_by('ctprovincia')
+            self.fields['canton'].queryset = Cantones.objects\
+                .filter(empresa=self.empresa, leliminado=False)\
+                .order_by('ctcanton')
 
     def clean(self):
         cleaned_data = super().clean()
@@ -286,3 +295,25 @@ class TiposEmpresasForm(forms.ModelForm):
                 'class':'form-control'
             })
 
+class ActividadParticipanteForm(forms.ModelForm):
+    class Meta:
+        model = Datos_participantes
+
+        fields = [ 'actividad']
+        labels={'actividad':'Actividad económica'}
+
+    def __init__(self, *args, **kwargs):
+        self.sector_economico = kwargs.pop('sector_economico', None)
+        super().__init__(*args, **kwargs)
+        
+        self.fields['actividad'].widget = forms.Select(
+            attrs={'class': 'form-control', 'size': '20'}
+        )
+        self.fields['actividad'].queryset = Actividades.objects\
+            .filter(cxactividad__startswith=self.sector_economico[0]
+                    , nnivel__gt = 1)\
+            .order_by('cxactividad')
+        
+        # Mantener la opción seleccionada si existe
+        if self.instance and self.instance.pk:
+            self.fields['actividad'].initial = self.instance.actividad

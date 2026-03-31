@@ -932,7 +932,7 @@ function NegociadoPorActividad(url){
 
     // Iterate over the data to populate the arrays
     data.forEach(item => {
-        actividades.push(item.cxcliente__cxcliente__actividad__ctactividad);
+        actividades.push(item.cxcliente__cxcliente__sectoreconomico__ctactividad);
         totales.push(item.total);
     });
     

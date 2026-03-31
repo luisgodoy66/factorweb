@@ -9,7 +9,7 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     EditarTasasDocumentoSolicitud, DesembolsarAsignacion, \
     GeneraDetalleParaTabla1, AsignacionesPendientesDesembolsarView, \
     ReversaAceptacionAsignacion, GeneraListaAsignacionesJSON, \
-    GeneraListaAsignacionesRegistradasJSON, EstadoOperativoCliente, \
+    GeneraListaAsignacionesRegistradasJSON, \
     GeneraResumenAntigüedadCarteraJSON, EstadosOperativosView, \
     AntigüedadCarteraClienteJSON, GeneraListaFacturasPendientesClienteJSON, \
     GeneraListaChequesADepositarClienteJSON, AnexosView, PagareDatos,\
@@ -34,6 +34,7 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     GeneraListaCarteraDeudorJSON, CarteraPorDeudorConsulta, \
     RevisionCarteraDetalle, GeneraListaCarteraVencidaJSON, \
     CarteraVencidaConsulta
+# EstadoOperativoCliente, \
     
 from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
     ImpresionAsignacionDesdeSolicitud, ImpresionFacturasPendientes, \
@@ -53,8 +54,8 @@ urlpatterns = [
         name='datosoperativos_editar'),
     path('listaestadosoperativos',EstadosOperativosView.as_view(), \
          name='listaestadosoperativos'),
-    path('estadosoperativocliente/<cliente_id>/<nombre_cliente>'
-         ,EstadoOperativoCliente, name='estadooperativocliente'),
+    # path('estadosoperativocliente/<cliente_id>/<nombre_cliente>'
+    #      ,EstadoOperativoCliente, name='estadooperativocliente'),
     path('antigüedadcarteracliente/<cliente_id>'
          , AntigüedadCarteraClienteJSON),
     path('carteraclientejson/<cliente_id>/<fecha_corte>'

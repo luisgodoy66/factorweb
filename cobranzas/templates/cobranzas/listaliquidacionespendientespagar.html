@@ -16,17 +16,16 @@
 {% block content %}
     <div class="card bg-flat-color-0">
         <div class="card-header" style="background-color: white;">
-            <div class="dropdown float-right">
+            <!-- <div class="dropdown float-right">
                 <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
                     <i class="fa fa-bars"></i>
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                     <div class="dropdown-menu-content">
-                        <!-- <a class="dropdown-item" href="{% url 'operaciones:listadatosoperativos' %}">Nuevo</a> -->
                         <a class="dropdown-item" href="#">Imprimir</a>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <h4 class="mb-0">
                 <span class="count">{{ consulta.count }} encontrado{% if consulta.count != 1 %}s{% endif %}</span>
             </h4>
@@ -50,15 +49,19 @@
 
             <div>
 
-                <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+                <table class="table table-hover table-bordered" 
+                    id="bootstrap-data-table-export"
+                    >
                     <thead>
-                        <th>Nombre de cliente</th>
-                        <th>Liquidación</th>
-                        <!-- <th>Tipo de factoring</th> -->
-                        <th>Instrucción de pago</th>
-                        <th>Desembolso</th>
-                        <th>Valor neto</th>
-                        <th class="all">Acciones</th>
+                        <tr>
+                            <th data-field="campo1" data-sortable="true">Nombre de cliente</th>
+                            <th data-field="campo2" data-sortable="true">Liquidación</th>
+                            <th data-field="campo3" data-sortable="true">Tipo de factoring</th>
+                            <th data-field="campo4" data-sortable="true">Instrucción de pago</th>
+                            <th data-field="campo5" data-sortable="true">Desembolso</th>
+                            <th data-field="campo6" data-sortable="true">Valor neto</th>
+                            <th data-field="campo7" data-sortable="false">Acciones</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for item in consulta %}

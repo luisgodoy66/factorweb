@@ -8,8 +8,8 @@ from .views import  ClientesView,  DatosClientes, DatosClienteNatural \
     , CuentasBancariasDeudoresView, CuentasBancariasDeudorNew\
     , CuentasBancariasDeudorEdit, ClientesSolicitudesView\
     , EstadoCompradorEdit,CuentasBancariasEdit, CompradorEdit, CompradorNew\
-    , DeClienteAComprador, EliminarCupoComprador
-    # , DatosCuposCompradorNuevo,DatosCompradores\
+    , DeClienteAComprador, EliminarCupoComprador, obtener_cantones_por_provincia\
+    , DatosClientes_view
 from operaciones.views import DatosOperativosHistoricoView
 
 urlpatterns = [
@@ -29,6 +29,10 @@ urlpatterns = [
         , name='clientejuridico_editar'),
     path('declienteacomprador/<participante_id>',DeClienteAComprador
          , name='cliente_es_comprador'),
+    path('view/<participante_id>/',DatosClientes_view
+         , name='cliente_view'),
+    path('view/<participante_id>/<tab>/',DatosClientes_view
+         , name='cliente_view'),
     # compradores
     path('listacompradores/',CompradoresView.as_view(), name='listacompradores'),
     path('compradornuevo/',CompradorNew.as_view(), name='comprador_nuevo'),
@@ -71,4 +75,7 @@ urlpatterns = [
         , name='estadoclasecomprador_editar'),
     path('listadatosoperativoshistorico/<id_cliente>',DatosOperativosHistoricoView.as_view(), \
         name='listadatosoperativoshistorico'),
+    # AJAX endpoints
+    path('ajax/cantones/<int:provincia_id>/', obtener_cantones_por_provincia, 
+        name='obtener_cantones_por_provincia'),
 ]

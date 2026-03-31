@@ -151,6 +151,9 @@ class Datos_generales(ClaseModelo):
         
         return json.dumps(cobranzas_data)
     
+    def tipo_cliente(self):
+        return self.get_cxtipocliente_display()
+    
     class Meta:
         ordering = [
             'cxcliente__ctnombre'
@@ -440,6 +443,12 @@ class Personas_naturales(ClaseModelo):
     def save(self):
         self.ctnombrenegocio=self.ctnombrenegocio.upper()
         return super(Personas_naturales, self).save()
+    
+    def sexo(self):
+        return self.get_cxsexo_display()
+    
+    def estado_civil(self):
+        return self.get_cxestadocivil_display()
 
 class Socios(ClaseModelo):
     cxcliente = models.ForeignKey(Datos_participantes,

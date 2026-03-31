@@ -27,7 +27,7 @@
             </div>
         </div>
         <h4 class="mb-0">
-            <span class="count">{{ consulta.count }} registros</span>
+            <span class="count">{{ consulta.count }} registro{% if consulta.count != 1 %}s{% endif %}</span>
         </h4>
 
     </div>
@@ -49,11 +49,15 @@
 
         <!-- <div class="content"> -->
 
-            <table class="table table-hover table-bordered" id="bootstrap-data-table-export">
+            <table class="table table-hover table-bordered" 
+                id="bootstrap-data-table-export"
+                >
                 <thead>
-                    <th>Id</th>
-                    <th>Clase</th>
-                    <th class="all">Acciones</th>
+                    <tr>
+                        <th data-field="campo1" data-sortable="true">Id</th>
+                        <th data-field="campo2" data-sortable="true">Clase</th>
+                        <th data-field="campo3" data-sortable="false">Acciones</th>
+                    </tr>
                 </thead>
                 <tbody>
                     {% for item in consulta %}
