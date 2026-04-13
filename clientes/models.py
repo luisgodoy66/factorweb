@@ -473,6 +473,7 @@ class Datos_operativos_hist(ClaseModelo):
         ('P', 'Pre legal'),
         ('L', 'Legal'),
         ('X', 'Bloqueado'),
+        ('C', 'Cartera castigada'),
     )
     cxcliente=models.ForeignKey(Datos_generales, on_delete=models.RESTRICT
         , related_name="datos_operativos_hist")
@@ -486,6 +487,7 @@ class Datos_operativos_hist(ClaseModelo):
     cxbeneficiariocobranzas = models.CharField(max_length=13, blank=True, null=True)
     ctbeneficiariocobranzas = models.TextField(blank=True, null=True)
     cxestado=models.CharField(max_length=1, default='A', choices=ESTADOS_DE_CLIENTES  )
+    ntasamora= models.DecimalField(max_digits=11, decimal_places=8, default=0) 
 
     def estado(self):
         return self.get_cxestado_display()

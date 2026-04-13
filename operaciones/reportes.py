@@ -764,7 +764,7 @@ def ImpresionFacturasPendientesCorte(request, corte_id):
         content_type='application/pdf',
         # stylesheets=stylesheet_paths
     )
-    response['Content-Disposition'] = 'inline; filename="factueas pendientes.pdf"'
+    response['Content-Disposition'] = 'inline; filename="facturas pendientes.pdf"'
     return response
 
 def ImpresionAccesoriosPendientesCorte(request, corte_id=None):
@@ -796,10 +796,11 @@ def ImpresionAccesoriosPendientesCorte(request, corte_id=None):
         content_type='application/pdf',
         # stylesheets=stylesheet_paths
     )
-    response['Content-Disposition'] = 'inline; filename="facturas_pendientes.pdf"'
+    response['Content-Disposition'] = 'inline; filename="accesorios_pendientes.pdf"'
     return response
 
 def ImpresionAntiguedadCarteraPorDeudor(request, id_cliente, cliente):
+    # esta función dejó de usarse para usar los datos json grabados en el registro del cliente en la revision de cartera
     id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
 
     facturas = Documentos.objects\
@@ -1160,5 +1161,42 @@ def ImpresionCargosCarteraVencida(request, fecha_corte, clientes = None):
         # stylesheets=stylesheet_paths
     )
     response['Content-Disposition'] = 'inline; filename="facturas pendientes.pdf"'
+    return response
+
+def ImpresionAccesoriosPendientesDeudores(request, deudores=None):
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+#     se esta filtrando por un solo cliente por lo que el arreglo no hace falta
+    arr_deudores = []
+     
+    if deudores != None:
+        ids = deudores.split(',')
+        for id in ids:
+            arr_deudores.append(id)
+
+    if deudores == None:
+        cartera = ChequesAccesorios.objects\
+            .cheques_pendientes(id_empresa.empresa)
+    else:
+        cartera = ChequesAccesorios.objects\
+            .cheques_pendientes_deudores(id_empresa.empresa, arr_deudores)
+
+    total = cartera.aggregate(total = Sum('ntotal'))
+
+    template_path = 'operaciones/detalle_accesoriospendientes_reporte.html'
+
+    context={
+        "detalle" : cartera,
+        'empresa': id_empresa.empresa,
+        'total': total['total']
+    }
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
+    )
+    response['Content-Disposition'] = 'inline; filename="accesorios_pendientes.pdf"'
     return response
 

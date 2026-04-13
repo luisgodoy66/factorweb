@@ -7,9 +7,10 @@ from .views import  ClientesView,  DatosClientes, DatosClienteNatural \
     , ActualizarCuentaTransferencia,  DatosClienteJuridico\
     , CuentasBancariasDeudoresView, CuentasBancariasDeudorNew\
     , CuentasBancariasDeudorEdit, ClientesSolicitudesView\
-    , EstadoCompradorEdit,CuentasBancariasEdit, CompradorEdit, CompradorNew\
+    , EstadoCompradorEdit,CuentasBancariasEdit, CompradorEdit\
+    , CompradorNew, DatosDeudores\
     , DeClienteAComprador, EliminarCupoComprador, obtener_cantones_por_provincia\
-    , DatosClientes_view
+    , DatosClientes_view, DatosCompradores_view, CambiarTasaGAOA_todos, CambiarTasaMora_todos
 from operaciones.views import DatosOperativosHistoricoView
 
 urlpatterns = [
@@ -34,9 +35,18 @@ urlpatterns = [
     path('view/<participante_id>/<tab>/',DatosClientes_view
          , name='cliente_view'),
     # compradores
-    path('listacompradores/',CompradoresView.as_view(), name='listacompradores'),
-    path('compradornuevo/',CompradorNew.as_view(), name='comprador_nuevo'),
-    path('editcomprador/<int:pk>',CompradorEdit.as_view(), name='comprador_editar'),
+    path('listacompradores/',CompradoresView.as_view()
+         , name='listacompradores'),
+    # path('compradornuevo/',CompradorNew.as_view()
+    #      , name='comprador_nuevo'),
+    # path('editcomprador/<int:pk>',CompradorEdit.as_view()
+    #      , name='comprador_editar'),
+    path('viewcomprador/<participante_id>/',DatosCompradores_view
+         , name='comprador_view'),
+    path('editcomprador/<participante_id>/<tab>/',DatosDeudores
+         , name='comprador_editar'),
+    path('compradornuevo/',DatosDeudores
+         , name='comprador_nuevo'),
     # línea factoring
     path('listalineas/',LineasView.as_view(), name='listalineas'),
     path('lineafactoringnueva/<cliente>/<cliente_id>',LineaNew.as_view()
@@ -75,6 +85,11 @@ urlpatterns = [
         , name='estadoclasecomprador_editar'),
     path('listadatosoperativoshistorico/<id_cliente>',DatosOperativosHistoricoView.as_view(), \
         name='listadatosoperativoshistorico'),
+    path('cambiartasagaoa-todos/<ids>/', CambiarTasaGAOA_todos, 
+         name='cambiar_tasa_gaoa_todos'),
+    path('cambiartasamora-todos/<ids>/', CambiarTasaMora_todos, 
+         name='cambiar_tasa_mora_todos'),
+
     # AJAX endpoints
     path('ajax/cantones/<int:provincia_id>/', obtener_cantones_por_provincia, 
         name='obtener_cantones_por_provincia'),

@@ -6,7 +6,7 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Participantes</a></li>
                     <li><a href="#">Deudores</a></li>
-                    <li class="active">Ficha general</li>
+                    <li class="active">Lista</li>
                 </ol>
             </div>
         </div>
@@ -60,8 +60,8 @@
                             <th data-field="telefonos" data-sortable="true">Teléfonos</th>
                             <th data-field="email" data-sortable="true">Email</th>
                             <th data-field="clase" data-sortable="true">Clase</th>
-                            <th data-field="registro" data-sortable="true">Registro</th>
                             <th data-field="estado" data-sortable="true">Estado</th>
+                            <!-- <th data-field="registro" data-sortable="true">Registro</th> -->
                             <th data-field="acciones" >Acciones</th>
                         </tr>
                     </thead>
@@ -70,20 +70,20 @@
                         <tr>
                             <td>{{ item.cxcomprador.cxparticipante }}</td>
                             <td>{{ item }}</td>
-                            <td>{{ item.cxcomprador.ctdireccion }}</td>
-                            <td>{{ item.cxcomprador.cttelefono1 }} / {{ item.cxcomprador.cttelefono2 }} / {{ item.cxcomprador.ctcelular }}</td>
-                            <td>{{ item.cxcomprador.ctemail }}</td>
-                            <td>{{ item.cxclase }}</td>
-                            <td>{{ item.dregistro|date:"Y/m/d H:i:s" }}</td>
-                            <td>{{ item.estado }}</td>
+                            <td>{{ item.cxcomprador.ctdireccion|default:"" }}</td>
                             <td>
-                                <a href="{% url 'clientes:comprador_editar' item.cxcomprador.id %}" 
-                                    class="btn  btn-sm" title="Editar" role="button"><i class="fa fa-edit"></i></a>
-                                <button class="btn  btn-sm"  title="Estado y clase"
-                                        onclick="return AbrirModal('{% url 'clientes:estadoclasecomprador_editar' item.id %}')"
-                                    role="button">
-                                    <i class="fa fa-star"></i>
-                                </button>
+                                {{ item.cxcomprador.cttelefono1|default:"" }}
+                                {{ item.cxcomprador.cttelefono2|default:"" }}
+                                {{ item.cxcomprador.ctcelular|default:"" }}
+                            </td>
+                            <td>{{ item.cxcomprador.ctemail|default:"" }}</td>
+                            <td>{{ item.cxclase|default:"" }}</td>
+                            <td>{{ item.estado|default:"" }}</td>
+                            <!-- <td>{{ item.dregistro|date:"Y/m/d H:i:s" }}</td> -->
+                            <td>
+                                <a href="{% url 'clientes:comprador_view' item.cxcomprador.id %}" 
+                                    class="btn  btn-sm" title="Ver" role="button"><i class="fa fa-eye"></i>
+                                </a>
                                 {% if not item.cxcomprador.datos_generales %}
                                 <a href="{% url 'clientes:cliente_editar' item.cxcomprador.id %}"  title="Registrar como cliente"
                                     class="btn  btn-sm" role="button"><i class="fa fa-user"></i></a>

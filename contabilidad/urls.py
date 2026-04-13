@@ -27,7 +27,8 @@ from .views import CuentasView, CuentasEspecialesEdit, BuscarCuentasEspeciales\
     , GenerarAsientosTransferencias, GeneraListaRecuperacionesJSON\
     , GenerarAsientosRecuperaciones, ListaRecuperacionesAGenerar\
     , BuscarCuentasReestructuracion, CuentasReestructuracionNew\
-     , CuentasReestructuracionEdit, CargarDetalleAsiento, MesCerrado
+     , CuentasReestructuracionEdit, CargarDetalleAsiento, MesCerrado\
+     , asiento_contable_api
 
 from .sri import GeneraXMLFactura
 from .reportes import ImpresionDiarioContable, ImpresionComprobanteEgreso\
@@ -194,4 +195,6 @@ urlpatterns = [
     path('comprobanteegresoeditar/<diario_id>/<desde_consulta>',ComprobanteEgreso, 
          name="comprobanteegreso_editar"),
      path('cuentacontablebanco/<banco_id>',CuentaContableBanco),
+    path('asiento-contable/<str:asiento_id>/'
+         , asiento_contable_api, name='asiento_contable_api'),
 ]

@@ -8,7 +8,8 @@ from django.db import transaction
 
 from .models import Cuenta_transferencia, Datos_generales \
     , Personas_juridicas, Personas_naturales, Linea_Factoring \
-    , Datos_compradores, Cupos_compradores, Cuentas_bancarias
+    , Datos_compradores, Cupos_compradores, Cuentas_bancarias \
+    , Datos_operativos_hist
 from solicitudes.models import Clientes as Solicitante \
     , Asignacion as Asignacion
 from bases.models import Usuario_empresa
@@ -334,7 +335,9 @@ class CompradoresView(SinPrivilegios, generic.ListView):
 
     def get_queryset(self) :
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        qs=Datos_compradores.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        qs=Datos_compradores.objects\
+            .filter(leliminado = False, empresa = id_empresa.empresa)\
+            .order_by('cxcomprador__ctnombre')
         return qs
     
     def get_context_data(self, **kwargs):
@@ -395,41 +398,6 @@ class CuposCompradoresNew(SinPrivilegios, generic.CreateView):
         # else:
             # return super().form_invalid(form)
             
-# @login_required(login_url='/login/')
-# @permission_required('clientes.add_cupos_compradores', login_url='bases:sin_permisos')
-# def DatosCuposCompradorNuevo(request, ):
-#     template_name = "clientes/datoscupo_modal.html"
-#     contexto = {}
-#     formulario = {}
-#     id_empresa = Usuario_empresa.objects\
-#         .filter(user=request.user).first()
-#     form_submitted = False
-
-#     if request.method == 'POST':
-#         formulario = CuposCompradoresForm(request.POST, empresa=id_empresa.empresa)
-            
-#         form_submitted = True
-
-#         if formulario.is_valid():
-#             datosparticipante = formulario.save(commit=False)
-#             datosparticipante.cxusuariocrea = request.user
-#             datosparticipante.empresa = id_empresa.empresa
-#             datosparticipante.save()
-
-#             return redirect("clientes:listacupos")
-#         else:
-#             contexto['form_errors'] = formulario.errors
-#             # return HttpResponse(str(formulario.errors))
-#     else:
-#         formulario = CuposCompradoresForm(empresa=id_empresa.empresa)
-
-#     contexto.update({
-#         'form': formulario,
-#         'form_submitted': form_submitted,
-#     })
-
-#     return render(request, template_name, contexto)
-        
 class CuposCompradoresEdit(SinPrivilegios, generic.UpdateView):
     model=Cupos_compradores
     template_name="clientes/datoscupo_modal.html"
@@ -552,6 +520,7 @@ class CompradorEdit(SinPrivilegios, generic.UpdateView):
         kwargs = super(CompradorEdit, self).get_form_kwargs()
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         kwargs['empresa'] = id_empresa.empresa
+        kwargs['tipo_participante'] = 'D'
         return kwargs
        
 class CompradorNew(SinPrivilegios, generic.CreateView):
@@ -596,6 +565,7 @@ class CompradorNew(SinPrivilegios, generic.CreateView):
         kwargs = super(CompradorNew, self).get_form_kwargs()
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         kwargs['empresa'] = id_empresa.empresa
+        kwargs['tipo_participante'] = 'D'
         return kwargs
        
 @login_required(login_url='/login/')
@@ -618,14 +588,14 @@ def DatosClientes(request, participante_id=None, solicitante_id=None):
             return redirect("bases:sin_permisos")
 
     if request.method == 'POST':
-        # la pantalla maneja dos formas: una para datos del cliente y otra para la actividad del cliente, por eso se bifurca dependiendo de cuál formulario se envía
+        # la pantalla maneja dos formas: una para datos del cliente 
+        # y otra para la actividad del cliente, por eso se bifurca 
+        # dependiendo de cuál formulario se envía
         if 'actividad' in request.POST:
             sector_economico = datosparticipante.sectoreconomico.cxactividad
-            print('sector economico', sector_economico)
             form_actividad = ActividadParticipanteForm(request.POST
                                                             , sector_economico = sector_economico)
             if form_actividad.is_valid():
-                print('actividad validada', form_actividad.cleaned_data['actividad'])
                 datosparticipante.actividad = form_actividad.cleaned_data['actividad']
                 datosparticipante.cxusuariomodifica = request.user.id
                 datosparticipante.save()
@@ -636,7 +606,8 @@ def DatosClientes(request, participante_id=None, solicitante_id=None):
         else:
             if participante_id:
                 
-                formulario = ParticipanteForm(request.POST, instance=datosparticipante, empresa=id_empresa.empresa)
+                formulario = ParticipanteForm(request.POST, instance=datosparticipante
+                                              , empresa=id_empresa.empresa)
             else:
                 formulario = ParticipanteForm(request.POST, empresa=id_empresa.empresa)
             
@@ -1115,7 +1086,8 @@ def obtener_cantones_por_provincia(request, provincia_id):
     Vista AJAX que devuelve los cantones de una provincia específica
     """
     try:
-        id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+        id_empresa = Usuario_empresa.objects\
+            .filter(user=request.user).first()
         
         if not id_empresa:
             return JsonResponse({'error': 'Usuario no autorizado'}, status=403)
@@ -1185,6 +1157,7 @@ def DatosClientes_view(request, participante_id=None, tab=None):
             cliente_id = datoscliente.id
             primera_operacion = datoscliente.dprimeraoperacion
             cantidad_operaciones = datoscliente.ncantidadoperaciones
+            ppdp = datoscliente.npromediodemoradepago
 
             # datos generales
             e={
@@ -1270,8 +1243,8 @@ def DatosClientes_view(request, participante_id=None, tab=None):
         .TotalPagaresCliente(cliente_id)
     restructuracion = total_reestructuracion['Total'] or 0
 
-    ppmp = Documentos_detalle.objects\
-        .promedio_ponderado_demora(cliente_id)
+    # ppdp = Documentos_detalle.objects\
+    #     .promedio_ponderado_demora(cliente_id)
 
     # Determinar qué tab debe estar activo (por defecto estado_operativo)
     active_tab = tab or 'home'
@@ -1302,12 +1275,322 @@ def DatosClientes_view(request, participante_id=None, tab=None):
         'solicitudes_pendientes':sp,
         'total_cartera_protestos': cartera + protestos,
         'total_reestructuracion':restructuracion,
-        'promedio_ponderado_demora': ppmp,
+        'promedio_ponderado_demora': ppdp,
         'primera_operacion': primera_operacion,
         'cantidad_operaciones': cantidad_operaciones,
         'año': año,
         'cantidad_movimientos': 10,
         'active_tab': active_tab
+    })
+
+    return render(request, template_name, contexto)
+
+@login_required(login_url='/login/')
+@permission_required('clientes.view_datos_generales', login_url='bases:sin_permisos')
+def DatosCompradores_view(request, participante_id=None, tab=None):
+    template_name="clientes/datoscomprador_view.html"
+    contexto = {}
+    datosparticipante = {}
+    form_deudor={}
+    formulario={}
+    form_actividad={}
+
+    comprador_id = None
+    # valor_linea = None
+    # porc_disponible = None
+    estado_deudor=''
+    clase_deudor =''
+    # primera_operacion = None
+    color_estado = 1
+    # dias_ultima_operacion = None
+    año = 2025
+    # cantidad_operaciones = None
+
+    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+    
+    if participante_id:
+        datosparticipante = Datos_participantes.objects\
+            .filter(pk=participante_id).first()
+        
+        if datosparticipante.empresa != id_empresa.empresa:
+            return redirect("bases:sin_permisos")
+
+
+    if datosparticipante:
+        formulario = ParticipanteForm(instance=datosparticipante, empresa=id_empresa.empresa)
+        datosdeudor = Datos_compradores.objects\
+            .filter(cxcomprador=datosparticipante).first()
+        
+        if datosdeudor:
+            comprador_id = datosdeudor.id
+            estado_deudor = datosdeudor.cxestado
+            clase_deudor = datosdeudor.cxclase
+
+            # datos generales
+            e={
+                'cxclase':datosdeudor.cxclase,
+                'cxestado':datosdeudor.cxestado,
+            }
+            form_deudor=CompradorForm(e, empresa = id_empresa.empresa)
+
+
+            if estado_deudor=='A':
+                estado_deudor = 'Activo'
+                color_estado = 5
+            elif estado_deudor=='B':
+                estado_deudor = 'Baja'
+                color_estado = 2
+            elif estado_deudor=='I':
+                estado_deudor = 'Inactivo'
+                color_estado = 2
+            elif estado_deudor=='P':
+                estado_deudor = 'Pre legal'
+                color_estado = 3
+            elif estado_deudor=='L':
+                estado_deudor = 'Legal'
+                color_estado = 4
+            elif estado_deudor=='X':
+                estado_deudor = 'Bloqueado'
+                color_estado = 4
+
+        else:
+            form_deudor=CompradorForm(empresa = id_empresa.empresa)
+
+        # incluir la forma de actividad del cliente
+        e = {'actividad': datosparticipante.actividad}
+        sector_economico = datosparticipante.sectoreconomico.cxactividad if datosparticipante.sectoreconomico else 'Z'
+        form_actividad = ActividadParticipanteForm(e
+                                                    , sector_economico = sector_economico )
+    sp = Asignacion.objects\
+        .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+
+    total_cartera = Documentos.objects\
+        .TotalCarteraDeudor(comprador_id)
+    cartera = total_cartera['Total'] or 0
+
+    total_protesto = Cheques_protestados.objects\
+        .TotalProtestosDeudor(participante_id)
+    protestos = total_protesto['Total'] or 0
+
+    ppdp = Documentos_detalle.objects\
+        .promedio_ponderado_demora_deudor(comprador_id)
+
+    cupos = Cupos_compradores.objects\
+        .filter(cxcomprador = comprador_id, empresa = id_empresa.empresa
+                , leliminado = False)
+    # Determinar qué tab debe estar activo (por defecto estado_operativo)
+    active_tab = tab or 'home'
+    
+    contexto.update({
+        'datosparticipante': datosparticipante,
+        'datosdeudor': datosdeudor,
+        'form': formulario,
+        'solicitudes_pendientes': sp,
+        'form_deudor':form_deudor,
+        'form_actividad':form_actividad,
+
+        'deudor_id':comprador_id,
+        'hoy' : date.today(),
+        'nombre_deudor': datosparticipante.ctnombre if datosparticipante else '',
+        'estado': estado_deudor,
+        'clase':clase_deudor,
+        'color_estado':color_estado,
+        'solicitudes_pendientes':sp,
+        'total_cartera_protestos': cartera + protestos,
+        'promedio_ponderado_demora': ppdp,
+        # 'primera_operacion': primera_operacion,
+        # 'cantidad_operaciones': cantidad_operaciones,
+        'año': año,
+        'active_tab': active_tab,
+        'consulta': cupos,
+    })
+
+    return render(request, template_name, contexto)
+
+@login_required(login_url='/login/')
+@permission_required('operaciones.change_datos_operativos', login_url='bases:sin_permisos')
+def CambiarTasaGAOA_todos(request, ids):
+
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
+    
+    template_name="clientes/datostasagaoatodos_modal.html"
+
+    if request.method=='POST':
+
+        ntasagaoa = request.POST.get("id_nvalor")
+        # ntasamora = request.POST.get('ntasamora')
+
+        ids = ids.split(',')
+        for id in ids:
+    
+            datos_operativos = Datos_operativos.objects\
+            .filter(cxcliente=id).first()
+    
+            datos_operativos.ntasagaoa=ntasagaoa
+            # datos_operativos.ntasamora = ntasamora
+
+            datos_operativos.save()
+
+            # crear un registro historico del cambio realizado
+            datoshistorico= Datos_operativos_hist(
+                cxclase=datos_operativos.cxclase,
+                nporcentajeanticipo=datos_operativos.nporcentajeanticipo,
+                cxcliente = datos_operativos.cxcliente,
+                ntasacomision = datos_operativos.ntasacomision,
+                ntasadescuentocartera = datos_operativos.ntasadescuentocartera,
+                ntasagaoa = ntasagaoa,
+                cxbeneficiarioasignacion = datos_operativos.cxbeneficiarioasignacion,
+                ctbeneficiarioasignacion = datos_operativos.ctbeneficiarioasignacion,
+                cxbeneficiariocobranzas = datos_operativos.cxbeneficiariocobranzas,
+                ctbeneficiariocobranzas = datos_operativos.ctbeneficiariocobranzas,
+                cxusuariocrea = request.user,
+                cxestado = datos_operativos.cxestado,
+                empresa = id_empresa.empresa,
+                ntasamora = datos_operativos.ntasamora
+            )
+
+            datoshistorico.save()
+
+        return redirect("operaciones:listadatosoperativos", )
+
+    return render(request, template_name, {'ids': ids})
+
+@login_required(login_url='/login/')
+@permission_required('operaciones.change_datos_operativos', login_url='bases:sin_permisos')
+def CambiarTasaMora_todos(request, ids):
+
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
+    
+    template_name="clientes/datostasamoratodos_modal.html"
+
+    if request.method=='POST':
+
+        # ntasagaoa = request.POST.get("id_nvalor")
+        ntasamora = request.POST.get('id_nvalor')
+
+        ids = ids.split(',')
+        for id in ids:
+    
+            datos_operativos = Datos_operativos.objects\
+            .filter(cxcliente=id).first()
+    
+            # datos_operativos.ntasagaoa=ntasagaoa
+            datos_operativos.ntasamora = ntasamora
+
+            datos_operativos.save()
+
+            # crear un registro historico del cambio realizado
+            datoshistorico= Datos_operativos_hist(
+                cxclase=datos_operativos.cxclase,
+                nporcentajeanticipo=datos_operativos.nporcentajeanticipo,
+                cxcliente = datos_operativos.cxcliente,
+                ntasacomision = datos_operativos.ntasacomision,
+                ntasadescuentocartera = datos_operativos.ntasadescuentocartera,
+                ntasagaoa = datos_operativos.ntasagaoa,
+                cxbeneficiarioasignacion = datos_operativos.cxbeneficiarioasignacion,
+                ctbeneficiarioasignacion = datos_operativos.ctbeneficiarioasignacion,
+                cxbeneficiariocobranzas = datos_operativos.cxbeneficiariocobranzas,
+                ctbeneficiariocobranzas = datos_operativos.ctbeneficiariocobranzas,
+                cxusuariocrea = request.user,
+                cxestado = datos_operativos.cxestado,
+                empresa = id_empresa.empresa,
+                ntasamora = ntasamora
+            )
+
+            datoshistorico.save()
+
+        return redirect("operaciones:listadatosoperativos", )
+
+    return render(request, template_name, {'ids': ids})
+
+@login_required(login_url='/login/')
+@permission_required('clientes.change_datos_generales', login_url='bases:sin_permisos')
+def DatosDeudores(request, participante_id=None, tab=None):
+    template_name="clientes/datoscomprador_form.html"
+    contexto = {}
+    datosparticipante = {}
+    formulario={}
+    form_actividad={}
+
+    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+
+    if participante_id:
+        datosparticipante = Datos_participantes.objects\
+            .filter(pk=participante_id).first()
+        
+        if datosparticipante.empresa != id_empresa.empresa:
+            return redirect("bases:sin_permisos")
+
+    if request.method == 'POST':
+        # la pantalla maneja dos formas: una para datos del cliente 
+        # y otra para la actividad del cliente, por eso se bifurca 
+        # dependiendo de cuál formulario se envía
+        if 'actividad' in request.POST:
+            sector_economico = datosparticipante.sectoreconomico.cxactividad
+            form_actividad = ActividadParticipanteForm(request.POST
+                                                            , sector_economico = sector_economico)
+            if form_actividad.is_valid():
+                datosparticipante.actividad = form_actividad.cleaned_data['actividad']
+                datosparticipante.cxusuariomodifica = request.user.id
+                datosparticipante.save()
+            else:
+                print('actividad no validada', form_actividad.errors)
+
+            return redirect("clientes:listacompradores")
+        else:
+            if participante_id:
+                formulario = ParticipanteForm(request.POST, instance=datosparticipante
+                                              , empresa=id_empresa.empresa)
+            else:
+                formulario = ParticipanteForm(request.POST, empresa=id_empresa.empresa)
+            
+            form_submitted = True
+
+            if formulario.is_valid():
+
+                datosparticipante = formulario.save(commit=False)
+                if not participante_id:
+                    datosparticipante.cxusuariocrea = request.user
+                    datosparticipante.empresa = id_empresa.empresa
+                else:
+                    datosparticipante.cxusuariomodifica = request.user.id
+
+                datosparticipante.save()
+                return redirect("clientes:comprador_editar", participante_id=participante_id, tab='actividad')
+
+            else:
+                # contexto['form_participante'] = formulario
+                contexto['form_errors'] = formulario.errors
+            
+    else:
+        form_submitted = False
+
+        if datosparticipante:
+            formulario = ParticipanteForm(instance=datosparticipante
+                                          , empresa=id_empresa.empresa)
+            
+            # incluir la forma de actividad del cliente
+            e = {'actividad': datosparticipante.actividad}
+            sector_economico = datosparticipante.sectoreconomico.cxactividad if datosparticipante.sectoreconomico else 'Z'
+            form_actividad = ActividadParticipanteForm(e
+                                                        , sector_economico = sector_economico )
+        else:
+            formulario = ParticipanteForm(empresa=id_empresa.empresa)
+
+    sp = Asignacion.objects\
+        .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+    # Determinar qué tab debe estar activo (por defecto estado_operativo)
+    active_tab = tab or 'home'
+
+    contexto.update({
+        'datosparticipante': datosparticipante,
+        'form': formulario,
+        'solicitudes_pendientes': sp,
+        'form_submitted': form_submitted,
+        'form_actividad':form_actividad,
+        'active_tab': active_tab,
     })
 
     return render(request, template_name, contexto)

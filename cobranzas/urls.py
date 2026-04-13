@@ -32,7 +32,8 @@ from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos\
     , ImpresionProtestosPendientes, ImpresionAmpliacionDePlazo\
     , ImpresionDetalleCobranzas, ImpresionDetalleRecuperaciones\
-    , ImpresionCobranzaCuota, ImpresionProtestosPendientesCorte
+    , ImpresionCobranzaCuota, ImpresionProtestosPendientesCorte\
+    , ImpresionProtestosPendientesDeudor
 
 urlpatterns = [
     # cobranzas
@@ -167,6 +168,8 @@ urlpatterns = [
          , name='protestos_pendientes'),
     path('motivo_responsabilidad/<int:motivo_id>/', get_motivo_responsabilidad
          , name='motivo_responsabilidad'),
+    path('impresionprotestosdeudoor/<int:id_participante>', ImpresionProtestosPendientesDeudor
+         , name='protestos_pendientes_deudor'),
 
     # notas de debito
     path('listaliquidacionesennegativopendientes/',LiquidacionesEnNegativoPendientesView.as_view()

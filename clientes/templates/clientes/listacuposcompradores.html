@@ -86,8 +86,7 @@
                                     role="button">
                                     <i class="fa fa-edit"></i>
                                 </button>
-                                <a href="#" onclick="return EliminarCupo({{item.id}}, {{item.nutilizadocartera}}, 
-                                    '{{item.cxcomprador}}')" title="Eliminar"
+                                <a href="#" onclick="return EliminarCupo({{item.id}}, '{{item.cxcomprador.cxcomprador}}', {{item.nutilizadocartera}})" title="Eliminar"
                                     class="btn  btn-sm" role="button"><i class="fa fa-trash"></i>
                                 </a>
                             </td>
@@ -106,21 +105,5 @@
 
 {% block js_page %}
 <script>
-    function EliminarCupo( documento_id, utilizado, comprador){
-        if (utilizado > 0){
-            MensajeError("No se puede eliminar un cupo con saldo utilizado");
-            return;
-        }
-        MensajeConfirmacion("Eliminar cupo de " + comprador + "?",function(){
-
-            fetchProcesar("/clientes/eliminarcupo/"+ documento_id, function(){
-            // $table.bootstrapTable('remove', {
-            //   field: 'id',
-            //   values: [documento_id]
-            // });
-            location.reload();
-            })
-        })
-    }
 </script>
 {% endblock %}

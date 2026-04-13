@@ -7,7 +7,7 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Participantes</a></li>
                     <li><a href="#">Clientes</a></li>
-                    <li><a href="{% url 'clientes:listaclientes' %}">ficha general</a></li>
+                    <li><a href="{% url 'clientes:listaclientes' %}">lista</a></li>
                     <li class="active">editar</li>
                 </ol>
             </div>
@@ -32,7 +32,6 @@
 </ul>
 <div class="tab-content pl-3 p-1" id="myTabContent">
     <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-        <!-- <p>Complete la información obligatoria (<span style="color: red;">*</span>) en este y el resto de tabs.</p> -->
         <!-- columna izquierda -->
         <form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal"
             onsubmit="return checkSubmit();">
@@ -85,7 +84,7 @@
                                         <div class="col col-md-3"><label for="id_cxtipocliente" class=" form-control-label">
                                             {{ form_cliente.cxtipocliente.label}} <span style="color: red;">*</span>
                                         </label></div>
-                                        <div class="col-12 col-md-9">
+                                        <div class="col-md-9">
                                             {{ form_cliente.cxtipocliente}}
                                         </div>
                                     </div>  
@@ -216,7 +215,7 @@
                                     </div>
                                 </div> 
                                 <div class="row form-group">
-                                    <div class="col col-md-2"><label for="id_actividad" class=" form-control-label">
+                                    <div class="col col-md-2"><label for="id_sectoreconomico" class=" form-control-label">
                                         {{form.sectoreconomico.label}} <span style="color: red;">*</span>
                                     </label></div>
                                     <div class="col-md-10">
@@ -290,7 +289,6 @@
         
     <!-- Sección para mostrar errores del formulario -->
     {% if form_submitted and form.errors %}
-    {#% if form.errors %#}
     <div class="alert alert-danger" role="alert">
         <ul>
             {% for field, errors in form.errors.items %}
@@ -307,6 +305,12 @@
 {% block js_page %}
 <script>
     enviando = false; //Obligaremos a entrar el if en el primer submit
+    // Agregar evento change al campo cxcliente
+    document.getElementById("id_cxparticipante").addEventListener("change", function() {
+        var ruc = this.value;
+        obtener_datos_contribuyente(ruc);
+    });
+
    // Función para obtener datos del contribuyente
    function obtener_datos_contribuyente(ruc) {
         // var url = `/api/sri/obtener-datos-contribuyente/${ruc}`;
@@ -331,12 +335,6 @@
                 console.error('Error:', error);
             });
     }
-
-    // Agregar evento change al campo cxcliente
-    document.getElementById("id_cxparticipante").addEventListener("change", function() {
-        var ruc = this.value;
-        obtener_datos_contribuyente(ruc);
-    });
 
     // Función para filtrar cantones por provincia
     function filtrarCantonesPorProvincia(provinciaId, preservarSeleccion = false) {

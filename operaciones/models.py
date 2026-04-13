@@ -27,6 +27,7 @@ class Datos_operativos(ClaseModelo):
         ('P', 'Pre legal'),
         ('L', 'Legal'),
         ('X', 'Bloqueado'),
+        ('C', 'Cartera castigada'),
     )
     cxcliente=models.ForeignKey(Datos_generales_cliente
         , on_delete=models.RESTRICT
@@ -434,7 +435,7 @@ class Documentos_Manager(models.Manager):
             )
         ).order_by()
 
-    def antigüedad_por_deudor(self, id_empresa, id_cliente):
+    def antigüedad_por_deudor(self, id_deudor):
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
         vcdo30 = datetime.today()+timedelta(days=-30)
@@ -446,8 +447,8 @@ class Documentos_Manager(models.Manager):
             , cxasignacion__cxtipo = "F"
             , cxasignacion__cxestado = "P"
             , cxasignacion__leliminado = False
-            , empresa = id_empresa
-            , cxcliente = id_cliente
+            # , empresa = id_empresa
+            , cxcomprador = id_deudor
             )\
             .values('cxcomprador__cxcomprador__ctnombre')\
             .annotate(
@@ -685,6 +686,34 @@ class Documentos_Manager(models.Manager):
             deuda = saldo_anticipado_expr + dc_negociado_expr + dc_vencido_expr + gao_adicional_expr + iva_expr
         ).order_by('cxtipofactoring__cttipofactoring', 'cxcliente__cxcliente__ctnombre')
         return x
+    
+    def TotalCarteraDeudor(self, id_deudor):
+        return self.filter(leliminado = False, nsaldo__gt = 0
+                           , cxcomprador = id_deudor
+                           , cxasignacion__cxestado = "P"
+                           , cxasignacion__leliminado = False)\
+            .aggregate(Total = Sum('nsaldo'))
+    
+    def documentos_negociados_deudor(self, id_empresa, año, id_deudor):
+        # en django obtener el año del campo date llamado ddesembolso?
+        return self.filter(cxasignacion__ddesembolso__year = año,
+            cxasignacion__cxestado = "P"
+            , cxasignacion__leliminado = False
+            , empresa = id_empresa
+            , cxcomprador = id_deudor)\
+            .aggregate(enero = Sum('ntotal', filter=Q(cxasignacion__ddesembolso__month=1))
+                       , febrero= Sum('ntotal', filter=Q(cxasignacion__ddesembolso__month=2))
+                       , marzo= Sum('ntotal', filter=Q(cxasignacion__ddesembolso__month=3))
+                       , abril= Sum('ntotal', filter=Q(cxasignacion__ddesembolso__month=4))
+                       , mayo= Sum('ntotal', filter=Q(cxasignacion__ddesembolso__month=5))
+                       , junio= Sum('ntotal', filter=Q(cxasignacion__ddesembolso__month=6))
+                       , julio= Sum('ntotal', filter=Q(cxasignacion__ddesembolso__month=7))
+                       , agosto= Sum('ntotal', filter=Q(cxasignacion__ddesembolso__month=8))
+                       , septiembre= Sum('ntotal', filter=Q(cxasignacion__ddesembolso__month=9))
+                       , octubre= Sum('ntotal', filter=Q(cxasignacion__ddesembolso__month=10))
+                       , noviembre= Sum('ntotal', filter=Q(cxasignacion__ddesembolso__month=11))
+                       , diciembre= Sum('ntotal', filter=Q(cxasignacion__ddesembolso__month=12))
+                       )
     
 class Documentos(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
@@ -1038,7 +1067,7 @@ class ChequesAccesorios_Manager(models.Manager):
             ) \
             .order_by()
 
-    def antigüedad_por_deudor(self, id_empresa, id_cliente):
+    def antigüedad_por_deudor(self, id_deudor):
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
         vcdo30 = datetime.today()+timedelta(days=-30)
@@ -1050,8 +1079,8 @@ class ChequesAccesorios_Manager(models.Manager):
                 , leliminado = False, lcanjeado  = False, laccesorioquitado = False
                 , documento__cxasignacion__cxestado = "P"
                 , documento__cxasignacion__leliminado = False
-                , empresa = id_empresa
-                , documento__cxcliente = id_cliente
+                # , empresa = id_empresa
+                , documento__cxcomprador = id_deudor
             )\
             .values('documento__cxcomprador__cxcomprador__ctnombre')\
             .annotate(
@@ -1324,6 +1353,38 @@ class ChequesAccesorios_Manager(models.Manager):
         ).order_by('documento__cxtipofactoring__cttipofactoring',
                    'documento__cxcliente__cxcliente__ctnombre')
 
+    def cheques_pendientes_deudores(self, id_empresa, arr_deudores):
+        # se usa en impresion de accesorio pendientes
+        return self.filter(laccesorioquitado = False, cxestado='A'
+                , leliminado = False, lcanjeado = False
+                , empresa = id_empresa
+                , documento__cxcomprador__in = arr_deudores
+                , documento__cxasignacion__cxestado = "P"
+                , documento__cxasignacion__leliminado = False)\
+                .values("documento__cxcomprador__cxcomprador__ctnombre"
+                        , "documento__cxcliente__cxcliente__ctnombre"
+                        , "documento__cxasignacion__cxasignacion"
+                        , "documento__ctdocumento"
+                        , "dvencimiento", "ndiasprorroga"
+                        , "documento__cxasignacion__ddesembolso"
+                        , "ntotal")\
+                .annotate(vencimiento =ExpressionWrapper( F('dvencimiento') + F('ndiasprorroga')
+                                                         , output_field = DateField() ),
+                        dias_vencidos=Cast(ExtractDay(ExpressionWrapper(date.today() - F('dvencimiento')
+                                                                            , output_field=DateField()))
+                                                , IntegerField()),
+                        dias_negociados=Cast(ExtractDay(ExpressionWrapper(F('dvencimiento')
+                                                                          -F('documento__cxasignacion__ddesembolso')
+                                                                          , output_field=DateField()))
+                                                , IntegerField()),
+                        descripcion =  Concat('cxbanco__ctbanco'
+                                                , Value(' CTA.') 
+                                                , 'ctcuenta'
+                                                , Value(' CH/')
+                                                , ('ctcheque'), output_field=CharField())
+                          )\
+                .order_by('documento__cxcomprador__cxcomprador__ctnombre')
+
 class Cheques_quitados_Manager(models.Manager):
     def antigüedad_cartera(self, id_empresa, id_cliente=None):
         # grafico de antigüedad de cartera 
@@ -1465,7 +1526,7 @@ class Cheques_quitados_Manager(models.Manager):
             ) \
             .order_by()
 
-    def antigüedad_por_deudor(self, id_empresa, id_cliente):
+    def antigüedad_por_deudor(self, id_deudor):
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
         vcdo30 = datetime.today()+timedelta(days=-30)
@@ -1477,8 +1538,8 @@ class Cheques_quitados_Manager(models.Manager):
                 , leliminado = False
                 , accesorio_quitado__documento__cxasignacion__cxestado = "P"
                 , accesorio_quitado__documento__cxasignacion__leliminado = False
-                , empresa = id_empresa
-                , accesorio_quitado__documento__cxcliente = id_cliente)\
+                # , empresa = id_empresa
+                , accesorio_quitado__documento__cxcomprador = id_deudor)\
             .values('accesorio_quitado__documento__cxcomprador__cxcomprador__ctnombre')\
             .annotate(
                 vencido_mas_90 = Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__lt = vcdo90) ) 

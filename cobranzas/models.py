@@ -126,12 +126,45 @@ class Documentos_cabecera(ClaseModelo):
         return self.get_cxestado_display()
     
 class Documentos_detalle_Manager(models.Manager):
-    def promedio_ponderado_demora(self, id_cliente):
+    # def promedio_ponderado_demora(self, id_cliente):
+    #     # promedio ponderado de demora de los documentos
+    #     # de la empresa
+    #     documentos = self.filter(leliminado=False
+    #                              , cxcobranza__cxcliente=id_cliente
+    #                              )
+        
+    #     total = documentos.aggregate(
+    #         Total=Sum(
+    #             models.F('nvalorcobranza') 
+    #             + models.F('nvalorbaja') 
+    #             + models.F('nretenciones')
+    #             )
+    #         )
+        
+    #     totaldias = 0
+    #     for documento in documentos:
+    #         dias_vencidos = decimal.Decimal( documento.dias_vencidos_vencimiento_original())
+    #         totaldias += dias_vencidos * (
+    #             documento.nvalorcobranza 
+    #             + documento.nvalorbaja 
+    #             + documento.nretenciones)
+        
+    #     if total['Total'] and totaldias:
+    #         return totaldias / total['Total']
+    #     else:
+    #         return 0
+        
+    def promedio_ponderado_demora_por_deudor(self, id_cliente, id_deudor):
         # promedio ponderado de demora de los documentos
-        # de la empresa
+        # de la empresa y del deudor
         documentos = self.filter(leliminado=False
                                  , cxcobranza__cxcliente=id_cliente
+                                 , cxdocumento__cxcomprador=id_deudor
+                                 , cxcobranza__lpagadoporelcliente=False
                                  )
+        
+        if not documentos.exists():
+            return 'N/A'
         
         total = documentos.aggregate(
             Total=Sum(
@@ -153,12 +186,11 @@ class Documentos_detalle_Manager(models.Manager):
             return totaldias / total['Total']
         else:
             return 0
-        
-    def promedio_ponderado_demora_por_deudor(self, id_cliente, id_deudor):
+
+    def promedio_ponderado_demora_deudor(self, id_deudor):
         # promedio ponderado de demora de los documentos
         # de la empresa y del deudor
-        documentos = self.filter(leliminado=False
-                                 , cxcobranza__cxcliente=id_cliente
+        documentos = self.filter( cxcobranza__leliminado=False
                                  , cxdocumento__cxcomprador=id_deudor
                                  , cxcobranza__lpagadoporelcliente=False
                                  )
@@ -427,14 +459,63 @@ class Protestos_Manager(models.Manager):
                     )
         return cp.union(rp)
         
-    def TotalProtestosCliente(self, id_cliente):
+    def TotalProtestosCliente(self, id_participante):
         return self.filter(leliminado=False
                            , nsaldocartera__gt = 0)\
-                    .filter(Q(cheque__cheque_cobranza__cxcliente = id_cliente
+                    .filter(Q(cheque__cheque_cobranza__cxcliente = id_participante
                               , cxtipooperacion='C')
-                            |Q(cheque__cheque_recuperacion__cxcliente = id_cliente
+                            |Q(cheque__cheque_recuperacion__cxcliente = id_participante
                                , cxtipooperacion='R'))\
             .aggregate(Total = Sum('nsaldocartera'))
+        # return self.filter(leliminado=False
+        #                    , nsaldocartera__gt = 0)\
+        #             .filter(cheque__cxparticipante = id_participante
+        #                       , cheque__cxtipoparticipante = 'C'
+        #                       )\
+        #     .aggregate(Total = Sum('nsaldocartera'))
+
+    def TotalProtestosDeudor(self, id_participante):
+        return self.filter(leliminado=False
+                           , nsaldocartera__gt = 0)\
+                    .filter(cheque__cxparticipante = id_participante
+                              , cheque__cxtipoparticipante = 'D'
+                              )\
+            .aggregate(Total = Sum('nsaldocartera'))
+
+    def protestos_pendientes_deudor(self, id_empresa, id_participante):
+        cp = self.filter(nsaldocartera__gt=0
+                         , leliminado = False
+                         , empresa = id_empresa
+                        #  , cheque__cheque_cobranza__cxcliente = id_participante
+                         , cheque__cxparticipante = id_participante
+                         , cheque__cxtipoparticipante = 'D'
+                         , cxtipooperacion='C')\
+            .values('id','cheque__cheque_cobranza'
+                    ,'cheque__cheque_cobranza__cxcliente__cxcliente__ctnombre'
+                    ,'cheque__cheque_cobranza__cxcobranza'
+                    ,'cheque__cheque_cobranza__dcobranza'
+                    ,'cheque__cheque_cobranza__ddeposito'
+                    ,'cheque__ctgirador','dprotesto'
+                    ,'motivoprotesto__ctmotivoprotesto'
+                    ,'nvalor','nsaldocartera','nvalorcartera'
+                    )
+        rp = self.filter(nsaldocartera__gt=0
+                         , leliminado = False
+                         , empresa = id_empresa
+                         , cheque__cxparticipante = id_participante
+                         , cheque__cxtipoparticipante = 'D'
+                         , cxtipooperacion='R')\
+            .values('id','cheque__cheque_recuperacion'
+                    ,'cheque__cheque_recuperacion__cxcliente__cxcliente__ctnombre'
+                    ,'cheque__cheque_recuperacion__cxrecuperacion'
+                    ,'cheque__cheque_recuperacion__dcobranza'
+                    ,'cheque__cheque_recuperacion__ddeposito'
+                    ,'cheque__ctgirador','dprotesto'
+                    ,'motivoprotesto__ctmotivoprotesto'
+                    ,'nvalor','nsaldocartera','nvalorcartera'
+                    )
+        return cp.union(rp)
+        
 
 class Cheques_protestados(ClaseModelo):
     FORMAS_DE_COBRO = (
@@ -724,7 +805,7 @@ class Documentos_protestados_Manager(models.Manager):
             ) \
             .order_by()
 
-    def antigüedad_por_deudor_facturas(self, id_empresa, id_cliente):
+    def antigüedad_por_deudor_facturas(self, id_deudor):
         # la fecha de vencimiento está en el documento
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
@@ -736,8 +817,8 @@ class Documentos_protestados_Manager(models.Manager):
         return self.filter( leliminado = False
                            , nsaldo__gt = 0
                            , accesorio__isnull = True
-                           , empresa = id_empresa
-                           , documento__cxcliente = id_cliente)\
+                        #    , empresa = id_empresa
+                           , documento__cxcomprador = id_deudor)\
             .values('documento__cxcomprador__cxcomprador__ctnombre')\
             .annotate(
                 vencido_mas_90 = Sum('nsaldo', filter=Q(documento__dvencimiento__lt = vcdo90) ) 
@@ -758,7 +839,7 @@ class Documentos_protestados_Manager(models.Manager):
                 )\
             .order_by()
     
-    def antigüedad_por_deudor_accesorios(self, id_empresa, id_cliente):
+    def antigüedad_por_deudor_accesorios(self, id_deudor):
         # la fecha de vencimiento está en el accesorio
         vcdo90 = datetime.today()+timedelta(days=-90)
         vcdo60 = datetime.today()+timedelta(days=-60)
@@ -770,8 +851,8 @@ class Documentos_protestados_Manager(models.Manager):
         return self.filter( leliminado = False
                            , nsaldo__gt = 0
                            , accesorio__isnull = False
-                           , empresa = id_empresa
-                           , documento__cxcliente = id_cliente)\
+                        #    , empresa = id_empresa
+                           , documento__cxcomprador = id_deudor)\
             .values('documento__cxcomprador__cxcomprador__ctnombre')\
             .annotate(
                 vencido_mas_90 = Sum('nsaldo', filter=Q(accesorio__dvencimiento__lt = vcdo90) ) 

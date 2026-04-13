@@ -1993,6 +1993,7 @@ def GeneraListaFacturasPendientesClienteJSONSalida(doc):
     output["Documento"] = doc.ctdocumento
     output["Vencimiento"] = doc.dias_vencidos()
     output["Saldo"] = doc.nsaldo
+    output["Cliente"] = doc.cxcliente.cxcliente.ctnombre
 
     return output
 
@@ -2008,7 +2009,7 @@ def GeneraListaAccesoriosQuitadosClienteJSONSalida(acc):
         output["Saldo"] = acc.chequequitado.nsaldo
     else:
         output["Saldo"] = acc.nsaldo
-
+    output["Cliente"] = acc.documento.cxcliente.cxcliente.ctnombre
     return output
 
 def GeneraListaChequesADepositarClienteJSON(request, cliente_id, fecha_corte):
@@ -2042,6 +2043,7 @@ def GeneraListaChequesADepositarClienteJSONSalida(acc):
     output["Vencimiento"] = acc.dias_vencidos()
     output["Valor"] = acc.ntotal
     output["Datos"] = acc.cxbanco.ctbanco +' CTA.'+ acc.ctcuenta + ' CH/' + acc.ctcheque
+    output["Cliente"] = acc.documento.cxcliente.cxcliente.ctnombre
 
     return output
 
@@ -2292,7 +2294,9 @@ def GeneraListaDesembolsosJSONSalida(transaccion):
             output["Operacion"] = operacion.__str__()
             output["TipoFactoring"] = operacion.cxtipofactoring.__str__()
     if transaccion.cxasiento:
-        output["Asiento"] = transaccion.cxasiento.cxtransaccion
+        output["Asiento"] = transaccion.cxasiento.cxtransaccion 
+        if transaccion.cxasiento.cxestado == 'E':
+            output["Asiento"] += " (Eliminado)"
         output["IdAsiento"] = transaccion.cxasiento.id
     else:
         output["Asiento"] = None
@@ -3282,4 +3286,224 @@ def GeneraListaProvisionCarteraVencidaJSONSalida(transaccion):
     output["Deuda"] = transaccion["deuda"]
 
     return output
+
+def GeneraResumenCarteraNegociadaDeudorJSON(request, deudor_id, año):
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    actual = Documentos.objects\
+        .documentos_negociados_deudor(id_empresa.empresa, año
+                                      , deudor_id)
+    anterior = Documentos.objects\
+        .documentos_negociados_deudor(id_empresa.empresa, año-1
+                                      , deudor_id)
+
+    data = { "actual":actual,
+            "anterior":anterior}
+    
+    return JsonResponse( data)
+
+@login_required(login_url='/login/')
+@permission_required('operaciones.view_documentos', login_url='bases:sin_permisos')
+def AntigüedadCarteraDeudorJSON(request, deudor_id):
+    
+    cheques = None
+    cuotas = None
+
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
+
+    facturas = Documentos.objects\
+        .antigüedad_por_deudor(deudor_id)
+    
+    acc_quitados = Cheques_quitados.objects\
+        .antigüedad_por_deudor(deudor_id)
+    
+    docs = facturas.union(acc_quitados)
+    cartera = docs.aggregate(fvencido_mas_90 = Sum('vencido_mas_90')
+                        , fvencido_90 = Sum('vencido_90')
+                        , fvencido_60 = Sum('vencido_60')
+                        , fvencido_30 = Sum('vencido_30')
+                        , fporvencer_30 = Sum('porvencer_30')
+                        , fporvencer_60 = Sum('porvencer_60')
+                        , fporvencer_90 = Sum('porvencer_90')
+                        , fporvencer_mas_90 = Sum('porvencer_mas_90')
+                        , ftotal = Sum('total')
+                        )
+
+    prot_fac = Documentos_protestados.objects\
+        .antigüedad_por_deudor_facturas(deudor_id)
+    prot_acces = Documentos_protestados.objects\
+        .antigüedad_por_deudor_accesorios(deudor_id)
+
+    prot = prot_fac.union(prot_acces)
+    protestos = prot.aggregate(pvencido_mas_90 = Sum('vencido_mas_90')
+                        , pvencido_90 = Sum('vencido_90')
+                        , pvencido_60 = Sum('vencido_60')
+                        , pvencido_30 = Sum('vencido_30')
+                        , pporvencer_30 = Sum('porvencer_30')
+                        , pporvencer_60 = Sum('porvencer_60')
+                        , pporvencer_90 = Sum('porvencer_90')
+                        , pporvencer_mas_90 = Sum('porvencer_mas_90')
+                        , ptotal = Sum('total')
+                        )
+    # cheques
+    accesorios = ChequesAccesorios.objects\
+        .antigüedad_por_deudor(deudor_id)
+    if accesorios:
+        cheques = accesorios[0]
+
+
+    data={
+      'facturas':cartera,
+      'accesorios':cheques,
+      'protestos':protestos,
+        }
+    return JsonResponse( data)
+
+def GeneraListaFacturasPendientesDeudorJSON(request, deudor_id, fecha_corte = None):
+    # Es invocado desde la url de una tabla bt
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    documentos = Documentos.objects\
+        .facturas_pendientes_vencimiento_original(fecha_corte, id_empresa.empresa)\
+        .filter(cxcomprador = deudor_id)
+
+    tempBlogs = []
+    for i in range(len(documentos)):
+        tempBlogs.append(GeneraListaFacturasPendientesClienteJSONSalida(documentos[i])) 
+
+    # los accesorios que fueron quitados se convierten en facturas pendientes
+    quitados = ChequesAccesorios.objects\
+        .facturas_pendientes_vencimiento_original(fecha_corte, id_empresa.empresa)\
+        .filter(documento__cxcomprador = deudor_id)
+
+    for i in range(len(quitados)):
+        tempBlogs.append(GeneraListaAccesoriosQuitadosClienteJSONSalida(quitados[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaChequesADepositarDeudorJSON(request, deudor_id, fecha_corte):
+    # Es invocado desde la url de una tabla bt
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+
+    documentos = ChequesAccesorios.objects\
+        .cheques_a_depositar(fecha_corte, id_empresa.empresa)\
+        .filter(documento__cxcomprador = deudor_id)
+
+    tempBlogs = []
+    for i in range(len(documentos)):
+        tempBlogs.append(GeneraListaChequesADepositarClienteJSONSalida(documentos[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    return HttpResponse(JsonResponse( data))
+
+def GeneraListaProtestosPendientesDeudorJSON(request, deudor_id):
+    # Es invocado desde la url de una tabla bt
+    deudor = ModeloCliente.Datos_compradores.objects\
+        .filter(pk=deudor_id).first()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
+    if deudor.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+
+    # documentos = Cheques_protestados.objects\
+    #     .filter(leliminado=False, nsaldocartera__gt = 0
+    #             , cxtipooperacion = 'C'
+    #             , cheque__cheque_cobranza__cxcliente = deudor_id).all()
+    documentos = Cheques_protestados.objects\
+        .filter(leliminado=False, nsaldocartera__gt = 0
+                , cheque__cxparticipante = deudor.cxcomprador
+                , cheque__cxtipoparticipante = 'D').all()
+
+    # recuperciones = Cheques_protestados.objects\
+    #     .filter(leliminado=False, nsaldocartera__gt = 0
+    #             , cxtipooperacion = 'R'
+    #             , cheque__cheque_recuperacion__cxcliente = deudor_id).all()
+
+    # documentos = documentos.union(recuperciones)
+
+    tempBlogs = []
+    for i in range(len(documentos)):
+        tempBlogs.append(GeneraListaProtestosPendientesClienteJSONSalida(documentos[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaCanjesDeudorJSON(request, deudor_id):
+    # Es invocado desde la url de una tabla bt
+
+    deudor = ModeloCliente.Datos_compradores.objects\
+        .filter(pk=deudor_id).first()
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
+    
+    if deudor.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
+    documentos = Cheques_canjeados.objects\
+        .filter(leliminado=False
+                , accesoriooriginal__documento__cxcomprador = deudor_id
+                , accesoriooriginal__cxpropietariocuenta = 'D').all()
+
+    tempBlogs = []
+    for i in range(len(documentos)):
+        tempBlogs.append(GeneraListaCanjesClienteJSONSalida(documentos[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaChequesQuitadosDeudorJSON(request, deudor_id):
+    # Es invocado desde la url de una tabla bt
+
+    deudor = ModeloCliente.Datos_compradores.objects\
+        .filter(pk=deudor_id).first()
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
+    
+    if deudor.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+    
+    documentos = Cheques_quitados.objects\
+        .filter(leliminado=False
+                , accesorio_quitado__documento__cxcomprador = deudor_id).all()
+
+    tempBlogs = []
+    for i in range(len(documentos)):
+        tempBlogs.append(GeneraListaChequesQuitadosClienteJSONSalida(documentos[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
 

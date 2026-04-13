@@ -1,0 +1,644 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Participantes</a></li>
+                    <li><a href="#">Deudores</a></li>
+                    <li><a href="{% url 'clientes:listacompradores' %}">lista</a></li>
+                    <li class="active">vista</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+<div class="card">
+    <div class="card-header" style="background-color: white;">
+        <div class="d-flex justify-content-between align-items-center ">
+            <h5>{{ datosparticipante }} </h5> 
+            <div class="mb-3">
+                <a href="{% url 'clientes:comprador_editar' datosparticipante.id 'home' %}" class="btn btn-primary btn-sm">
+                    <i class="fa fa-edit"></i> Editar datos generales
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body card-block">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link {% if active_tab == 'home' %}active{% endif %}" id="home-tab" data-toggle="tab" href="#home" 
+                role="tab" aria-controls="home" aria-selected="{% if active_tab == 'home' %}true{% else %}false{% endif %}">Datos generales</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_tab == 'cupos' %}active{% endif %}" id="cupos-tab" data-toggle="tab" href="#cupos" 
+                role="tab" aria-controls="cupos" aria-selected="{% if active_tab == 'cupos' %}true{% else %}false{% endif %}">Cupos</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_tab == 'estado_operativo' %}active{% endif %}" id="estado_operativo-tab" data-toggle="tab" href="#estado_operativo" 
+                role="tab" aria-controls="estado_operativo" aria-selected="{% if active_tab == 'estado_operativo' %}true{% else %}false{% endif %}">Estado operativo</a>
+            </li>
+        </ul>
+        <div class="tab-content pl-3 p-1" id="myTabContent">
+            <div class="tab-pane fade {% if active_tab == 'home' %}show active{% endif %}" id="home" role="tabpanel" aria-labelledby="home-tab">
+                <div class="col-md-7">
+                    <div class="card mt-3"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header"style="background-color: white;">
+                            <h6>Identificación</h6> 
+                        </div>
+                        <div class="card-body">
+                            <div class="col-md-12">
+                                
+                                <div class="row form-group">
+                                    <div class="col col-md-4"><label for="id_cxtipoid" class=" form-control-label">
+                                        {{form.cxtipoid.label}} 
+                                    </label></div>
+                                    <div class="col-md-8">
+                                        {{datosparticipante.tipo_identificacion}}
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col col-md-4"><label for="id_cxparticipante" class=" form-control-label">
+                                        {{form.cxparticipante.label}} 
+                                    </label></div>
+                                    <div class="col-md-8">
+                                        {{datosparticipante.cxparticipante}}
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col col-md-4"><label for="id_ctnombre" class=" form-control-label">
+                                        {{form.ctnombre.label}} 
+                                    </label></div>
+                                    <div class="col-md-8">
+                                        {{datosparticipante.ctnombre}}
+                                    </div>
+                                </div>
+
+                                
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="card mt-3"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header"style="background-color: white;">
+                            <div class="d-flex justify-content-between align-items-center ">
+                                <h6>Clase y estado</h6>
+                                <button class="btn btn-outline-secondary btn-sm"  title="Estado y clase"
+                                        onclick="return AbrirModal('{% url 'clientes:estadoclasecomprador_editar' datosdeudor.id %}')"
+                                    role="button">
+                                    <i class="fa fa-star"></i> Editar clase y estado
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- clase -->
+                            <div class="row form-group">
+                                <div class="col col-md-4"><label for="id_cxclase" 
+                                    class=" form-control-label">{{form_deudor.cxclase.label}}</label></div>
+                                <div class="col-md-8">
+                                    {{datosdeudor.cxclase}}
+                                </div>
+                            </div>
+                            <!-- estado -->
+                            <div class="row form-group">
+                                <div class="col col-md-4"><label for="id_cxestado" 
+                                    class=" form-control-label">{{form_deudor.cxestado.label}}</label></div>
+                                <div class="col-md-8">
+                                    {{datosdeudor.estado}}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header"style="background-color: white;">
+                            <h6>Ubicación y contactos</h6>
+                        </div>
+                        <div class="card-body">
+
+                            <div class="col-md-6">
+                                <div class="row form-group">
+                                    <div class="col col-md-4"><label for="id_provincia" class=" form-control-label">
+                                        {{form.provincia.label}} 
+                                    </label></div>
+                                    <div class="col-md-8">
+                                        {{datosparticipante.provincia}}
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col col-md-4"><label for="id_canton" class=" form-control-label">
+                                        {{form.canton.label}} 
+                                    </label></div>
+                                    <div class="col-md-8">
+                                        {{datosparticipante.canton}}
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col col-md-4"><label for="id_ctdireccion" class=" form-control-label">
+                                        {{form.ctdireccion.label}} 
+                                    </label></div>
+                                    <div class="col-md-8">
+                                        {{datosparticipante.ctdireccion}}
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!-- columna derecha -->
+                            <div class="col-md-6">
+                                <div class="row form-group">
+                                    <div class="col col-md-3"><label for="id_cttelefono1" class=" form-control-label">
+                                        {{form.cttelefono1.label}}
+                                    </label></div>
+                                    <div class="col-md-4">
+                                        {{datosparticipante.cttelefono1}}
+                                    </div>
+                                    <div class="col-md-1">-</div>
+                                    <div class="col-md-4">{{datosparticipante.cttelefono2}}</div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col col-md-3"><label for="id_ctcelular" class=" form-control-label">
+                                        {{form.ctcelular.label}}
+                                    </label></div>
+                                    <div class="col-md-9">
+                                        {{datosparticipante.ctcelular}}
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col col-md-3"><label for="id_ctemail" class=" form-control-label">
+                                        {{form.ctemail.label}}
+                                    </label></div>
+                                    <div class="col-md-9">
+                                        {{datosparticipante.ctemail}}
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col col-md-3"><label for="id_ctemail2" class=" form-control-label">
+                                        {{form.ctemail2.label}}
+                                    </label></div>
+                                    <div class="col-md-9">
+                                        {{datosparticipante.ctemail2}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-md-12">
+
+                    <div class="card mt-3"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header"style="background-color: white;">
+                            <h6>Información comercial</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="col-md-6">
+
+                                <div class="row form-group">
+                                    <div class="col col-md-4"><label for="id_dinicioactividades" class=" form-control-label">
+                                        {{form.dinicioactividades.label}} 
+                                    </label></div>
+                                    <div class="col-md-8">
+                                        {{datosparticipante.dinicioactividades}}
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col col-md-4"><label for="id_ctgirocomercial" class=" form-control-label">
+                                        {{form.ctgirocomercial.label}} 
+                                    </label></div>
+                                    <div class="col-md-8">
+                                        {{datosparticipante.ctgirocomercial}}
+                                    </div>
+                                </div> 
+                                <div class="row form-group">
+                                    <div class="col col-md-4"><label for="id_actividad" class=" form-control-label">
+                                        {{form.sectoreconomico.label}} 
+                                    </label></div>
+                                    <div class="col-md-8">
+                                        {{datosparticipante.sectoreconomico}}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+
+                                <div class="row form-group">
+                                    <div class="col col-md-3"><label for="id_actividad" class=" form-control-label">
+                                        {{form_actividad.actividad.label}} 
+                                    </label></div>
+                                    <div class="col-md-9">
+                                        {{datosparticipante.actividad}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="tab-pane fade {% if active_tab == 'cupos' %}show active{% endif %}" id="cupos" role="tabpanel" aria-labelledby="cupos-tab">
+                <table class="table table-hover table-bordered" 
+                    id="bootstrap-data-table-export"
+                    >
+                    <thead>
+                        <tr>
+                            <th data-field="campo3" data-sortable="true">Cliente</th>
+                            <th data-field="campo4" data-sortable="true">Cupo</th>
+                            <th data-field="campo5" data-sortable="true">Utilizado</th>
+                            <th data-field="campo6" data-sortable="true">Disponible</th>
+                            <th data-field="campo7" data-sortable="true">Activo</th>
+                            <th data-field="campo8" data-sortable="true">Aprobación</th>
+                            <th data-field="campo9" data-sortable="false">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in consulta %}
+                        <tr>
+                            <td>{{ item.cxcliente }}</td>
+                            <td class="text-right">{{ item.ncupocartera |floatformat:"2g"}}</td>
+                            <td class="text-right">{{ item.nutilizadocartera |floatformat:"2g"}}</td>
+                            <td class="text-right">{{ item.disponible |floatformat:"2g"}}</td>
+                            <td>{{ item.lactivo|yesno:'Si,No' }}</td>
+                            <td>{{ item.daprobacion|date:"Y/m/d" }}</td>
+                            <td>
+                                <button class="btn  btn-sm"  title="Editar"
+                                    onclick="return AbrirModal('{% url 'clientes:cupo_editar' item.id %}')"
+                                    role="button">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+                                <a href="#" onclick="return EliminarCupo({{item.id}}, '{{item.cxcliente}}', {{item.nutilizadocartera}})" title="Eliminar"
+                                    class="btn  btn-sm" role="button"><i class="fa fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-pane fade {% if active_tab == 'estado_operativo' %}show active{% endif %}" id="estado_operativo" role="tabpanel" aria-labelledby="estado_operativo-tab">
+                        <div class="row mt-3">
+                            <div class="col-lg-12 col-md-12">
+                                <!-- <div class="col-md-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="stat-widget-one">
+                                                <div class="stat-icon dib"><i class="ti-money text-success border-success"></i></div>
+                                                <div class="stat-content dib">
+                                                    <div class="stat-text">Monto de línea</div>
+                                                    <div class="stat-digit">{{ valor_linea|floatformat:"0g"}}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> -->
+
+                                <!-- <div class="col-md-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="stat-widget-one">
+                                                <div class="stat-icon dib"><i class="ti-thumb-up text-primary border-primary"></i></div>
+                                                <div class="stat-content dib">
+                                                    <div class="stat-text">Disponible</div>
+                                                    <div class="stat-digit">{{ porc_disponible }}%</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> -->
+
+                                <div class="col-md-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="clearfix">
+                                                <i class="fa fa-dollar 
+                                                {% if color_estado == 1 %} 
+                                                    bg-flat-color-1
+                                                {% elif color_estado == 2 %}
+                                                    bg-flat-color-2
+                                                {% elif color_estado == 3 %}
+                                                    bg-flat-color-3
+                                                {% elif color_estado == 4 %}
+                                                    bg-flat-color-4
+                                                {% elif color_estado == 5 %}
+                                                    bg-flat-color-5
+                                                {% endif %}                           
+                                                p-3 font-2xl mr-3 float-left text-light"></i>
+                                                <div class="h5 text-secondary mb-0 mt-1">{{ total_cartera_protestos|floatformat:"2g" }}</div>
+                                                <div class="text-muted text-uppercase font-weight-bold font-xs small">
+                                                    <h6>Facturas y protestos</h6></div>
+                                            </div>
+                                            <div class="b-b-1 pt-3"></div>
+                                            <hr>
+                                            <div class="more-info pt-2" style="margin-bottom:-10px;">
+                                                <a class="font-weight-bold font-xs btn-block text-muted small" 
+                                                href="{% url 'operaciones:detalle_facturas_pendientes_deudores' deudor_id %}"  target="cartera">
+                                                <h6>Facturas pendientes
+                                                <i class="fa fa-angle-right float-right font-lg"></i></h6></a>
+                                            </div>
+                                            <div class="more-info pt-2" style="margin-bottom:-10px;">
+                                                <a class="font-weight-bold font-xs btn-block text-muted small" 
+                                                href="{% url 'operaciones:detalle_cheques_pendientes_deudores' deudor_id %}"  target="cheques">
+                                                <h6>Cheques pendientes
+                                                <i class="fa fa-angle-right float-right font-lg"></i></h6></a>
+                                            </div>
+                                            <div class="more-info pt-2" style="margin-bottom:-10px;">
+                                                <a class="font-weight-bold font-xs btn-block text-muted small" 
+                                                href="{% url 'cobranzas:protestos_pendientes_deudor' datosparticipante.id %}"  target="protestos">
+                                                <h6>Protestos
+                                                <i class="fa fa-angle-right float-right font-lg"></i></h6></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="stat-widget-one">
+                                                <div class="stat-icon dib"><i class="ti-user text-info border-info"></i></div>
+                                                <div class="stat-content dib">
+                                                    <div class="stat-text">Clase</div>
+                                                    <div class="stat-digit">{{clase}}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card
+                                        {% if color_estado == 1 %} 
+                                            bg-flat-color-1
+                                        {% elif color_estado == 2 %}
+                                            bg-flat-color-2
+                                        {% elif color_estado == 3 %}
+                                            bg-flat-color-3
+                                        {% elif color_estado == 4 %}
+                                            bg-flat-color-4
+                                        {% elif color_estado == 5 %}
+                                            bg-flat-color-5
+                                        {% endif %}
+                                        text-light">
+                                        <div class="card-body">
+                                            <div class="h4 m-0">{{estado}}</div>
+                                            <div>Estado</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="stat-widget-one">
+                                                <div class="stat-icon dib"><i class="ti-time text-success border-success"></i></div>
+                                                <div class="stat-content dib">
+                                                    <div class="stat-text">Demora de pago</div>
+                                                    <div class="stat-digit">{{ promedio_ponderado_demora|floatformat:"2g"}} días</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12">
+                                <!-- grafico cartera negociada -->
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h4 class="mb-3">Cartera negociada </h4>
+                                            <canvas id="lineChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h4 class="mb-3">Antigüedad de la cartera y protestos</h4>
+                                            <canvas id="singelBarChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div><!-- /# column -->
+                            </div>
+                        </div>
+                        <!-- <div class="row">
+                            <div class="col-lg-12 col-md-12">
+
+                                <div class="col-md-3 col-lg-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="stat-widget-one">
+                                                <div class="stat-icon dib"><i class="ti-calendar text-info border-info"></i></div>
+                                                <div class="stat-content dib">
+                                                    <div class="stat-text">Opera desde</div>
+                                                    <div class="stat-digit">{{ primera_operacion|date:"b/Y" }} </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="stat-widget-one">
+                                                <div class="stat-icon dib"><i class="ti-time text-warning border-warning"></i></div>
+                                                <div class="stat-content dib">
+                                                    <div class="stat-text">Días sin operar</div>
+                                                    <div class="stat-digit">{{ dias_ultima_operacion }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="stat-widget-one">
+                                                <div class="stat-icon dib"><i class="ti-files text-primary border-primary"></i></div>
+                                                <div class="stat-content dib">
+                                                    <div class="stat-text">Operaciones</div>
+                                                    <div class="stat-digit">{{ cantidad_operaciones }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div> -->
+                        <div class="col-xl-6">
+                            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <div class="card-header" style="background-color: white;">
+                                    <h6>Documentos vencidos</h6>
+                                </div>
+                                <!-- <small> -->
+                                    <div>
+                                        <table id="table"  class="table table-hover table-bordered"
+                                            data-url="{% url 'operaciones:carteradeudor_json' deudor_id hoy %}"
+                                            data-id-field="id"
+                                            >
+                                            <thead>
+                                                <tr>
+                                                <th data-field="Cliente" data-filter-control="input"
+                                                data-sortable="true" >Cliente</th>
+                                                <th data-field="Asignacion" data-filter-control="input"
+                                                data-sortable="true" >Asignación</th>
+                                                <th data-field="Documento" data-filter-control="input"
+                                                data-sortable="true" >Documento</th>
+                                                <th data-field="Vencimiento" data-sortable="true" >Vencidos</th>
+                                                <th data-field="Saldo" data-sortable="true" >Saldo</th>
+                                                </tr>
+                                            </thead>
+                                        </table>             
+                                    </div>
+                                <!-- </small> -->
+                            </div>
+                        </div>
+                        <div class="col-xl-6">
+                            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <div class="card-header" style="background-color: white;">
+                                    <h6>Accesorios vencidos</h6>
+                                </div>
+                                <!-- <small> -->
+                                    <div>
+                                        <table id="tbcheques"  class="table table-hover table-bordered"
+                                        data-url="{% url 'operaciones:chequesadepositardeudor_json' deudor_id hoy %}"
+                                            data-id-field="id"
+                                            >
+                                            <thead>
+                                                <tr>
+                                                <th data-field="Cliente" data-filter-control="input"
+                                                data-sortable="true" >Cliente</th>
+                                                <th data-field="Asignacion" data-filter-control="input"
+                                                data-sortable="true" >Asignación</th>
+                                                <th data-field="Datos" data-filter-control="input"
+                                                data-sortable="true" >Datos</th>
+                                                <th data-field="Vencimiento" data-sortable="true" >Vencidos</th>
+                                                <th data-field="Valor" data-sortable="true" >Saldo</th>
+                                                </tr>
+                                            </thead>
+                                        </table>             
+                                    </div>
+                                <!-- </small> -->
+                            </div>
+                        </div>
+                        <div class="col-xl-6">
+                            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <div class="card-header" style="background-color: white;">
+                                    <h6>Protestos pendientes</h6>
+                                </div>
+                                <!-- <small> -->
+                                    <div>
+                                        <table id="tbprotestos"  class="table table-hover table-bordered"
+                                        data-url="{% url 'operaciones:protestospendientesdeudor_json' deudor_id %}"
+                                            data-id-field="id"
+                                            >
+                                            <thead>
+                                                <tr>
+                                                <th data-field="Girador" data-filter-control="input"
+                                                data-sortable="true" >Girador</th>
+                                                <th data-field="Cheque" data-filter-control="input"
+                                                data-sortable="true" >Cheque</th>
+                                                <th data-field="Protesto" data-filter-control="input"
+                                                data-sortable="true" >Fecha</th>
+                                                <th data-field="Motivo" data-sortable="true" >Motivo</th>
+                                                <th data-field="Saldo" data-sortable="true" >Saldo</th>
+                                                </tr>
+                                            </thead>
+                                        </table>             
+                                    </div>
+                                <!-- </small> -->
+                            </div>
+                        </div>    
+                        <div class="col-xl-6">
+                            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <div class="card-header" style="background-color: white;">
+                                    <h6>Canjes</h6>
+                                </div>
+                                <!-- <small> -->
+                                    <div>
+                                        <table id="tbcanjes"  class="table table-hover table-bordered"
+                                        data-url="{% url 'operaciones:listacanjesdeudor_json' deudor_id %}"
+                                            data-id-field="id"
+                                            >
+                                            <thead>
+                                                <tr>
+                                                <th data-field="Fecha" data-filter-control="input"
+                                                data-sortable="true" >Fecha</th>
+                                                <th data-field="Asignacion" data-filter-control="input"
+                                                data-sortable="true" >Asignación</th>
+                                                <th data-field="Original" data-filter-control="input"
+                                                data-sortable="true" >Original</th>
+                                                <th data-field="Nuevo" data-filter-control="input"
+                                                data-sortable="true" >Nuevo</th>
+                                                <th data-field="Motivo" 
+                                                data-sortable="true" >Motivo</th>
+                                                </tr>
+                                            </thead>
+                                        </table>             
+                                    </div>
+                                <!-- </small> -->
+                            </div>
+                        </div>
+                        <div class="col-xl-6">
+                            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <div class="card-header" style="background-color: white;">
+                                    <h6>Accesorios quitados</h6>
+                                </div>
+                                <!-- <small> -->
+                                    <div>
+                                        <table id="tbquitados"  class="table table-hover table-bordered"
+                                        data-url="{% url 'operaciones:listachequesquitadosdeudor_json' deudor_id %}"
+                                            data-id-field="id"
+                                            >
+                                            <thead>
+                                                <tr>
+                                                <th data-field="Registro" data-filter-control="input"
+                                                data-sortable="true" >Registro</th>
+                                                <th data-field="Asignacion" data-filter-control="input"
+                                                data-sortable="true" >Asignación</th>
+                                                <th data-field="Cheque" data-filter-control="input"
+                                                data-sortable="true" >Cheque</th>
+                                                <th data-field="Saldo" data-filter-control="input"
+                                                data-sortable="true" >Saldo</th>
+                                                <th data-field="Motivo" 
+                                                data-sortable="true" >Motivo</th>
+                                                </tr>
+                                            </thead>
+                                        </table>             
+                                    </div>
+                                <!-- </small> -->
+                            </div>
+                        </div>
+            </div>
+        </div>
+
+    </div>    
+</div>
+                               
+{% endblock %}
+{% block js_page %}
+<script src="{% static 'factorweb/vendors/chart.js/dist/Chart.bundle.min.js' %}"></script>
+<script>
+    var $table = jQuery('#table')
+    var $tbprotestos = jQuery('#tbprotestos')
+    var $tbcheques = jQuery('#tbcheques')
+    var $tbcanjes = jQuery('#tbcanjes')
+    var $tbquitados = jQuery('#tbquitados')
+
+    const deudor_id = "{{ deudor_id }}"
+
+    window.onload=function(){
+    $table.bootstrapTable({locale:"es-EC"});
+    $tbprotestos.bootstrapTable({locale:"es-EC"});
+    $tbcheques.bootstrapTable({locale:"es-EC"});
+    $tbcanjes.bootstrapTable({locale:"es-EC"});
+    $tbquitados.bootstrapTable({locale:"es-EC"});
+
+    antigüedadcartera("/operaciones/antigüedadcarteradeudor/"+deudor_id);
+    carteranegociada("/operaciones/carteranegociadadeudor/"+deudor_id+"/{{año}}", "{{año}}");
+    }
+</script>
+{% endblock %}

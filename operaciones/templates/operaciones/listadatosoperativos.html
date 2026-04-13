@@ -47,14 +47,41 @@
             {% endif %}
 
             <!-- <div class="content"> -->
+            <div>
+                <!-- <h5 class="heading-title mb-1 text-secondary">Formas de cobro</h5> -->
+        
+                <div id="toolbar" >
+                    <button id="todos_tasa_gaoa" class="btn btn-danger" disabled>
+                        <i class="ti ti-edit"></i> Actualizar tasas de GAO adicional
+                    </button>
+                    <button id="todos_tasa_mora" class="btn btn-danger" disabled>
+                        <i class="ti ti-edit"></i> Actualizar tasas de mora
+                    </button>
+    
+                </div>
+            </div>        
 
                 <table class="table table-hover table-bordered" 
-                    id="bootstrap-data-table-export"
+                    id="table"
                     data-filter-control="true"
+                    data-show-search-clear-button="true"
+                    data-show-refresh="true"
+                    data-show-fullscreen="true"
+                    data-show-columns="true"
+                    data-show-columns-toggle-all="true"
+                    data-show-export="true"
+                    data-detail-formatter="detailFormatter"
+                    data-show-pagination-switch="true"
+                    data-pagination="true"
+                    data-page-list="[10, 25, 50, 100, all]"
+                    data-toolbar="#toolbar"
+                    data-id-field="id"
+                    data-click-to-select="true"
                     >
                     <thead>
                         <tr>
                             <th data-field="state" data-checkbox="true"></th>
+                            <th data-field="id">Ref.</th>
                             <th data-field="campo1" data-sortable="true" data-filter-control="input">Nombre</th>
                             <!-- <th data-field="campo2" data-sortable="true">Id</th> -->
                             <th data-field="campo3" data-sortable="true" data-filter-control="input">Clase</th>
@@ -71,6 +98,7 @@
                     <tbody>
                         {% for item in consulta %}
                         <tr>
+                            <td>{{ false }}</td>
                             <td>{{ item.id }}</td>
                             <td>{{ item }}</td>
                             <!-- <td>{{ item.cxcliente.cxparticipante }}</td> -->
@@ -100,4 +128,60 @@
  
 
 {% endblock %}
+{% block js_page %}
+<script>
+var $table = jQuery('#table')
+var $todos_tasa_gaoa = jQuery("#todos_tasa_gaoa")
+var $todos_tasa_mora = jQuery("#todos_tasa_mora")
+var selections = []
 
+window.onload=function(){
+
+    $table.bootstrapTable({locale:"es-EC"});
+    
+    // evento de marcar y desmarcar documentos
+    $table.on('check.bs.table uncheck.bs.table ' +
+      'check-all.bs.table uncheck-all.bs.table',
+        function () {
+        $todos_tasa_gaoa.prop('disabled', !$table.bootstrapTable('getSelections').length)
+        $todos_tasa_mora.prop('disabled', !$table.bootstrapTable('getSelections').length)
+
+        // save your data, here just save the current page
+        selections = getIdSelections()
+        console.log('selections', selections)
+        // push or splice the selections if you want to save all data selections
+        }
+    )
+
+    // acciones ejecutada sobre registros seleccionados
+    $todos_tasa_gaoa.click(function () {
+      EditarTasaGAOA();
+      $todos_tasa_gaoa.prop('disabled', true)
+    })
+
+    $todos_tasa_mora.click(function () {
+      EditarTasaMora();
+      $todos_tasa_mora.prop('disabled', true)
+    })
+
+};
+
+function EditarTasaGAOA(){
+
+//   var seleccion=  $table.bootstrapTable('getSelections')
+  var ids = getIdSelections()
+    console.log('ids', ids,)
+  AbrirModal('/clientes/cambiartasagaoa-todos/'+ids )
+}    
+
+function EditarTasaMora(){
+
+//   var seleccion=  $table.bootstrapTable('getSelections')
+  var ids = getIdSelections()
+    console.log('ids', ids,)
+  AbrirModal('/clientes/cambiartasamora-todos/'+ids )
+}    
+
+</script>
+
+{% endblock %}

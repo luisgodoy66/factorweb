@@ -7,7 +7,7 @@
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Participantes</a></li>
                     <li><a href="#">deudores</a></li>
-                    <li><a href="{% url 'clientes:listacompradores' %}">Ficha general</a></li>
+                    <li><a href="{% url 'clientes:listacompradores' %}">lista</a></li>
                     <li class="active">editar</li>
                 </ol>
             </div>
@@ -16,169 +16,384 @@
 {% endblock breadcrumbs %}
 {% block content %}
 
-<form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal"
-    onsubmit="return checkSubmit();">
-    <!-- <div class="col-lg-6"> -->
-        <div class="card">
-            {% csrf_token %}
-            <div class="card-header" style="background-color: white;">
-                <div class="d-flex justify-content-between align-items-center ">
-                    <h5>Ficha general de {% if datosparticipante %} {{ datosparticipante }} {% else %}  nuevo comprador {% endif %}</h5> 
-                    <a href="{% url 'clientes:listacompradores' %}" class="btn  btn-sm">
-                        <i class="fa fa-times"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="card-body card-block">
-                <!-- columna izquierda -->
-                <div class="col-lg-6">
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'home' %}active{% endif %}" id="home-tab" data-toggle="tab" href="#home" 
+        role="tab" aria-controls="home" aria-selected="true">Datos generales</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'actividad' %}active{% endif %}" id="actividad-tab" data-toggle="tab" href="#actividad" 
+        role="tab" aria-controls="actividad" aria-selected="false">Actividad económica</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'contact' %}active{% endif %}" id="contact-tab" data-toggle="tab" href="#contact" 
+        role="tab" aria-controls="contact" aria-selected="false">Datos financieros</a>
+    </li>
+</ul>
+<div class="tab-content pl-3 p-1" id="myTabContent">
+    <div class="tab-pane fade {% if active_tab == 'home' %}show active{% endif %}" id="home" role="tabpanel" aria-labelledby="home-tab">
+        <form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal"
+            onsubmit="return checkSubmit();">
+            <!-- <div class="col-lg-6"> -->
+                <div class="card">
+                    {% csrf_token %}
+                    <div class="card-header" style="background-color: white;">
+                        <div class="d-flex justify-content-between align-items-center ">
+                            <h5>Ficha general de {% if datosparticipante %} {{ datosparticipante }} {% else %}  nuevo comprador {% endif %}</h5> 
+                            <a href="{% url 'clientes:listacompradores' %}" class="btn  btn-sm">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body card-block">
+                        <div class="card mt-3"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <div class="card-header">
+                                <h6>Identificación</h6> 
+                            </div>
+                            <div class="card-body">
+                                <!-- columna izquierda -->
+                                <div class="col-md-4">
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-4"><label for="id_cxtipoid" class=" form-control-label">
+                                            {{form.cxtipoid.label}}
+                                        </label></div>
+                                        <div class="col-md-8">
+                                            {{form.cxtipoid}}
+                                            <!-- <small class="form-text text-muted">Máximo 13 caracteres</small> -->
+                                        </div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-4"><label for="id_cxparticipante" class=" form-control-label">
+                                            {{form.cxparticipante.label}}
+                                        </label></div>
+                                        <div class="col-md-8">
+                                            {{form.cxparticipante}}
+                                            <small class="form-text text-muted">Máximo 13 caracteres</small>
+                                        </div>                            
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="id_ctnombre" class=" form-control-label">
+                                            {{form.ctnombre.label}}
+                                        </label></div>
+                                        <div class="col-md-9">
+                                            {{form.ctnombre}}
+                                            <small class="form-text text-muted">Máximo 100 caracteres</small></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card mt-3"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <div class="card-header">
+                                <h6>Ubicación y contactos</h6>
+                            </div>
+                            <div class="card-body">
+
+                                <div class="col-md-7">
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="id_provincia" class=" form-control-label">
+                                            {{form.provincia.label}} 
+                                        </label></div>
+                                        <div class="col-md-10">
+                                            {{form.provincia}}
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="id_canton" class=" form-control-label">
+                                            {{form.canton.label}} 
+                                        </label></div>
+                                        <div class="col-md-10">
+                                            {{form.canton}}
+                                        </div>
+                                    </div>
+                                
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="id_ctdireccion" class=" form-control-label">
+                                            {{form.ctdireccion.label}}
+                                        </label></div>
+                                        <div class="col-md-10">
+                                            {{form.ctdireccion}}
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- columna derecha -->
+                                <div class="col-lg-5">
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="id_cttelefono1" class=" form-control-label">
+                                            {{form.cttelefono1.label}}
+                                        </label></div>
+                                        <div class="col-md-10">
+                                            {{form.cttelefono1}}
+                                            <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="id_cttelefono2" class=" form-control-label">
+                                            {{form.cttelefono2.label}}
+                                        </label></div>
+                                        <div class="col-md-10">
+                                            {{form.cttelefono2}}
+                                            <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="id_ctcelular" class=" form-control-label">
+                                            {{form.ctcelular.label}}
+                                        </label></div>
+                                        <div class="col-md-10">
+                                            {{form.ctcelular}}
+                                            <small class="form-text text-muted">Máximo 30 caracteres. Incluya el código de país</small></div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="id_ctemail" class=" form-control-label">
+                                            {{form.ctemail.label}}
+                                        </label></div>
+                                        <div class="col-md-10">
+                                            {{form.ctemail}}
+                                            <small class="text-muted form-text">Ingrese el email principal</small></div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="id_ctemail2" class=" form-control-label">
+                                            {{form.ctemail2.label}}
+                                        </label></div>
+                                        <div class="col-md-10">
+                                            {{form.ctemail2}}
+                                            <small class="text-muted form-text">Ingrese el email secundario</small></div>
+                                    </div>
+                                </div>
+                            </div>       
+                        </div>
+                        <div class="card mt-3"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <div class="card-header">
+                                <h6>Información comercial</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row form-group">
+                                    <div class="col col-md-2"><label for="id_ctgirocomercial" class=" form-control-label">
+                                        {{form.ctgirocomercial.label}}
+                                    </label></div>
+                                    <div class="col-md-10">
+                                        {{form.ctgirocomercial}}
+                                    </div>
+                                </div> 
+                                <!-- <div class="row form-group">
+                                    <div class="col col-md-2"><label for="id_actividad" class=" form-control-label">
+                                        {{form.actividad.label}}
+                                    </label></div>
+                                    <div class="col-md-10">
+                                        {{form.actividad}}
+                                    </div>
+                                </div> -->
+                                <div class="row form-group">
+                                    <div class="col col-md-2"><label for="id_dinicioactividades" class=" form-control-label">
+                                        {{form.dinicioactividades.label}}
+                                    </label></div>
+                                    <div class="col-md-10">
+                                        {{form.dinicioactividades}}
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col col-md-2"><label for="id_sectoreconomico" class=" form-control-label">
+                                        {{form.sectoreconomico.label}} <span style="color: red;">*</span>
+                                    </label></div>
+                                    <div class="col-md-10">
+                                        {{form.sectoreconomico}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>    
                     
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cxtipoid" class=" form-control-label">
-                            {{form.cxtipoid.label}}
-                        </label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.cxtipoid}}
-                            <!-- <small class="form-text text-muted">Máximo 13 caracteres</small> -->
+                    <div class="card-footer">
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-secondary btn-sm">
+                                <i class="fa fa-dot-circle-o"></i> Grabar
+                            </button>
+
                         </div>
                     </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cxparticipante" class=" form-control-label">
-                            {{form.cxparticipante.label}}
-                        </label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.cxparticipante}}
-                            <small class="form-text text-mut ed">Máximo 13 caracteres</small>
-                        </div>                            
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_ctnombre" class=" form-control-label">
-                            {{form.ctnombre.label}}
-                        </label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.ctnombre}}
-                            <small class="form-text text-muted">Máximo 100 caracteres</small></div>
-                    </div>
-                    <!-- <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cxlocalidad" class=" form-control-label">Localidad</label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.cxlocalidad}}
-                        </div>
-                    </div> -->
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_ctdireccion" class=" form-control-label">
-                            {{form.ctdireccion.label}}
-                        </label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.ctdireccion}}
-                        </div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cttelefono1" class=" form-control-label">
-                            {{form.cttelefono1.label}}
-                        </label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.cttelefono1}}
-                            <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
-                    </div>
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_cttelefono2" class=" form-control-label">
-                            {{form.cttelefono2.label}}
-                        </label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.cttelefono2}}
-                            <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
-                    </div>
-
+                <!-- Sección para mostrar errores del formulario -->
+                {#% if form_submitted and form.errors %#}
+                {% if form.errors %}
+                <div class="alert alert-danger" role="alert">
+                    <ul>
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <!-- <li>{{ field }}: {{ error }}</li> -->
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
                 </div>
-                <!-- columna derecha -->
-                <div class="col-lg-6">
-
-                     <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_ctcelular" class=" form-control-label">
-                            {{form.ctcelular.label}}
-                        </label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.ctcelular}}
-                            <small class="form-text text-muted">Máximo 30 caracteres. Incluya el código de país</small></div>
-                    </div>
-                   <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_ctemail" class=" form-control-label">
-                            {{form.ctemail.label}}
-                        </label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.ctemail}}
-                            <small class="text-muted form-text">Ingrese el email principal</small></div>
-                    </div>
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_ctemail2" class=" form-control-label">
-                            {{form.ctemail2.label}}
-                        </label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.ctemail2}}
-                            <small class="text-muted form-text">Ingrese el email secundario</small></div>
-                    </div>
-
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_ctgirocomercial" class=" form-control-label">
-                            {{form.ctgirocomercial.label}}
-                        </label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.ctgirocomercial}}
-                        </div>
-                    </div> 
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_actividad" class=" form-control-label">
-                            {{form.actividad.label}}
-                        </label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.actividad}}
-                        </div>
-                    </div>
-                    <div class="row form-group">
-                        <div class="col col-md-3"><label for="id_dinicioactividades" class=" form-control-label">
-                            {{form.dinicioactividades.label}}
-                        </label></div>
-                        <div class="col-12 col-md-9">
-                            {{form.dinicioactividades}}
-                        </div>
-                    </div>
-                            
+            {% endif %}
                 </div>
-            </div>    
-            
-            <div class="card-footer">
-                <div class="text-right">
-                    <button type="submit" class="btn btn-secondary btn-sm">
-                        <i class="fa fa-dot-circle-o"></i> Grabar
-                    </button>
+            <!-- </div> -->
+        </form>
+    </div>
+    <div class="tab-pane fade {% if active_tab == 'actividad' %}show active{% endif %}" id="actividad" role="tabpanel" aria-labelledby="actividad-tab">
+        <form  method="post" id="frmActividad" enctype="multipart/form-data" class="form-horizontal"
+            onsubmit="return checkSubmit();">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-header" style="background-color: white;">
+                    <div class="d-flex justify-content-between align-items-center ">
+                        <h5>Ficha general de {% if datosparticipante %} {{ datosparticipante }} {% else %}  nuevo cliente {% endif %} </h5> 
+                        <a 
+                        {% if desde_solicitud %} 
+                            href="{% url 'clientes:listaclientessolicitudes' %}" 
+                        {% else %} 
+                            href="{% url 'clientes:listaclientes' %}" 
+                        {% endif %}
+                        class="btn  btn-sm">
+                            <i class="fa fa-times"></i> 
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row form-group">
+                        <div class="col-md-12">
+                            <h6>{{form.sectoreconomico.label}}: {{datosparticipante.sectoreconomico.ctactividad|default:"No definido" }}</h6>
+                            <br>
+                            <h6>{{form_actividad.actividad.label}} actual: {{datosparticipante.actividad|default:"No definido" }}</h6>
 
+                        </div>
+                    </div>
+                    {{ form_actividad }}
+                </div>
+                <div class="card-footer">
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-secondary btn-sm">
+                            <i class="fa fa-dot-circle-o"></i> Grabar
+                        </button>
+
+                    </div>
                 </div>
             </div>
-           <!-- Sección para mostrar errores del formulario -->
-           {#% if form_submitted and form.errors %#}
-           {% if form.errors %}
-           <div class="alert alert-danger" role="alert">
-               <ul>
-                   {% for field, errors in form.errors.items %}
-                       {% for error in errors %}
-                           <!-- <li>{{ field }}: {{ error }}</li> -->
-                           <li>{{ error }}</li>
-                       {% endfor %}
-                   {% endfor %}
-               </ul>
-           </div>
-       {% endif %}
-        </div>
-    <!-- </div> -->
-</form>
+        </form>
+    </div>
+</div>
+    <!-- Sección para mostrar errores del formulario -->
+    {% if form_submitted and form.errors %}
+    <div class="alert alert-danger" role="alert">
+        <ul>
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <li>{{ field }}: {{ error }}</li>
+                    <!-- <li>{{ error }}</li> -->
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 {% endblock %}
 {% block js_page %}
 <script>
     enviando = false; //Obligaremos a entrar el if en el primer submit
+    // Agregar evento change al campo cxcomprador
+    document.getElementById("id_cxparticipante").addEventListener("change", function() {
+        var ruc = this.value;
+        obtener_datos_contribuyente(ruc);
+    });
+
+    // Agregar evento change al campo provincia
+    document.getElementById("id_provincia").addEventListener("change", function() {
+        const provinciaId = this.value;
+        filtrarCantonesPorProvincia(provinciaId, false); // No preservar selección en cambio manual
+    });
+
+    // Al cargar la página, verificar si hay una provincia seleccionada
+    document.addEventListener('DOMContentLoaded', function() {
+        const provinciaSelect = document.getElementById('id_provincia');
+        if (provinciaSelect && provinciaSelect.value) {
+            filtrarCantonesPorProvincia(provinciaSelect.value, true); // Preservar selección existente
+        }
+    });
+
+    // Función para obtener datos del contribuyente
+    function obtener_datos_contribuyente(ruc) {
+        // var url = `/api/sri/obtener-datos-contribuyente/${ruc}`;
+        var url = '/api/sri/obtener-datos-contribuyente/'+ruc;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    console.log(data);
+                    document.getElementById("id_ctnombre").value = data.razonSocial;
+                    if (!document.getElementById("id_ctgirocomercial").value) {
+                        document.getElementById("id_ctgirocomercial").value = data.actividadEconomicaPrincipal;
+                    }
+                    // Extraer solo la fecha (sin hora y minutos)
+                    var fechaInicioActividades = data.informacionFechasContribuyente.fechaInicioActividades.split(" ")[0];
+                    document.getElementById("id_dinicioactividades").value = fechaInicioActividades;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    // Función para filtrar cantones por provincia
+    function filtrarCantonesPorProvincia(provinciaId, preservarSeleccion = false) {
+        const cantonSelect = document.getElementById('id_canton');
+        const cantonActual = cantonSelect.value; // Guardar valor actual
+        
+        if (!provinciaId || provinciaId === '') {
+            // Si no hay provincia seleccionada, limpiar cantones solo si no hay preservar selección
+            if (!preservarSeleccion) {
+                cantonSelect.innerHTML = '<option value="">---------</option>';
+            }
+            return;
+        }
+
+        // Si hay un cantón seleccionado y se solicita preservar selección, no hacer nada
+        if (preservarSeleccion && cantonActual && cantonActual !== '') {
+            return;
+        }
+
+        // Mostrar un estado de carga
+        cantonSelect.innerHTML = '<option value="">Cargando...</option>';
+        cantonSelect.disabled = true;
+
+        // Hacer petición AJAX
+        const url = `{% url 'clientes:obtener_cantones_por_provincia' 0 %}`.replace('0', provinciaId);
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                cantonSelect.disabled = false;
+                
+                if (data.success) {
+                    // Limpiar opciones existentes
+                    cantonSelect.innerHTML = '<option value="">---------</option>';
+                    
+                    // Agregar nuevas opciones
+                    data.cantones.forEach(canton => {
+                        const option = document.createElement('option');
+                        option.value = canton.id;
+                        option.textContent = canton.nombre;
+                        
+                        // Restaurar selección si coincide
+                        if (preservarSeleccion && canton.id.toString() === cantonActual) {
+                            option.selected = true;
+                        }
+                        
+                        cantonSelect.appendChild(option);
+                    });
+                } else {
+                    cantonSelect.innerHTML = '<option value="">Error al cargar cantones</option>';
+                    console.error('Error:', data.error);
+                }
+            })
+            .catch(error => {
+                cantonSelect.disabled = false;
+                cantonSelect.innerHTML = '<option value="">Error al cargar cantones</option>';
+                console.error('Error:', error);
+            });
+    }
+
     
 </script>
 {% endblock %}

@@ -10,6 +10,8 @@ from django.db import transaction
 from django.views import generic
 from django.utils.dateparse import parse_date
 
+from rest_framework.decorators import api_view
+
 import json
 
 from .models import Plan_cuentas, Cuentas_especiales, Cuentas_bancos\
@@ -37,6 +39,8 @@ from .forms import CuentasEspecialesForm, CuentasBancosForm, FacturaVentaForm\
 
 import xml.etree.cElementTree as etree
 from datetime import date, timedelta, datetime
+
+from .serializers import AsientoDiarioSerializer
 
 class CuentasView(SinPrivilegios, generic.ListView):
     model = Plan_cuentas
@@ -2903,3 +2907,22 @@ def CuentaContableBanco(request, banco_id):
         .first()
 
     return JsonResponse(cuenta_banco)
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+def asiento_contable_api(request, asiento_id):
+
+    asiento = Diario_cabecera.objects\
+        .filter(id=asiento_id).first()
+
+    data = {
+        'transaccion': asiento.cxtransaccion if asiento else None,
+        'fecha_contabilizado': asiento.dcontabilizado if asiento else None,
+        'concepto': asiento.ctconcepto if asiento else None,
+        'valor': asiento.nvalor if asiento else None,
+        'estado': asiento.cxestado if asiento else None,
+    }
+    
+    serializer = AsientoDiarioSerializer(data)
+    # return Response(serializer.data)
+    return JsonResponse(serializer.data)

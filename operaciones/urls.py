@@ -33,7 +33,11 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     GeneraResumenCarteraNegociadaClienteJSON, CarteraPorClienteConsulta, \
     GeneraListaCarteraDeudorJSON, CarteraPorDeudorConsulta, \
     RevisionCarteraDetalle, GeneraListaCarteraVencidaJSON, \
-    CarteraVencidaConsulta
+    CarteraVencidaConsulta, GeneraResumenCarteraNegociadaDeudorJSON, \
+    AntigüedadCarteraDeudorJSON, GeneraListaFacturasPendientesDeudorJSON, \
+    GeneraListaChequesADepositarDeudorJSON, \
+    GeneraListaProtestosPendientesDeudorJSON, GeneraListaCanjesDeudorJSON,\
+    GeneraListaChequesQuitadosDeudorJSON
 # EstadoOperativoCliente, \
     
 from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
@@ -44,8 +48,8 @@ from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
     ImpresionAntiguedadCarteraCorte, ImpresionFacturasPendientesCorte,\
     ImpresionAccesoriosPendientesCorte, ImpresionAntiguedadCarteraPorDeudor,\
     ImpresionFacturasPendientesDeudores, ImpresionCarteraPendientePorCliente,\
-    ImpresionCarteraPendientePorDeudor, ImpresionCargosCarteraVencida
-
+    ImpresionCarteraPendientePorDeudor, ImpresionCargosCarteraVencida,\
+    ImpresionAccesoriosPendientesDeudores
 urlpatterns = [
 # datos operativos
     path('listadatosoperativos/',DatosOperativosView.as_view(), \
@@ -58,22 +62,48 @@ urlpatterns = [
     #      ,EstadoOperativoCliente, name='estadooperativocliente'),
     path('antigüedadcarteracliente/<cliente_id>'
          , AntigüedadCarteraClienteJSON),
+    path('antigüedadcarteradeudor/<deudor_id>'
+         , AntigüedadCarteraDeudorJSON),
     path('carteraclientejson/<cliente_id>/<fecha_corte>'
-         ,GeneraListaFacturasPendientesClienteJSON, name="carteracliente_json"),
+         ,GeneraListaFacturasPendientesClienteJSON
+         , name="carteracliente_json"),
     path('chequesadepositarclientejson/<cliente_id>/<fecha_corte>'
          ,GeneraListaChequesADepositarClienteJSON
          , name="chequesadepositarcliente_json"),
-    path('listacargospendientesclientejson/<cliente_id>',\
-         GeneraListaCargosPendientesClienteJSON, name="listacargospendientescliente_json"),
+    path('listacargospendientesclientejson/<cliente_id>',
+         GeneraListaCargosPendientesClienteJSON
+         , name="listacargospendientescliente_json"),
     path('protestospendientesjson/<cliente_id>'
-         ,GeneraListaProtestosPendientesClienteJSON, name="protestospendientescliente_json"),
+         ,GeneraListaProtestosPendientesClienteJSON
+         , name="protestospendientescliente_json"),
     path('canjesclientejson/<cliente_id>',GeneraListaCanjesClienteJSON, 
         name="listacanjescliente_json"),
-    path('chequesquitadosclientejson/<cliente_id>',GeneraListaChequesQuitadosClienteJSON, 
+    path('chequesquitadosclientejson/<cliente_id>'
+         ,GeneraListaChequesQuitadosClienteJSON, 
         name="listachequesquitadoscliente_json"),
-    path('movimientosclientejson/<cliente_id>/<int:registros>',GeneraListaMovimientosClienteJSON,
+    path('movimientosclientejson/<cliente_id>/<int:registros>'
+         ,GeneraListaMovimientosClienteJSON,
         name='movimientoscliente_json'),
-    path('carteranegociadacliente/<cliente_id>/<int:año>', GeneraResumenCarteraNegociadaClienteJSON),
+    path('carteranegociadacliente/<cliente_id>/<int:año>'
+         , GeneraResumenCarteraNegociadaClienteJSON),
+    path('carteranegociadadeudor/<deudor_id>/<int:año>'
+         , GeneraResumenCarteraNegociadaDeudorJSON),
+    path('carteradeudorjson/<deudor_id>/<fecha_corte>'
+         ,GeneraListaFacturasPendientesDeudorJSON
+         , name="carteradeudor_json"),
+    path('chequesadepositardeudorjson/<deudor_id>/<fecha_corte>'
+         ,GeneraListaChequesADepositarDeudorJSON
+         , name="chequesadepositardeudor_json"),
+    path('protestospendientesdeudorjson/<deudor_id>'
+         ,GeneraListaProtestosPendientesDeudorJSON
+         , name="protestospendientesdeudor_json"),
+    path('canjesclientejson/<cliente_id>',GeneraListaCanjesClienteJSON, 
+        name="listacanjescliente_json"),
+    path('canjesdeudorjson/<deudor_id>',GeneraListaCanjesDeudorJSON, 
+        name="listacanjesdeudor_json"),
+    path('chequesquitadosdeudorjson/<deudor_id>'
+         ,GeneraListaChequesQuitadosDeudorJSON, 
+        name="listachequesquitadosdeudor_json"),
 # movimientos
     path('listamaestromovimientos/',MaestroMovimientosView.as_view(), \
         name='listamaestromovimientos'),
@@ -276,4 +306,6 @@ urlpatterns = [
          , name='cargos_cartera_vencida'),
      path('impresioncargoscarteravencida/<fecha_corte>/<clientes>', ImpresionCargosCarteraVencida
          , name='cargos_cartera_vencida'),
+    path('impresionchequespendientesdeudores/<deudores>/', ImpresionAccesoriosPendientesDeudores
+         , name='detalle_cheques_pendientes_deudores'),
 ]

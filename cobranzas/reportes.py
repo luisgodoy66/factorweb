@@ -962,3 +962,51 @@ def ImpresionProtestosPendientesCorte(request, corte_id = None):
     )
     response['Content-Disposition'] = 'inline; filename="protestos_pendientes.pdf"'
     return response
+
+def ImpresionProtestosPendientesDeudor(request, id_participante = None):
+
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+     
+    if id_participante:         
+        protestos = Cheques_protestados.objects\
+            .protestos_pendientes_deudor(id_empresa.empresa, id_participante)
+
+        tot_cobro = Cheques_protestados.objects\
+            .filter(empresa = id_empresa.empresa
+                    , leliminado = False
+                    , nsaldocartera__gt=0)\
+            .filter(cheque__cxparticipante = id_participante
+                    , cheque__cxtipoparticipante = 'D'
+                    )\
+            .aggregate(total_cartera = Sum('nvalorcartera')
+                        , total_saldo = Sum('nsaldocartera'))
+
+    else:
+        protestos = Cheques_protestados.objects\
+            .protestos_pendientes(id_empresa.empresa)
+
+        # totalizar el campo nsaldocartera de la tabla cheques_protestados
+        tot_cobro = Cheques_protestados.objects\
+            .filter(empresa = id_empresa.empresa, leliminado = False, nsaldocartera__gt=0)\
+                .aggregate(total_cartera = Sum('nvalorcartera')
+                        , total_saldo = Sum('nsaldocartera'))
+
+    template_path = 'cobranzas/protestos_reporte.html'
+
+    context={
+        "protestos" : protestos,
+        "totales": tot_cobro,
+        'empresa': id_empresa.empresa,
+    }
+
+    # Generar el archivo PDF usando WeasyTemplateResponse
+    response = WeasyTemplateResponse(
+        request=request,
+        template=template_path,
+        context=context,
+        content_type='application/pdf',
+        # stylesheets=stylesheet_paths
+    )
+    response['Content-Disposition'] = 'inline; filename="protestos_pendientes.pdf"'
+    return response
+
