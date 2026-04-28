@@ -7,12 +7,12 @@ from django.db.models import Value, CharField, BooleanField, IntegerField
 
 from .models import Tipos_factoring, Tasas_factoring, Clases_cliente\
     , Cuentas_bancarias, Localidades, Puntos_emision, Otros_cargos\
-    , Tipos_empresas, Movimientos_maestro
+    , Tipos_empresas, Movimientos_maestro, Funcionarios
 from bases.models import Usuario_empresa, Empresas
 from solicitudes.models import Asignacion
 # from empresa.models import Movimientos_maestro
 
-from .forms import CuentaBancariaForm, TipoFactoringForm, TasaFactoringForm\
+from .forms import CuentaBancariaForm, FuncionariosForm, TipoFactoringForm, TasaFactoringForm\
     , ClasesParticipantesForm, LocalidadForm, PuntoEmisionForm\
     , OtroCargoForm, TiposEmpresasForm
 from bases.forms import EmpresaForm
@@ -693,6 +693,79 @@ class TiposEmpresasEdit(SinPrivilegios, generic.UpdateView):
     def get_context_data(self, **kwargs):
         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
         context = super(TiposEmpresasEdit, self).get_context_data(**kwargs)
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class FuncionariosView(SinPrivilegios, generic.ListView):
+    model = Funcionarios
+    template_name = "empresa/listafuncionarios.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="empresa.view_funcionarios"
+
+    def get_queryset(self) :
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        qs=Funcionarios.objects.filter(leliminado = False
+                                     , empresa = id_empresa.empresa)\
+                                     .order_by("ctfuncionario")
+        return qs
+    
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(FuncionariosView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class FuncionariosNew(SinPrivilegios, generic.CreateView):
+    model = Funcionarios
+    template_name="empresa/datosfuncionario_form.html"
+    form_class=FuncionariosForm
+    context_object_name='funcionario'
+    success_url= reverse_lazy("empresa:listafuncionarios")
+    login_url = 'bases:login'
+    permission_required="empresa.add_funcionarios"
+
+    def form_valid(self, form):
+        form.instance.cxusuariocrea = self.request.user
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        form.instance.empresa = id_empresa.empresa
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(FuncionariosNew, self).get_context_data(**kwargs)
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class FuncionariosEdit(SinPrivilegios, generic.UpdateView):
+    model = Funcionarios
+    template_name="empresa/datosfuncionario_form.html"
+    form_class=FuncionariosForm
+    context_object_name='funcionario'
+    success_url= reverse_lazy("empresa:listafuncionarios")
+    login_url = 'bases:login'
+    permission_required="empresa.change_funcionarios"
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        context = super(FuncionariosEdit, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp

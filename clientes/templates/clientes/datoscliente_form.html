@@ -18,20 +18,32 @@
 
 <ul class="nav nav-tabs" id="myTab" role="tablist">
     <li class="nav-item">
-        <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" 
+        <a class="nav-link {% if active_tab == 'home' %}active{% endif %}" id="home-tab" data-toggle="tab" href="#home" 
         role="tab" aria-controls="home" aria-selected="true">Datos generales</a>
     </li>
+    {% if datoscliente and datoscliente.cxtipocliente and datoscliente.cxtipocliente == 'J' %}
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'juridico' %}active{% endif %}" id="juridica-tab" data-toggle="tab" href="#juridico" 
+        role="tab" aria-controls="juridica" aria-selected="false">Información de la empresa</a>
+    </li>
+    {% endif %}
+    {% if datoscliente and datoscliente.cxtipocliente and datoscliente.cxtipocliente == 'N' %}
+    <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'natural' %}active{% endif %}" id="natural-tab" data-toggle="tab" href="#natural" 
+        role="tab" aria-controls="natural" aria-selected="false">Información personal</a>
+    </li>
+    {% endif %}
     <li class="nav-item">
         <a class="nav-link" id="actividad-tab" data-toggle="tab" href="#actividad" 
         role="tab" aria-controls="actividad" aria-selected="false">Actividad económica</a>
     </li>
-    <li class="nav-item">
+    <!-- <li class="nav-item">
         <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" 
         role="tab" aria-controls="contact" aria-selected="false">Datos financieros</a>
-    </li>
+    </li> -->
 </ul>
 <div class="tab-content pl-3 p-1" id="myTabContent">
-    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+    <div class="tab-pane fade {% if active_tab == 'home' %}show active{% endif %}" id="home" role="tabpanel" aria-labelledby="home-tab">
         <!-- columna izquierda -->
         <form  method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal"
             onsubmit="return checkSubmit();">
@@ -142,6 +154,15 @@
                                             <small class="form-text text-muted">{{form_cliente.cxlocalidad.help_text}}</small>
                                         </div>
                                     </div>
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="id_funcionario" class=" form-control-label">
+                                            {{form_cliente.funcionario.label}} <span style="color: red;">*</span>
+                                        </label></div>
+                                        <div class="col-12 col-md-10">
+                                            {{form_cliente.funcionario}}
+                                            <small class="form-text text-muted">{{form_cliente.funcionario.help_text}}</small>
+                                        </div>
+                                    </div>
 
                                 </div>
                                 <!-- columna derecha -->
@@ -236,9 +257,6 @@
             </div>
         </form>
     </div>
-    <!-- <div class="tab-pane fade" id="ubicacion" role="tabpanel" aria-labelledby="ubicacion-tab">
-        <p>Complete la información obligatoria (<span style="color: red;">*</span>) en este y el resto de tabs.</p>
-    </div> -->
     <div class="tab-pane fade" id="actividad" role="tabpanel" aria-labelledby="actividad-tab">
         <!-- <p>Complete la información obligatoria (<span style="color: red;">*</span>) en este y el resto de tabs.</p> -->
         <form  method="post" id="frmActividad" enctype="multipart/form-data" class="form-horizontal"
@@ -281,6 +299,377 @@
             </div>
         </form>
     </div>
+    <div class="tab-pane fade {% if active_tab == 'juridico' %}show active{% endif %}" id="juridico" role="tabpanel" aria-labelledby="juridico-tab">
+        <!-- columna izquierda -->
+        <form  method="post" id="frmJuridica" enctype="multipart/form-data" class="form-horizontal"
+            onsubmit="return checkSubmit();">
+            {% csrf_token %}
+            <div hidden>{{ form_juridico.cxcliente}}</div>  
+            <div class="card">
+                <div class="card-header" style="background-color: white;">
+                    <div class="d-flex justify-content-between align-items-center ">
+                        <h5>Ficha general de {% if datosparticipante %} {{ datosparticipante }} {% else %}  nuevo cliente {% endif %} </h5> 
+                        <a href="{% url 'clientes:listaclientes' %}" class="btn  btn-sm">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body card-block">
+                    <!-- columna izquierda -->
+                    <div class="col-lg-6">
+                        
+                        <div hidden>{{ form.cxcliente}}</div>  
+                        <div class="row form-group">
+                            <div class="col-md-4"><label for="id_ctnombrecorto">
+                                {{ form_juridico.ctnombrecorto.label}}
+                            </label>
+                            </div>
+                            <div class="col-md-8">
+                                {{ form_juridico.ctnombrecorto}}
+                                <small class="form-text text-muted">Nombre de fantasía</small>
+                            </div>
+                        </div>  
+
+                        <div class="row form-group">
+                            <div class="col-md-4"><label for="id_tipoempresa">{{form_juridico.tipoempresa.label}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                {{form_juridico.tipoempresa}}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-4"><label for="id_ctcontacto">{{form_juridico.ctcontacto.label}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                {{form_juridico.ctcontacto}}
+                                <small class="form-text text-muted">Persona de contacto</small>
+                            </div>
+                        </div>
+
+                        <div class="row form-group">
+                            <div class="col-md-4"><label for="id_ladministrasocios">{{form_juridico.ladministrasocios.label}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="switch switch-3d switch-success mr-3">
+                                    <input type="checkbox" class="switch-input" 
+                                    {% if  datosjuridicos.ladministrasocios %} checked {% endif %} 
+                                    id = "id_ladministrasocios" name = "ladministrasocios"> 
+                                    <span class="switch-label"></span> 
+                                    <span class="switch-handle"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="row form-group">
+                            <div class="col-md-4"><label for="id_ladministraindividual">{{form_juridico.ladministraindividual.label}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="switch switch-3d switch-success mr-3">
+                                    <input type="checkbox" class="switch-input" 
+                                    {% if  datosjuridicos.ladministraindividual %} checked {% endif %} 
+                                    id = "id_ladministraindividual" name = "ladministraindividual"> 
+                                    <span class="switch-label"></span> 
+                                    <span class="switch-handle"></span>
+                                </label>
+                        </div>
+                        </div>
+
+                        <div class="row form-group">
+                            <div class="col-md-4"><label for="id_ctobjetosocial">{{form_juridico.ctobjetosocial.label}}</label>
+                            </div>
+                            <div class="col-md-8">
+                                {{form_juridico.ctobjetosocial}}
+                            </div>
+                        </div> 
+                    </div>
+                    <!-- columna derecha -->
+                    <div class="col-lg-6">
+                        <div class="default-tab">
+                            <nav>
+                                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                                    <a class="nav-item nav-link active" id="nav-home-tab" 
+                                        data-toggle="tab" href="#nav-home" role="tab" 
+                                        aria-controls="nav-home" aria-selected="true">Represent. legal 1</a>
+                                    <a class="nav-item nav-link" id="nav-profile-tab" 
+                                    data-toggle="tab" href="#nav-profile" role="tab" 
+                                    aria-controls="nav-profile" aria-selected="false">Represent. legal 2</a>
+                                    <a class="nav-item nav-link" id="nav-contact-tab" 
+                                    data-toggle="tab" href="#nav-contact" role="tab" 
+                                    aria-controls="nav-contact" aria-selected="false">Represent. legal 3</a>
+                                </div>
+                            </nav>
+                            <div class="tab-content pl-3 pt-2" id="nav-tabContent">
+                                <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                                        <div class="row form-group">
+                                            <div class="col-md-5"><label for="id_cxrepresentante1">{{form_juridico.cxrepresentante1.label}}</label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                {{form_juridico.cxrepresentante1}}
+                                                <!-- <small class="form-text text-muted">Máximo 100 caracteres</small> -->
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="col-md-5"><label for="id_ctrepresentante1">{{form_juridico.ctrepresentante1.label}}</label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                {{form_juridico.ctrepresentante1}}
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="col-md-5"><label for="id_ctcargorepresentante1">{{form_juridico.ctcargorepresentante1.label}}</label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                {{form_juridico.ctcargorepresentante1}}
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="col-md-5"><label for="id_dvencimientocargorepresentante1">{{form_juridico.dvencimientocargorepresentante1.label}}</label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                {{form_juridico.dvencimientocargorepresentante1}}
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="col-md-5"><label for="id_cxestadocivilrepresentante1">{{form_juridico.cxestadocivilrepresentante1.label}}</label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                {{form_juridico.cxestadocivilrepresentante1}}
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="col-md-5"><label for="id_cttelefonorepresentante1">{{form_juridico.cttelefonorepresentante1.label}}</label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                {{form_juridico.cttelefonorepresentante1}}
+                                            </div>
+                                        </div>
+
+                                </div>
+                                <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                                    <div class="row form-group">
+                                        <div class="col-md-5"><label for="id_cxrepresentante2">{{form_juridico.cxrepresentante2.label}}</label>                                    
+                                        </div>
+                                        <div class="col-md-7">
+                                            {{form_juridico.cxrepresentante2}}
+                                            <!-- <small class="form-text text-muted">Máximo 100 caracteres</small> -->
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-5"><label for="id_ctrepresentante2">{{form_juridico.ctrepresentante2.label}}</label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            {{form_juridico.ctrepresentante2}}
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-5"><label for="id_ctcargorepresentante2">{{form_juridico.ctcargorepresentante2.label}}</label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            {{form_juridico.ctcargorepresentante2}}
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-5"><label for="id_dvencimientocargorepresentante2">{{form_juridico.dvencimientocargorepresentante2.label}}</label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            {{form_juridico.dvencimientocargorepresentante2}}
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-5"><label for="id_cxestadocivilrepresentante2">{{form_juridico.cxestadocivilrepresentante2.label}}</label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            {{form_juridico.cxestadocivilrepresentante2}}
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-5"><label for="id_cttelefonorepresentante2">{{form_juridico.cttelefonorepresentante2.label}}</label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            {{form_juridico.cttelefonorepresentante2}}
+                                        </div>
+                                    </div>
+                            </div>
+                                <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+                                    <div class="row form-group">
+                                        <div class="col-md-5"><label for="id_cxrepresentante3">{{form_juridico.cxrepresentante3.label}}</label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            {{form_juridico.cxrepresentante3}}
+                                            <!-- <small class="form-text text-muted">Máximo 100 caracteres</small> -->
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-5"><label for="id_ctrepresentante3">{{form_juridico.ctrepresentante3.label}}</label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            {{form_juridico.ctrepresentante3}}
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-5"><label for="id_ctcargorepresentante3">{{form_juridico.ctcargorepresentante3.label}}</label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            {{form_juridico.ctcargorepresentante3}}
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-5"><label for="id_dvencimientocargorepresentante3">{{form_juridico.dvencimientocargorepresentante3.label}}</label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            {{form_juridico.dvencimientocargorepresentante3}}
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-5"><label for="id_cxestadocivilrepresentante3">{{form_juridico.cxestadocivilrepresentante3.label}}</label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            {{form_juridico.cxestadocivilrepresentante3}}
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-5"><label for="id_cttelefonorepresentante3">{{form_juridico.cttelefonorepresentante3.label}}</label>
+                                        </div>
+                                        <div class="col-md-7">
+                                            {{form_juridico.cttelefonorepresentante3}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        
+                    </div>
+                </div>    
+                <div class="card-footer">
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-secondary btn-sm">
+                            <i class="fa fa-dot-circle-o"></i> Grabar
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="tab-pane fade {% if active_tab == 'natural' %}show active{% endif %}" id="natural" role="tabpanel" aria-labelledby="natural-tab">
+        <!-- columna izquierda -->
+        <form  method="post" id="frmNatural" enctype="multipart/form-data" class="form-horizontal"
+            onsubmit="return checkSubmit();">
+            {% csrf_token %}
+            <div hidden>{{ form_natural.cxcliente}}</div>  
+            <div class="card">
+                <div class="card-header" style="background-color: white;">
+                    <div class="d-flex justify-content-between align-items-center ">
+                        <h5>Ficha general de {% if datosparticipante %} {{ datosparticipante }} {% else %}  nuevo cliente {% endif %} </h5> 
+                        <a href="{% url 'clientes:listaclientes' %}" class="btn  btn-sm">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body card-block">
+                    <!-- columna izquierda -->
+                    <div class="col-md-6">
+                        <div class="card mt-3"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <div class="card-header">
+                                <h6>Información personal</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row form-group">
+                                    <div class="col col-md-4">
+                                        <label for="id_cxsexo" class=" form-control-label">
+                                            {{form_natural.cxsexo.label}}</label></div>
+                                    <div class="col-12 col-md-8">
+                                        {{ form_natural.cxsexo}}
+                                    </div>
+                                </div>  
+                
+                                <div class="row form-group">
+                                    <div class="col col-md-4">
+                                        <label for="id_dnacimiento" class=" form-control-label">
+                                        {{form_natural.dnacimiento.label}}</label></div>
+                                    <div class="col-12 col-md-8">
+                                        {{form_natural.dnacimiento}}
+                                        <small class="form-text text-muted">Máximo 13 caracteres</small></div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mt-3"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <div class="card-header">
+                                <h6>Información adicional</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row form-group">
+                                    <div class="col col-md-4">
+                                        <label for="id_cxestadocivil" class=" form-control-label">
+                                            {{form_natural.cxestadocivil.label}}</label></div>
+                                    <div class="col-12 col-md-8">
+                                        {{form_natural.cxestadocivil}}
+                                    </div>
+                                </div>
+
+                                <div class="row form-group">
+                                    <div class="col col-md-4">
+                                        <label for="id_cxconyuge" class=" form-control-label">
+                                            {{form_natural.cxconyuge.label}}</label></div>
+                                    <div class="col-12 col-md-8">
+                                        {{form_natural.cxconyuge}}
+                                        <!-- <small class="form-text text-muted">Máximo 10 caracteres.</small> -->
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col col-md-4">
+                                        <label for="id_ctnombreconyuge" class=" form-control-label">
+                                            {{form_natural.ctnombreconyuge.label}}</label></div>
+                                    <div class="col-12 col-md-8">
+                                        {{form_natural.ctnombreconyuge}}
+                                        <small class="form-text text-muted">Máximo 60 caracteres.</small></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-md-12">
+                        <div class="card mt-3"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <div class="card-header">
+                                <h6>Información laboral</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row form-group">
+                                    <div class="col col-md-2">
+                                        <label for="id_ctprofesion" class=" form-control-label">
+                                            {{form_natural.ctprofesion.label}}</label></div>
+                                    <div class="col-12 col-md-10">
+                                        {{form_natural.ctprofesion}}
+                                        <small class="form-text text-muted">Máximo 60 caracteres.</small></div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col col-md-2">
+                                        <label for="id_ctnombrenegocio" class=" form-control-label">
+                                            {{form_natural.ctnombrenegocio.label}}</label></div>
+                                    <div class="col-12 col-md-10">
+                                        {{form_natural.ctnombrenegocio}}
+                                        <small class="form-text text-muted">Máximo 60 caracteres.</small></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>                    
+                <div class="card-footer">
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-secondary btn-sm">
+                            <i class="fa fa-dot-circle-o"></i> Grabar
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
     <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
         <p>Próximamente.</p>
     </div>
@@ -288,17 +677,55 @@
                                
         
     <!-- Sección para mostrar errores del formulario -->
-    {% if form_submitted and form.errors %}
-    <div class="alert alert-danger" role="alert">
-        <ul>
-            {% for field, errors in form.errors.items %}
-                {% for error in errors %}
-                    <li>{{ field }}: {{ error }}</li>
-                    <!-- <li>{{ error }}</li> -->
+    {% if form_submitted  %}
+        {% if form.errors %}
+        <div class="alert alert-danger" role="alert">
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ field }}: {{ error }}</li>
+                        <!-- <li>{{ error }}</li> -->
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
-        </ul>
-    </div>
+            </ul>
+        </div>
+        {% endif %}
+        {% if form_juridico.errors %}
+        <div class="alert alert-danger" role="alert">
+            <ul>
+                {% for field, errors in form_juridico.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ field }}: {{ error }}</li>
+                        <!-- <li>{{ error }}</li> -->
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% if form_cliente.errors %}
+        <div class="alert alert-danger" role="alert">
+            <ul>
+                {% for field, errors in form_cliente.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ field }}: {{ error }}</li>
+                        <!-- <li>{{ error }}</li> -->
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% if form_natural.errors %}
+        <div class="alert alert-danger" role="alert">
+            <ul>
+                {% for field, errors in form_natural.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ field }}: {{ error }}</li>
+                        <!-- <li>{{ error }}</li> -->
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
     {% endif %}
 <!-- </div> -->
 {% endblock %}

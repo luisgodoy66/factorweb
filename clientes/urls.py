@@ -1,16 +1,17 @@
 from django.urls import URLPattern, path
-from .views import  ClientesView,  DatosClientes, DatosClienteNatural \
+from .views import  ClientesView,  DatosClientes \
     , LineasView, LineaNew, LineaEdit, CompradoresView\
     , CuposCompradoresView, CuposCompradoresEdit\
     , CuposCompradoresNew, CuentasBancariasView, CuentasBancariasCliente\
     , DetalleCuentasBancarias, CuentasBancariasNew, EliminarCuentaBancaria\
-    , ActualizarCuentaTransferencia,  DatosClienteJuridico\
+    , ActualizarCuentaTransferencia, DatosDeudores\
     , CuentasBancariasDeudoresView, CuentasBancariasDeudorNew\
     , CuentasBancariasDeudorEdit, ClientesSolicitudesView\
-    , EstadoCompradorEdit,CuentasBancariasEdit, CompradorEdit\
-    , CompradorNew, DatosDeudores\
+    , EstadoCompradorEdit,CuentasBancariasEdit\
     , DeClienteAComprador, EliminarCupoComprador, obtener_cantones_por_provincia\
     , DatosClientes_view, DatosCompradores_view, CambiarTasaGAOA_todos, CambiarTasaMora_todos
+    # ,  DatosClienteJuridico, DatosClienteNatural
+    # , CompradorNew, CompradorEdit\
 from operaciones.views import DatosOperativosHistoricoView
 
 urlpatterns = [
@@ -22,12 +23,14 @@ urlpatterns = [
     path('clientenuevo/',DatosClientes, name='datoscliente_nuevo'),
     path('edit/<participante_id>',DatosClientes
          , name='cliente_editar'),
+    path('edit/<participante_id>/<tab>/',DatosClientes
+         , name='cliente_editar'),
     path('clientenuevo/<solicitante_id>',DatosClientes
          , name='solicitante_nuevo'),
-    path('editnatural/<cliente_id>',DatosClienteNatural
-        , name='clientenatural_editar'),
-    path('editjuridico/<cliente_id>',DatosClienteJuridico
-        , name='clientejuridico_editar'),
+    # path('editnatural/<cliente_id>',DatosClienteNatural
+    #     , name='clientenatural_editar'),
+    # path('editjuridico/<cliente_id>',DatosClienteJuridico
+    #     , name='clientejuridico_editar'),
     path('declienteacomprador/<participante_id>',DeClienteAComprador
          , name='cliente_es_comprador'),
     path('view/<participante_id>/',DatosClientes_view

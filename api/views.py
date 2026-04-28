@@ -285,7 +285,7 @@ class InvoiceAIAnalysisView(APIView):
             
             total_negociado = cliente.monto_total_negociado()
             promedio_demora_pago = cliente.npromediodemoradepago
-            actividad_economica = cliente.cxcliente.actividad.ctactividad if cliente.cxcliente.actividad.ctactividad else 'N/A'
+            actividad_economica = cliente.cxcliente.actividad.ctactividad if cliente.cxcliente.actividad else 'N/A'
             inicio_actividades = cliente.cxcliente.dinicioactividades.strftime("%Y-%m-%d") if cliente.cxcliente.dinicioactividades else 'N/A'
 
             promedio_demora_pago_deudor = CobranzasDocumentosDetalle.objects\

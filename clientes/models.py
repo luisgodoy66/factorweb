@@ -2,7 +2,7 @@ from django.db import models
 
 from bases.models import ClaseModelo
 from empresa.models import Datos_participantes, Clases_cliente, \
-    Localidades, Tipos_empresas
+    Localidades, Tipos_empresas, Funcionarios
 from pais.models import Bancos
 from django.db.models import Sum, F
 import json
@@ -82,10 +82,10 @@ class Datos_generales(ClaseModelo):
         help_text='Fecha de emisión de contrato'    )
     ctbeneficiariodevolucion=models.CharField(max_length=80, null=True,
         help_text='beneficiario de devolucion por valores no negociados'    )
-    cxfuncionario=models.CharField(max_length=5, null=True,
-        help_text='funcionario asignado'    )
-    cxfuncionario2=models.CharField(max_length=5,null=True,
-        help_text='funcionario que comparte la comision por venta'    )
+    # cxfuncionario=models.CharField(max_length=5, null=True,
+    #     help_text='funcionario asignado'    )
+    # cxfuncionario2=models.CharField(max_length=5,null=True,
+    #     help_text='funcionario que comparte la comision por venta'    )
     lcomisiones=models.BooleanField(default=True,
         help_text='el cliente ingresa en el proceso de calculo de comisiones a funconarios'    )
     npromediodemoradepago=models.DecimalField(max_digits=8, decimal_places=2, default=0,
@@ -108,7 +108,11 @@ class Datos_generales(ClaseModelo):
         help_text='fecha de la primera operación'    )
     ncantidadoperaciones=models.SmallIntegerField(default=0,
         help_text='cantidad de operaciones realizadas'    )
-    
+    funcionario = models.ForeignKey(Funcionarios, null=True, on_delete=models.RESTRICT,
+        related_name="funcionario_cliente")
+    funcionario2 = models.ForeignKey(Funcionarios, null=True, blank=True, on_delete=models.RESTRICT,
+        related_name="funcionario2_cliente")
+
     objects = Datos_generales_Manager()
     
     def __str__(self):
@@ -416,6 +420,44 @@ class Personas_juridicas(ClaseModelo):
         # self.ctobjetosocial=self.ctobjetosocial.upper()
         return super(Personas_juridicas, self).save()
 
+    def representante1(self):
+        return "{} ID. {}".format(self.ctrepresentante1, self.cxrepresentante1)
+    
+    def cargo_representante1(self):
+        fecha = self.dvencimientocargorepresentante1.strftime('%d de %B de %Y') if self.dvencimientocargorepresentante1 else 'Sin fecha'
+        return "{} hasta {}".format(self.ctcargorepresentante1, fecha)
+    
+    def estado_civil_representante1(self):
+        return self.get_cxestadocivilrepresentante1_display()
+    
+    def representante2(self):
+        if self.ctrepresentante2:
+            return "{} ID. {}".format(self.ctrepresentante2, self.cxrepresentante2)
+        return ""
+    
+    def cargo_representante2(self):
+        if self.ctrepresentante2:
+            fecha = self.dvencimientocargorepresentante2.strftime('%d de %B de %Y') if self.dvencimientocargorepresentante2 else 'Sin fecha'
+            return "{} hasta {}".format(self.ctcargorepresentante2, fecha)
+        return ""
+    
+    def estado_civil_representante2(self):
+        return self.get_cxestadocivilrepresentante2_display()
+    
+    def representante3(self):
+        if self.ctrepresentante3:
+            return "{} ID. {}".format(self.ctrepresentante3, self.cxrepresentante3)
+        return ""
+    
+    def cargo_representante3(self):
+        if self.ctrepresentante3:
+            fecha = self.dvencimientocargorepresentante3.strftime('%d de %B de %Y') if self.dvencimientocargorepresentante3 else 'Sin fecha'
+            return "{} hasta {}".format(self.ctcargorepresentante3, fecha)
+        return ""
+    
+    def estado_civil_representante3(self):
+        return self.get_cxestadocivilrepresentante3_display()
+    
 class Personas_naturales(ClaseModelo):
     TIPOS_DE_SEXOS = (
         ('M', 'Masculino'),

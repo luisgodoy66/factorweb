@@ -3,7 +3,7 @@ from django import forms
 
 from .models import Clases_cliente, Datos_participantes, Tipos_factoring, \
     Tasas_factoring, Cuentas_bancarias, Localidades, Puntos_emision, \
-    Otros_cargos, Tipos_empresas
+    Otros_cargos, Tipos_empresas, Funcionarios
 from pais.models import Bancos, Provincias, Cantones
 from bases.models import Actividades
 # from datetime import datetime
@@ -317,3 +317,18 @@ class ActividadParticipanteForm(forms.ModelForm):
         # Mantener la opción seleccionada si existe
         if self.instance and self.instance.pk:
             self.fields['actividad'].initial = self.instance.actividad
+
+class FuncionariosForm(forms.ModelForm):
+    class Meta:
+        model = Funcionarios
+
+        fields = [ 'ctfuncionario', 'cxfuncionario']
+        labels={'ctfuncionario':'Descripción', 'cxfuncionario':'Código'}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+

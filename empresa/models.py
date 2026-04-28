@@ -89,7 +89,7 @@ class Funcionarios(ClaseModelo):
     cxfuncionario = models.CharField(max_length=5)
     ctfuncionario = models.CharField(max_length=100)
     nporcentajecomision = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    lcomisionflat = models.BooleanField()
+    lcomisionflat = models.BooleanField(default=False)
     nperiocidadcomision = models.DecimalField(max_digits=5, decimal_places=2, default=360)
     lcomisionsobregao = models.BooleanField(default=False)
     lcomisionsobredescuentocartera = models.BooleanField(default=False)

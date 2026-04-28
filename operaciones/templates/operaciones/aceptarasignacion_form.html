@@ -380,27 +380,30 @@ jQuery(document).ready(function() {
 });
 
 window.operateEvents = {
-  'click .like': function (e, value, row, index) {
-    CambiarTasasDocumento(row.id,capturaValor("id_ddesembolso"),function(){
-    })
-  },
-  'click .remove': function (e, value, row, index) {
-  EliminarDocumentoDeSolicitudAsignacion(asignacion_id, row.id, tipo_asignacion
-    , row.Documento)
-  },
+    'click .like': function (e, value, row, index) {
+        CambiarTasasDocumento(row.id,capturaValor("id_ddesembolso"),function(){
+        })
+    },
+    'click .remove': function (e, value, row, index) {
+    EliminarDocumentoDeSolicitudAsignacion(asignacion_id, row.id, tipo_asignacion
+        , row.Documento)
+    },
     'click .analizar': function (e, value, row, index) {
-    analizarFacturaAI(row.id);
+    analizarFacturaAI(row.id_documento);
     },
     'click .consultar': function (e, value, row, index) {
-    consultarFacturaAI(row.id);
+    consultarFacturaAI(row.id_documento);
     }
 };
 
 function operateFormatter(value, row, index) {
-    if (row.ia_analizada){
-        var ia_icon = '<a class="consultar" href="javascript:void(0)" title="Consultar análisis"><i class="fa fa-search"></i></a>'
-    } else {
-        var ia_icon = '<a class="analizar" href="javascript:void(0)" title="Analizar inteligente de riesgo"><i class="fa fa-search"></i></a>'
+    ia_icon = ''
+    if (tipo_asignacion == 'F'){
+        if (row.ia_analizada){
+            var ia_icon = '<a class="consultar" href="javascript:void(0)" title="Consultar análisis"><i class="fa fa-search"></i></a>'
+        } else {
+            var ia_icon = '<a class="analizar" href="javascript:void(0)" title="Analizar inteligente de riesgo"><i class="fa fa-search"></i></a>'
+        }
     }
   return [
     '<a class="like" href="javascript:void(0)" title="Configurar tasas">',
@@ -440,10 +443,6 @@ function Suma_Cargos(asgn, iva_gao, iva_dc, carga_gao, carga_dc, porcentaje_iva)
               +"/"+carga_gao+"/"+carga_dc+"/"+porcentaje_iva
     , function(data){
     if (data){
-        // jQuery("#id_nanticipo").val(data['anticipo'])    
-        // jQuery("#id_ngao").val(data['gao'])    
-        // jQuery("#id_ndescuentodecartera").val(data['dc'])
-        // jQuery("#id_niva").val(data['iva'])    
 
         inicializarInner("divAnticipo", data['anticipo'] )
         inicializarInner("divGAO", data['gao'] )

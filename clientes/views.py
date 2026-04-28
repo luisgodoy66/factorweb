@@ -13,7 +13,8 @@ from .models import Cuenta_transferencia, Datos_generales \
 from solicitudes.models import Clientes as Solicitante \
     , Asignacion as Asignacion
 from bases.models import Usuario_empresa
-from empresa.models import Datos_participantes, Localidades
+from empresa.models import Datos_participantes, Localidades\
+    , Funcionarios
 from pais.models import Provincias, Cantones
 from operaciones.models import Datos_operativos, Pagares
 from cobranzas.models import Cheques_protestados, Documentos_detalle
@@ -38,7 +39,9 @@ class ClientesView(SinPrivilegios, generic.ListView):
         id_empresa = Usuario_empresa.objects\
             .filter(user = self.request.user).first()
         qs=Datos_generales.objects\
-            .filter(leliminado = False, empresa = id_empresa.empresa)
+            .filter(leliminado = False
+                    , cxcliente__leliminado = False
+                    , empresa = id_empresa.empresa)
         return qs
     
     def get_context_data(self, **kwargs):
@@ -62,7 +65,8 @@ class LineasView(SinPrivilegios, generic.ListView):
         id_empresa = Usuario_empresa.objects\
             .filter(user = self.request.user).first()
         qs=Datos_generales.objects\
-            .filter(leliminado = False, empresa = id_empresa.empresa)
+            .filter(leliminado = False
+                    , empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self, **kwargs):
@@ -486,97 +490,103 @@ class EstadoCompradorEdit(SinPrivilegios, generic.UpdateView):
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
        
-class CompradorEdit(SinPrivilegios, generic.UpdateView):
-    model=Datos_participantes
-    template_name="clientes/datoscomprador_form.html"
-    context_object_name = "datosparticipante"
-    form_class=ParticipanteForm
-    success_url=reverse_lazy("clientes:listacompradores")
-    success_message="Datos actualizados satisfactoriamente"
-    login_url = 'bases:login'
-    permission_required="clientes.change_datos_compradores"
+# class CompradorEdit(SinPrivilegios, generic.UpdateView):
+#     model=Datos_participantes
+#     template_name="clientes/datoscomprador_form.html"
+#     context_object_name = "datosparticipante"
+#     form_class=ParticipanteForm
+#     success_url=reverse_lazy("clientes:listacompradores")
+#     success_message="Datos actualizados satisfactoriamente"
+#     login_url = 'bases:login'
+#     permission_required="clientes.change_datos_compradores"
 
-    def get_object(self, queryset=None):
-        obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
-        if obj.empresa_id != id_empresa.empresa.id:
-            raise Http404("No tiene permisos para editar este registro")
-        return obj
+#     def get_object(self, queryset=None):
+#         obj = super().get_object(queryset)
+#         id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+#         if obj.empresa_id != id_empresa.empresa.id:
+#             raise Http404("No tiene permisos para editar este registro")
+#         return obj
 
-    def form_valid(self, form):
-        form.instance.cxusuariomodifica = self.request.user.id
-        return super().form_valid(form)
+#     def form_valid(self, form):
+#         form.instance.cxusuariomodifica = self.request.user.id
+#         return super().form_valid(form)
 
-    def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        sp = Asignacion.objects\
-            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
-        context = super(CompradorEdit, self).get_context_data(**kwargs)
-        context["solicitudes_pendientes"]=sp
+#     def get_context_data(self, **kwargs):
+#         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+#         sp = Asignacion.objects\
+#             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+#         context = super(CompradorEdit, self).get_context_data(**kwargs)
+#         context["solicitudes_pendientes"]=sp
 
-        return context
+#         return context
 
-    def get_form_kwargs(self):
-        kwargs = super(CompradorEdit, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        kwargs['empresa'] = id_empresa.empresa
-        kwargs['tipo_participante'] = 'D'
-        return kwargs
+#     def get_form_kwargs(self):
+#         kwargs = super(CompradorEdit, self).get_form_kwargs()
+#         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+#         kwargs['empresa'] = id_empresa.empresa
+#         kwargs['tipo_participante'] = 'D'
+#         return kwargs
        
-class CompradorNew(SinPrivilegios, generic.CreateView):
-    model=Datos_participantes
-    template_name="clientes/datoscomprador_form.html"
-    context_object_name = "datosparticipante"
-    form_class=ParticipanteForm
-    success_url=reverse_lazy("clientes:listacompradores")
-    success_message="Datos actualizados satisfactoriamente"
-    login_url = 'bases:login'
-    permission_required="clientes.change_datos_compradores"
+# class CompradorNew(SinPrivilegios, generic.CreateView):
+#     model=Datos_participantes
+#     template_name="clientes/datoscomprador_form.html"
+#     context_object_name = "datosparticipante"
+#     form_class=ParticipanteForm
+#     success_url=reverse_lazy("clientes:listacompradores")
+#     success_message="Datos actualizados satisfactoriamente"
+#     login_url = 'bases:login'
+#     permission_required="clientes.change_datos_compradores"
 
-    def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+#     def form_valid(self, form):
+#         id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
 
-        form.instance.cxusuariocrea = self.request.user
-        form.instance.empresa = id_empresa.empresa
+#         form.instance.cxusuariocrea = self.request.user
+#         form.instance.empresa = id_empresa.empresa
 
-        # Guardar el nuevo registro en Datos_participantes
-        response = super().form_valid(form)
+#         # Guardar el nuevo registro en Datos_participantes
+#         response = super().form_valid(form)
 
-        # Crear un nuevo registro en Datos_compradores
-        datoscomprador = Datos_compradores(
-            cxcomprador=self.object,  # self.object es el nuevo registro de Datos_participantes
-            cxusuariocrea=self.request.user,
-            empresa=id_empresa.empresa,
-        )
-        datoscomprador.save()
+#         # Crear un nuevo registro en Datos_compradores
+#         datoscomprador = Datos_compradores(
+#             cxcomprador=self.object,  # self.object es el nuevo registro de Datos_participantes
+#             cxusuariocrea=self.request.user,
+#             empresa=id_empresa.empresa,
+#         )
+#         datoscomprador.save()
 
-        return response
+#         return response
 
-    def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        sp = Asignacion.objects\
-            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
-        context = super(CompradorNew, self).get_context_data(**kwargs)
-        context["solicitudes_pendientes"]=sp
+#     def get_context_data(self, **kwargs):
+#         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+#         sp = Asignacion.objects\
+#             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+#         context = super(CompradorNew, self).get_context_data(**kwargs)
+#         context["solicitudes_pendientes"]=sp
 
-        return context
+#         return context
 
-    def get_form_kwargs(self):
-        kwargs = super(CompradorNew, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        kwargs['empresa'] = id_empresa.empresa
-        kwargs['tipo_participante'] = 'D'
-        return kwargs
+#     def get_form_kwargs(self):
+#         kwargs = super(CompradorNew, self).get_form_kwargs()
+#         id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+#         kwargs['empresa'] = id_empresa.empresa
+#         kwargs['tipo_participante'] = 'D'
+#         return kwargs
        
 @login_required(login_url='/login/')
 @permission_required('clientes.change_datos_generales', login_url='bases:sin_permisos')
-def DatosClientes(request, participante_id=None, solicitante_id=None):
+def DatosClientes(request, participante_id=None, solicitante_id=None, tab=None):
     template_name="clientes/datoscliente_form.html"
     contexto = {}
     datosparticipante = {}
-    form_cliente={}
+    datoscliente={}
+    datosjuridicos={}
+    datosnaturales={}
     formulario={}
+    form_cliente={}
     form_actividad={}
+    form_juridico={}
+    form_natural={}
+    form_submitted = False
 
     id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
 
@@ -588,6 +598,7 @@ def DatosClientes(request, participante_id=None, solicitante_id=None):
             return redirect("bases:sin_permisos")
 
     if request.method == 'POST':
+        form_submitted = True
         # la pantalla maneja dos formas: una para datos del cliente 
         # y otra para la actividad del cliente, por eso se bifurca 
         # dependiendo de cuál formulario se envía
@@ -603,6 +614,65 @@ def DatosClientes(request, participante_id=None, solicitante_id=None):
                 print('actividad no validada', form_actividad.errors)
 
             return redirect("clientes:listaclientes")
+
+        if 'tipoempresa' in request.POST:
+
+            datosjuridicos: Personas_juridicas | None = Personas_juridicas.objects\
+                .filter(cxcliente=datosparticipante).first()    
+
+            if not datosjuridicos:
+                nuevo = True
+                form_juridico = PersonaJuridicaForm(request.POST
+                                                    , empresa=id_empresa.empresa )
+            else:
+                nuevo = False
+                form_juridico = PersonaJuridicaForm(request.POST
+                                                    , instance=datosjuridicos
+                                                    , empresa=id_empresa.empresa )
+                
+            if form_juridico.is_valid():
+                datosjuridicos = form_juridico.save(commit=False)
+                
+                if nuevo:
+                    datosjuridicos.cxusuariocrea = request.user
+                    datosjuridicos.empresa = id_empresa.empresa
+                else:
+                    datosjuridicos.cxusuariomodifica = request.user.id
+
+                datosjuridicos.save()
+
+                return redirect("clientes:listaclientes")
+            else:
+                contexto['form_errors'] = form_juridico.errors
+
+        if 'cxsexo' in request.POST:
+
+            datosnaturales: Personas_naturales | None = Personas_naturales.objects\
+                .filter(cxcliente=datosparticipante).first()    
+
+            if not datosnaturales:
+                nuevo = True
+                form_natural = PersonaNaturalForm(request.POST)
+            else:
+                nuevo = False
+                form_natural = PersonaNaturalForm(request.POST
+                                                  , instance=datosnaturales )
+                
+            if form_natural.is_valid():
+                datosnaturales = form_natural.save(commit=False)
+
+                if nuevo:
+                    datosnaturales.cxusuariocrea = request.user
+                    datosnaturales.empresa = id_empresa.empresa
+                else:
+                    datosnaturales.cxusuariomodifica = request.user.id
+
+                datosnaturales.save()
+
+                return redirect("clientes:listaclientes")
+            else:
+                contexto['form_errors'] = form_natural.errors
+
         else:
             if participante_id:
                 
@@ -632,13 +702,16 @@ def DatosClientes(request, participante_id=None, solicitante_id=None):
 
                 cxtipocliente = request.POST.get("cxtipocliente")
                 cxlocalidad=request.POST.get("cxlocalidad")
+                cxfuncionario=request.POST.get("funcionario")
                 local = Localidades.objects.filter(pk=cxlocalidad).first()
+                funcionario = Funcionarios.objects.filter(pk=cxfuncionario).first()
 
                 if not datoscliente:
                     datoscliente= Datos_generales(
                         cxcliente = datosparticipante,
                         cxtipocliente=cxtipocliente,
                         cxlocalidad=local,
+                        cxfuncionario=funcionario,
                         cxusuariocrea = request.user,
                         empresa = id_empresa.empresa,
                     )
@@ -647,6 +720,7 @@ def DatosClientes(request, participante_id=None, solicitante_id=None):
                 else:
                     datoscliente.cxtipocliente=cxtipocliente
                     datoscliente.cxlocalidad=local
+                    datoscliente.funcionario=funcionario
                     datoscliente.cxusuariomodifica = request.user.id
 
                     datoscliente.save()
@@ -674,18 +748,19 @@ def DatosClientes(request, participante_id=None, solicitante_id=None):
 
                 # bifurcar dependiendo del tipo de cliente: natural o juridico
                 if cxtipocliente=="N":
-                    return redirect("clientes:clientenatural_editar"
-                                    ,cliente_id=datosparticipante.id)
+                    return redirect("clientes:cliente_editar"
+                                    ,participante_id=datosparticipante.id
+                                    ,tab='natural')
                 else:
-                    return redirect("clientes:clientejuridico_editar"
-                                    ,cliente_id=datosparticipante.id)
+                    return redirect("clientes:cliente_editar"
+                                    ,participante_id=datosparticipante.id
+                                    ,tab='juridico')
 
             else:
                 # contexto['form_participante'] = formulario
                 contexto['form_errors'] = formulario.errors
             
     else:
-        form_submitted = False
 
         if datosparticipante:
             formulario = ParticipanteForm(instance=datosparticipante, empresa=id_empresa.empresa)
@@ -696,6 +771,7 @@ def DatosClientes(request, participante_id=None, solicitante_id=None):
                 e={
                     'cxtipocliente':datoscliente.cxtipocliente,
                     'cxlocalidad':datoscliente.cxlocalidad,
+                    'funcionario':datoscliente.funcionario,
                 }
                 form_cliente=ClienteForm(e, empresa = id_empresa.empresa)
 
@@ -707,6 +783,26 @@ def DatosClientes(request, participante_id=None, solicitante_id=None):
             sector_economico = datosparticipante.sectoreconomico.cxactividad if datosparticipante.sectoreconomico else 'Z'
             form_actividad = ActividadParticipanteForm(e
                                                         , sector_economico = sector_economico )
+            # datos juridicos si el cliente es juridico
+            datosjuridicos: Personas_juridicas | None = Personas_juridicas.objects\
+                .filter(cxcliente=datosparticipante).first()    
+            if datosjuridicos:
+                form_juridico = PersonaJuridicaForm(instance=datosjuridicos
+                                                 , empresa=id_empresa.empresa)
+            else:
+                form_juridico=PersonaJuridicaForm(empresa=id_empresa.empresa)
+
+            # datos naturales si el cliente es natural
+            datosnaturales = Personas_naturales.objects\
+                .filter(cxcliente=datosparticipante).first()
+            if datosnaturales:
+                print('cargando datos naturales')
+                form_natural = PersonaNaturalForm(instance=datosnaturales) 
+            else:
+                print('cargando formulario vacio naturales')
+                e={'cxcliente': datosparticipante}
+                form_natural = PersonaNaturalForm(e)
+
         else:
             formulario = ParticipanteForm(empresa=id_empresa.empresa)
             form_cliente=ClienteForm(empresa = id_empresa.empresa)
@@ -735,6 +831,8 @@ def DatosClientes(request, participante_id=None, solicitante_id=None):
     sp = Asignacion.objects\
         .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
 
+    # Determinar qué tab debe estar activo (por defecto estado_operativo)
+    active_tab = tab or 'home'
     contexto.update({
         'datosparticipante': datosparticipante,
         'form': formulario,
@@ -742,161 +840,172 @@ def DatosClientes(request, participante_id=None, solicitante_id=None):
         'form_submitted': form_submitted,
         'form_cliente':form_cliente,
         'desde_solicitud': True if solicitante_id else False,
-        'form_actividad':form_actividad
+        'form_actividad':form_actividad,
+        'datoscliente': datoscliente,
+        'form_juridico': form_juridico,
+        'datosjuridicos': datosjuridicos,
+        'form_natural': form_natural,
+        'datosnaturales': datosnaturales,
+        'active_tab': active_tab,
+
     })
 
     return render(request, template_name, contexto)
 
-@login_required(login_url='/login/')
-@permission_required('clientes.change_personas_naturales', login_url='bases:sin_permisos')
-def DatosClienteNatural(request, cliente_id=None):
-    template_name="clientes/datosclientenatural_form.html"
-    contexto={}
-    formulario={}
-    datoscliente={}
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+# @login_required(login_url='/login/')
+# @permission_required('clientes.change_personas_naturales', login_url='bases:sin_permisos')
+# def DatosClienteNatural(request, cliente_id=None):
+#     template_name="clientes/datosclientenatural_form.html"
+#     contexto={}
+#     formulario={}
+#     datoscliente={}
+#     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
     
-    cliente = Datos_generales.objects\
-        .filter(cxcliente=cliente_id).first()
+#     cliente = Datos_generales.objects\
+#         .filter(cxcliente=cliente_id).first()
 
-    if cliente.empresa != id_empresa.empresa:
-        return redirect("bases:sin_permisos")
+#     if cliente.empresa != id_empresa.empresa:
+#         return redirect("bases:sin_permisos")
     
-    sp = Asignacion.objects\
-        .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+#     sp = Asignacion.objects\
+#         .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
 
-    if request.method=='GET':
-        datoscliente = Personas_naturales.objects\
-            .filter(cxcliente=cliente_id).first()
+#     if request.method=='GET':
+#         datoscliente = Personas_naturales.objects\
+#             .filter(cxcliente=cliente_id).first()
 
-        if datoscliente:
-            nacimiento= date.isoformat(datoscliente.dnacimiento)
-            e={ 
-                'cxcliente':datoscliente.cxcliente,
-                'dnacimiento':nacimiento,
-                'cxsexo':datoscliente.cxsexo,
-                'cxestadocivil':datoscliente.cxestadocivil,
-                'cxconyuge':datoscliente.cxconyuge,
-                'ctnombrenegocio':datoscliente.ctnombrenegocio,
-                'ctnombreconyuge':datoscliente.ctnombreconyuge,
-                'ctprofesion':datoscliente.ctprofesion,
-            }
-            formulario=PersonaNaturalForm(e)
-        else:
-            formulario=PersonaNaturalForm()
+#         if datoscliente:
+#             nacimiento= date.isoformat(datoscliente.dnacimiento)
+#             e={ 
+#                 'cxcliente':datoscliente.cxcliente,
+#                 'dnacimiento':nacimiento,
+#                 'cxsexo':datoscliente.cxsexo,
+#                 'cxestadocivil':datoscliente.cxestadocivil,
+#                 'cxconyuge':datoscliente.cxconyuge,
+#                 'ctnombrenegocio':datoscliente.ctnombrenegocio,
+#                 'ctnombreconyuge':datoscliente.ctnombreconyuge,
+#                 'ctprofesion':datoscliente.ctprofesion,
+#             }
+#             formulario=PersonaNaturalForm(e)
+#         else:
+#             formulario=PersonaNaturalForm()
     
-    contexto={'nombrecliente':cliente
-            , 'form_cliente':formulario
-            , 'solicitudes_pendientes':sp
-            }
+#     contexto={'nombrecliente':cliente
+#             , 'form_cliente':formulario
+#             , 'solicitudes_pendientes':sp
+#             }
 
-    if request.method=='POST':
+#     if request.method=='POST':
 
-        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+#         id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
         
-        dnacimiento = request.POST.get("dnacimiento")
-        cxsexo = request.POST.get("cxsexo")
-        cxestadocivil = request.POST.get("cxestadocivil")
-        cxconyuge = request.POST.get("cxconyuge")
-        ctnombrenegocio = request.POST.get("ctnombrenegocio")
-        ctnombreconyuge = request.POST.get("ctnombreconyuge")
-        ctprofesion = request.POST.get("ctprofesion")
+#         dnacimiento = request.POST.get("dnacimiento")
+#         cxsexo = request.POST.get("cxsexo")
+#         cxestadocivil = request.POST.get("cxestadocivil")
+#         cxconyuge = request.POST.get("cxconyuge")
+#         ctnombrenegocio = request.POST.get("ctnombrenegocio")
+#         ctnombreconyuge = request.POST.get("ctnombreconyuge")
+#         ctprofesion = request.POST.get("ctprofesion")
 
-        datoscliente = Personas_naturales.objects\
-            .filter(cxcliente=cliente.cxcliente).first()
+#         datoscliente = Personas_naturales.objects\
+#             .filter(cxcliente=cliente.cxcliente).first()
 
-        if not datoscliente:
-            datoscliente= Personas_naturales(
-                dnacimiento = dnacimiento,
-                cxsexo=cxsexo,
-                cxestadocivil=cxestadocivil,
-                cxcliente = cliente.cxcliente,
-                cxconyuge = cxconyuge,
-                ctnombrenegocio = ctnombrenegocio,
-                ctprofesion = ctprofesion,
-                ctnombreconyuge=ctnombreconyuge,
-                cxusuariocrea = request.user,
-                empresa = id_empresa.empresa,
-            )
-            if datoscliente:
-                datoscliente.save()
-        else:
-            datoscliente.dnacimiento=dnacimiento
-            datoscliente.cxsexo = cxsexo
-            datoscliente.cxestadocivil=cxestadocivil
-            datoscliente.cxconyuge=cxconyuge
-            datoscliente.ctnombreconyuge=ctnombreconyuge
-            datoscliente.ctnombrenegocio=ctnombrenegocio
-            datoscliente.ctprofesion=ctprofesion
+#         if not datoscliente:
+#             datoscliente= Personas_naturales(
+#                 dnacimiento = dnacimiento,
+#                 cxsexo=cxsexo,
+#                 cxestadocivil=cxestadocivil,
+#                 cxcliente = cliente.cxcliente,
+#                 cxconyuge = cxconyuge,
+#                 ctnombrenegocio = ctnombrenegocio,
+#                 ctprofesion = ctprofesion,
+#                 ctnombreconyuge=ctnombreconyuge,
+#                 cxusuariocrea = request.user,
+#                 empresa = id_empresa.empresa,
+#             )
+#             if datoscliente:
+#                 datoscliente.save()
+#         else:
+#             datoscliente.dnacimiento=dnacimiento
+#             datoscliente.cxsexo = cxsexo
+#             datoscliente.cxestadocivil=cxestadocivil
+#             datoscliente.cxconyuge=cxconyuge
+#             datoscliente.ctnombreconyuge=ctnombreconyuge
+#             datoscliente.ctnombrenegocio=ctnombrenegocio
+#             datoscliente.ctprofesion=ctprofesion
 
-            datoscliente.cxusuariomodifica = request.user.id
+#             datoscliente.cxusuariomodifica = request.user.id
 
-            datoscliente.save()
+#             datoscliente.save()
 
-        return redirect("clientes:listaclientes")
+#         return redirect("clientes:listaclientes")
 
-    return render(request, template_name, contexto)
+#     return render(request, template_name, contexto)
 
-@login_required(login_url='/login/')
-@permission_required('clientes.change_personas_juridicas', login_url='bases:sin_permisos')
-def DatosClienteJuridico(request, cliente_id=None):
-    template_name="clientes/datosclientejuridico_form.html"
-    contexto={}
-    formulario={}
+# @login_required(login_url='/login/')
+# @permission_required('clientes.change_personas_juridicas', login_url='bases:sin_permisos')
+# def DatosClienteJuridico(request, cliente_id=None):
+#     template_name="clientes/datosclientejuridico_form.html"
+#     contexto={}
+#     formulario={}
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
-    datoscliente: Personas_juridicas | None = Personas_juridicas.objects\
-        .filter(cxcliente=cliente_id).first()    
-    cliente = Datos_generales.objects\
-        .filter(cxcliente=cliente_id).first()
+#     id_empresa = Usuario_empresa.objects\
+#         .filter(user = request.user).first()
+#     datoscliente: Personas_juridicas | None = Personas_juridicas.objects\
+#         .filter(cxcliente=cliente_id).first()    
+#     cliente = Datos_generales.objects\
+#         .filter(cxcliente=cliente_id).first()
 
-    if cliente.empresa != id_empresa.empresa:
-        return redirect("bases:sin_permisos")
+#     if cliente.empresa != id_empresa.empresa:
+#         return redirect("bases:sin_permisos")
     
-    if request.method=='GET':
-        form_submitted = False
+#     if request.method=='GET':
+#         form_submitted = False
 
-        if datoscliente:
-            formulario = PersonaJuridicaForm(instance=datoscliente, empresa=id_empresa.empresa)
-        else:
-            formulario=PersonaJuridicaForm(empresa=id_empresa.empresa)
+#         if datoscliente:
+#             formulario = PersonaJuridicaForm(instance=datoscliente
+#                                              , empresa=id_empresa.empresa)
+#         else:
+#             formulario=PersonaJuridicaForm(empresa=id_empresa.empresa)
 
-    if request.method=='POST':
-        form_submitted = True
+#     if request.method=='POST':
+#         form_submitted = True
 
-        if not datoscliente:
-            formulario = PersonaJuridicaForm(request.POST, empresa=id_empresa.empresa )
-        else:
-            formulario = PersonaJuridicaForm(request.POST, instance=datoscliente, empresa=id_empresa.empresa )
+#         if not datoscliente:
+#             formulario = PersonaJuridicaForm(request.POST
+#                                              , empresa=id_empresa.empresa )
+#         else:
+#             formulario = PersonaJuridicaForm(request.POST
+#                                              , instance=datoscliente
+#                                              , empresa=id_empresa.empresa )
             
-        if formulario.is_valid():
+#         if formulario.is_valid():
 
-            datoscliente = formulario.save(commit=False)
+#             datoscliente = formulario.save(commit=False)
             
-            if not cliente_id:
-                datoscliente.cxusuariocrea = request.user
-                datoscliente.empresa = id_empresa.empresa
-            else:
-                datoscliente.cxusuariomodifica = request.user.id
+#             if not cliente_id:
+#                 datoscliente.cxusuariocrea = request.user
+#                 datoscliente.empresa = id_empresa.empresa
+#             else:
+#                 datoscliente.cxusuariomodifica = request.user.id
 
-            datoscliente.save()
-            return redirect("clientes:listaclientes")
-        else:
-            contexto['form_errors'] = formulario.errors
+#             datoscliente.save()
+#             return redirect("clientes:listaclientes")
+#         else:
+#             contexto['form_errors'] = formulario.errors
 
-    sp = Asignacion.objects\
-        .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+#     sp = Asignacion.objects\
+#         .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
 
-    contexto.update({'nombrecliente':cliente
-              , 'datoscliente':datoscliente
-              , 'form':formulario
-              , 'solicitudes_pendientes':sp
-              , 'form_submitted': form_submitted,
+#     contexto.update({'nombrecliente':cliente
+#               , 'datoscliente':datoscliente
+#               , 'form':formulario
+#               , 'solicitudes_pendientes':sp
+#               , 'form_submitted': form_submitted,
 
-            })
+#             })
 
-    return render(request, template_name, contexto)
+#     return render(request, template_name, contexto)
 
 @login_required(login_url='/login/')
 @permission_required('clientes.view_cuentas_bancarias', login_url='bases:sin_permisos')
@@ -1155,7 +1264,7 @@ def DatosClientes_view(request, participante_id=None, tab=None):
         
         if datoscliente:
             cliente_id = datoscliente.id
-            primera_operacion = datoscliente.dprimeraoperacion
+            primera_operacion = datoscliente.dprimeraoperacion if datoscliente.dprimeraoperacion else date(date.today().year, 1, 1)
             cantidad_operaciones = datoscliente.ncantidadoperaciones
             ppdp = datoscliente.npromediodemoradepago
 

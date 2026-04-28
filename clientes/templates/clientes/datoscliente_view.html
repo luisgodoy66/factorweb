@@ -228,6 +228,86 @@
                         </div>
                     {% endif %}
                 </div>
+                {% if datoscliente and datoscliente.cxtipocliente == 'J' %}
+                <div class="col-md-12">
+                    <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header"style="background-color: white;">
+                            <h6>Representantes legales</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="col-md-4">
+                                    <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                        <div class="row form-group">
+                                            <div class="col-md-12">
+                                                {{cliente_juridico.representante1}}
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="col-md-12">
+                                                {{cliente_juridico.cargo_representante1}}
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="col-md-12">
+                                                {{cliente_juridico.estado_civil_representante1}}
+                                            <!-- </div> -->
+                                             Tel.
+                                            <!-- <div class="col-md-6"> -->
+                                                {{cliente_juridico.cttelefonorepresentante1}}
+                                            </div>
+                                        </div>
+                                    </div>
+                            </div>
+                            <div class="col-md-4">
+                                    <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                        <div class="row form-group">
+                                            <div class="col-md-12">
+                                                {{cliente_juridico.representante2}}
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="col-md-12">
+                                                {{cliente_juridico.cargo_representante2}}
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="col-md-12">
+                                                {{cliente_juridico.estado_civil_representante2}}
+                                            <!-- </div> -->
+                                             Tel.
+                                            <!-- <div class="col-md-6"> -->
+                                                {{cliente_juridico.cttelefonorepresentante2}}
+                                            </div>
+                                        </div>
+                                    </div>
+                            </div>
+                            <div class="col-md-4">
+                                    <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                        <div class="row form-group">
+                                            <div class="col-md-12">
+                                                {{cliente_juridico.representante3}}
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="col-md-12">
+                                                {{cliente_juridico.cargo_representante3}}
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="col-md-12">
+                                                {{cliente_juridico.estado_civil_representante3}}
+                                            <!-- </div> -->
+                                             Tel.
+                                            <!-- <div class="col-md-6"> -->
+                                                {{cliente_juridico.cttelefonorepresentante3}}
+                                            </div>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
                 <div class="col-md-12">
                     <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                         <div class="card-header"style="background-color: white;">
@@ -266,6 +346,14 @@
                                     </label></div>
                                     <div class="col-12 col-md-8">
                                         {{datoscliente.cxlocalidad}}
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col col-md-4"><label for="id_funcionario" class=" form-control-label">
+                                        {{form_cliente.funcionario.label}} 
+                                    </label></div>
+                                    <div class="col-12 col-md-8">
+                                        {{datoscliente.funcionario}}
                                     </div>
                                 </div>
 

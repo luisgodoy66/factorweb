@@ -1518,11 +1518,11 @@ class Cheques_quitados_Manager(models.Manager):
                 por_vencer=Sum('nsaldo', filter=Q(accesorio_quitado__dvencimiento__gte=datetime.today())),
                 protesto=Value(0, output_field=DecimalField()),
                 total=Sum('nsaldo'),
-            datos_json=Case(
-                *[When(accesorio_quitado__documento__cxcliente=k, then=Value(v, output_field=models.JSONField())) 
-                  for k, v in registros.items()],
-                default=Value([], output_field=models.JSONField())
-            )
+                datos_json=Case(
+                    *[When(accesorio_quitado__documento__cxcliente=k
+                           , then=Value(v, output_field=models.JSONField())) for k, v in registros.items()]
+                           , default=Value([], output_field=models.JSONField())
+                )
             ) \
             .order_by()
 
@@ -2145,16 +2145,34 @@ class Cuotas_pagare_Manager(models.Manager):
         vcdo60 = datetime.today() + timedelta(days=-60)
         vcdo90 = datetime.today() + timedelta(days=-90)
 
-        return self.filter(leliminado = False, nsaldo__gt = 0
+        qs = self.filter(
+            leliminado=False, nsaldo__gt=0
             , pagare__leliminado = False
-            , empresa = id_empresa)\
+            , empresa = id_empresa)
+        
+        # Agrupar los registros por cliente y obtener los datos requeridos
+        clientes = qs.values('pagare__cxcliente').distinct()
+        registros = {}
+
+        for cliente in clientes:
+            registros_cliente = qs.filter(pagare__cxcliente=cliente['pagare__cxcliente']
+            ).values(
+                'pagare__cxcliente',
+            ).annotate(
+                deudor=F('pagare__cxcliente__cxcliente__ctnombre'),
+                documento_negociado=F('ncuota'),
+                vencimiento_str=Cast('dfechapago', output_field=CharField()),
+                saldo=Cast('nsaldo', output_field=CharField())
+            )
+            registros[cliente['pagare__cxcliente']] = list(registros_cliente)
+
+        return qs\
             .values('pagare__cxcliente__cxcliente__ctnombre',
                     'pagare__cxcliente__linea_factoring__nvalor',
                     'pagare__cxcliente__datos_operativos__cxclase__cxclase',
                     'pagare__cxcliente__datos_operativos__cxestado',
                     'pagare__cxcliente',
-                    ) \
-            .annotate(
+            ).annotate(
                 vencido_mas_60=Sum('nsaldo', filter=Q(dfechapago__lt=vcdo60)),
                 vencido_mas_90=Sum('nsaldo', filter=Q(dfechapago__lt=vcdo90)),
                 vencido_90=Sum('nsaldo', filter=Q(dfechapago__lt=vcdo60, dfechapago__gte=vcdo90)),
@@ -2164,9 +2182,35 @@ class Cuotas_pagare_Manager(models.Manager):
                 por_vencer=Sum('nsaldo', filter=Q(dfechapago__gte=datetime.today())),
                 protesto = Value(0, output_field=DecimalField()),
                 total=Sum('nsaldo'),
-                datos_json=Value('', output_field=models.JSONField())
-            ) \
-            .order_by()
+                datos_json=Case(
+                    *[When(pagare__cxcliente=k, then=Value(v, output_field=models.JSONField())) 
+                    for k, v in registros.items()],
+                    default=Value([], output_field=models.JSONField())
+                )
+            ).order_by()
+
+        # return self.filter(leliminado = False, nsaldo__gt = 0
+        #     , pagare__leliminado = False
+        #     , empresa = id_empresa)\
+        #     .values('pagare__cxcliente__cxcliente__ctnombre',
+        #             'pagare__cxcliente__linea_factoring__nvalor',
+        #             'pagare__cxcliente__datos_operativos__cxclase__cxclase',
+        #             'pagare__cxcliente__datos_operativos__cxestado',
+        #             'pagare__cxcliente',
+        #             ) \
+        #     .annotate(
+        #         vencido_mas_60=Sum('nsaldo', filter=Q(dfechapago__lt=vcdo60)),
+        #         vencido_mas_90=Sum('nsaldo', filter=Q(dfechapago__lt=vcdo90)),
+        #         vencido_90=Sum('nsaldo', filter=Q(dfechapago__lt=vcdo60, dfechapago__gte=vcdo90)),
+        #         vencido_60=Sum('nsaldo', filter=Q(dfechapago__lt=vcdo30, dfechapago__gte=vcdo60)),
+        #         vencido_30=Sum('nsaldo', filter=Q(dfechapago__lt=datetime.today()
+        #             , dfechapago__gte=vcdo30)),
+        #         por_vencer=Sum('nsaldo', filter=Q(dfechapago__gte=datetime.today())),
+        #         protesto = Value(0, output_field=DecimalField()),
+        #         total=Sum('nsaldo'),
+        #         datos_json=Value('', output_field=models.JSONField())
+        #     ) \
+        #     .order_by()
 
 class Pagare_detalle(ClaseModelo):
     pagare = models.ForeignKey(Pagares, on_delete=models.CASCADE)

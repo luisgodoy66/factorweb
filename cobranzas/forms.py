@@ -26,7 +26,7 @@ class CobranzasDocumentosForm(forms.ModelForm):
             , 'ddeposito': 'Fecha de depósito'
             , 'cxcuentatransferencia': 'Cuenta de origen de transferencia'
             , 'cxcuentaconjunta': 'Cuenta compartida'
-            , 'ctcomentario': 'Comentarios internos'
+            , 'ctcomentario': 'Nota interna'
         }
         widgets = {
             'dcobranza': forms.DateInput(

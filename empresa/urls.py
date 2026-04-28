@@ -1,12 +1,13 @@
 from django.urls import URLPattern, path
-from .views import TiposFactoringView, TipoFactoringNew , TipoFactoringEdit\
+from .views import FuncionariosEdit, TiposFactoringView, TipoFactoringNew , TipoFactoringEdit\
     , TasasFactoringView, TasaFactoringNew, TasaFactoringEdit\
     , ClasesParticipanteView, ClasesParticipanteNew, OtrosCargosView\
     , CuentasBancariasView, CuentaBancariaNew, CuentaBancariaEdit\
     , LocalidadesView, LocalidadesNew, LocalidadesEdit, PuntosEmisionView\
     , PuntoEmisionNew, PuntoEmisionEdit, DatosEmpresaEdit\
     , OtroCargoEdit, OtroCargoNew, TiposEmpresasView, TiposEmpresasNew\
-    , OtrosCargosJSON, ClasesParticipanteEdit, TiposEmpresasEdit
+    , OtrosCargosJSON, ClasesParticipanteEdit, TiposEmpresasEdit\
+    , FuncionariosView, FuncionariosNew
 # , DatosOtroCargo
 
 urlpatterns = [
@@ -41,8 +42,10 @@ urlpatterns = [
     path('cuentabancariaedit/<int:pk>',CuentaBancariaEdit.as_view()
     ,name='cuentabancaria_editar'),
     path('listalocalidades/',LocalidadesView.as_view(),name='listalocalidades'),
-    path('localidadnueva/',LocalidadesNew.as_view(),name='localidad_nueva'),
-    path('localidadedit/<int:pk>',LocalidadesEdit.as_view(),name='localidad_editar'),
+    path('localidadnueva/',LocalidadesNew.as_view()
+         ,name='localidad_nueva'),
+    path('localidadedit/<int:pk>',LocalidadesEdit.as_view()
+         ,name='localidad_editar'),
     path('listapuntosemision',PuntosEmisionView.as_view(),name='listapuntosemision'),
     path('puntoemisionnuevo/',PuntoEmisionNew.as_view(), name='puntoemision_nuevo'),
     path('puntoemisioneditar/<int:pk>',PuntoEmisionEdit.as_view()
@@ -54,5 +57,12 @@ urlpatterns = [
     path('datostipoempresa_nueva', TiposEmpresasNew.as_view()
     , name="datostipoempresa_nueva"),
     path('datostipoempresa_editar/<int:pk>', TiposEmpresasEdit.as_view()
-    , name="datostipoempresa_editar"),
+         , name="datostipoempresa_editar"),
+    path('listafuncionarios/', FuncionariosView.as_view()
+         , name='listafuncionarios'),
+    path('funcionarionuevo', FuncionariosNew.as_view()
+         , name="funcionario_nuevo"),
+    path('funcionarioeditar/<int:pk>', FuncionariosEdit.as_view()
+         , name="funcionario_editar"),
+
 ]

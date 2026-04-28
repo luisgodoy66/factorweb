@@ -163,6 +163,32 @@ class DocumentosForm(forms.ModelForm):
         except Exception as e:
             raise forms.ValidationError(f"Documento ya registrado, {e}")
         
+        try:
+            sc = Documentos.objects\
+                .get(ctdocumento=ctdocumento
+                     , ctserie1=ctserie1
+                     , ctserie2=ctserie2
+                     , cxasignacion__cxcliente__cxcliente=self.ruc
+                     , leliminado=False
+                    )
+            
+            if not self.instance.pk:
+                # es nuevo registro
+                if sc.empresa.id == self.empresa:
+                    raise forms.ValidationError(
+                        "Documento ya registrado anteriormente en esta u otra solicitud.")
+                else:
+                    raise forms.ValidationError("Documento negociado en otro factor.")
+
+            elif self.instance.pk!=sc.pk:
+                # es un registro existente
+                raise forms.ValidationError("Cambio no permitido. Documento ya registrado en esta u otra solicitud.")
+        except Documentos.DoesNotExist:
+            pass
+                
+        except Exception as e:
+            raise forms.ValidationError(f"Documento ya registrado, {e}")
+        
         return cleaned_data
 
 class ChequesForm(forms.ModelForm):

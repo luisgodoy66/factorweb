@@ -1,0 +1,68 @@
+{% extends 'bases/home.html' %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">configuración</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li><a href="{% url 'empresa:listafuncionarios' %}">funcionarios</a></li>
+                    <li class="active">editar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="col-lg-6">
+<form  method="post"  class="form-horizontal"
+    onsubmit="return checkSubmit();">
+        <div class="card">
+            <div class="card-header" style="background-color: white;">
+                <div class="d-flex justify-content-between align-items-center ">
+                    <h5>Datos de {% if funcionario %}  {{ funcionario }} {% else %}  nuevo funcionario {% endif %} </h5>
+                    <a href="{% url 'empresa:listafuncionarios' %}" class="btn  btn-sm">
+                        <i class="fa fa-times"></i> 
+                    </a>
+                </div>
+            </div>
+                {% csrf_token %}
+            <div class="card-body card-block">
+
+                    <div class="row form-group">
+                        <div class="col-12 col-md-4"><label for="id_cxfuncionario" class=" form-control-label">
+                            {{ form.cxfuncionario.label}}
+                        </label></div>
+                        <div class="col col-md-8">
+                            {{ form.cxfuncionario}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-12 col-md-4"><label for="id_ctfuncionario" class=" form-control-label">
+                            {{ form.ctfuncionario.label}}
+                        </label></div>
+                        <div class="col col-md-8">
+                            {{ form.ctfuncionario}}
+                        </div>
+                    </div>  
+
+            </div>    
+
+            <div class="card-footer">
+                <div class="text-right">
+                    <button type="submit" class="btn btn-secondary btn-sm">
+                        <span class="fa fa-dot-circle-o"></span> Grabar
+                    </button>
+
+                </div>
+                {{ form.errors}}
+            </div>
+        </div>
+</form>
+    </div>
+{% endblock %}
+{% block js_page %}
+<script>
+    enviando = false; //Obligaremos a entrar el if en el primer submit
+</script>
+{% endblock %}

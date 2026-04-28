@@ -18,6 +18,9 @@
 
 <form method="post" id="frmCliente" enctype="multipart/form-data" class="form-horizontal" onsubmit="return checkSubmit();">
         {% csrf_token %}
+                <div hidden>
+                    {{form.empresa}}
+                </div>
     <div class="card">
         <div class="card-header" style="background-color: white;">
             <div class="d-flex justify-content-between align-items-center ">
@@ -28,100 +31,127 @@
             </div>
         </div>
         <div class="card-body">
-            <!-- columna izquierda -->
-            <div class="col-md-6">
-                <div hidden>
-                    {{form.empresa}}
-                </div>
-                
-                <div class="row form-group">
-                    <div class="col col-md-4">
-                        <label for="id_cxcliente" class="form-control-label">{{form.cxcliente.label}}</label></div>
-                    <div class="col-md-7">
-                        {{form.cxcliente}}
-                        <small class="form-text text-muted">Máximo 13 caracteres</small>
-                    </div>
-                    <div class="col-md-1">
-                        <button type="button" class="btn btn-sm" title="Cargar datos del solicitante desde el SRI"
-                            onclick="return obtener_datos_contribuyente(document.getElementById('id_cxcliente').value)"
-                            style="background-color: white;">
-                        <i class="fa fa-search"></i>
-                        </button>
-                    </div>
-                </div>
+                        <div class="card mt-3"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <div class="card-header">
+                                <h6>Identificación</h6> 
+                            </div>
+                            <div class="card-body">
+                                <div class="col-md-4">
+                                    
+                                    <div class="row form-group">
+                                        <div class="col col-md-4"><label for="id_cxcliente" class=" form-control-label">
+                                            {{form.cxcliente.label}} <span style="color: red;">*</span>
+                                        </label></div>
+                                        <div class="col-md-7">
+                                            {{form.cxcliente}}
+                                            <!-- <small class="form-text text-muted">Máximo 13 caracteres</small> -->
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-sm" title="Cargar datos del solicitante desde el SRI"
+                                                onclick="return obtener_datos_contribuyente(document.getElementById('id_cxcliente').value)"
+                                                style="background-color: white;">
+                                            <i class="fa fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
 
-                <div class="row form-group">
-                    <div class="col col-md-4">
-                        <label for="id_ctnombre" class="form-control-label">{{form.ctnombre.label}}</label></div>
-                    <div class="col-md-8">
-                        {{form.ctnombre}}
-                        <small class="form-text text-muted">Máximo 100 caracteres</small></div>
-                </div>
-                <div class="row form-group">
-                    <div class="col col-md-4">
-                        <label for="id_ctdireccion" class="form-control-label">{{form.ctdireccion.label}}</label></div>
-                    <div class="col-md-8">
-                        {{form.ctdireccion}}
-                    </div>
-                </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="id_ctnombre" class=" form-control-label">
+                                            {{form.ctnombre.label}} <span style="color: red;">*</span>
+                                        </label></div>
+                                        <div class="col-md-9">
+                                            {{form.ctnombre}}
+                                            <small class="form-text text-muted">Máximo 100 caracteres</small></div>
+                                    </div>
 
-                <div class="row form-group">
-                    <div class="col col-md-4">
-                        <label for="id_cttelefono1" class="form-control-label">{{form.cttelefono1.label}}</label></div>
-                    <div class="col-md-8">
-                        {{form.cttelefono1}}
-                        <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
-                </div>
-                <div class="row form-group">
-                    <div class="col col-md-4">
-                        <label for="id_cttelefono2" class="form-control-label">{{form.cttelefono2.label}}</label></div>
-                    <div class="col-12 col-md-8">
-                        {{form.cttelefono2}}
-                        <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small></div>
-                </div>
-            </div>
-            <!-- columna derecha -->
-            <div class="col-md-6">
-                <div class="row form-group">
-                    <div class="col col-md-4">
-                        <label for="id_ctcelular" class="form-control-label">{{form.ctcelular.label}}</label></div>
-                    <div class="col-md-8">
-                        {{form.ctcelular}}
-                        <small class="form-text text-muted">Use el formato internacional. Ejemplo: +593934567890</small></div>
-                </div>
+                                    
+                                </div>
 
-                <div class="row form-group">
-                    <div class="col col-md-4">
-                        <label for="id_ctemail" class="form-control-label">{{form.ctemail.label}}</label></div>
-                    <div class="col-md-8">
-                        {{form.ctemail}}
-                        <small class="text-muted form-text">Ingrese el email principal</small></div>
-                </div>
-                <div class="row form-group">
-                    <div class="col col-md-4">
-                        <label for="id_ctemail2" class="form-control-label">{{form.ctemail2.label}}</label></div>
-                    <div class="col-md-8">
-                        {{form.ctemail2}}
-                        <small class="text-muted form-text">Ingrese el email secundario</small></div>
-                </div>
+                            </div>
+                        </div>
+                        <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <div class="card-header">
+                                <h6>Ubicación y contactos</h6>
+                            </div>
+                            <div class="card-body">
 
-                <div class="row form-group">
-                    <div class="col col-md-4">
-                        <label for="id_ctgirocomercial" class="form-control-label">{{form.ctgirocomercial.label}}</label></div>
-                    <div class="col-md-8">
-                        {{form.ctgirocomercial}}
-                    </div>
-                </div> 
-                <div class="row form-group">
-                    <div class="col col-md-4"><label for="id_dinicioactividades" class=" form-control-label">
-                        {{form.dinicioactividades.label}}
-                    </label></div>
-                    <div class="col-md-8">
-                        {{form.dinicioactividades}}
-                    </div>
-                </div>
-                    
-            </div>
+                                <div class="col-md-7">
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="id_ctdireccion" class=" form-control-label">
+                                            {{form.ctdireccion.label}} <span style="color: red;">*</span>
+                                        </label></div>
+                                        <div class="col-md-10">
+                                            {{form.ctdireccion}}
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- columna derecha -->
+                                <div class="col-lg-5">
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="id_cttelefono1" class=" form-control-label">
+                                            {{form.cttelefono1.label}}
+                                        </label></div>
+                                        <div class="col-md-4">
+                                            {{form.cttelefono1}}
+                                            <!-- <small class="form-text text-muted">Máximo 30 caracteres. Incluya el área</small> -->
+                                        </div>
+                                        <div class="col-md-1">-</div>
+                                        <div class="col-md-4">{{form.cttelefono2}}</div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="id_ctcelular" class=" form-control-label">
+                                            {{form.ctcelular.label}}
+                                        </label></div>
+                                        <div class="col-md-9">
+                                            {{form.ctcelular}}
+                                            <small class="form-text text-muted">Use el formato internacional. Ejemplo: +593934567890</small></div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="id_ctemail" class=" form-control-label">
+                                            {{form.ctemail.label}}<span style="color: red;">*</span>
+                                        </label></div>
+                                        <div class="col-md-9">
+                                            {{form.ctemail}}
+                                            <small class="text-muted form-text">Ingrese el email principal</small></div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="id_ctemail2" class=" form-control-label">
+                                            {{form.ctemail2.label}}
+                                        </label></div>
+                                        <div class="col-md-9">
+                                            {{form.ctemail2}}
+                                            <small class="text-muted form-text">Ingrese el email secundario</small></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card mt-3"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <div class="card-header">
+                                <h6>Información comercial</h6>
+                            </div>
+                            <div class="card-body">
+
+                                <div class="row form-group">
+                                    <div class="col col-md-2"><label for="id_dinicioactividades" class=" form-control-label">
+                                        {{form.dinicioactividades.label}} <span style="color: red;">*</span>
+                                    </label></div>
+                                    <div class="col-md-10">
+                                        {{form.dinicioactividades}}
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col col-md-2"><label for="id_ctgirocomercial" class=" form-control-label">
+                                        {{form.ctgirocomercial.label}} <span style="color: red;">*</span>
+                                    </label></div>
+                                    <div class="col-md-10">
+                                        {{form.ctgirocomercial}}
+                                    </div>
+                                </div> 
+                            </div>
+                        </div>
         </div>    
         <div class="card-footer">
             <div class="text-right">

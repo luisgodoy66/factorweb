@@ -57,12 +57,17 @@ class DatosOperativosView(SinPrivilegios, generic.ListView):
     permission_required="clientes.view_datos_generales"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        qs=ModeloCliente.Datos_generales.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
+        qs=ModeloCliente.Datos_generales.objects\
+            .filter(leliminado = False
+                    , cxcliente__leliminado = False
+                    , empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = Usuario_empresa.objects\
+            .filter(user = self.request.user).first()
         context = super(DatosOperativosView, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -1329,12 +1334,14 @@ def DetalleDocumentoADiccionario(doc, tipo_asignacion):
         output["Documento"] = doc.ctdocumento
         output["Emision"] = doc.demision.strftime("%Y-%m-%d")
         output["ia_analizada"] = hasattr(doc, 'ai_analysis')
+        output["id_documento"] = doc.id
     else:
         output["Comprador"] = doc.documento.ctcomprador
         output["ClaseComprador"] = doc.documento.ctcomprador
         output["Documento"] = doc.documento.ctdocumento
         output["Emision"] = doc.documento.demision.strftime("%Y-%m-%d")
         output["ia_analizada"] = hasattr(doc.documento, 'ai_analysis')
+        output["id_documento"] = doc.documento.id
 
     output["Vencimiento"] = doc.dvencimiento.strftime("%Y-%m-%d")
     output["Total"] = doc.ntotal
@@ -1754,11 +1761,13 @@ def ReversaAceptacionAsignacion(request, pid_asignacion):
         exceso_temporal.save()
     return HttpResponse(resultado)
   
-def GeneraListaAsignacionesJSON(request, desde = None, hasta= None, clientes =None):
+def GeneraListaAsignacionesJSON(request, desde = None
+                                , hasta= None, clientes =None):
     # Es invocado desde la url de una tabla bt
 
     arr_clientes = []
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
     
     if clientes == None:
         asignacion = Asignacion.objects\

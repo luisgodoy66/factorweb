@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from .models import  Cuentas_bancarias, Datos_generales, Linea_Factoring\
     , Personas_juridicas , Personas_naturales, Cupos_compradores\
     , Datos_compradores, Clases_cliente
-from empresa.models import Localidades, Datos_participantes, Tipos_empresas
+from empresa.models import Funcionarios, Localidades, Datos_participantes, Tipos_empresas
 from pais.models import Bancos
 
 from datetime import date
@@ -14,9 +14,10 @@ class ClienteForm(forms.ModelForm):
     
     class Meta:
         model=Datos_generales
-        fields=['cxtipocliente', 'cxlocalidad',]
+        fields=['cxtipocliente', 'cxlocalidad', 'funcionario']
         labels={'cxtipocliente':'Tipo de persona'
             , 'cxlocalidad':'Sucursal de atención'
+            , 'funcionario':'Funcionario asignado'
         }
     def __init__(self, *args, **kwargs):
         empresa = kwargs.pop('empresa', None)
@@ -30,6 +31,8 @@ class ClienteForm(forms.ModelForm):
         if empresa:
             self.fields['cxlocalidad'].queryset = Localidades.objects\
                 .filter(empresa=empresa, lactiva = True, leliminado = False)
+            self.fields['funcionario'].queryset = Funcionarios.objects\
+                .filter(empresa=empresa, leliminado = False)
             
 class CompradorForm(forms.ModelForm):
     
