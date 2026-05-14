@@ -196,14 +196,20 @@ class Documentos(ClaseModelo):
     lnotificaciongenerada = models.BooleanField(default=False
         , help_text='Indica si se ha generado la notificación de este documento')
 
+    def total_factura(self):
+        return self.nvalorantesiva + self.niva
+    
     def total_negociado(self):
-        return self.ntotal #- self.nvalornonegociado
+        return self.ntotal 
 
     def __str__(self):
         return '{}-{}-{}'.format(self.ctserie1, self.ctserie2, self.ctdocumento)
 
     def total_cargos(self):
         return self.ngao + self.ndescuentocartera
+    
+    def retenciones(self):
+        return self.nretencioniva + self.nretencionrenta
         
 class ChequesAccesorios(ClaseModelo):
     PROPIETARIO = (

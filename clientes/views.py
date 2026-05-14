@@ -683,7 +683,7 @@ def DatosClientes(request, participante_id=None, solicitante_id=None, tab=None):
             
             form_cliente = ClienteForm(request.POST, empresa=id_empresa.empresa)
 
-            form_submitted = True
+            # form_submitted = True
 
             if formulario.is_valid():
 
@@ -711,7 +711,7 @@ def DatosClientes(request, participante_id=None, solicitante_id=None, tab=None):
                         cxcliente = datosparticipante,
                         cxtipocliente=cxtipocliente,
                         cxlocalidad=local,
-                        cxfuncionario=funcionario,
+                        funcionario=funcionario,
                         cxusuariocrea = request.user,
                         empresa = id_empresa.empresa,
                     )

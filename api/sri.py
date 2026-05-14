@@ -1,11 +1,27 @@
 # import zeep
-from urllib import response
+import logging
+
+import requests
+from django.conf import settings
+from django.core.cache import cache
+from django.http import JsonResponse
+from requests import Session
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from zeep import Client
 from zeep.transports import Transport
-from requests import Session
-from django.http import HttpResponse, JsonResponse
 
-WSDL_URL = "https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl"
+WSDL_URL = getattr(
+    settings,
+    "SRI_WSDL_URL",
+    "https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl",
+)
+DEFAULT_SRI_CONTRIBUYENTE_URL = (
+    "https://srienlinea.sri.gob.ec/sri-catastro-sujeto-servicio-internet/rest/"
+    "ConsolidadoContribuyente/obtenerPorNumerosRuc?ruc={ruc}"
+)
+
+logger = logging.getLogger(__name__)
 
 class SRIConsultationService:
     def __init__(self, wsdl_url):
@@ -47,32 +63,119 @@ if __name__ == "__main__":
     result = service.consult_document_status(access_key)
     print(result)
 
-import requests
 
-def obtener_datos_contribuyente(request,ruc):
+def _build_retry_session():
+    retry = Retry(
+        total=3,
+        connect=3,
+        read=3,
+        backoff_factor=0.6,
+        status_forcelist=(429, 500, 502, 503, 504),
+        allowed_methods=frozenset(["GET"]),
+        raise_on_status=False,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session = requests.Session()
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
+
+
+def _get_sri_contribuyente_endpoints(ruc):
+    endpoints = getattr(settings, "SRI_CONTRIBUYENTE_ENDPOINTS", None)
+    if not endpoints:
+        endpoints = [DEFAULT_SRI_CONTRIBUYENTE_URL]
+
+    if isinstance(endpoints, str):
+        endpoints = [endpoints]
+
+    normalized = []
+    for endpoint in endpoints:
+        normalized.append(endpoint.format(ruc=ruc) if "{ruc}" in endpoint else endpoint)
+    return normalized
+
+
+def _extract_contribuyente(payload):
+    if isinstance(payload, list) and payload:
+        first = payload[0]
+        if isinstance(first, dict):
+            return first
+    if isinstance(payload, dict) and payload.get("razonSocial"):
+        return payload
+    return None
+
+def obtener_datos_contribuyente(request, ruc):
     datos = consulta_contribuyente_sri(ruc)
     return JsonResponse(datos)
 
+
 def consulta_contribuyente_sri(ruc):
-    # URL del servicio web del SRI
-    url = f"https://srienlinea.sri.gob.ec/sri-catastro-sujeto-servicio-internet/rest/ConsolidadoContribuyente/obtenerPorNumerosRuc?ruc={ruc}"
-    
-    try:
-        # Realizar la solicitud GET al servicio web
-        response = requests.get(url)
-        
-        # Verificar si la solicitud fue exitosa (código 200)
-        if response.status_code == 200:
-            # Convertir la respuesta a JSON
-            datos_contribuyente = response.json()
-            return datos_contribuyente[0]
-        else:
-            # Si la solicitud no fue exitosa, devolver un mensaje de error
-            return {"error": f"Error al consultar el RUC. Código de estado: {response.status_code}"}
-    
-    except requests.exceptions.RequestException as e:
-        # Manejar errores de conexión o solicitud
-        return {"error": f"Error de conexión: {str(e)}"}
+    if not ruc or not str(ruc).isdigit() or len(str(ruc)) != 13:
+        return {"error": "RUC invalido. Debe tener 13 digitos numericos."}
+
+    cache_key = f"sri:ruc:{ruc}"
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        return cached_data
+
+    proxies = getattr(settings, "SRI_PROXY", None)
+    timeout = getattr(settings, "SRI_TIMEOUT", 20)
+    verify_cert = getattr(settings, "SRI_VERIFY_CERT", True)
+    headers = {
+        "Accept": "application/json, text/plain, */*",
+        "User-Agent": "factorweb/1.0",
+    }
+
+    session = _build_retry_session()
+    endpoints = _get_sri_contribuyente_endpoints(ruc)
+
+    for endpoint in endpoints:
+        try:
+            response = session.get(
+                endpoint,
+                headers=headers,
+                proxies=proxies,
+                timeout=timeout,
+                verify=verify_cert,
+            )
+
+            if response.status_code == 200:
+                payload = response.json()
+                datos_contribuyente = _extract_contribuyente(payload)
+                if datos_contribuyente:
+                    cache_ttl = getattr(settings, "SRI_RUC_CACHE_SECONDS", 12 * 60 * 60)
+                    cache.set(cache_key, datos_contribuyente, timeout=cache_ttl)
+                    return datos_contribuyente
+
+                logger.warning("SRI respondio 200 pero sin estructura esperada. endpoint=%s", endpoint)
+                continue
+
+            if response.status_code in (403, 451):
+                logger.warning(
+                    "Posible bloqueo geografico del SRI. endpoint=%s status=%s",
+                    endpoint,
+                    response.status_code,
+                )
+                continue
+
+            logger.warning("Fallo consulta SRI endpoint=%s status=%s", endpoint, response.status_code)
+
+        except requests.exceptions.Timeout:
+            logger.warning("Timeout consultando SRI endpoint=%s", endpoint)
+        except requests.exceptions.ProxyError as exc:
+            logger.warning("Error de proxy al consultar SRI endpoint=%s error=%s", endpoint, exc)
+        except requests.exceptions.SSLError as exc:
+            logger.warning("Error SSL al consultar SRI endpoint=%s error=%s", endpoint, exc)
+        except requests.exceptions.RequestException as exc:
+            logger.warning("Error de red al consultar SRI endpoint=%s error=%s", endpoint, exc)
+
+    return {
+        "error": (
+            "No fue posible consultar el SRI desde este servidor. "
+            "Configura SRI_CONTRIBUYENTE_ENDPOINTS con un endpoint en Ecuador "
+            "(proxy o relay) y verifica SRI_PROXY/SRI_TIMEOUT."
+        )
+    }
 
 def consulta_estado_comprobante_sri(request, access_key):
     # Crear cliente SOAP
@@ -102,47 +205,6 @@ def consulta_estado_comprobante_sri(request, access_key):
         })
     return JsonResponse(resultado, safe=False)
 
-# sri_utils.py
-import requests
-import logging
-from django.conf import settings
-
-logger = logging.getLogger(__name__)
-
 def consulta_contribuyente_sri_vps_externo(ruc):
-    """
-    Consulta el SRI usando proxy autorizado, con manejo de errores y logs.
-    """
-    url = f"https://srienlinea.sri.gob.ec/sri-catastro-sujeto-servicio-internet/rest/ConsolidadoContribuyente/obtenerPorNumerosRuc?ruc={ruc}"
-    try:
-        response = requests.get(
-            url,
-            proxies=settings.SRI_PROXY,
-            timeout=settings.SRI_TIMEOUT,
-            verify=settings.SRI_VERIFY_CERT
-        )
-        response.raise_for_status()  # Lanza excepción si HTTP >=400
-        logger.info("Conexión exitosa al SRI, status %s", response.status_code)
-        # Verificar si la solicitud fue exitosa (código 200)
-        if response.status_code == 200:
-            # Convertir la respuesta a JSON
-            datos_contribuyente = response.json()
-            return datos_contribuyente[0]
-        else:
-            # Si la solicitud no fue exitosa, devolver un mensaje de error
-            return {"error": f"Error al consultar el RUC. Código de estado: {response.status_code}"}
-    
-    except requests.exceptions.SSLError as e:
-        logger.error("Error SSL/TLS al conectar con SRI: %s", e)
-    except requests.exceptions.ProxyError as e:
-        logger.error("Error de proxy al conectar con SRI: %s", e)
-    except requests.exceptions.ConnectionError as e:
-        logger.error("Error de conexión al SRI: %s", e)
-    except requests.exceptions.Timeout as e:
-        logger.error("Timeout al conectar con SRI: %s", e)
-    except requests.exceptions.HTTPError as e:
-        logger.error("Error HTTP al SRI: %s", e)
-    except Exception as e:
-        logger.error("Error inesperado al conectar con SRI: %s", e)
-    
-    return None  # En caso de error
+    """Compatibilidad: usa la misma estrategia robusta para VPS externo."""
+    return consulta_contribuyente_sri(ruc)

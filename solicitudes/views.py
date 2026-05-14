@@ -11,6 +11,7 @@ from django.utils.dateparse import parse_date
 from django.urls import reverse_lazy
 from django_weasyprint import WeasyTemplateResponse
 from django.http import JsonResponse
+from django.db import DataError
 
 from .forms import AsignacionesForm, ChequesForm, DocumentosForm\
     , ClientesForm, NivelesAprobacionForm, LiquidacionesForm
@@ -22,6 +23,7 @@ from .models import Asignacion, ChequesAccesorios, Documentos, \
 from clientes.models import Datos_compradores
 from pais.models import Bancos, Feriados
 from bases.models import Usuario_empresa, Empresas
+from operaciones.models import Documentos as DocumentosOperaciones
 
 from bases.views import enviarPost, SinPrivilegios
 
@@ -1048,9 +1050,7 @@ def DatosAccesorioEditar(request, accesorio_id = None, tipo_factoring_id = None)
 def PedirArchivoXML(request):
     template_name = "solicitudes/importarasignacion_modal.html"
     return render(request, template_name)
-from django.http import JsonResponse
-from django.db import DataError
-from operaciones.models import Documentos as DocumentosOperaciones
+# from django.http import JsonResponse
 
 def ImportarOperacion(request):
     objeto=json.loads(request.body.decode("utf-8"))

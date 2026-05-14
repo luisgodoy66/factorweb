@@ -227,16 +227,41 @@ PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")
 # settings.py
 
 # URL del servicio del SRI
-SRI_WSDL_URL = "https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl"
+SRI_WSDL_URL = os.getenv(
+    "SRI_WSDL_URL",
+    "https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl",
+)
 
-# Proxy autorizado por el SRI (si requiere usuario y contraseña)
-SRI_PROXY = {
-    "https": "http://usuario:contraseña@IP_DEL_PROXY:PUERTO"
-}
+# Endpoints para consulta de contribuyente (puedes poner relay en Ecuador como primer valor)
+# Formato esperado: URL(s) separadas por coma, cada una con {ruc}
+SRI_CONTRIBUYENTE_ENDPOINTS = [
+    item.strip()
+    for item in os.getenv(
+        "SRI_CONTRIBUYENTE_ENDPOINTS",
+        "https://srienlinea.sri.gob.ec/sri-catastro-sujeto-servicio-internet/rest/ConsolidadoContribuyente/obtenerPorNumerosRuc?ruc={ruc}",
+    ).split(",")
+    if item.strip()
+]
+
+# Proxy opcional en Ecuador para evitar bloqueo geografico del SRI
+SRI_PROXY_URL = os.getenv("SRI_PROXY_URL", "").strip()
+SRI_PROXY = (
+    {"http": SRI_PROXY_URL, "https": SRI_PROXY_URL}
+    if SRI_PROXY_URL
+    else None
+)
 
 # Timeout en segundos para la conexión
-SRI_TIMEOUT = 20
+SRI_TIMEOUT = int(os.getenv("SRI_TIMEOUT", "20"))
 
-# Ruta al certificado del proxy, si aplica (opcional)
-# SRI_VERIFY_CERT = "/ruta/al/certificado.pem"
-SRI_VERIFY_CERT = True  # usa True si quieres verificar certificados por defecto
+# Cache de respuestas de RUC en segundos (default 12h)
+SRI_RUC_CACHE_SECONDS = int(os.getenv("SRI_RUC_CACHE_SECONDS", "43200"))
+
+# Verificación TLS (True/False o ruta de certificado)
+_sri_verify_cert = os.getenv("SRI_VERIFY_CERT", "true").strip()
+if _sri_verify_cert.lower() in ("1", "true", "yes"):
+    SRI_VERIFY_CERT = True
+elif _sri_verify_cert.lower() in ("0", "false", "no"):
+    SRI_VERIFY_CERT = False
+else:
+    SRI_VERIFY_CERT = _sri_verify_cert
