@@ -89,7 +89,7 @@
                         </button>
                         {% if cheque %}
                             <button type="submit" class="btn btn-primary btn-sm">
-                                <i class="fa fa-dot-circle-o"></i> Grabar
+                                <i class="fa fa-dot-circle-o"></i> Actualizar
                             </button>
                         {% else %}
                             <button type="button" class="btn btn-primary btn-sm"
@@ -105,20 +105,52 @@
     </div>
 
     <script>
-    var enviando = false; //Obligaremos a entrar el if en el primer submit
     const cheque = "{{ cheque }}";
     const selectElement = document.getElementById('id_cxpropietariocuenta');
-    selectElement.addEventListener('change', evaluarSeleccion);
+    var enviando = false; //Obligaremos a entrar el if en el primer submit
+    var url = jQuery("[name=form]").attr("action");
+    var token = jQuery("[name=csrfmiddlewaretoken]").val();
+    // var asgn = jQuery("[name=asignacion_id]").val();
 
-    // este modal viene desde nuevo registro o edicion de cheque. Si es nuevo
-    // (no hay cheque), inicializar los valores del comprador y total
-    if ( cheque  === null || cheque === 'None')
-    {
+
+    window.onload = function() {
         // Agregar un evento change al objeto select para evaluar la selección cuando cambie
+        selectElement.addEventListener('change', evaluarSeleccion);
+    
+        // este modal viene desde nuevo registro o edicion de cheque. Si es nuevo
+        // (no hay cheque), inicializar los valores del comprador y total
+        if ( cheque  === null || cheque === 'None')
+        {
+            // Agregar un evento change al objeto select para evaluar la selección cuando cambie
 
-        evaluarSeleccion( );
-        inicializaValor("cheque_nvalor",capturaValor("id_ntotal"))
+            evaluarSeleccion( );
+            inicializaValor("cheque_nvalor",capturaValor("id_ntotal"))
+        };
     };
+        
+        jQuery("form").submit(function(e){
+            e.preventDefault();
+            var formData = jQuery("form").serializeArray();
+            // console.log(formData);
+            jQuery.ajax({
+                url:url,
+                method:"POST",
+                headers: {'X-CSRFToken': token },
+                data: formData
+            })
+            .done(function(r,textStatus,xhr){
+                if(xhr.status===200){
+                    jQuery("#popup").modal('hide');
+                    // refrescar la tabla
+                    RefrescarTabla(asignacion_id);
+                }
+                else{
+                    alert(textStatus);
+                }
+            }).fail(function (error) {
+                MensajeError(error.responseText);
+            });
+        });
 
     // Función para evaluar la selección del objeto select y asignar el valor correspondiente
     function evaluarSeleccion() {

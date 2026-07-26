@@ -2048,7 +2048,7 @@ def GeneraListaChequesADepositarClienteJSONSalida(acc):
 
     output["Comprador"] = acc.documento.cxcomprador.cxcomprador.ctnombre
     output["Asignacion"] = acc.documento.cxasignacion.cxasignacion
-    output["Documento"] = acc.documento.ctdocumento
+    output["Documento"] = f"{acc.documento.cxasignacion.cxasignacion} / {acc.documento.ctdocumento}"
     output["Vencimiento"] = acc.dias_vencidos()
     output["Valor"] = acc.ntotal
     output["Datos"] = acc.cxbanco.ctbanco +' CTA.'+ acc.ctcuenta + ' CH/' + acc.ctcheque
@@ -2230,6 +2230,7 @@ def GeneraListaChequesQuitadosClienteJSONSalida(doc):
     output["Registro"] = doc.dregistro.strftime("%Y-%b-%d %H:%M")
     accesorio = ChequesAccesorios.objects.filter(chequequitado=doc.id).first()
     output["Asignacion"] = accesorio.documento.cxasignacion.cxasignacion
+    output["Documento"] = f"{accesorio.documento.cxasignacion.cxasignacion} / {accesorio.documento.ctdocumento}"
     output["Cheque"] = accesorio.__str__()
     output["Motivo"] = doc.ctmotivoquitado
     output["Saldo"] = doc.nsaldo

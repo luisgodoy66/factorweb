@@ -167,10 +167,10 @@
 <!-- <script src="{% static 'factorweb/vendors/chosen/chosen.jquery.min.js' %}"></script> -->
 <!-- <script type="text/javascript" src="{% static 'factorweb/js/datosasignacionconaccesorios.js' %}"></script> -->
 <script>
+const asignacion_id = "{{ asignacion.id }}"
 var enviando = false; //Obligaremos a entrar el if en el primer submit
 var $table = jQuery('#table')
 var selections = []
-const asignacion_id = "{{ asignacion.id }}"
 
 window.onload=function(){
     initTable();
@@ -294,5 +294,13 @@ function EditarDocumento( doc_id){
   tipo_factoring=capturaValor("id_cxtipofactoring");
   AbrirModal('/solicitudes/editarchequeaccesorio/'+doc_id+'/'+tipo_factoring )
 }    
+
+function RefrescarTabla(asgn){
+  // se invoca desde modal de cambio de tasa
+  $table.bootstrapTable('refresh', {
+    url: "/solicitudes/detallesolicitudconaccesorios/" + asgn 
+  });
+}
+
 </script>
 {% endblock %}

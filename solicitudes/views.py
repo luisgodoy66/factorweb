@@ -1043,7 +1043,8 @@ def DatosAccesorioEditar(request, accesorio_id = None, tipo_factoring_id = None)
 
             accesorio.save()
 
-        return redirect("solicitudes:asignacionconaccesorios_editar", pk= asg_id)
+        return HttpResponse(1)
+        # return redirect("solicitudes:asignacionconaccesorios_editar", pk= asg_id)
 
     return render(request, template_name, contexto)
 
