@@ -871,8 +871,11 @@ class GestionDeCobro(SinPrivilegios, generic.TemplateView):
         if gc.empresa != id_empresa.empresa:
             raise Http404("No tiene permisos para editar este registro")
 
-        ppmp = Documentos_detalle.objects\
-            .promedio_ponderado_demora(gc.revision_cartera_cliente.cxcliente.id)
+        # ppmp = Documentos_detalle.objects\
+        #     .promedio_ponderado_demora(gc.revision_cartera_cliente.cxcliente.id)
+        ppmp = Datos_generales.objects\
+            .filter(pk = gc.revision_cartera_cliente.cxcliente.id)\
+            .values('npromediodemoradepago').first()['npromediodemoradepago'] or 0
         
         total_cartera = Documentos.objects\
             .TotalCarteraCliente(gc.revision_cartera_cliente.cxcliente.id)
