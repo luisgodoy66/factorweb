@@ -8,7 +8,8 @@ from solicitudes.views import SolicitudesView, DetalleSolicitudFacturasPuras , \
     GeneraListaSolicitudesRegistradasJSON, NivelesAprobacionView, \
     NivelAprobacionCrearView, NivelAprobacionEditarView, \
     ExcesosTemporalesView, AceptarExcesoTemporal, RechazarExcesoTemporal, \
-    InstruccionDePagoView, ImpresionSolicitud
+    InstruccionDePagoView, ImpresionSolicitud, \
+    webhook_cargar_solicitudes_factoring
 
 urlpatterns=[
     path('listasolicitudes/',SolicitudesView.as_view(), \
@@ -66,4 +67,5 @@ urlpatterns=[
         name='instruccion_de_pago'),
     path('reporte_solicitud/<int:solicitud_id>', ImpresionSolicitud, \
         name='reporte_solicitud'),
+    path('webhook/cargar-facturas/', webhook_cargar_solicitudes_factoring, name='webhook_cargar_facturas'),
 ]
