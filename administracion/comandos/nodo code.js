@@ -92,3 +92,24 @@ return $input.all().map(item => {
     }
   };
 });
+
+
+
+// para separar los adjuntos del correo y llevarlos a json
+let results = [];
+//let salida = [];
+
+for (item of items) {
+    for (key of Object.keys(item.binary)) {
+        results.push({
+            json: {
+                fileName: item.binary[key].fileName
+            },
+            binary: {
+                data: item.binary[key],
+            }
+        });
+    }
+}
+//salida.push({json: {attachments: results}})
+return results;

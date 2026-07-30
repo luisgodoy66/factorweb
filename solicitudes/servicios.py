@@ -231,6 +231,7 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     asunto = correo_data.get('subject') or correo_data.get('asunto') or ''
     attachments = correo_data.get('attachments') or correo_data.get('adjuntos') or []
     print(f"Procesando correo de {sender_email} con asunto '{asunto}' y {len(attachments)} adjuntos")
+    print(f"Adjuntos: {attachments}")
     if not attachments:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
