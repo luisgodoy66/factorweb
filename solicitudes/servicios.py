@@ -244,7 +244,7 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
         else:
             xml_content = attachment
             filename = 'adjunto.xml'
-
+        print(f"Procesando adjunto '{filename}' con contenido: {xml_content[:100]}...")
         if not xml_content:
             continue
 
