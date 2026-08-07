@@ -172,14 +172,14 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
     cliente = encontrar_cliente_por_remitente(sender_email, empresa=empresa)
     if cliente is None:
         raise ValueError('No se encontró un cliente para el remitente {}'.format(sender_email))
-
+    print(f"Cliente encontrado: {cliente.cxcliente} para remitente {sender_email}" )
     if tipo_factoring is None:
         tipo_factoring = Tipos_factoring.objects\
             .filter(empresa=empresa, leliminado=False)\
             .order_by('dregistro').first()
     if tipo_factoring is None:
         raise ValueError('No existe un tipo de factoring configurado para la empresa')
-
+    print(f"Tipo de factoring encontrado: {tipo_factoring.cxdescripcion} para empresa {empresa}")
     datos = parsear_factura_xml(xml_content, xsd_path=xsd_path)
     ruc = cliente.cxcliente
 
@@ -192,13 +192,15 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
             cxtipo='F',
             cxestado='P',
         ).first()
-
+        print(f"Asignación existente encontrada: {asignacion_existente.cxasignacion if asignacion_existente else 'Ninguna'} para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.cxdescripcion}")
         if asignacion_existente:
+            print(f"Actualizando asignación existente {asignacion_existente.cxasignacion} con nuevo valor {datos['total']} y cantidad de documentos {asignacion_existente.ncantidaddocumentos + 1}")
             # si existe, actualizar el valor y la cantidad de documentos
             asignacion_existente.nvalor += datos['total']
             asignacion_existente.ncantidaddocumentos += 1
             asignacion_existente.save(update_fields=['nvalor', 'ncantidaddocumentos'])
             asignacion = asignacion_existente
+            print(f"Asignación actualizada: {asignacion.cxasignacion} con valor {asignacion.nvalor} y cantidad de documentos {asignacion.ncantidaddocumentos}")
         else:
             secuencia = Contador.objects.\
                 filter(empresa=empresa,
@@ -216,7 +218,7 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
                 secuencia.save()
 
             numero_solicitud = INICIAL_SOLICITUD+str(secuencia.nultimonumero).zfill(5)
-
+            print(f"Creando nueva asignación con número {numero_solicitud} para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.cxdescripcion}")
             asignacion = Asignacion.objects.create(
                 empresa=empresa,
                 cxusuariocrea=user,
@@ -230,6 +232,7 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
                 cxasignacion=numero_solicitud,
                 # ctinstrucciondepago=asunto or '',
             )
+            print(f"Asignación creada: {asignacion.cxasignacion} con valor {asignacion.nvalor} y cantidad de documentos {asignacion.ncantidaddocumentos}")
 
         documento = Documentos.objects.create(
             empresa=empresa,
@@ -249,10 +252,12 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
             # nvalornonegociado=datos['total'],
             cxautorizacion_ec=datos['clave_acceso'][:49],
         )
+        print(f"Documento creado: {documento.id} para asignación {asignacion.cxasignacion} con valor {documento.ntotal}")
 
         asignacion.nvalor = datos['total']
         asignacion.ncantidaddocumentos = 1
         asignacion.save(update_fields=['nvalor', 'ncantidaddocumentos'])
+        print(f"Asignación actualizada: {asignacion.cxasignacion} con valor {asignacion.nvalor} y cantidad de documentos {asignacion.ncantidaddocumentos}")
 
     return {
         'cliente': cliente,
@@ -272,7 +277,7 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     if not attachment:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
-    print(f"Adjuntos: {attachment}")
+    # print(f"Adjuntos: {attachment}")
     resultados = []
     correos_procesados = []
     # for attachment in attachments:
