@@ -71,6 +71,31 @@ def _fecha(texto, default=None):
     return default
 
 
+def _extraer_xml_factura(xml_content):
+    """Devuelve el XML de factura, incluso si viene envuelto en <autorizacion>/<comprobante>."""
+    xml_texto = xml_content.decode('utf-8', errors='ignore') if isinstance(xml_content, bytes) else str(xml_content)
+    xml_texto = xml_texto.strip().lstrip('\ufeff')
+
+    root = ET.fromstring(xml_texto)
+    tag_raiz = root.tag.split('}')[-1].lower()
+
+    if tag_raiz == 'factura':
+        return xml_texto
+
+    if tag_raiz == 'autorizacion':
+        comprobante = root.find('comprobante') or root.find('{*}comprobante')
+        if comprobante is None or not comprobante.text:
+            raise ValueError('El XML de autorizacion no contiene comprobante con factura')
+        factura_xml = comprobante.text.strip().lstrip('\ufeff')
+        # ET entrega CDATA como texto plano; al reparsear validamos que sea una factura.
+        factura_root = ET.fromstring(factura_xml)
+        if factura_root.tag.split('}')[-1].lower() != 'factura':
+            raise ValueError('El comprobante no contiene un XML de factura valido')
+        return factura_xml
+
+    raise ValueError('El XML no corresponde a una factura ni a una autorizacion SRI')
+
+
 def validar_xml_con_xsd(xml_content, xsd_path=None):
     """Valida el XML contra el XSD adjunto cuando lxml está disponible."""
     if not xsd_path:
@@ -91,9 +116,10 @@ def validar_xml_con_xsd(xml_content, xsd_path=None):
 
 def parsear_factura_xml(xml_content, xsd_path=None):
     """Parsea un XML de factura al formato esperado por los modelos."""
-    validar_xml_con_xsd(xml_content, xsd_path=xsd_path)
+    factura_xml = _extraer_xml_factura(xml_content)
+    validar_xml_con_xsd(factura_xml, xsd_path=xsd_path)
 
-    root = ET.fromstring(xml_content.encode('utf-8') if isinstance(xml_content, str) else xml_content)
+    root = ET.fromstring(factura_xml.encode('utf-8'))
     info_tributaria = root.find('infoTributaria') or root.find('{*}infoTributaria')
     info_factura = root.find('infoFactura') or root.find('{*}infoFactura')
     detalles = root.find('detalles') or root.find('{*}detalles')
@@ -273,17 +299,18 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     """Procesa un correo ya leído por un agente IA y sus adjuntos XML."""
     sender_email = correo_data.get('from') or correo_data.get('sender') or correo_data.get('sender_email') or ''
     asunto = correo_data.get('subject') or correo_data.get('asunto') or ''
-    # attachments = correo_data.get('attachments') or correo_data.get('adjuntos') or []
     attachment = correo_data.get('attachments') or correo_data.get('adjuntos') or []
 
     if not attachment:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
+    if not isinstance(attachment, list):
+        attachment = [attachment]
+
     resultados = []
     correos_procesados = []
-    # for attachment in attachments:
+    # for attachment in attachment:
     if isinstance(attachment, dict):
-        print('Procesando adjunto dict: ', attachment)
         xml_content = attachment.get('content') or attachment.get('xml') or attachment.get('data') or ''
         filename = attachment.get('filename') or attachment.get('name') or 'adjunto.xml'
     else:
@@ -295,7 +322,6 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
     if isinstance(xml_content, bytes):
-        print(f"Decodificando contenido de adjunto '{filename}' de bytes a UTF-8")
         xml_content = xml_content.decode('utf-8', errors='ignore')
     else:
         xml_content = str(xml_content)
@@ -303,7 +329,7 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     if '<' not in xml_content or '</' not in xml_content:
         print(f"Adjunto '{filename}' no es un XML válido, se omite")
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
-    print(f"Procesando xml '{xml_content}' ")
+
     try:
         resultado = crear_asignacion_desde_xml(
             xml_content=xml_content,

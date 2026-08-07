@@ -112,6 +112,61 @@ class FacturasXmlTests(TestCase):
         self.assertEqual(documento.nvalorantesiva, Decimal('100.00'))
         self.assertEqual(documento.niva, Decimal('15.00'))
 
+    def test_crear_asignacion_desde_xml_autorizacion_con_cdata(self):
+        xml_content = '''<?xml version="1.0" encoding="UTF-8"?>
+        <autorizacion>
+          <estado>AUTORIZADO</estado>
+          <numeroAutorizacion>0207202601099303308100120010010000484802025043811</numeroAutorizacion>
+          <fechaAutorizacion>2026-07-02T15:57:48-05:00</fechaAutorizacion>
+          <ambiente>PRODUCCION</ambiente>
+          <comprobante><![CDATA[
+            <?xml version="1.0" encoding="utf-8"?>
+            <factura id="comprobante" version="1.1.0">
+              <infoTributaria>
+                <ambiente>2</ambiente>
+                <tipoEmision>1</tipoEmision>
+                <razonSocial>LITTLE ITALY ECUADOR CIA. LTDA</razonSocial>
+                <ruc>0993033081001</ruc>
+                <claveAcceso>0207202601099303308100120010010000484802025043811</claveAcceso>
+                <codDoc>01</codDoc>
+                <estab>001</estab>
+                <ptoEmi>001</ptoEmi>
+                <secuencial>000048480</secuencial>
+              </infoTributaria>
+              <infoFactura>
+                <fechaEmision>02/07/2026</fechaEmision>
+                <tipoIdentificacionComprador>04</tipoIdentificacionComprador>
+                <razonSocialComprador>CODIGO BAMBU</razonSocialComprador>
+                <identificacionComprador>0993220167001</identificacionComprador>
+                <totalSinImpuestos>57.33</totalSinImpuestos>
+                <totalDescuento>0.00</totalDescuento>
+                <totalConImpuestos>
+                  <totalImpuesto>
+                    <codigo>2</codigo>
+                    <codigoPorcentaje>4</codigoPorcentaje>
+                    <baseImponible>57.33</baseImponible>
+                    <valor>8.60</valor>
+                  </totalImpuesto>
+                </totalConImpuestos>
+                <importeTotal>65.93</importeTotal>
+              </infoFactura>
+            </factura>
+          ]]></comprobante>
+        </autorizacion>'''
+
+        resultado = crear_asignacion_desde_xml(
+            xml_content=xml_content,
+            sender_email='facturas@example.com',
+            empresa=self.empresa,
+            user=self.user,
+            tipo_factoring=self.tipo_factoring,
+            asunto='Factura autorizada',
+        )
+
+        self.assertEqual(resultado['cliente'], self.cliente)
+        self.assertEqual(resultado['asignacion'].nvalor, Decimal('65.93'))
+        self.assertEqual(resultado['documentos'][0].ctdocumento, '000048480')
+
     def test_webhook_carga_facturas_por_payload_del_agente(self):
         payload = {
             'correo': {
