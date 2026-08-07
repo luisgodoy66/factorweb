@@ -80,7 +80,7 @@ def webhook_cargar_solicitudes_factoring(request):
     try:
         resultado = procesar_mensaje_del_agente(
             correo_data=data,
-            empresa=1,
+            empresa=2,
             user=1,
             tipo_factoring=None,
             xsd_path=None,
@@ -90,7 +90,7 @@ def webhook_cargar_solicitudes_factoring(request):
 
     return JsonResponse({
         'ok': True,
-        'empresa_id': 1,
+        'empresa_id': 2,
         'procesados': resultado.get('procesados', 0),
         'creadas': resultado.get('creadas', 0),
         'resultados': resultado.get('resultados', []),
