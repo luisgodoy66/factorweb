@@ -178,9 +178,10 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
         tipo_factoring = Tipos_factoring.objects\
             .filter(empresa=empresa, leliminado=False)\
             .order_by('dregistro').first()
-    print(f"Tipo de factoring encontrado: {tipo_factoring.cxdescripcion} para empresa {empresa}")
+    print(f"Tipo de factoring encontrado: {tipo_factoring.cttipofactoring} para empresa {empresa}")
     if tipo_factoring is None:
         raise ValueError('No existe un tipo de factoring configurado para la empresa')
+    print(xml_content[:200])
     datos = parsear_factura_xml(xml_content, xsd_path=xsd_path)
     ruc = cliente.cxcliente
 
@@ -274,11 +275,10 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     asunto = correo_data.get('subject') or correo_data.get('asunto') or ''
     # attachments = correo_data.get('attachments') or correo_data.get('adjuntos') or []
     attachment = correo_data.get('attachments') or correo_data.get('adjuntos') or []
-    print(f"Procesando correo de {sender_email} ")
+
     if not attachment:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
-    # print(f"Adjuntos: {attachment}")
     resultados = []
     correos_procesados = []
     # for attachment in attachments:
