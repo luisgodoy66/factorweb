@@ -157,6 +157,7 @@ def parsear_factura_xml(xml_content, xsd_path=None):
 def encontrar_cliente_por_remitente(sender_email, empresa=None):
     """Busca el cliente por el email del remitente usando ctemail2."""
     email = _normalizar_email(sender_email)
+    print(f"Buscando cliente para remitente {sender_email} (normalizado: {email}) y empresa {empresa}")
     if not email:
         return None
 
@@ -170,16 +171,16 @@ def encontrar_cliente_por_remitente(sender_email, empresa=None):
 def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_factoring=None, asunto=None, xsd_path=None):
     """Crea una asignación y un documento a partir de un XML de factura."""
     cliente = encontrar_cliente_por_remitente(sender_email, empresa=empresa)
+    print(f"Cliente encontrado: {cliente.cxcliente} para remitente {sender_email}" )
     if cliente is None:
         raise ValueError('No se encontró un cliente para el remitente {}'.format(sender_email))
-    print(f"Cliente encontrado: {cliente.cxcliente} para remitente {sender_email}" )
     if tipo_factoring is None:
         tipo_factoring = Tipos_factoring.objects\
             .filter(empresa=empresa, leliminado=False)\
             .order_by('dregistro').first()
+    print(f"Tipo de factoring encontrado: {tipo_factoring.cxdescripcion} para empresa {empresa}")
     if tipo_factoring is None:
         raise ValueError('No existe un tipo de factoring configurado para la empresa')
-    print(f"Tipo de factoring encontrado: {tipo_factoring.cxdescripcion} para empresa {empresa}")
     datos = parsear_factura_xml(xml_content, xsd_path=xsd_path)
     ruc = cliente.cxcliente
 
@@ -273,7 +274,7 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     asunto = correo_data.get('subject') or correo_data.get('asunto') or ''
     # attachments = correo_data.get('attachments') or correo_data.get('adjuntos') or []
     attachment = correo_data.get('attachments') or correo_data.get('adjuntos') or []
-    print(f"Procesando correo de {sender_email} con data '{correo_data}' y {len(attachment)} adjuntos")
+    print(f"Procesando correo de {sender_email} ")
     if not attachment:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
@@ -287,7 +288,7 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     else:
         xml_content = attachment
         filename = 'adjunto.xml'
-    # print(f"Procesando adjunto '{filename}' con contenido: {xml_content[:100]}...")
+
     if not xml_content:
         print(f"Adjunto '{filename}' no tiene contenido, se omite")
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
