@@ -80,7 +80,7 @@ def validar_xml_con_xsd(xml_content, xsd_path=None):
 
     if lxml_etree is None:
         return True
-
+    print(f"Validando XML con XSD {xsd_path}")
     parser = lxml_etree.XMLParser(remove_blank_text=True)
     xml_doc = lxml_etree.fromstring(xml_content.encode('utf-8') if isinstance(xml_content, str) else xml_content, parser=parser)
     schema_doc = lxml_etree.parse(str(xsd_path), parser=parser)
@@ -283,6 +283,7 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     correos_procesados = []
     # for attachment in attachments:
     if isinstance(attachment, dict):
+        print('Procesando adjunto dict: ', attachment)
         xml_content = attachment.get('content') or attachment.get('xml') or attachment.get('data') or ''
         filename = attachment.get('filename') or attachment.get('name') or 'adjunto.xml'
     else:
@@ -294,6 +295,7 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
     if isinstance(xml_content, bytes):
+        print(f"Decodificando contenido de adjunto '{filename}' de bytes a UTF-8")
         xml_content = xml_content.decode('utf-8', errors='ignore')
     else:
         xml_content = str(xml_content)
@@ -301,7 +303,7 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     if '<' not in xml_content or '</' not in xml_content:
         print(f"Adjunto '{filename}' no es un XML válido, se omite")
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
-
+    print(f"Procesando xml '{xml_content}' ")
     try:
         resultado = crear_asignacion_desde_xml(
             xml_content=xml_content,
