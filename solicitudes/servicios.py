@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 
 from django.db import transaction
 
-from empresa.models import Tipos_factoring
+from empresa.models import Tipos_factoring, Contador
 from solicitudes.models import Asignacion, Clientes, Documentos
 
 
@@ -18,6 +18,7 @@ except ImportError:  # pragma: no cover - dependency optional
 
 
 DEFAULT_XSD_PATH = Path(__file__).resolve().parent.parent / 'factura_V2.1.0.xsd'
+INICIAL_SOLICITUD = 'sol'
 
 
 def _normalizar_texto(value) -> str:
@@ -173,26 +174,62 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
         raise ValueError('No se encontró un cliente para el remitente {}'.format(sender_email))
 
     if tipo_factoring is None:
-        tipo_factoring = Tipos_factoring.objects.filter(empresa=empresa, leliminado=False).order_by('dregistro').first()
+        tipo_factoring = Tipos_factoring.objects\
+            .filter(empresa=empresa, leliminado=False)\
+            .order_by('dregistro').first()
     if tipo_factoring is None:
         raise ValueError('No existe un tipo de factoring configurado para la empresa')
 
     datos = parsear_factura_xml(xml_content, xsd_path=xsd_path)
+    ruc = cliente.cxcliente
 
     with transaction.atomic():
-        asignacion = Asignacion.objects.create(
+        # buscar si existe una asignación con el mismo cliente, tipo de factoring y documento
+        asignacion_existente = Asignacion.objects.filter(
             empresa=empresa,
-            cxusuariocrea=user,
-            # cxusuariomodifica=user.id,
             cxcliente=cliente,
-            cxtipofactoring=tipo_factoring,
+            # cxtipofactoring=tipo_factoring,
             cxtipo='F',
-            nvalor=datos['total'],
-            ncantidaddocumentos=1,
             cxestado='P',
-            cxasignacion='{}{:04d}'.format((tipo_factoring.ctabreviacion or 'OP')[:3], 1)[:8],
-            # ctinstrucciondepago=asunto or '',
-        )
+        ).first()
+
+        if asignacion_existente:
+            # si existe, actualizar el valor y la cantidad de documentos
+            asignacion_existente.nvalor += datos['total']
+            asignacion_existente.ncantidaddocumentos += 1
+            asignacion_existente.save(update_fields=['nvalor', 'ncantidaddocumentos'])
+            asignacion = asignacion_existente
+        else:
+            secuencia = Contador.objects.\
+                filter(empresa=empresa,
+                    cxtransaccion=INICIAL_SOLICITUD+ruc).first()
+            if not secuencia:
+                secuencia = Contador(
+                    empresa=empresa,
+                    cxusuariocrea=user,
+                    cxtransaccion=INICIAL_SOLICITUD+ruc,
+                    nultimonumero=1
+                )
+                secuencia.save()
+            else:
+                secuencia.nultimonumero += 1
+                secuencia.save()
+
+            numero_solicitud = INICIAL_SOLICITUD+str(secuencia.nultimonumero).zfill(5)
+
+            asignacion = Asignacion.objects.create(
+                empresa=empresa,
+                cxusuariocrea=user,
+                # cxusuariomodifica=user.id,
+                cxcliente=cliente,
+                cxtipofactoring=tipo_factoring,
+                cxtipo='F',
+                nvalor=datos['total'],
+                ncantidaddocumentos=1,
+                cxestado='P',
+                cxasignacion=numero_solicitud,
+                # ctinstrucciondepago=asunto or '',
+            )
 
         documento = Documentos.objects.create(
             empresa=empresa,
@@ -229,53 +266,57 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     """Procesa un correo ya leído por un agente IA y sus adjuntos XML."""
     sender_email = correo_data.get('from') or correo_data.get('sender') or correo_data.get('sender_email') or ''
     asunto = correo_data.get('subject') or correo_data.get('asunto') or ''
-    attachments = correo_data.get('attachments') or correo_data.get('adjuntos') or []
-    print(f"Procesando correo de {sender_email} con data '{correo_data}' y {len(attachments)} adjuntos")
-    print(f"Adjuntos: {attachments}")
-    if not attachments:
+    # attachments = correo_data.get('attachments') or correo_data.get('adjuntos') or []
+    attachment = correo_data.get('attachments') or correo_data.get('adjuntos') or []
+    print(f"Procesando correo de {sender_email} con data '{correo_data}' y {len(attachment)} adjuntos")
+    if not attachment:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
+    print(f"Adjuntos: {attachment}")
     resultados = []
     correos_procesados = []
-    for attachment in attachments:
-        if isinstance(attachment, dict):
-            xml_content = attachment.get('content') or attachment.get('xml') or attachment.get('data') or ''
-            filename = attachment.get('filename') or attachment.get('name') or 'adjunto.xml'
-        else:
-            xml_content = attachment
-            filename = 'adjunto.xml'
-        # print(f"Procesando adjunto '{filename}' con contenido: {xml_content[:100]}...")
-        if not xml_content:
-            continue
+    # for attachment in attachments:
+    if isinstance(attachment, dict):
+        xml_content = attachment.get('content') or attachment.get('xml') or attachment.get('data') or ''
+        filename = attachment.get('filename') or attachment.get('name') or 'adjunto.xml'
+    else:
+        xml_content = attachment
+        filename = 'adjunto.xml'
+    # print(f"Procesando adjunto '{filename}' con contenido: {xml_content[:100]}...")
+    if not xml_content:
+        print(f"Adjunto '{filename}' no tiene contenido, se omite")
+        return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
-        if isinstance(xml_content, bytes):
-            xml_content = xml_content.decode('utf-8', errors='ignore')
-        else:
-            xml_content = str(xml_content)
+    if isinstance(xml_content, bytes):
+        xml_content = xml_content.decode('utf-8', errors='ignore')
+    else:
+        xml_content = str(xml_content)
 
-        if '<' not in xml_content or '</' not in xml_content:
-            continue
+    if '<' not in xml_content or '</' not in xml_content:
+        print(f"Adjunto '{filename}' no es un XML válido, se omite")
+        return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
-        try:
-            resultado = crear_asignacion_desde_xml(
-                xml_content=xml_content,
-                sender_email=sender_email,
-                empresa=empresa,
-                user=user,
-                tipo_factoring=tipo_factoring,
-                asunto=asunto,
-                xsd_path=xsd_path,
-            )
-            resultados.append(resultado)
-        except (ValueError, ET.ParseError):
-            continue
+    try:
+        resultado = crear_asignacion_desde_xml(
+            xml_content=xml_content,
+            sender_email=sender_email,
+            empresa=empresa,
+            user=user,
+            tipo_factoring=tipo_factoring,
+            asunto=asunto,
+            xsd_path=xsd_path,
+        )
+        resultados.append(resultado)
+    except (ValueError, ET.ParseError):
+        print(f"Error al procesar adjunto '{filename}', se omite")
+        return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
     if resultados:
         correos_procesados.append({
             'from': sender_email,
             'subject': asunto,
             'creadas': len(resultados),
-            'attachments': len(attachments),
+            'attachments': len(attachment),
         })
 
     return {
@@ -286,50 +327,50 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     }
 
 
-def procesar_adjuntos_xml_de_correo(attachments, sender_email, empresa, user, tipo_factoring=None, asunto=None, xsd_path=None):
-    """Procesa una lista de adjuntos de correo y crea una asignación por cada XML válido."""
-    resultados = []
-    for attachment in attachments or []:
-        if not attachment:
-            continue
+# def procesar_adjuntos_xml_de_correo(attachments, sender_email, empresa, user, tipo_factoring=None, asunto=None, xsd_path=None):
+#     """Procesa una lista de adjuntos de correo y crea una asignación por cada XML válido."""
+#     resultados = []
+#     for attachment in attachments or []:
+#         if not attachment:
+#             continue
 
-        filename = None
-        content = None
-        if isinstance(attachment, dict):
-            filename = attachment.get('filename') or attachment.get('name')
-            content = attachment.get('content') or attachment.get('bytes') or attachment.get('data')
-        elif isinstance(attachment, tuple) and len(attachment) == 2:
-            filename, content = attachment
-        else:
-            filename = getattr(attachment, 'filename', None) or getattr(attachment, 'name', None)
-            content = getattr(attachment, 'content', None) or getattr(attachment, 'bytes', None) or getattr(attachment, 'data', None)
+#         filename = None
+#         content = None
+#         if isinstance(attachment, dict):
+#             filename = attachment.get('filename') or attachment.get('name')
+#             content = attachment.get('content') or attachment.get('bytes') or attachment.get('data')
+#         elif isinstance(attachment, tuple) and len(attachment) == 2:
+#             filename, content = attachment
+#         else:
+#             filename = getattr(attachment, 'filename', None) or getattr(attachment, 'name', None)
+#             content = getattr(attachment, 'content', None) or getattr(attachment, 'bytes', None) or getattr(attachment, 'data', None)
 
-        if content is None:
-            continue
+#         if content is None:
+#             continue
 
-        if filename and not str(filename).lower().endswith('.xml') and not isinstance(content, (bytes, bytearray, str)):
-            continue
+#         if filename and not str(filename).lower().endswith('.xml') and not isinstance(content, (bytes, bytearray, str)):
+#             continue
 
-        if isinstance(content, bytes):
-            xml_content = content.decode('utf-8', errors='ignore')
-        else:
-            xml_content = str(content)
+#         if isinstance(content, bytes):
+#             xml_content = content.decode('utf-8', errors='ignore')
+#         else:
+#             xml_content = str(content)
 
-        if '<' not in xml_content or '</' not in xml_content:
-            continue
+#         if '<' not in xml_content or '</' not in xml_content:
+#             continue
 
-        try:
-            resultado = crear_asignacion_desde_xml(
-                xml_content=xml_content,
-                sender_email=sender_email,
-                empresa=empresa,
-                user=user,
-                tipo_factoring=tipo_factoring,
-                asunto=asunto,
-                xsd_path=xsd_path,
-            )
-            resultados.append(resultado)
-        except (ValueError, ET.ParseError):
-            continue
+#         try:
+#             resultado = crear_asignacion_desde_xml(
+#                 xml_content=xml_content,
+#                 sender_email=sender_email,
+#                 empresa=empresa,
+#                 user=user,
+#                 tipo_factoring=tipo_factoring,
+#                 asunto=asunto,
+#                 xsd_path=xsd_path,
+#             )
+#             resultados.append(resultado)
+#         except (ValueError, ET.ParseError):
+#             continue
 
-    return resultados
+#     return resultados
