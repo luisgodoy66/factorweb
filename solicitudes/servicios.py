@@ -305,6 +305,7 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
 
     if not isinstance(attachment, list):
         attachment = [attachment]
+    print(f"attachment: {attachment}")
 
     resultados = []
     correos_procesados = []
@@ -312,10 +313,10 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     if isinstance(attachment, dict):
         xml_content = attachment.get('content') or attachment.get('xml') or attachment.get('data') or ''
         filename = attachment.get('filename') or attachment.get('name') or 'adjunto.xml'
+        print(f"Procesando content ={xml_content}")
     else:
         xml_content = attachment
         filename = 'adjunto.xml'
-    print(f"xml 1: {xml_content}")
     if not xml_content:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
@@ -323,7 +324,6 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
         xml_content = xml_content.decode('utf-8', errors='ignore')
     else:
         xml_content = str(xml_content)
-    print(f"xml 2: {xml_content}")
 
     if '<' not in xml_content or '</' not in xml_content:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
