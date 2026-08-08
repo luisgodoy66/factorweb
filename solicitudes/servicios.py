@@ -73,12 +73,13 @@ def _fecha(texto, default=None):
 
 def _extraer_xml_factura(xml_content):
     """Devuelve el XML de factura, incluso si viene envuelto en <autorizacion>/<comprobante>."""
+    print(f"Extrayendo XML de factura del contenido recibido (longitud: {len(xml_content)})")
     xml_texto = xml_content.decode('utf-8', errors='ignore') if isinstance(xml_content, bytes) else str(xml_content)
     xml_texto = xml_texto.strip().lstrip('\ufeff')
 
     root = ET.fromstring(xml_texto)
     tag_raiz = root.tag.split('}')[-1].lower()
-
+    print(xml_texto)
     if tag_raiz == 'factura':
         return xml_texto
 
@@ -183,7 +184,6 @@ def parsear_factura_xml(xml_content, xsd_path=None):
 def encontrar_cliente_por_remitente(sender_email, empresa=None):
     """Busca el cliente por el email del remitente usando ctemail2."""
     email = _normalizar_email(sender_email)
-    print(f"Buscando cliente para remitente {sender_email} (normalizado: {email}) y empresa {empresa}")
     if not email:
         return None
 
@@ -197,17 +197,16 @@ def encontrar_cliente_por_remitente(sender_email, empresa=None):
 def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_factoring=None, asunto=None, xsd_path=None):
     """Crea una asignación y un documento a partir de un XML de factura."""
     cliente = encontrar_cliente_por_remitente(sender_email, empresa=empresa)
-    print(f"Cliente encontrado: {cliente.cxcliente} para remitente {sender_email}" )
     if cliente is None:
         raise ValueError('No se encontró un cliente para el remitente {}'.format(sender_email))
+
     if tipo_factoring is None:
         tipo_factoring = Tipos_factoring.objects\
             .filter(empresa=empresa, leliminado=False)\
             .order_by('dregistro').first()
-    print(f"Tipo de factoring encontrado: {tipo_factoring.cttipofactoring} para empresa {empresa}")
     if tipo_factoring is None:
         raise ValueError('No existe un tipo de factoring configurado para la empresa')
-    print(xml_content[:200])
+
     datos = parsear_factura_xml(xml_content, xsd_path=xsd_path)
     ruc = cliente.cxcliente
 
