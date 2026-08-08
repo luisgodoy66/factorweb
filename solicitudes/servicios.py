@@ -299,13 +299,13 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     sender_email = correo_data.get('from') or correo_data.get('sender') or correo_data.get('sender_email') or ''
     asunto = correo_data.get('subject') or correo_data.get('asunto') or ''
     attachment = correo_data.get('attachments') or correo_data.get('adjuntos') or []
+    print(f"attachment: {attachment}")
 
     if not attachment:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
-    if not isinstance(attachment, list):
-        attachment = [attachment]
-    print(f"attachment: {attachment}")
+    # if not isinstance(attachment, list):
+    #     attachment = [attachment]
 
     resultados = []
     correos_procesados = []
