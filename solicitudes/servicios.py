@@ -76,13 +76,14 @@ def _extraer_xml_factura(xml_content):
     print(f"Extrayendo XML de factura del contenido recibido (longitud: {len(xml_content)})")
     xml_texto = xml_content.decode('utf-8', errors='ignore') if isinstance(xml_content, bytes) else str(xml_content)
     xml_texto = xml_texto.strip().lstrip('\ufeff')
+    print(f"xml_texto: {xml_texto}")
 
     root = ET.fromstring(xml_texto)
+    print(f"Root tag: {root.tag}")
     tag_raiz = root.tag.split('}')[-1].lower()
-    print(xml_texto)
     if tag_raiz == 'factura':
         return xml_texto
-
+    print(f"Tag raíz no es 'factura', es '{tag_raiz}'")
     if tag_raiz == 'autorizacion':
         comprobante = root.find('comprobante') or root.find('{*}comprobante')
         if comprobante is None or not comprobante.text:
