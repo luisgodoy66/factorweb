@@ -117,7 +117,6 @@ def validar_xml_con_xsd(xml_content, xsd_path=None):
 
 def parsear_factura_xml(xml_content, xsd_path=None):
     """Parsea un XML de factura al formato esperado por los modelos."""
-    print(f"xml_content: {xml_content}")
     factura_xml = _extraer_xml_factura(xml_content)
     validar_xml_con_xsd(factura_xml, xsd_path=xsd_path)
 
@@ -316,18 +315,17 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     else:
         xml_content = attachment
         filename = 'adjunto.xml'
-
+    print(f"xml 1: {xml_content}")
     if not xml_content:
-        print(f"Adjunto '{filename}' no tiene contenido, se omite")
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
     if isinstance(xml_content, bytes):
         xml_content = xml_content.decode('utf-8', errors='ignore')
     else:
         xml_content = str(xml_content)
+    print(f"xml 2: {xml_content}")
 
     if '<' not in xml_content or '</' not in xml_content:
-        print(f"Adjunto '{filename}' no es un XML válido, se omite")
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
     try:
