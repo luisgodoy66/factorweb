@@ -73,24 +73,25 @@ def _fecha(texto, default=None):
 
 def _extraer_xml_factura(xml_content):
     """Devuelve el XML de factura, incluso si viene envuelto en <autorizacion>/<comprobante>."""
-    print(f"Extrayendo XML de factura del contenido recibido (longitud: {len(xml_content)})")
     xml_texto = xml_content.decode('utf-8', errors='ignore') if isinstance(xml_content, bytes) else str(xml_content)
     xml_texto = xml_texto.strip().lstrip('\ufeff')
 
     root = ET.fromstring(xml_texto)
-    print(f"Root tag: {root.tag}")
     tag_raiz = root.tag.split('}')[-1].lower()
+    print(f"tag_raiz: {tag_raiz}")
     if tag_raiz == 'factura':
         return xml_texto
 
     if tag_raiz == 'autorizacion':
         comprobante = root.find('comprobante') or root.find('{*}comprobante')
         if comprobante is None or not comprobante.text:
+            print("El XML de autorizacion no contiene comprobante con factura")
             raise ValueError('El XML de autorizacion no contiene comprobante con factura')
         factura_xml = comprobante.text.strip().lstrip('\ufeff')
         # ET entrega CDATA como texto plano; al reparsear validamos que sea una factura.
         factura_root = ET.fromstring(factura_xml)
         if factura_root.tag.split('}')[-1].lower() != 'factura':
+            print("El comprobante no contiene un XML de factura valido")
             raise ValueError('El comprobante no contiene un XML de factura valido')
         return factura_xml
 
@@ -118,6 +119,7 @@ def validar_xml_con_xsd(xml_content, xsd_path=None):
 def parsear_factura_xml(xml_content, xsd_path=None):
     """Parsea un XML de factura al formato esperado por los modelos."""
     factura_xml = _extraer_xml_factura(xml_content)
+    print(f"Factura XML extraído (longitud: {len(factura_xml)}): {factura_xml[:400]}...")
     validar_xml_con_xsd(factura_xml, xsd_path=xsd_path)
 
     root = ET.fromstring(factura_xml.encode('utf-8'))
@@ -299,7 +301,6 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     sender_email = correo_data.get('from') or correo_data.get('sender') or correo_data.get('sender_email') or ''
     asunto = correo_data.get('subject') or correo_data.get('asunto') or ''
     attachment = correo_data.get('attachments') or correo_data.get('adjuntos') or []
-    print(f"attachment: {attachment}")
 
     if not attachment:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
@@ -340,7 +341,6 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
         )
         resultados.append(resultado)
     except (ValueError, ET.ParseError):
-        print(f"Error al procesar adjunto '{filename}', se omite")
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
     if resultados:
