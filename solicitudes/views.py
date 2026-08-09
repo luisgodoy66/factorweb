@@ -56,6 +56,7 @@ def webhook_cargar_solicitudes_factoring(request):
             data = {}
     else:
         data = request.POST.dict()
+    print(f"Webhook recibido: {data}")
     # correo_data = data.get('correo') or data.get('email') or data.get('message') or data.get('payload') or {}
     # if isinstance(correo_data, str):
     #     try:

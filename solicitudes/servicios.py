@@ -113,6 +113,7 @@ def validar_xml_con_xsd(xml_content, xsd_path=None):
     schema_doc = lxml_etree.parse(str(xsd_path), parser=parser)
     schema = lxml_etree.XMLSchema(schema_doc)
     schema.assertValid(xml_doc)
+    print("XML validado correctamente contra el XSD")
     return True
 
 
@@ -301,7 +302,7 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     sender_email = correo_data.get('from') or correo_data.get('sender') or correo_data.get('sender_email') or ''
     asunto = correo_data.get('subject') or correo_data.get('asunto') or ''
     attachment = correo_data.get('attachments') or correo_data.get('adjuntos') or []
-
+    print(attachment)
     if not attachment:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
 
@@ -314,7 +315,6 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     if isinstance(attachment, dict):
         xml_content = attachment.get('content') or attachment.get('xml') or attachment.get('data') or ''
         filename = attachment.get('filename') or attachment.get('name') or 'adjunto.xml'
-        print(f"Procesando content ={xml_content}")
     else:
         xml_content = attachment
         filename = 'adjunto.xml'
