@@ -52,11 +52,12 @@ def webhook_cargar_solicitudes_factoring(request):
     if request.content_type and 'application/json' in request.content_type:
         try:
             data = json.loads(request.body.decode('utf-8')) if request.body else {}
+            print(f"Webhook recibido con payload: ")
         except json.JSONDecodeError:
             data = {}
     else:
         data = request.POST.dict()
-    print(f"Webhook recibido: {data}")
+        print(f"Webhook recibido con payload (form-data): ")
     # correo_data = data.get('correo') or data.get('email') or data.get('message') or data.get('payload') or {}
     # if isinstance(correo_data, str):
     #     try:
