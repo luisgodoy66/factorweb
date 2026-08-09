@@ -72,6 +72,7 @@ def _fecha(texto, default=None):
 
 
 def _extraer_xml_factura(xml_content):
+    print(f"Extrayendo XML de factura del contenido proporcionado")
     """Devuelve el XML de factura, incluso si viene envuelto en <autorizacion>/<comprobante>."""
     xml_texto = xml_content.decode('utf-8', errors='ignore') if isinstance(xml_content, bytes) else str(xml_content)
     xml_texto = xml_texto.strip().lstrip('\ufeff')
@@ -99,6 +100,7 @@ def _extraer_xml_factura(xml_content):
 
 
 def validar_xml_con_xsd(xml_content, xsd_path=None):
+    print(f"Validando XML con XSD {xsd_path if xsd_path else DEFAULT_XSD_PATH}")
     """Valida el XML contra el XSD adjunto cuando lxml está disponible."""
     if not xsd_path:
         xsd_path = DEFAULT_XSD_PATH
@@ -107,7 +109,6 @@ def validar_xml_con_xsd(xml_content, xsd_path=None):
 
     if lxml_etree is None:
         return True
-    print(f"Validando XML con XSD {xsd_path}")
     parser = lxml_etree.XMLParser(remove_blank_text=True)
     xml_doc = lxml_etree.fromstring(xml_content.encode('utf-8') if isinstance(xml_content, str) else xml_content, parser=parser)
     schema_doc = lxml_etree.parse(str(xsd_path), parser=parser)
@@ -118,6 +119,7 @@ def validar_xml_con_xsd(xml_content, xsd_path=None):
 
 
 def parsear_factura_xml(xml_content, xsd_path=None):
+    print(f"Parseando XML de factura")
     """Parsea un XML de factura al formato esperado por los modelos."""
     factura_xml = _extraer_xml_factura(xml_content)
     print(f"Factura XML extraído (longitud: {len(factura_xml)}): {factura_xml[:400]}...")
@@ -185,6 +187,7 @@ def parsear_factura_xml(xml_content, xsd_path=None):
 
 
 def encontrar_cliente_por_remitente(sender_email, empresa=None):
+    print(f"Buscando cliente por remitente")
     """Busca el cliente por el email del remitente usando ctemail2."""
     email = _normalizar_email(sender_email)
     if not email:
@@ -198,6 +201,7 @@ def encontrar_cliente_por_remitente(sender_email, empresa=None):
 
 
 def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_factoring=None, asunto=None, xsd_path=None):
+    print(f"Creando asignación desde XML para remitente ")
     """Crea una asignación y un documento a partir de un XML de factura."""
     cliente = encontrar_cliente_por_remitente(sender_email, empresa=empresa)
     if cliente is None:
@@ -298,6 +302,7 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
 
 
 def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None, xsd_path=None):
+    print(f"Procesando mensaje del agente")
     """Procesa un correo ya leído por un agente IA y sus adjuntos XML."""
     sender_email = correo_data.get('from') or correo_data.get('sender') or correo_data.get('sender_email') or ''
     asunto = correo_data.get('subject') or correo_data.get('asunto') or ''
