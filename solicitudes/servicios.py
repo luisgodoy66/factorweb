@@ -110,12 +110,12 @@ def validar_xml_con_xsd(xml_content, xsd_path=None):
     if lxml_etree is None:
         print("lxml no está disponible, no se puede validar el XML contra el XSD")
         return True
-    print(xml_content)
     parser = lxml_etree.XMLParser(remove_blank_text=True)
     xml_doc = lxml_etree.fromstring(xml_content.encode('utf-8') if isinstance(xml_content, str) else xml_content, parser=parser)
     schema_doc = lxml_etree.parse(str(xsd_path), parser=parser)
     schema = lxml_etree.XMLSchema(schema_doc)
     schema.assertValid(xml_doc)
+    print(f"XML content: {xml_content:300}")
     print("XML validado correctamente contra el XSD")
     return True
 
