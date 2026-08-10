@@ -108,7 +108,9 @@ def validar_xml_con_xsd(xml_content, xsd_path=None):
         return True
 
     if lxml_etree is None:
+        print("lxml no está disponible, no se puede validar el XML contra el XSD")
         return True
+    print(xml_content)
     parser = lxml_etree.XMLParser(remove_blank_text=True)
     xml_doc = lxml_etree.fromstring(xml_content.encode('utf-8') if isinstance(xml_content, str) else xml_content, parser=parser)
     schema_doc = lxml_etree.parse(str(xsd_path), parser=parser)
@@ -122,7 +124,6 @@ def parsear_factura_xml(xml_content, xsd_path=None):
     print(f"Parseando XML de factura")
     """Parsea un XML de factura al formato esperado por los modelos."""
     factura_xml = _extraer_xml_factura(xml_content)
-    print(f"Factura XML extraído (longitud: {len(factura_xml)}): {factura_xml[:400]}...")
     validar_xml_con_xsd(factura_xml, xsd_path=xsd_path)
 
     root = ET.fromstring(factura_xml.encode('utf-8'))

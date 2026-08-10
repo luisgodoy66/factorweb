@@ -65,8 +65,8 @@ def webhook_cargar_solicitudes_factoring(request):
             correo_data = json.loads(correo_data)
         except json.JSONDecodeError:
             correo_data = {}
-    # if not isinstance(correo_data, dict):
-    #     return JsonResponse({'ok': False, 'error': 'El payload debe incluir un objeto correo o payload'}, status=400)
+    if not isinstance(correo_data, dict):
+        return JsonResponse({'ok': False, 'error': 'El payload debe incluir un objeto correo o payload'}, status=400)
 
     # empresa_id = data.get('empresa_id') or correo_data.get('empresa_id')
     # user_id = data.get('user_id') or correo_data.get('user_id')
