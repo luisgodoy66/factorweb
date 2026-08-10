@@ -85,6 +85,7 @@ def _extraer_xml_factura(xml_content):
 
     if tag_raiz == 'autorizacion':
         comprobante = root.find('comprobante') or root.find('{*}comprobante')
+        print(f"comprobante encontrado: {comprobante if comprobante is not None else 'None'}")
         if comprobante is None or not comprobante.text:
             print("El XML de autorizacion no contiene comprobante con factura")
             raise ValueError('El XML de autorizacion no contiene comprobante con factura')
