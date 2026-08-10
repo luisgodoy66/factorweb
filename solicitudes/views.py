@@ -58,12 +58,13 @@ def webhook_cargar_solicitudes_factoring(request):
     else:
         data = request.POST.dict()
         print(f"Webhook recibido con payload (form-data): ")
-    correo_data = data.get('correo') or data.get('email') or data.get('message') or data.get('payload') or {}
-    # if isinstance(correo_data, str):
-    #     try:
-    #         correo_data = json.loads(correo_data)
-    #     except json.JSONDecodeError:
-    #         correo_data = {}
+    # correo_data = data.get('correo') or data.get('email') or data.get('message') or data.get('payload') or {}
+    correo_data = data
+    if isinstance(correo_data, str):
+        try:
+            correo_data = json.loads(correo_data)
+        except json.JSONDecodeError:
+            correo_data = {}
     # if not isinstance(correo_data, dict):
     #     return JsonResponse({'ok': False, 'error': 'El payload debe incluir un objeto correo o payload'}, status=400)
 
