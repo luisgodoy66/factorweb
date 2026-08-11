@@ -112,7 +112,7 @@ class Documentos_cabecera(ClaseModelo):
     objects = Documentos_cabecera_Manager()
     
     def __str__(self):
-        return self.cxcobranza
+        return f"{self.cxcobranza}"
 
     def movimiento(self):
         # si está protestada debe decir "cobranza protestada"
@@ -345,7 +345,7 @@ class Liquidacion_cabecera(ClaseModelo):
     lincluyecargosprevios = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.cxliquidacion
+        return f"{self.cxliquidacion}"
 
     def cargos(self):
         return (self.ngao 
@@ -516,7 +516,6 @@ class Protestos_Manager(models.Manager):
                     )
         return cp.union(rp)
         
-
 class Cheques_protestados(ClaseModelo):
     FORMAS_DE_COBRO = (
         ('CHE', 'Cheque'),
@@ -1401,7 +1400,7 @@ class Recuperaciones_cabecera(ClaseModelo):
     ctcomentario = models.TextField(blank=True, default='')
 
     def __str__(self):
-        return self.cxrecuperacion
+        return f'{self.cxrecuperacion}'
 
     def movimiento(self):
         # si está protestada debe decir "cobranza protestada"
@@ -1492,7 +1491,7 @@ class Cargos_cabecera(ClaseModelo):
     lcontabilizada = models.BooleanField(default=False, null=True)
 
     def __str__(self):
-        return self.cxcobranza
+        return f'{self.cxcobranza}'
 
     def movimiento(self):
         # si está protestada debe decir "cobranza ... protestada"
@@ -1579,7 +1578,7 @@ class Pagare_cabecera(ClaseModelo):
                                      , null=True)
 
     def __str__(self):
-        return self.cxcobranza
+        return f"{self.cxcobranza}"
 
     def movimiento(self):
         # si está protestada debe decir "cobranza protestada"
@@ -1616,7 +1615,7 @@ class Factura_cuota(ClaseModelo):
     lfacturagenerada = models.BooleanField(default=False)
     
     def __str__(self):
-        return self.cobranzacuota.cobranza.cxcobranza
+        return f"{self.cobranzacuota.cobranza}"
     
 class Protestos_historico_Manager(models.Manager):
     def TotalProtestos(self, id_empresa, id_corte):
