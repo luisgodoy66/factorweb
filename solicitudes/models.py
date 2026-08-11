@@ -26,7 +26,7 @@ class Clientes(ClaseModelo):
         help_text='fecha de inicio de actividades')
 
     def __str__(self):
-        return self.ctnombre
+        return f"{self.ctnombre}"
     
     class Meta:
         constraints = [
@@ -155,7 +155,7 @@ class Asignacion(ClaseModelo):
         return self.get_cxestado_display()
     
     def __str__(self):
-        return self.cxasignacion
+        return f"{self.cxasignacion}"
     
     def tipo_asignacion(self):
         return self.get_cxtipo_display()
@@ -250,9 +250,10 @@ class Respuesta_aprobacion(ClaseModelo):
     ctrespuesta = models.CharField(max_length=15,blank=True)
 
     def __str__(self):
-        return self.ctrespuesta
+        return f"{self.ctrespuesta}"
 
-from clientes.models import Linea_Factoring
+# from clientes.models import Linea_Factoring
+
 class Exceso_temporal(ClaseModelo):
     RESPUESTA = (
         ('P', 'Pendiente'),
@@ -271,7 +272,7 @@ class Exceso_temporal(ClaseModelo):
         , on_delete=models.SET_NULL, related_name="exceso_aprobado")
 
     def __str__(self):
-        return self.cxexceso
+        return f"{self.cxexceso}"
     
     def estado(self):
         if self.cxrespuesta == 'P':

@@ -70,7 +70,7 @@ class Diario_cabecera(ClaseModelo):
     # cxlocalidad character(2) COLLATE pg_catalog."default",
 
     def __str__(self):
-        return self.ctconcepto
+        return f"{self.ctconcepto}"
 
     def save(self):
         self.ctconcepto = self.ctconcepto.upper()
@@ -230,6 +230,7 @@ class Impuestos_facturaventa(ClaseModelo):
     cxporcentaje = models.CharField(max_length=5)
     nbase = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     nvalor = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
 from clientes.models import  Cuenta_transferencia
 
 class Comprobante_egreso(ClaseModelo):

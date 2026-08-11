@@ -9,7 +9,7 @@ class Bancos(ClaseModelo):
     llocal = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.ctbanco
+        return f"{self.ctbanco}"
 
 class Feriados(ClaseModelo):
     dferiado = models.DateField()
@@ -24,7 +24,7 @@ class Provincias(ClaseModelo):
     ctprovincia = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.ctprovincia
+        return f"{self.ctprovincia}"
     
 class Cantones(ClaseModelo):
     provincia = models.ForeignKey(Provincias, on_delete=models.CASCADE)
@@ -32,4 +32,4 @@ class Cantones(ClaseModelo):
     ctcanton = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.ctcanton    
+        return f"{self.ctcanton}"
