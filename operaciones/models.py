@@ -1864,7 +1864,7 @@ class Condiciones_operativas_detalle(ClaseModelo):
     objects = Condiciones_Operativas_Manager()
 
     def __str__(self):
-        return self.cxcondicion
+        return f"{self.cxcondicion}"
 
 class Anexos(ClaseModelo):
     TIPOS_DE_CLIENTES = (
