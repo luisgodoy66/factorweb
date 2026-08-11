@@ -1980,6 +1980,6 @@ class Twilio_whatsapp(ClaseModelo):
     def __str__(self):
         return self.ctsid
 
-    class Meta:
-        verbose_name = 'Mensaje de WhatsApp'
-        verbose_name_plural = 'Mensajes de WhatsApp'
+    # class Meta:
+    #     verbose_name = 'Mensaje de WhatsApp'
+    #     verbose_name_plural = 'Mensajes de WhatsApp'
