@@ -312,7 +312,6 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     print(f"Remitente: {sender_email}, Asunto: {asunto}, Adjuntos: {len(attachment) if isinstance(attachment, list) else 1}")
     if not attachment:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
-    print(f"Adjuntos recibidos: {attachment}")
     # if not isinstance(attachment, list):
     #     attachment = [attachment]
 

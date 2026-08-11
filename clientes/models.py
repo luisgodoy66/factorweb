@@ -319,7 +319,7 @@ class Linea_Factoring(ClaseModelo):
     objects = Linea_Manager()
 
     def __str__(self):
-        return self.cxcliente.ctnombre
+        return self.cxcliente.cxcliente.ctnombre
 
     # def excede_monto_de_linea(self):
     #     return self.nvalor + self.nvalorexceso < self.nutilizado
