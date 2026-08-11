@@ -1954,8 +1954,8 @@ class Gestion_cobro(ClaseModelo):
     revision_cartera_cliente = models.ForeignKey(Revision_cartera_detalle
         , on_delete=models.CASCADE, null=True, related_name="revision_cartera_cliente")
     cxestado = models.CharField(max_length=1, default='P', choices=ESTADOS_DE_GESTION)
-    ctnumerowhatsapp = models.CharField(max_length=20, null=True, blank=True
-        , verbose_name='Número de WhatsApp')
+    ctnumerowhatsapp = models.CharField(max_length=20, null=True, blank=True)
+        # , verbose_name='Número de WhatsApp')
 
     def __str__(self):
         if self.cxtipoparticipante == 'C':
