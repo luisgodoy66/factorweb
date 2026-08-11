@@ -103,7 +103,7 @@ class Cuentas_bancos(ClaseModelo):
     cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT)
 
     def __str__(self):
-        return self.cuenta
+        return f"{self.cuenta}"
 
 class Cuentas_tiposfactoring(ClaseModelo):
     tipofactoring = models.OneToOneField(Tipos_factoring, on_delete=models.RESTRICT
@@ -113,7 +113,7 @@ class Cuentas_tiposfactoring(ClaseModelo):
                                         , related_name='cuenta_cxc')
 
     def __str__(self):
-        return self.cuenta
+        return f"{self.cuenta}"
 
 class Cuentas_tasasfactoring(ClaseModelo):
     tasafactoring = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT
@@ -123,7 +123,7 @@ class Cuentas_tasasfactoring(ClaseModelo):
     cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT)
 
     def __str__(self):
-        return self.cuenta
+        return f"{self.cuenta}"
 
 class Cuentas_diferidos(ClaseModelo):
     tasafactoring = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT
@@ -133,7 +133,7 @@ class Cuentas_diferidos(ClaseModelo):
     cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
                                        , related_name="cuenta_diferido")
     def __str__(self):
-        return self.cuenta
+        return f"{self.cuenta}"
 
 class Cuentas_provisiones(ClaseModelo):
     tasafactoring = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT
@@ -144,7 +144,7 @@ class Cuentas_provisiones(ClaseModelo):
                                         , related_name="cuenta_provision")
 
     def __str__(self):
-        return self.cuenta
+        return f"{self.cuenta}"
 
 from operaciones.models import  Notas_debito_cabecera
 
@@ -353,7 +353,7 @@ class Cuentas_cargosfactoring(ClaseModelo):
     cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT)
 
     def __str__(self):
-        return self.cuenta
+        return f"{self.cuenta}"
 
 class Cuentas_reestructuracion(ClaseModelo):
     cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT)
@@ -362,5 +362,5 @@ class Cuentas_reestructuracion(ClaseModelo):
     cuentainteres = models.ForeignKey(Plan_cuentas,on_delete=models.RESTRICT
                                         , related_name='reestructuracion_interes')
     def __str__(self):
-        return self.cuenta
+        return f"{self.cuenta}"
 
