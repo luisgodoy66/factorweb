@@ -167,8 +167,9 @@ class Movimientos_maestro(ClaseModelo):
     lcargo = models.BooleanField(default=False)
     # lcargaiva = models.BooleanField(default=False)
     
-    # def __str__(self):
-    #     return self.ctmovimiento
+    def __str__(self):
+        # ajustado para que no salga error al eliminar usuario en pantalla de admin
+        return 'self.ctmovimiento'
 
     def save(self):
         self.cxmovimiento=self.cxmovimiento.upper()
