@@ -1837,7 +1837,7 @@ class Condiciones_operativas_cabecera(ClaseModelo):
     laplicaaaccesorios = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.ctcondicion
+        return f"{self.ctcondicion}"
 
 class Condiciones_Operativas_Manager(models.Manager):
     def ubicar_plazo(self, condicion, clase_cliente, clase_comprador, plazo=0):
