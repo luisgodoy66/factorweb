@@ -49,7 +49,7 @@ class Datos_operativos(ClaseModelo):
     ntasamora= models.DecimalField(max_digits=11, decimal_places=8, default=0) 
 
     def __str__(self):
-        return self.cxcliente.cxcliente.ctnombre
+        return f"{self.cxcliente.cxcliente.ctnombre}"
   
     def estado(self):
         return self.get_cxestado_display()
@@ -1804,7 +1804,7 @@ class Movimientos_clientes(ClaseModelo):
     dmovimiento = models.DateField() 
     
     def __str__(self):
-        return self.cxcliente
+        return f"{self.cxcliente}"
 
 class Cargos_detalle(ClaseModelo):
     cxcliente=models.ForeignKey(Datos_generales_cliente
