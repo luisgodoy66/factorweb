@@ -168,8 +168,7 @@ class Movimientos_maestro(ClaseModelo):
     # lcargaiva = models.BooleanField(default=False)
     
     def __str__(self):
-        # ajustado para que no salga error al eliminar usuario en pantalla de admin
-        return 'self.ctmovimiento'
+        return f"{self.ctmovimiento}"
 
     def save(self):
         self.cxmovimiento=self.cxmovimiento.upper()
@@ -190,13 +189,13 @@ class Tasas_factoring(ClaseModelo):
                                    , on_delete=models.DO_NOTHING, null=True)
 
     def __str__(self):
-        return self.movimiento.ctmovimiento
+        return f"{self.movimiento.ctmovimiento}"
+    
     def save(self):
         self.cxtasa=self.cxtasa.upper()
         # self.cttasa=self.cttasa.upper()
         return super(Tasas_factoring, self).save()
    
-# from operaciones.models import Movimientos_maestro
 class Otros_cargos(ClaseModelo):
     ctabreviacion = models.CharField(max_length= 30) 
     lcargaiva = models.BooleanField(default=True)
