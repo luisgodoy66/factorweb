@@ -133,7 +133,7 @@ class Cuentas_diferidos(ClaseModelo):
     cuenta = models.ForeignKey(Plan_cuentas, on_delete=models.RESTRICT
                                        , related_name="cuenta_diferido")
     def __str__(self):
-        return self.cuentadiferido
+        return self.cuenta
 
 class Cuentas_provisiones(ClaseModelo):
     tasafactoring = models.ForeignKey(Movimientos_maestro, on_delete=models.RESTRICT
@@ -144,7 +144,7 @@ class Cuentas_provisiones(ClaseModelo):
                                         , related_name="cuenta_provision")
 
     def __str__(self):
-        return self.cuentaprovision
+        return self.cuenta
 
 from operaciones.models import  Notas_debito_cabecera
 
@@ -222,7 +222,7 @@ class Items_facturaventa(ClaseModelo):
     lcargaiva = models.BooleanField()
 
     def __str__(self):
-        return self.item
+        return f"{self.item}"
     
 class Impuestos_facturaventa(ClaseModelo):
     factura = models.ForeignKey(Factura_venta, on_delete=models.RESTRICT)
