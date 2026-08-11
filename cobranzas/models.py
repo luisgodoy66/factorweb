@@ -1978,7 +1978,7 @@ class Twilio_whatsapp(ClaseModelo):
     jcontexto = models.JSONField(verbose_name='Contexto', )
 
     def __str__(self):
-        return self.ctsid
+        return f"{self.ctsid}"
 
     # class Meta:
     #     verbose_name = 'Mensaje de WhatsApp'
