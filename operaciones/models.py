@@ -1826,7 +1826,7 @@ class Cargos_detalle(ClaseModelo):
     lgeneraprocesocontable = models.BooleanField(default=False, null=True)
 
     def __str__(self):
-        return f"{self.cxmovimiento.ctmovimiento}"
+        return f"{self.cxmovimiento}"
         
 class Condiciones_operativas_cabecera(ClaseModelo):
     ctcondicion = models.CharField(max_length=40)
