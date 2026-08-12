@@ -2002,8 +2002,8 @@ from contabilidad.models import Diario_cabecera
 
 class Desembolsos(ClaseModelo):
     TIPOS_DE_OPERACION = (
-        ('A', 'Asignaciones'),
-        ('C', 'Cobranzas'),
+        ('A', 'Asignación'),
+        ('C', 'Cobranza'),
     )
     FORMAS_DE_PAGO = (
         ('EFE', 'Efectivo'),
@@ -2029,7 +2029,11 @@ class Desembolsos(ClaseModelo):
                                      , null=True)
 
     def __str__(self):
-        return self.cxformapago
+        return "{} a {} por {} Id.{} {}".format(self.get_cxformapago_display(), 
+                                   self.cxcliente,
+                                   self.get_cxtipooperacion_display(),
+                                   self.cxoperacion,
+                                   self.cxcuentapago)
 
 class Pagares_Manager(models.Manager):
 
