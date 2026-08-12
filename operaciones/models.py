@@ -2033,7 +2033,7 @@ class Desembolsos(ClaseModelo):
                                    self.cxcliente,
                                    self.get_cxtipooperacion_display(),
                                    self.cxoperacion,
-                                   self.cxcuentapago)
+                                   self.cxcuentapago or '')
 
 class Pagares_Manager(models.Manager):
 
