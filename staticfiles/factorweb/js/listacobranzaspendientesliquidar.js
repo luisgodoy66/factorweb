@@ -18,7 +18,6 @@ window.onload=function(){
   )
     
   $table.on('all.bs.table', function (e, name, args) {
-    console.log(name, args)
   })
   
   // acciones ejecutada sobre registros seleccionados
@@ -32,7 +31,7 @@ window.onload=function(){
 
 window.operateEvents = {
   'click .revertir': function (e, value, row, index) {
-    ReversaConfirmacion(row.id, row.TipoOperacion)
+    ReversaConfirmacion(row.id, row.TipoOperacion, row.Cliente, row.FormaCobro)
   },
   'click .condonar': function (e, value, row, index) {
     Condonar( row.id, row.TipoOperacion)
@@ -43,25 +42,30 @@ window.operateEvents = {
 };
 
 function operateFormatter(value, row, index) {
-return [
-  '<a class="condonar" href="javascript:void(0)" title="Días a condonar">',
-  '<i class="fa fa-gift"></i>',
-  '</a>  ',
-  '<a class="revertir" href="javascript:void(0)" title="Reverso de confirmación">',
-  '<i class="fa fa-rotate-left"></i>',
-  '</a>  ',
-  '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
-  '<i class="fa fa-print"></i>',
-  '</a>  ',
-].join('')
+  return [
+    '<a class="condonar" href="javascript:void(0)" title="Días a condonar">',
+    '<i class="fa fa-gift"></i>',
+    '</a>&nbsp;&nbsp;',
+    '<a class="revertir" href="javascript:void(0)" title="Reverso de confirmación">',
+    '<i class="fa fa-rotate-left"></i>',
+    '</a>&nbsp;&nbsp;',
+    '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
+    '<i class="fa fa-print"></i>',
+    '</a>&nbsp;&nbsp;',
+  ].join('')
 }
 
-function ReversaConfirmacion(cobranza_id, tipo_operacion){
-    MensajeConfirmacion("Reversa la confirmación de " +  cobranza_id +"?",function(){
+function ReversaConfirmacion(cobranza_id, tipo_operacion, cliente, forma_cobro){
+  console.log("ReversaConfirmacion", forma_cobro)
+  if (forma_cobro == 'EFE'){
+    MensajeOK("La cobranza en efectivo no tiene confirmación a revertir")
+  }else{
+    MensajeConfirmacion("Reversa la confirmación de " +  cliente +"?",function(){
       fetchProcesar("/cobranzas/reversaconfirmacioncobranza/"+cobranza_id+"/"+tipo_operacion, function(){
             location.reload();
           })
       })
+  }
 
   }
 

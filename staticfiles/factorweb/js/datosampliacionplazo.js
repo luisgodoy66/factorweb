@@ -10,6 +10,7 @@ const id_cliente = capturaValor("id_cliente")
 var iniciales_dc = capturaValor("iniciales_dc")
 var iniciales_gaoa = capturaValor("iniciales_gaoa")
 var selections = []
+var base_iva = 0
 
 window.onload=function(){
   //  // cerrar side bar
@@ -32,7 +33,7 @@ window.onload=function(){
 
   };
 
-  window.operateEvents = {
+window.operateEvents = {
   'click .editar': function (e, value, row, index) {
     CambiarTasasDocumento(row.id,capturaValor("fechacorte"), row.Tipo_documento,function(){
     })
@@ -77,7 +78,8 @@ function Suma_Cargos(ids, iva_gaoa, iva_dc, porcentaje_iva){
       jQuery("#id_ndescuentodecartera").val(data['dc'])
       jQuery("#id_ngaoa").val(data['gaoa'])    
       jQuery("#id_niva").val(data['iva'])    
-      jQuery("#total").val(data['total'])    
+      jQuery("#total").val(data['total'])   
+      base_iva = data['base_iva'] 
     }
   })
 }
@@ -140,6 +142,7 @@ function AceptarAmpliacionPlazo(){
         "valor_ampliacion": capturaValor("total"),
         "porcentaje_iva":porcentaje_iva,
         "arr_documentos_ampliados": JSONdocumentos,
+        "base_iva": base_iva
       }
 
       fetchPostear("/cobranzas/aceptarampliaciondeplazo/", objeto, function(data){

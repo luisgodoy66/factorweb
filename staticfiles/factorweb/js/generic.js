@@ -24,9 +24,13 @@ function LineaCantidadEnPieDePaginaDeTabla(data) {
     }).length;
 }
 
+function numberFormatter(value) {
+    return Number(value).toLocaleString('es-EC', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function LineaTotalValoresEnPieDepaginaDeTabla(data) {
     var field = this.field;
-    return '$' + data
+    return '$' + numberFormatter(data
         .filter(function (row) {
             return !row.Eliminado; // Filtrar registros que no están eliminados
         })
@@ -35,7 +39,7 @@ function LineaTotalValoresEnPieDepaginaDeTabla(data) {
         })
         .reduce(function (sum, i) {
             return Math.round((sum + i + Number.EPSILON) * 100) / 100;
-        }, 0);
+        }, 0));
 }    
 
 function detailFormatter(index, row) {
@@ -79,8 +83,12 @@ function MensajeConfirmacion(msg="Confirme proceso",callback){
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Sí!'
+        cancelButtonColor: '#ffffff',
+        cancelButtonText: 'No',
+        confirmButtonText: 'Sí!',
+        didOpen: (modal) => {
+            modal.querySelector('.swal2-cancel').style.color = '#000000';
+        }
       }).then((result) => {
         if (result.isConfirmed) {
             callback()
@@ -275,3 +283,31 @@ function checkSubmit() {
         return false;
     }
 }
+
+function logingoogle() {
+    // Abrir la URL de inicio de sesión de Google en una nueva ventana
+    window.open("/api/google/logingoogle", "_blank", "width=500,height=600");
+}
+
+function google_session_active() {
+    fetch("/api/google/session/active/")
+        .then(response => response.json())
+        .then(data => {
+            return data.active;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            MensajeError("Error al verificar la sesión de Google. Conecte nuevamente.");
+        });
+}
+
+function registrarEvento(id, cliente, comentario){
+    if (!google_session_active()) {
+        MensajeError("Debe conectar con Google antes de registrar un evento");
+        return;
+    }
+    // Abrir el modal para registrar un evento de cobranza
+    observacion = comentario;
+    AbrirModal("/api/google/crear_evento_recordatorio_cobranza/"+encodeURIComponent(cliente));
+}
+

@@ -192,7 +192,7 @@ function AceptarAsignacion(){
         "sinstruccionpago": capturaValor("id_ctinstrucciondepago"),
         "porcentaje_iva": porcentaje_iva
       }
-    fetchPostear("/operaciones/aceptardocumentos/", objeto, function(){
+    fetchAceptar("/operaciones/aceptardocumentos/", objeto, function(){
         // regresar a la lista de solicitudes
         window.location.href = "/solicitudes/listasolicitudes";
         
@@ -203,4 +203,36 @@ function AceptarAsignacion(){
       })
   })
     
+}
+
+function fetchAceptar(url, objeto, callback){
+  alert("Procesando solicitud de aceptación de asignación")
+    var token= document.getElementsByName("csrfmiddlewaretoken")[0].value
+    fetch(url,{
+        headers:{
+            "Content-type":"application/json",
+            "X-CSRFToken":token
+        },
+        method:"POST",
+        body:JSON.stringify(objeto)
+    }).then(res=>res.text())
+    .then(res=>{
+        console.log(res.slice(0,2))
+        // res.slice(0,2) == 'OK' indica que la operación se realizó correctamente
+        if(res.slice(0,2)=='OK'){
+            MensajeOK()
+            callback(res.slice(2))
+        }
+        else{
+          if (res.slice(0,2)=='ND'){
+           MensajeConfirmacion(res.slice(2) + " ¿Desea continuar generando un exceso temporal?",function(){
+               fetchPostear("/operaciones/aceptardocumentos/", objeto, callback)
+           })
+          }
+          else{
+           MensajeError(res)       
+        }
+        }
+    })
+
 }

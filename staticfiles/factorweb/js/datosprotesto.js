@@ -29,8 +29,6 @@ function AceptarProtesto(){
           }
           
     fetchPostear("/cobranzas/aceptarprotesto/", objeto, function(data){
-          // regresar a la lista de solicitudes
-          window.location.href = "/cobranzas/listacobranzasporconfirmar";
           // en una nueva ventana abrir el reporte de cobranza
            url = window.location.origin
            if (tipo_operacion=="Cobranza"){
@@ -40,6 +38,8 @@ function AceptarProtesto(){
             url = url + "/cobranzas/reporterecuperacion/"+data;
            }
            window.open( url);
+          // regresar a la lista de solicitudes
+          window.location.href = "/cobranzas/listacobranzasporconfirmar";
         })
     })       
   }

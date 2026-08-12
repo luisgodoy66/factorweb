@@ -47,6 +47,7 @@ function GenerarFacturas(){
             MensajeError('Ningún registro encontrado para el mes indicado.')
         }
         else{
+                console.log(data)
                 alert('Revise los asientos generados.')
                 window.location.href = "/contabilidad/listaasientoscontables";
         }

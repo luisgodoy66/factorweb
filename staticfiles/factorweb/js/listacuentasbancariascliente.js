@@ -28,10 +28,10 @@ function operateFormatter(value, row, index) {
 return [
   '<a class="editar" href="javascript:void(0)" title="Editar cuenta">',
   '<i class="fa fa-edit"></i>',
-  '</a>  ',
+  '</a>&nbsp;&nbsp;',  
   '<a class="like" href="javascript:void(0)" title="Recibe transferencias">',
   '<i class="fa fa-heart"></i>',
-  '</a>  ',
+  '</a>&nbsp;&nbsp;',
   '<a class="remove" href="javascript:void(0)" title="Eliminar">',
     '<i class="fa fa-trash"></i>',
   '</a>'
@@ -40,7 +40,7 @@ return [
 function initTable() {
 
   $table.bootstrapTable('destroy').bootstrapTable({
-    height: 450,
+    // height: 450,
     locale: "es-EC",
     columns: [
       [{title: 'Ref.', field: 'id', rowspan: 2, align: 'center',

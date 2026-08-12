@@ -5,11 +5,7 @@ function EliminarDocumentoDeSolicitudAsignacion(asignacion_id, documento_id, tip
 
       fetchProcesar("/solicitudes/eliminardetalleasignacion/"
         + asignacion_id + "/" + documento_id+"/"+tipo_asignacion, function(){
-        // $table.bootstrapTable('remove', {
-        //   field: 'id',
-        //   values: [documento_id]
-        // });
-        $table.bootstrapTable('refresh');
+        $table.bootstrapTable('refresh', {silent: true});
         // location.reload();
       })
   })
@@ -25,6 +21,23 @@ function RecuperarDocumentoDeSolicitudAsignacion(asignacion_id, documento_id, ti
         // location.reload();
       })
   })
+}
+
+function calcularTotalesSolicitud() {
+  var totalValor = 0;
+  var cnt = 0;
+  var data = $table.bootstrapTable('getData');
+
+  data.forEach(function(row) {
+    if (! row.Eliminado){
+      cnt += 1;
+      totalValor += parseFloat(row.Total.replace(/,/g, '')) || 0;
+    }
+  });
+  inicializaValor("id_nvalor", totalValor.toFixed(2));
+  inicializaValor("id_ncantidaddocumentos", cnt);
+  inicializarInner("divCantidad", '<h6>' + cnt + '</h6>');    
+  inicializarInner("divValor", '<h6>' + totalValor.toFixed(2) + '</h6>');    
 }
 
 function ImprimirCobranza(cobranza_id, tipo_operacion){
@@ -61,15 +74,15 @@ function ReversarCobranza(operacion_id, tipo_operacion, nombre_cliente = null){
   else{
     id_operacion =  operacion_id
   }
-    if (tipo_operacion!= 'L'){
+    if (tipo_operacion == 'L'){
+      ReversarliquidacionCobranza(operacion_id)
+    }else{
       MensajeConfirmacion("Reversar cobranza " +  id_operacion +"?",function(){
           fetchProcesar("/cobranzas/reversarcobranza/" +  operacion_id + "/"
             + tipo_operacion,  function(){
               location.reload();
           })
       })
-    }else{
-      ReversarliquidacionCobranza(operacion_id)
     }
       
 }
@@ -85,8 +98,10 @@ window.open( url);
 function ReversarAceptacionAsignacion(asignacion_id, codigo_asgn = ''){
   // este proceso a diferencia de aceptar no se ejecuta desde un
   // formulario por eso no usa fetchPostear
+  // 12-feb-25  l.g.  lo que se va a reversar no es en la tabla de asignaciones
+  // sino en la tabla de solicitudes
 
-  MensajeConfirmacion("Reversar aceptación " +  codigo_asgn +"?",function(){
+  MensajeConfirmacion("Reversar liquidación " +  codigo_asgn +"?",function(){
       fetchProcesar("/operaciones/reversaraceptacionasignacion/"+  asignacion_id,  function(){
           location.reload();
       })
@@ -317,11 +332,15 @@ function ReversarAsientoDiario(asiento_id, asiento){
 })
 }
 
-function ModificarCobranza(cobranza_id, tipo_operacion, contabilizada){
+function ModificarCobranza(cobranza_id, tipo_operacion, contabilizada, estado = null){
   if (contabilizada){
     MensajeError("Cobranza ya está contabilizada. No se puede modificar.")
   }
   else{
+    if (estado && estado.trim() == 'E'){
+      MensajeError("Cobranza ya está eliminada.")
+      return false
+    }
     if (tipo_operacion == 'C' || tipo_operacion =='R'){
       AbrirModal("/cobranzas/modificarcobranza/"+ cobranza_id + '/' + tipo_operacion)
     }
@@ -345,7 +364,7 @@ function EliminarDebitoCuentaCompartida(nd_id,){
     
 }
 
-function CargaXMLfactura(xmlFile){
+function CargaXMLfactura(xmlFile, desdeSRI = false){
   const file = xmlFile.files[0];
   const reader = new FileReader();
   var parser = new DOMParser();
@@ -365,103 +384,156 @@ function CargaXMLfactura(xmlFile){
 
           if (estado != 'AUTORIZADO'){
               alert('Documento no tiene estado de autorizado')
-          }
-          else{
+          }else{
+            if (desdeSRI){
+              let numero_autorizacion=xmlDoc.getElementsByTagName("numeroAutorizacion")[0]
+                .childNodes[0].nodeValue;
+
+              // llamar al servicio del SRI para recuperar el comprobante y tomar los datos
+              // no desde el archivo sino de la respuesta del SRI
+              CargarDatosFactura(numero_autorizacion, xmlDoc);
+            }else{
               comprobante = xmlDoc.getElementsByTagName("comprobante")[0]
-                .childNodes[0].nodeValue
-
-              xmlFactura = parser.parseFromString(comprobante,"text/xml")
-
-              let infoTributaria=xmlFactura.getElementsByTagName("infoTributaria")[0]
-                .childNodes ;
-
-              for (let i in infoTributaria) {
-                  switch (infoTributaria[i].nodeName) {
-                      case "estab":
-                          inicializaValor("id_ctserie1", infoTributaria[i]
-                            .childNodes[0].nodeValue);
-                          break;
-                      case "ptoEmi":
-                          inicializaValor("id_ctserie2", infoTributaria[i]
-                            .childNodes[0].nodeValue);
-                          break;
-                      case "secuencial":
-                          inicializaValor("id_ctdocumento", infoTributaria[i]
-                            .childNodes[0].nodeValue);
-                          break;
-                      case "claveAcceso":
-                          inicializaValor("id_cxautorizacion_ec", infoTributaria[i]
-                            .childNodes[0].nodeValue);
-                          break;
-                  }
-              }
-              let infoFactura=xmlFactura.getElementsByTagName("infoFactura")[0]
-                .childNodes ;
-              
-              for (let i in infoFactura ){
-                  switch (infoFactura[i].nodeName){
-                      case "razonSocialComprador":
-                          inicializaValor("id_ctcomprador",infoFactura[i]
-                            .childNodes[0].nodeValue);
-                          break;
-                      case "identificacionComprador":
-                          inicializaValor("id_cxcomprador",infoFactura[i]
-                            .childNodes[0].nodeValue);
-                          break;
-                      case "totalSinImpuestos":
-                          inicializaValor("id_nvalorantesiva",infoFactura[i]
-                            .childNodes[0].nodeValue);
-                          break;
-                      case "fechaEmision":
-                          var fechaEmision = infoFactura[i].childNodes[0].nodeValue
-                          var dateParts = fechaEmision.split("/");
-                          var fecha= dateParts[2] + "-" + (dateParts[1]) + "-" + dateParts[0];
-                          inicializaValor("id_demision",fecha)
-                          break;
-                      case "tipoIdentificacionComprador":
-                          var tipo =infoFactura[i].childNodes[0].nodeValue
-                          switch (tipo) {
-                              case '04': inicializaValor("cxtipoid",'R'); break;
-                              case '05': inicializaValor("cxtipoid",'C'); break;
-                              case '06': inicializaValor("cxtipoid",'P'); break;
-                              case '08': inicializaValor("cxtipoid",'O'); break;
-                          }
-                          break;
-                  }
-                  
-              }
-              let detalles =xmlFactura.getElementsByTagName("detalles")[0].childNodes ;
-              let valorIva=0;
-              let detalle1, impuesto1, nodo, iva_imp;
-
-              for (let i in detalles ){
-                  detalle1=detalles[i].childNodes
-                  for (let j in detalle1){
-                      if (detalle1[j].nodeName=="impuestos"){
-                          impuesto1=detalle1[j].childNodes
-                          for (let k in impuesto1 ){
-                              nodo = impuesto1[k].childNodes
-                              iva_imp=false
-                              for (let l in nodo){
-                                  if(nodo[l].nodeName=='codigo'){
-                                      if (nodo[l].childNodes[0].nodeValue='2'){iva_imp = true}
-                                  }
-                                  if (iva_imp & nodo[l].nodeName== "valor"){
-                                      valorIva += parseFloat((parseFloat(nodo[l].childNodes[0].nodeValue)*1).toFixed(3))
-                                      }
-                              }
-                          }
-                      }
-                  }
-              }
-              inicializaValor("id_niva",valorIva)
-              total=jQuery("#id_nvalorantesiva").val()
-              total = +total+valorIva;
-              inicializaValor("id_ntotal",total.toFixed(2))
-              
+                .childNodes[0].nodeValue;
+              CargarFacturaDesdeComprobante(comprobante)
+            }
           }
       }
-};
+  };
+}
+
+function CargarDatosFactura(numero_autorizacion, xmlDoc=null){
+
+  if (numero_autorizacion.length != 49){
+      alert('Número de autorización debe tener 49 dígitos')
+      return false
+  }
+  // llamar al servicio del SRI para recuperar el comprobante y tomar los datos
+  fetchRecuperar('/api/sri/consulta-estado-comprobante/'+ numero_autorizacion, function(data) 
+    {
+      if (data['error']){
+        alert(data['error'] + '. Intente nuevamente.')
+        return false
+      }
+      if (data['mensaje']){
+        alert(data['mensaje'])
+
+        if (xmlDoc){
+          comprobante = xmlDoc.getElementsByTagName("comprobante")[0]
+            .childNodes[0].nodeValue;
+          estado=xmlDoc.getElementsByTagName("estado")[0]
+            .childNodes[0].nodeValue ;
+          ambiente=xmlDoc.getElementsByTagName("ambiente")[0]
+            .childNodes[0].nodeValue ;
+        }else{
+          return false
+        }
+      }
+      else{
+        comprobante = data[0]['comprobante']
+        estado = data[0]['estado']
+        ambiente = data[0]['ambiente']
+      }
+
+      if (estado != 'AUTORIZADO' || ambiente != 'PRODUCCIÓN'){
+          alert('Documento no tiene estado de autorizado o no es de producción')
+      }
+      else{
+        CargarFacturaDesdeComprobante(comprobante)
+      }
+    })
+}
+
+function CargarFacturaDesdeComprobante(comprobante){
+  var parser = new DOMParser();
+        xmlFactura = parser.parseFromString(comprobante,"text/xml")
+
+        let infoTributaria=xmlFactura.getElementsByTagName("infoTributaria")[0]
+          .childNodes ;
+
+        for (let i in infoTributaria) {
+            switch (infoTributaria[i].nodeName) {
+                case "estab":
+                    inicializaValor("id_ctserie1", infoTributaria[i]
+                      .childNodes[0].nodeValue);
+                    break;
+                case "ptoEmi":
+                    inicializaValor("id_ctserie2", infoTributaria[i]
+                      .childNodes[0].nodeValue);
+                    break;
+                case "secuencial":
+                    inicializaValor("id_ctdocumento", infoTributaria[i]
+                      .childNodes[0].nodeValue);
+                    break;
+                case "claveAcceso":
+                    inicializaValor("id_cxautorizacion_ec", infoTributaria[i]
+                      .childNodes[0].nodeValue);
+                    break;
+            }
+        }
+        let infoFactura=xmlFactura.getElementsByTagName("infoFactura")[0]
+          .childNodes ;
+        
+        for (let i in infoFactura ){
+            switch (infoFactura[i].nodeName){
+                case "razonSocialComprador":
+                    inicializaValor("id_ctcomprador",infoFactura[i]
+                      .childNodes[0].nodeValue);
+                    break;
+                case "identificacionComprador":
+                    inicializaValor("id_cxcomprador",infoFactura[i]
+                      .childNodes[0].nodeValue);
+                    break;
+                case "totalSinImpuestos":
+                    inicializaValor("id_nvalorantesiva",infoFactura[i]
+                      .childNodes[0].nodeValue);
+                    break;
+                case "fechaEmision":
+                    var fechaEmision = infoFactura[i].childNodes[0].nodeValue
+                    var dateParts = fechaEmision.split("/");
+                    var fecha= dateParts[2] + "-" + (dateParts[1]) + "-" + dateParts[0];
+                    inicializaValor("id_demision",fecha)
+                    break;
+                case "tipoIdentificacionComprador":
+                    var tipo =infoFactura[i].childNodes[0].nodeValue
+                    switch (tipo) {
+                        case '04': inicializaValor("cxtipoid",'R'); break;
+                        case '05': inicializaValor("cxtipoid",'C'); break;
+                        case '06': inicializaValor("cxtipoid",'P'); break;
+                        case '08': inicializaValor("cxtipoid",'O'); break;
+                    }
+                    break;
+            }
+            
+        }
+        let detalles =xmlFactura.getElementsByTagName("detalles")[0].childNodes ;
+        let valorIva=0;
+        let detalle1, impuesto1, nodo, iva_imp;
+
+        for (let i in detalles ){
+            detalle1=detalles[i].childNodes
+            for (let j in detalle1){
+                if (detalle1[j].nodeName=="impuestos"){
+                    impuesto1=detalle1[j].childNodes
+                    for (let k in impuesto1 ){
+                        nodo = impuesto1[k].childNodes
+                        iva_imp=false
+                        for (let l in nodo){
+                            if(nodo[l].nodeName=='codigo'){
+                                if (nodo[l].childNodes[0].nodeValue='2'){iva_imp = true}
+                            }
+                            if (iva_imp & nodo[l].nodeName== "valor"){
+                                valorIva += parseFloat((parseFloat(nodo[l].childNodes[0].nodeValue)*1).toFixed(3))
+                                }
+                        }
+                    }
+                }
+            }
+        }
+        inicializaValor("id_niva",valorIva.toFixed(2))
+        total=jQuery("#id_nvalorantesiva").val()
+        total = +total+valorIva;
+        inicializaValor("id_ntotal",total.toFixed(2))
 
 }
 
@@ -517,7 +589,7 @@ function generaAnexos(id_asignacion, tipo_cliente){
 
 }
 
-function carteranegociada(url){
+function carteranegociada(url, año_actual='Ultimo año'){
 
     //line chart
   fetchRecuperar(url,function(cartera){
@@ -549,7 +621,7 @@ function carteranegociada(url){
                     ]
                             },
                 {
-                    label: "Año actual",
+                    label: año_actual,
                     borderColor: "rgba(0, 123, 255, 0.9)",
                     borderWidth: "1",
                     backgroundColor: "rgba(0, 123, 255, 0.5)",
@@ -710,9 +782,9 @@ function CargaXMLOperacion(xmlFile){
                       case "NOMBRECOMP":
                           objetoDetalle.nombre_comprador = detalle1[j].childNodes[0].nodeValue;
                           break;
-                      // case "DOCTIPO":
-                      //     objetoDetalle.tipo_documento = detalle1[j].childNodes[0].nodeValue;
-                      //     break;
+                      case "NO":
+                          objetoDetalle.numero_autorizacion = detalle1[j].childNodes[0].nodeValue;
+                          break;
                       case "SERIE1":
                           objetoDetalle.serie1 = detalle1[j].childNodes[0].nodeValue;
                           break;
@@ -806,43 +878,38 @@ function ReversarAceptacionPagare(asignacion_id, codigo_asgn = ''){
     
 }
 
-function ReversarDesembolso(desembolso_id, tipo_operacion, operacion, asiento){
-  // este proceso a diferencia de aceptar no se ejecuta desde un
-  // formulario por eso no usa fetchPostear
+function ReversarDesembolso(desembolso_id, tipo_operacion
+  , operacion, asiento_id){
 
-  if (asiento ){
-    MensajeError("Desembolso tiene asiento contable. No se puede reversar.")
-  }
-  else{
-    MensajeConfirmacion("Reversar el desembolso de la operación " +  operacion +"?",function(){
-      if (tipo_operacion == 'A'){
-        fetchProcesar("/operaciones/reversardesembolsoasignacion/"+ desembolso_id, function(){
-            location.reload();
-        })
+  if (asiento_id ){
+    asiento_contable_api_url = "/contabilidad/asiento-contable/" + asiento_id
+    fetchRecuperar(asiento_contable_api_url, function(data){
+      if (data['estado'] == 'A' ){
+        MensajeError("Desembolso tiene asiento contable. No se puede reversar.")
+        return false
       }
-      if (tipo_operacion == 'C'){
-        fetchProcesar("/cobranzas/reversardesembolsoliquidacion/"+ desembolso_id, function(){
-            location.reload();
-        })
+      else{
+        ConfirmaReversoDesembolso(desembolso_id, tipo_operacion, operacion)
       }
-    })  
+    })
+  }else{
+    ConfirmaReversoDesembolso(desembolso_id, tipo_operacion, operacion)
   }
-    
 }
 
-function ReversarAmpliacionPlazo(nd_id, ampliacion){
-  MensajeConfirmacion("Reversar ampliación " +  ampliacion +"?",function(){
-    fetchProcesar("/cobranzas/reversarampliaciondeplazo/"+nd_id, function(){
-        // location.reload();
-        $table.bootstrapTable('updateByUniqueId', {
-          id: nd_id,
-          row: {
-              Estado: 'E'
-          }
-      });
-
-    })
-})
+function ConfirmaReversoDesembolso(desembolso_id, tipo_operacion  , operacion){
+  MensajeConfirmacion("Reversar el desembolso de la operación " +  operacion +"?",function(){
+    if (tipo_operacion == 'A'){
+      fetchProcesar("/operaciones/reversardesembolsoasignacion/"+ desembolso_id, function(){
+          location.reload();
+      })
+    }
+    if (tipo_operacion == 'C'){
+      fetchProcesar("/cobranzas/reversardesembolsoliquidacion/"+ desembolso_id, function(){
+          location.reload();
+      })
+    }
+  })  
 }
 
 function NegociadoPorActividad(url){
@@ -860,7 +927,7 @@ function NegociadoPorActividad(url){
 
     // Iterate over the data to populate the arrays
     data.forEach(item => {
-        actividades.push(item.cxcliente__cxcliente__actividad__ctactividad);
+        actividades.push(item.cxcliente__cxcliente__sectoreconomico__ctactividad);
         totales.push(item.total);
     });
     
@@ -921,3 +988,177 @@ function NegociadoPorActividad(url){
 //     "rgba(0,0,0,0.07)"
 // ]
 
+function saldoPorCliente(url) {
+    fetchRecuperar(url, function(data) {
+        // Ordenar los datos en orden descendente por el campo 'total'
+        data.sort((a, b) => b.total - a.total);
+
+        // Inicializar arrays vacíos para nombres de clientes y valores pendientes
+        let nombresClientes = [];
+        let valoresPendientes = [];
+
+        // Iterar sobre los datos para poblar los arrays
+        data.forEach(item => {
+            nombresClientes.push(item.cxcliente__cxcliente__ctnombre);
+            valoresPendientes.push(item.total_pendiente );
+        });
+
+        var ctx = document.getElementById("horizontalBarChart").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'horizontalBar',
+            data: {
+                labels: nombresClientes,
+                datasets: [{
+                    label: 'Sobre la línea de factoring',
+                    data: valoresPendientes,
+                    backgroundColor:   'rgba(75, 192, 192, 0.5)',
+                    borderColor:   'rgba(75, 192, 192, 0.5)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                },
+                responsive: true,
+                // maintainAspectRatio: false
+            }
+        });
+    });
+}
+
+function EditarAsientoDiario(asiento_id, tipo, desde_consulta = false){
+  // en una nueva ventana abrir el reporte de asignación
+  if (tipo == 'D')
+    url = '/contabilidad/asientodiarioeditar/'+asiento_id+'/'+desde_consulta
+  else
+    url = "/contabilidad/comprobanteegresoeditar/"+asiento_id+'/' + desde_consulta;
+    
+    location.href=url
+}
+
+function imprimeFacturasPendientesPorCliente(){
+  var x = [];
+  var options = document.getElementById("id_clientes").selectedOptions;
+  for (var i = 0; i < options.length; i++) {
+    x.push(options[i].value);
+  }
+  // en una nueva ventana abrir el reporte de asignación
+  url = window.location.origin
+  url = url + "/operaciones/impresioncarterapendienteclientes/"+x;
+  window.open( url);
+}
+
+function imprimeFacturasPendientesPorDeudor(){
+  var x = [];
+  var options = document.getElementById("id_deudores").selectedOptions;
+  for (var i = 0; i < options.length; i++) {
+    x.push(options[i].value);
+  }
+  // en una nueva ventana abrir el reporte de asignación
+  url = window.location.origin
+  url = url + "/operaciones/impresioncarterapendientedeudores/"+x;
+  window.open( url);
+}
+
+function imprimeCarteraPendientePorCliente(){
+  var x = [];
+  var options = document.getElementById("id_clientes").selectedOptions;
+  for (var i = 0; i < options.length; i++) {
+    x.push(options[i].value);
+  }
+  // en una nueva ventana abrir el reporte de asignación
+  url = window.location.origin
+  url = url + "/operaciones/reportecarterapendienteclientes/"+x;
+  window.open( url);
+}
+
+function imprimeCarteraPendientePorDeudor(){
+  var x = [];
+  var options = document.getElementById("id_deudores").selectedOptions;
+  for (var i = 0; i < options.length; i++) {
+    x.push(options[i].value);
+  }
+  // en una nueva ventana abrir el reporte de asignación
+  url = window.location.origin
+  url = url + "/operaciones/reportecarterapendientedeudores/"+x;
+  window.open( url);
+}
+
+function imprimeCargosCarteraVencida(){
+  var x = [];
+  var options = document.getElementById("id_clientes").selectedOptions;
+  for (var i = 0; i < options.length; i++) {
+    x.push(options[i].value);
+  }
+  // en una nueva ventana abrir el reporte de asignación
+  url = window.location.origin
+  url = url + "/operaciones/impresioncargoscarteravencida/"+capturaValor("fechahasta")+"/"+x;
+  window.open( url);
+}
+
+function LiquidacionEnCero(Tipo_operacion, por_vencer){
+  // validar que los elementos seleccionados sean del mismo cliente
+  // y del mismo tipo de factoring
+
+  var seleccion=  $table.bootstrapTable('getSelections')
+  var ids = getIdSelections()
+  var id_cliente = ''
+  var error = false
+  var tipo_factoring=''
+
+  seleccion.map(function(row)  {
+    // validar un solo cliente
+    if (id_cliente==''){
+      id_cliente=row.IdCliente
+    }
+    else{ if (id_cliente != row.IdCliente){
+      error = true
+    }}
+    // validar un solo tipo de factoring. Aunque este campo no aparece en la bt, 
+    // si está en el data con que se carga la bt
+    if (tipo_factoring==''){
+      tipo_factoring=row.IdTipoFactoring
+    }
+    else{ if (tipo_factoring != row.IdTipoFactoring){
+        error = true
+    }}
+    // solo los tipos de factoring que anticipan el 100%
+    if ( row.Anticipa100){
+      error = true
+    }
+  });
+
+  if (error ){
+    alert("Ha seleccionado varios clientes o tipos de factoring que no aplican liquidación de cobranza."
+      +" No puede continuar")
+  }
+  else{
+
+      url = `/cobranzas/consultaliquidacionencero/${ids}/${id_cliente}/${tipo_factoring}/${por_vencer}/${Tipo_operacion}`;
+    
+    location.href=url
+  }
+  return false
+}
+
+    function EliminarCupo( documento_id, comprador, utilizado){
+        if (utilizado > 0){
+            MensajeError("No se puede eliminar un cupo con saldo utilizado");
+            return;
+        }
+        MensajeConfirmacion("Eliminar cupo de " + comprador + "?",function(){
+
+            fetchProcesar("/clientes/eliminarcupo/"+ documento_id, function(){
+            // $table.bootstrapTable('remove', {
+            //   field: 'id',
+            //   values: [documento_id]
+            // });
+            location.reload();
+            })
+        })
+    }

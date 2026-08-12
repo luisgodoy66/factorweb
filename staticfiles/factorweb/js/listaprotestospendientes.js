@@ -4,6 +4,7 @@ var $cobroconcheque = jQuery("#cobroconcheque")
 var $cobroconefectivo = jQuery("#cobroconefectivo")
 var $cobroconmovimiento = jQuery("#cobroconmovimiento")
 var $cobrocontransferencia = jQuery("#cobrocontransferencia")
+var $liquidacionencero = jQuery("#liquidacionencero")
 
 window.onload=function(){
 
@@ -18,6 +19,7 @@ window.onload=function(){
         $cobroconefectivo.prop('disabled', !$table.bootstrapTable('getSelections').length)
         $cobroconmovimiento.prop('disabled', !$table.bootstrapTable('getSelections').length)
         $cobrocontransferencia.prop('disabled', !$table.bootstrapTable('getSelections').length)
+        $liquidacionencero.prop('disabled', !$table.bootstrapTable('getSelections').length)
 
         // save your data, here just save the current page
         selections = getIdSelections()
@@ -31,27 +33,28 @@ window.onload=function(){
 
     // acciones ejecutada sobre registros seleccionados
     $cobroconcheque.click(function () {
-
       RecuperacionDeProtesto('CHE');
       $cobroconcheque.prop('disabled', true)
     })
 
     $cobroconefectivo.click(function () {
-
       RecuperacionDeProtesto('EFE');
       $cobroconefectivo.prop('disabled', true)
     })
 
     $cobroconmovimiento.click(function () {
-
       RecuperacionDeProtesto('MOV');
       $cobroconmovimiento.prop('disabled', true)
     })
 
     $cobrocontransferencia.click(function () {
-
       RecuperacionDeProtesto('TRA');
       $cobrocontransferencia.prop('disabled', true)
+    })
+
+    $liquidacionencero.click(function () {
+      LiquidacionEnCero('Recuperación', 'No');
+      $liquidacionencero.prop('disabled', true)
     })
 
 };
@@ -61,12 +64,18 @@ window.operateEvents = {
     ReversaProtesto(row.IdCobranza, row.id, row.TipoOperacion, row.Cobranza
       , row.IdCliente, row.IdTipoFactoring)
   },
+  'click .imprimir': function (e, value, row, index) {
+    ImprimirCobranza(row.IdCobranza, row.TipoOperacion)
+  },
 };
 
 function operateFormatter(value, row, index) {
 return [
   '<a class="revertir" href="javascript:void(0)" title="Reverso de protesto">',
   '<i class="fa fa-rotate-left"></i>',
+  '</a>&nbsp;&nbsp;',
+  '<a class="imprimir" href="javascript:void(0)" title="Imprimir cobranza">',
+  '<i class="fa fa-print"></i>',
   '</a>  ',
 ].join('')
 }

@@ -39,15 +39,19 @@ window.onload=function(){
 };
 window.operateEvents = {
       'click .imprimir': function (e, value, row, index) {
+        if (row.Diario != null){
         ImprimirAsientoDiario( row.Diario, row.Tipo)
+        }
       },
     };
       
 function operateFormatter(value, row, index) {
-    return [
-        '<a class="imprimir" href="javascript:void(0)" title="Imprimir asiento">',
-        '<i class="fa fa-print"></i>',
-        '</a>  ',
-      ].join('')
+    if (row.Diario != null){
+        return [
+            '<a class="imprimir" href="javascript:void(0)" title="Imprimir asiento">',
+            '<i class="fa fa-print"></i>',
+            '</a>  ',
+        ].join('')
+    }
 }
     
