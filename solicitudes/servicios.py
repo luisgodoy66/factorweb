@@ -72,14 +72,14 @@ def _fecha(texto, default=None):
 
 
 def _extraer_xml_factura(xml_content):
-    print(f"Extrayendo XML de factura del contenido proporcionado")
+    # print(f"Extrayendo XML de factura del contenido proporcionado")
     """Devuelve el XML de factura, incluso si viene envuelto en <autorizacion>/<comprobante>."""
     xml_texto = xml_content.decode('utf-8', errors='ignore') if isinstance(xml_content, bytes) else str(xml_content)
     xml_texto = xml_texto.strip().lstrip('\ufeff')
 
     root = ET.fromstring(xml_texto)
     tag_raiz = root.tag.split('}')[-1].lower()
-    print(f"tag_raiz: {tag_raiz}")
+    # print(f"tag_raiz: {tag_raiz}")
     if tag_raiz == 'factura':
         return xml_texto
 
@@ -122,7 +122,7 @@ def validar_xml_con_xsd(xml_content, xsd_path=None):
 
 
 def parsear_factura_xml(xml_content, xsd_path=None):
-    print(f"Parseando XML de factura")
+    # print(f"Parseando XML de factura")
     """Parsea un XML de factura al formato esperado por los modelos."""
     factura_xml = _extraer_xml_factura(xml_content)
     validar_xml_con_xsd(factura_xml, xsd_path=xsd_path)
@@ -189,7 +189,7 @@ def parsear_factura_xml(xml_content, xsd_path=None):
 
 
 def encontrar_cliente_por_remitente(sender_email, empresa=None):
-    print(f"Buscando cliente por remitente")
+    # print(f"Buscando cliente por remitente")
     """Busca el cliente por el email del remitente usando ctemail2."""
     email = _normalizar_email(sender_email)
     if not email:
@@ -203,7 +203,7 @@ def encontrar_cliente_por_remitente(sender_email, empresa=None):
 
 
 def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_factoring=None, asunto=None, xsd_path=None):
-    print(f"Creando asignación desde XML para remitente ")
+    # print(f"Creando asignación desde XML para remitente ")
     """Crea una asignación y un documento a partir de un XML de factura."""
     cliente = encontrar_cliente_por_remitente(sender_email, empresa=empresa)
     if cliente is None:
@@ -304,12 +304,12 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
 
 
 def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None, xsd_path=None):
-    print(f"Procesando mensaje del agente")
+    # print(f"Procesando mensaje del agente")
     """Procesa un correo ya leído por un agente IA y sus adjuntos XML."""
     sender_email = correo_data.get('from') or correo_data.get('sender') or correo_data.get('sender_email') or ''
     asunto = correo_data.get('subject') or correo_data.get('asunto') or ''
     attachment = correo_data.get('attachments') or correo_data.get('adjuntos') or []
-    print(f"Remitente: {sender_email}, Asunto: {asunto}, Adjuntos: {len(attachment) if isinstance(attachment, list) else 1}")
+    # print(f"Remitente: {sender_email}, Asunto: {asunto}, Adjuntos: {len(attachment) if isinstance(attachment, list) else 1}")
     if not attachment:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': []}
     # if not isinstance(attachment, list):
