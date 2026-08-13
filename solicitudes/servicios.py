@@ -260,6 +260,7 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
 
             numero_solicitud = INICIAL_SOLICITUD+str(secuencia.nultimonumero).zfill(5)
             print(f"Creando nueva asignación con número {numero_solicitud} para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.cttipofactoring}")
+            print(f"empresa={empresa}, user={user}, cliente={cliente.cxcliente}, tipo_factoring={tipo_factoring.cttipofactoring}, datos['total']={datos['total']}, numero_solicitud={numero_solicitud}")
             asignacion = Asignacion.objects.create(
                 empresa=empresa,
                 cxusuariocrea=user,
