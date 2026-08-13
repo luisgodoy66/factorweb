@@ -48,7 +48,7 @@ User = get_user_model()
 @csrf_exempt
 @require_POST
 def webhook_cargar_solicitudes_factoring(request):
-    print(request.body)
+    # print(request.body)
     """Endpoint para que un agente IA envíe un correo ya leído y sus adjuntos XML para cargar solicitudes."""
     if request.content_type and 'application/json' in request.content_type:
         try:

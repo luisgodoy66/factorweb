@@ -106,6 +106,7 @@ def validar_xml_con_xsd(xml_content, xsd_path=None):
     if not xsd_path:
         xsd_path = DEFAULT_XSD_PATH
     if not xsd_path or not os.path.exists(xsd_path):
+        print(f"No se encontró el archivo XSD en {xsd_path}, no se puede validar el XML contra el XSD")
         return True
 
     if lxml_etree is None:
@@ -217,6 +218,7 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
         raise ValueError('No existe un tipo de factoring configurado para la empresa')
 
     datos = parsear_factura_xml(xml_content, xsd_path=xsd_path)
+    print(f"Datos parseados del XML: {datos}")
     ruc = cliente.cxcliente
 
     with transaction.atomic():
