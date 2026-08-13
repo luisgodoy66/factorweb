@@ -239,9 +239,11 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
             asignacion = asignacion_existente
             print(f"Asignación actualizada: {asignacion.cxasignacion} con valor {asignacion.nvalor} y cantidad de documentos {asignacion.ncantidaddocumentos}")
         else:
+            print(f"No se encontró asignación existente, creando nueva asignación para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.cttipofactoring}")
             secuencia = Contador.objects.\
                 filter(empresa=empresa,
                     cxtransaccion=INICIAL_SOLICITUD+ruc).first()
+            print(f"Secuencia encontrada: {secuencia.nultimonumero if secuencia else 'Ninguna'} para empresa {empresa} y cliente {cliente.cxcliente}")
             if not secuencia:
                 secuencia = Contador(
                     empresa=empresa,
@@ -255,7 +257,7 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
                 secuencia.save()
 
             numero_solicitud = INICIAL_SOLICITUD+str(secuencia.nultimonumero).zfill(5)
-            print(f"Creando nueva asignación con número {numero_solicitud} para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.cxdescripcion}")
+            print(f"Creando nueva asignación con número {numero_solicitud} para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.cttipofactoring}")
             asignacion = Asignacion.objects.create(
                 empresa=empresa,
                 cxusuariocrea=user,
