@@ -94,10 +94,10 @@ def webhook_cargar_solicitudes_factoring(request):
     return JsonResponse({
         'ok': True,
         'empresa_id': empresa.id,
-        # 'procesados': resultado.get('procesados', 0),
-        # 'creadas': resultado.get('creadas', 0),
-        # 'resultados': resultado.get('resultados', []),
-        # 'correos': resultado.get('correos', []),
+        'procesados': resultado.get('procesados', 0),
+        'creadas': resultado.get('creadas', 0),
+        'resultados': resultado.get('resultados', []),
+        'correos': resultado.get('correos', []),
     })
 '''
     ejemplo de payload que envia el agente IA:
