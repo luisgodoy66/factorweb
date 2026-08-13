@@ -48,12 +48,10 @@ User = get_user_model()
 @csrf_exempt
 @require_POST
 def webhook_cargar_solicitudes_factoring(request):
-    # print(request.body)
     """Endpoint para que un agente IA envíe un correo ya leído y sus adjuntos XML para cargar solicitudes."""
     if request.content_type and 'application/json' in request.content_type:
         try:
             data = json.loads(request.body.decode('utf-8')) if request.body else {}
-            print(f"Webhook recibido con payload: ")
         except json.JSONDecodeError:
             data = {}
     else:
@@ -64,28 +62,29 @@ def webhook_cargar_solicitudes_factoring(request):
     correo_data = data
     if isinstance(correo_data, str):
         try:
+            print(f"Intentando decodificar correo_data desde string: {correo_data}")
             correo_data = json.loads(correo_data)
         except json.JSONDecodeError:
             correo_data = {}
     if not isinstance(correo_data, dict):
         return JsonResponse({'ok': False, 'error': 'El payload debe incluir un objeto correo o payload'}, status=400)
 
-    # empresa_id = data.get('empresa_id') or correo_data.get('empresa_id')
-    # user_id = data.get('user_id') or correo_data.get('user_id')
+    empresa_id = data.get('empresa_id') or correo_data.get('empresa_id')
+    user_id = data.get('user_id') or correo_data.get('user_id')
 
-    # empresa = Empresas.objects.filter(id=empresa_id).first() if empresa_id else Empresas.objects.first()
-    # if empresa is None:
-    #     return JsonResponse({'ok': False, 'error': 'No existe una empresa configurada'}, status=400)
+    empresa = Empresas.objects.filter(id=empresa_id).first() if empresa_id else Empresas.objects.first()
+    if empresa is None:
+        return JsonResponse({'ok': False, 'error': 'No existe una empresa configurada'}, status=400)
 
-    # user = User.objects.filter(id=user_id).first() if user_id else User.objects.filter(is_superuser=True).first() or User.objects.first()
-    # if user is None:
-    #     return JsonResponse({'ok': False, 'error': 'No existe un usuario para registrar las solicitudes'}, status=400)
+    user = User.objects.filter(id=user_id).first() if user_id else User.objects.filter(is_superuser=True).first() or User.objects.first()
+    if user is None:
+        return JsonResponse({'ok': False, 'error': 'No existe un usuario para registrar las solicitudes'}, status=400)
 
     try:
         resultado = procesar_mensaje_del_agente(
             correo_data=correo_data,
-            empresa=2,
-            user=1,
+            empresa=empresa,
+            user=user,
             tipo_factoring=None,
             xsd_path=None,
         )
@@ -94,7 +93,7 @@ def webhook_cargar_solicitudes_factoring(request):
 
     return JsonResponse({
         'ok': True,
-        'empresa_id': 2,
+        'empresa_id': empresa.id,
         'procesados': resultado.get('procesados', 0),
         'creadas': resultado.get('creadas', 0),
         'resultados': resultado.get('resultados', []),
