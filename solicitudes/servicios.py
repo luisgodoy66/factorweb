@@ -261,19 +261,22 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
             numero_solicitud = INICIAL_SOLICITUD+str(secuencia.nultimonumero).zfill(5)
             print(f"Creando nueva asignación con número {numero_solicitud} para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.cttipofactoring}")
             print(f"empresa={empresa}, user={user}, cliente={cliente.cxcliente}, tipo_factoring={tipo_factoring.cttipofactoring}, datos['total']={datos['total']}, numero_solicitud={numero_solicitud}")
-            asignacion = Asignacion(
-                cxcliente = cliente,
-                cxtipofactoring = tipo_factoring,
-                cxtipo = 'F',
-                nvalor = datos['total'],
-                ncantidaddocumentos = 1,
-                cxusuariocrea = user,
-                empresa = empresa,
-                cxasignacion = numero_solicitud
-            )
-            if asignacion:
-                asignacion.save()
-                print(f"Asignación creada: {asignacion.cxasignacion} con valor {asignacion.nvalor} y cantidad de documentos {asignacion.ncantidaddocumentos}")
+            try:
+                asignacion = Asignacion(
+                    cxcliente = cliente,
+                    cxtipofactoring = tipo_factoring,
+                    cxtipo = 'F',
+                    nvalor = datos['total'],
+                    ncantidaddocumentos = 1,
+                    cxusuariocrea = user,
+                    empresa = empresa,
+                    cxasignacion = numero_solicitud
+                )
+                if asignacion:
+                    asignacion.save()
+                    print(f"Asignación creada: {asignacion.cxasignacion} con valor {asignacion.nvalor} y cantidad de documentos {asignacion.ncantidaddocumentos}")
+            except Exception as e:
+                print(f"Error al crear asignación: {e}")
 
         documento = Documentos(
             empresa=empresa,
