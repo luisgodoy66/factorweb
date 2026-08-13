@@ -221,6 +221,7 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
             # cxtipofactoring=tipo_factoring,
             cxtipo='F',
             cxestado='P',
+            leliminado = False,
         ).first()
         print(f"Asignación existente encontrada: {asignacion_existente.cxasignacion if asignacion_existente else 'Ninguna'} "
               f"para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.cttipofactoring}")

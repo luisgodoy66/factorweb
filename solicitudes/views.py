@@ -90,14 +90,14 @@ def webhook_cargar_solicitudes_factoring(request):
         )
     except Exception as exc:
         return JsonResponse({'ok': False, 'error': str(exc)}, status=500)
-
+    print(resultado)
     return JsonResponse({
         'ok': True,
         'empresa_id': empresa.id,
-        'procesados': resultado.get('procesados', 0),
-        'creadas': resultado.get('creadas', 0),
-        'resultados': resultado.get('resultados', []),
-        'correos': resultado.get('correos', []),
+        # 'procesados': resultado.get('procesados', 0),
+        # 'creadas': resultado.get('creadas', 0),
+        # 'resultados': resultado.get('resultados', []),
+        # 'correos': resultado.get('correos', []),
     })
 '''
     ejemplo de payload que envia el agente IA:
