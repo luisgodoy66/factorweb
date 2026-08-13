@@ -261,22 +261,21 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
             numero_solicitud = INICIAL_SOLICITUD+str(secuencia.nultimonumero).zfill(5)
             print(f"Creando nueva asignación con número {numero_solicitud} para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.cttipofactoring}")
             print(f"empresa={empresa}, user={user}, cliente={cliente.cxcliente}, tipo_factoring={tipo_factoring.cttipofactoring}, datos['total']={datos['total']}, numero_solicitud={numero_solicitud}")
-            asignacion = Asignacion.objects.create(
-                empresa=empresa,
-                cxusuariocrea=user,
-                # cxusuariomodifica=user.id,
-                cxcliente=cliente,
-                cxtipofactoring=tipo_factoring,
-                cxtipo='F',
-                nvalor=datos['total'],
-                ncantidaddocumentos=1,
-                cxestado='P',
-                cxasignacion=numero_solicitud,
-                # ctinstrucciondepago=asunto or '',
+            asignacion = Asignacion(
+                cxcliente = cliente,
+                cxtipofactoring = tipo_factoring,
+                cxtipo = 'F',
+                nvalor = datos['total'],
+                ncantidaddocumentos = 1,
+                cxusuariocrea = user,
+                empresa = empresa,
+                cxasignacion = numero_solicitud
             )
-            print(f"Asignación creada: {asignacion.cxasignacion} con valor {asignacion.nvalor} y cantidad de documentos {asignacion.ncantidaddocumentos}")
+            if asignacion:
+                asignacion.save()
+                print(f"Asignación creada: {asignacion.cxasignacion} con valor {asignacion.nvalor} y cantidad de documentos {asignacion.ncantidaddocumentos}")
 
-        documento = Documentos.objects.create(
+        documento = Documentos(
             empresa=empresa,
             cxusuariocrea=user,
             cxusuariomodifica=user.id,
@@ -294,10 +293,12 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
             # nvalornonegociado=datos['total'],
             cxautorizacion_ec=datos['clave_acceso'][:49],
         )
-        print(f"Documento creado: {documento.id} para asignación {asignacion.cxasignacion} con valor {documento.ntotal}")
+        if documento:
+            documento.save()
+            print(f"Documento creado: {documento.id} para asignación {asignacion.cxasignacion} con valor {documento.ntotal}")
 
-        asignacion.nvalor = datos['total']
-        asignacion.ncantidaddocumentos = 1
+        asignacion.nvalor += datos['total']
+        asignacion.ncantidaddocumentos += 1
         asignacion.save(update_fields=['nvalor', 'ncantidaddocumentos'])
         print(f"Asignación actualizada: {asignacion.cxasignacion} con valor {asignacion.nvalor} y cantidad de documentos {asignacion.ncantidaddocumentos}")
 
