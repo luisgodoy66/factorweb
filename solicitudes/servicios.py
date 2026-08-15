@@ -269,6 +269,7 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
             except Exception as e:
                 print(f"Error al crear asignación: {e}")
 
+        
         documento = Documentos(
             empresa=empresa,
             cxusuariocrea=user,
@@ -365,51 +366,3 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
         'correos': correos_procesados,
     }
 
-
-# def procesar_adjuntos_xml_de_correo(attachments, sender_email, empresa, user, tipo_factoring=None, asunto=None, xsd_path=None):
-#     """Procesa una lista de adjuntos de correo y crea una asignación por cada XML válido."""
-#     resultados = []
-#     for attachment in attachments or []:
-#         if not attachment:
-#             continue
-
-#         filename = None
-#         content = None
-#         if isinstance(attachment, dict):
-#             filename = attachment.get('filename') or attachment.get('name')
-#             content = attachment.get('content') or attachment.get('bytes') or attachment.get('data')
-#         elif isinstance(attachment, tuple) and len(attachment) == 2:
-#             filename, content = attachment
-#         else:
-#             filename = getattr(attachment, 'filename', None) or getattr(attachment, 'name', None)
-#             content = getattr(attachment, 'content', None) or getattr(attachment, 'bytes', None) or getattr(attachment, 'data', None)
-
-#         if content is None:
-#             continue
-
-#         if filename and not str(filename).lower().endswith('.xml') and not isinstance(content, (bytes, bytearray, str)):
-#             continue
-
-#         if isinstance(content, bytes):
-#             xml_content = content.decode('utf-8', errors='ignore')
-#         else:
-#             xml_content = str(content)
-
-#         if '<' not in xml_content or '</' not in xml_content:
-#             continue
-
-#         try:
-#             resultado = crear_asignacion_desde_xml(
-#                 xml_content=xml_content,
-#                 sender_email=sender_email,
-#                 empresa=empresa,
-#                 user=user,
-#                 tipo_factoring=tipo_factoring,
-#                 asunto=asunto,
-#                 xsd_path=xsd_path,
-#             )
-#             resultados.append(resultado)
-#         except (ValueError, ET.ParseError):
-#             continue
-
-#     return resultados
