@@ -58,7 +58,7 @@ def webhook_cargar_solicitudes_factoring(request):
         data = request.POST.dict()
         print(f"Webhook recibido con payload (form-data): ")
     correo_data = data.get('correo') or data.get('email') or data.get('message') or data.get('payload') or {}
-
+    print(f"Cantidad de adjuntos: {len(correo_data.get('attachments', []))}")
     if isinstance(correo_data, str):
         try:
             print(f"Intentando decodificar correo_data desde string: {correo_data}")
