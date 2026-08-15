@@ -58,8 +58,7 @@ def webhook_cargar_solicitudes_factoring(request):
         data = request.POST.dict()
         print(f"Webhook recibido con payload (form-data): ")
     correo_data = data.get('correo') or data.get('email') or data.get('message') or data.get('payload') or {}
-    # correo_data = data
-    print(f"Webhook recibido con payload: {correo_data}")
+
     if isinstance(correo_data, str):
         try:
             print(f"Intentando decodificar correo_data desde string: {correo_data}")
@@ -96,7 +95,7 @@ def webhook_cargar_solicitudes_factoring(request):
         'empresa_id': empresa.id,
         'procesados': resultado.get('procesados', 0),
         'creadas': resultado.get('creadas', 0),
-        # 'resultados': resultado.get('resultados', []),
+        'resultados': resultado.get('resultados', []),
         'correos': resultado.get('correos', []),
     })
 '''
@@ -1472,7 +1471,6 @@ def ImpresionSolicitud(request, solicitud_id, crear_pdf = False):
         output_filename = os.path.join(settings.MEDIA_ROOT, f"solicitud_{solicitud_id}.pdf")
         with open(output_filename, "wb") as f:
             f.write(response.rendered_content)
-        print(f"Archivo PDF creado en: {output_filename}")
         return "OK"
     else:
         # Devolver el PDF para visualización en el navegador

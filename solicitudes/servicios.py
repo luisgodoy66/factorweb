@@ -210,7 +210,6 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
         raise ValueError('No existe un tipo de factoring configurado para la empresa')
 
     datos = parsear_factura_xml(xml_content, xsd_path=xsd_path)
-    print(f"Datos parseados del XML: {datos}")
     ruc = cliente.cxcliente
 
     with transaction.atomic():
@@ -306,7 +305,6 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
 
 
 def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None, xsd_path=None):
-    # print(f"Procesando mensaje del agente")
     """Procesa un correo ya leído por un agente IA y sus adjuntos XML."""
     sender_email = correo_data.get('from') or correo_data.get('sender') or correo_data.get('sender_email') or ''
     asunto = correo_data.get('subject') or correo_data.get('asunto') or ''
