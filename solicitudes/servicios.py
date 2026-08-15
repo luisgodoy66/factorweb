@@ -310,7 +310,6 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     asunto = correo_data.get('subject') or correo_data.get('asunto') or ''
     attachment = correo_data.get('attachments') or correo_data.get('adjuntos') or []
     print(f"Procesando correo de {sender_email} con asunto '{asunto}' y {len(attachment) if isinstance(attachment, list) else 'no lista de'} adjuntos")
-    print('attachment', attachment)
     if not attachment:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': [], 'msg': 'No hay adjuntos para procesar'}
     if not isinstance(attachment, list):
@@ -320,22 +319,26 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
     correos_procesados = []
     # for attachment in attachment:
     if isinstance(attachment, dict):
+        print(f"es instancia de dict: {attachment.get('filename') or attachment.get('name') or 'sin nombre'}")
         xml_content = attachment.get('content') or attachment.get('xml') or attachment.get('data') or ''
         filename = attachment.get('filename') or attachment.get('name') or 'adjunto.xml'
     else:
+        print(f"no es instancia de dict: {getattr(attachment, 'name', 'sin nombre')}")
         xml_content = attachment
         filename = 'adjunto.xml'
     if not xml_content:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': [], 'msg': f'No se encontró contenido XML en el adjunto {filename}'}
 
     if isinstance(xml_content, bytes):
+        print(f"es instancia de bytes, convirtiendo contenido XML a UTF-8 para el adjunto {filename}")
         xml_content = xml_content.decode('utf-8', errors='ignore')
     else:
+        print(f"no es instancia de bytes, convirtiendo contenido XML a str para el adjunto {filename}")
         xml_content = str(xml_content)
 
     if '<' not in xml_content or '</' not in xml_content:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': [], 'msg': 'El contenido XML no es válido'}
-
+    print(xml_content[:200] + '...' if len(xml_content) > 200 else xml_content)
     try:
         resultado = crear_asignacion_desde_xml(
             xml_content=xml_content,
