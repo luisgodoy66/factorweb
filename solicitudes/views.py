@@ -95,7 +95,7 @@ def webhook_cargar_solicitudes_factoring(request):
         'empresa_id': empresa.id,
         'procesados': resultado.get('procesados', 0),
         'creadas': resultado.get('creadas', 0),
-        'resultados': resultado.get('resultados', []),
+        # 'resultados': resultado.get('resultados', []),
         'correos': resultado.get('correos', []),
     })
 '''
