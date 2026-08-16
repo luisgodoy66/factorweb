@@ -196,152 +196,137 @@ def encontrar_cliente_por_remitente(sender_email, empresa=None):
     return qs.filter(ctemail2__iexact=email).order_by('-dregistro').first() or qs.filter(ctemail__iexact=email).order_by('-dregistro').first()
 
 
-def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_factoring=None, asunto=None, xsd_path=None):
-    """Crea una asignación y un documento a partir de un XML de factura."""
+def _crear_documento_desde_datos(datos, asignacion, empresa, user):
+    fecha = datos['fecha_emision'] or datos['fecha_vencimiento'] or __import__('datetime').datetime.today().date()
+    return Documentos.objects.create(
+        empresa=empresa,
+        cxusuariocrea=user,
+        cxusuariomodifica=user.id,
+        cxasignacion=asignacion,
+        cxcomprador=datos['comprador_identificacion'][:13],
+        ctcomprador=datos['comprador_nombre'][:100],
+        ctserie1=datos['serie1'][:3],
+        ctserie2=datos['serie2'][:3],
+        ctdocumento=datos['documento'][:9],
+        demision=fecha,
+        dvencimiento=datos['fecha_vencimiento'] or fecha,
+        nvalorantesiva=datos['valor_antes_iva'],
+        niva=datos['iva'],
+        ntotal=datos['total'],
+        cxautorizacion_ec=datos['clave_acceso'][:49],
+    )
+
+
+def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_factoring=None, asunto=None, xsd_path=None):
+    """Crea una sola asignación y un documento por cada XML recibido."""
+    if not xml_contents:
+        raise ValueError('No se recibieron facturas XML')
+
     cliente = encontrar_cliente_por_remitente(sender_email, empresa=empresa)
     if cliente is None:
         raise ValueError('No se encontró un cliente para el remitente {}'.format(sender_email))
 
     if tipo_factoring is None:
-        tipo_factoring = Tipos_factoring.objects\
-            .filter(empresa=empresa, leliminado=False)\
-            .order_by('dregistro').first()
+        tipo_factoring = Tipos_factoring.objects.filter(
+            empresa=empresa, leliminado=False
+        ).order_by('dregistro').first()
     if tipo_factoring is None:
         raise ValueError('No existe un tipo de factoring configurado para la empresa')
 
-    datos = parsear_factura_xml(xml_content, xsd_path=xsd_path)
+    datos_facturas = [parsear_factura_xml(xml, xsd_path=xsd_path) for xml in xml_contents]
+    total_lote = sum((datos['total'] for datos in datos_facturas), Decimal('0'))
     ruc = cliente.cxcliente
 
     with transaction.atomic():
-        # buscar si existe una asignación con el mismo cliente, tipo de factoring y documento
-        asignacion_existente = Asignacion.objects.filter(
+        asignacion = Asignacion.objects.filter(
             empresa=empresa,
             cxcliente=cliente,
-            # cxtipofactoring=tipo_factoring,
             cxtipo='F',
             cxestado='P',
-            leliminado = False,
+            leliminado=False,
         ).first()
-        print(f"Asignación existente encontrada: {asignacion_existente.cxasignacion if asignacion_existente else 'Ninguna'} "
-              f"para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.cttipofactoring}")
-        if asignacion_existente:
-            # si existe, actualizar el valor y la cantidad de documentos
-            asignacion_existente.nvalor += datos['total']
-            asignacion_existente.ncantidaddocumentos += 1
-            asignacion_existente.save(update_fields=['nvalor', 'ncantidaddocumentos'])
-            asignacion = asignacion_existente
-            print(f"Asignación actualizada: {asignacion.cxasignacion} con valor {asignacion.nvalor} y cantidad de documentos {asignacion.ncantidaddocumentos}")
-        else:
-            secuencia = Contador.objects.\
-                filter(empresa=empresa,
-                    cxtransaccion=INICIAL_SOLICITUD+ruc).first()
-            print(f"Secuencia encontrada: {secuencia.nultimonumero if secuencia else 'Ninguna'} para empresa {empresa} y cliente {cliente.cxcliente}")
-            if not secuencia:
-                secuencia = Contador(
+
+        if asignacion is None:
+            secuencia = Contador.objects.filter(
+                empresa=empresa,
+                cxtransaccion=INICIAL_SOLICITUD + ruc,
+            ).first()
+            if secuencia is None:
+                secuencia = Contador.objects.create(
                     empresa=empresa,
                     cxusuariocrea=user,
-                    cxtransaccion=INICIAL_SOLICITUD+ruc,
-                    nultimonumero=1
+                    cxtransaccion=INICIAL_SOLICITUD + ruc,
+                    nultimonumero=1,
                 )
-                secuencia.save()
             else:
                 secuencia.nultimonumero += 1
-                secuencia.save()
+                secuencia.save(update_fields=['nultimonumero'])
 
-            numero_solicitud = INICIAL_SOLICITUD+str(secuencia.nultimonumero).zfill(5)
-            print(f"Creando nueva asignación con número {numero_solicitud} para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.cttipofactoring}")
-            print(f"empresa={empresa}, user={user}, cliente={cliente.cxcliente}, tipo_factoring={tipo_factoring.cttipofactoring}, datos['total']={datos['total']}, numero_solicitud={numero_solicitud}")
-            try:
-                asignacion = Asignacion(
-                    cxcliente = cliente,
-                    cxtipofactoring = tipo_factoring,
-                    cxtipo = 'F',
-                    nvalor = datos['total'],
-                    ncantidaddocumentos = 1,
-                    cxusuariocrea = user,
-                    empresa = empresa,
-                    cxasignacion = numero_solicitud
-                )
-                if asignacion:
-                    asignacion.save()
-                    print(f"Asignación creada: {asignacion.cxasignacion} con valor {asignacion.nvalor} y cantidad de documentos {asignacion.ncantidaddocumentos}")
-            except Exception as e:
-                print(f"Error al crear asignación: {e}")
+            numero_solicitud = INICIAL_SOLICITUD + str(secuencia.nultimonumero).zfill(5)
+            asignacion = Asignacion.objects.create(
+                cxcliente=cliente,
+                cxtipofactoring=tipo_factoring,
+                cxtipo='F',
+                nvalor=Decimal('0'),
+                ncantidaddocumentos=0,
+                cxusuariocrea=user,
+                empresa=empresa,
+                cxasignacion=numero_solicitud,
+            )
 
-        
-        documento = Documentos(
-            empresa=empresa,
-            cxusuariocrea=user,
-            cxusuariomodifica=user.id,
-            cxasignacion=asignacion,
-            cxcomprador=datos['comprador_identificacion'][:13],
-            ctcomprador=datos['comprador_nombre'][:100],
-            ctserie1=datos['serie1'][:3],
-            ctserie2=datos['serie2'][:3],
-            ctdocumento=datos['documento'][:9],
-            demision=datos['fecha_emision'] or datos['fecha_vencimiento'] or __import__('datetime').datetime.today().date(),
-            dvencimiento=datos['fecha_vencimiento'] or datos['fecha_emision'] or __import__('datetime').datetime.today().date(),
-            nvalorantesiva=datos['valor_antes_iva'],
-            niva=datos['iva'],
-            ntotal=datos['total'],
-            # nvalornonegociado=datos['total'],
-            cxautorizacion_ec=datos['clave_acceso'][:49],
-        )
-        if documento:
-            documento.save()
-            print(f"Documento creado: {documento.id} para asignación {asignacion.cxasignacion} con valor {documento.ntotal}")
-
-        asignacion.nvalor += datos['total']
-        asignacion.ncantidaddocumentos += 1
+        documentos = [
+            _crear_documento_desde_datos(datos, asignacion, empresa, user)
+            for datos in datos_facturas
+        ]
+        asignacion.nvalor = (asignacion.nvalor or Decimal('0')) + total_lote
+        asignacion.ncantidaddocumentos = (asignacion.ncantidaddocumentos or 0) + len(documentos)
         asignacion.save(update_fields=['nvalor', 'ncantidaddocumentos'])
-        print(f"Asignación actualizada: {asignacion.cxasignacion} con valor {asignacion.nvalor} y cantidad de documentos {asignacion.ncantidaddocumentos}")
 
     return {
-        'cliente': cliente.ctnombre,
-        'asignacion': asignacion.cxasignacion,
-        'documentos': [documento],
-        'datos': datos,
+        'cliente': cliente,
+        'asignacion': asignacion,
+        'documentos': documentos,
+        'datos': datos_facturas,
     }
+
+
+def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_factoring=None, asunto=None, xsd_path=None):
+    """Mantiene la API individual y delega en el procesamiento por lote."""
+    return crear_asignacion_desde_xmls(
+        [xml_content], sender_email, empresa, user, tipo_factoring, asunto, xsd_path
+    )
 
 
 def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None, xsd_path=None):
     """Procesa un correo ya leído por un agente IA y sus adjuntos XML."""
     sender_email = correo_data.get('from') or correo_data.get('sender') or correo_data.get('sender_email') or ''
     asunto = correo_data.get('subject') or correo_data.get('asunto') or ''
-    attachment = correo_data.get('attachments') or correo_data.get('adjuntos') or []
-    print(f"Procesando correo de {sender_email} con asunto '{asunto}' y {len(attachment) if isinstance(attachment, list) else 'no lista de'} adjuntos")
-    if not attachment:
+    attachments = correo_data.get('attachments') or correo_data.get('adjuntos') or []
+    if not attachments:
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': [], 'msg': 'No hay adjuntos para procesar'}
-    if not isinstance(attachment, list):
-        attachment = [attachment]
 
-    resultados = []
-    correos_procesados = []
-    # for attachment in attachment:
-    if isinstance(attachment, dict):
-        print(f"es instancia de dict: {attachment.get('filename') or attachment.get('name') or 'sin nombre'}")
-        xml_content = attachment.get('content') or attachment.get('xml') or attachment.get('data') or ''
-        filename = attachment.get('filename') or attachment.get('name') or 'adjunto.xml'
-    else:
-        print(f"no es instancia de dict: {getattr(attachment, 'name', 'sin nombre')}")
-        xml_content = attachment
-        filename = 'adjunto.xml'
-    if not xml_content:
-        return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': [], 'msg': f'No se encontró contenido XML en el adjunto {filename}'}
+    if not isinstance(attachments, list):
+        attachments = [attachments]
 
-    if isinstance(xml_content, bytes):
-        print(f"es instancia de bytes, convirtiendo contenido XML a UTF-8 para el adjunto {filename}")
-        xml_content = xml_content.decode('utf-8', errors='ignore')
-    else:
-        print(f"no es instancia de bytes, convirtiendo contenido XML a str para el adjunto {filename}")
-        xml_content = str(xml_content)
+    xml_contents = []
+    for attachment in attachments:
+        if isinstance(attachment, dict):
+            xml_content = attachment.get('content') or attachment.get('xml') or attachment.get('data') or ''
+        else:
+            xml_content = attachment
+        if isinstance(xml_content, bytes):
+            xml_content = xml_content.decode('utf-8', errors='ignore')
+        xml_content = str(xml_content) if xml_content else ''
+        if '<' not in xml_content or '</' not in xml_content:
+            continue
+        xml_contents.append(xml_content)
 
-    if '<' not in xml_content or '</' not in xml_content:
-        return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': [], 'msg': 'El contenido XML no es válido'}
-    print(xml_content[:200] + '...' if len(xml_content) > 200 else xml_content)
+    if not xml_contents:
+        return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': [], 'msg': 'No se encontraron XML válidos'}
+
     try:
-        resultado = crear_asignacion_desde_xml(
-            xml_content=xml_content,
+        resultado = crear_asignacion_desde_xmls(
+            xml_contents=xml_contents,
             sender_email=sender_email,
             empresa=empresa,
             user=user,
@@ -349,22 +334,18 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
             asunto=asunto,
             xsd_path=xsd_path,
         )
-        resultados.append(resultado)
     except (ValueError, ET.ParseError):
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': [], 'msg': 'Error al procesar el XML'}
 
-    if resultados:
-        correos_procesados.append({
+    return {
+        'procesados': 1,
+        'creadas': len(resultado['documentos']),
+        'resultados': [resultado],
+        'correos': [{
             'from': sender_email,
             'subject': asunto,
-            'creadas': len(resultados),
-            'attachments': len(attachment),
-        })
-
-    return {
-        'procesados': len(correos_procesados),
-        'creadas': len(resultados),
-        'resultados': resultados,
-        'correos': correos_procesados,
+            'creadas': len(resultado['documentos']),
+            'attachments': len(xml_contents),
+        }],
     }
 

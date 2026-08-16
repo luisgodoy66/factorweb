@@ -7,7 +7,7 @@ from django.test import RequestFactory, TestCase
 from bases.models import Empresas
 from empresa.models import Tipos_factoring
 from solicitudes.models import Asignacion, Clientes, Documentos
-from solicitudes.servicios import crear_asignacion_desde_xml, encontrar_cliente_por_remitente
+from solicitudes.servicios import crear_asignacion_desde_xml, crear_asignacion_desde_xmls, encontrar_cliente_por_remitente
 from solicitudes.views import webhook_cargar_solicitudes_factoring
 
 
@@ -239,3 +239,37 @@ class FacturasXmlTests(TestCase):
         self.assertTrue(body['ok'])
         self.assertEqual(body['creadas'], 1)
         self.assertEqual(body['procesados'], 1)
+
+    def test_crear_una_asignacion_con_dos_facturas(self):
+        def factura_xml(secuencial, total):
+            return f'''<?xml version="1.0" encoding="UTF-8"?>
+            <factura>
+              <infoTributaria>
+                <estab>001</estab>
+                <ptoEmi>001</ptoEmi>
+                <secuencial>{secuencial}</secuencial>
+                <claveAcceso>clave-{secuencial}</claveAcceso>
+              </infoTributaria>
+              <infoFactura>
+                <fechaEmision>27/07/2026</fechaEmision>
+                <razonSocialComprador>Cliente Test</razonSocialComprador>
+                <identificacionComprador>0999999999001</identificacionComprador>
+                <totalSinImpuestos>{total}</totalSinImpuestos>
+                <totalDescuento>0.00</totalDescuento>
+                <importeTotal>{total}</importeTotal>
+              </infoFactura>
+            </factura>'''
+
+        resultado = crear_asignacion_desde_xmls(
+            xml_contents=[factura_xml('000000001', '10.00'), factura_xml('000000002', '25.50')],
+            sender_email='facturas@example.com',
+            empresa=self.empresa,
+            user=self.user,
+            tipo_factoring=self.tipo_factoring,
+        )
+
+        asignacion = resultado['documentos'][0].cxasignacion
+        self.assertEqual(Asignacion.objects.count(), 1)
+        self.assertEqual(Documentos.objects.filter(cxasignacion=asignacion).count(), 2)
+        self.assertEqual(asignacion.ncantidaddocumentos, 2)
+        self.assertEqual(asignacion.nvalor, Decimal('35.50'))
