@@ -197,7 +197,10 @@ def encontrar_cliente_por_remitente(sender_email, empresa=None):
 
 
 def _crear_documento_desde_datos(datos, asignacion, empresa, user):
-    fecha = datos['fecha_emision'] or datos['fecha_vencimiento'] or __import__('datetime').datetime.today().date()
+    from datetime import date, timedelta
+
+    fecha = datos['fecha_emision'] or date.today()
+    fecha_vencimiento = date.today() + timedelta(days=30)
     return Documentos.objects.create(
         empresa=empresa,
         cxusuariocrea=user,
@@ -209,7 +212,7 @@ def _crear_documento_desde_datos(datos, asignacion, empresa, user):
         ctserie2=datos['serie2'][:3],
         ctdocumento=datos['documento'][:9],
         demision=fecha,
-        dvencimiento=datos['fecha_vencimiento'] or fecha,
+        dvencimiento=fecha_vencimiento,
         nvalorantesiva=datos['valor_antes_iva'],
         niva=datos['iva'],
         ntotal=datos['total'],
