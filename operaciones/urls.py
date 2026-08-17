@@ -37,7 +37,8 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     AntigüedadCarteraDeudorJSON, GeneraListaFacturasPendientesDeudorJSON, \
     GeneraListaChequesADepositarDeudorJSON, \
     GeneraListaProtestosPendientesDeudorJSON, GeneraListaCanjesDeudorJSON,\
-    GeneraListaChequesQuitadosDeudorJSON
+    GeneraListaChequesQuitadosDeudorJSON, GeneraListaProtestosClienteJSON, \
+    GeneraListaProtestosDeudorJSON
 # EstadoOperativoCliente, \
     
 from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
@@ -104,6 +105,12 @@ urlpatterns = [
     path('chequesquitadosdeudorjson/<deudor_id>'
          ,GeneraListaChequesQuitadosDeudorJSON, 
         name="listachequesquitadosdeudor_json"),
+    path('protestosclientejson/<cliente_id>'
+         ,GeneraListaProtestosClienteJSON
+         , name="protestoscliente_json"),
+    path('protestosdeudorjson/<deudor_id>'
+         ,GeneraListaProtestosDeudorJSON
+         , name="protestosdeudor_json"),
 # movimientos
     path('listamaestromovimientos/',MaestroMovimientosView.as_view(), \
         name='listamaestromovimientos'),

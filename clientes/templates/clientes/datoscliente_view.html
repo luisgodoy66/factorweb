@@ -49,6 +49,10 @@
                 <a class="nav-link {% if active_tab == 'movimientos' %}active{% endif %}" id="movimientos-tab" data-toggle="tab" href="#movimientos" 
                 role="tab" aria-controls="movimientos" aria-selected="{% if active_tab == 'movimientos' %}true{% else %}false{% endif %}">Movimientos</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_tab == 'accesorios' %}active{% endif %}" id="accesorios-tab" data-toggle="tab" href="#accesorios" 
+                role="tab" aria-controls="accesorios" aria-selected="{% if active_tab == 'accesorios' %}true{% else %}false{% endif %}">Historial de cheques</a>
+            </li>
         </ul>
         <div class="tab-content pl-3 p-1" id="myTabContent">
             <div class="tab-pane fade {% if active_tab == 'home' %}show active{% endif %}" id="home" role="tabpanel" aria-labelledby="home-tab">
@@ -889,66 +893,6 @@
                         <div class="col-xl-6">
                             <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                                 <div class="card-header" style="background-color: white;">
-                                    <h6>Canjes</h6>
-                                </div>
-                                <!-- <small> -->
-                                    <div>
-                                        <table id="tbcanjes"  class="table table-hover table-bordered"
-                                        data-url="{% url 'operaciones:listacanjescliente_json' cliente_id %}"
-                                            data-id-field="id"
-                                            >
-                                            <thead>
-                                                <tr>
-                                                <th data-field="Fecha" data-filter-control="input"
-                                                data-sortable="true" >Fecha</th>
-                                                <th data-field="Asignacion" data-filter-control="input"
-                                                data-sortable="true" >Asignación</th>
-                                                <th data-field="Original" data-filter-control="input"
-                                                data-sortable="true" >Original</th>
-                                                <th data-field="Nuevo" data-filter-control="input"
-                                                data-sortable="true" >Nuevo</th>
-                                                <th data-field="Motivo" 
-                                                data-sortable="true" >Motivo</th>
-                                                </tr>
-                                            </thead>
-                                        </table>             
-                                    </div>
-                                <!-- </small> -->
-                            </div>
-                        </div>
-                        <div class="col-xl-6">
-                            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <div class="card-header" style="background-color: white;">
-                                    <h6>Accesorios quitados</h6>
-                                </div>
-                                <!-- <small> -->
-                                    <div>
-                                        <table id="tbquitados"  class="table table-hover table-bordered"
-                                        data-url="{% url 'operaciones:listachequesquitadoscliente_json' cliente_id %}"
-                                            data-id-field="id"
-                                            >
-                                            <thead>
-                                                <tr>
-                                                <th data-field="Registro" data-filter-control="input"
-                                                data-sortable="true" >Registro</th>
-                                                <th data-field="Documento" data-filter-control="input"
-                                                data-sortable="true" >Documento</th>
-                                                <th data-field="Cheque" data-filter-control="input"
-                                                data-sortable="true" >Cheque</th>
-                                                <th data-field="Saldo" data-filter-control="input"
-                                                data-sortable="true" >Saldo</th>
-                                                <th data-field="Motivo" 
-                                                data-sortable="true" >Motivo</th>
-                                                </tr>
-                                            </thead>
-                                        </table>             
-                                    </div>
-                                <!-- </small> -->
-                            </div>
-                        </div>
-                        <div class="col-xl-6">
-                            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <div class="card-header" style="background-color: white;">
                                     <h6>Cargos pendientes</h6>
                                 </div>
                                 <!-- <small> -->
@@ -1048,6 +992,94 @@
                     </div>
                 </div>
             </div>
+            <div class="tab-pane fade {% if active_tab == 'accesorios' %}show active{% endif %}" id="accesorios" role="tabpanel" aria-labelledby="accesorios-tab">
+                        <div class="col-md-12 mt-3">
+                            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <div class="card-header" style="background-color: white;">
+                                    <h6>Canjes</h6>
+                                </div>
+                                <!-- <small> -->
+                                    <div>
+                                        <table id="tbcanjes"  class="table table-hover table-bordered"
+                                        data-url="{% url 'operaciones:listacanjescliente_json' cliente_id %}"
+                                            data-id-field="id"
+                                            >
+                                            <thead>
+                                                <tr>
+                                                <th data-field="Fecha" data-filter-control="input"
+                                                data-sortable="true" >Fecha</th>
+                                                <th data-field="Asignacion" data-filter-control="input"
+                                                data-sortable="true" >Asignación</th>
+                                                <th data-field="Original" data-filter-control="input"
+                                                data-sortable="true" >Original</th>
+                                                <th data-field="Nuevo" data-filter-control="input"
+                                                data-sortable="true" >Nuevo</th>
+                                                <th data-field="Motivo" 
+                                                data-sortable="true" >Motivo</th>
+                                                </tr>
+                                            </thead>
+                                        </table>             
+                                    </div>
+                                <!-- </small> -->
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <div class="card-header" style="background-color: white;">
+                                    <h6>Accesorios quitados</h6>
+                                </div>
+                                <!-- <small> -->
+                                    <div>
+                                        <table id="tbquitados"  class="table table-hover table-bordered"
+                                        data-url="{% url 'operaciones:listachequesquitadoscliente_json' cliente_id %}"
+                                            data-id-field="id"
+                                            >
+                                            <thead>
+                                                <tr>
+                                                <th data-field="Registro" data-filter-control="input"
+                                                data-sortable="true" >Registro</th>
+                                                <th data-field="Documento" data-filter-control="input"
+                                                data-sortable="true" >Documento</th>
+                                                <th data-field="Cheque" data-filter-control="input"
+                                                data-sortable="true" >Cheque</th>
+                                                <th data-field="Saldo" data-filter-control="input"
+                                                data-sortable="true" >Saldo</th>
+                                                <th data-field="Motivo" 
+                                                data-sortable="true" >Motivo</th>
+                                                </tr>
+                                            </thead>
+                                        </table>             
+                                    </div>
+                                <!-- </small> -->
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <div class="card-header" style="background-color: white;">
+                                    <h6>Protestos</h6>
+                                </div>
+                                    <div>
+                                        <table id="tbhistorialprotestos"  class="table table-hover table-bordered"
+                                        data-url="{% url 'operaciones:protestoscliente_json' cliente_id %}"
+                                            data-id-field="id"
+                                            >
+                                            <thead>
+                                                <tr>
+                                                <th data-field="Girador" data-filter-control="input"
+                                                data-sortable="true" >Girador</th>
+                                                <th data-field="Cheque" data-filter-control="input"
+                                                data-sortable="true" >Cheque</th>
+                                                <th data-field="Protesto" data-filter-control="input"
+                                                data-sortable="true" >Fecha</th>
+                                                <th data-field="Motivo" data-sortable="true" >Motivo</th>
+                                                <th data-field="Saldo" data-sortable="true" >Saldo</th>
+                                                </tr>
+                                            </thead>
+                                        </table>             
+                                    </div>
+                            </div>
+                        </div>    
+            </div>
         </div>
 
     </div>    
@@ -1068,6 +1100,7 @@
     var $tbquitados = jQuery('#tbquitados')
     var $tboperaciones = jQuery('#tboperaciones')
     var $tbmovimientos_todos = jQuery('#tbmovimientos_todos')
+    var $tbhistorialprotestos = jQuery('#tbhistorialprotestos')
     const cliente_id = "{{ cliente_id }}"
 
     window.onload=function(){
@@ -1080,6 +1113,7 @@
     $tbquitados.bootstrapTable({locale:"es-EC"});
     $tboperaciones.bootstrapTable({locale:"es-EC"});
     $tbmovimientos_todos.bootstrapTable({locale:"es-EC"});
+    $tbhistorialprotestos.bootstrapTable({locale:"es-EC"});
 
     antigüedadcartera("/operaciones/antigüedadcarteracliente/"+cliente_id);
     carteranegociada("/operaciones/carteranegociadacliente/"+cliente_id+"/{{año}}", "{{año}}");

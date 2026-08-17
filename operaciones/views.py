@@ -3517,3 +3517,71 @@ def GeneraListaChequesQuitadosDeudorJSON(request, deudor_id):
         }
     return JsonResponse( data)
 
+def GeneraListaProtestosClienteJSON(request, cliente_id):
+    # Es invocado desde la url de una tabla bt
+    cliente = ModeloCliente.Datos_generales.objects\
+        .filter(pk=cliente_id).first()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
+    if cliente.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+
+    documentos = Cheques_protestados.objects\
+        .filter(leliminado=False
+                , cxtipooperacion = 'C'
+                , cheque__cheque_cobranza__cxcliente = cliente_id).all()
+
+    recuperciones = Cheques_protestados.objects\
+        .filter(leliminado=False
+                , cxtipooperacion = 'R'
+                , cheque__cheque_recuperacion__cxcliente = cliente_id).all()
+
+    documentos = documentos.union(recuperciones)
+
+    tempBlogs = []
+    for i in range(len(documentos)):
+        tempBlogs.append(GeneraListaProtestosPendientesClienteJSONSalida(documentos[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
+def GeneraListaProtestosDeudorJSON(request, deudor_id):
+    # Es invocado desde la url de una tabla bt
+    deudor = ModeloCliente.Datos_compradores.objects\
+        .filter(pk=deudor_id).first()
+    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    
+    if deudor.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+
+    documentos = Cheques_protestados.objects\
+        .filter(leliminado=False
+                , cheque__cxparticipante = deudor.cxcomprador
+                , cheque__cxtipoparticipante = 'D').all()
+
+    # recuperciones = Cheques_protestados.objects\
+    #     .filter(leliminado=False, nsaldocartera__gt = 0
+    #             , cxtipooperacion = 'R'
+    #             , cheque__cheque_recuperacion__cxcliente = deudor_id).all()
+
+    # documentos = documentos.union(recuperciones)
+
+    tempBlogs = []
+    for i in range(len(documentos)):
+        tempBlogs.append(GeneraListaProtestosPendientesClienteJSONSalida(documentos[i])) 
+
+    docjson = tempBlogs
+
+    # crear el contexto
+    data = {"total": documentos.count(),
+        "totalNotFiltered": documentos.count(),
+        "rows": docjson 
+        }
+    return JsonResponse( data)
+
