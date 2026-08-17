@@ -1,4 +1,5 @@
 from django.urls import URLPattern, path
+
 from solicitudes.views import SolicitudesView, DetalleSolicitudFacturasPuras , \
     DetalleSolicitudConAccesorios, EliminarDocumento, EliminarAsignacion, \
     DatosAsignacionConAccesorios,  DatosFacturasPuras, RecuperarDocumento,\
@@ -8,8 +9,9 @@ from solicitudes.views import SolicitudesView, DetalleSolicitudFacturasPuras , \
     GeneraListaSolicitudesRegistradasJSON, NivelesAprobacionView, \
     NivelAprobacionCrearView, NivelAprobacionEditarView, \
     ExcesosTemporalesView, AceptarExcesoTemporal, RechazarExcesoTemporal, \
-    InstruccionDePagoView, ImpresionSolicitud, \
-    webhook_cargar_solicitudes_factoring
+    InstruccionDePagoView, ImpresionSolicitud
+
+from solicitudes.webhooks import webhook_cargar_solicitudes_factoring
 
 urlpatterns=[
     path('listasolicitudes/',SolicitudesView.as_view(), \
