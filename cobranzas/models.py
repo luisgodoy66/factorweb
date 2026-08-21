@@ -20,6 +20,7 @@ from operaciones.models import Documentos, ChequesAccesorios\
     , Revision_cartera_detalle, Asignacion
 from cuentasconjuntas import models as CuentasConjuntasModels
 from api.models import Configuracion_twilio_whatsapp
+from contabilidad.models import Diario_cabecera
 
 import decimal
 class Cheques(ClaseModelo):
@@ -43,8 +44,6 @@ class Cheques(ClaseModelo):
 
     def __str__(self):
         return '{} CH/{}'.format(self.cxcuentabancaria, self.ctcheque)
-
-from contabilidad.models import Diario_cabecera
 
 class Documentos_cabecera_Manager(models.Manager):
     def valores_cobrados_por_dia(self, id_empresa, año, mes):

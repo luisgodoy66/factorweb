@@ -27,13 +27,14 @@ from .views import CobranzasDocumentosView, DetalleDocumentosFacturasPuras\
     , DetalleDocumentosFacturasPurasLiquidacionEnCero, get_motivo_responsabilidad\
     , DetalleDocumentosProtestosLiquidacionEnCero
 
-
 from .reportes import ImpresionCobranzaCartera, ImpresionLiquidacion\
     , ImpresionRecuperacionProtesto, ImpresionCobranzaCargos\
     , ImpresionProtestosPendientes, ImpresionAmpliacionDePlazo\
     , ImpresionDetalleCobranzas, ImpresionDetalleRecuperaciones\
     , ImpresionCobranzaCuota, ImpresionProtestosPendientesCorte\
     , ImpresionProtestosPendientesDeudor
+
+from cobranzas.webhooks import facturas_por_vencer
 
 urlpatterns = [
     # cobranzas
@@ -237,4 +238,6 @@ urlpatterns = [
     path('gestioncobro/<int:pk>', GestionDeCobro.as_view()
          , name='gestion_cobro'),
 
+    # webhooks
+    path('webhooks/facturas_por_vencer/', facturas_por_vencer, name='facturas_por_vencer'),
 ]

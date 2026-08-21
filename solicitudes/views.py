@@ -673,6 +673,15 @@ def EliminarAsignacion(request, asignacion_id):
         # asgn.cxestado = "R"
         asgn.save()
 
+        # marcar como eliminado los documentos asociados
+        documentos = Documentos.objects\
+            .filter(cxasignacion=asignacion_id
+                    , empresa = id_empresa.empresa).all()
+        for doc in documentos:
+            doc.leliminado = True
+            doc.cxusuarioelimina = request.user.id
+            doc.save()
+
     return HttpResponse("OK")
 
 def DetalleSolicitudFacturasPuras(request, asignacion_id):
