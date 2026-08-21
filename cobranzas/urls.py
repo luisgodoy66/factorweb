@@ -239,5 +239,5 @@ urlpatterns = [
          , name='gestion_cobro'),
 
     # webhooks
-    path('webhooks/facturas_por_vencer/', facturas_por_vencer, name='facturas_por_vencer'),
+    path('webhook/facturas_por_vencer/', facturas_por_vencer, name='facturas_por_vencer'),
 ]
