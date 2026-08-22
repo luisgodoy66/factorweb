@@ -347,7 +347,8 @@ def DatosFacturasPuras(request, cliente_id, tipo_factoring_id
     template_name="solicitudes/datosasignacionfacturaspuras_modal.html"
     acepta_vencimiento_en_feriado = False
 
-    tipoFactoring = Tipos_factoring.objects.filter(pk=tipo_factoring_id).first()        
+    tipoFactoring = Tipos_factoring.objects\
+        .filter(pk=tipo_factoring_id).first()        
     acepta_vencimiento_en_feriado = tipoFactoring.lpermitediasferiados
 
     if doc_id:
@@ -380,8 +381,9 @@ def DatosFacturasPuras(request, cliente_id, tipo_factoring_id
                 # crear la asignacion
                 if not asignacion_id:
                     # 11-feb-25: se incorporar el contador de solicitudes SOL0001
-                    secuencia = Contador.objects.filter(empresa = id_empresa.empresa,
-                                                    cxtransaccion = INICIAL_SOLICITUD+ruc).first()
+                    secuencia = Contador.objects\
+                        .filter(empresa = id_empresa.empresa,
+                                cxtransaccion = INICIAL_SOLICITUD+ruc).first()
                     if not secuencia:
                         secuencia = Contador(
                             empresa = id_empresa.empresa,
@@ -410,7 +412,9 @@ def DatosFacturasPuras(request, cliente_id, tipo_factoring_id
                         asignacion.save()
                         asignacion_id = asignacion.id
                 else:
-                    asignacion = Asignacion.objects.filter(pk= asignacion_id).first()
+                    asignacion = Asignacion.objects\
+                        .filter(pk= asignacion_id).first()
+                    
                     if asignacion:
 
                         asignacion.cxcliente = cliente
@@ -427,6 +431,7 @@ def DatosFacturasPuras(request, cliente_id, tipo_factoring_id
 
                 detalle.cxasignacion = asignacion
                 detalle.empresa = id_empresa.empresa
+                
                 if not doc_id:
                     detalle.cxusuariocrea = request.user
                 else:

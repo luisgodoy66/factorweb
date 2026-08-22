@@ -7,8 +7,9 @@ import xml.etree.ElementTree as ET
 
 from django.db import transaction
 
-from empresa.models import Tipos_factoring, Contador
+from empresa.models import Tipos_factoring, Contador, Datos_participantes
 from solicitudes.models import Asignacion, Clientes, Documentos
+from clientes.models import Datos_compradores
 
 
 try:
@@ -193,7 +194,8 @@ def encontrar_cliente_por_remitente(sender_email, empresa=None):
     if empresa is not None:
         qs = qs.filter(empresa=empresa)
 
-    return qs.filter(ctemail2__iexact=email).order_by('-dregistro').first() or qs.filter(ctemail__iexact=email).order_by('-dregistro').first()
+    return qs.filter(ctemail2__iexact=email)\
+        .order_by('-dregistro').first() or qs.filter(ctemail__iexact=email).order_by('-dregistro').first()
 
 
 def _crear_documento_desde_datos(datos, asignacion, empresa, user):
@@ -201,6 +203,7 @@ def _crear_documento_desde_datos(datos, asignacion, empresa, user):
 
     fecha = datos['fecha_emision'] or date.today()
     fecha_vencimiento = date.today() + timedelta(days=30)
+
     return Documentos.objects.create(
         empresa=empresa,
         cxusuariocrea=user,
@@ -241,6 +244,8 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
     ruc = cliente.cxcliente
 
     with transaction.atomic():
+        # Buscar una asignación existente para el cliente y tipo de 
+        # factoring, si no existe, crear una nueva
         asignacion = Asignacion.objects.filter(
             empresa=empresa,
             cxcliente=cliente,
@@ -250,9 +255,10 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
         ).first()
 
         if asignacion is None:
-            secuencia = Contador.objects.filter(
-                empresa=empresa,
-                cxtransaccion=INICIAL_SOLICITUD + ruc,
+            secuencia = Contador.objects\
+                .filter(
+                    empresa=empresa,
+                    cxtransaccion=INICIAL_SOLICITUD + ruc,
             ).first()
             if secuencia is None:
                 secuencia = Contador.objects.create(
@@ -266,6 +272,7 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
                 secuencia.save(update_fields=['nultimonumero'])
 
             numero_solicitud = INICIAL_SOLICITUD + str(secuencia.nultimonumero).zfill(5)
+            
             asignacion = Asignacion.objects.create(
                 cxcliente=cliente,
                 cxtipofactoring=tipo_factoring,
@@ -277,18 +284,54 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
                 cxasignacion=numero_solicitud,
             )
 
-        documentos = [
+        documento = [
             _crear_documento_desde_datos(datos, asignacion, empresa, user)
             for datos in datos_facturas
         ]
         asignacion.nvalor = (asignacion.nvalor or Decimal('0')) + total_lote
-        asignacion.ncantidaddocumentos = (asignacion.ncantidaddocumentos or 0) + len(documentos)
+        asignacion.ncantidaddocumentos = (asignacion.ncantidaddocumentos or 0) + len(documento)
         asignacion.save(update_fields=['nvalor', 'ncantidaddocumentos'])
+
+        # grabar comprador , si es nuevo
+        datosparticipante = Datos_participantes.objects\
+            .filter(cxparticipante = documento[0].cxcomprador if documento else None,
+                    empresa = empresa).first()
+        
+        if not datosparticipante:
+
+            cxtipoid = documento[0].cxtipoid if documento else None
+
+            datosparticipante=Datos_participantes(
+                cxtipoid = cxtipoid,
+                cxparticipante = documento[0].cxcomprador if documento else None,
+                ctnombre = documento[0].ctcomprador if documento else None,
+                cxusuariocrea = user,
+                empresa = empresa,
+            )
+            if datosparticipante:
+                datosparticipante.save()
+
+        comprador = Datos_compradores.objects\
+            .filter(cxcomprador = datosparticipante.id)\
+                .first()
+
+        if not comprador:
+            comprador=Datos_compradores(
+                cxcomprador = datosparticipante,
+                cxusuariocrea = user,
+                empresa = empresa
+            )
+            if comprador:
+                comprador.save()
+
+        # grabar eºl código del comprador en la factura
+        documento[0].comprador = comprador
+        documento[0].save()
 
     return {
         'cliente': cliente,
         'asignacion': asignacion,
-        'documentos': documentos,
+        'documentos': documento,
         'datos': datos_facturas,
     }
 
