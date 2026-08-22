@@ -284,54 +284,55 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
                 cxasignacion=numero_solicitud,
             )
 
-        documento = [
+        documentos = [
             _crear_documento_desde_datos(datos, asignacion, empresa, user)
             for datos in datos_facturas
         ]
         asignacion.nvalor = (asignacion.nvalor or Decimal('0')) + total_lote
-        asignacion.ncantidaddocumentos = (asignacion.ncantidaddocumentos or 0) + len(documento)
+        asignacion.ncantidaddocumentos = (asignacion.ncantidaddocumentos or 0) + len(documentos)
         asignacion.save(update_fields=['nvalor', 'ncantidaddocumentos'])
 
-        # grabar comprador , si es nuevo
-        datosparticipante = Datos_participantes.objects\
-            .filter(cxparticipante = documento[0].cxcomprador if documento else None,
-                    empresa = empresa).first()
-        
-        if not datosparticipante:
+        for documento in documentos:
+            # grabar comprador , si es nuevo
+            datosparticipante = Datos_participantes.objects\
+                .filter(cxparticipante = documento.cxcomprador if documento else None,
+                        empresa = empresa).first()
+            
+            if not datosparticipante:
 
-            cxtipoid = documento[0].cxtipoid if documento else None
+                cxtipoid = documento.cxtipoid if documento else None
 
-            datosparticipante=Datos_participantes(
-                cxtipoid = cxtipoid,
-                cxparticipante = documento[0].cxcomprador if documento else None,
-                ctnombre = documento[0].ctcomprador if documento else None,
-                cxusuariocrea = user,
-                empresa = empresa,
-            )
-            if datosparticipante:
-                datosparticipante.save()
+                datosparticipante=Datos_participantes(
+                    cxtipoid = cxtipoid,
+                    cxparticipante = documento.cxcomprador if documento else None,
+                    ctnombre = documento.ctcomprador if documento else None,
+                    cxusuariocrea = user,
+                    empresa = empresa,
+                )
+                if datosparticipante:
+                    datosparticipante.save()
 
-        comprador = Datos_compradores.objects\
-            .filter(cxcomprador = datosparticipante.id)\
-                .first()
+            comprador = Datos_compradores.objects\
+                .filter(cxcomprador = datosparticipante.id)\
+                    .first()
 
-        if not comprador:
-            comprador=Datos_compradores(
-                cxcomprador = datosparticipante,
-                cxusuariocrea = user,
-                empresa = empresa
-            )
-            if comprador:
-                comprador.save()
+            if not comprador:
+                comprador=Datos_compradores(
+                    cxcomprador = datosparticipante,
+                    cxusuariocrea = user,
+                    empresa = empresa
+                )
+                if comprador:
+                    comprador.save()
 
-        # grabar eºl código del comprador en la factura
-        documento[0].comprador = comprador
-        documento[0].save()
+            # grabar eºl código del comprador en la factura
+            documento.comprador = comprador
+            documento.save()
 
     return {
         'cliente': cliente,
         'asignacion': asignacion,
-        'documentos': documento,
+        'documentos': documentos,
         'datos': datos_facturas,
     }
 
