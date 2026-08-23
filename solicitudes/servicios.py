@@ -246,6 +246,7 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
     with transaction.atomic():
         # Buscar una asignación existente para el cliente y tipo de 
         # factoring, si no existe, crear una nueva
+        print(f"Buscando asignación existente para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.id}")
         asignacion = Asignacion.objects.filter(
             empresa=empresa,
             cxcliente=cliente,
@@ -255,6 +256,7 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
         ).first()
 
         if asignacion is None:
+            print(f"No se encontró asignación existente, creando una nueva para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.id}")
             secuencia = Contador.objects\
                 .filter(
                     empresa=empresa,
@@ -283,6 +285,7 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
                 empresa=empresa,
                 cxasignacion=numero_solicitud,
             )
+            print(f"Asignación creada con número {numero_solicitud} para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.id}")
 
         documentos = [
             _crear_documento_desde_datos(datos, asignacion, empresa, user)
@@ -293,13 +296,14 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
         asignacion.save(update_fields=['nvalor', 'ncantidaddocumentos'])
 
         for documento in documentos:
+            print(f"Procesando documento {documento.ctserie1}-{documento.ctserie2}-{documento.ctdocumento} para asignación {asignacion.cxasignacion}")
             # grabar comprador , si es nuevo
             datosparticipante = Datos_participantes.objects\
                 .filter(cxparticipante = documento.cxcomprador if documento else None,
                         empresa = empresa).first()
             
             if not datosparticipante:
-
+                print(f"No se encontró participante para {documento.cxcomprador}, creando uno nuevo")
                 cxtipoid = documento.cxtipoid if documento else None
 
                 datosparticipante=Datos_participantes(
@@ -317,6 +321,7 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
                     .first()
 
             if not comprador:
+                print(f"No se encontró comprador para participante {datosparticipante.id}, creando uno nuevo")
                 comprador=Datos_compradores(
                     cxcomprador = datosparticipante,
                     cxusuariocrea = user,
@@ -328,6 +333,7 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
             # grabar eºl código del comprador en la factura
             documento.comprador = comprador
             documento.save()
+            print(f"Documento {documento.ctserie1}-{documento.ctserie2}-{documento.ctdocumento} procesado y asociado al comprador {comprador.id}")
 
     return {
         'cliente': cliente,
