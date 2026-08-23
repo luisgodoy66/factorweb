@@ -307,7 +307,7 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
                 cxtipoid = documento.cxtipoid if documento else None
 
                 try:
-
+                    print("antes de crear participante")
                     datosparticipante=Datos_participantes(
                         cxtipoid = cxtipoid,
                         cxparticipante = documento.cxcomprador if documento else None,
@@ -315,6 +315,7 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
                         cxusuariocrea = user,
                         empresa = empresa,
                     )
+                    print("despues de crear participante")
                     if datosparticipante:
                         datosparticipante.save()
                 except Exception as e:
