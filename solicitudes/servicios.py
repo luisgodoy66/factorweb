@@ -306,15 +306,19 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
                 print(f"No se encontró participante para {documento.cxcomprador}, creando uno nuevo")
                 cxtipoid = documento.cxtipoid if documento else None
 
-                datosparticipante=Datos_participantes(
-                    cxtipoid = cxtipoid,
-                    cxparticipante = documento.cxcomprador if documento else None,
-                    ctnombre = documento.ctcomprador if documento else None,
-                    cxusuariocrea = user,
-                    empresa = empresa,
-                )
-                if datosparticipante:
-                    datosparticipante.save()
+                try:
+
+                    datosparticipante=Datos_participantes(
+                        cxtipoid = cxtipoid,
+                        cxparticipante = documento.cxcomprador if documento else None,
+                        ctnombre = documento.ctcomprador if documento else None,
+                        cxusuariocrea = user,
+                        empresa = empresa,
+                    )
+                    if datosparticipante:
+                        datosparticipante.save()
+                except Exception as e:
+                    print(f"Error al crear participante {documento.cxcomprador}: {e}")
 
             comprador = Datos_compradores.objects\
                 .filter(cxcomprador = datosparticipante.id)\
