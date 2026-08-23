@@ -334,6 +334,7 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
                     print(f"Error al crear comprador para participante {datosparticipante.id}: {e}")
 
             # grabar eºl código del comprador en la factura
+            print(f"Asociando documento {documento.ctserie1}-{documento.ctserie2}-{documento.ctdocumento} al comprador {comprador.id}")
             documento.comprador = comprador
             documento.save()
             print(f"Documento {documento.ctserie1}-{documento.ctserie2}-{documento.ctdocumento} procesado y asociado al comprador {comprador.id}")
