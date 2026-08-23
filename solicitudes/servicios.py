@@ -155,6 +155,7 @@ def parsear_factura_xml(xml_content, xsd_path=None):
 
     razon_comprador = _texto(info_factura, 'razonSocialComprador')
     identificacion_comprador = _texto(info_factura, 'identificacionComprador')
+    tipo_identificacion_comprador = _texto(info_factura, 'tipoIdentificacionComprador')
 
     descripcion = ''
     cantidad = Decimal('0')
@@ -181,6 +182,7 @@ def parsear_factura_xml(xml_content, xsd_path=None):
         'descripcion': descripcion,
         'cantidad': cantidad,
         'precio_unitario': precio_unitario,
+        'tipo_identificacion_comprador': tipo_identificacion_comprador,
     }
 
 
@@ -220,6 +222,7 @@ def _crear_documento_desde_datos(datos, asignacion, empresa, user):
         niva=datos['iva'],
         ntotal=datos['total'],
         cxautorizacion_ec=datos['clave_acceso'][:49],
+        cxtipoidentificacionsri=datos['tipo_identificacion_comprador'][:2]
     )
 
 
@@ -304,12 +307,12 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
             
             if not datosparticipante:
                 print(f"No se encontró participante para {documento.cxcomprador}, creando uno nuevo")
-                cxtipoid = documento.cxtipoid if documento else None
+                # cxtipoid = documento.cxtipoid if documento else None
 
                 try:
                     print("antes de crear participante")
                     datosparticipante=Datos_participantes(
-                        cxtipoid = cxtipoid,
+                        cxtipoid = documento.tipo_identificacion() if documento else None,
                         cxparticipante = documento.cxcomprador if documento else None,
                         ctnombre = documento.ctcomprador if documento else None,
                         cxusuariocrea = user,

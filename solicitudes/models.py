@@ -165,6 +165,12 @@ class Asignacion(ClaseModelo):
         return self.exceso_asignacion.filter(cxrespuesta='P', leliminado=False).exists()
 
 class Documentos(ClaseModelo):
+    TIPO_DE_IDENTIFICACION = (
+        ('04', 'R'),
+        ('05', 'C'),
+        ('06', 'P'),
+        ('08', 'O'),
+    )
     cxasignacion=models.ForeignKey(Asignacion
         , on_delete=models.CASCADE, related_name="documentos_asignacion"
     )
@@ -195,6 +201,8 @@ class Documentos(ClaseModelo):
     )
     lnotificaciongenerada = models.BooleanField(default=False
         , help_text='Indica si se ha generado la notificación de este documento')
+    cxtipoidentificacionsri = models.CharField(max_length=2, choices=TIPO_DE_IDENTIFICACION
+                                               , default='05', null=True, help_text='Tipo de identificación del comprador según SRI')
 
     def total_factura(self):
         return self.nvalorantesiva + self.niva
@@ -210,6 +218,9 @@ class Documentos(ClaseModelo):
     
     def retenciones(self):
         return self.nretencioniva + self.nretencionrenta
+
+    def tipo_identificacion(self):
+        return dict(self.TIPO_DE_IDENTIFICACION).get(self.cxtipoidentificacionsri, 'Desconocido')
         
 class ChequesAccesorios(ClaseModelo):
     PROPIETARIO = (
