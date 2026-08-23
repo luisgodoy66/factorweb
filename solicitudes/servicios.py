@@ -322,13 +322,16 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
 
             if not comprador:
                 print(f"No se encontró comprador para participante {datosparticipante.id}, creando uno nuevo")
-                comprador=Datos_compradores(
-                    cxcomprador = datosparticipante,
-                    cxusuariocrea = user,
-                    empresa = empresa
-                )
-                if comprador:
-                    comprador.save()
+                try:
+                    comprador=Datos_compradores(
+                        cxcomprador = datosparticipante,
+                        cxusuariocrea = user,
+                        empresa = empresa
+                    )
+                    if comprador:
+                        comprador.save()
+                except Exception as e:
+                    print(f"Error al crear comprador para participante {datosparticipante.id}: {e}")
 
             # grabar eºl código del comprador en la factura
             documento.comprador = comprador
