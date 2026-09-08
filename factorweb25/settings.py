@@ -252,7 +252,7 @@ SRI_PROXY = (
 )
 
 # Timeout en segundos para la conexión
-SRI_TIMEOUT = int(os.getenv("SRI_TIMEOUT", "20"))
+SRI_TIMEOUT = int(os.getenv("SRI_TIMEOUT", "30"))
 
 # Cache de respuestas de RUC en segundos (default 12h)
 SRI_RUC_CACHE_SECONDS = int(os.getenv("SRI_RUC_CACHE_SECONDS", "43200"))
