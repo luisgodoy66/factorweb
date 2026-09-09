@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.utils import timezone
+from django.db.models import F
 from datetime import timedelta
 
 from operaciones.models import Documentos
@@ -49,7 +50,7 @@ def facturas_por_vencer(request):
             cxasignacion__cxtipo="F",
             cxasignacion__cxestado="P",
             cxasignacion__leliminado=False,
-            dvencimiento__lte=fecha_limite,
+            dvencimiento__lte=fecha_limite - F("nprorroga"),
         )
         .select_related("cxcliente__cxcliente", "cxasignacion")
         .order_by("cxcliente__cxcliente__ctnombre", "dvencimiento")
