@@ -50,7 +50,7 @@ def facturas_por_vencer(request):
             cxasignacion__cxtipo="F",
             cxasignacion__cxestado="P",
             cxasignacion__leliminado=False,
-            dvencimiento__lte=fecha_limite - F("nprorroga"),
+            dvencimiento__lte=fecha_limite - F("ndiasprorroga"),
         )
         .select_related("cxcliente__cxcliente", "cxasignacion")
         .order_by("cxcliente__cxcliente__ctnombre", "dvencimiento")
