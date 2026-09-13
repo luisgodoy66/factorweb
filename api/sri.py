@@ -12,7 +12,7 @@ from zeep import Client
 from zeep.transports import Transport
 
 WSDL_URL = getattr(
-    settings,
+    settings.configure(),
     "SRI_WSDL_URL",
     "https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl",
 )
@@ -57,7 +57,7 @@ class SRIConsultationService:
 
 # Ejemplo de uso
 if __name__ == "__main__":
-    access_key = "2508202501171423032100120010020000035750000007211"  # Reemplazar con clave de acceso real
+    access_key = "2708202606176815353000121540410002877688562751713"  # Reemplazar con clave de acceso real
 
     service = SRIConsultationService(WSDL_URL)
     result = service.consult_document_status(access_key)

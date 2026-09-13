@@ -172,7 +172,7 @@ wsdl_url = 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComp
 client = Client(wsdl=wsdl_url)
 
 # Clave de acceso del comprobante (49 dígitos)
-clave_acceso = '2708202606176815353000121540410002877688562751713'
+clave_acceso = '2208202601099276597600120030010003729970044499510'
 
 # Invocar el método de autorización
 response = client.service.autorizacionComprobante(claveAccesoComprobante=clave_acceso)
