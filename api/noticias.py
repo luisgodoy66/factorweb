@@ -67,39 +67,39 @@ def generar_prompt_riesgo(empresa, lista_noticias):
     """
     return prompt
 
-# --- EJEMPLO DE USO ---
+# # --- EJEMPLO DE USO ---
 
-API_KEY_NOTICIAS = os.getenv("API_KEY_NOTICIAS")
-monitor = NoticieroFactoring(API_KEY_NOTICIAS)
+# API_KEY_NOTICIAS = os.getenv("API_KEY_NOTICIAS")
+# monitor = NoticieroFactoring(API_KEY_NOTICIAS)
 
-# Supongamos que un cliente quiere negociar una factura de "Corporación Favorita"
-# (Usa nombres específicos para evitar falsos positivos)
-deudor = "Corporación Favorita"
-ruc_deudor = "0993379806001"
-noticias_encontradas = monitor.buscar_noticias_ecuador(deudor, ruc_deudor)
+# # Supongamos que un cliente quiere negociar una factura de "Corporación Favorita"
+# # (Usa nombres específicos para evitar falsos positivos)
+# deudor = "Corporación Favorita"
+# ruc_deudor = "0993379806001"
+# noticias_encontradas = monitor.buscar_noticias_ecuador(deudor, ruc_deudor)
 
-if noticias_encontradas:
-    print(f"--- Alertas encontradas para {deudor} ---")
-    for idx, noticia in enumerate(noticias_encontradas, 1):
-        print(f"{idx}. {noticia['titular']} (Fuente: {noticia['fuente']}) Link: {noticia['link']}")
-else:
-    print(f"No se encontraron alertas recientes para {deudor}.")
+# if noticias_encontradas:
+#     print(f"--- Alertas encontradas para {deudor} ---")
+#     for idx, noticia in enumerate(noticias_encontradas, 1):
+#         print(f"{idx}. {noticia['titular']} (Fuente: {noticia['fuente']}) Link: {noticia['link']}")
+# else:
+#     print(f"No se encontraron alertas recientes para {deudor}.")
 
-# {"status":"success","totalResults":1
-#  ,"results":[{"article_id":"3e3887cae4e453e95e2db6a9f29e434c"
-#               ,"link":"https://eluniverso.com/noticias/economia/byd-ecuador-taxis-crecimiento-ventas-nuevos-modelos-nota/"
-#                 ,"title":"BYD acelera en Ecuador y entra en el transporte comercial con un modelo para taxis"
-#                 ,"description":"Primer lote de 150 unidades. A nivel general, Andor Corp., que comercializa carros de esta marca china, busca pasar de 2.916 a 7.000 unidades vendidas."
-#                 ,"content":"SOLO DISPONIBLE EN PLANES DE PAGO"
-#                 ,"keywords":["china","ecuador","transporte","vehículos","automóviles","no_premium"]
-#                 ,"creator":["vanessa silva cruz"],"language":"spanish","country":["ecuador"]
-#                 ,"category":["business"],"datatype":"news","pubDate":"2026-03-31 15:00:00","pubDateTZ":"UTC"
-#                 ,"fetched_at":"2026-03-31 15:06:44"
-#                   ,"image_url":"https://eluniverso.com/resizer/9rypkWjzrtP04OiMbT9xdIth4Is=/cloudfront-us-east-1.images.arcpublishing.com/eluniverso/HY3SLAYLWFAM3AUNZEFHYEFAGA.jpg"
-#                 ,"video_url":null,"source_id":"eluniverso","source_name":"Eluniverso","source_priority":31547
-#                 ,"source_url":"https://www.eluniverso.com","source_icon":"https://n.bytvi.com/eluniverso.png"
-#                 ,"sentiment":"SOLO DISPONIBLE EN PLANES PROFESIONALES Y CORPORATIVOS"
-#                 ,"sentiment_stats":"SOLO DISPONIBLE EN PLANES PROFESIONALES Y CORPORATIVOS"
-#                 ,"ai_tag":"SOLO DISPONIBLE EN PLANES PROFESIONALES Y CORPORATIVOS"
-#                 ,"ai_region":"SOLO DISPONIBLE EN PLANES CORPORATIVOS","ai_org":"SOLO DISPONIBLE EN PLANES CORPORATIVOS"
-#                 ,"ai_summary":"SOLO DISPONIBLE EN PLANES DE PAGO","duplicate":false}],"nextPage":null}
+# # {"status":"success","totalResults":1
+# #  ,"results":[{"article_id":"3e3887cae4e453e95e2db6a9f29e434c"
+# #               ,"link":"https://eluniverso.com/noticias/economia/byd-ecuador-taxis-crecimiento-ventas-nuevos-modelos-nota/"
+# #                 ,"title":"BYD acelera en Ecuador y entra en el transporte comercial con un modelo para taxis"
+# #                 ,"description":"Primer lote de 150 unidades. A nivel general, Andor Corp., que comercializa carros de esta marca china, busca pasar de 2.916 a 7.000 unidades vendidas."
+# #                 ,"content":"SOLO DISPONIBLE EN PLANES DE PAGO"
+# #                 ,"keywords":["china","ecuador","transporte","vehículos","automóviles","no_premium"]
+# #                 ,"creator":["vanessa silva cruz"],"language":"spanish","country":["ecuador"]
+# #                 ,"category":["business"],"datatype":"news","pubDate":"2026-03-31 15:00:00","pubDateTZ":"UTC"
+# #                 ,"fetched_at":"2026-03-31 15:06:44"
+# #                   ,"image_url":"https://eluniverso.com/resizer/9rypkWjzrtP04OiMbT9xdIth4Is=/cloudfront-us-east-1.images.arcpublishing.com/eluniverso/HY3SLAYLWFAM3AUNZEFHYEFAGA.jpg"
+# #                 ,"video_url":null,"source_id":"eluniverso","source_name":"Eluniverso","source_priority":31547
+# #                 ,"source_url":"https://www.eluniverso.com","source_icon":"https://n.bytvi.com/eluniverso.png"
+# #                 ,"sentiment":"SOLO DISPONIBLE EN PLANES PROFESIONALES Y CORPORATIVOS"
+# #                 ,"sentiment_stats":"SOLO DISPONIBLE EN PLANES PROFESIONALES Y CORPORATIVOS"
+# #                 ,"ai_tag":"SOLO DISPONIBLE EN PLANES PROFESIONALES Y CORPORATIVOS"
+# #                 ,"ai_region":"SOLO DISPONIBLE EN PLANES CORPORATIVOS","ai_org":"SOLO DISPONIBLE EN PLANES CORPORATIVOS"
+# #                 ,"ai_summary":"SOLO DISPONIBLE EN PLANES DE PAGO","duplicate":false}],"nextPage":null}

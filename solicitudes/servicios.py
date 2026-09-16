@@ -204,7 +204,7 @@ def _crear_documento_desde_datos(datos, asignacion, empresa, user, dias):
     from datetime import date, timedelta
 
     fecha = datos['fecha_emision'] or date.today()
-    fecha_vencimiento = fecha + timedelta(days=dias)
+    fecha_vencimiento = date.today() + timedelta(days=dias)
 
     return Documentos.objects.create(
         empresa=empresa,

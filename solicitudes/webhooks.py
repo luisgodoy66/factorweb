@@ -82,7 +82,19 @@ def webhook_cargar_solicitudes_factoring(request):
 
     empresa_id = data.get('empresa_id') or correo_data.get('empresa_id')
     user_id = data.get('user_id') or correo_data.get('user_id')
-    dias = data.get('dias') or correo_data.get('dias')
+
+    # 16-sep-26 l.g.  'dias' puede llegar como numero (body JSON del agente) o
+    # como texto ("30", body de formulario).  _crear_documento_desde_datos hace
+    # timedelta(days=dias), que revienta con TypeError si llega un str o None,
+    # por lo que se normaliza a entero y se usa 30 como valor por defecto.
+    try:
+        dias = int(data.get('dias') or correo_data.get('dias') or 30)
+    except (TypeError, ValueError):
+        logger.warning(
+            'Webhook de solicitudes: valor de dias invalido (%r), se usan 30 dias',
+            data.get('dias') or correo_data.get('dias')
+        )
+        dias = 30
 
     empresa = Empresas.objects.filter(id=empresa_id).first() if empresa_id else Empresas.objects.first()
     if empresa is None:
