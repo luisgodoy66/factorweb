@@ -118,8 +118,15 @@ def enviar_mensaje_whatsapp(request, whatsapp_destino ):
 
             return HttpResponse("OK")
             
-        except Exception as e:
-            return HttpResponse( str(e), status=500)
+        except Exception:
+            logger.exception(
+                "Error enviando mensaje de WhatsApp",
+                extra={"integration": "twilio"},
+            )
+            return JsonResponse(
+                {"status": "error", "message": "No fue posible enviar el mensaje."},
+                status=502,
+            )
 
     return JsonResponse({'status': 'error', 'message': 'Método no permitido.'}, status=405)
 

@@ -18,6 +18,12 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+
+handler400 = 'factorweb25.error_views.bad_request'
+handler403 = 'factorweb25.error_views.permission_denied'
+handler404 = 'factorweb25.error_views.not_found'
+handler500 = 'factorweb25.error_views.server_error'
+
 urlpatterns = [
     path('',include(('bases.urls','bases'),namespace='bases')),
     path('clientes/',include(('clientes.urls','clientes'),namespace='clientes')),

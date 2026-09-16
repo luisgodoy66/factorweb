@@ -1,9 +1,11 @@
 import requests
 import json
 import os
+import logging
 from dotenv import load_dotenv
 
 load_dotenv()
+logger = logging.getLogger("factorweb.api.noticias")
 
 class NoticieroFactoring:
     def __init__(self, news_api_key):
@@ -32,8 +34,8 @@ class NoticieroFactoring:
             
             return self._formatear_resultados(data.get('results', []))
         
-        except requests.exceptions.RequestException as e:
-            print(f"Error de conexión: {e}")
+        except requests.exceptions.RequestException:
+            logger.exception("Error consultando News API", extra={"integration": "news_api"})
             return []
 
     def _formatear_resultados(self, resultados):
