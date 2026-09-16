@@ -86,10 +86,11 @@ class WebhookSolicitudesTests(TestCase):
         self.url = reverse('solicitudes:webhook_cargar_facturas')
         self.factory = RequestFactory()
 
-    def _peticion(self, clave=None):
+    def _peticion(self, clave=None, cabecera='X-Margarita-Key'):
         extra = {}
         if clave is not None:
-            extra['HTTP_X_MARGARITA_KEY'] = clave
+            # RequestFactory usa el nombre de cabecera con guiones -> guiones_bajos
+            extra['HTTP_' + cabecera.upper().replace('-', '_')] = clave
         return self.factory.post(
             self.url, data=json.dumps({'correo': {}}),
             content_type='application/json', **extra
@@ -111,7 +112,45 @@ class WebhookSolicitudesTests(TestCase):
         ok, motivo = _clave_webhook_valida(self._peticion(clave))
         self.assertTrue(ok, motivo)
 
+    def test_clave_correcta_con_cabecera_alterna_se_acepta(self):
+        """n8n puede enviar X-Margarita-API-Key; tambien debe funcionar."""
+        clave = settings.MARGARITA_API_KEY
+        if not clave:
+            self.skipTest('MARGARITA_API_KEY no configurada en el entorno')
+        ok, motivo = _clave_webhook_valida(
+            self._peticion(clave, cabecera='X-Margarita-API-Key')
+        )
+        self.assertTrue(ok, motivo)
+
+    def test_clave_incorrecta_con_cabecera_alterna_se_rechaza(self):
+        ok, _ = _clave_webhook_valida(
+            self._peticion('clave_incorrecta', cabecera='X-Margarita-API-Key')
+        )
+        self.assertFalse(ok)
+
     def test_webhook_anonimo_devuelve_403(self):
+        respuesta = self.client.post(
+            self.url, data=json.dumps({'correo': {}}),
+            content_type='application/json', secure=True
+        )
+        self.assertEqual(respuesta.status_code, 403)
+
+    def test_peticion_http_con_cabecera_correcta_pasa_la_autenticacion(self):
+        """Integracion real: debe superar el control de clave y fallar mas
+        adelante por payload invalido (400), nunca por 403."""
+        clave = settings.MARGARITA_API_KEY
+        if not clave:
+            self.skipTest('MARGARITA_API_KEY no configurada en el entorno')
+
+        for cabecera in ('HTTP_X_MARGARITA_KEY', 'HTTP_X_MARGARITA_API_KEY'):
+            with self.subTest(cabecera=cabecera):
+                respuesta = self.client.post(
+                    self.url, data=json.dumps({'correo': {}}),
+                    content_type='application/json', secure=True, **{cabecera: clave}
+                )
+                self.assertNotEqual(respuesta.status_code, 403)
+
+    def test_peticion_http_sin_cabecera_devuelve_403(self):
         respuesta = self.client.post(
             self.url, data=json.dumps({'correo': {}}),
             content_type='application/json', secure=True

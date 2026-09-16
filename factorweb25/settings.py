@@ -14,10 +14,15 @@ except locale.Error:
 # 09-ene-23 l.g.    usar environ y el archivo de configuracion de elasticbeanstalk
 from dotenv import load_dotenv
 
-load_dotenv()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# 26-jul-26 l.g.  load_dotenv() sin argumentos busca el .env en el DIRECTORIO
+# DE TRABAJO. Si gunicorn/systemd arranca desde otra ruta, el .env no se lee y
+# todas las variables de integracion (MARGARITA_API_KEY, WHATSAPP_APP_SECRET,
+# WHATSAPP_TOKEN...) quedan en None. Se ancla explicitamente a BASE_DIR y se
+# deja el comportamiento anterior como respaldo.
+load_dotenv(BASE_DIR / '.env') or load_dotenv()
 
 
 # Quick-start development settings - unsuitable for production

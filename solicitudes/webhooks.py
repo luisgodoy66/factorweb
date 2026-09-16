@@ -11,12 +11,19 @@ from .servicios import procesar_mensaje_del_agente
 
 logger = logging.getLogger(__name__)
 
+# 26-jul-26 l.g.  Se aceptan los dos nombres de cabecera en uso:
+#   X-Margarita-Key      -> convencion documentada en este proyecto
+#   X-Margarita-API-Key  -> nombre usado por algunos flujos de n8n
+# El valor es el mismo (MARGARITA_API_KEY).
+NOMBRES_CABECERA_CLAVE = ('X-Margarita-Key', 'X-Margarita-API-Key')
+
 
 def _clave_webhook_valida(request):
     """Valida la clave compartida del webhook de carga de solicitudes.
 
-    El agente (n8n) debe enviar la cabecera X-Margarita-Key con el valor de
-    la variable de entorno MARGARITA_API_KEY.
+    El agente (n8n) debe enviar la clave en la cabecera X-Margarita-Key
+    (o X-Margarita-API-Key) con el valor de la variable de entorno
+    MARGARITA_API_KEY.
 
     Si MARGARITA_API_KEY no esta definida, se rechaza la peticion: el webhook
     crea operaciones de factoring y no puede quedar abierto.
@@ -25,13 +32,17 @@ def _clave_webhook_valida(request):
     if not clave_esperada:
         return False, 'MARGARITA_API_KEY no configurada en el entorno'
 
-    clave_recibida = (
-        request.headers.get('X-Margarita-Key')
-        or request.POST.get('api_key')
-        or ''
-    )
+    clave_recibida = ''
+    for nombre in NOMBRES_CABECERA_CLAVE:
+        valor = request.headers.get(nombre)
+        if valor:
+            clave_recibida = valor
+            break
     if not clave_recibida:
-        return False, 'falta la cabecera X-Margarita-Key'
+        clave_recibida = request.POST.get('api_key') or ''
+
+    if not clave_recibida:
+        return False, 'falta la cabecera %s' % ' / '.join(NOMBRES_CABECERA_CLAVE)
 
     if not hmac.compare_digest(str(clave_esperada), str(clave_recibida)):
         return False, 'clave invalida'
