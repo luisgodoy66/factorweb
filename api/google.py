@@ -12,7 +12,8 @@ from django.contrib.auth.decorators import login_required
 import os
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Only for development!
-SCOPES = ['https://www.googleapis.com/auth/calendar.events']
+SCOPES = ['https://www.googleapis.com/auth/calendar.app.created']  # solo eventos creados por esta app
+APP_CALENDAR_SUMMARY = 'Factorweb - Recordatorios de Cobranza'
 
 def google_login(request):
     if os.path.exists("client_secret.json"):
@@ -69,6 +70,30 @@ def oauth2callback(request):
             request.session.pop('oauth_scopes', None)
             return HttpResponse('Error: Los permisos (scopes) han cambiado. Por favor, vuelva a conectar su cuenta de Google.', status=400)
         return HttpResponse('Error al procesar la solicitud de OAuth2.', status=500)
+
+def _get_or_create_app_calendar(service, request):
+    """Obtiene el ID del calendario secundario propio de la app, creándolo si aún no existe."""
+    calendar_id = request.session.get('google_calendar_id')
+    if calendar_id:
+        return calendar_id
+
+    # calendar.app.created solo expone calendarios creados por esta app, así que
+    # cualquier resultado aquí ya pertenece a la aplicación.
+    calendar_list = service.calendarList().list().execute()
+    for entry in calendar_list.get('items', []):
+        if entry.get('summary') == APP_CALENDAR_SUMMARY:
+            calendar_id = entry['id']
+            request.session['google_calendar_id'] = calendar_id
+            return calendar_id
+
+    nuevo_calendario = {
+        'summary': APP_CALENDAR_SUMMARY,
+        'timeZone': 'America/Guayaquil',
+    }
+    creado = service.calendars().insert(body=nuevo_calendario).execute()
+    calendar_id = creado['id']
+    request.session['google_calendar_id'] = calendar_id
+    return calendar_id
 
 @login_required(login_url='/login/')
 def crear_evento_recordatorio_cobranza(request, cliente):
@@ -144,11 +169,8 @@ def crear_evento_recordatorio_cobranza(request, cliente):
     }
 
     try:
-        # Insertar el evento en el calendario
-        if 'google_calendar_id' in request.session:
-            calendar_id = request.session['google_calendar_id']
-        else:
-            calendar_id = 'primary'
+        # Insertar el evento en el calendario propio de la app (requerido por el scope calendar.app.created)
+        calendar_id = _get_or_create_app_calendar(service, request)
         created_event = service.events().insert(calendarId=calendar_id, body=event).execute()
     except Exception as e:
         return HttpResponse(f"Error al crear el evento: {e}", status=500)
