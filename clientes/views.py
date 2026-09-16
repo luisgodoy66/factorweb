@@ -1246,6 +1246,7 @@ def DatosClientes_view(request, participante_id=None, tab=None):
     dias_ultima_operacion = None
     año = None
     cantidad_operaciones = None
+    ppdp = None
 
     id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
     
@@ -1446,18 +1447,18 @@ def DatosCompradores_view(request, participante_id=None, tab=None):
             if estado_deudor=='A':
                 estado_deudor = 'Activo'
                 color_estado = 5
-            elif estado_deudor=='B':
-                estado_deudor = 'Baja'
-                color_estado = 2
-            elif estado_deudor=='I':
-                estado_deudor = 'Inactivo'
-                color_estado = 2
-            elif estado_deudor=='P':
-                estado_deudor = 'Pre legal'
-                color_estado = 3
-            elif estado_deudor=='L':
-                estado_deudor = 'Legal'
-                color_estado = 4
+            # elif estado_deudor=='B':
+            #     estado_deudor = 'Baja'
+            #     color_estado = 2
+            # elif estado_deudor=='I':
+            #     estado_deudor = 'Inactivo'
+            #     color_estado = 2
+            # elif estado_deudor=='P':
+            #     estado_deudor = 'Pre legal'
+            #     color_estado = 3
+            # elif estado_deudor=='L':
+            #     estado_deudor = 'Legal'
+            #     color_estado = 4
             elif estado_deudor=='X':
                 estado_deudor = 'Bloqueado'
                 color_estado = 4

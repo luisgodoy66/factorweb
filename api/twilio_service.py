@@ -7,13 +7,56 @@
 # #     print(response.headers)
 
 from django.http import HttpResponse, JsonResponse
+from django.conf import settings
 from twilio.rest import Client
+from twilio.request_validator import RequestValidator
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import DisallowedHost
 
 from api.models import Configuracion_twilio_whatsapp
 from cobranzas.models import Gestion_cobro, Twilio_whatsapp
 from bases.models import Usuario_empresa
 import json
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def _firma_twilio_valida(request, configuracion):
+    """Valida la cabecera X-Twilio-Signature del webhook entrante.
+
+    Twilio firma la URL publica exacta mas los parametros POST con el
+    auth token del proyecto. Sin esta validacion el endpoint es publico y
+    cualquiera puede inyectar mensajes en la bitacora de cobranzas.
+
+    Devuelve (es_valida, motivo).
+    """
+    if not getattr(settings, 'TWILIO_VALIDATE_SIGNATURE', True):
+        # Escape explicito solo para depuracion local.
+        logger.warning('Validacion de firma de Twilio desactivada por configuracion')
+        return True, 'validacion desactivada'
+
+    auth_token = configuracion.ctauthtoken
+    if not auth_token:
+        return False, 'la configuracion de Twilio no tiene auth token'
+
+    firma = request.headers.get('X-Twilio-Signature')
+    if not firma:
+        return False, 'falta la cabecera X-Twilio-Signature'
+
+    try:
+        validador = RequestValidator(auth_token)
+        # build_absolute_uri respeta SECURE_PROXY_SSL_HEADER, por lo que
+        # detras de nginx devuelve la URL https que Twilio firmo.
+        url_publica = request.build_absolute_uri()
+    except DisallowedHost as error:
+        # Un Host no permitido no debe tumbar el endpoint con un 500.
+        return False, 'host no permitido: {}'.format(error)
+    except Exception as error:  # noqa: BLE001
+        return False, 'no se pudo determinar la URL publica: {}'.format(error)
+
+    es_valida = validador.validate(url_publica, request.POST, firma)
+    return es_valida, 'firma invalida' if not es_valida else 'ok'
 
 def enviar_mensaje_whatsapp(request, whatsapp_destino ):
     datos = json.loads(request.body.decode('utf-8'))  # Imprime el cuerpo de la solicitud para depuración
@@ -118,6 +161,15 @@ def webhook_whatsapp_twilio(request):
         
         if not configuracion:
             return JsonResponse({'error': 'Configuración de Twilio no encontrada'}, status=404)
+
+        # Seguridad: solo se aceptan peticiones firmadas por Twilio
+        firma_ok, motivo = _firma_twilio_valida(request, configuracion)
+        if not firma_ok:
+            logger.warning(
+                'Webhook Twilio rechazado desde %s: %s',
+                request.META.get('REMOTE_ADDR'), motivo
+            )
+            return JsonResponse({'error': 'Firma de Twilio inválida'}, status=403)
 
         # Busca la gestión de cobro asociada al número del cliente (si aplica)
         numero_whatsapp = from_number.replace('whatsapp:', '')

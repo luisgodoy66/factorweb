@@ -1,9 +1,48 @@
 # views.py
+import hmac
+import hashlib
+import logging
+import os
+
 import requests
 from django.conf import settings
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
+
+logger = logging.getLogger(__name__)
+
+
+def _firma_meta_valida(request):
+    """Valida la cabecera X-Hub-Signature-256 que envia Meta.
+
+    Meta firma el cuerpo CRUDO del request con el App Secret (HMAC-SHA256).
+    Sin esta validacion el webhook es publico y cualquiera puede inyectar
+    eventos falsos de WhatsApp.
+
+    Devuelve (es_valida, motivo).
+    """
+    app_secret = getattr(settings, 'WHATSAPP_APP_SECRET', None)
+    if not app_secret:
+        return False, 'WHATSAPP_APP_SECRET no configurado'
+
+    firma = request.headers.get('X-Hub-Signature-256', '')
+    if not firma.startswith('sha256='):
+        return False, 'falta la cabecera X-Hub-Signature-256'
+
+    partes = firma.split('=', 1)
+    if len(partes) != 2:
+        return False, 'formato de firma invalido'
+
+    esperada = hmac.new(
+        app_secret.encode('utf-8'),
+        request.body,
+        hashlib.sha256
+    ).hexdigest()
+
+    if not hmac.compare_digest(esperada, partes[1]):
+        return False, 'firma invalida'
+    return True, 'ok'
 
 def enviar_mensaje(request, numero_destino):
     mensaje = "¡Hola desde Django con WhatsApp API! 🎉"
@@ -39,8 +78,13 @@ def enviar_mensaje(request, numero_destino):
 @csrf_exempt
 def webhook_whatsapp(request):
     if request.method == 'GET':
-        # Meta valida el webhook por querystring
-        verify_token = settings.WHATSAPP_TOKEN  # Define tú este token
+        # Meta valida el webhook por querystring.
+        # El verify token debe ser propio y no el token de acceso.
+        verify_token = (
+            os.getenv("WHATSAPP_VERIFY_TOKEN")
+            or getattr(settings, 'WHATSAPP_VERIFY_TOKEN', None)
+            or settings.WHATSAPP_TOKEN
+        )
         mode = request.GET.get("hub.mode")
         token = request.GET.get("hub.verify_token")
         challenge = request.GET.get("hub.challenge")
@@ -51,6 +95,15 @@ def webhook_whatsapp(request):
             return HttpResponse(status=403)
 
     if request.method == 'POST':
+        # Seguridad: solo se aceptan eventos firmados por Meta
+        firma_ok, motivo = _firma_meta_valida(request)
+        if not firma_ok:
+            logger.warning(
+                'Webhook WhatsApp rechazado desde %s: %s',
+                request.META.get('REMOTE_ADDR'), motivo
+            )
+            return JsonResponse({'error': 'Firma de Meta inválida'}, status=403)
+
         data = json.loads(request.body)
         # Aquí puedes procesar los mensajes o eventos
         entry = data["entry"][0]

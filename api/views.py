@@ -163,7 +163,7 @@ class ConfiguracionTwilioEdit(SinPrivilegios, generic.UpdateView):
         return context
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def estado_operativo_cliente_api(request, cliente_id):
     valor_linea = 0
     porc_disponible = 0
@@ -176,16 +176,36 @@ def estado_operativo_cliente_api(request, cliente_id):
     protestos = 0
     restructuracion = 0
 
-    cliente = ModeloCliente.Datos_generales.objects.filter(id=cliente_id).first()
-    if cliente:
+    # Aislamiento multi-empresa: el cliente debe pertenecer a la empresa del usuario
+    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+    if not id_empresa:
+        return Response(
+            {'error': 'El usuario no tiene una empresa asignada'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    cliente = ModeloCliente.Datos_generales.objects\
+        .filter(id=cliente_id, empresa=id_empresa.empresa)\
+        .first()
+    if not cliente:
+        return Response(
+            {'error': 'Cliente no encontrado'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    if cliente.cxcliente:
         nombre_cliente = cliente.cxcliente.ctnombre
 
-    linea = ModeloCliente.Linea_Factoring.objects.filter(cxcliente=cliente_id).first()
+    linea = ModeloCliente.Linea_Factoring.objects\
+        .filter(cxcliente=cliente_id, empresa=id_empresa.empresa)\
+        .first()
     if linea:
         valor_linea = linea.nvalor
         porc_disponible = linea.porcentaje_disponible()
 
-    operativos = Datos_operativos.objects.filter(cxcliente=cliente_id).first()
+    operativos = Datos_operativos.objects\
+        .filter(cxcliente=cliente_id, empresa=id_empresa.empresa)\
+        .first()
     if operativos:
         estado_cliente = operativos.cxestado
         clase_cliente = operativos.cxclase
@@ -244,12 +264,21 @@ class InvoiceAIAnalysisView(APIView):
     """
     POST /api/invoices/<id>/analyze-ai/
     """
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
+        # Aislamiento multi-empresa: la factura debe ser de la empresa del usuario
+        id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+        if not id_empresa:
+            return Response(
+                {"error": "El usuario no tiene una empresa asignada"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         try:
             invoice = ModelosSolicitud.Documentos.objects.select_related(
                  'comprador', 'cxasignacion__cxcliente',
-            ).get(id=id)
+            ).get(id=id, empresa=id_empresa.empresa)
         except ModelosSolicitud.Documentos.DoesNotExist:
             return Response(
                 {"error": "Factura no encontrada"},
@@ -347,10 +376,24 @@ class InvoiceAIAnalysisView(APIView):
             status=status.HTTP_201_CREATED
         )
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def ConsultarFacturaAI(request, id):
+    # Aislamiento multi-empresa: el analisis debe ser de la empresa del usuario
+    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+    if not id_empresa:
+        return Response(
+            {"error": "El usuario no tiene una empresa asignada"},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
     try:
-        analysis = InvoiceAIAnalysis.objects.get(invoice__id=id)
-        return JsonResponse(
+        analysis = InvoiceAIAnalysis.objects.get(
+            invoice__id=id,
+            invoice__empresa=id_empresa.empresa,
+            empresa=id_empresa.empresa,
+        )
+        return Response(
             {
                 "invoice_id": analysis.invoice.id,
                 "risk_level": analysis.risk_level,
@@ -360,7 +403,7 @@ def ConsultarFacturaAI(request, id):
             }
         )
     except InvoiceAIAnalysis.DoesNotExist:
-        return JsonResponse(
+        return Response(
             {"error": "Análisis de IA no encontrado para esta factura"},
-            status=404
+            status=status.HTTP_404_NOT_FOUND
         )

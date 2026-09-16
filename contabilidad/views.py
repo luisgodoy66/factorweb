@@ -10,7 +10,10 @@ from django.db import transaction
 from django.views import generic
 from django.utils.dateparse import parse_date
 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status as drf_status
 
 import json
 
@@ -2909,11 +2912,20 @@ def CuentaContableBanco(request, banco_id):
     return JsonResponse(cuenta_banco)
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def asiento_contable_api(request, asiento_id):
 
+    # Aislamiento multi-empresa: el asiento debe pertenecer a la empresa del usuario
+    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+    if not id_empresa:
+        return Response(
+            {'error': 'El usuario no tiene una empresa asignada'},
+            status=drf_status.HTTP_403_FORBIDDEN
+        )
+
     asiento = Diario_cabecera.objects\
-        .filter(id=asiento_id).first()
+        .filter(id=asiento_id, empresa=id_empresa.empresa)\
+        .first()
 
     data = {
         'transaccion': asiento.cxtransaccion if asiento else None,
@@ -2924,5 +2936,4 @@ def asiento_contable_api(request, asiento_id):
     }
     
     serializer = AsientoDiarioSerializer(data)
-    # return Response(serializer.data)
-    return JsonResponse(serializer.data)
+    return Response(serializer.data)

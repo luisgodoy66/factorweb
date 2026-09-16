@@ -30,22 +30,38 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# Para producción, es crucial poner DEBUG en False
-DEBUG = True
-# ALLOWED_HOSTS = ['factorweb-dev2.us-east-2.elasticbeanstalk.com','localhost', '*']
-# CSRF_TRUSTED_ORIGINS=['http://factorweb-dev2.us-east-2.elasticbeanstalk.com/']
-# # ALLOWED_HOSTS = ['factorweb-dev.us-east-2.elasticbeanstalk.com','localhost', '127.0.0.1','*']
-# # CSRF_TRUSTED_ORIGINS=['http://factorweb-dev.us-east-2.elasticbeanstalk.com/']
-ALLOWED_HOSTS = [
-    '69.62.68.116', 'localhost','127.0.0.1',
-    'www.margarita.codigobambuecuador.com', # Reemplaza con tu dominio
-    'margarita.codigobambuecuador.com', # Reemplaza con tu dominio
-    # '*' # Es una mala práctica de seguridad en producción
+# 26-jul-26 l.g.  DEBUG pasa a ser una variable de entorno con valor por
+# defecto seguro (False). Para desarrollo local agregar DEBUG=True al .env,
+# que esta excluido del repositorio por .gitignore.
+DEBUG = os.getenv("DEBUG", "False").strip().lower() in ("1", "true", "yes", "on")
+
+if DEBUG:
+    # Solo para desarrollo local
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
+    CSRF_TRUSTED_ORIGINS = [
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
     ]
-CSRF_TRUSTED_ORIGINS=[
-    'http://69.62.68.116',
-    'https://69.62.68.116',
-    'https://margarita.codigobambuecuador.com' # Añade tu dominio con https
+else:
+    # Produccion: se puede sobreescribir con ALLOWED_HOSTS / CSRF_TRUSTED_ORIGINS
+    # (variables separadas por coma) sin necesidad de tocar el codigo.
+    _hosts_entorno = [
+        h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()
+    ]
+    ALLOWED_HOSTS = _hosts_entorno or [
+        '69.62.68.116', 'localhost', '127.0.0.1',
+        'www.margarita.codigobambuecuador.com',  # Reemplaza con tu dominio
+        'margarita.codigobambuecuador.com',  # Reemplaza con tu dominio
+    ]
+    _origenes_entorno = [
+        o.strip() for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()
+    ]
+    CSRF_TRUSTED_ORIGINS = _origenes_entorno or [
+        'http://69.62.68.116',
+        'https://69.62.68.116',
+        'https://margarita.codigobambuecuador.com'  # Añade tu dominio con https
     ]
 
 
@@ -70,6 +86,7 @@ INSTALLED_APPS = [
     'cuentasconjuntas.apps.CuentasconjuntasConfig',
     'contabilidad.apps.ContabilidadConfig',
     'api.apps.ApiConfig',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -223,6 +240,40 @@ GOOGLE_OAUTH2_REDIRECT_URI = 'https://margarita.codigobambuecuador.com/api/googl
 
 WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN")
 PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")
+
+# --- Seguridad de integraciones y webhooks ---
+# 26-jul-26 l.g.  Estos valores DEBEN definirse en el entorno.
+# Ninguno de los webhooks entrantes debe quedar accesible de forma anonima.
+
+# Secreto de la app de Meta para validar X-Hub-Signature-256 en el webhook de WhatsApp.
+WHATSAPP_APP_SECRET = os.getenv("WHATSAPP_APP_SECRET") or os.getenv("CLAVE_SECRETA_WHATSAPP_META")
+
+# Clave compartida para el webhook de carga de solicitudes (n8n).
+# Enviar en la cabecera X-Margarita-Key.
+MARGARITA_API_KEY = os.getenv("MARGARITA_API_KEY")
+
+# Endpoints internos invocados por automatizaciones (cobranzas, SRI, etc.).
+INTERNAL_API_KEY = os.getenv("INTERNAL_API_KEY")
+
+# Permite desactivar la validacion de firma de Twilio solo para depuracion local.
+TWILIO_VALIDATE_SIGNATURE = os.getenv(
+    "TWILIO_VALIDATE_SIGNATURE", "True"
+).strip().lower() in ("1", "true", "yes", "on")
+
+# --- Django REST Framework ---
+# Cualquier vista DRF es privada por defecto; las publicas deben declararlo.
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+}
 
 # settings.py
 

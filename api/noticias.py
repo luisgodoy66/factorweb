@@ -1,5 +1,9 @@
 import requests
 import json
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class NoticieroFactoring:
     def __init__(self, news_api_key):
@@ -65,7 +69,7 @@ def generar_prompt_riesgo(empresa, lista_noticias):
 
 # --- EJEMPLO DE USO ---
 
-API_KEY_NOTICIAS = "pub_781334009b194ecaa1b83135b87756ad"
+API_KEY_NOTICIAS = os.getenv("API_KEY_NOTICIAS")
 monitor = NoticieroFactoring(API_KEY_NOTICIAS)
 
 # Supongamos que un cliente quiere negociar una factura de "Corporación Favorita"

@@ -12,7 +12,7 @@ from zeep import Client
 from zeep.transports import Transport
 
 WSDL_URL = getattr(
-    settings.configure(),
+    settings,
     "SRI_WSDL_URL",
     "https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl",
 )

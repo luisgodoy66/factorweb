@@ -1,4 +1,5 @@
 import os
+import ast
 
 from django.conf import settings
 from django.shortcuts import redirect, render, get_object_or_404
@@ -915,9 +916,25 @@ def DatosAsignacionConAccesorios(request, cliente_id,
                 # grabar detalle de cheques
 
                 # recuperar el string de lista de cheques pasado en la data y
-                # convertir a lista
+                # convertir a lista.
+                # Seguridad: nunca usar eval() con data del request. Se acepta
+                # unicamente JSON (lo que envia el formulario) o, como respaldo,
+                # un literal de Python validado con ast.literal_eval.
                 lista = request.POST.get("Cheques")
-                output = eval(lista)
+                try:
+                    if not lista:
+                        raise ValueError("vacio")
+                    output = json.loads(lista)
+                except (ValueError, TypeError):
+                    try:
+                        output = ast.literal_eval(lista) if lista else []
+                    except (ValueError, SyntaxError, TypeError):
+                        output = []
+
+                # descartar cualquier elemento que no sea un diccionario
+                if not isinstance(output, list):
+                    output = []
+                output = [elem for elem in output if isinstance(elem, dict)]
 
                 for elem in output:      
                     #accedemos a cada elemento de la lista (en este caso cada elemento es un dictionario)

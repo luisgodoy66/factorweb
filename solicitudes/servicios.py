@@ -200,11 +200,11 @@ def encontrar_cliente_por_remitente(sender_email, empresa=None):
         .order_by('-dregistro').first() or qs.filter(ctemail__iexact=email).order_by('-dregistro').first()
 
 
-def _crear_documento_desde_datos(datos, asignacion, empresa, user):
+def _crear_documento_desde_datos(datos, asignacion, empresa, user, dias):
     from datetime import date, timedelta
 
     fecha = datos['fecha_emision'] or date.today()
-    fecha_vencimiento = date.today() + timedelta(days=30)
+    fecha_vencimiento = fecha + timedelta(days=dias)
 
     return Documentos.objects.create(
         empresa=empresa,
@@ -226,7 +226,7 @@ def _crear_documento_desde_datos(datos, asignacion, empresa, user):
     )
 
 
-def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_factoring=None, asunto=None, xsd_path=None):
+def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_factoring=None, asunto=None, xsd_path=None, dias=30):
     """Crea una sola asignación y un documento por cada XML recibido."""
     if not xml_contents:
         raise ValueError('No se recibieron facturas XML')
@@ -291,7 +291,7 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
             print(f"Asignación creada con número {numero_solicitud} para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.id}")
 
         documentos = [
-            _crear_documento_desde_datos(datos, asignacion, empresa, user)
+            _crear_documento_desde_datos(datos, asignacion, empresa, user, dias)
             for datos in datos_facturas
         ]
         asignacion.nvalor = (asignacion.nvalor or Decimal('0')) + total_lote
@@ -362,7 +362,7 @@ def crear_asignacion_desde_xml(xml_content, sender_email, empresa, user, tipo_fa
     )
 
 
-def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None, xsd_path=None):
+def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None, xsd_path=None, dias=30):
     """Procesa un correo ya leído por un agente IA y sus adjuntos XML."""
     sender_email = correo_data.get('from') or correo_data.get('sender') or correo_data.get('sender_email') or ''
     asunto = correo_data.get('subject') or correo_data.get('asunto') or ''
@@ -398,6 +398,7 @@ def procesar_mensaje_del_agente(correo_data, empresa, user, tipo_factoring=None,
             tipo_factoring=tipo_factoring,
             asunto=asunto,
             xsd_path=xsd_path,
+            dias=dias,
         )
     except (ValueError, ET.ParseError):
         return {'procesados': 0, 'creadas': 0, 'resultados': [], 'correos': [], 'msg': 'Error al procesar el XML'}
