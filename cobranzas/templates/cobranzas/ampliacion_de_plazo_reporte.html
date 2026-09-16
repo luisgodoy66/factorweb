@@ -1,0 +1,242 @@
+{% load filtros %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Ampliación de plazo</title>
+
+    <style type="text/css">
+        @page {
+            size: A4;
+            margin: 0cm;
+            size:  portrait;
+        }
+        .table thead th {
+                vertical-align:  top ;
+                border-bottom: 1px solid #000;
+        }
+        .table td.numero{
+            text-align: right;
+        }
+        .table td.centrado{
+            text-align: center;
+        }
+        .caja { 
+        font-family: sans-serif; 
+        font-size: 18px; 
+        font-weight: 400; 
+        color: #090909; 
+        background:#a9b7b7 
+        }        
+        .alerta { 
+        font-family: sans-serif; 
+        font-size: 11px; 
+        font-weight: 400; 
+        color: #eb1111; 
+        }     
+        .footer{
+            position: absolute;
+            bottom: 0;
+            /* text-align: center; */
+            width: 100%;
+        }   
+        body {
+            font-family: sans-serif;
+            font-size: 09px;
+            font-weight: 400;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <table class="table table-striped table-hover nowrap" style="width:100%">
+                    <tbody>
+                        <tr>
+                            <td >
+                                <div style="width:4cm; height:2cm;  align-items:center; justify-content:center;  
+                                border-radius:4px; overflow:hidden;">
+                                    <!--begin::Logo-->
+                                        <img src="{{ user.usuario_empresa.get.empresa.ilogolargo.url }}" alt="Logo" 
+                                        style="width:100%; height:100%; object-fit:contain;">
+                                    <!--end::Logo-->
+                                </div>
+                            </td>
+                            <td class="centrado" ><h3>AMPLIACIÓN DE PLAZO</h3></td>
+                            <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <br>
+            <div class="list-group">
+                <table class="table" style="width:100%">
+                    <tbody>
+                        <tr>
+                            <td style="width: 20%; "><strong>Cliente:</strong></td>
+                            <td style="width: 40%; ">{{ ampliacion.cxcliente.cxcliente.ctnombre }}</td>
+                            <td style="width: 20%; "><strong>Fecha de ampliación:</strong></td>
+                            <td style="width: 20%; ">{{ ampliacion.dnotadebito|custom_date_format }}</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%; "><strong>Id:</strong></td>
+                            <td style="width: 40%; ">{{ampliacion.cxcliente.cxcliente.cxparticipante}}</td>
+                            <td style="width: 20%; "><strong>Tipo de factoring:</strong></td>
+                            <td style="width: 20%; ">{{ ampliacion.cxtipofactoring }}</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%; "><strong>Ampliación:</strong></td>
+                            <td style="width: 40%; ">{{ ampliacion.cxnotadebito }}</td>
+                            <td style="width: 20%; "><strong>Total:</strong></td>
+                            <td style="width: 20%; ">{{ ap.nvalor|floatformat:"2g"}}</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%; "><strong>Ampliar hasta:</strong></td>
+                            <td style="width: 40%; ">{{ ap.dampliacionhasta|custom_date_format }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- <hr> -->
+            </div>         
+            <!-- <hr> -->
+            <!-- Resumen -->
+            <div class="caja">
+                <h4>Documentos:</h4>
+            </div>
+            <div class="row">
+                <table class="table table-striped table-hover nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                        <th >Asignación</th>
+                        <th >Documento</th>
+                        {% if hay_accesorios %}
+                        <th >Accesorio</th>
+                        {% endif %}
+                        <th >Generación anterior de cargos</th>
+                        <th style="text-align: right;">Plazo de ampliación</th>
+                        <th style="text-align: right;">Saldo de cartera en ampliación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr></tr>
+                        {% for doc in detalle_ampliacion %}
+                        <tr>
+                            <td > {{doc.Asignacion}} </td>
+                            <td > {{doc.Documento}} </td>
+                            {% if hay_accesorios %}
+                            <td width="30%"> {{doc.Accesorio}} </td>
+                            {% endif %}
+                            <td class="centrado"> {{doc.AmpliarDesde|custom_date_format}} </td>
+                            <td class="numero"> {{doc.Plazo}} </td>
+                            <td class="numero"> {{doc.Cartera|floatformat:"2g"}} </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+            <!-- aqui debe haber una linea en blano por lo menos -->
+            <div class="caja">
+                <h4>Cargos:</h4>
+            </div>
+            <div class="row">
+                <!-- <div class="col"> -->
+                    <table class="table table-striped table-hover nowrap" style="width:100%">
+                        <thead>
+                            <th>Asignación</th>        
+                            <th>Documento</th>
+                            <th>Fecha de desembolso</th>
+                            <th style="text-align: right;">Base de cálculo</th>
+                            <th style="text-align: right;">Tasa</th>
+                            <th style="text-align: right;">Días</th>
+                            <th style="text-align: right;">Valor</th>
+                            <th style="text-align: right;">Total</th>
+                        </thead>
+                        <tbody>
+                            <!-- <tr></tr> -->
+                            {% for cargo in detalle %}
+                                <tr></tr>
+                                <tr>
+                                    <td colspan="7"><strong> {{ cargo.nombre }}</strong></td>
+                                    <td class="numero"><strong> {{ cargo.valor|floatformat:"2g" }}</strong></td>
+                                </tr>
+                                {% for item in cargo.detalle %}
+                                <tr>
+                                    {% if item.asignacion == 'N/A' %}
+                                    <td colspan="3">{{ item.documento }}</td>
+                                    {% else %}
+                                    <td>{{ item.asignacion }}</td>
+                                    <td>{{ item.documento }}</td>
+                                    <td>{{ item.desembolso|custom_date_format }}</td>
+                                    {% endif %}
+                                    <td class="numero">{{ item.valor_base|floatformat:2 }}</td>
+                                    <td class="numero">{{ item.tasa_calculo }}</td>
+                                    <td class="numero">{{ item.dias_calculo }}</td>
+                                    <td class="numero">{{ item.valor|floatformat:"2g" }}</td>
+                                    <td></td>
+                                </tr>
+                                {% endfor %}
+                            {% endfor %}
+                            <!-- totales -->
+                        </tbody>
+                    </table>
+
+                <!-- </div> -->
+            </div>
+            <!-- Resumen -->
+            <div class="caja">
+                <h4>Resumen:</h4>
+            </div>
+            <div class="row">
+                <table class="table table-striped table-hover nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                        <th style="text-align: right;">{{nombre_dc}}</th>
+                        <th style="text-align: right;">{{nombre_gaoa}}</th>
+                        <th style="text-align: right;">IVA</th>
+                        <th style="text-align: right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr></tr>
+                        <tr>
+                            <td><h3>Totales:</h3></td>
+                            <td class="numero"> {{ap.ndescuentodecartera|floatformat:"2g" }} </td>
+                            <td class="numero"> {{ap.ncomision|floatformat:"2g" }} </td>
+                            <td class="numero"> {{ap.niva|floatformat:"2g" }} </td>
+                            <td class="numero"> {{ap.nvalor|floatformat:"2g"}} </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            <br><br>
+            <div class="row ">
+                <table class="table table-striped table-hover nowrap" style="width:100%">
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td><strong>Elaborado por: </strong>{{ ampliacion.cxusuariocrea}}</td>
+                            <td><strong>Revisado por:</strong></td>
+                            <td><strong>Recibido por:</strong></td>
+                            {% if ampliacion.cxestado == 'E' %}
+                            <td class="alerta"><strong>Reversada</strong></td>
+                            {% endif %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+            {% if empresa.lgratis %}
+            <footer class="footer">
+                <p>SAAS Margarita desarrollado por Código Bambú</p>
+            </footer>
+            {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" rol="form" id="frmLinea" class="form-horizontal" enctype="multipart/form-data"
+            action="{% url 'clientes:cambiar_tasa_gaoa_todos' ids %}"
+            onsubmit="return checkSubmit();">
+            <!-- <div class="col"> -->
+            <div class="card">
+
+                {% csrf_token %}
+                <div class="card-header">
+                    <strong>Tasa </strong> 
+                </div>
+                
+                <div class="card-body card-block">
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_nvalor" class=" form-control-label">Valor</label></div>
+                        <div class="col-12 col-md-9">
+                           <input type="number" id="id_nvalor" name="id_nvalor"
+                           step="0.01" min="0" class="form-control" value="0" required>
+                        </div>
+                    </div>
+
+                </div>    
+                
+                <div class="card-footer">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="return CerrarModal()">
+                        <i class="fa fa-ban"></i> Cerrar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+                </div>
+            </div>
+            <!-- </div> -->
+        </form>
+
+    </div>
+</div>
+
+{% block js_page %}
+<script>
+     enviando = false; //Obligaremos a entrar el if en el primer submit
+     
+</script>
+{% endblock %}

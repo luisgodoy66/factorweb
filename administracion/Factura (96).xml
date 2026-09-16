@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<autorizacion>
+<estado>AUTORIZADO</estado>
+<numeroAutorizacion>0207202601099303308100120010010000484802025043811</numeroAutorizacion>
+<fechaAutorizacion>2026-07-02T15:57:48-05:00</fechaAutorizacion>
+<ambiente>PRODUCCIÓN</ambiente>
+<comprobante><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+<factura id="comprobante" version="1.1.0">
+  <infoTributaria>
+    <ambiente>2</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <razonSocial>ZAVALA GARCIA Y CARRASCO TRATTORIAS UNIDAS LITTLEITALYECUADOR CIA LTDA</razonSocial>
+    <nombreComercial>LITTLE ITALY ECUADOR CIA. LTDA</nombreComercial>
+    <ruc>0993033081001</ruc>
+    <claveAcceso>0207202601099303308100120010010000484802025043811</claveAcceso>
+    <codDoc>01</codDoc>
+    <estab>001</estab>
+    <ptoEmi>001</ptoEmi>
+    <secuencial>000048480</secuencial>
+    <dirMatriz>Av. Juan Tanca Marengo #100 y Joaquin J Orrantia. CC Mall del Sol local #6</dirMatriz>
+  </infoTributaria>
+  <infoFactura>
+    <fechaEmision>02/07/2026</fechaEmision>
+    <dirEstablecimiento>Av. Juan Tanca Marengo #100 y Joaquin J Orrantia. CC Mall del Sol local #6</dirEstablecimiento>
+    <obligadoContabilidad>SI</obligadoContabilidad>
+    <tipoIdentificacionComprador>04</tipoIdentificacionComprador>
+    <razonSocialComprador>CODIGO BAMBU</razonSocialComprador>
+    <identificacionComprador>0993220167001</identificacionComprador>
+    <direccionComprador>GUAYAQUIL</direccionComprador>
+    <totalSinImpuestos>57.33</totalSinImpuestos>
+    <totalDescuento>0.00</totalDescuento>
+    <totalConImpuestos>
+      <totalImpuesto>
+        <codigo>2</codigo>
+        <codigoPorcentaje>0</codigoPorcentaje>
+        <descuentoAdicional>0</descuentoAdicional>
+        <baseImponible>0</baseImponible>
+        <valor>0.00</valor>
+      </totalImpuesto>
+      <totalImpuesto>
+        <codigo>2</codigo>
+        <codigoPorcentaje>4</codigoPorcentaje>
+        <descuentoAdicional>0</descuentoAdicional>
+        <baseImponible>57.33</baseImponible>
+        <valor>8.6</valor>
+      </totalImpuesto>
+    </totalConImpuestos>
+    <propina>0</propina>
+    <importeTotal>65.93</importeTotal>
+    <moneda>DOLAR</moneda>
+    <pagos>
+      <pago>
+        <formaPago>19</formaPago>
+        <total>43.95</total>
+        <plazo>0</plazo>
+        <unidadTiempo>Dias</unidadTiempo>
+      </pago>
+      <pago>
+        <formaPago>16</formaPago>
+        <total>21.98</total>
+        <plazo>0</plazo>
+        <unidadTiempo>Dias</unidadTiempo>
+      </pago>
+    </pagos>
+  </infoFactura>
+  <detalles>
+    <detalle>
+      <codigoPrincipal>2146435446</codigoPrincipal>
+      <codigoAuxiliar>1</codigoAuxiliar>
+      <descripcion>STELLA ARTOIS</descripcion>
+      <cantidad>6.00</cantidad>
+      <precioUnitario>5.21</precioUnitario>
+      <descuento>0.00</descuento>
+      <precioTotalSinImpuesto>31.26</precioTotalSinImpuesto>
+      <impuestos>
+        <impuesto>
+          <codigo>2</codigo>
+          <codigoPorcentaje>4</codigoPorcentaje>
+          <tarifa>15</tarifa>
+          <baseImponible>31.26</baseImponible>
+          <valor>4.69</valor>
+        </impuesto>
+      </impuestos>
+    </detalle>
+    <detalle>
+      <codigoPrincipal>2146435209</codigoPrincipal>
+      <codigoAuxiliar>1</codigoAuxiliar>
+      <descripcion>PIZZA BURRATA 30</descripcion>
+      <cantidad>1.00</cantidad>
+      <precioUnitario>14.77</precioUnitario>
+      <descuento>0.00</descuento>
+      <precioTotalSinImpuesto>14.77</precioTotalSinImpuesto>
+      <impuestos>
+        <impuesto>
+          <codigo>2</codigo>
+          <codigoPorcentaje>4</codigoPorcentaje>
+          <tarifa>15</tarifa>
+          <baseImponible>14.77</baseImponible>
+          <valor>2.22</valor>
+        </impuesto>
+      </impuestos>
+    </detalle>
+    <detalle>
+      <codigoPrincipal>2146435137</codigoPrincipal>
+      <codigoAuxiliar>1</codigoAuxiliar>
+      <descripcion>MARGUERITA 30</descripcion>
+      <cantidad>1.00</cantidad>
+      <precioUnitario>11.30</precioUnitario>
+      <descuento>0.00</descuento>
+      <precioTotalSinImpuesto>11.30</precioTotalSinImpuesto>
+      <impuestos>
+        <impuesto>
+          <codigo>2</codigo>
+          <codigoPorcentaje>4</codigoPorcentaje>
+          <tarifa>15</tarifa>
+          <baseImponible>11.30</baseImponible>
+          <valor>1.70</valor>
+        </impuesto>
+      </impuestos>
+    </detalle>
+  </detalles>
+  <infoAdicional>
+    <campoAdicional nombre="CorreoCliente">CODIGOBAMBU@HOTMAIL.COM</campoAdicional>
+    <campoAdicional nombre="CAJERO">CAJERO</campoAdicional>
+    <campoAdicional nombre="TRANSACCION">10657</campoAdicional>
+    <campoAdicional nombre="FORMA DE PAGO">TARJETA DEBITO: 21.98</campoAdicional>
+    <campoAdicional nombre="FORMA DE PAGO">DISCOVER: 21.97</campoAdicional>
+    <campoAdicional nombre="FORMA DE PAGO">T.Credito VISA: 21.98</campoAdicional>
+    <campoAdicional nombre="GRATIFICACION">0</campoAdicional>
+    <campoAdicional nombre="FECHA CIERRE">02/07/2026</campoAdicional>
+    <campoAdicional nombre="TRANSPORTADO POR">Acklins S.A</campoAdicional>
+    <campoAdicional nombre="URL">http://facturas.acklins.net</campoAdicional>
+    <campoAdicional nombre="Nac">AGENTE DE RETENCION RESOLUCION NAC-DNCRASC20-00000001</campoAdicional>
+  </infoAdicional>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="Signature-53f19ca2-5c94-44fe-9c28-7aeae6f97052"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><ds:Reference Id="Reference-afc959c4-2417-4833-9f32-1f1c08ff7d74" URI="#comprobante"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><ds:DigestValue>ltVbPzeUUeixwJ0BXow3jAlAySg=</ds:DigestValue></ds:Reference><ds:Reference Id="ReferenceKeyInfo" URI="#KeyInfoId-Signature-53f19ca2-5c94-44fe-9c28-7aeae6f97052"><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><ds:DigestValue>tTAlQW68nMXofMUMor0euz6512Q=</ds:DigestValue></ds:Reference><ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#SignedProperties-Signature-53f19ca2-5c94-44fe-9c28-7aeae6f97052"><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><ds:DigestValue>KomS3kQmaiRRudRjHCWAdFUjDUM=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue Id="SignatureValue-53f19ca2-5c94-44fe-9c28-7aeae6f97052">g7Oa7VTxVKROxxAiz+hIYECZj3sqBlEfguTt3T6EtZEBneQhdJtbOAXhfCSodHjLCOefIELu+bJbZXZAKSuIAuBwPPndw0VV6rNpfWK/Maoiz6LRMjnMP/+CX6euHg1daK2SSnLBUkhNBwQBkWCnOR0DAb9uLhKd6r+srRpNAWZLYSyYkcMvcHeYflbxQJJbhkNeaQX5jBDn27QXyE9XHyHBH1w7JD7nm8SlwsvCRV7nWQ/7GCg0SRGT5FlxBbu7fiK550Fe6iqepCQbFXljYD4aiITmPctc9qv9iD+jiZXUrRVi3AePtALLzrbtNREw4XIf8fTMyCRmTLe+HxYRKQ==</ds:SignatureValue><ds:KeyInfo Id="KeyInfoId-Signature-53f19ca2-5c94-44fe-9c28-7aeae6f97052"><ds:X509Data><ds:X509Certificate>MIILQjCCCSqgAwIBAgIIRPM0Bhp0EF4wDQYJKoZIhvcNAQELBQAwgZkxCzAJBgNVBAYTAkVDMR0wGwYDVQQKDBRTRUNVUklUWSBEQVRBIFMuQS4gMjEwMC4GA1UECwwnRU5USURBRCBERSBDRVJUSUZJQ0FDSU9OIERFIElORk9STUFDSU9OMTkwNwYDVQQDDDBBVVRPUklEQUQgREUgQ0VSVElGSUNBQ0lPTiBTVUJDQS0yIFNFQ1VSSVRZIERBVEEwHhcNMjYwMzMwMTgwNzU0WhcNMjgwMzI5MTgwNzU0WjCBqDEmMCQGA1UEAwwdRE9SSVMgQUxFWEFORFJBIEdBUkNJQSBNQURSSUQxIDAeBgNVBAUTFzE3MTc4MDg5NTgtMzAwMzI2MTMxNzQyMTAwLgYDVQQLDCdFTlRJREFEIERFIENFUlRJRklDQUNJT04gREUgSU5GT1JNQUNJT04xHTAbBgNVBAoMFFNFQ1VSSVRZIERBVEEgUy5BLiAyMQswCQYDVQQGEwJFQzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL8iVxI66RHfFRtx7lWC4YusEe+GnPMFc8bk0Z6A6EX/2sLqyGd811jTF+dtQa1cjMEQ4Q93HeLUfM57pYxW193qFQ07KJy9/7RZsBep7ZweSkPCPeUvw2+3nTUDFcOpWea1voxsgUQgwyg5CYPNAnISYh56EC8e82Tg3LhctI9VYlOfviMLns4YSqvvZZBeI2e7yxFQqt+f7vzkmesC0kT6x/kWkUXWeas0gV5yS8Kp/49SnxgSRo9J9kvLtJDZ5oOOt4LseoUcYKP+tndi21oWTw91ZHCkW93rWWg4LVz28a6+A+SsQSwBg+Ni1cvpew5nO6TOCE5YRwQ6s301RmkCAwEAAaOCBnswggZ3MAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUjLrKEVd4JYAdawpLVb+NrmLdvY8wWQYIKwYBBQUHAQEETTBLMEkGCCsGAQUFBzABhj1odHRwOi8vb2NzcGd3LnNlY3VyaXR5ZGF0YS5uZXQuZWMvZWpiY2EvcHVibGljd2ViL3N0YXR1cy9vY3NwMCYGA1UdEQQfMB2BG2RvcmlzZ2FyY2lhbWFkcmlkQGdtYWlsLmNvbTCCARUGA1UdIASCAQwwggEIMGIGCisGAQQBgqZyAgkwVDBSBggrBgEFBQcCAjBGHkQAQwBlAHIAdABpAGYAaQBjAGEAZABvACAAZABlACAAUgBlAHAAcgBlAHMAZQBuAHQAYQBuAHQAZQAgAEwAZQBnAGEAbDCBoQYKKwYBBAGCpnICAzCBkjCBjwYIKwYBBQUHAgEWgYJodHRwczovL3d3dy5zZWN1cml0eWRhdGEubmV0LmVjL3dwLWNvbnRlbnQvZG93bmxvYWRzL05vcm1hdGl2YXMvUF9kZV9DZXJ0aWZpY2Fkb3MvUG9saXRpY2FzIGRlIENlcnRpZmljYWRvIFJlcHJlc2VudGFudGUgTGVnYWwucGRmMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDBDCCAg8GA1UdHwSCAgYwggICMIHeoDqgOIY2aHR0cDovL2NybDEuc2VjdXJpdHlkYXRhLm5ldC5lYy9zdWJjYTJjcmwxL2NybGZpbGUuY3JsooGfpIGcMIGZMTkwNwYDVQQDDDBBVVRPUklEQUQgREUgQ0VSVElGSUNBQ0lPTiBTVUJDQS0yIFNFQ1VSSVRZIERBVEExMDAuBgNVBAsMJ0VOVElEQUQgREUgQ0VSVElGSUNBQ0lPTiBERSBJTkZPUk1BQ0lPTjEdMBsGA1UECgwUU0VDVVJJVFkgREFUQSBTLkEuIDIxCzAJBgNVBAYTAkVDMDygOqA4hjZodHRwOi8vY3JsMi5zZWN1cml0eWRhdGEubmV0LmVjL3N1YmNhMmNybDIvY3JsZmlsZS5jcmwwgeCggd2ggdqGgddodHRwczovL3BvcnRhbC1vcGVyYWRvcjIuc2VjdXJpdHlkYXRhLm5ldC5lYy9lamJjYS9wdWJsaWN3ZWIvd2ViZGlzdC9jZXJ0ZGlzdD9jbWQ9Y3JsJmlzc3Vlcj1DTj1BVVRPUklEQUQgREUgQ0VSVElGSUNBQ0lPTiBTVUJDQS0yIFNFQ1VSSVRZIERBVEEsT1U9RU5USURBRCBERSBDRVJUSUZJQ0FDSU9OIERFIElORk9STUFDSU9OLE89U0VDVVJJVFkgREFUQSBTLkEuIDIsQz1FQzAdBgNVHQ4EFgQUZAV7TLnlz2INkH1WHcuIIV7ZfvwwKwYDVR0QBCQwIoAPMjAyNjAzMzAxODA3NTRagQ8yMDI4MDMyOTE4MDc1NFowCwYDVR0PBAQDAgXgMB8GCisGAQQBgqZyAwUEEQwPR0VSRU5URSBHRU5FUkFMMBoGCisGAQQBgqZyAwEEDAwKMTcxNzgwODk1ODBABgorBgEEAYKmcgMJBDIMMEdVQVlBUVVJTCBDQUJFQ0VSQSBDQU5UT05BTCBZIENBUElUQUwgUFJPVklOQ0lBTDARBgorBgEEAYKmcgMiBAMMAS4wRwYKKwYBBAGCpnIDBwQ5DDdBViBKVUFOIFRBTkNBIE1BUkVOR08gMTAwIFkgSk9BUVVJTiBKIE9SUkFOVElBIEdPTlpBTEVaMB8GCisGAQQBgqZyAwIEEQwPRE9SSVMgQUxFWEFORFJBMB8GCisGAQQBgqZyAyAEEQwPMDAxMDAyMDAxMTI5MTMxMBMGCisGAQQBgqZyAyEEBQwDUEZYMBcGCisGAQQBgqZyAwwECQwHRUNVQURPUjAWBgorBgEEAYKmcgMDBAgMBkdBUkNJQTBWBgorBgEEAYKmcgMKBEgMRlpBVkFMQSBHQVJDSUEgWSBDQVJSQVNDTyBUUkFUVE9SSUFTIFVOSURBUyBMSVRUTEVJVEFMWUVDVUFET1IgQ0lBIExUREEwHQYKKwYBBAGCpnIDCwQPDA0wOTkzMDMzMDgxMDAxMBEGCisGAQQBgqZyAx0EAwwBLjAWBgorBgEEAYKmcgMEBAgMBk1BRFJJRDAaBgorBgEEAYKmcgMIBAwMCjA5ODg3NjE5NDIwDQYJKoZIhvcNAQELBQADggIBAEl6nhOjncv3ZNMqcrB/mgUusMX5jEMDr1leAYs8P9UH88hzKBIUaBWRWuhabeIltWvUyjEd58UHwyp4bJW2msRdfXBA8jkR4AOvC38HYs/f0vABxrcEu/pA6sMDphAdb7GcjAbIOLUlDOomXn06nh3UKiNikEcFW1YusWYerz+l5BmXuie05wz8uc1GGC7OZNSp9Fq97CzWc5jWzAVoq3EDzAp4sWT9X7yE5M3bhkPI07HtHOkWhTxJxXX/ecQPqpinR2ngAUKH5b2gc1DykuOu2ddnc/PSSKc7Dy6IjYcV/XtaIA5Kn+W4ZbRNwUVnaYQcTvpmQ7nqWeO8PvVRetJHYm3wa8M+bS4FxjjtYTp+C9wtlC6cB8kXcnRJU/tFmpBcAKzPBwlEoHKTEgCORKfxoZOmWF0I6exp3cgnD9NYsjTwCFfeTRA+SKRywlpie5HvDmLpltLezreGuOQzixl+D3RG6Rkc8r9fc0cx192cdX2p28exaepQi4NmBF/S3TYBuGhhiwGykgY5gCjcgfGYmUySYJAxLB4yXggra0mRSJIGr9mPNps70CURhrOpJ3CMppX2n8l7vIpLv9SAA2f6YXOxEhg5e6PtZ38eB0al3pX2C/XXnssRpq3gTG0XVS8BJqFWixCobIHmDor90F0M6kspMLiME5IZL0vcYMfr</ds:X509Certificate></ds:X509Data><ds:KeyValue><ds:RSAKeyValue><ds:Modulus>vyJXEjrpEd8VG3HuVYLhi6wR74ac8wVzxuTRnoDoRf/awurIZ3zXWNMX521BrVyMwRDhD3cd4tR8znuljFbX3eoVDTsonL3/tFmwF6ntnB5KQ8I95S/Db7edNQMVw6lZ5rW+jGyBRCDDKDkJg80CchJiHnoQLx7zZODcuFy0j1ViU5++IwuezhhKq+9lkF4jZ7vLEVCq35/u/OSZ6wLSRPrH+RaRRdZ5qzSBXnJLwqn/j1KfGBJGj0n2S8u0kNnmg463gux6hRxgo/62d2LbWhZPD3VkcKRb3etZaDgtXPbxrr4D5KxBLAGD42LVy+l7Dmc7pM4ITlhHBDqzfTVGaQ==</ds:Modulus><ds:Exponent>AQAB</ds:Exponent></ds:RSAKeyValue></ds:KeyValue></ds:KeyInfo><ds:Object Id="XadesObjectId-c1471c91-7778-4fbf-83b2-fc90888a9f82"><xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Id="QualifyingProperties-899b9585-1a9a-4409-84a4-3a6cef406dbb" Target="#Signature-53f19ca2-5c94-44fe-9c28-7aeae6f97052"><xades:SignedProperties Id="SignedProperties-Signature-53f19ca2-5c94-44fe-9c28-7aeae6f97052"><xades:SignedSignatureProperties><xades:SigningTime>2026-07-02T15:57:47-05:00</xades:SigningTime><xades:SigningCertificate><xades:Cert><xades:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><ds:DigestValue>kb4Pt5djZinQN+xm7lCKLa1H5UE=</ds:DigestValue></xades:CertDigest><xades:IssuerSerial><ds:X509IssuerName>CN=AUTORIDAD DE CERTIFICACION SUBCA-2 SECURITY DATA, OU=ENTIDAD DE CERTIFICACION DE INFORMACION, O=SECURITY DATA S.A. 2, C=EC</ds:X509IssuerName><ds:X509SerialNumber>4968372014738051166</ds:X509SerialNumber></xades:IssuerSerial></xades:Cert></xades:SigningCertificate></xades:SignedSignatureProperties><xades:SignedDataObjectProperties><xades:DataObjectFormat ObjectReference="#Reference-afc959c4-2417-4833-9f32-1f1c08ff7d74"><xades:MimeType>text/xml</xades:MimeType><xades:Encoding>UTF-8</xades:Encoding></xades:DataObjectFormat></xades:SignedDataObjectProperties></xades:SignedProperties></xades:QualifyingProperties></ds:Object></ds:Signature></factura>]]></comprobante>
+<mensajes/>
+</autorizacion>
+

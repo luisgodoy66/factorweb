@@ -1,0 +1,187 @@
+{% extends 'bases/home.html' %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Participantes</a></li>
+                    <li><a href="#">Clientes</a></li>
+                    <li class="active">Datos operativos</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div class="card-header" style="background-color: white;">
+            <!-- <div class="dropdown float-right">
+                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <div class="dropdown-menu-content">
+                        <a class="dropdown-item" href="#">Imprimir</a>
+                    </div>
+                </div>
+            </div> -->
+            <h4 class="mb-0">
+                <span class="count">{{ consulta.count }} registro{{ consulta.count|pluralize }}</span>
+            </h4>
+
+        </div>
+        <div class="card-body">
+
+            {% if not consulta %}
+            <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                <span class="badge badge-pill badge-danger">Sin registros</span>
+                {% if error %}
+                    {{ error }}
+                {% else %}
+                 No hay clientes registrados.
+               {% endif %}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            {% endif %}
+
+            <!-- <div class="content"> -->
+            <div>
+                <!-- <h5 class="heading-title mb-1 text-secondary">Formas de cobro</h5> -->
+        
+                <div id="toolbar" >
+                    <button id="todos_tasa_gaoa" class="btn btn-danger" disabled>
+                        <i class="ti ti-edit"></i> Actualizar tasas de GAO adicional
+                    </button>
+                    <button id="todos_tasa_mora" class="btn btn-danger" disabled>
+                        <i class="ti ti-edit"></i> Actualizar tasas de mora
+                    </button>
+    
+                </div>
+            </div>        
+
+                <table class="table table-hover table-bordered" 
+                    id="table"
+                    data-filter-control="true"
+                    data-show-search-clear-button="true"
+                    data-show-refresh="true"
+                    data-show-fullscreen="true"
+                    data-show-columns="true"
+                    data-show-columns-toggle-all="true"
+                    data-show-export="true"
+                    data-detail-formatter="detailFormatter"
+                    data-show-pagination-switch="true"
+                    data-pagination="true"
+                    data-page-list="[10, 25, 50, 100, all]"
+                    data-toolbar="#toolbar"
+                    data-id-field="id"
+                    data-click-to-select="true"
+                    >
+                    <thead>
+                        <tr>
+                            <th data-field="state" data-checkbox="true"></th>
+                            <th data-field="id">Ref.</th>
+                            <th data-field="campo1" data-sortable="true" data-filter-control="input">Nombre</th>
+                            <!-- <th data-field="campo2" data-sortable="true">Id</th> -->
+                            <th data-field="campo3" data-sortable="true" data-filter-control="input">Clase</th>
+                            <th data-field="campo4" data-sortable="true" data-filter-control="input">% anticipo</th>
+                            <th data-field="campo5" data-sortable="true" data-filter-control="input">Tasa de <br>GAO</th>
+                            <th data-field="campo6" data-sortable="true" data-filter-control="input">Tasa de <br>descuento</th>
+                            <th data-field="campo7" data-sortable="true" data-filter-control="input">Tasa de GAO <br>adicional</th>
+                            <th data-field="campo8" data-sortable="true" data-filter-control="input">Tasa de <br>mora</th>
+                            <th data-field="campo9" data-sortable="true" data-filter-control="input">Estado</th>
+                            <th data-field="campo10" data-sortable="true" data-filter-control="input">Alta</th>
+                            <th data-field="campo11" data-sortable="false">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in consulta %}
+                        <tr>
+                            <td>{{ false }}</td>
+                            <td>{{ item.id }}</td>
+                            <td>{{ item }}</td>
+                            <!-- <td>{{ item.cxcliente.cxparticipante }}</td> -->
+                            <td>{{ item.datos_operativos.get.cxclase }}</td>
+                            <td>{{ item.datos_operativos.get.nporcentajeanticipo }}</td>
+                            <td>{{ item.datos_operativos.get.ntasacomision }}</td>
+                            <td>{{ item.datos_operativos.get.ntasadescuentocartera }}</td>
+                            <td>{{ item.datos_operativos.get.ntasagaoa }}</td>
+                            <td>{{ item.datos_operativos.get.ntasamora }}</td>
+                            <td>{{ item.datos_operativos.get.estado}}</td>
+                            <td>{{ item.datos_operativos.get.dalta|date:"Y-m-d" }}</td>
+                            <td>
+                                <a href="{% url 'operaciones:datosoperativos_editar' item.cxcliente.id %}" 
+                                    class="btn  btn-sm" title="Editar" role="button"><i class="fa fa-edit"></i></a>
+                                <a href="{% url 'clientes:listadatosoperativoshistorico' item.id %}" 
+                                    class="btn  btn-sm" title="Historia" role="button"><i class="fa fa-archive"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            <!-- </div> -->
+
+        </div>
+
+    </div>
+ 
+
+{% endblock %}
+{% block js_page %}
+<script>
+var $table = jQuery('#table')
+var $todos_tasa_gaoa = jQuery("#todos_tasa_gaoa")
+var $todos_tasa_mora = jQuery("#todos_tasa_mora")
+var selections = []
+
+window.onload=function(){
+
+    $table.bootstrapTable({locale:"es-EC"});
+    
+    // evento de marcar y desmarcar documentos
+    $table.on('check.bs.table uncheck.bs.table ' +
+      'check-all.bs.table uncheck-all.bs.table',
+        function () {
+        $todos_tasa_gaoa.prop('disabled', !$table.bootstrapTable('getSelections').length)
+        $todos_tasa_mora.prop('disabled', !$table.bootstrapTable('getSelections').length)
+
+        // save your data, here just save the current page
+        selections = getIdSelections()
+        console.log('selections', selections)
+        // push or splice the selections if you want to save all data selections
+        }
+    )
+
+    // acciones ejecutada sobre registros seleccionados
+    $todos_tasa_gaoa.click(function () {
+      EditarTasaGAOA();
+      $todos_tasa_gaoa.prop('disabled', true)
+    })
+
+    $todos_tasa_mora.click(function () {
+      EditarTasaMora();
+      $todos_tasa_mora.prop('disabled', true)
+    })
+
+};
+
+function EditarTasaGAOA(){
+
+//   var seleccion=  $table.bootstrapTable('getSelections')
+  var ids = getIdSelections()
+    console.log('ids', ids,)
+  AbrirModal('/clientes/cambiartasagaoa-todos/'+ids )
+}    
+
+function EditarTasaMora(){
+
+//   var seleccion=  $table.bootstrapTable('getSelections')
+  var ids = getIdSelections()
+    console.log('ids', ids,)
+  AbrirModal('/clientes/cambiartasamora-todos/'+ids )
+}    
+
+</script>
+
+{% endblock %}

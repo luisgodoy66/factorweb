@@ -1,0 +1,293 @@
+{% load filtros %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Asignación</title>
+
+    <style type="text/css">
+        @page {
+            size: A4;
+            margin: 0cm;
+            size: landscape;
+        }
+        .table thead th {
+                vertical-align:  top ;
+                border-bottom: 1px solid #000;
+        }
+        .table td.numero{
+            text-align: right;
+        }
+        .table td.centrado{
+            text-align: center;
+        }
+        .table td.subrayado{
+            border-bottom: 1px solid black;
+        }
+        .table td.sobrerayado{
+            border-top: 1.5px solid black;
+            padding-top: 0px; /* Reduce el espacio entre la raya y el texto */
+        }
+        .alerta { 
+        font-family: sans-serif; 
+        font-size: 11px; 
+        font-weight: 400; 
+        color: #eb1111; 
+        }        
+        body {
+            font-family: sans-serif;
+            font-size: 09px;
+            font-weight: 400;
+            color: #000;
+        }
+        .container{
+            margin: 0 auto;
+            padding: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+
+                <table class="table" style="width:100%">
+                    <tbody>
+                        <tr>
+                            {% if fuente == 'operacion' %}
+                                <td >
+                                    <div style="width:4cm; height:2cm;  align-items:center; justify-content:center;  
+                                    border-radius:4px; overflow:hidden;">
+                                        <!--begin::Logo-->
+                                            <img src="{{ user.usuario_empresa.get.empresa.ilogolargo.url }}" alt="Logo" 
+                                            style="width:100%; height:100%; object-fit:contain;">
+                                        <!--end::Logo-->
+                                    </div>
+                                </td>
+                                <td class="centrado" ><h3>LIQUIDACIÓN DE ASIGNACIÓN </h3></td>
+                            {% else %}
+                                <td colspan="2"><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
+                                <td class="centrado" ><h3>LIQUIDACIÓN DE SOLICITUD </h3></td>
+                            {% endif %}
+                            <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+
+            <div class="row">
+                <table class="table " style="width:100%; ">
+                    <tbody>
+                        <tr>
+                            <td style="width: 10%; "><strong>Cliente:</strong></td>
+                            <td style="width: 30%; ">{{ asignacion.cxcliente }}</td>
+                            <td style="width: 20%; "></td>
+                            <td style="width: 15%; "><strong>Fecha de negociacion:</strong></td>
+                            <td style="width: 25%; ">{{ asignacion.dnegociacion|custom_date_format }}</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 10%; "><strong>Id:</strong></td>
+                            {% if fuente == 'operacion' %}
+                                <td style="width: 30%; ">{{asignacion.cxcliente.cxcliente.cxparticipante}}</td>
+                            {% else %}
+                                <td style="width: 30%; ">{{asignacion.cxcliente.cxcliente}}</td>
+                            {% endif %}
+                            <td style="width: 20%; "></td>
+                            <td style="width: 15%; "><strong>Fecha de desembolso:</strong></td>
+                            <td style="width: 25%; ">{{ asignacion.ddesembolso|custom_date_format }}</td>
+                        </tr>
+                        <tr>
+                            {% if fuente == 'operacion' %}
+                            <td style="width: 10%; "><strong>Asignación:</strong></td>
+                            {% else %}
+                            <td style="width: 10%; "><strong>Solicitud:</strong></td>
+                            {% endif %}
+                            <td style="width: 30%; ">{{ asignacion.cxasignacion }}</td>
+                            <td style="width: 20%; "></td>
+                            <td style="width: 15%; "><strong>Tipo de factoring:</strong></td>
+                            <td style="width: 25%; ">{{ asignacion.cxtipofactoring.cttipofactoring}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <hr>
+            </div>                       
+
+            <div class="row">
+                <div class="col">
+                    <table class="table table-striped table-hover nowrap" style="width:100%">
+                        <thead>
+                            <th>Deudor / Ref.</th>        
+                            <th>Documento</th>
+                            <th>Emisión</th>
+                            <th>Vencimiento.</th>
+                            <th>Total</th>
+                            <th>Plazo</th>
+                            <th>% Anticipo</th>
+                            <th>Anticipo</th>
+                            {% if gao.imprimir %}<th>% {{gao.iniciales}}</th>{% endif %}
+                            <th>{{ gao.descripcion }}</th>
+                            {% if dc.imprimir %}<th>% {{dc.iniciales}}</th>{% endif %}
+                            <th>{{ dc.descripcion }}</th>
+                            <th>Total cargos</th>
+                        </thead>
+                        <tbody>
+                            {% if fuente == 'operacion' %}
+                                {% regroup documentos|dictsort:"cxcomprador.cxcomprador.ctnombre" by cxcomprador as documentos_list %}
+                            {% else %}                                
+                                {% regroup documentos by comprador.cxcomprador.ctnombre as documentos_list %}
+                            {% endif %}
+                            {% for comprador in documentos_list %}
+                                <tr></tr>
+                                <tr>
+                                    <td class="subrayado" colspan="4"><strong>{{ comprador.grouper }}</strong></td>
+                                    <td class="subrayado numero"><strong> {{comprador.list|running_total2|floatformat:"2g" }}</strong></td>
+                                    <td class="subrayado" colspan="6"></td>
+                                    {% if gao.imprimir %}
+                                        <td class="subrayado"></td>
+                                    {% endif %}
+                                    {% if dc.imprimir %}
+                                        <td class="subrayado"></td>
+                                    {% endif %}
+                                </tr>
+                                {% for item in comprador.list %}
+                                    <tr></tr>
+                                    <tr>
+                                        <td width="5%">{{ item.id }}</td>
+                                        <td width="10%">{{ item }}</td>
+                                        <td>{{ item.demision|custom_date_format  }}</td>
+                                        <td class="centrado">{{ item.dvencimiento|custom_date_format  }}</td>
+                                        <td class="numero">{{ item.ntotal|floatformat:"2g" }}</td>
+                                        <td class="numero">{{ item.nplazo }}</td>
+                                        <td class="numero">{{ item.nporcentajeanticipo }}</td>
+                                        <td class="numero">{{ item.nanticipo|floatformat:"2g" }}</td>
+                                        {% if gao.imprimir %}
+                                            <td class="numero">{{ item.ntasacomision|floatformat:2 }}</td>
+                                        {% endif %}
+                                        <td class="numero">{{ item.ngao|floatformat:"2g"  }}</td>
+                                        {% if dc.imprimir %}
+                                            <td class="numero">{{ item.ntasadescuento|floatformat:2 }}</td>
+                                        {% endif %}
+                                        <td class="numero">{{ item.ndescuentocartera|floatformat:"2g"  }}</td>
+                                        <td class="numero">{{ item.total_cargos|floatformat:"2g" }}</td>
+                                    </tr>
+                                {% endfor %}
+                                <tr></tr>
+                            {% endfor %}
+                            <!-- totales -->
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="numero sobrerayado"><h4>{{ asignacion.nvalor|floatformat:"2g" }}</h4></td>
+                                <td colspan="2" style="text-align: right;"><h4>Totales a liquidar:</h4></td>
+                                <td class="sobrerayado numero"><h4>{{ asignacion.nanticipo|floatformat:"2g" }}</h4></td>
+                                {% if gao.imprimir %}<td class="sobrerayado"></td>{% endif %}
+                                <td class="sobrerayado numero"><h4>{{ asignacion.ngao|floatformat:"2g" }}</h4></td>
+                                {% if dc.imprimir %}<td class="sobrerayado"></td>{% endif %}
+                                <td class="sobrerayado numero"><h4>{{ asignacion.ndescuentodecartera|floatformat:"2g" }}</h4></td>
+                                <td class="sobrerayado numero"><h4>{{cargos_negociacion|floatformat:"2g"}}</h4></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                {% if gao.imprimir %}<td></td>{% endif %}
+                                <td colspan="2"><strong>Anticipo menos cargos</strong></td>
+                                <td class="numero">{{ subtotal|floatformat:"2g"}}</td>
+                            </tr>
+                            {% if asignacion.notroscargos > 0 %}
+                            {% for item in otros_cargos %}
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                {% if gao.imprimir %}<td></td>{% endif %}
+                                <td colspan="2"><strong>{{item.Cargo}}</strong></td>
+                                <td class="numero">{{ item.Valor|floatformat:"2u"}}</td>
+                        </tr>
+                            {% endfor %}
+                        {% endif %}
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                {% if gao.imprimir %}<td></td>{% endif %}
+                                <td colspan="2"><strong>I.V.A.</strong></td>
+                                <td class="numero">{{ asignacion.niva|floatformat:"2g"}}</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                {% if gao.imprimir %}<td></td>{% endif %}
+                                <td colspan="2"><strong>Neto a recibir</strong></td>
+                                <td class="numero">{{ neto|floatformat:"2g"}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+                <!-- instruccion de pago -->
+            </div>
+            <div class="row">
+                <p>
+                <strong>Instrucción de pago: </strong>{{ asignacion.ctinstrucciondepago}}
+                </p>
+            </div>
+            <!-- <div class="row "> -->
+                <table style="width: 100%;">
+                    <tbody>
+                        <tr>
+                            {% if asignacion.cxusuariomodifica %}
+                                <td><strong>Elaborado por: </strong>{{ asignacion.cxusuariomodifica}}</td>
+                            {% else %}
+                                <td><strong>Elaborado por: </strong>{{ asignacion.cxusuariocrea}}</td>
+                            {% endif %}
+                            <td><strong>Revisado por:</strong></td>
+                            {% if fuente == 'operacion' %}
+                                <td><strong>Recibido por:</strong></td>
+                            {% endif %}
+                            {% if asignacion.cxestado == 'R' %}
+                                <td class="alerta"><strong>Reversada</strong></td>
+                            {% endif %}
+                        </tr>
+                    </tbody>
+                </table>
+            <!-- </div> -->
+
+
+        </div>
+        {% if empresa.lgratis %}
+        <footer class="footer">
+            <p>SAAS Margarita desarrollado por Código Bambú</p>
+        </footer>
+        {% endif %}
+    </div>
+
+</body>
+</html>

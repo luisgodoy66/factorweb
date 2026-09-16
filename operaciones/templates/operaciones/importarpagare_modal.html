@@ -1,0 +1,199 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" id="frmPagare" name="form" rol="form"
+            action="{% url 'operaciones:importar_xml' %}"
+            class="form-horizontal" onsubmit="return checkSubmit();">
+            <div class="card">
+                {% csrf_token %}
+                <div class="card-header">
+                    <strong>Seleccionar archivo de carga</strong> 
+                </div>
+                <div class="card-body">
+                    <div class="row form-group">
+                        <div class="col-md-6">
+                        <div class="row form-group">
+                            <input type="file" id="xmlFile" accept=".xml">
+
+                        </div>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_nvalor" class=" form-control-label">
+                            RUC de cliente:
+                        </label></div>
+                        <div class="col-md-8" id="Ruc"></div>
+                    </div> 
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_nvalor" class=" form-control-label">
+                            Cliente:
+                        </label></div>
+                        <div class="col-md-8" id="Cliente"></div>
+                    </div> 
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">Cantidad de pagos:</label>
+                        </div>
+                        <div class="col-md-8" id="Cantidad"></div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">Capital:</label>
+                        </div>
+                        <div class="col-md-8" id="Capital"></div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">Interes:</label>
+                        </div>
+                        <div class="col-md-8" id="Interes"></div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="id_nvalor" class=" form-control-label">Total:</label>
+                        </div>
+                        <div class="col-md-8" id="Total"></div>
+                    </div>  
+                </div>
+                <div class="card-footer">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="return CerrarModal()">
+                        <i class="fa fa-dot-circle-o"></i> Cerrar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm ">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+
+                </div>
+            </div>
+                <!-- </div> -->
+        </form>
+    </div>
+{% block js_page %}
+    <script>
+        var enviando = false; //Obligaremos a entrar el if en el primer submit
+        var tf ;
+        var objeto = {};
+
+        const xmlFile = document.getElementById('xmlFile');
+        xmlFile.addEventListener('change', function() {
+
+            CargaXMLPagare(xmlFile).then((resultado) => {
+                objeto = resultado;
+                document.getElementById("Ruc").innerHTML = objeto["id_cliente"];                
+                document.getElementById("Cliente").innerHTML = objeto["nombre_cliente"];                
+                document.getElementById("Cantidad").innerHTML = objeto["numero_documentos"];                
+                document.getElementById("Total").innerHTML = objeto["total"];                
+                document.getElementById("Capital").innerHTML = objeto["capital"];                
+                document.getElementById("Interes").innerHTML = objeto["interes"];                
+            });
+
+        });
+
+        jQuery("form").submit(function(e){
+            e.preventDefault();
+                fetchPostear("{% url 'operaciones:importar_xml_pagare' %}", objeto, function(pagare_id){
+                    window.location.href = "{% url 'operaciones:listapagares' %}";
+                    url = window.location.origin
+                    url = url + "/operaciones/reportepagare/"+pagare_id;
+                    window.open( url);
+                });
+            CerrarModal();
+        });
+
+        function CargaXMLPagare(xmlFile){
+            return new Promise((resolve, reject) => {
+
+            const file = xmlFile.files[0];
+            const reader = new FileReader();
+
+            reader.readAsText(file);
+            reader.onerror = function(event) {
+                reject(new Error("Error al leer el archivo"));
+            };
+            reader.onload = function() {
+                const xml = reader.result;
+                var parser = new DOMParser();
+                // process the xml here
+                var xmlDoc = parser.parseFromString(xml,"text/xml");
+
+                if (xmlDoc.documentElement.localName != 'PAGARE'){
+                    alert('No corresponde')
+                    reject(new Error('No corresponde'));          
+                }
+                else{
+                    let cliente = xmlDoc.getElementsByTagName("CLIENTE")[0].childNodes;
+                    for (let i in cliente){
+                        switch(cliente[i].nodeName){
+                        case "RUC":
+                            ruc_cliente = cliente[i].childNodes[0].nodeValue;
+                            break;
+                        case "NOMBRE":
+                            nombre_cliente = cliente[i].childNodes[0].nodeValue;
+                            break;
+                        }
+                    }
+                    let vncapital = xmlDoc.getElementsByTagName("CAPITAL")[0].childNodes[0].nodeValue
+                    let vninteres = xmlDoc.getElementsByTagName("INTERES")[0].childNodes[0].nodeValue ;
+                    let vntasainteres = xmlDoc.getElementsByTagName("TASAINTERES")[0].childNodes[0].nodeValue ;
+                    let vdemision = xmlDoc.getElementsByTagName("EMISION")[0].childNodes[0].nodeValue ;
+                    let vdvencimiento = xmlDoc.getElementsByTagName("VENCIMIENTO")[0].childNodes[0].nodeValue ;
+                    let vnpagos = xmlDoc.getElementsByTagName("PAGOS")[0].childNodes[0].nodeValue ;
+                    let vnplazo = xmlDoc.getElementsByTagName("PLAZO")[0].childNodes[0].nodeValue ;
+                    let vntotal = xmlDoc.getElementsByTagName("TOTAL")[0].childNodes[0].nodeValue ;
+                    let lista = xmlDoc.getElementsByTagName("CUOTAS")[0].children ;
+
+                    let total_capital = 0;
+                    let total_interes = 0;
+
+                    let docs = []; // Paso 1
+
+                    for (let i in lista) {
+                        let detalle1 = lista[i].children;
+                        let objetoDetalle = {}; // Paso 2
+                        console.log(detalle1);
+                        for (let j in detalle1) {
+                            console.log(detalle1[j].nodeName);
+                            if (detalle1[j].nodeName != undefined && detalle1[j].childNodes.length > 0) {
+                                switch (detalle1[j].nodeName) {
+                                    case "FECHAPAGO":
+                                        objetoDetalle.fechapago = detalle1[j].childNodes[0].nodeValue;
+                                        break;
+                                    case "CAPITALCUOTA":
+                                        objetoDetalle.capital = parseFloat((parseFloat(detalle1[j].childNodes[0].nodeValue) * 1).toFixed(3));
+                                        total_capital += objetoDetalle.capital;
+                                        break;
+                                    case "INTERESCUOTA":
+                                        objetoDetalle.interes = parseFloat((parseFloat(detalle1[j].childNodes[0].nodeValue) * 1).toFixed(3));
+                                        total_interes += objetoDetalle.interes;
+                                        break;
+                                }
+                            }
+                        }
+                        if (detalle1 != undefined){
+                            docs.push(objetoDetalle); // Paso 5
+                        }
+                    }
+                    
+                    resultado = {
+                        id_cliente: ruc_cliente,
+                        nombre_cliente: nombre_cliente,
+                        emision : vdemision,
+                        vencimiento : vdvencimiento,
+                        capital : vncapital,
+                        tasa_interes: vntasainteres,
+                        interes: vninteres,
+                        plazo: vnplazo,
+                        numero_documentos: lista.length - 1,
+                        total : total_capital+total_interes,
+                        documentos: docs,
+                    }
+                }
+                resolve(resultado);
+            };
+
+            });
+            }
+
+    </script>
+{% endblock %}
+</div>

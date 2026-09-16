@@ -1,0 +1,121 @@
+{% load filtros %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Facturas pendientes</title>
+
+    <style type="text/css">
+        @page { 
+            size: A4;
+            margin: 0cm;
+            size:  portrait;
+        }
+        .table thead th {
+                vertical-align:  top ;
+                border-bottom: 1px solid #000;
+        }
+        .table td.numero{
+            text-align: right;
+        }
+        .table td.centrado{
+            text-align: center;
+        }
+        .table td.subrayado{
+            border-bottom: 1px solid black;
+        }
+        .alerta { 
+        font-family: sans-serif; 
+        font-size: 11px; 
+        font-weight: 400; 
+        color: #eb1111; 
+        }        
+        body {
+            font-family: sans-serif;
+            font-size: 09px;
+            font-weight: 400;
+            color: #000;
+        }
+        .container{
+            margin: 0 auto;
+            padding: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <table class="table" style="width:100%">
+                    <tbody>
+                        <tr>
+                            <td colspan="2"><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
+                            <td class="centrado" colspan="2"><h3>LISTADO DE FACTURAS PENDIENTES</h3></td>
+                            <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
+                        </tr>
+                        {% if corte %}
+                        <tr>
+                            <td colspan="2"><h4></h4></td>
+                            <td class="centrado" colspan="2"><h3>{{ corte.ctdescripcion }}</h3></td>
+                            <td style="text-align: right;">Realizado el: {{ corte.dregistro|date:"Y/m/d H:i:s" }}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col">
+                    <table class="table table-striped table-hover nowrap" style="width:100%">
+                        <thead>
+                            <th>Deudor/Cliente</th>        
+                            <th>Asignación</th>        
+                            <th>Documento</th>
+                            <th>Vencimiento</th>
+                            <th>Días negociados</th>
+                            <th>Días vencidos</th>
+                            <th>Saldo</th>
+                        </thead>
+                        <tbody>
+                            <tr></tr>
+                            {% regroup detalle by cxcomprador__cxcomprador__ctnombre as cartera_list %}
+                            {% for deudor in cartera_list %}
+                            <tr></tr>
+                            <tr>
+                                <td class="subrayado" colspan="6"><strong>{{ deudor.grouper }}</strong></td>
+                                <td class="subrayado numero"><strong> {{deudor.list|running_saldo|floatformat:"2g" }}</strong></td>
+                            </tr>
+                                {% for item in deudor.list %}
+                                <tr></tr>
+                                <tr>
+                                    <td>{{ item.cxcliente__cxcliente__ctnombre }}</td>
+                                    <td>{{ item.cxasignacion__cxasignacion }}</td>
+                                    <td>{{ item.ctdocumento }}</td>
+                                    <td>{{ item.vencimiento |custom_date_format}}</td>
+                                    <td class="numero">{{ item.dias_negociados }}</td>
+                                    <td class="numero"> {% if item.ndiasprorroga > 0 %}<strong>{% endif %}
+                                        {{ item.dias_vencidos }}
+                                        {% if item.ndiasprorroga > 0 %}</strong>{% endif %}
+                                    </td>
+                                    <td class="numero">{{ item.nsaldo|floatformat:"2g" }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr></tr>
+                            {% endfor %}
+                            <tr></tr>
+                            <tr>
+                                <td colspan="7" class="numero"><h4>Total: {{ total|floatformat:"2g" }}</h4></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="POST" rol="form" id="frmLinea" class="form-horizontal" enctype="multipart/form-data"
+                action="{% url 'clientes:estadoclasecomprador_editar' pk %}"
+                onsubmit="return checkSubmit();">
+                <!-- <div class="col"> -->
+            <div class="card">
+
+                {% csrf_token %}
+                <div class="card-header">
+                    <strong>Datos del deudor </strong> {{ nombre_deudor }}
+                </div>
+                
+                <div class="card-body card-block">
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_nvalor" 
+                            class=" form-control-label">{{ form.cxclase.label}}</label></div>
+                        <div class="col-12 col-md-9">
+                            {{ form.cxclase}}
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col col-md-3"><label for="id_cxparticipante" 
+                            class=" form-control-label">{{ form.cxestado.label}}</label></div>
+                        <div class="col-12 col-md-9">
+                            {{ form.cxestado}}
+                        </div>
+                    </div>
+
+                </div>    
+                
+                <div class="card-footer">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="return CerrarModal()">
+                        <i class="fa fa-ban"></i> Cerrar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+                </div>
+            </div>
+            <!-- </div> -->
+        </form>
+
+    </div>
+</div>
+
+{% block js_page %}
+<script>
+     enviando = false; //Obligaremos a entrar el if en el primer submit
+     
+</script>
+{% endblock %}

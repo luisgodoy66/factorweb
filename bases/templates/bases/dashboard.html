@@ -1,0 +1,147 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block content %}
+<div class="content mt-3">
+    <!-- totales -->
+    <div class="col-md-12 col-lg-12">
+        <!-- total cartera y protestos -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="clearfix">
+                        <i class="fa fa-dollar bg-flat-color-5 p-3 font-2xl mr-3 float-left text-light"></i>
+                        <div class="h5 text-secondary mb-0 mt-1">{{total_cartera_protestos|floatformat:"2g"}}</div>
+                        <div class="text-muted text-uppercase font-weight-bold font-xs small">
+                            <h6>Facturas y protestos</h6></div>
+                    </div>
+                    <div class="b-b-1 pt-3"></div>
+                    <hr>
+                    <div class="more-info pt-2" style="margin-bottom:-10px;">
+                        <a class="font-weight-bold font-xs btn-block text-muted small" 
+                            href="{% url 'operaciones:antigüedad_por_cliente' %}"  target="cartera">
+                            <h6>Antigüedad por cliente
+                            <i class="fa fa-angle-right float-right font-lg"></i></h6>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- total de protestos -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="clearfix">
+                        <i class="fa fa-bell bg-danger p-3 font-2xl mr-3 float-left text-light"></i>
+                        <div class="h5 text-secondary mb-0 mt-1">{{total_protestos|floatformat:"2g"}}</div>
+                        <div class="text-muted text-uppercase font-weight-bold font-xs small">
+                            <h6>Protestos</h6></div>
+                    </div>
+                    <div class="b-b-1 pt-3"></div>
+                    <hr>
+                    <div class="more-info pt-2" style="margin-bottom:-10px;">
+                        <a class="font-weight-bold font-xs btn-block text-muted small" 
+                        href="{% url 'cobranzas:protestos_pendientes' %}" target="protestos">
+                            <h6>Listado de protestos pendientes
+                            <i class="fa fa-angle-right float-right font-lg"></i></h6>
+                        </a>
+                    </div>
+                </div>
+            </div>
+           
+        </div>
+        <!-- total negociado -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="stat-widget-one">
+                        <div class="stat-icon dib"><i class="ti-file text-success border-success"></i></div>
+                        <div class="stat-content dib">
+                            <div class="stat-text">Total negociado</div>
+                            <div class="stat-digit">{{ total_negociado|floatformat:"2g"}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- total ingresos año -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="stat-widget-one">
+                        <div class="stat-icon dib"><i class="ti-money text-primary border-primary"></i></div>
+                        <div class="stat-content dib">
+                            <div class="stat-text">Facturado año actual</div>
+                            <div class="stat-digit">{{ ingreso_acumulado|floatformat:"2g"}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- <div class="animated fadeIn"> -->
+    <div class="row">
+        <!-- grafico cartera negociada -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-3">Cartera negociada </h4>
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-3">Antigüedad de la cartera</h4>
+                    <canvas id="singelBarChart"></canvas>
+                </div>
+            </div>
+        </div><!-- /# column -->
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-3">Utilizado por cliente</h4>
+                    <canvas id="horizontalBarChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-3">Ingresos facturados</h4>
+                    <canvas id="IngresosGenerados"></canvas>
+                </div>
+            </div>
+        </div><!-- /# column -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-3">Negociado por sector </h4>
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+        </div><!-- /# column -->
+
+    </div>
+
+
+</div>
+
+{% endblock %}
+{% block js_page %}
+<!-- Chart js -->
+<script src="{% static 'factorweb/vendors/chart.js/dist/Chart.bundle.min.js' %}"></script>
+<!-- <script src="{% static 'factorweb/assets/js/widgets.js' %}"></script> -->
+<script>
+
+    window.onload=function(){
+
+    antigüedadcartera("/operaciones/antigüedadcartera");
+    carteranegociada("/operaciones/carteranegociada/{{año}}","{{año}}");
+    ingresosGenerados("/operaciones/ingresosgenerados/{{año}}");
+    NegociadoPorActividad("/operaciones/negociadoporactividad");
+    saldoPorCliente("/operaciones/clientesvalorespendientes/95");
+    }
+    
+</script>    
+{% endblock %}

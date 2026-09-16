@@ -1,0 +1,80 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">configuración</a></li>
+                    <li><a href="#">Tablas</a></li>
+                    <li><a href="{% url 'cobranzas:listamotivosprotesto' %}">Motivos de protesto</a></li>
+                    <li class="active">editar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="col-lg-6">
+    <form  method="post"  class="form-horizontal">
+                {% csrf_token %}
+        <div class="card">
+            <div class="card-header" style="background-color: white;">
+                <div class="d-flex justify-content-between align-items-center ">
+                    <h5>Datos de {% if motivo %}  {{ motivo }} {% else %}  nuevo motivo {% endif %} </h5> 
+                    <a href="{% url 'cobranzas:listamotivosprotesto' %}" class="btn  btn-sm">
+                        <i class="fa fa-times"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body card-block">
+
+                    <div class="row form-group">
+                        <div class="col-12 col-md-6">
+                            <label for="id_ctmotivoprotesto" class=" form-control-label">
+                                {{ form.ctmotivoprotesto.label}}</label></div>
+                        <div class="col col-md-6">
+                            {{ form.ctmotivoprotesto}}
+                        </div>
+                    </div>  
+                    <div class="row form-group">
+                        <div class="col-12 col-md-6">
+                            <label for="id_ctabreviacion" class=" form-control-label">
+                                {{ form.ctabreviacion.label}}</label></div>
+                        <div class="col col-md-6">
+                            {{ form.ctabreviacion}}
+                        </div>
+                    </div>  
+
+                    <div class="row form-group">
+                        <div class="col col-md-6">
+                            <label for="id_lresponsabilidadgirador">{{form.lresponsabilidadgirador.label}}</label>                            
+                        </div>
+                        <div class="col ">
+                            <label class="switch switch-3d switch-success mr-3">
+                                <input type="checkbox" class="switch-input" 
+                                {% if  motivo.lresponsabilidadgirador %} checked {% endif %} 
+                                id = "id_lresponsabilidadgirador" name = "lresponsabilidadgirador"> 
+                                <span class="switch-label"></span> 
+                                <span class="switch-handle"></span>
+                            </label>
+                        </div>
+                    </div>
+
+            </div>    
+
+            <div class="card-footer">
+                <div class="text-right">
+                    <button type="submit" class="btn btn-secondary btn-sm">
+                        <span class="fa fa-dot-circle-o"></span> Grabar
+                    </button>
+
+                </div>
+                    {{ form.errors}}
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% block js_page %}
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends 'bases/home.html' %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Participantes</a></li>
+                    <li><a href="#">Clientes</a></li>
+                    <li><a href="{% url 'operaciones:listadatosoperativos' %}">Datos operativos</a></li>
+                    <li class="active">{{cliente}}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div class="card-header" style="background-color: white;">
+            <div class="d-flex justify-content-between align-items-center ">
+                <!-- <div class="dropdown float-right">
+                    <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        <div class="dropdown-menu-content">
+                            <a class="dropdown-item" href="#">Imprimir</a>
+                        </div>
+                    </div>
+                </div> -->
+                <h4 class="mb-0">
+                    <span class="count">{{ consulta.count }} registrado{{ consulta.count|pluralize:"s" }}</span>
+                </h4>
+                <a href="{% url 'operaciones:listadatosoperativos' %}" class="btn  btn-sm">
+                    <i class="fa fa-times"></i> 
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+
+            {% if not consulta %}
+            <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                <span class="badge badge-pill badge-danger">Sin registros</span>
+                {% if error %}
+                    {{ error }}
+                {% else %}
+                 No hay historico registrado.
+               {% endif %}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            {% endif %}
+
+            <!-- <div class="content"> -->
+
+                <table class="table table-hover table-bordered" 
+       id="bootstrap-data-table-export"
+       data-search="true"
+       data-show-columns="true"
+       data-show-export="true"
+       data-show-refresh="true"
+       data-pagination="true"
+       data-page-size="10"
+       data-page-list="[10, 25, 50, 100, all]"
+       data-locale="es-EC">
+    <thead>
+        <tr>
+            <th data-field="campo1" data-sortable="true">Fecha</th>
+            <th data-field="campo2" data-sortable="true">Clase</th>
+            <th data-field="campo3" data-sortable="true">% anticipo</th>
+            <th data-field="campo4" data-sortable="true">Tasa GAO</th>
+            <th data-field="campo5" data-sortable="true">Tasa de <br>descuento</th>
+            <th data-field="campo6" data-sortable="true">Tasa de GAO <br>adicional</th>
+            <th data-field="campo7" data-sortable="true">Tasa de <br> mora</th>
+            <th data-field="campo8" data-sortable="true">Beneficiario <br>asignación</th>
+            <th data-field="campo9" data-sortable="true">Beneficiario <br>cobranza</th>
+            <th data-field="campo10" data-sortable="true">Estado</th>
+        </tr>
+    </thead>
+                    <tbody>
+                        {% for item in consulta %}
+                        <tr>
+                            <td data-order="{{item.dregistro |date:'yyy-MM-dd H:i'}}">{{ item.dregistro }}</td>
+                            <td>{{ item.cxclase }}</td>
+                            <td>{{ item.nporcentajeanticipo }}</td>
+                            <td>{{ item.ntasacomision }}</td>
+                            <td>{{ item.ntasadescuentocartera }}</td>
+                            <td>{{ item.ntasagaoa }}</td>
+                            <td>{{ item.ntasamora }}</td>
+                            <td>{{ item.ctbeneficiarioasignacion }}</td>
+                            <td>{{ item.ctbeneficiariocobranzas }}</td>
+                            <td>{{ item.estado}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            <!-- </div> -->
+
+        </div>
+    </div>
+ 
+
+{% endblock %}
+

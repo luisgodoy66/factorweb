@@ -1,0 +1,58 @@
+<div class="modal-dialog ">
+    <div class="modal-content">
+
+        <form  method="post" id="frmSolicitud" enctype="multipart/form-data" 
+            name="form" class="form-horizontal"
+            action="{% url 'operaciones:cortehistorico_editar' corte.id %}"
+            onsubmit="return checkSubmit();">
+            <!-- <div class="col"> -->
+            <div class="card">
+                {% csrf_token %}
+                <div class="card-header">
+                    <strong>Datos del corte </strong> 
+                </div>
+                
+                <div class="card-body card-block">
+                    <div class="row form-group">
+                        <div class="col col-md-3">
+                            <label for="id_nvalor" class=" form-control-label">{{ form.ctdescripcion.label}}</label>
+                        </div>
+                        <div class="col-12 col-md-9">
+                            {{ form.ctdescripcion}}
+                            <small class="form-text text-muted">Esta descripción aparecerá en los reportes de cartera</small>
+                        </div>
+                    </div>
+                    <!-- <div class="row form-group">
+                        <div class="col col-md-3">
+                            <label for="id_cxparticipante" class=" form-control-label">{{form.lactivo.label}}</label>
+                        </div>
+                        <div class="col-12 col-md-9">
+                            {{ form.lactivo}}
+                        </div>
+                    </div> -->
+
+                </div>    
+                
+                <div class="card-footer">
+                    <button type="button" class="btn btn-danger btn-sm" 
+                        onclick="return CerrarModal()">
+                        <i class="fa fa-ban"></i> Cerrar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+                </div>
+            </div>
+            <!-- </div> -->
+        </form>
+
+    </div>
+</div>
+
+
+<!-- {% block js_page %} -->
+<script>
+     enviando = false; //Obligaremos a entrar el if en el primer submit
+     
+</script>
+<!-- {% endblock %} -->

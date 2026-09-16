@@ -1,0 +1,140 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">operaciones</a></li>
+                    <li><a href="#">desembolsos</a></li>
+                    <li class="active">pago de negociación</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div class="card-header" style="background-color: white;">
+            <!-- <div class="dropdown float-right">
+                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <div class="dropdown-menu-content">
+                        <a class="dropdown-item" href="#">Imprimir</a>
+                    </div>
+                </div>
+            </div> -->
+            <h4 class="mb-0">
+                <span class="count">{{ consulta.count }} encontrado{% if consulta.count != 1 %}s{% endif %}</span>
+            </h4>
+
+        </div>
+        <div class="card-body">
+
+            {% if not consulta %}
+            <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                <span class="badge badge-pill badge-danger">Sin registros</span>
+                {% if error %}
+                    {{ error }}
+                {% else %}
+                 No hay asignaciones pendientes hasta la fecha.
+               {% endif %}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            {% endif %}
+
+            <div >
+
+                <table class="table table-hover table-bordered" 
+                    id="bootstrap-data-table-export"
+                    >
+                    <thead>
+                        <tr>
+                            <th data-field="campo1" data-sortable="true">Nombre de cliente</th>
+                            <th data-field="campo2" data-sortable="true">Liquidación</th>
+                            <!-- <th data-field="campo3" data-sortable="true">Tipo de factoring</th> -->
+                            <th data-field="campo4" data-sortable="true">Instrucción de pago</th>
+                            <th data-field="campo5" data-sortable="true">Desembolso</th>
+                            <th data-field="campo6" data-sortable="true">Valor neto</th>
+                            <th data-field="campo7" data-sortable="false">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in consulta %}
+                        <tr>
+                            <td>{{ item.cxcliente }}</td>
+                            <td>{{ item.cxasignacion }}<br>
+                                {{ item.cxtipofactoring }}
+                            </td>
+                            <td>{{ item.ctinstrucciondepago }} </td>
+                            <td>{{ item.ddesembolso|date:"Y/m/d" }}</td>
+                            <td>{{ item.neto |floatformat:"2g"}}</td>
+                            <td>
+                                {% if item.exceso_pendiente %}
+                                    Exceso pendiente
+                                {% else %}
+                                    {% if not item.lrequiereaprobacion or item.solicitudaprobacion.aprobada %}
+                                        <a href="{% url 'operaciones:desembolsarasignacion' item.id item.cliente.id %}" 
+                                        class="btn  btn-sm" role="button"  title="Pagar">
+                                        <i class="fa fa-check"></i></a>
+                                    {% else %}
+                                        {% if item.solicitudaprobacion.pendiente %}
+                                        <button onclick="reenviarSolicitudAprobacion( {{item.id}})" role="button"
+                                                class="btn  btn-sm" title="Reenviar aprobación" >
+                                            <i class="fa fa-rotate-right"></i>
+                                        </button>
+                                        {% else %}
+                                        <button onclick="enviarSolicitudAprobacion( {{item.id}})" role="button"
+                                                class="btn  btn-sm" title="Solicitar aprobación" >
+                                            <i class="fa fa-envelope"></i>
+                                        </button>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+ 
+
+{% endblock %}
+
+{% block js_page %}
+<script>
+    function enviarSolicitudAprobacion(id) {
+
+        MensajeConfirmacion("¿Está seguro de enviar la solicitud de aprobación?", function(){
+            fetchProcesar("/api/slack/enviar-solicitud-aprobacion/" + id, function(){
+                MensajeOk("Solicitud enviada correctamente")
+                location.reload()
+            })
+        })
+
+    }
+    function reenviarSolicitudAprobacion(id) {
+
+        MensajeConfirmacion("¿Está seguro de reenviar la solicitud de aprobación?", function(){
+            fetchProcesar("/api/slack/reenviar-solicitud-aprobacion/" + id, function(){
+                MensajeOk("Solicitud enviada correctamente")
+                location.reload()
+            })
+        })
+
+    }
+
+    // Refrescar la lista automáticamente después de unos segundos
+    setTimeout(function(){
+        location.reload();
+    }, 10000); // 10000 milisegundos = 10 segundos
+</script>
+{% endblock %}

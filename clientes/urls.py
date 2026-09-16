@@ -1,0 +1,99 @@
+from django.urls import URLPattern, path
+from .views import  ClientesView,  DatosClientes \
+    , LineasView, LineaNew, LineaEdit, CompradoresView\
+    , CuposCompradoresView, CuposCompradoresEdit\
+    , CuposCompradoresNew, CuentasBancariasView, CuentasBancariasCliente\
+    , DetalleCuentasBancarias, CuentasBancariasNew, EliminarCuentaBancaria\
+    , ActualizarCuentaTransferencia, DatosDeudores\
+    , CuentasBancariasDeudoresView, CuentasBancariasDeudorNew\
+    , CuentasBancariasDeudorEdit, ClientesSolicitudesView\
+    , EstadoCompradorEdit,CuentasBancariasEdit\
+    , DeClienteAComprador, EliminarCupoComprador, obtener_cantones_por_provincia\
+    , DatosClientes_view, DatosCompradores_view, CambiarTasaGAOA_todos, CambiarTasaMora_todos
+    # ,  DatosClienteJuridico, DatosClienteNatural
+    # , CompradorNew, CompradorEdit\
+from operaciones.views import DatosOperativosHistoricoView
+
+urlpatterns = [
+    # clientes
+    path('listaclientessolicitudes/',ClientesSolicitudesView.as_view()
+        , name='listaclientessolicitudes'),
+    path('listaclientes/',ClientesView.as_view()
+         , name='listaclientes'),
+    path('clientenuevo/',DatosClientes, name='datoscliente_nuevo'),
+    path('edit/<participante_id>',DatosClientes
+         , name='cliente_editar'),
+    path('edit/<participante_id>/<tab>/',DatosClientes
+         , name='cliente_editar'),
+    path('clientenuevo/<solicitante_id>',DatosClientes
+         , name='solicitante_nuevo'),
+    # path('editnatural/<cliente_id>',DatosClienteNatural
+    #     , name='clientenatural_editar'),
+    # path('editjuridico/<cliente_id>',DatosClienteJuridico
+    #     , name='clientejuridico_editar'),
+    path('declienteacomprador/<participante_id>',DeClienteAComprador
+         , name='cliente_es_comprador'),
+    path('view/<participante_id>/',DatosClientes_view
+         , name='cliente_view'),
+    path('view/<participante_id>/<tab>/',DatosClientes_view
+         , name='cliente_view'),
+    # compradores
+    path('listacompradores/',CompradoresView.as_view()
+         , name='listacompradores'),
+    # path('compradornuevo/',CompradorNew.as_view()
+    #      , name='comprador_nuevo'),
+    # path('editcomprador/<int:pk>',CompradorEdit.as_view()
+    #      , name='comprador_editar'),
+    path('viewcomprador/<participante_id>/',DatosCompradores_view
+         , name='comprador_view'),
+    path('editcomprador/<participante_id>/<tab>/',DatosDeudores
+         , name='comprador_editar'),
+    path('compradornuevo/',DatosDeudores
+         , name='comprador_nuevo'),
+    # línea factoring
+    path('listalineas/',LineasView.as_view(), name='listalineas'),
+    path('lineafactoringnueva/<cliente>/<cliente_id>',LineaNew.as_view()
+        , name='lineafactoring_nueva'),
+    path('editlineafactoring/<cliente>/<cliente_id>/<int:pk>',LineaEdit.as_view()
+        , name='lineafactoring_editar'),
+    # cupos
+    path('listacupos/',CuposCompradoresView.as_view(), name='listacupos'),
+    path('cuponuevo/',CuposCompradoresNew.as_view(), name='cupo_nuevo'),
+    path('editcupo/<int:pk>',CuposCompradoresEdit.as_view(), name='cupo_editar'),
+    path('eliminarcupo/<int:pk>',EliminarCupoComprador
+        , name='cupo_eliminar'),
+    # cuentas
+    path('listacuentasbancarias/',CuentasBancariasView.as_view()
+    , name='listacuentasbancarias'),
+    path('listacuentasbancariasdeudores/',CuentasBancariasDeudoresView.as_view()
+        , name='listacuentasbancarias_deudores'),
+    path('listacuentasbancariascliente/<cliente_id>/',CuentasBancariasCliente
+        , name='listacuentasbancariascliente'),
+    path('detallecuentasbancariascliente/<cliente_id>/',DetalleCuentasBancarias
+        , name='detallecuentasbancariascliente'),
+    path('cuentabancarianueva/<cliente_id>',CuentasBancariasNew.as_view()
+        , name='cuentabancaria_nueva'),
+    path('editcuentabancaria/<cliente_id>/<int:pk>',CuentasBancariasEdit.as_view()
+    , name='cuentabancaria_editar'),
+    path('cuentabancariadeudornueva/',CuentasBancariasDeudorNew.as_view()
+        , name='cuentabancariadeudor_nueva'),
+    path('cuentabancariadeudoreditar/<int:pk>',CuentasBancariasDeudorEdit.as_view()
+        , name='cuentabancariadeudor_editar'),
+    path('eliminarcuentabancaria/<int:pk>',EliminarCuentaBancaria
+        , name='cuentabancaria_eliminar'),
+    path('actualizarcuentatransferencia/<int:pk>/<cliente_ruc>',ActualizarCuentaTransferencia
+        , name='cuentatransferencia_actualizar'),
+    # datos operativo
+    path('editestadoclasecomprador/<int:pk>',EstadoCompradorEdit.as_view()
+        , name='estadoclasecomprador_editar'),
+    path('listadatosoperativoshistorico/<id_cliente>',DatosOperativosHistoricoView.as_view(), \
+        name='listadatosoperativoshistorico'),
+    path('cambiartasagaoa-todos/<ids>/', CambiarTasaGAOA_todos, 
+         name='cambiar_tasa_gaoa_todos'),
+    path('cambiartasamora-todos/<ids>/', CambiarTasaMora_todos, 
+         name='cambiar_tasa_mora_todos'),
+
+    # AJAX endpoints
+    path('ajax/cantones/<int:provincia_id>/', obtener_cantones_por_provincia, 
+        name='obtener_cantones_por_provincia'),
+]

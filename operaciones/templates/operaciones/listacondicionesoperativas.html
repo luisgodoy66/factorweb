@@ -1,0 +1,135 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Configuración</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li class="active">condiciones operativas</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div class="card-header" style="background-color: white;">
+            <div class="dropdown float-right">
+                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <div class="dropdown-menu-content">
+                        <a class="dropdown-item" href="{% url 'operaciones:condicionesoperativas_nueva' %}">Nueva</a>
+                        <!-- <a class="dropdown-item" href="#">Imprimir</a> -->
+                    </div>
+                </div>
+            </div>
+            <h4 class="mb-0">
+                <span class="count">{{ consulta.count }} encontrado{% if consulta.count != 1 %}s{% endif %}</span>
+            </h4>
+
+        </div>
+        <div class="card-body">
+
+            {% if not consulta %}
+            <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                <span class="badge badge-pill badge-danger">Sin registros</span>
+                {% if error %}
+                    {{ error }}
+                {% else %}
+                 No hay condiciones operativas.
+               {% endif %}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            {% endif %}
+
+            <!-- <div class="content"> -->
+
+                <table class="table table-hover table-bordered" 
+                    id="bootstrap-data-table-export"
+                    >
+                    <thead>
+                        <tr>
+                            <th data-field="campo1" data-sortable="true">Id</th>
+                            <th data-field="campo2" data-sortable="true">Descripción</th>
+                            <th data-field="campo3" data-sortable="true">Tipo de factoring</th>
+                            <th data-field="campo4" data-sortable="true">Activa</th>
+                            <th data-field="campo5" data-sortable="true">Aplica a facturas <br>puras</th>
+                            <th data-field="campo6" data-sortable="true">Aplica a facturas <br>con accesorios</th>
+                            <th data-field="campo7" data-sortable="false">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in consulta %}
+                        <tr>
+                            <td>{{ item.id }}</td>
+                            <td>{{ item }}</td>
+                            <td>{{ item.cxtipofactoring }}</td>
+                            <td>{{ item.lactiva|yesno:"Si,No" }}</td>
+                            <td>{{ item.laplicaafacturaspuras|yesno:"Si,No" }}</td>
+                            <td>{{ item.laplicaaaccesorios|yesno:"Si,No" }}</td>
+                            <td>
+                                <a href="{% url 'operaciones:condicionesoperativas_editar' item.id %}"  title="Editar"
+                                class="btn  btn-sm" role="button"><i class="fa fa-edit"></i>
+                                </a>
+                                <button onclick="inactivar({{item.id}})"role="button"class="btn  btn-sm"
+                                {% if item.lactiva %}
+                                      title="Inactivar" >
+                                    <i class="fa fa-thumbs-down"></i>
+                                {% else %}
+                                      title="Activar" >
+                                    <i class="fa fa-thumbs-up"></i>
+                                {% endif %}
+                                </button>                            
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            <!-- </div> -->
+
+        </div>
+
+    </div>
+ 
+
+{% endblock %}
+{% block js_page %}
+<!-- <script type="text/javascript" src="{% static 'factorweb/js/listacondicionesoperativas.js' %}"></script> -->
+<!-- para tomar el token se prograna el script aqui -->
+<script>
+function inactivar(id)
+{
+  var data = {id:id};
+  data = JSON.stringify(data);
+  var token = '{{csrf_token}}';
+  
+  jQuery.ajax({
+    headers : {"X-CSRFToken": token},
+    type:"POST",
+    url:"/operaciones/estadocondicionoperativa/"+id,
+    data: data,
+    success: function(response){
+      if(response==="OK")
+      {
+        location.reload(true);
+      }
+      else{
+        MensajeError("Error Intentado Cambiar Estado a Cliente");
+      }
+    },
+    error: function(jqXHR, textStatus, errorThrow){
+      console.log(textStatus, errorThrow);
+      MensajeError(errorThrow,'red');
+      CerrarModal();
+    }
+  });
+}
+
+</script>
+{% endblock %}

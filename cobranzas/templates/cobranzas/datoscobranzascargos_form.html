@@ -1,0 +1,213 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    {% if tipo_nd == 'AP' %}
+                    <li><a href="#">ampliación de plazo</a></li>
+                        <li><a href="{% url 'cobranzas:listaampliacionespendientespagar' %}">cargos pendientes</a></li>
+                    {% else %}
+                    <li><a href="#">cobranzas</a></li>
+                        <li><a href="{% url 'cobranzas:listaliquidacionesennegativopendientes' %}">cargos pendientes</a></li>
+                    {% endif %}
+                    <li class="active">cobro de cargos</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+
+        <div hidden>
+            <input id="documentos" name="documentos" value="{{ documentos }}" >
+            <input id="total_cargos" name="total_cargos" value="{{ total_cargos }}" >
+            <input id="id_cliente" name="id_cliente" value="{{ cliente_id }}"  >
+            <input id="forma_cobro" value="{{ forma_cobro }}" >
+            <input id="tipo_factoring" value="{{ tipo_factoring }}">
+            <!-- <input id="tipo_deuda" value="{{ tipo_deuda }}"> -->
+        </div>
+
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" 
+    class="form-horizontal">
+    {% csrf_token %}
+    <!-- <div class="col-lg-6"> -->
+    <div class="card">
+        <div class="card-header" style="background-color: white;">
+            <div class="d-flex justify-content-between align-items-center ">
+            <h5>Cobro de cargos de {{ cliente }} </h5>
+            <a 
+                href="{% url 'cobranzas:listaliquidacionesennegativopendientes' %}" 
+                class="btn  btn-sm">
+                <i class="fa fa-times"></i>
+            </a>
+            </div>
+        </div>
+        <div class="card-body card-block">
+            <div class="row form-group">
+                <div class="col-12">
+                    <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header">
+                            <h6>Datos de la cobranza</h6>                            
+                        </div>
+                        <div class="card-body">
+                            <div class="row form-group ">
+                                <div class="col-md-1"><label for="id_dcobranza" 
+                                    class=" form-control-label">
+                                    {{ form.dcobranza.label}}</label>
+                                </div>
+                                <div class="col-md-2">
+                                    {{ form.dcobranza}}
+                                </div>
+                                <div class="col-3"></div>
+                                <div class="col-md-1">
+                                    <label for="id_nvalor" class=" form-control-label">
+                                    {{ form.nvalor.label}}</label>
+                                </div>
+                                <div class="col-md-2 animate__animated animate__shakeX">
+                                        {{ form.nvalor}}
+                                </div>
+
+                                
+                                <div class="col-md-1 "><label for="id_nsobrepago" 
+                                    class=" form-control-label">
+                                    {{ form.nsobrepago.label}}</label>
+                                </div>
+                                <div class="col-md-2">
+                                    <!-- {{ form.nsobrepago}} -->
+                                      <div id="divSobrepago" class="text-right">0.00</div>
+                                </div>
+
+                            </div>
+
+                            {% if forma_cobro in 'CHE, TRA' %} 
+                            <div class="row form-group ">
+                                <div class="col-md-1">
+                                    <label for="id_cxbanco" class=" form-control-label">
+                                    {{ form_cheque.cxcuentabancaria.label}}</label>
+                                </div>
+                                <div class="col-md-5">
+                                    <!-- presentar la lista de cuentas bancarias -->
+                                    <div id="div_cuentas_cliente" >
+                                        <select data-placeholder="Seleccione una cuenta..." 
+                                            class="form-control" tabindex="1" 
+                                            id="cuenta_cliente" name="cuenta_cliente"
+                                            >
+                                            <option value=""></option>
+                                            {% for cuenta in cuentas_bancarias_cliente %}
+                                            <option value="{{ cuenta.id}}" >{{ cuenta}} </option>
+                                            {% endfor %}
+                                        </select>
+                                        
+                                    </div>
+                                </div>
+
+                                {% if forma_cobro == 'CHE' %}
+
+                                <div class="col-md-1"><label for="id_ctcheque" 
+                                    class=" form-control-label">
+                                    {{ form_cheque.ctcheque.label}}</label>
+                                </div>
+                                <div class="col-md-1">
+                                    {{ form_cheque.ctcheque}}
+                                </div>
+                                <div class="col-md-1"><label for="id_ctgirador" 
+                                    class=" form-control-label">
+                                    {{ form_cheque.ctgirador.label}}</label>
+                                </div>
+                                <div class="col-md-3">
+                                    {{ form_cheque.ctgirador}}
+                                </div>
+                                <!-- <div class="col-md-1"><label for="id_demision" 
+                                    class=" form-control-label">
+                                    {{ form_cheque.demision.label}}</label>
+                                </div>
+                                <div class="col-md-1">
+                                    {{ form_cheque.demision}}
+                                </div> -->
+                                {% endif %}
+                            </div>
+                            {% endif %} 
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- parte inferior -->
+            <!-- <h5 class="heading-title mb-1 mt-3 text-secondary">Detalle de documentos</h5> -->
+
+            <div class="row form-group">
+                <!-- <small> -->
+                <div class="col-12">
+                    <div class="card "style="border:1px solid #ddd;  border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header">
+                            <h6>Cargos</h6>
+                        </div>
+                        <div class="body">
+                            <table id="table"                      
+                            data-show-columns-toggle-all="true"
+                            data-detail-formatter="detailFormatter"
+                            data-minimum-count-columns="2"
+                            data-id-field="id"
+                            data-unique-id="id"
+                            data-show-footer="true"
+                            data-side-pagination="server"
+                            data-url="{% url 'cobranzas:detallenotasdebito_json' documentos %}"
+                            >
+                            </table>
+
+                        </div>
+                    </div>
+                <!-- </small> -->
+                </div>
+            </div>
+            <!-- datos de deposito -->
+            <div {% if forma_cobro == 'MOV' %} hidden {% endif %} >
+
+                <div class="row form-group">
+                    <div class="col-12">
+                        <div class="card" style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);" >
+                            <div class="card-header">
+                                <h6>Datos del depósito</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="col-md-1"><label for="id_cxcuentadeposito" 
+                                    class=" form-control-label">
+                                    {{form.cxcuentadeposito.label}}</label>
+                                </div>
+                                <div class="col-md-5">
+                                    {{form.cxcuentadeposito}}
+                                </div>
+                                <div class="col-3"></div>
+                                <div class="col-md-1"><label for="id_ddeposito" 
+                                    class=" form-control-label">
+                                    {{form.ddeposito.label}}</label></div>
+                                <div class="col-md-2">
+                                    {{form.ddeposito}}
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>    
+          
+        <div class="card-footer">
+            <div class="text-right">
+            <button class="btn btn-secondary btn-sm"  type="button" onclick="AceptarCobranza()">  
+                <i class="fa fa-dot-circle-o"></i> Grabar
+            </button>
+            </div>
+        </div>
+    </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<script type="text/javascript" src="{% static 'factorweb/js/datoscobranzascargos.js' %}"></script>
+{% endblock %}

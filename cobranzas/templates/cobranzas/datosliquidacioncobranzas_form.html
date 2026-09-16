@@ -1,0 +1,587 @@
+{% extends 'bases/home.html' %}
+{% load static %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">Operaciones</a></li>
+                    <li><a href="#">cobranzas</a></li>
+                    <li><a href="{% url 'cobranzas:listacobranzaspendientesliquidar' %}">por liquidar</a></li>
+                    <li class="active">Liquidación</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+        <div hidden>
+            <input id="data_cobranzas" value="{{ cobranzas }}">
+        </div>
+<form  method="post" id="frmSolicitud" enctype="multipart/form-data" class="form-horizontal">
+                {% csrf_token %}
+    <!-- <div class="col-md-12"> -->
+    <div class="card">
+        <div class="card-header" style="background-color: white;">
+            <div class="d-flex justify-content-between align-items-center ">
+            <h5>Liquidación de {{ nombredecliente }}</h5> 
+            <a href="{% url 'cobranzas:listacobranzaspendientesliquidar' %}" 
+                class="btn btn-sm ">
+                <i class="fa fa-times"></i>
+            </a>
+            </div>            
+        </div>
+        <div class="card-body card-block">
+            <!-- detalle de cargos -->
+            <div class="row form-group">
+                <div class="col-12">
+                    <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header"style="background-color: white;">
+                            <h6 class="heading-title mb-1 text-secondary">Detalle de cobranzas a liquidar</h6>
+                        </div>
+                        <div class="body" style="overflow-x: auto;">
+                            <table id="table"  class="table table-hover table-bordered">
+                                <thead>
+                                    <tr>
+                                    <th data-field="cobranza">Cobranza</th>
+                                    <th data-field="asignacion">Asignación</th>
+                                    <th data-field="documento">Documento</th>
+                                    <th data-field="dias_vencidos">Días vencidos</th>
+                                    <th data-field="dias_negociados">Días negociados</th>
+                                    <th data-field="valor_cobrado">Aplicado a cartera</th>
+                                    {% if total_dc > 0 %}
+                                        <th data-field="dc_combined" class="combined-dc-column">{{nombre_dc}}<br> negociado
+                                            <!-- <small>Tasa % / Valor</small> -->
+                                        </th>
+                                    {% endif %}
+                                    {% if total_dcv > 0 %}
+                                        <th data-field="dcv_combined" class="combined-dcv-column">{{nombre_dc}}<br> vencido
+                                        <!-- <th data-field="tasa_dcv">Tasa mora %</th>
+                                        <th data-field="dcv">{{nombre_dc}} vencido</th> -->
+                                    {% endif %}
+                                    {% if total_gao > 0 %}
+                                        <th data-field="gao_combined" class="combined-gao-column">{{nombre_gao}}<br>
+                                        <!-- <th data-field="tasa_gao">Tasa GAO</th>
+                                        <th data-field="gao">{{ nombre_gao }}</th> -->
+                                    {% endif %}
+                                    {% if total_gaoa > 0 %}
+                                        <th data-field="gaoa_combined" class="combined-gaoa-column">{{nombre_gaoa}}<br>
+                                        <!-- <th data-field="tasa_gaoa">Tasa GAOA</th>
+                                        <th data-field="gaoa">{{nombre_gaoa}}</th> -->
+                                    {% endif %}
+                                    {% if total_cargoretenciones > 0 %}
+                                        <th data-field="retenciones">Retenciones</th>
+                                    {% endif %}
+                                    {% if total_cargobajas > 0 %}
+                                        <th data-field="bajas">Bajas</th>
+                                    {% endif %}
+                                    </tr>
+                                </thead>
+                            </table>
+
+                        </div>
+                        <!-- <small> -->
+
+
+                        <!-- </small> -->
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="row form-group">
+                <!-- liquidacion -->
+                <div class="col-4">
+                    <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div class="card-header" style="background-color: white;">
+                                <h6 class="heading-title mb-1 text-secondary">Liquidación de cobranzas</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row form-group">
+                                <div class="col-md-8">
+                                    <h6 for="id_ctinstrucciondepago" class=" form-control-label">
+                                    Reserva</h6></div>
+                                <div class="col col-md-4 text-right">
+                                    {{ total_vuelto |floatformat:"2g"}}
+                                </div>
+                            </div>
+                            {% if total_sobrepagos > 0 %}
+                            <div class="row form-group">
+                                <div class="col-md-8">
+                                    <h6 class=" form-control-label">
+                                    + Sobrepagos</h6></div>
+                                <div class="col col-md-4 text-right">
+                                    {{ total_sobrepagos|floatformat:"2g" }}
+                                </div>
+                            </div>  
+                            {% endif %}
+                            <div class="row form-group">
+                                <div class="col col-md-8">
+                                    <h6 class=" form-control-label">
+                                    - Cargos por liquidación</h6></div>
+                                <div class="col col-md-4 text-right" id="divCargos">
+                                    {{ total_cargos |floatformat:"2g"}}
+                                </div>
+                            </div>  
+                            {% if total_dc != 0 %}
+                            <div class="row form-group">
+                                <div class="col-md-1"></div>
+                                <div class="col col-md-6"><label class=" form-control-label">
+                                    {{ nombre_dc }}
+                                </label></div>
+                                <div class="col col-md-3 text-right">
+                                    {{ total_dc |floatformat:"2g" }}
+                                </div>
+                            </div>  
+                            {% endif %}
+                            {% if total_dcv > 0 %}
+                            <div class="row form-group">
+                                <div class="col-md-1"></div>
+                                <div class="col col-md-6"><label class=" form-control-label">
+                                    {{ nombre_dc }} vencido
+                                </label></div>
+                                <div class="col col-md-3 text-right">
+                                    {{ total_dcv |floatformat:"2g"}}
+                                </div>
+                            </div>  
+                            {% endif %}
+                            {% if total_gao != 0 %}
+                            <div class="row form-group">
+                                <div class="col-md-1"></div>
+                                <div class="col col-md-6"><label class=" form-control-label">
+                                    {{ nombre_gao }}
+                                </label></div>
+                                <div class="col col-md-3 text-right">
+                                    {{ total_gao |floatformat:"2g"}}
+                                </div>
+                            </div>  
+                            {% endif %}
+                            {% if total_gaoa > 0 %}
+                            <div class="row form-group">
+                                <div class="col-md-1"></div>
+                                <div class="col col-md-6"><label class=" form-control-label">
+                                    {{ nombre_gaoa }}
+                                </label></div>
+                                <div class="col col-md-3 text-right">
+                                    {{ total_gaoa |floatformat:"2g"}}
+                                </div>
+                            </div>  
+                            {% endif %}
+                            {% if total_cargobajas > 0%}
+                            <div class="row form-group">
+                                <div class="col-md-1"></div>
+                                <div class="col col-md-6"><label class=" form-control-label">
+                                    Baja de documentos
+                                </label></div>
+                                <div class="col col-md-3 text-right">
+                                    {{ total_cargobajas |floatformat:"2g"}}
+                                </div>
+                            </div>  
+                            {% endif %}
+                            {% if total_cargoretenciones > 0%}
+                            <div class="row form-group">
+                                <div class="col-md-1"></div>
+                                <div class="col col-md-6"><label for="id_nvalor" class=" form-control-label">
+                                    Retenciones en cobranzas
+                                </label></div>
+                                <div class="col col-md-3 text-right">
+                                    {{ total_cargoretenciones |floatformat:"2g"}}
+                                </div>
+                            </div>  
+                            {% endif %}
+                            {% for item in otros_cargos %}
+                            <div class="row form-group">
+                                <div class="col-md-1"></div>
+                                <div class="col col-md-6">
+                                    <label for="id_notroscargos" class=" form-control-label">{{item}}</label></div>
+                                <div class="col-3 col-md-4">
+                                    <input type="number" step="1" class="otros_cargos form-control " value="{{item.nvalor}}" 
+                                        data-cargo="{{item}}"
+                                        data-cargaiva = {{item.lcargaiva}} min="0" data-idmovimiento="{{item.movimiento.id}}">
+                                </div>
+                            </div>  
+                            {% endfor %}
+                            {# if total_iva != 0 #}
+                            <div class="row form-group">
+                                <div class="col col-md-8">
+                                    <h6 for="id_ctinstrucciondepago" class=" form-control-label">
+                                    - IVA</h6></div>
+                                <div class="col col-md-4 text-right" id = "divIVA">
+                                    {{ total_iva|floatformat:"2u" }}
+                                </div>
+                            </div>  
+                            {# endif #}
+                            {% if total_otros_cargos > 0%}
+                            <div class="row form-group">
+                                <div class="col col-md-8">
+                                    <h6 for="id_ctinstrucciondepago" class=" form-control-label">
+                                    - Cargos previos</h6></div>
+                                <div class="col col-md-4 text-right">
+                                    {{ total_otros_cargos|floatformat:"2g" }}
+                                </div>
+                            </div>  
+                            {% endif %}
+
+                        </div>
+                        <div class="card-footer"style="background-color: white;">
+                            <div class="row form-group">
+                                <div class="col col-md-7">
+                                    <h6>{{form.nneto.label}}</h6>
+                                </div>
+                                <div class="col col-md-5 text-right" id="divNeto">
+                                    <h6>{{ neto |floatformat:"2g"}}</h6>
+                                </div>
+                            </div>  
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-8">
+                    <!-- datos de cliente -->
+                    <div class="row form-group">
+                        <div class="col-12">
+                            <div class ="card"style="border:1px solid #ddd; border-radius:8px; position:relative; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <div class="card-header" style="background-color: white;">
+                                        <h6 class="heading-title mb-1 text-secondary">Datos del cliente</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row form-group ">
+                                        <div class="col-6">
+                                            <label class="form-control-label"><h6>
+                                                Beneficiario de cheque:</h6>
+                                            </label>
+                                            <div>{{ beneficiario|default:'No registrado' }}</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-control-label"><h6>
+                                                Cuenta de transferencia:</h6>
+                                            </label>
+                                            <div>{{ cuenta_transferencia|default:'No registrada' }}</div>
+                                        </div>  
+                                    </div>
+
+                                </div>
+                            </div>
+                           
+                        </div>
+                    </div>
+                    <!-- datos para el pago -->
+                    <div class="row form-group">
+                        <div class="col-12">
+                            <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <div class="card-header">
+                                        <h6>Datos para el pago</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row form-group">
+                                        <div class="col-md-2"><label for="id_dliquidacion" class=" form-control-label">
+                                        {{ form.dliquidacion.label}}
+                                        </label></div>
+                                        <div class="col-md-3">
+                                            {{ form.dliquidacion}}
+                                        </div>
+                                        <div class="col-2"></div>
+                                        <div class="col-md-2"><label for="id_ddesembolso" class=" form-control-label">
+                                        {{ form.ddesembolso.label}}
+                                        </label></div>
+                                        <div class="col-md-3">
+                                            {{ form.ddesembolso}}
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="id_ctinstrucciondepago" class=" form-control-label">
+                                            {{ form.ctinstrucciondepago.label}}</label></div>
+                                        <div class="col-md-10">
+                                            {{ form.ctinstrucciondepago}}
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="card-footer">
+                                    <div class="text-right">
+                                    <button type="button" onclick="LiquidarCobranza()" id="btnAceptar" class="btn btn-secondary btn-sm">
+                                        <i class="fa fa-dot-circle-o"></i> Aceptar
+                                    </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-md-12">
+                    <div {%  if total_otros_cargos == 0 %} hidden {% endif %}>
+                        <div class="card"style="border:1px solid #ddd; border-radius:8px; position:relative;box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <div class="card-header"style="background-color: white;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="heading-title mb-1 text-secondary">Detalle de cargos previos</h6>
+                                    <h6 class="heading-title text-secondary">Total: <span>{{ total_otros_cargos|floatformat:"2" }}</span></h6>
+                                </div>
+                            </div>
+                            <div class="body">
+                                <!-- <input type="text" hidden id="data_otros_cargos" value="{{ cargos_no_operativos }}"> -->
+                                <table id="table_otros"  class="table table-hover table-bordered">
+                                <!-- <thead>
+                                    <tr>
+                                    <th data-field="descripcion">Cargo</th>
+                                    <th data-field="codigo_cobranza">Operación / Factura</th>
+                                    <th data-field="fecha">Fecha</th>
+                                    <th data-field="valor">Valor</th>
+                                    </tr>
+                                </thead> -->
+                                </table>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>    
+    </div>
+    <!-- </div> -->
+</form>
+{% endblock %}
+{% block js_page %}
+<!-- <script type="text/javascript" src="{% static 'factorweb/js/datosliquidacioncobranzas.js' %}"></script> -->
+<script>
+var $table = jQuery('#table')
+const cobranzastxt =capturaValor("data_cobranzas")
+// const cobranzastxt ="{{ cobranzas }}"
+const cargostxt ="{{data|escapejs}}"
+const otroscargostxt ="{{ cargos_no_operativos|escapejs }}"
+const tipo_operacion = "{{ tipo_operacion }}"
+const vuelto = "{{ total_vuelto|floatformat:'2u' }}"
+const sobrepago = "{{ total_sobrepagos|floatformat:'2u' }}"
+const gao = '{{ total_gao|floatformat:"2u" }}'
+const gaoa = '{{ total_gaoa|floatformat:"2u" }}'
+const dc = '{{ total_dc|floatformat:"2u" }}'
+const retenciones = '{{ total_cargoretenciones|floatformat:"2u" }}'
+const bajas = '{{ total_cargobajas|floatformat:"2u" }}'
+const total_cargos_no_operativos = '{{ total_otros_cargos|floatformat:"2u" }}'
+const dcv = '{{ total_dcv|floatformat:"2u" }}'
+const base_iva_tasas = parseFloat('{{ base_iva|floatformat:"2u" }}')
+const base_noiva_tasas = parseFloat('{{ base_noiva|floatformat:"2u" }}')
+const porcentaje_iva = '{{ porcentaje_iva|floatformat:"2u" }}'
+const cliente = "{{ cliente }}"
+const tipo_factoring = "{{ tipo_factoring }}"
+const total_cargos_operativos = '{{ total_cargos|floatformat:"2u" }}'
+const errorprevio = '{{error}}'
+var neto = '{{ neto|floatformat:"2u" }}'
+var iva = '{{ total_iva|floatformat:"2u" }}'
+var base_iva_otros = 0
+var base_noiva_otros = 0
+
+var $tableotros = jQuery('#table_otros')
+
+window.onload= function(){
+
+    if (errorprevio != ""){
+        alert(errorprevio)
+        document.getElementById('btnAceptar').disabled = true;
+    }
+    // para cargar la data en la tabla se necesita convertir, se usa JSON.parse
+    data = JSON.parse(cargostxt)
+
+    // Process data to combine tasa_dc and dc columns
+    if (data && data.length > 0) {
+        data = data.map(function(row) {
+            if (row.tasa_dc !== undefined && row.dc !== undefined) {
+                row.dc_combined = '<div class="combined-dc-column"><div class="tasa-value">$' + 
+                                 parseFloat(row.dc).toFixed(2) + '</div><div class="dc-value"><span class="badge badge-info">Tasa: ' + 
+                                 parseFloat(row.tasa_dc).toFixed(2) + '%</span></div></div>'
+                                 ;
+            }
+            if (row.tasa_dcv !== undefined && row.dcv !== undefined) {
+                row.dcv_combined = '<div class="combined-dcv-column"><div class="tasa-value">$' + 
+                                 parseFloat(row.dcv).toFixed(2) + '</div><div class="dc-value"><span class="badge badge-info">Tasa: ' + 
+                                 parseFloat(row.tasa_dcv).toFixed(2) + '%</span></div></div>'
+                                 ;
+            }
+            if (row.tasa_gao !== undefined && row.gao !== undefined) {
+                row.gao_combined = '<div class="combined-gao-column"><div class="tasa-value">$' + 
+                                 parseFloat(row.gao).toFixed(2) + '</div><div class="dc-value"><span class="badge badge-info">Tasa: ' + 
+                                 parseFloat(row.tasa_gao).toFixed(2) + '%</span></div></div>'
+                                 ;
+            }
+            if (row.tasa_gaoa !== undefined && row.gaoa !== undefined) {
+                row.gaoa_combined = '<div class="combined-gaoa-column"><div class="tasa-value">$' + 
+                                 parseFloat(row.gaoa).toFixed(2) + '</div><div class="dc-value"><span class="badge badge-info">Tasa: ' + 
+                                 parseFloat(row.tasa_gaoa).toFixed(2) + '%</span></div></div>'
+                                 ;
+            }
+            return row;
+        });
+    }
+    
+    $table.bootstrapTable('destroy').bootstrapTable({
+        data: data,
+        fixedColumns: true,
+        fixedNumber: 6
+    })
+    // para cargar la data en la tabla se necesita convertir, se usa JSON.parse
+    otros = JSON.parse(otroscargostxt)
+
+    $tableotros.bootstrapTable('destroy').bootstrapTable({
+        data: otros,
+        columns: [
+            {field: 'descripcion', title: 'Cargo'},
+            {field: 'codigo_cobranza', title: 'Operación / Factura'},
+            {field: 'fecha', title: 'Fecha'},
+            {field: 'valor', title: 'Saldo'}
+        ]
+    });
+    // calcular con los valores iniciales de otros cargos
+    agregaOtrosCargos(vuelto
+            , sobrepago
+            , total_cargos_operativos
+            , total_cargos_no_operativos
+        )
+    // si neto es 0 cargar el texto Liquidacion en cero en instruccion de pago
+    if (parseFloat(neto) == 0){
+        inicializaValor("id_ctinstrucciondepago","Liquidación en cero.")
+    }
+    if (parseFloat(neto) < 0){
+        inicializaValor("id_ctinstrucciondepago","Liquidación en negativo.")
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Selecciona todos los inputs con la clase 'otros_cargos'
+    const inputs = document.querySelectorAll('.otros_cargos');
+    console.log('Inputs seleccionados:', inputs); // Verifica que los inputs se seleccionen correctamente
+    // Función que se ejecutará cuando el valor de un input cambie
+    function onInputChange(event) {
+        console.log('Nuevo valor:', event.target.value);
+        // Aquí puedes agregar más lógica para manejar el cambio de valor
+        agregaOtrosCargos(vuelto
+            , sobrepago
+            , total_cargos_operativos
+            , total_cargos_no_operativos
+        )
+    }
+
+    // Agrega el controlador de eventos 'change' a cada input
+    inputs.forEach(input => {
+        input.addEventListener('change', onInputChange);
+    });
+});
+
+function agregaOtrosCargos(vuelto, sobrepago, total_cargos_operativos, total_cargos_no_operativos) {
+    const nvuelto = parseFloat(vuelto)
+    const nsobrepago = parseFloat(sobrepago)
+    const ncargos_operativos = parseFloat(total_cargos_operativos)
+    const ncargos_no_operativos = parseFloat(total_cargos_no_operativos)
+    base_iva_otros = obtenerAcumuladoBaseIVAOtrosCargos()
+    base_noiva_otros = obtenerAcumuladoBaseNoIVAOtrosCargos()
+    var ivaotroscargos = 0
+    var total_cargos_operativos = parseFloat(ncargos_operativos + base_iva_otros + base_noiva_otros).toFixed(2)
+    inicializarInner("divCargos",total_cargos_operativos)
+    
+    iva = parseFloat(((base_iva_tasas + base_iva_otros) * porcentaje_iva / 100)).toFixed(2);
+
+    inicializarInner("divIVA",iva)
+
+    neto = (nvuelto 
+        + nsobrepago 
+        - ncargos_operativos 
+        - ncargos_no_operativos
+        - base_iva_otros 
+        - base_noiva_otros 
+        - iva).toFixed(2)
+
+    inicializarInner("divNeto",'<h6>' + neto + '</h6>')    
+}
+
+function obtenerAcumuladoBaseIVAOtrosCargos() {
+    const inputs = document.querySelectorAll('.otros_cargos'); // Selecciona todos los inputs con la clase 'otros_cargos'
+    let acumulado = 0;
+    inputs.forEach(input => {
+        // Verifica si data-cargaiva es 'True'
+        if (input.getAttribute('data-cargaiva') === 'True') {
+            const valor = parseFloat(input.value) || 0; // Convierte el valor a número, asume 0 si no es numérico
+            acumulado += valor; // Suma al acumulado
+        }
+    });
+    console.log('Acumulado con carga IVA:', acumulado); // Muestra el acumulado en la consola
+    return acumulado; // Retorna el valor acumulado por si necesitas usarlo
+}
+
+function obtenerAcumuladoBaseNoIVAOtrosCargos() {
+    const inputs = document.querySelectorAll('.otros_cargos'); // Selecciona todos los inputs con la clase 'otros_cargos'
+    let acumulado = 0;
+    inputs.forEach(input => {
+        // Verifica si data-cargaiva es 'True'
+        if (input.getAttribute('data-cargaiva') != 'True') {
+            const valor = parseFloat(input.value) || 0; // Convierte el valor a número, asume 0 si no es numérico
+            acumulado += valor; // Suma al acumulado
+        }
+    });
+    console.log('Acumulado con carga no IVA:', acumulado); // Muestra el acumulado en la consola
+    return acumulado; // Retorna el valor acumulado por si necesitas usarlo
+}
+
+function obtenerArregloCargos() {
+    const inputs = document.querySelectorAll('.otros_cargos'); // Selecciona todos los inputs con la clase 'otros_cargos'
+    let arreglo = [];
+    inputs.forEach(input => {
+        // Verifica si data-cargaiva es 'True'
+            const Id = input.getAttribute('data-idmovimiento');
+            const Cargo = input.getAttribute('data-cargo');
+            const Valor = parseFloat(input.value) || 0; // Convierte el valor a número, asume 0 si no es numérico
+            const CargaIVA = input.getAttribute('data-cargaiva');
+            arreglo.push({Id, Cargo, Valor, CargaIVA}); 
+    });
+    console.log('arreglo de cargos:', arreglo); // Muestra el acumulado en la consola
+    return arreglo; 
+}
+
+function LiquidarCobranza(){
+    MensajeConfirmacion("Aceptar liquidación con desembolso el " 
+      + capturaValor("id_ddesembolso") +"?",function(){
+
+        var cargos = JSON.stringify(obtenerArregloCargos())
+        //para pasar el detalle al stored procedure se envia como llegó (json.dumps)
+        var objeto={
+            "fecha_liquidacion":capturaValor("id_dliquidacion"),
+            "ddesembolso": capturaValor("id_ddesembolso"), 
+            "sinstruccionpago": capturaValor("id_ctinstrucciondepago"),
+            "id_cliente":cliente,
+            "tipo_factoring":tipo_factoring, 
+            "porcentaje_iva": porcentaje_iva,
+            "niva": iva,
+            "documentos": cargostxt,
+            "vuelto":vuelto,
+            "sobrepago":sobrepago,
+            "gao":gao,
+            "gaoa":gaoa,
+            "descuentodecartera":dc,
+            "descuentodecarteravencido":dcv,
+            "retenciones":retenciones,
+            "bajas":bajas,
+            "otros":total_cargos_no_operativos,
+            "neto":neto,
+            "cobranzas" : cobranzastxt,
+            "otros_cargos_no_operativos":otroscargostxt,
+            "arr_otros_cargos": cargos,
+            "base_iva" : base_iva_tasas + base_iva_otros,
+            "base_noiva" : base_noiva_tasas + base_noiva_otros,
+        }
+
+        fetchPostear("/cobranzas/liquidacion/"+tipo_operacion, objeto, function(data){
+          // en una nueva ventana abrir el reporte de asignación
+          url = window.location.origin
+          url = url + "/cobranzas/reporteliquidacion/"+data;
+          window.open( url);
+          // regresar a la lista de solicitudes
+          window.location.href = "/cobranzas/listacobranzaspendientesliquidar";
+        })
+    })
+      
+  }
+      
+</script>
+{% endblock %}

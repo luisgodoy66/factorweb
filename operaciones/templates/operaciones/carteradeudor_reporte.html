@@ -1,0 +1,123 @@
+{#% load humanize %#}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Cartera por cliente</title>
+
+    <style type="text/css">
+        @page {
+            size: A4;
+            margin: 0cm;
+            size: landscape;
+        }
+        .table thead th {
+                vertical-align:  top ;
+                border-bottom: 1px solid #000;
+        }
+        .table td.numero{
+            text-align: right;
+        }
+        .table td.centrado{
+            text-align: center;
+        }
+        body {
+            font-family: sans-serif;
+            font-size: 09px;
+            font-weight: 400;
+            color: #000;
+        }
+        .container{
+            margin: 0 auto;
+            padding: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <table class="table" style="width:100%">
+                    <tbody>
+                        <tr>
+                            <td colspan="2"><h4>{{ empresa.ctnombre|default:'Nombre de empresa' }}</h4></td>
+                            <td class="centrado" colspan="2"><h3>ANTIGÜEDAD DE LA CARTERA DE {{cliente}} </h3></td>
+                            <td style="text-align: right;">Impresión: {% now "Y-m-d" %}</td>
+                        </tr>
+                        {% if corte %}
+                        <tr>
+                            <td colspan="2"><h4></h4></td>
+                            <td class="centrado" colspan="2"><h3>{{ corte.ctdescripcion }}</h3></td>
+                            <td style="text-align: right;">Realizado el: {{ corte.dregistro|date:"Y/m/d H:i:s" }}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <br>
+            <div class="row">
+                <!-- <div class="col"> -->
+                    <table class="table" style="width:100%">
+                        <thead>
+                            <th>Deudor</th>        
+                            <th style="text-align: right;">Vencido mas 90</th>
+                            <th style="text-align: right;">Vencido 90</th>
+                            <th style="text-align: right;">Vencido 60</th>
+                            <th style="text-align: right;">Vencido 30</th>
+                            <th style="text-align: right;">Por vencer 30</th>
+                            <th style="text-align: right;">Por vencer 60</th>
+                            <th style="text-align: right;">por vencer 90</th>
+                            <th style="text-align: right;">Por vencer mas 90</th>
+                            <th style="text-align: right;">Total</th>
+                        </thead>
+                        <tbody>
+                            <tr></tr>
+                            {% for cliente, item in documentos.items %}
+                            <tr>
+                                <td>{{ cliente }}</td>
+                                <td class="numero">{{ item.vencido_mas_90  |default:''|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.vencido_90 |default:''|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.vencido_60 |default:''|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.vencido_30 |default:''|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.porvencer_30 |default:''|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.porvencer_60 |default:''|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.porvencer_90 |default:''|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.porvencer_mas_90 |default:''|floatformat:"2g" }}</td>
+                                <td class="numero">{{ item.total |default:''|floatformat:"2g" }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="10"><hr></td>
+                            </tr>
+                            {% endfor %}
+                            <!-- totales -->
+                            <tr></tr>
+                            <tr>
+                                <td></td>
+                                <td class="numero"><h4>{{ totalvm90 |default:0.00|floatformat:"2g" }}</h4> </td>
+                                <td class="numero"><h4>{{ totalv90  |default:0.00|floatformat:"2g" }} </h4></td>
+                                <td class="numero"><h4>{{ totalv60  |default:0.00|floatformat:"2g" }}</h4> </td>
+                                <td class="numero"><h4>{{ totalv30  |default:0.00|floatformat:"2g" }} </h4></td>
+                                <td class="numero"><h4>{{ totalx30  |default:0.00|floatformat:"2g" }} </h4></td>
+                                <td class="numero"><h4>{{ totalx60  |default:0.00|floatformat:"2g" }} </h4></td>
+                                <td class="numero"><h4>{{ totalx90  |default:0.00|floatformat:"2g" }}</h4> </td>
+                                <td class="numero"><h4>{{ totalxm90 |default:0.00|floatformat:"2g" }}</h4> </td>
+                                <td class="numero"><h4>{{ total |default:0.00|floatformat:"2g" }}</h4> </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                <!-- </div> -->
+            </div>
+        </div>
+        {% if empresa.lgratis %}
+        <footer class="footer">
+            <p>SAAS Margarita desarrollado por Código Bambú</p>
+        </footer>
+        {% endif %}
+    </div>
+
+</body>
+</html>
