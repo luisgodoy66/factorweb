@@ -290,24 +290,28 @@ function logingoogle() {
 }
 
 function google_session_active() {
-    fetch("/api/google/session/active/")
+    return fetch("/api/google/session/active/")
         .then(response => response.json())
-        .then(data => {
-            return data.active;
-        })
         .catch(error => {
             console.error('Error:', error);
             MensajeError("Error al verificar la sesión de Google. Conecte nuevamente.");
+            return { active: false, reconnect_required: false };
         });
 }
 
 function registrarEvento(id, cliente, comentario){
-    if (!google_session_active()) {
-        MensajeError("Debe conectar con Google antes de registrar un evento");
-        return;
-    }
-    // Abrir el modal para registrar un evento de cobranza
-    observacion = comentario;
-    AbrirModal("/api/google/crear_evento_recordatorio_cobranza/"+encodeURIComponent(cliente));
+    google_session_active().then(data => {
+        if (data.reconnect_required) {
+            MensajeError("Los permisos de Google cambiaron. Por favor, vuelva a conectar su cuenta de Google.");
+            return;
+        }
+        if (!data.active) {
+            MensajeError("Debe conectar con Google antes de registrar un evento");
+            return;
+        }
+        // Abrir el modal para registrar un evento de cobranza
+        observacion = comentario;
+        AbrirModal("/api/google/crear_evento_recordatorio_cobranza/"+encodeURIComponent(cliente));
+    });
 }
 

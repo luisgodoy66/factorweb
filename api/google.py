@@ -179,13 +179,21 @@ def crear_evento_recordatorio_cobranza(request, cliente):
         
 def google_session_active(request):
     """
-    Retorna un JSON con el elemento 'active' indicando si hay una sesión de Google activa.
+    Retorna un JSON con el elemento 'active' indicando si hay una sesión de Google activa
+    y con permisos (scopes) vigentes.
     """
     credentials = request.session.get('google_credentials')
     active = False
+    reconnect_required = False
     if credentials:
-        creds = Credentials(**credentials)
-        if creds.valid:
-            active = True
-    return JsonResponse({'active': active})
-    return JsonResponse({'active': active})
+        # Si los scopes guardados no coinciden con los actuales (p.ej. tras un cambio de permisos),
+        # la sesión ya no sirve y se debe pedir reconexión.
+        if set(credentials.get('scopes') or []) != set(SCOPES):
+            request.session.pop('google_credentials', None)
+            request.session.pop('google_calendar_id', None)
+            reconnect_required = True
+        else:
+            creds = Credentials(**credentials)
+            if creds.valid:
+                active = True
+    return JsonResponse({'active': active, 'reconnect_required': reconnect_required})
