@@ -17,10 +17,10 @@ class Configuracion_correos(ClaseModelo):
     )
     cxtipo=models.CharField(max_length=3,null=False, choices=TIPOS_DE_CORREO)
     ctservidorcorreosaliente =models.TextField(default= 'smtp.gmail.com')
-    ctlogincorreo=models.TextField() 
-    ctpasswordcorreo=models.TextField() 
-    ctnombreremitente=models.CharField(max_length=60) 
-    ctasuntocorreo =models.TextField() 
+    ctlogincorreo=models.TextField(default='') 
+    ctpasswordcorreo=models.TextField(default='') 
+    ctnombreremitente=models.CharField(max_length=60, default='') 
+    ctasuntocorreo =models.TextField(default='')  
     npuerto =models.IntegerField(default= 587)
 
     def __str__(self):

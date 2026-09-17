@@ -73,19 +73,17 @@ def oauth2callback(request):
         return HttpResponse('Error al procesar la solicitud de OAuth2.', status=500)
 
 def _get_or_create_app_calendar(service, request):
-    """Obtiene el ID del calendario secundario propio de la app, creándolo si aún no existe."""
-    calendar_id = request.session.get('google_calendar_id')
-    if calendar_id:
-        return calendar_id
+    """Obtiene el ID del calendario secundario propio de la app, creándolo si aún no existe.
 
-    # calendar.app.created solo expone calendarios creados por esta app, así que
-    # cualquier resultado aquí ya pertenece a la aplicación.
-    calendar_list = service.calendarList().list().execute()
-    for entry in calendar_list.get('items', []):
-        if entry.get('summary') == APP_CALENDAR_SUMMARY:
-            calendar_id = entry['id']
-            request.session['google_calendar_id'] = calendar_id
-            return calendar_id
+    Se persiste en BD (por usuario) porque calendar.app.created no autoriza
+    calendarList().list(), así que no se puede recuperar buscando entre los calendarios.
+    """
+    from api.models import GoogleCalendarUsuario
+
+    registro = GoogleCalendarUsuario.objects.filter(user=request.user).first()
+    if registro:
+        request.session['google_calendar_id'] = registro.calendar_id
+        return registro.calendar_id
 
     nuevo_calendario = {
         'summary': APP_CALENDAR_SUMMARY,
@@ -93,6 +91,9 @@ def _get_or_create_app_calendar(service, request):
     }
     creado = service.calendars().insert(body=nuevo_calendario).execute()
     calendar_id = creado['id']
+    GoogleCalendarUsuario.objects.update_or_create(
+        user=request.user, defaults={'calendar_id': calendar_id}
+    )
     request.session['google_calendar_id'] = calendar_id
     return calendar_id
 

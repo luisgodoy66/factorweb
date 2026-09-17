@@ -1,7 +1,17 @@
 from django.db import models
+from django.contrib.auth.models import User
 from bases.models import ClaseModelo
 
 # Create your models here.
+class GoogleCalendarUsuario(models.Model):
+    """Persiste el calendario secundario que la app crea en Google Calendar para cada usuario."""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='google_calendar')
+    calendar_id = models.CharField(max_length=255)
+    dcreacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user} -> {self.calendar_id}"
+
 class Configuracion_slack (ClaseModelo):
     ctdescripcion = models.CharField(max_length=100)
     ctslackbottoken = models.CharField(max_length=100)
