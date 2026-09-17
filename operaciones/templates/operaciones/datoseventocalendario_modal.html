@@ -1,7 +1,7 @@
 <div class="modal-dialog ">
     <div class="modal-content">
 
-        <form  method="POST" rol="form"  name="form"
+        <form  method="POST" rol="form"  name="form" id="formEventoCalendario"
                 action="{% url 'api:crear_evento_recordatorio_cobranza' cliente %}"
             class="form-horizontal" onsubmit="return checkSubmit();">
             <!-- <div class="col-md-12"> -->
@@ -71,13 +71,15 @@
         };
 
         // antes de cerrar modal...
-        jQuery("form").submit(function(e){
+        // .off() evita que se acumulen manejadores si el modal se abre varias veces,
+        // y el selector por id evita afectar a otros formularios de la página (p.ej. logout)
+        jQuery("#formEventoCalendario").off('submit').on('submit', function(e){
 
             // actualizar la tabla con los valores del modal
             e.preventDefault();
-            var url = jQuery("[name=form]").attr("action");
-            var token = jQuery("[name=csrfmiddlewaretoken]").val();
-            var formData = jQuery("form").serializeArray();
+            var url = jQuery(this).attr("action");
+            var token = jQuery(this).find("[name=csrfmiddlewaretoken]").val();
+            var formData = jQuery(this).serializeArray();
 
             jQuery.ajax({
                 url:url,
