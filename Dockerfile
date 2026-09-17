@@ -30,5 +30,5 @@ EXPOSE 3000
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=factorweb25.settings
 
-# Genera estaticos y levanta la app
-CMD ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:3000"]
+# Regenera estaticos desde /app/static y levanta la app.
+CMD ["sh", "-c", "python manage.py collectstatic --noinput --clear && gunicorn factorweb25.wsgi:application --bind 0.0.0.0:3000"]

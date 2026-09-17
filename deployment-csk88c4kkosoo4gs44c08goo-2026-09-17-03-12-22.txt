@@ -1,0 +1,257 @@
+2026-Sep-17 01:37:05.011652 Starting deployment of luisgodoy66/factorweb:master to localhost.
+2026-Sep-17 01:37:05.203098 Preparing container with helper image: ghcr.io/coollabsio/coolify-helper:1.0.12
+2026-Sep-17 01:37:05.312382 [CMD]: docker stop -t 30 csk88c4kkosoo4gs44c08goo
+2026-Sep-17 01:37:05.312382 Error response from daemon: No such container: csk88c4kkosoo4gs44c08goo
+2026-Sep-17 01:37:05.454614 [CMD]: docker run -d --network coolify --name csk88c4kkosoo4gs44c08goo --rm -v /root/.docker/config.json:/root/.docker/config.json:ro -v /var/run/docker.sock:/var/run/docker.sock ghcr.io/coollabsio/coolify-helper:1.0.12
+2026-Sep-17 01:37:05.454614 cfbe82b13ceb759d11e396ed2a2f7a014b753e5661e5b62896e61f811e89a3a2
+2026-Sep-17 01:37:06.873291 [CMD]: docker exec csk88c4kkosoo4gs44c08goo bash -c 'GIT_SSH_COMMAND="ssh -o ConnectTimeout=30 -p 22 -o Port=22 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" git ls-remote https://x-access-token:<REDACTED>@github.com/luisgodoy66/factorweb.git refs/heads/master'
+2026-Sep-17 01:37:06.873291 bab616fa230b7bd83144d9afebf8a33f7529339b refs/heads/master
+2026-Sep-17 01:37:07.083323 ----------------------------------------
+2026-Sep-17 01:37:07.092163 Importing luisgodoy66/factorweb:master (commit sha bab616fa230b7bd83144d9afebf8a33f7529339b) to /artifacts/csk88c4kkosoo4gs44c08goo.
+2026-Sep-17 01:37:07.298087 [CMD]: docker exec csk88c4kkosoo4gs44c08goo bash -c 'git clone --depth=1 --recurse-submodules --shallow-submodules -b 'master' 'https://x-access-token:<REDACTED>@github.com/luisgodoy66/factorweb.git' '/artifacts/csk88c4kkosoo4gs44c08goo' && cd '/artifacts/csk88c4kkosoo4gs44c08goo' && if [ -f .gitmodules ]; then git submodule sync && GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" git submodule update --init --recursive --depth=1; fi && cd '/artifacts/csk88c4kkosoo4gs44c08goo' && GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" git lfs pull'
+2026-Sep-17 01:37:07.298087 Cloning into '/artifacts/csk88c4kkosoo4gs44c08goo'...
+2026-Sep-17 01:37:09.950738 Updating files: 51% (5388/10367)
+2026-Sep-17 01:37:09.953333 Updating files: 52% (5391/10367)
+2026-Sep-17 01:37:09.966876 Updating files: 53% (5495/10367)
+2026-Sep-17 01:37:09.981785 Updating files: 54% (5599/10367)
+2026-Sep-17 01:37:09.997215 Updating files: 55% (5702/10367)
+2026-Sep-17 01:37:10.013226 Updating files: 56% (5806/10367)
+2026-Sep-17 01:37:10.029996 Updating files: 57% (5910/10367)
+2026-Sep-17 01:37:10.050031 Updating files: 58% (6013/10367)
+2026-Sep-17 01:37:10.065001 Updating files: 59% (6117/10367)
+2026-Sep-17 01:37:10.083042 Updating files: 60% (6221/10367)
+2026-Sep-17 01:37:10.099160 Updating files: 61% (6324/10367)
+2026-Sep-17 01:37:10.117418 Updating files: 62% (6428/10367)
+2026-Sep-17 01:37:10.133712 Updating files: 63% (6532/10367)
+2026-Sep-17 01:37:10.153688 Updating files: 64% (6635/10367)
+2026-Sep-17 01:37:10.171630 Updating files: 65% (6739/10367)
+2026-Sep-17 01:37:10.188516 Updating files: 66% (6843/10367)
+2026-Sep-17 01:37:10.205351 Updating files: 67% (6946/10367)
+2026-Sep-17 01:37:10.222348 Updating files: 68% (7050/10367)
+2026-Sep-17 01:37:10.239679 Updating files: 69% (7154/10367)
+2026-Sep-17 01:37:10.255527 Updating files: 70% (7257/10367)
+2026-Sep-17 01:37:10.273515 Updating files: 71% (7361/10367)
+2026-Sep-17 01:37:10.291737 Updating files: 72% (7465/10367)
+2026-Sep-17 01:37:10.312700 Updating files: 73% (7568/10367)
+2026-Sep-17 01:37:10.332402 Updating files: 74% (7672/10367)
+2026-Sep-17 01:37:10.354380 Updating files: 75% (7776/10367)
+2026-Sep-17 01:37:10.380950 Updating files: 76% (7879/10367)
+2026-Sep-17 01:37:10.394204 Updating files: 77% (7983/10367)
+2026-Sep-17 01:37:10.410733 Updating files: 78% (8087/10367)
+2026-Sep-17 01:37:10.425383 Updating files: 79% (8190/10367)
+2026-Sep-17 01:37:10.439741 Updating files: 80% (8294/10367)
+2026-Sep-17 01:37:10.454504 Updating files: 81% (8398/10367)
+2026-Sep-17 01:37:10.470454 Updating files: 82% (8501/10367)
+2026-Sep-17 01:37:10.483104 Updating files: 83% (8605/10367)
+2026-Sep-17 01:37:10.496468 Updating files: 84% (8709/10367)
+2026-Sep-17 01:37:10.509420 Updating files: 85% (8812/10367)
+2026-Sep-17 01:37:10.528418 Updating files: 86% (8916/10367)
+2026-Sep-17 01:37:10.544944 Updating files: 87% (9020/10367)
+2026-Sep-17 01:37:10.566972 Updating files: 88% (9123/10367)
+2026-Sep-17 01:37:10.585630 Updating files: 89% (9227/10367)
+2026-Sep-17 01:37:10.600101 Updating files: 90% (9331/10367)
+2026-Sep-17 01:37:10.679754 Updating files: 91% (9434/10367)
+2026-Sep-17 01:37:10.696812 Updating files: 92% (9538/10367)
+2026-Sep-17 01:37:10.721673 Updating files: 93% (9642/10367)
+2026-Sep-17 01:37:10.741427 Updating files: 94% (9745/10367)
+2026-Sep-17 01:37:10.779296 Updating files: 95% (9849/10367)
+2026-Sep-17 01:37:10.797283 Updating files: 96% (9953/10367)
+2026-Sep-17 01:37:10.811007 Updating files: 97% (10056/10367)
+2026-Sep-17 01:37:10.831367 Updating files: 98% (10160/10367)
+2026-Sep-17 01:37:10.848571 Updating files: 99% (10264/10367)
+2026-Sep-17 01:37:10.879817 Updating files: 100% (10367/10367) Updating files: 100% (10367/10367), done.
+2026-Sep-17 01:37:11.441182 [CMD]: docker exec csk88c4kkosoo4gs44c08goo bash -c 'cd /artifacts/csk88c4kkosoo4gs44c08goo && git log -1 bab616fa230b7bd83144d9afebf8a33f7529339b --pretty=%B'
+2026-Sep-17 01:37:11.441182 feat: Restore Google session management functions in generic.js and listadocumentospendientes.html
+2026-Sep-17 01:37:11.561074 Image not found (tkoggsocc0o0g40kow0o0s8o:bab616fa230b7bd83144d9afebf8a33f7529339b). Building new image.
+2026-Sep-17 01:37:12.207195 [CMD]: docker exec csk88c4kkosoo4gs44c08goo bash -c 'cat /artifacts/csk88c4kkosoo4gs44c08goo/Dockerfile'
+2026-Sep-17 01:37:12.207195 # Usa la imagen base de Python que prefieras
+2026-Sep-17 01:37:12.207195 FROM python:3.10-slim
+2026-Sep-17 01:37:12.207195
+2026-Sep-17 01:37:12.207195 # Instala las dependencias del sistema
+2026-Sep-17 01:37:12.207195 RUN apt-get update && apt-get install -y \
+2026-Sep-17 01:37:12.207195 libcairo2 \
+2026-Sep-17 01:37:12.207195 libpango-1.0-0 \
+2026-Sep-17 01:37:12.207195 gir1.2-pango-1.0 \
+2026-Sep-17 01:37:12.207195 gir1.2-gdkpixbuf-2.0
+2026-Sep-17 01:37:12.207195
+2026-Sep-17 01:37:12.207195 # Establece el directorio de trabajo
+2026-Sep-17 01:37:12.207195 WORKDIR /app
+2026-Sep-17 01:37:12.207195
+2026-Sep-17 01:37:12.207195 # Copia los archivos de requirements
+2026-Sep-17 01:37:12.207195 COPY requirements.txt /app/
+2026-Sep-17 01:37:12.207195
+2026-Sep-17 01:37:12.207195 # Instala las dependencias de Python
+2026-Sep-17 01:37:12.207195 RUN pip install --no-cache-dir -r requirements.txt
+2026-Sep-17 01:37:12.207195
+2026-Sep-17 01:37:12.207195 # Copia el resto de tu código
+2026-Sep-17 01:37:12.207195 COPY . /app/
+2026-Sep-17 01:37:12.207195
+2026-Sep-17 01:37:12.207195 # Configura Nginx para servir archivos de media y manejar las subidas
+2026-Sep-17 01:37:12.207195 COPY nginx.uploads.conf /etc/nginx/sites-available/
+2026-Sep-17 01:37:12.207195
+2026-Sep-17 01:37:12.207195 # Expone el puerto en el que correrá la aplicación
+2026-Sep-17 01:37:12.207195 EXPOSE 3000
+2026-Sep-17 01:37:12.207195
+2026-Sep-17 01:37:12.207195 # Establece las variables de entorno necesarias
+2026-Sep-17 01:37:12.207195 ENV PYTHONUNBUFFERED=1
+2026-Sep-17 01:37:12.207195 ENV DJANGO_SETTINGS_MODULE=factorweb25.settings
+2026-Sep-17 01:37:12.207195
+2026-Sep-17 01:37:12.207195 # Genera estaticos y levanta la app
+2026-Sep-17 01:37:12.207195 CMD ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:3000"]
+2026-Sep-17 01:37:12.472595 Creating build-time .env file in /artifacts (outside Docker context).
+2026-Sep-17 01:37:12.835562 [CMD]: docker exec csk88c4kkosoo4gs44c08goo bash -c 'cat /artifacts/csk88c4kkosoo4gs44c08goo/Dockerfile'
+2026-Sep-17 01:37:12.835562 # Usa la imagen base de Python que prefieras
+2026-Sep-17 01:37:12.835562 FROM python:3.10-slim
+2026-Sep-17 01:37:12.835562
+2026-Sep-17 01:37:12.835562 # Instala las dependencias del sistema
+2026-Sep-17 01:37:12.835562 RUN apt-get update && apt-get install -y \
+2026-Sep-17 01:37:12.835562 libcairo2 \
+2026-Sep-17 01:37:12.835562 libpango-1.0-0 \
+2026-Sep-17 01:37:12.835562 gir1.2-pango-1.0 \
+2026-Sep-17 01:37:12.835562 gir1.2-gdkpixbuf-2.0
+2026-Sep-17 01:37:12.835562
+2026-Sep-17 01:37:12.835562 # Establece el directorio de trabajo
+2026-Sep-17 01:37:12.835562 WORKDIR /app
+2026-Sep-17 01:37:12.835562
+2026-Sep-17 01:37:12.835562 # Copia los archivos de requirements
+2026-Sep-17 01:37:12.835562 COPY requirements.txt /app/
+2026-Sep-17 01:37:12.835562
+2026-Sep-17 01:37:12.835562 # Instala las dependencias de Python
+2026-Sep-17 01:37:12.835562 RUN pip install --no-cache-dir -r requirements.txt
+2026-Sep-17 01:37:12.835562
+2026-Sep-17 01:37:12.835562 # Copia el resto de tu código
+2026-Sep-17 01:37:12.835562 COPY . /app/
+2026-Sep-17 01:37:12.835562
+2026-Sep-17 01:37:12.835562 # Configura Nginx para servir archivos de media y manejar las subidas
+2026-Sep-17 01:37:12.835562 COPY nginx.uploads.conf /etc/nginx/sites-available/
+2026-Sep-17 01:37:12.835562
+2026-Sep-17 01:37:12.835562 # Expone el puerto en el que correrá la aplicación
+2026-Sep-17 01:37:12.835562 EXPOSE 3000
+2026-Sep-17 01:37:12.835562
+2026-Sep-17 01:37:12.835562 # Establece las variables de entorno necesarias
+2026-Sep-17 01:37:12.835562 ENV PYTHONUNBUFFERED=1
+2026-Sep-17 01:37:12.835562 ENV DJANGO_SETTINGS_MODULE=factorweb25.settings
+2026-Sep-17 01:37:12.835562
+2026-Sep-17 01:37:12.835562 # Genera estaticos y levanta la app
+2026-Sep-17 01:37:12.835562 CMD ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:3000"]
+2026-Sep-17 01:37:12.871889 Final Dockerfile:
+2026-Sep-17 01:37:13.267324 [CMD]: docker exec csk88c4kkosoo4gs44c08goo bash -c 'cat /artifacts/csk88c4kkosoo4gs44c08goo/Dockerfile'
+2026-Sep-17 01:37:13.267324 # Usa la imagen base de Python que prefieras
+2026-Sep-17 01:37:13.267324 FROM python:3.10-slim
+2026-Sep-17 01:37:13.267324 ARG SECRET_KEY=<REDACTED>*nwyo@6fl6_p8gu)4&q\\!w=f\\!\\!df*ohl)a5zm5@8h33i-i9j(
+2026-Sep-17 01:37:13.267324 ARG PASSWORD_BD=uf5O2MMfTjw6XBoCnPJdRouMAbJ5yXNV34xIGhG3EqJi7vcFHKB076KFgGLNsmaG
+2026-Sep-17 01:37:13.267324 ARG OPENAI_API_KEY=<REDACTED>
+2026-Sep-17 01:37:13.267324 ARG RUTA_GCS=/GCS/margarita-454802-a3c18d00a90a.json
+2026-Sep-17 01:37:13.267324 ARG DEBUG=False
+2026-Sep-17 01:37:13.267324 ARG MARGARITA_API_KEY=<REDACTED>
+2026-Sep-17 01:37:13.267324 ARG API_KEY_NOTICIAS=pub_781334009b194ecaa1b83135b87756ad
+2026-Sep-17 01:37:13.267324 ARG COOLIFY_URL=http://margarita.codigobambuecuador.com,https//margarita.codigobambuecuador.com
+2026-Sep-17 01:37:13.267324 ARG COOLIFY_FQDN=margarita.codigobambuecuador.com,https
+2026-Sep-17 01:37:13.267324 ARG COOLIFY_BRANCH=master
+2026-Sep-17 01:37:13.267324 ARG COOLIFY_RESOURCE_UUID=tkoggsocc0o0g40kow0o0s8o
+2026-Sep-17 01:37:13.267324
+2026-Sep-17 01:37:13.267324 # Instala las dependencias del sistema
+2026-Sep-17 01:37:13.267324 RUN apt-get update && apt-get install -y \
+2026-Sep-17 01:37:13.267324 libcairo2 \
+2026-Sep-17 01:37:13.267324 libpango-1.0-0 \
+2026-Sep-17 01:37:13.267324 gir1.2-pango-1.0 \
+2026-Sep-17 01:37:13.267324 gir1.2-gdkpixbuf-2.0
+2026-Sep-17 01:37:13.267324
+2026-Sep-17 01:37:13.267324 # Establece el directorio de trabajo
+2026-Sep-17 01:37:13.267324 WORKDIR /app
+2026-Sep-17 01:37:13.267324
+2026-Sep-17 01:37:13.267324 # Copia los archivos de requirements
+2026-Sep-17 01:37:13.267324 COPY requirements.txt /app/
+2026-Sep-17 01:37:13.267324
+2026-Sep-17 01:37:13.267324 # Instala las dependencias de Python
+2026-Sep-17 01:37:13.267324 RUN pip install --no-cache-dir -r requirements.txt
+2026-Sep-17 01:37:13.267324
+2026-Sep-17 01:37:13.267324 # Copia el resto de tu código
+2026-Sep-17 01:37:13.267324 COPY . /app/
+2026-Sep-17 01:37:13.267324
+2026-Sep-17 01:37:13.267324 # Configura Nginx para servir archivos de media y manejar las subidas
+2026-Sep-17 01:37:13.267324 COPY nginx.uploads.conf /etc/nginx/sites-available/
+2026-Sep-17 01:37:13.267324
+2026-Sep-17 01:37:13.267324 # Expone el puerto en el que correrá la aplicación
+2026-Sep-17 01:37:13.267324 EXPOSE 3000
+2026-Sep-17 01:37:13.267324
+2026-Sep-17 01:37:13.267324 # Establece las variables de entorno necesarias
+2026-Sep-17 01:37:13.267324 ENV PYTHONUNBUFFERED=1
+2026-Sep-17 01:37:13.267324 ENV DJANGO_SETTINGS_MODULE=factorweb25.settings
+2026-Sep-17 01:37:13.267324
+2026-Sep-17 01:37:13.267324 # Genera estaticos y levanta la app
+2026-Sep-17 01:37:13.267324 CMD ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:3000"]
+2026-Sep-17 01:37:13.286083 ----------------------------------------
+2026-Sep-17 01:37:13.293473 Building docker image started.
+2026-Sep-17 01:37:13.301087 To check the current progress, click on Show Debug Logs.
+2026-Sep-17 01:37:13.641651 [CMD]: docker exec csk88c4kkosoo4gs44c08goo bash -c 'cat /artifacts/build.sh'
+2026-Sep-17 01:37:13.641651 cd /artifacts/csk88c4kkosoo4gs44c08goo && set -a && source /artifacts/build-time.env && set +a && docker build --add-host coolify:10.0.1.9 --add-host coolify-db:10.0.1.5 --add-host coolify-realtime:10.0.1.8 --add-host coolify-redis:10.0.1.6 --add-host dc44c8oc8g0w4owk00w88ss4:10.0.1.3 --add-host dc44c8oc8g0w4owk00w88ss4-proxy:10.0.1.7 --network host -f /artifacts/csk88c4kkosoo4gs44c08goo/Dockerfile --build-arg COOLIFY_URL --build-arg COOLIFY_FQDN --build-arg COOLIFY_BRANCH --build-arg COOLIFY_RESOURCE_UUID --build-arg SECRET_KEY --build-arg PASSWORD_BD --build-arg OPENAI_API_KEY --build-arg RUTA_GCS --build-arg DEBUG --build-arg MARGARITA_API_KEY --build-arg API_KEY_NOTICIAS --build-arg COOLIFY_BUILD_SECRETS_HASH=f92e7b169362fc90423ac6ffe67292b2d1ff3e8807a84f63eb98c1c30b74e968 --build-arg 'COOLIFY_URL' --build-arg 'COOLIFY_FQDN' --build-arg 'COOLIFY_BRANCH' --build-arg 'COOLIFY_RESOURCE_UUID' --progress plain -t tkoggsocc0o0g40kow0o0s8o:bab616fa230b7bd83144d9afebf8a33f7529339b /artifacts/csk88c4kkosoo4gs44c08goo
+2026-Sep-17 01:37:14.210496 [CMD]: docker exec csk88c4kkosoo4gs44c08goo bash -c 'bash /artifacts/build.sh'
+2026-Sep-17 01:37:14.210496 #0 building with "default" instance using docker driver
+2026-Sep-17 01:37:14.210496
+2026-Sep-17 01:37:14.210496 #1 [internal] load build definition from Dockerfile
+2026-Sep-17 01:37:14.210496 #1 transferring dockerfile: 1.77kB done
+2026-Sep-17 01:37:14.210496 #1 DONE 0.0s
+2026-Sep-17 01:37:14.210496
+2026-Sep-17 01:37:14.210496 #2 [auth] library/python:pull token for registry-1.docker.io
+2026-Sep-17 01:37:14.210496 #2 DONE 0.0s
+2026-Sep-17 01:37:14.210496
+2026-Sep-17 01:37:14.210496 #3 [internal] load metadata for docker.io/library/python:3.10-slim
+2026-Sep-17 01:37:14.236736 #3 DONE 0.2s
+2026-Sep-17 01:37:14.374903 #4 [internal] load .dockerignore
+2026-Sep-17 01:37:14.374903 #4 transferring context: 2B done
+2026-Sep-17 01:37:14.374903 #4 DONE 0.0s
+2026-Sep-17 01:37:14.374903
+2026-Sep-17 01:37:14.374903 #5 [1/7] FROM docker.io/library/python:3.10-slim@sha256:fd76ade0c607f27677bc04be3c60749f400eedc941d9e72967e19a4cedff80c2
+2026-Sep-17 01:37:14.374903 #5 DONE 0.0s
+2026-Sep-17 01:37:14.374903
+2026-Sep-17 01:37:14.374903 #6 [internal] load build context
+2026-Sep-17 01:37:16.707906 #6 transferring context: 114.34MB 2.4s done
+2026-Sep-17 01:37:16.707906 #6 DONE 2.4s
+2026-Sep-17 01:37:16.707906
+2026-Sep-17 01:37:16.707906 #7 [2/7] RUN apt-get update && apt-get install -y libcairo2 libpango-1.0-0 gir1.2-pango-1.0 gir1.2-gdkpixbuf-2.0
+2026-Sep-17 01:37:16.707906 #7 CACHED
+2026-Sep-17 01:37:16.707906
+2026-Sep-17 01:37:16.707906 #8 [3/7] WORKDIR /app
+2026-Sep-17 01:37:16.707906 #8 CACHED
+2026-Sep-17 01:37:16.707906
+2026-Sep-17 01:37:16.707906 #9 [4/7] COPY requirements.txt /app/
+2026-Sep-17 01:37:16.707906 #9 CACHED
+2026-Sep-17 01:37:16.707906
+2026-Sep-17 01:37:16.707906 #10 [5/7] RUN pip install --no-cache-dir -r requirements.txt
+2026-Sep-17 01:37:16.707906 #10 CACHED
+2026-Sep-17 01:37:16.707906
+2026-Sep-17 01:37:16.707906 #11 [6/7] COPY . /app/
+2026-Sep-17 01:37:20.168124 #11 DONE 3.5s
+2026-Sep-17 01:37:20.377283 #12 [7/7] COPY nginx.uploads.conf /etc/nginx/sites-available/
+2026-Sep-17 01:37:20.377283 #12 DONE 0.0s
+2026-Sep-17 01:37:20.377283
+2026-Sep-17 01:37:20.377283 #13 exporting to image
+2026-Sep-17 01:37:20.377283 #13 exporting layers
+2026-Sep-17 01:37:21.980414 #13 exporting layers 1.8s done
+2026-Sep-17 01:37:22.056449 #13 writing image sha256:d3b0a234e58cf22783a856e65200db91a8380b554bb21d4f3b3cfb45196d981c done
+2026-Sep-17 01:37:22.056449 #13 naming to docker.io/library/tkoggsocc0o0g40kow0o0s8o:bab616fa230b7bd83144d9afebf8a33f7529339b done
+2026-Sep-17 01:37:22.056449 #13 DONE 1.8s
+2026-Sep-17 01:37:22.064729 5 warnings found (use docker --debug to expand):
+2026-Sep-17 01:37:22.064729 - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "SECRET_KEY") (line 3)
+2026-Sep-17 01:37:22.064729 - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "PASSWORD_BD") (line 4)
+2026-Sep-17 01:37:22.064729 - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "OPENAI_API_KEY") (line 5)
+2026-Sep-17 01:37:22.064729 - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "MARGARITA_API_KEY") (line 8)
+2026-Sep-17 01:37:22.064729 - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "API_KEY_NOTICIAS") (line 9)
+2026-Sep-17 01:37:22.079321 Building docker image completed.
+2026-Sep-17 01:37:22.103344 Creating .env file with runtime variables for container.
+2026-Sep-17 01:37:22.386054 ----------------------------------------
+2026-Sep-17 01:37:22.393921 Application has ports mapped to the host system, rolling update is not supported.
+2026-Sep-17 01:37:22.400292 Removing old containers.
+2026-Sep-17 01:37:52.961272 [CMD]: docker stop -t 30 tkoggsocc0o0g40kow0o0s8o-013136015847
+2026-Sep-17 01:37:52.961272 tkoggsocc0o0g40kow0o0s8o-013136015847
+2026-Sep-17 01:37:53.269274 [CMD]: docker rm -f tkoggsocc0o0g40kow0o0s8o-013136015847
+2026-Sep-17 01:37:53.269274 tkoggsocc0o0g40kow0o0s8o-013136015847
+2026-Sep-17 01:37:53.676234 [CMD]: docker exec csk88c4kkosoo4gs44c08goo bash -c 'COOLIFY_URL=http://margarita.codigobambuecuador.com,https//margarita.codigobambuecuador.com COOLIFY_FQDN=margarita.codigobambuecuador.com,https COOLIFY_BRANCH=master COOLIFY_RESOURCE_UUID=tkoggsocc0o0g40kow0o0s8o docker compose --project-name tkoggsocc0o0g40kow0o0s8o --project-directory /artifacts/csk88c4kkosoo4gs44c08goo -f /artifacts/csk88c4kkosoo4gs44c08goo/docker-compose.yaml up --build -d'
+2026-Sep-17 01:37:53.676234 Container tkoggsocc0o0g40kow0o0s8o-013703865670 Creating
+2026-Sep-17 01:37:53.721014 tkoggsocc0o0g40kow0o0s8o-013703865670 Your kernel does not support memory swappiness capabilities or the cgroup is not mounted. Memory swappiness discarded.
+2026-Sep-17 01:37:53.725331 Container tkoggsocc0o0g40kow0o0s8o-013703865670 Created
+2026-Sep-17 01:37:53.731945 Container tkoggsocc0o0g40kow0o0s8o-013703865670 Starting
+2026-Sep-17 01:37:53.949164 Container tkoggsocc0o0g40kow0o0s8o-013703865670 Started
+2026-Sep-17 01:37:53.968603 New container started.
+2026-Sep-17 01:37:54.584868 Gracefully shutting down build container: csk88c4kkosoo4gs44c08goo
