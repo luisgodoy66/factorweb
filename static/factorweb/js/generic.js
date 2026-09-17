@@ -284,35 +284,35 @@ function checkSubmit() {
     }
 }
 
-function logingoogle() {
-    // Abrir la URL de inicio de sesión de Google en una nueva ventana
-    window.open("/api/google/logingoogle", "_blank", "width=500,height=600");
-}
+// function logingoogle() {
+//     // Abrir la URL de inicio de sesión de Google en una nueva ventana
+//     window.open("/api/google/logingoogle", "_blank", "width=500,height=600");
+// }
 
-function google_session_active() {
-    return fetch("/api/google/session/active/")
-        .then(response => response.json())
-        .catch(error => {
-            console.error('Error:', error);
-            MensajeError("Error al verificar la sesión de Google. Conecte nuevamente.");
-            return { active: false, reconnect_required: false };
-        });
-}
+// function google_session_active() {
+//     return fetch("/api/google/session/active/")
+//         .then(response => response.json())
+//         .catch(error => {
+//             console.error('Error:', error);
+//             MensajeError("Error al verificar la sesión de Google. Conecte nuevamente.");
+//             return { active: false, reconnect_required: false };
+//         });
+// }
 
-function registrarEvento(id, cliente, comentario){
-    google_session_active().then(data => {
-        console.log(data);
-        if (data.reconnect_required) {
-            MensajeError("Los permisos de Google cambiaron. Por favor, vuelva a conectar su cuenta de Google.");
-            return;
-        }
-        if (!data.active) {
-            MensajeError("Debe conectar con Google antes de registrar un evento");
-            return;
-        }
-        // Abrir el modal para registrar un evento de cobranza
-        observacion = comentario;
-        AbrirModal("/api/google/crear_evento_recordatorio_cobranza/"+encodeURIComponent(cliente));
-    });
-}
+// function registrarEvento(id, cliente, comentario){
+//     google_session_active().then(data => {
+//         console.log(data);
+//         if (data.reconnect_required) {
+//             MensajeError("Los permisos de Google cambiaron. Por favor, vuelva a conectar su cuenta de Google.");
+//             return;
+//         }
+//         if (!data.active) {
+//             MensajeError("Debe conectar con Google antes de registrar un evento");
+//             return;
+//         }
+//         // Abrir el modal para registrar un evento de cobranza
+//         observacion = comentario;
+//         AbrirModal("/api/google/crear_evento_recordatorio_cobranza/"+encodeURIComponent(cliente));
+//     });
+// }
 
