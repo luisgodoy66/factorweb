@@ -6,6 +6,7 @@ from google_auth_oauthlib.flow import Flow
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 import datetime
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -87,7 +88,7 @@ def _credentials_from_session_dict(data):
         creds.expiry = datetime.datetime.fromisoformat(expiry)
     return creds
 
-def _get_or_create_app_calendar(service, request):
+def _get_or_create_app_calendar(service, request, forzar_nuevo=False):
     """Obtiene el ID del calendario secundario propio de la app, creándolo si aún no existe.
 
     Se persiste en BD (por usuario) porque calendar.app.created no autoriza
@@ -95,10 +96,11 @@ def _get_or_create_app_calendar(service, request):
     """
     from api.models import GoogleCalendarUsuario
 
-    registro = GoogleCalendarUsuario.objects.filter(user=request.user).first()
-    if registro:
-        request.session['google_calendar_id'] = registro.calendar_id
-        return registro.calendar_id
+    if not forzar_nuevo:
+        registro = GoogleCalendarUsuario.objects.filter(user=request.user).first()
+        if registro:
+            request.session['google_calendar_id'] = registro.calendar_id
+            return registro.calendar_id
 
     nuevo_calendario = {
         'summary': APP_CALENDAR_SUMMARY,
@@ -181,7 +183,15 @@ def crear_evento_recordatorio_cobranza(request, cliente):
     try:
         # Insertar el evento en el calendario propio de la app (requerido por el scope calendar.app.created)
         calendar_id = _get_or_create_app_calendar(service, request)
-        created_event = service.events().insert(calendarId=calendar_id, body=event).execute()
+        try:
+            created_event = service.events().insert(calendarId=calendar_id, body=event).execute()
+        except HttpError as e:
+            if e.resp.status == 404:
+                # El calendario guardado ya no existe (borrado o de una cuenta de Google distinta): recrear y reintentar
+                calendar_id = _get_or_create_app_calendar(service, request, forzar_nuevo=True)
+                created_event = service.events().insert(calendarId=calendar_id, body=event).execute()
+            else:
+                raise
     except Exception as e:
         return HttpResponse(f"Error al crear el evento: {e}", status=500)
     
