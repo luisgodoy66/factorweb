@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.conf import settings
 from google_auth_oauthlib.flow import Flow
 from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 import datetime
 from django.http import JsonResponse
@@ -31,7 +32,7 @@ def google_login(request):
     authorization_url, state = flow.authorization_url(
         access_type='offline',
         include_granted_scopes='true',
-        # prompt='consent'  # <-- AÑADIR ESTA LÍNEA
+        prompt='consent',  # fuerza a Google a emitir refresh_token en cada conexión
     )
     request.session['oauth_state'] = state
     request.session['oauth_scopes'] = SCOPES  # Guardar los scopes usados
@@ -52,14 +53,7 @@ def oauth2callback(request):
         credentials = flow.credentials
 
         # Almacenar las credenciales serializadas en la sesión
-        request.session['google_credentials'] = {
-            'token': credentials.token,
-            'refresh_token': credentials.refresh_token,
-            'token_uri': credentials.token_uri,
-            'client_id': credentials.client_id,
-            'client_secret': credentials.client_secret,
-            'scopes': credentials.scopes,
-        }
+        request.session['google_credentials'] = _credentials_to_session_dict(credentials)
 
         return HttpResponse('Conexión exitosa! Puede cerrar esta ventana.')
     except Exception as e:
@@ -71,6 +65,27 @@ def oauth2callback(request):
             request.session.pop('oauth_scopes', None)
             return HttpResponse('Error: Los permisos (scopes) han cambiado. Por favor, vuelva a conectar su cuenta de Google.', status=400)
         return HttpResponse('Error al procesar la solicitud de OAuth2.', status=500)
+
+def _credentials_to_session_dict(credentials):
+    """Serializa las credenciales para guardarlas en la sesión (JSON-serializable)."""
+    return {
+        'token': credentials.token,
+        'refresh_token': credentials.refresh_token,
+        'token_uri': credentials.token_uri,
+        'client_id': credentials.client_id,
+        'client_secret': credentials.client_secret,
+        'scopes': credentials.scopes,
+        'expiry': credentials.expiry.isoformat() if credentials.expiry else None,
+    }
+
+def _credentials_from_session_dict(data):
+    """Reconstruye Credentials a partir de lo guardado en sesión, restaurando expiry."""
+    data = dict(data)
+    expiry = data.pop('expiry', None)
+    creds = Credentials(**data)
+    if expiry:
+        creds.expiry = datetime.datetime.fromisoformat(expiry)
+    return creds
 
 def _get_or_create_app_calendar(service, request):
     """Obtiene el ID del calendario secundario propio de la app, creándolo si aún no existe.
@@ -113,21 +128,14 @@ def crear_evento_recordatorio_cobranza(request, cliente):
                             , status=401)
 
     try:
-        # Verificar si las credenciales son válidas
-        creds = Credentials(**credentials)
+        creds = _credentials_from_session_dict(credentials)
+        if creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+            request.session['google_credentials'] = _credentials_to_session_dict(creds)
         if not creds.valid:
-            return HttpResponse('Credenciales de Google no válidas.', status=401)
-        # if creds.expired and creds.refresh_token:
-        #     creds.refresh(Request())
-        #     # Actualizar las credenciales en la sesión
-        #     request.session['google_credentials'] = {
-        #         'token': creds.token,
-        #         'refresh_token': creds.refresh_token,
-        #         'token_uri': creds.token_uri,
-        #         'client_id': creds.client_id,
-        #         'client_secret': creds.client_secret,
-        #         'scopes': creds.scopes,
-        #     }
+            # Token vencido y sin refresh_token disponible: no hay forma de renovarlo automáticamente.
+            request.session.pop('google_credentials', None)
+            return HttpResponse('Su conexión con Google expiró. Por favor, vuelva a conectar su cuenta de Google.', status=401)
         service = build('calendar', 'v3', credentials=creds)
 
     except Exception as e:
@@ -196,7 +204,14 @@ def google_session_active(request):
             request.session.pop('google_calendar_id', None)
             reconnect_required = True
         else:
-            creds = Credentials(**credentials)
+            creds = _credentials_from_session_dict(credentials)
+            if creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+                request.session['google_credentials'] = _credentials_to_session_dict(creds)
             if creds.valid:
                 active = True
+            elif creds.expired and not creds.refresh_token:
+                request.session.pop('google_credentials', None)
+                request.session.pop('google_calendar_id', None)
+                reconnect_required = True
     return JsonResponse({'active': active, 'reconnect_required': reconnect_required})
