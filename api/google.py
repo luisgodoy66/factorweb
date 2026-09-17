@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 import os
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Only for development!
+os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'  # evita error 'Scope has changed' cuando Google agrega scopes ya otorgados antes
 SCOPES = ['https://www.googleapis.com/auth/calendar.app.created']  # solo eventos creados por esta app
 APP_CALENDAR_SUMMARY = 'Factorweb - Recordatorios de Cobranza'
 
@@ -186,9 +187,10 @@ def google_session_active(request):
     active = False
     reconnect_required = False
     if credentials:
-        # Si los scopes guardados no coinciden con los actuales (p.ej. tras un cambio de permisos),
-        # la sesión ya no sirve y se debe pedir reconexión.
-        if set(credentials.get('scopes') or []) != set(SCOPES):
+        # include_granted_scopes puede sumar scopes ya otorgados antes; basta con que
+        # los scopes requeridos actuales estén incluidos, no que coincidan exactamente.
+        scopes_otorgados = set(credentials.get('scopes') or [])
+        if not set(SCOPES).issubset(scopes_otorgados):
             request.session.pop('google_credentials', None)
             request.session.pop('google_calendar_id', None)
             reconnect_required = True
