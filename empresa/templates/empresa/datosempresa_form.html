@@ -27,6 +27,18 @@
             </div>
         </div>
         <div class="card-body">
+            <ul class="nav nav-tabs" id="tabsEmpresa" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="tab-datos-tab" data-toggle="tab"
+                        href="#tab-datos" role="tab" aria-controls="tab-datos" aria-selected="true">Datos generales</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="tab-correos-tab" data-toggle="tab"
+                        href="#tab-correos" role="tab" aria-controls="tab-correos" aria-selected="false">Configuración de correos</a>
+                </li>
+            </ul>
+            <div class="tab-content pt-3" id="tabsEmpresaContent">
+            <div class="tab-pane fade show active" id="tab-datos" role="tabpanel" aria-labelledby="tab-datos-tab">
             <!-- cargos -->
             <div class="col-lg-12">
                     <div class="row form-group">
@@ -138,6 +150,57 @@
                     </div>
 
             </div>
+            </div>
+            <div class="tab-pane fade" id="tab-correos" role="tabpanel" aria-labelledby="tab-correos-tab">
+                <div class="col-lg-12">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="count">{{ configuraciones_correo|length }} registro{{ configuraciones_correo|length|pluralize }}</span>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="return AbrirConfiguracionCorreo();">
+                            <i class="fa fa-plus"></i> Nueva configuración
+                        </button>
+                    </div>
+                    {% if not configuraciones_correo %}
+                    <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                        <span class="badge badge-pill badge-danger">Sin registros</span>
+                        No hay configuraciones de correo registradas.
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% else %}
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Servidor SMTP</th>
+                                <th>Puerto</th>
+                                <th>Usuario / correo</th>
+                                <th>Remitente</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in configuraciones_correo %}
+                            <tr>
+                                <td>{{ item.get_cxtipo_display }}</td>
+                                <td>{{ item.ctservidorcorreosaliente }}</td>
+                                <td>{{ item.npuerto }}</td>
+                                <td>{{ item.ctlogincorreo }}</td>
+                                <td>{{ item.ctnombreremitente }}</td>
+                                <td>
+                                    <a href="javascript:void(0)" title="Editar" class="btn btn-sm" role="button"
+                                        onclick="return AbrirConfiguracionCorreo({{ item.id }});">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                </div>
+            </div>
+            </div>
         </div>
 
         <div class="card-footer">
@@ -157,4 +220,26 @@
     </div>
  
 </form>
+<script>
+    // recuerda la pestaña activa entre recargas (p.ej. tras grabar una configuración de correo)
+    var TAB_EMPRESA_KEY = 'tabEmpresaActiva';
+
+    jQuery('#tabsEmpresa a').on('shown.bs.tab', function (e) {
+        localStorage.setItem(TAB_EMPRESA_KEY, jQuery(e.target).attr('href'));
+    });
+
+    jQuery(function () {
+        var tabActiva = localStorage.getItem(TAB_EMPRESA_KEY);
+        if (tabActiva) {
+            jQuery('#tabsEmpresa a[href="' + tabActiva + '"]').tab('show');
+        }
+    });
+
+    function AbrirConfiguracionCorreo(id) {
+        var url = id
+            ? "{% url 'empresa:configuracioncorreo_editar' 0 %}".replace(/0$/, id)
+            : "{% url 'empresa:configuracioncorreo_nuevo' %}";
+        return AbrirModal(url);
+    }
+</script>
 {% endblock %}

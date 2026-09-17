@@ -3,7 +3,7 @@ from django import forms
 
 from .models import Clases_cliente, Datos_participantes, Tipos_factoring, \
     Tasas_factoring, Cuentas_bancarias, Localidades, Puntos_emision, \
-    Otros_cargos, Tipos_empresas, Funcionarios
+    Otros_cargos, Tipos_empresas, Funcionarios, Configuracion_correos
 from pais.models import Bancos, Provincias, Cantones
 from bases.models import Actividades
 # from datetime import datetime
@@ -231,6 +231,45 @@ class LocalidadForm(forms.ModelForm):
             self.fields[f].widget.attrs.update({
                 'class':'form-control'
             })
+
+class ConfiguracionCorreoForm(forms.ModelForm):
+    class Meta:
+        model = Configuracion_correos
+        fields = [
+            'cxtipo', 'ctservidorcorreosaliente', 'npuerto',
+            'ctlogincorreo', 'ctpasswordcorreo', 'ctnombreremitente',
+            'ctasuntocorreo',
+        ]
+        labels = {
+            'cxtipo': 'Tipo de correo',
+            'ctservidorcorreosaliente': 'Servidor SMTP',
+            'npuerto': 'Puerto',
+            'ctlogincorreo': 'Usuario / correo',
+            'ctpasswordcorreo': 'Contraseña',
+            'ctnombreremitente': 'Nombre del remitente',
+            'ctasuntocorreo': 'Asunto por defecto',
+        }
+        widgets = {
+            'ctpasswordcorreo': forms.PasswordInput(render_value=False),
+            'ctasuntocorreo': forms.Textarea(attrs={'rows': '2'}),
+            'ctservidorcorreosaliente': forms.Textarea(attrs={'rows': '2'}),
+            'ctlogincorreo': forms.Textarea(attrs={'rows': '2'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({'class': 'form-control'})
+        # la contraseña nunca se pre-carga en el HTML; dejarla en blanco conserva la actual
+        self.fields['ctpasswordcorreo'].required = False
+        if self.instance.pk:
+            self.fields['ctpasswordcorreo'].help_text = 'Deje en blanco para mantener la contraseña actual.'
+
+    def clean_ctpasswordcorreo(self):
+        password = self.cleaned_data.get('ctpasswordcorreo')
+        if not password and self.instance.pk:
+            return self.instance.ctpasswordcorreo
+        return password
 
 class PuntoEmisionForm(forms.ModelForm):
     class Meta:

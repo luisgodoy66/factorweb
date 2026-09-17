@@ -31,3 +31,6 @@ PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
 MARGARITA_API_KEY = os.getenv('MARGARITA_API_KEY', 'clave_de_prueba')  # noqa: F405
 INTERNAL_API_KEY = os.getenv('INTERNAL_API_KEY', 'clave_interna_prueba')  # noqa: F405
 WHATSAPP_APP_SECRET = os.getenv('WHATSAPP_APP_SECRET', 'secreto_meta_de_prueba')  # noqa: F405
+
+# Clave Fernet determinista para que los tests que usan EncryptedTextField no dependan del entorno.
+FIELD_ENCRYPTION_KEY = os.getenv('FIELD_ENCRYPTION_KEY', 'lSWs8YUvwIC_w1DVpvPGwjiyuQHBeDRKIeYn2ag8Ovw=')  # noqa: F405

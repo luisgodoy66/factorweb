@@ -1,5 +1,6 @@
 from django.db import models
 from bases.models import ClaseModelo
+from bases.fields import EncryptedTextField
 from pais.models import Bancos, Provincias, Cantones
 from bases.models import Actividades
 # Create your models here.
@@ -18,7 +19,7 @@ class Configuracion_correos(ClaseModelo):
     cxtipo=models.CharField(max_length=3,null=False, choices=TIPOS_DE_CORREO)
     ctservidorcorreosaliente =models.TextField(default= 'smtp.gmail.com')
     ctlogincorreo=models.TextField(default='') 
-    ctpasswordcorreo=models.TextField(default='') 
+    ctpasswordcorreo=EncryptedTextField(default='')
     ctnombreremitente=models.CharField(max_length=60, default='') 
     ctasuntocorreo =models.TextField(default='')  
     npuerto =models.IntegerField(default= 587)

@@ -1,0 +1,91 @@
+<div class="modal-dialog">
+    <div class="modal-content">
+
+        <form method="POST" id="formConfiguracionCorreo"
+            action="{% if pk %}{% url 'empresa:configuracioncorreo_editar' pk %}{% else %}{% url 'empresa:configuracioncorreo_nuevo' %}{% endif %}"
+            class="form-horizontal" onsubmit="return checkSubmit();">
+            <div class="card">
+                {% csrf_token %}
+                <div class="card-header">
+                    <strong>{% if pk %}Editar{% else %}Nueva{% endif %} configuración de correo</strong>
+                </div>
+
+                <div class="card-body card-block">
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_cxtipo" class="form-control-label">{{ form.cxtipo.label }}</label></div>
+                        <div class="col-md-8">{{ form.cxtipo }}</div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_ctservidorcorreosaliente" class="form-control-label">{{ form.ctservidorcorreosaliente.label }}</label></div>
+                        <div class="col-md-8">{{ form.ctservidorcorreosaliente }}</div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_npuerto" class="form-control-label">{{ form.npuerto.label }}</label></div>
+                        <div class="col-md-8">{{ form.npuerto }}</div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_ctlogincorreo" class="form-control-label">{{ form.ctlogincorreo.label }}</label></div>
+                        <div class="col-md-8">{{ form.ctlogincorreo }}</div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_ctpasswordcorreo" class="form-control-label">{{ form.ctpasswordcorreo.label }}</label></div>
+                        <div class="col-md-8">{{ form.ctpasswordcorreo }}</div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_ctnombreremitente" class="form-control-label">{{ form.ctnombreremitente.label }}</label></div>
+                        <div class="col-md-8">{{ form.ctnombreremitente }}</div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-4"><label for="id_ctasuntocorreo" class="form-control-label">{{ form.ctasuntocorreo.label }}</label></div>
+                        <div class="col-md-8">{{ form.ctasuntocorreo }}</div>
+                    </div>
+                </div>
+
+                {% if form.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ form.errors }}
+                </div>
+                {% endif %}
+
+                <div class="card-footer">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="return CerrarModal()">
+                        <i class="fa fa-dot-circle-o"></i> Cerrar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa fa-dot-circle-o"></i> Grabar
+                    </button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+    <script>
+        var enviando = false; //Obligaremos a entrar el if en el primer submit
+
+        // .off() evita acumular manejadores si el modal se abre varias veces
+        jQuery("#formConfiguracionCorreo").off('submit').on('submit', function (e) {
+            e.preventDefault();
+            var url = jQuery(this).attr("action");
+            var token = jQuery(this).find("[name=csrfmiddlewaretoken]").val();
+            var formData = jQuery(this).serializeArray();
+
+            jQuery.ajax({
+                url: url,
+                method: "POST",
+                headers: { 'X-CSRFToken': token },
+                data: formData
+            })
+            .done(function (r) {
+                if (r == "OK") {
+                    location.reload();
+                } else {
+                    MensajeError(r);
+                }
+            })
+            .fail(function (error) {
+                MensajeError(error.responseText);
+            });
+        });
+    </script>
+</div>

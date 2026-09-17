@@ -7,14 +7,14 @@ from django.db.models import Value, CharField, BooleanField, IntegerField
 
 from .models import Tipos_factoring, Tasas_factoring, Clases_cliente\
     , Cuentas_bancarias, Localidades, Puntos_emision, Otros_cargos\
-    , Tipos_empresas, Movimientos_maestro, Funcionarios
+    , Tipos_empresas, Movimientos_maestro, Funcionarios, Configuracion_correos
 from bases.models import Usuario_empresa, Empresas
 from solicitudes.models import Asignacion
 # from empresa.models import Movimientos_maestro
 
 from .forms import CuentaBancariaForm, FuncionariosForm, TipoFactoringForm, TasaFactoringForm\
     , ClasesParticipantesForm, LocalidadForm, PuntoEmisionForm\
-    , OtroCargoForm, TiposEmpresasForm
+    , OtroCargoForm, TiposEmpresasForm, ConfiguracionCorreoForm
 from bases.forms import EmpresaForm
 
 from bases.views import enviarPost, SinPrivilegios
@@ -525,7 +525,38 @@ class DatosEmpresaEdit(SinPrivilegios, generic.UpdateView):
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
+        context['configuraciones_correo'] = Configuracion_correos.objects\
+            .filter(empresa = id_empresa.empresa, leliminado = False)\
+            .order_by('cxtipo')
         return context
+
+@login_required(login_url='/login/')
+def configuracion_correo_modal(request, pk=None):
+    """Modal de mantenimiento (alta/edición) de Configuracion_correos para la empresa del usuario."""
+    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+    instancia = None
+    if pk:
+        instancia = Configuracion_correos.objects\
+            .filter(pk=pk, empresa=id_empresa.empresa, leliminado=False).first()
+        if not instancia:
+            raise Http404("No tiene permisos para editar este registro")
+
+    if request.method == 'POST':
+        form = ConfiguracionCorreoForm(request.POST, instance=instancia)
+        if form.is_valid():
+            registro = form.save(commit=False)
+            registro.empresa = id_empresa.empresa
+            if pk:
+                registro.cxusuariomodifica = request.user.id
+            else:
+                registro.cxusuariocrea = request.user
+            registro.save()
+            return HttpResponse("OK")
+        return HttpResponse(form.errors.as_text(), status=400)
+
+    form = ConfiguracionCorreoForm(instance=instancia)
+    return render(request, 'empresa/datosconfiguracioncorreo_modal.html'
+                  , {'form': form, 'pk': pk})
 
 # from django.db.models import Prefetch
 

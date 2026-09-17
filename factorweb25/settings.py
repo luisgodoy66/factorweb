@@ -34,6 +34,10 @@ load_dotenv(BASE_DIR / '.env') or load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 # SECRET_KEY = os.environ['SECRET_KEY']
 
+# Clave simétrica (Fernet) para cifrar campos sensibles en BD, p.ej. Configuracion_correos.ctpasswordcorreo.
+# Generar con: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+FIELD_ENCRYPTION_KEY = os.getenv("FIELD_ENCRYPTION_KEY")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 # 26-jul-26 l.g.  DEBUG pasa a ser una variable de entorno con valor por
 # defecto seguro (False). Para desarrollo local agregar DEBUG=True al .env,

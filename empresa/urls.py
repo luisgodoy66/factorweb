@@ -7,7 +7,7 @@ from .views import FuncionariosEdit, TiposFactoringView, TipoFactoringNew , Tipo
     , PuntoEmisionNew, PuntoEmisionEdit, DatosEmpresaEdit\
     , OtroCargoEdit, OtroCargoNew, TiposEmpresasView, TiposEmpresasNew\
     , OtrosCargosJSON, ClasesParticipanteEdit, TiposEmpresasEdit\
-    , FuncionariosView, FuncionariosNew
+    , FuncionariosView, FuncionariosNew, configuracion_correo_modal
 # , DatosOtroCargo
 
 urlpatterns = [
@@ -64,5 +64,9 @@ urlpatterns = [
          , name="funcionario_nuevo"),
     path('funcionarioeditar/<int:pk>', FuncionariosEdit.as_view()
          , name="funcionario_editar"),
+    path('configuracioncorreo/nuevo/', configuracion_correo_modal
+         , name='configuracioncorreo_nuevo'),
+    path('configuracioncorreo/editar/<int:pk>', configuracion_correo_modal
+         , name='configuracioncorreo_editar'),
 
 ]
