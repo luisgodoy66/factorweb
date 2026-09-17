@@ -150,7 +150,7 @@ window.operateEvents = {
   },
     'click .evento': function (e, value, row, index) {
       console.log(row.id, row.Cliente)
-      registrarEvento(row.id, row.Cliente, 'Ingrese el comentario del evento')
+      registrarEvento(row.id, row.Cliente, 'Deudor: ' + row.Comprador + ' Factura: ' + row.Documento + ' Saldo: ' + row.Saldo)
     },
 };
 

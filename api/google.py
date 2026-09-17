@@ -14,7 +14,7 @@ import os
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Only for development!
 os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'  # evita error 'Scope has changed' cuando Google agrega scopes ya otorgados antes
 SCOPES = ['https://www.googleapis.com/auth/calendar.app.created']  # solo eventos creados por esta app
-APP_CALENDAR_SUMMARY = 'Factorweb - Recordatorios de Cobranza'
+APP_CALENDAR_SUMMARY = 'Margarita - Recordatorios'
 
 def google_login(request):
     if os.path.exists("client_secret.json"):
