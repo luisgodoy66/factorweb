@@ -301,6 +301,7 @@ function google_session_active() {
 
 function registrarEvento(id, cliente, comentario){
     google_session_active().then(data => {
+        console.log(data);
         if (data.reconnect_required) {
             MensajeError("Los permisos de Google cambiaron. Por favor, vuelva a conectar su cuenta de Google.");
             return;
