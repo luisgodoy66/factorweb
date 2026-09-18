@@ -271,7 +271,7 @@ class Claves_webhook(ClaseModelo):
     def esta_vigente(self):
         if not self.lactiva or self.leliminado:
             return False
-        if self.dexpiracion and self.dexpiracion < timezone.localdate():
+        if self.dexpiracion and self.dexpiracion < timezone.now().date():
             return False
         return True
 

@@ -5,6 +5,11 @@ Uso:
 
 La base de datos se resuelve en SQLite en memoria, de modo que el runner de
 Django nunca crea ni destruye nada en el servidor PostgreSQL de produccion.
+
+Nota: las migraciones del proyecto no aplican sobre SQLite (falla un
+alter_field en contabilidad.0019). Para las suites que solo necesitan bases y
+empresa (p. ej. empresa.tests_seguridad) usar factorweb25.test_settings_min,
+que crea el esquema a partir de los modelos.
 """
 from .settings import *  # noqa: F401,F403
 

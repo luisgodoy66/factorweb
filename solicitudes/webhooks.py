@@ -2,50 +2,32 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from decimal import Decimal
-import hmac
 import json
 import logging
 from django.http import JsonResponse
 from bases.models import Empresas, User
+from empresa.claves import (
+    NOMBRES_CABECERA_CLAVE,
+    resolver_empresa_webhook,
+    validar_clave_webhook,
+)
 from .servicios import procesar_mensaje_del_agente
 
 logger = logging.getLogger(__name__)
 
-# 26-jul-26 l.g.  Se aceptan los dos nombres de cabecera en uso:
-#   X-Margarita-Key      -> convencion documentada en este proyecto
-#   X-Margarita-API-Key  -> nombre usado por algunos flujos de n8n
-# El valor es el mismo (MARGARITA_API_KEY).
-NOMBRES_CABECERA_CLAVE = ('X-Margarita-Key', 'X-Margarita-API-Key')
-
 
 def _clave_webhook_valida(request):
-    """Valida la clave compartida del webhook de carga de solicitudes.
+    """Valida la clave del webhook de carga de solicitudes.
 
-    El agente (n8n) debe enviar la clave en la cabecera X-Margarita-Key
-    (o X-Margarita-API-Key) con el valor de la variable de entorno
-    MARGARITA_API_KEY.
+    Admite las claves por empresa definidas en empresa.Claves_webhook y, por
+    compatibilidad hacia atras, la clave global de entorno
+    (MARGARITA_API_KEY / INTERNAL_API_KEY).
 
-    Si MARGARITA_API_KEY no esta definida, se rechaza la peticion: el webhook
-    crea operaciones de factoring y no puede quedar abierto.
+    Mantiene el contrato (bool, motivo) que ya usaban las pruebas.
     """
-    clave_esperada = getattr(settings, 'MARGARITA_API_KEY', None)
-    if not clave_esperada:
-        return False, 'MARGARITA_API_KEY no configurada en el entorno'
-
-    clave_recibida = ''
-    for nombre in NOMBRES_CABECERA_CLAVE:
-        valor = request.headers.get(nombre)
-        if valor:
-            clave_recibida = valor
-            break
-    if not clave_recibida:
-        clave_recibida = request.POST.get('api_key') or ''
-
-    if not clave_recibida:
-        return False, 'falta la cabecera %s' % ' / '.join(NOMBRES_CABECERA_CLAVE)
-
-    if not hmac.compare_digest(str(clave_esperada), str(clave_recibida)):
-        return False, 'clave invalida'
+    _empresa_id, _clave, error = validar_clave_webhook(request)
+    if error:
+        return False, error
     return True, 'ok'
 
 
@@ -96,9 +78,19 @@ def webhook_cargar_solicitudes_factoring(request):
         )
         dias = 30
 
-    empresa = Empresas.objects.filter(id=empresa_id).first() if empresa_id else Empresas.objects.first()
-    if empresa is None:
-        return JsonResponse({'ok': False, 'error': 'No existe una empresa configurada'}, status=400)
+    # La empresa se resuelve desde la clave: si la clave es de una empresa,
+    # prevalece sobre el empresa_id del cuerpo (aislamiento multi-tenant).
+    empresa, error_empresa = resolver_empresa_webhook(
+        request, empresa_id if empresa_id else None)
+    if error_empresa or empresa is None:
+        empresa = empresa or Empresas.objects.first()
+        if empresa is None:
+            return JsonResponse(
+                {'ok': False, 'error': 'No existe una empresa configurada'},
+                status=400)
+        logger.warning(
+            'Webhook de solicitudes: %s; se usa la empresa %s (%s) por defecto',
+            error_empresa, empresa.id, empresa.ctnombre)
 
     user = User.objects.filter(id=user_id).first() if user_id else User.objects.filter(is_superuser=True).first() or User.objects.first()
     if user is None:
