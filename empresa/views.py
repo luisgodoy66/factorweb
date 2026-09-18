@@ -7,14 +7,15 @@ from django.db.models import Value, CharField, BooleanField, IntegerField
 
 from .models import Tipos_factoring, Tasas_factoring, Clases_cliente\
     , Cuentas_bancarias, Localidades, Puntos_emision, Otros_cargos\
-    , Tipos_empresas, Movimientos_maestro, Funcionarios, Configuracion_correos
+    , Tipos_empresas, Movimientos_maestro, Funcionarios, Configuracion_correos\
+    , Claves_webhook
 from bases.models import Usuario_empresa, Empresas
 from solicitudes.models import Asignacion
 # from empresa.models import Movimientos_maestro
 
 from .forms import CuentaBancariaForm, FuncionariosForm, TipoFactoringForm, TasaFactoringForm\
     , ClasesParticipantesForm, LocalidadForm, PuntoEmisionForm\
-    , OtroCargoForm, TiposEmpresasForm, ConfiguracionCorreoForm
+    , OtroCargoForm, TiposEmpresasForm, ConfiguracionCorreoForm, ClaveWebhookForm
 from bases.forms import EmpresaForm
 
 from bases.views import enviarPost, SinPrivilegios
@@ -801,4 +802,122 @@ class FuncionariosEdit(SinPrivilegios, generic.UpdateView):
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
         return context
+
+class ClavesWebhookView(SinPrivilegios, generic.ListView):
+    model = Claves_webhook
+    template_name = "empresa/listaclaveswebhook.html"
+    context_object_name='consulta'
+    login_url = 'bases:login'
+    permission_required="empresa.view_claves_webhook"
+
+    def get_queryset(self) :
+        id_empresa = self.request.usuario_empresa
+        qs=Claves_webhook.objects.filter(leliminado = False
+                                     , empresa = id_empresa.empresa)\
+                                     .order_by("ctnombre")
+        return qs
+
+    def get_context_data(self, **kwargs):
+        id_empresa = self.request.usuario_empresa
+        context = super(ClavesWebhookView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class ClaveWebhookNew(SinPrivilegios, generic.CreateView):
+    model = Claves_webhook
+    template_name="empresa/datosclavewebhook_form.html"
+    form_class=ClaveWebhookForm
+    context_object_name='clave'
+    login_url = 'bases:login'
+    permission_required="empresa.add_claves_webhook"
+
+    def form_valid(self, form):
+        id_empresa = self.request.usuario_empresa
+        form.instance.cxusuariocrea = self.request.user
+        form.instance.empresa = id_empresa.empresa
+        clave_plana = form.instance.generar_clave()
+        self.object = form.save()
+        return render(self.request, "empresa/claveswebhook_generada.html", {
+            'clave': self.object,
+            'clave_plana': clave_plana,
+        })
+
+    def get_context_data(self, **kwargs):
+        id_empresa = self.request.usuario_empresa
+        context = super(ClaveWebhookNew, self).get_context_data(**kwargs)
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class ClaveWebhookEdit(SinPrivilegios, generic.UpdateView):
+    model = Claves_webhook
+    template_name="empresa/datosclavewebhook_form.html"
+    form_class=ClaveWebhookForm
+    context_object_name='clave'
+    success_url= reverse_lazy("empresa:listaclaveswebhook")
+    login_url = 'bases:login'
+    permission_required="empresa.change_claves_webhook"
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = self.request.usuario_empresa
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
+    def form_valid(self, form):
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        id_empresa = self.request.usuario_empresa
+        context = super(ClaveWebhookEdit, self).get_context_data(**kwargs)
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+@login_required(login_url='/login/')
+@permission_required('empresa.change_claves_webhook', login_url='bases:sin_permisos')
+def ClaveWebhookRegenerar(request, pk):
+    # regenera la clave secreta; la anterior queda inválida de inmediato
+    id_empresa = request.usuario_empresa
+    clave = Claves_webhook.objects.filter(pk=pk, leliminado=False).first()
+    if not clave:
+        raise Http404("Clave no encontrada")
+    if clave.empresa_id != id_empresa.empresa.id:
+        raise Http404("No tiene permisos sobre este registro")
+
+    if request.method == "POST":
+        clave_plana = clave.generar_clave()
+        clave.cxusuariomodifica = request.user.id
+        clave.save()
+        return render(request, "empresa/claveswebhook_generada.html", {
+            'clave': clave,
+            'clave_plana': clave_plana,
+        })
+
+    return render(request, "empresa/claveswebhook_regenerar.html", {'clave': clave})
+
+@login_required(login_url='/login/')
+@permission_required('empresa.delete_claves_webhook', login_url='bases:sin_permisos')
+def ClaveWebhookEliminar(request, pk):
+    # la eliminacion es lógica
+    id_empresa = request.usuario_empresa
+    clave = Claves_webhook.objects.filter(pk=pk, leliminado=False).first()
+    if not clave:
+        raise Http404("Clave no encontrada")
+    if clave.empresa_id != id_empresa.empresa.id:
+        raise Http404("No tiene permisos sobre este registro")
+
+    if request.method == "POST":
+        clave.leliminado = True
+        clave.cxusuarioelimina = request.user.id
+        clave.save()
+        return redirect("empresa:listaclaveswebhook")
+
+    return render(request, "empresa/claveswebhook_eliminar.html", {'clave': clave})
 

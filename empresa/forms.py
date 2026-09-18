@@ -3,7 +3,8 @@ from django import forms
 
 from .models import Clases_cliente, Datos_participantes, Tipos_factoring, \
     Tasas_factoring, Cuentas_bancarias, Localidades, Puntos_emision, \
-    Otros_cargos, Tipos_empresas, Funcionarios, Configuracion_correos
+    Otros_cargos, Tipos_empresas, Funcionarios, Configuracion_correos, \
+    Claves_webhook
 from pais.models import Bancos, Provincias, Cantones
 from bases.models import Actividades
 # from datetime import datetime
@@ -363,6 +364,32 @@ class FuncionariosForm(forms.ModelForm):
 
         fields = [ 'ctfuncionario', 'cxfuncionario']
         labels={'ctfuncionario':'Descripción', 'cxfuncionario':'Código'}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for f in iter(self.fields):
+            self.fields[f].widget.attrs.update({
+                'class':'form-control'
+            })
+
+class ClaveWebhookForm(forms.ModelForm):
+    class Meta:
+        model = Claves_webhook
+
+        fields = [ 'ctnombre', 'ctdescripcion', 'dexpiracion', 'lactiva']
+        labels = {
+            'ctnombre': 'Nombre',
+            'ctdescripcion': 'Descripción / uso',
+            'dexpiracion': 'Fecha de expiración',
+            'lactiva': 'Activa',
+        }
+        widgets = {
+            'ctdescripcion': forms.Textarea(attrs={'rows': '3'}),
+            'dexpiracion': forms.DateInput(
+                format=('%Y-%m-%d'),
+                attrs={'class': 'form-control', 'type': 'date'}
+            ),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

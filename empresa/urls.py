@@ -7,7 +7,9 @@ from .views import FuncionariosEdit, TiposFactoringView, TipoFactoringNew , Tipo
     , PuntoEmisionNew, PuntoEmisionEdit, DatosEmpresaEdit\
     , OtroCargoEdit, OtroCargoNew, TiposEmpresasView, TiposEmpresasNew\
     , OtrosCargosJSON, ClasesParticipanteEdit, TiposEmpresasEdit\
-    , FuncionariosView, FuncionariosNew, configuracion_correo_modal
+    , FuncionariosView, FuncionariosNew, configuracion_correo_modal\
+    , ClavesWebhookView, ClaveWebhookNew, ClaveWebhookEdit\
+    , ClaveWebhookRegenerar, ClaveWebhookEliminar
 # , DatosOtroCargo
 
 urlpatterns = [
@@ -68,5 +70,15 @@ urlpatterns = [
          , name='configuracioncorreo_nuevo'),
     path('configuracioncorreo/editar/<int:pk>', configuracion_correo_modal
          , name='configuracioncorreo_editar'),
+    path('listaclaveswebhook/', ClavesWebhookView.as_view()
+         , name='listaclaveswebhook'),
+    path('clavewebhook_nueva', ClaveWebhookNew.as_view()
+         , name='clavewebhook_nueva'),
+    path('clavewebhook_editar/<int:pk>', ClaveWebhookEdit.as_view()
+         , name='clavewebhook_editar'),
+    path('clavewebhook_regenerar/<int:pk>', ClaveWebhookRegenerar
+         , name='clavewebhook_regenerar'),
+    path('clavewebhook_eliminar/<int:pk>', ClaveWebhookEliminar
+         , name='clavewebhook_eliminar'),
 
 ]

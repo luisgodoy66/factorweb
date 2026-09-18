@@ -1,0 +1,87 @@
+{% extends 'bases/home.html' %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">configuración</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li class="active">claves secretas (webhooks)</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="card bg-flat-color-0">
+        <div class="card-header" style="background-color: white;">
+            <div class="dropdown float-right">
+                <button class="btn bg-transparent dropdown-toggle theme-toggle " type="button" id="dropdownMenuButton1" data-toggle="dropdown">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <div class="dropdown-menu-content">
+                        <a class="dropdown-item" href="{% url 'empresa:clavewebhook_nueva' %}">Nueva clave</a>
+                    </div>
+                </div>
+            </div>
+            <h4 class="mb-0">
+                <span class="count">{{ consulta.count }} clave{% if consulta.count != 1 %}s{% endif %}</span>
+            </h4>
+        </div>
+        <div class="card-body">
+
+            {% if not consulta %}
+            <div class="sufee-alert alert with-close alert-danger alert-dismissible fade show">
+                <span class="badge badge-pill badge-danger">Sin registros</span>
+                No hay claves secretas registradas.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            {% endif %}
+
+            <p class="text-muted">
+                Las claves se usan para autenticar las conexiones de integraciones externas
+                (por ejemplo, flujos de n8n) que consumen o envían información hacia webhooks
+                de esta empresa. El valor completo de la clave solo se muestra una vez, al
+                crearla o al regenerarla.
+            </p>
+
+            <table class="table table-hover table-bordered"
+                id="bootstrap-data-table-export"
+                >
+                <thead>
+                    <tr>
+                        <th data-field="campo1" data-sortable="true">Nombre</th>
+                        <th data-field="campo2" data-sortable="false">Prefijo</th>
+                        <th data-field="campo3" data-sortable="true">Activa</th>
+                        <th data-field="campo4" data-sortable="true">Expira</th>
+                        <th data-field="campo5" data-sortable="true">Último uso</th>
+                        <th data-field="campo6" data-sortable="false">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in consulta %}
+                    <tr>
+                        <td>{{ item.ctnombre }}</td>
+                        <td><code>{{ item.ctprefijo }}…</code></td>
+                        <td>{{ item.lactiva|yesno:"Si,No" }}</td>
+                        <td>{{ item.dexpiracion|default:"—" }}</td>
+                        <td>{{ item.dultimouso|default:"—" }}</td>
+                        <td>
+                            <a href="{% url 'empresa:clavewebhook_editar' item.id %}" title="Editar"
+                                class="btn btn-sm" role="button"><i class="fa fa-edit"></i></a>
+                            <a href="{% url 'empresa:clavewebhook_regenerar' item.id %}" title="Regenerar"
+                                class="btn btn-sm" role="button"><i class="fa fa-refresh"></i></a>
+                            <a href="{% url 'empresa:clavewebhook_eliminar' item.id %}" title="Eliminar"
+                                class="btn btn-sm text-danger" role="button"><i class="fa fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+{% endblock %}

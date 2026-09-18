@@ -1,0 +1,56 @@
+{% extends 'bases/home.html' %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">configuración</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li><a href="{% url 'empresa:listaclaveswebhook' %}">claves secretas (webhooks)</a></li>
+                    <li class="active">clave generada</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header" style="background-color: white;">
+                <h5>Clave secreta de "{{ clave.ctnombre }}"</h5>
+            </div>
+            <div class="card-body card-block">
+                <div class="sufee-alert alert alert-warning">
+                    Copie y guarde esta clave ahora. Por seguridad no se volverá a mostrar
+                    completa; solo se guarda su hash.
+                </div>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="id_clave_generada"
+                        value="{{ clave_plana }}" readonly>
+                    <div class="input-group-append">
+                        <button class="btn btn-secondary" type="button" onclick="copiarClave()">
+                            <i class="fa fa-clipboard"></i> Copiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="text-right">
+                    <a href="{% url 'empresa:listaclaveswebhook' %}" class="btn btn-secondary btn-sm">
+                        Ir al listado
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block js_page %}
+<script>
+    function copiarClave() {
+        var campo = document.getElementById('id_clave_generada');
+        campo.select();
+        campo.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(campo.value);
+    }
+</script>
+{% endblock %}

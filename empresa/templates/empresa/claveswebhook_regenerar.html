@@ -1,0 +1,38 @@
+{% extends 'bases/home.html' %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">configuración</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li><a href="{% url 'empresa:listaclaveswebhook' %}">claves secretas (webhooks)</a></li>
+                    <li class="active">regenerar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header" style="background-color: white;">
+                <h5>Regenerar clave de "{{ clave.ctnombre }}"</h5>
+            </div>
+            <div class="card-body card-block">
+                <div class="sufee-alert alert alert-warning">
+                    Al regenerar, la clave actual dejará de funcionar de inmediato en
+                    cualquier integración que la esté usando (por ejemplo, en n8n). Deberá
+                    actualizar la clave en dichas integraciones.
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="text-right">
+                        <a href="{% url 'empresa:listaclaveswebhook' %}" class="btn btn-secondary btn-sm">Cancelar</a>
+                        <button type="submit" class="btn btn-warning btn-sm">Regenerar clave</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

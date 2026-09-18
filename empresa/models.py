@@ -1,4 +1,9 @@
+import secrets
+
+from django.contrib.auth.hashers import check_password, make_password
 from django.db import models
+from django.utils import timezone
+
 from bases.models import ClaseModelo
 from bases.fields import EncryptedTextField
 from pais.models import Bancos, Provincias, Cantones
@@ -237,3 +242,39 @@ class Tipos_empresas(ClaseModelo):
 
     def __str__(self):
         return self.cttipoempresa
+
+class Claves_webhook(ClaseModelo):
+    """Claves secretas usadas por integraciones externas (p.ej. n8n) para
+    autenticar peticiones de webhooks hacia/desde esta empresa."""
+    ctnombre = models.CharField(max_length=80)
+    ctdescripcion = models.TextField(blank=True, default='')
+    ctprefijo = models.CharField(max_length=12, editable=False, blank=True)
+    ctclavehash = models.CharField(max_length=128, editable=False, blank=True)
+    lactiva = models.BooleanField(default=True)
+    dexpiracion = models.DateField(null=True, blank=True)
+    dultimouso = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.ctnombre} ({self.ctprefijo}…)"
+
+    def generar_clave(self):
+        # devuelve la clave en texto plano; solo se puede ver en este momento,
+        # ya que únicamente se guarda su hash.
+        clave_plana = secrets.token_urlsafe(32)
+        self.ctprefijo = clave_plana[:8]
+        self.ctclavehash = make_password(clave_plana)
+        return clave_plana
+
+    def verificar_clave(self, clave_plana):
+        return bool(self.ctclavehash) and check_password(clave_plana, self.ctclavehash)
+
+    def esta_vigente(self):
+        if not self.lactiva or self.leliminado:
+            return False
+        if self.dexpiracion and self.dexpiracion < timezone.localdate():
+            return False
+        return True
+
+    def registrar_uso(self):
+        self.dultimouso = timezone.now()
+        self.save(update_fields=['dultimouso'])

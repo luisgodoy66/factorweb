@@ -1,0 +1,37 @@
+{% extends 'bases/home.html' %}
+{% block breadcrumbs %}
+    <div class="col-sm-8">
+        <div class="page-header float-right">
+            <div class="page-title">
+                <ol class="breadcrumb text-right">
+                    <li><a href="#">configuración</a></li>
+                    <li><a href="#">empresa</a></li>
+                    <li><a href="{% url 'empresa:listaclaveswebhook' %}">claves secretas (webhooks)</a></li>
+                    <li class="active">eliminar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header" style="background-color: white;">
+                <h5>Eliminar clave "{{ clave.ctnombre }}"</h5>
+            </div>
+            <div class="card-body card-block">
+                <div class="sufee-alert alert alert-danger">
+                    ¿Confirma que desea eliminar esta clave? Cualquier integración que la
+                    esté usando (por ejemplo, en n8n) dejará de poder autenticarse.
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="text-right">
+                        <a href="{% url 'empresa:listaclaveswebhook' %}" class="btn btn-secondary btn-sm">Cancelar</a>
+                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
