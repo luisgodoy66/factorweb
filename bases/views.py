@@ -175,7 +175,7 @@ def dashboard(request):
     protestos = 0
     pagares = 0
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     docs = Documentos.objects.TotalCartera(id_empresa.empresa)
     if docs['Total']:
@@ -303,7 +303,7 @@ def dashboard_ayerhoy(request):
     protestos = 0
     pagares = 0
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     docs = Documentos.objects.TotalCartera(id_empresa.empresa)
     if docs['Total']:

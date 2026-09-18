@@ -1,7 +1,7 @@
 # from re import T
 from django.db import models
 
-from bases.models import ClaseModelo
+from bases.models import ClaseModelo, TenantManager
 from empresa.models import Tipos_factoring
 from pais.models import Bancos
 from clientes.models import Datos_compradores 
@@ -70,7 +70,7 @@ class Solicitud_aprobacion(ClaseModelo):
     
 from clientes.models import Datos_generales as Datos_generales_cliente
 
-class Asignacion_Manager(models.Manager):
+class Asignacion_Manager(TenantManager):
     def pendientes_o_rechazadas(self, empresa):
         return self.filter(cxestado__in=['P', 'R'], leliminado=False, empresa=empresa)
     

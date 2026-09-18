@@ -27,14 +27,14 @@ class TiposFactoringView(SinPrivilegios, generic.ListView):
     permission_required="empresa.view_tipos_factoring"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Tipos_factoring.objects.filter(leliminado = False
                                      , empresa = id_empresa.empresa)\
                                      .order_by("cttipofactoring")
         return qs
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(TiposFactoringView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -52,7 +52,7 @@ class TipoFactoringNew(SinPrivilegios, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.empresa = id_empresa.empresa
         # marcar como tipo de factoring creado
         empresa = Empresas.objects.filter (pk = id_empresa.empresa.id).first()
@@ -61,7 +61,7 @@ class TipoFactoringNew(SinPrivilegios, generic.CreateView):
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(TipoFactoringNew, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -69,7 +69,7 @@ class TipoFactoringNew(SinPrivilegios, generic.CreateView):
         return context
 
     def get_success_url(self):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         empresa = Empresas.objects.filter (pk = id_empresa.empresa.id).first()
         if not empresa.ltasasfactoringconfiguradas :
             return reverse_lazy("bases:home")
@@ -89,7 +89,7 @@ class TipoFactoringEdit(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -99,7 +99,7 @@ class TipoFactoringEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(TipoFactoringEdit, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -114,14 +114,14 @@ class TasasFactoringView(SinPrivilegios, generic.ListView):
     permission_required="empresa.view_tasas_factoring"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Tasas_factoring.objects.filter(leliminado = False
                                      , empresa = id_empresa.empresa)\
                                      .order_by("cxtasa")
         return qs
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(TasasFactoringView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -138,13 +138,13 @@ class TasaFactoringNew(SinPrivilegios, generic.CreateView):
     permission_required="empresa.add_tasas_factoring"
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.cxusuariocrea = self.request.user
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(TasaFactoringNew, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -162,7 +162,7 @@ class TasaFactoringEdit(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -170,14 +170,14 @@ class TasaFactoringEdit(SinPrivilegios, generic.UpdateView):
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
         # marcar como tipo de factoring creado
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         empresa = Empresas.objects.filter (pk = id_empresa.empresa.id).first()
         empresa.ltasasfactoringconfiguradas = True
         empresa.save()
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(TasaFactoringEdit, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -185,7 +185,7 @@ class TasaFactoringEdit(SinPrivilegios, generic.UpdateView):
         return context
 
     def get_success_url(self):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         empresa = Empresas.objects.filter (pk = id_empresa.empresa.id).first()
         if not empresa.ltasasfactoringconfiguradas :
             return reverse_lazy("bases:home")
@@ -202,14 +202,14 @@ class ClasesParticipanteView(SinPrivilegios, generic.ListView):
     permission_required="empresa.view_clases_cliente"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Clases_cliente.objects.filter(leliminado = False
                                      , empresa = id_empresa.empresa)\
                                      .order_by("cxclase")
         return qs
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(ClasesParticipanteView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -226,13 +226,13 @@ class ClasesParticipanteNew(SinPrivilegios, generic.CreateView):
     permission_required="empresa.add_clases_cliente"
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.cxusuariocrea = self.request.user
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(ClasesParticipanteNew, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -250,7 +250,7 @@ class ClasesParticipanteEdit(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -260,7 +260,7 @@ class ClasesParticipanteEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(ClasesParticipanteEdit, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -275,13 +275,13 @@ class CuentasBancariasView(SinPrivilegios, generic.ListView):
     permission_required="empresa.view_cuentas_bancarias"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Cuentas_bancarias.objects.filter(leliminado = False
                                      , empresa = id_empresa.empresa)
         return qs
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(CuentasBancariasView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -299,18 +299,18 @@ class CuentaBancariaNew(SinPrivilegios, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
     def get_form_kwargs(self):
         kwargs = super(CuentaBancariaNew, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(CuentaBancariaNew, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -328,7 +328,7 @@ class CuentaBancariaEdit(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -339,12 +339,12 @@ class CuentaBancariaEdit(SinPrivilegios, generic.UpdateView):
     
     def get_form_kwargs(self):
         kwargs = super(CuentaBancariaEdit, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(CuentaBancariaEdit, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -359,14 +359,14 @@ class LocalidadesView(SinPrivilegios, generic.ListView):
     permission_required="empresa.view_localidades"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Localidades.objects.filter(leliminado = False
                                      , empresa = id_empresa.empresa)\
                                      .order_by("ctlocalidad")
         return qs
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(LocalidadesView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -384,12 +384,12 @@ class LocalidadesNew(SinPrivilegios, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(LocalidadesNew, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -407,7 +407,7 @@ class LocalidadesEdit(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -417,7 +417,7 @@ class LocalidadesEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(LocalidadesEdit, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -432,13 +432,13 @@ class PuntosEmisionView(SinPrivilegios, generic.ListView):
     permission_required="empresa.view_puntos_emision"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Puntos_emision.objects.filter(leliminado = False
                                      , empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(PuntosEmisionView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -456,12 +456,12 @@ class PuntoEmisionNew(SinPrivilegios, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(PuntoEmisionNew, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -479,19 +479,19 @@ class PuntoEmisionEdit(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
 
     def form_valid(self, form):
         form.instance.cxusuariomodifica = self.request.user.id
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(PuntoEmisionEdit, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -508,7 +508,7 @@ class DatosEmpresaEdit(SinPrivilegios, generic.UpdateView):
     permission_required="empresa.change_empresas"
 
     def get_object(self, queryset=None):
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         return Empresas.objects.get(pk=id_empresa.empresa.id)
 
     def form_valid(self, form):
@@ -520,7 +520,7 @@ class DatosEmpresaEdit(SinPrivilegios, generic.UpdateView):
             return self.form_invalid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(DatosEmpresaEdit, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -533,7 +533,7 @@ class DatosEmpresaEdit(SinPrivilegios, generic.UpdateView):
 @login_required(login_url='/login/')
 def configuracion_correo_modal(request, pk=None):
     """Modal de mantenimiento (alta/edición) de Configuracion_correos para la empresa del usuario."""
-    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+    id_empresa = request.usuario_empresa
     instancia = None
     if pk:
         instancia = Configuracion_correos.objects\
@@ -568,7 +568,7 @@ class OtrosCargosView(SinPrivilegios, generic.ListView):
     permission_required="empresa.view_otros_cargos"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Movimientos_maestro.objects\
             .exclude(cxmovimiento__in=('GAO', 'DCAR', 'DCAV', 'GAOA'))\
             .filter(leliminado = False
@@ -578,7 +578,7 @@ class OtrosCargosView(SinPrivilegios, generic.ListView):
         return qs
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(OtrosCargosView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -595,13 +595,13 @@ class OtroCargoNew(SinPrivilegios, generic.CreateView):
     permission_required="empresa.add_otros_cargos"
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.cxusuariocrea = self.request.user
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         nombre_movimiento = self.kwargs.get('movimiento')
         movimiento_id = self.kwargs.get('movimiento_id')
 
@@ -625,7 +625,7 @@ class OtroCargoEdit(SinPrivilegios, generic.UpdateView):
   
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -635,7 +635,7 @@ class OtroCargoEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         nombre_movimiento = self.kwargs.get('movimiento')
         movimiento_id = self.kwargs.get('movimiento_id')
 
@@ -649,7 +649,7 @@ class OtroCargoEdit(SinPrivilegios, generic.UpdateView):
         return context
 
 def OtrosCargosJSON(request):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     resultado=[]
     lista = Otros_cargos.objects.filter(leliminado = False, lactivo = True
                                      , empresa = id_empresa.empresa)\
@@ -669,7 +669,7 @@ class TiposEmpresasView(SinPrivilegios, generic.ListView):
     permission_required="empresa.view_tipos_empresas"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Tipos_empresas.objects.filter(leliminado = False
                                      , empresa = id_empresa.empresa)\
                                      .order_by("cttipoempresa")
@@ -678,7 +678,7 @@ class TiposEmpresasView(SinPrivilegios, generic.ListView):
         return qs
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(TiposEmpresasView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -695,13 +695,13 @@ class TiposEmpresasNew(SinPrivilegios, generic.CreateView):
     permission_required="empresa.add_tipos_empresas"
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.cxusuariocrea = self.request.user
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(TiposEmpresasNew, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -722,7 +722,7 @@ class TiposEmpresasEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(TiposEmpresasEdit, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -737,14 +737,14 @@ class FuncionariosView(SinPrivilegios, generic.ListView):
     permission_required="empresa.view_funcionarios"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Funcionarios.objects.filter(leliminado = False
                                      , empresa = id_empresa.empresa)\
                                      .order_by("ctfuncionario")
         return qs
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(FuncionariosView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -762,12 +762,12 @@ class FuncionariosNew(SinPrivilegios, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.cxusuariocrea = self.request.user
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(FuncionariosNew, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -785,7 +785,7 @@ class FuncionariosEdit(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -795,7 +795,7 @@ class FuncionariosEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(FuncionariosEdit, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()

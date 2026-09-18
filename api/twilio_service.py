@@ -67,8 +67,7 @@ def enviar_mensaje_whatsapp(request, whatsapp_destino ):
 
         if not cuerpo_mensaje or not gestion_cobro_id:
             return JsonResponse({'status': 'error', 'message': 'Faltan parámetros.'}, status=400)
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = request.user).first()
+        id_empresa = request.usuario_empresa
 
         configuracion_twilio = Configuracion_twilio_whatsapp.objects\
             .filter(empresa=id_empresa.empresa, lactivo=True).first()

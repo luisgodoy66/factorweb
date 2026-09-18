@@ -32,12 +32,12 @@ class CuentasView(SinPrivilegios, generic.ListView):
     permission_required="cuentasconjuntas.view_cuentas_bancarias"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Cuentas_bancarias.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(CuentasView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -54,13 +54,13 @@ class CuentasBancariasNew(SinPrivilegios, generic.CreateView):
     permission_required="cuentasconjuntas.add_cuentas_bancarias"
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(CuentasBancariasNew, self).get_context_data(**kwargs)
         context["nueva"]=True
         sp = Asignacion.objects\
@@ -70,7 +70,7 @@ class CuentasBancariasNew(SinPrivilegios, generic.CreateView):
 
     def get_form_kwargs(self):
         kwargs = super(CuentasBancariasNew, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
@@ -85,7 +85,7 @@ class CuentasBancariasEdit(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -95,7 +95,7 @@ class CuentasBancariasEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         pk = self.kwargs.get('pk')
 
         context = super(CuentasBancariasEdit, self).get_context_data(**kwargs)
@@ -108,7 +108,7 @@ class CuentasBancariasEdit(SinPrivilegios, generic.UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super(CuentasBancariasEdit, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
@@ -120,7 +120,7 @@ class CobranzasPorConfirmarView(SinPrivilegios, generic.ListView):
     permission_required="cobranzas.change_documentos_cabecera"
 
     def get_queryset(self):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         # no sé por qué tenía la cdición de no anticipa total negociado 
         cobranzas = Documentos_cabecera.objects\
             .filter(cxestado='A', leliminado = False
@@ -154,7 +154,7 @@ class CobranzasPorConfirmarView(SinPrivilegios, generic.ListView):
         return cobranzas.union(recuperaciones)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(CobranzasPorConfirmarView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -169,14 +169,14 @@ class CargosPendientesView(SinPrivilegios, generic.ListView):
     permission_required="cobranzas.view_debitoscuentasconjuntas"
 
     def get_queryset(self):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         return DebitosCuentasConjuntas.objects\
             .filter(leliminado = False
                     , empresa = id_empresa.empresa
                     , notadedebito__nsaldo__gt = 0)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(CargosPendientesView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -194,13 +194,13 @@ class DebitoBancarioEdit(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         pk = self.kwargs.get('pk')
         # obtener el id de la nota de debito
         nd = DebitosCuentasConjuntas.objects.filter(pk=pk).first()
@@ -264,12 +264,12 @@ class TransferenciasView(SinPrivilegios, generic.ListView):
     permission_required="cuentasconjuntas.view_transferencias"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Transferencias.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
     
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(TransferenciasView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -287,19 +287,19 @@ class TansferenciaEdit(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(TansferenciaEdit, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -308,14 +308,14 @@ class TansferenciaEdit(SinPrivilegios, generic.UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super(TansferenciaEdit, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
 def ConfirmarCobranza(request, cobranza_id, tipo_operacion, cuenta_conjunta):
     template_name = "cuentasconjuntas/datosconfirmacioncobranza_form.html"
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     cc = Cuentas_bancarias.objects\
         .filter(pk = cuenta_conjunta
@@ -383,7 +383,7 @@ def AceptarConfirmacion(request):
 @permission_required('operaciones.add_notas_debito_cabecera', login_url='bases:sin_permisos')
 def DebitoBancarioSinCobranza(request, cuenta_conjunta):
     template_name = "cuentasconjuntas/datosdebitobancario_form.html"
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     sp = Asignacion.objects\
         .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
 
@@ -430,7 +430,7 @@ def DebitoBancarioSinCobranza(request, cuenta_conjunta):
 @permission_required('cobranzas.change_debitoscuentasconjuntas', login_url='bases:sin_permisos')
 def EliminarNotaDebito(request, pk):
     resultado = 'OK'
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     ndcc = DebitosCuentasConjuntas.objects\
         .filter(pk = pk, empresa = id_empresa.empresa).first()
@@ -458,7 +458,7 @@ def EliminarNotaDebito(request, pk):
 @permission_required('cuentasconjuntas.change_transferencias', login_url='bases:sin_permisos')
 def EliminarTransferencia(request, pk):
     # la eliminacion es lógica
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     resultado = 'OK'
     transferencia = Transferencias.objects\
         .filter(pk=pk, empresa = id_empresa.empresa).first()
@@ -496,7 +496,7 @@ def EliminarTransferencia(request, pk):
 @permission_required('cuentasconjuntas.add_transferencias', login_url='bases:sin_permisos')
 def DatosTransferencia(request):
     template_name = "cuentasconjuntas/datostransferencia_form.html"
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     form = TransferenciasForm(empresa = id_empresa.empresa)
     
     sp = Asignacion.objects\

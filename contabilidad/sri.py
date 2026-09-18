@@ -14,7 +14,7 @@ from .models import Impuestos_facturaventa, Items_facturaventa, Factura_venta\
 
 def GeneraXMLFactura(request, ids_facturas, ambiente):
     # clave de acceso
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     ids = ids_facturas.split(',')
     for id_factura in ids:

@@ -57,8 +57,7 @@ class DatosOperativosView(SinPrivilegios, generic.ListView):
     permission_required="clientes.view_datos_generales"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=ModeloCliente.Datos_generales.objects\
             .filter(leliminado = False
                     , cxcliente__leliminado = False
@@ -66,8 +65,7 @@ class DatosOperativosView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(DatosOperativosView, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -82,8 +80,7 @@ class AsignacionesView(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_asignacion"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=ModelosSolicitud.Asignacion.objects\
             .filter(leliminado = False
                     , cxestado='L'
@@ -91,7 +88,7 @@ class AsignacionesView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(AsignacionesView, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -106,12 +103,12 @@ class AsignacionesConsulta(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_asignacion"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Asignacion.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         desde = date.today() + timedelta(days=-date.today().day +1)
         hasta = date.today()
 
@@ -133,7 +130,7 @@ class AsignacionesPendientesDesembolsarView(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_asignacion"
 
     def get_queryset(self):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         # 8-FEB-25  L.G.    Mantener las solicitudes pendientes de desembolsar
         return ModelosSolicitud.Asignacion.objects.filter(cxestado='L'
                                          , empresa = id_empresa.empresa
@@ -141,7 +138,7 @@ class AsignacionesPendientesDesembolsarView(SinPrivilegios, generic.ListView):
                                          , ddesembolso__lte = date.today())
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(AsignacionesPendientesDesembolsarView, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -156,12 +153,12 @@ class MaestroMovimientosView(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_movimientos_maestro"
     
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Movimientos_maestro.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(MaestroMovimientosView, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -179,13 +176,13 @@ class MaestroMovimientoNew(SinPrivilegios, generic.CreateView):
     permission_required="operaciones.add_movimientos_maestro"
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(MaestroMovimientoNew, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -208,7 +205,7 @@ class MaestroMovimientoEdit(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -218,7 +215,7 @@ class MaestroMovimientoEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(MaestroMovimientoEdit, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -238,13 +235,13 @@ class CondicionesOperativasView(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_condiciones_operativas_cabecera"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Condiciones_operativas_cabecera.objects\
             .filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(CondicionesOperativasView, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -261,7 +258,7 @@ class CondicionesOperativasUpdate(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -272,12 +269,12 @@ class CondicionesOperativasUpdate(SinPrivilegios, generic.UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super(CondicionesOperativasUpdate, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(CondicionesOperativasUpdate, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -292,12 +289,12 @@ class AnexosView(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_anexos"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Anexos.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(AnexosView, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -314,13 +311,13 @@ class AnexosNew(SinPrivilegios, generic.CreateView):
     permission_required="operaciones.add_anexos"
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.cxusuariocrea = self.request.user
         form.instance.empresa = id_empresa.empresa
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(AnexosNew, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -339,7 +336,7 @@ class AnexosEdit(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -353,7 +350,7 @@ class AnexosEdit(SinPrivilegios, generic.UpdateView):
             return self.form_invalid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(AnexosEdit, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -368,13 +365,13 @@ class EstadosOperativosView(SinPrivilegios, generic.ListView):
     permission_required="clientes.view_datos_generales"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=ModeloCliente.Datos_generales.objects.filter(leliminado = False
                                                         , empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(EstadosOperativosView, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -388,7 +385,7 @@ class DesembolsosConsulta(SinPrivilegios, generic.TemplateView):
     permission_required="operaciones.view_desembolsos"
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         desde = date.today() + timedelta(days=-date.today().day +1)
         hasta = date.today()
 
@@ -415,7 +412,7 @@ class DatosOperativosHistoricoView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         id_cliente = self.kwargs.get('id_cliente')
         cliente = ModeloCliente.Datos_generales.objects\
             .filter(pk=id_cliente).first()
@@ -439,12 +436,12 @@ class PagaresView(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_pagares"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Pagares.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(PagaresView, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -458,7 +455,7 @@ class PagareDatos(SinPrivilegios, generic.TemplateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -468,8 +465,7 @@ class PagareDatos(SinPrivilegios, generic.TemplateView):
         context["pagare"] = Pagares.objects\
             .filter(pk = self.kwargs.get('pk')).first()
 
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         
         sp = ModelosSolicitud.Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -484,8 +480,7 @@ class AnexosClienteView(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_anexos"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         
         cliente_id = self.kwargs.get('cliente_id')
         cliente = ModeloCliente.Datos_generales.objects\
@@ -498,7 +493,7 @@ class AnexosClienteView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(AnexosClienteView, self).get_context_data(**kwargs)
 
         solicitud_id = self.kwargs.get('solicitud_id')
@@ -519,7 +514,7 @@ class RevisionCartera(SinPrivilegios, generic.TemplateView):
     permission_required="operaciones.view_asignacion"
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
 
         context = super(RevisionCartera, self).get_context_data(**kwargs)
         context["revisiones"] = Revision_cartera.objects\
@@ -544,7 +539,7 @@ class RevisionCarteraClienteEdit(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -573,12 +568,12 @@ class CortesHistoricoView(SinPrivilegios, generic.ListView):
     permission_required="Operaciones.view_cortes_historico"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Cortes_historico.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(CortesHistoricoView, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -596,7 +591,7 @@ class CorteHistoricoEdit(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -617,8 +612,7 @@ class AnexosCesionFacturasView(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_anexos"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
 
         solicitud_id = self.kwargs.get('solicitud_id')
 
@@ -633,7 +627,7 @@ class AnexosCesionFacturasView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(AnexosCesionFacturasView, self).get_context_data(**kwargs)
 
         solicitud_id = self.kwargs.get('solicitud_id')
@@ -652,7 +646,7 @@ class CarteraPorClienteConsulta(SinPrivilegios, generic.TemplateView):
     permission_required="operaciones.view_asignacion"
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
 
         context = super(CarteraPorClienteConsulta, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
@@ -667,7 +661,7 @@ class CarteraPorDeudorConsulta(SinPrivilegios, generic.TemplateView):
     permission_required="operaciones.view_asignacion"
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
 
         context = super(CarteraPorDeudorConsulta, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
@@ -682,7 +676,7 @@ class CarteraVencidaConsulta(SinPrivilegios, generic.TemplateView):
     permission_required="operaciones.view_asignacion"
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
 
         context = super(CarteraVencidaConsulta, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects\
@@ -699,8 +693,7 @@ def DesembolsarAsignacion(request, pk, cliente_id):
     contexto = {}
     formulario={}
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     cliente = ModeloCliente.Datos_generales.objects\
         .filter(id=cliente_id).first()
@@ -801,9 +794,8 @@ def DatosOperativos(request, cliente_id=None):
     contexto={}
     formulario={}
     datos_operativos={}
+    id_empresa = request.usuario_empresa
     
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-
     cliente = ModeloCliente.Datos_generales.objects\
         .filter(cxcliente=cliente_id).first()
     
@@ -945,7 +937,7 @@ def AceptarAsignacion(request, asignacion_id=None):
     beneficiario = ''
     otros_cargos = None
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     asignacion = ModelosSolicitud.Asignacion.objects\
         .filter(pk=asignacion_id).first()
@@ -1070,7 +1062,7 @@ def DetalleCargosAsignacion(request, asignacion_id = None
     # se ejecuta desde fetchProcesar (fetch) por lo tanto si todo terminar bien
     # debe regresar el texto 'OK'.
     # Si regresa otro texto debe aparecer modal con mensaje de error.
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     asignacion = ModelosSolicitud.Asignacion.objects.get(pk=asignacion_id) 
 
@@ -1299,9 +1291,9 @@ def GeneraDetalleParaTabla1(request,asignacion_id):
     # Es invocado desde la url
     # crear detalle de salida para el contexto
     # no calcula, ni graba cargos, recupera los documentos
-    asignacion = ModelosSolicitud.Asignacion.objects.get(pk=asignacion_id) 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
+    asignacion = ModelosSolicitud.Asignacion.objects.get(pk=asignacion_id) 
     if asignacion.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
 
@@ -1436,7 +1428,7 @@ def EditarTasasDocumentoSolicitud(request, documento_id, fecha_desembolso, asign
     contexto={}
     formulario={}
     numero_documento=""
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     # si son facturas puras los documentos son las facturas
     # si son accesorios los documentos son los cheques
     asignacion = ModelosSolicitud.Asignacion.objects.get(pk=asignacion_id) 
@@ -1526,7 +1518,7 @@ def EnviarCorreoLiquidacionAsignacion(request, solicitud_id):
         if not solicitud:
             return HttpResponse(f"No se pudo enviar correo de liquidación: no se encontró la asignación generada {solicitud_id}", status=404)
 
-        id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+        id_empresa = request.usuario_empresa
 
         nombre_archivo, pdf_bytes, error = generar_pdf_liquidacion(
             request, solicitud.id, id_empresa)
@@ -1583,7 +1575,7 @@ def AceptarDocumentos(request):
 @login_required(login_url='/login/')
 @permission_required('operaciones.add_condiciones_operativas_cabecera', login_url='bases:sin_permisos')
 def DatosCondicionOperativaNueva(request):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     template_name="operaciones/datoscondicionesoperativas_form.html"
         
     sp = ModelosSolicitud.Asignacion.objects\
@@ -1600,7 +1592,7 @@ def DatosCondicionesOperativas(request, tipo_factoring_id
                                , condicion_id=None, detalle_id=None):
     template_name='operaciones/datoscondicionesoperativas_modal.html'
     condicion={}
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if condicion_id:
         condicion = Condiciones_operativas_cabecera.objects\
@@ -1703,7 +1695,7 @@ def DatosCondicionesOperativas(request, tipo_factoring_id
 
 def DetalleCondicionOperativa(request, condicion_id = None):
     
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     detalle = Condiciones_operativas_detalle.objects\
         .filter(cxcondicion=condicion_id, leliminado = False
@@ -1745,7 +1737,7 @@ def CondicionesOperativasADictionario(det):
 def EliminarDetalleCondicionOperativa(request, detalle_id):
 
     condicion = Condiciones_operativas_detalle.objects.filter(pk=detalle_id).first()
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if condicion.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -1778,7 +1770,7 @@ def bajararchivo(request,plantilla, nombrearchivo):
 @permission_required('operaciones.change_asignacion', login_url='bases:sin_permisos')
 def ReversaAceptacionAsignacion(request, pid_asignacion):
     # # ejecuta un store procedure 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     asignacion = ModelosSolicitud.Asignacion.objects.filter(pk=pid_asignacion).first()
     if asignacion.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -1804,8 +1796,7 @@ def GeneraListaAsignacionesJSON(request, desde = None
     # Es invocado desde la url de una tabla bt
 
     arr_clientes = []
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     if clientes == None:
         asignacion = Asignacion.objects\
@@ -1839,7 +1830,7 @@ def GeneraListaAsignacionesJSON(request, desde = None
 def GeneraListaAsignacionesRegistradasJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if desde == 'None':
         asignacion = Asignacion.objects\
@@ -1891,7 +1882,7 @@ def GeneraListaAsignacionesJSONSalida(asignacion):
 
 def GeneraResumenAntigüedadCarteraJSON(request):
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     documentos = Documentos.objects.antigüedad_cartera(id_empresa.empresa)
     acc_quitados =  Cheques_quitados.objects.antigüedad_cartera(id_empresa.empresa)
@@ -1942,8 +1933,7 @@ def AntigüedadCarteraClienteJSON(request, cliente_id):
     cheques = None
     cuotas = None
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     facturas = Documentos.objects\
         .antigüedad_por_cliente(id_empresa.empresa)\
@@ -2005,7 +1995,7 @@ def AntigüedadCarteraClienteJSON(request, cliente_id):
 
 def GeneraListaFacturasPendientesClienteJSON(request, cliente_id, fecha_corte = None):
     # Es invocado desde la url de una tabla bt
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     documentos = Documentos.objects\
         .facturas_pendientes_vencimiento_original(fecha_corte, id_empresa.empresa)\
@@ -2062,7 +2052,7 @@ def GeneraListaAccesoriosQuitadosClienteJSONSalida(acc):
 def GeneraListaChequesADepositarClienteJSON(request, cliente_id, fecha_corte):
     # Es invocado desde la url de una tabla bt
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     documentos = ChequesAccesorios.objects\
         .cheques_a_depositar(fecha_corte, id_empresa.empresa)\
@@ -2098,7 +2088,7 @@ def GeneraListaCargosPendientesClienteJSON(request, cliente_id):
     # Es invocado desde la url de una tabla bt
     cliente = ModeloCliente.Datos_generales.objects\
         .filter(pk=cliente_id).first()
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     if cliente.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -2158,7 +2148,7 @@ def GeneraListaProtestosPendientesClienteJSON(request, cliente_id):
     # Es invocado desde la url de una tabla bt
     cliente = ModeloCliente.Datos_generales.objects\
         .filter(pk=cliente_id).first()
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     if cliente.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -2204,7 +2194,7 @@ def GeneraListaCanjesClienteJSON(request, cliente_id):
 
     cliente = ModeloCliente.Datos_generales.objects\
         .filter(pk=cliente_id).first()
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     if cliente.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -2241,7 +2231,7 @@ def GeneraListaChequesQuitadosClienteJSON(request, cliente_id):
 
     cliente = ModeloCliente.Datos_generales.objects\
         .filter(pk=cliente_id).first()
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     if cliente.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -2277,7 +2267,7 @@ def GeneraListaChequesQuitadosClienteJSONSalida(doc):
 
 def GeneraListaDesembolsosJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if desde == 'None':
         movimiento = Desembolsos.objects\
@@ -2355,7 +2345,7 @@ def GeneraListaDesembolsosJSONSalida(transaccion):
 @permission_required("operaciones.change_condiciones_operativas_cabecera",login_url="/login/")
 def CondicionesOperativasInactivar(request,id):
     condicion = Condiciones_operativas_cabecera.objects.filter(pk=id).first()
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if condicion.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -2373,7 +2363,7 @@ def CondicionesOperativasInactivar(request,id):
 @login_required(login_url="/login/")
 @permission_required("operaciones.view_anexos",login_url="/login/")
 def ConsultaAnexosActivos(request, tipo_cliente):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     anexos = Anexos.objects\
         .filter(lactivo = True, empresa = id_empresa.empresa)\
@@ -2391,7 +2381,7 @@ def GenerarAnexo(request, asignacion_id, anexo_id, deudor_id = None):
     nombre_deudor = ''
     total_deudor_valor = 0
     # Genera un anexo de la asignación
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     asignacion = ModelosSolicitud.Asignacion.objects\
         .filter(pk=asignacion_id).first()
@@ -2500,7 +2490,7 @@ def GenerarAnexo(request, asignacion_id, anexo_id, deudor_id = None):
 
 def GeneraResumenCarteraNegociadaJSON(request, año):
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     actual = Asignacion.objects.operaciones_negociadas(id_empresa.empresa, año)
     anterior = Asignacion.objects.operaciones_negociadas(id_empresa.empresa, año-1)
@@ -2513,7 +2503,7 @@ def GeneraResumenCarteraNegociadaJSON(request, año):
 def MarcarAnexoGenerado(request, asignacion_id):
 
     asignacion = Asignacion.objects.filter(pk=asignacion_id).first()
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     if asignacion.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -2525,7 +2515,7 @@ def MarcarAnexoGenerado(request, asignacion_id):
     return HttpResponse( "OK")
 
 def IngresosGeneradosJSON(request, año):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     actual = Factura_venta.objects.ingresos_mensuales(id_empresa.empresa, año)
     anterior = Factura_venta.objects.ingresos_mensuales(id_empresa.empresa, año-1)
@@ -2540,7 +2530,7 @@ def PedirArchivoXML(request):
 
 def ImportarOperacion(request):
     objeto=json.loads(request.body.decode("utf-8"))
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     id_cliente=objeto["id_cliente"]
     nombre_cliente=objeto["nombre_cliente"]
@@ -2651,7 +2641,7 @@ def ImportarOperacion(request):
 @login_required(login_url='/login/')
 @permission_required('operaciones.change_pagares', login_url='bases:sin_permisos')
 def ReversaAceptacionPagare(request, pid_asignacion):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     asignacion = ModelosSolicitud.Asignacion.objects.filter(pk=pid_asignacion).first()
     if asignacion.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -2666,8 +2656,7 @@ def ReversaAceptacionPagare(request, pid_asignacion):
 @permission_required('operaciones.change_desembolsos', login_url='bases:sin_permisos')
 def ReversoDesembolsoAsignacion(request, desembolso_id):
     # # ejecuta un store procedure 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     desembolso = Desembolsos.objects\
         .filter(pk = desembolso_id).first()
@@ -2683,8 +2672,7 @@ def ReversoDesembolsoAsignacion(request, desembolso_id):
 def GeneraListaCuotasPagareJSON(request, pagare_id):
     # Es invocado desde la url de una tabla bt
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     documentos = Pagare_detalle.objects\
         .filter(pagare = pagare_id, empresa = id_empresa.empresa)\
@@ -2724,7 +2712,7 @@ def ModificarCuota(request,cuota_id):
     estado ={}
     form_cobranza={}
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     cuota=Pagare_detalle.objects.get(pk=cuota_id)
     if cuota.empresa != id_empresa.empresa:
@@ -2760,7 +2748,7 @@ def ModificarCuota(request,cuota_id):
 
 def GeneraResumenNegociadPorActividadJSON(request):
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     total_por_actividad = Asignacion.objects.total_por_actividad(id_empresa.empresa)
     
@@ -2770,7 +2758,7 @@ def GeneraResumenNegociadPorActividadJSON(request):
 
 def GeneraListaMovimientosClienteJSON(request, cliente_id, registros = 10, ):
     # Es invocado desde la url de una tabla bt
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if registros == 0:
         documentos = Movimientos_clientes.objects\
@@ -2813,8 +2801,7 @@ def GeneraListaMovimientosClienteJSONSalida(doc):
 
 def GeneraListaClientesValoresPendientes(request, porcentaje = 80):
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     total_por_cliente = ModeloCliente.Linea_Factoring.objects\
         .clientes_con_valores_pendientes(id_empresa.empresa, porcentaje)
@@ -2824,7 +2811,7 @@ def GeneraListaClientesValoresPendientes(request, porcentaje = 80):
 
 def NuevaRevisionCarteraJSON(request,):
     # Es invocado desde la url de una tabla bt
-    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+    id_empresa = request.usuario_empresa
 
     facturas = Documentos.objects.revision_cartera(id_empresa.empresa)
     accesorios = ChequesAccesorios.objects.revision_cartera(id_empresa.empresa)
@@ -2925,8 +2912,7 @@ def GeneraNuevaListarevisionCarteraJSONSalida(cartera, cliente, revision, usuari
 def RevisionCarteraJSON(request,pk):
     # Es invocado desde la url de una tabla bt
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     documentos = Revision_cartera_detalle.objects\
         .filter(revision = pk, leliminado = False
@@ -2968,7 +2954,7 @@ def GeneraListarevisionCarteraJSONSalida(cartera,):
     return output
 
 def estadisticas_mes(request, año = None, mes = None):
-    id_empresa = Usuario_empresa.objects.filter(user=request.user).first().empresa
+    id_empresa = request.empresa
 
     if not año:
         año = datetime.now().year
@@ -3020,7 +3006,7 @@ def estadisticas_mes(request, año = None, mes = None):
     return render(request, 'operaciones/consultaestadisticasmes.html', context)
 
 def GuardarCorteHistorico(request):
-    id_empresa = Usuario_empresa.objects.filter(user=request.user).first().empresa
+    id_empresa = request.empresa
 
     resultado=enviarPost("CALL uspguardarcortehistorico( {0},{1}, '')"
         .format(id_empresa.id, request.user.id))
@@ -3032,8 +3018,7 @@ def GuardarCorteHistorico(request):
 def corteHistorico(request, corte_id = None):
     template_name='operaciones/consultacortehistorico.html'
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     corte = Cortes_historico.objects\
         .filter(id = corte_id).first()
@@ -3074,7 +3059,7 @@ def corteHistorico(request, corte_id = None):
 
 def GeneraResumenAntigüedadCarteraCorteJSON(request, corte_id = None):
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     documentos = Documentos_historico.objects\
         .antigüedad_cartera(id_empresa.empresa, corte_id)
@@ -3125,7 +3110,7 @@ def GeneraResumenAntigüedadCarteraCorteJSON(request, corte_id = None):
 
 def GeneraResumenCarteraNegociadaClienteJSON(request, cliente_id, año):
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     actual = Asignacion.objects\
         .operaciones_negociadas_cliente(id_empresa.empresa, año, cliente_id)
@@ -3140,7 +3125,7 @@ def GeneraResumenCarteraNegociadaClienteJSON(request, cliente_id, año):
 def GeneraListaCarteraClienteJSON(request,  clientes =None):
     # Es invocado desde la url de una tabla bt
     arr_clientes = []
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if clientes==None:
         facturas = Documentos.objects\
@@ -3200,7 +3185,7 @@ def GeneraListaCarteraClienteJSONSalida(transaccion):
 def GeneraListaCarteraDeudorJSON(request,  deudores =None):
     # Es invocado desde la url de una tabla bt
     arr_deudores = []
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if deudores != None:
         ids = deudores.split(',')
@@ -3247,7 +3232,7 @@ def GeneraListaCarteraDeudorJSON(request,  deudores =None):
 def RevisionCarteraDetalle(request, cliente_id, revision_id):
     template_name = "operaciones/revisioncarteradetalle_modal.html"
     contexto={}
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     # if request.method=='GET':
     detalle = Revision_cartera_detalle.objects\
@@ -3272,8 +3257,8 @@ def RevisionCarteraDetalle(request, cliente_id, revision_id):
 def GeneraListaCarteraVencidaJSON(request, fecha_corte=None,  clientes =None):
     # Es invocado desde la url de una tabla bt
     arr_clientes = []
-    # id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    # id_empresa = request.usuario_empresa
+    id_empresa = request.usuario_empresa
 
     if not fecha_corte:
         fecha_corte = date.today()
@@ -3337,7 +3322,7 @@ def GeneraListaProvisionCarteraVencidaJSONSalida(transaccion):
 
 def GeneraResumenCarteraNegociadaDeudorJSON(request, deudor_id, año):
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     actual = Documentos.objects\
         .documentos_negociados_deudor(id_empresa.empresa, año
@@ -3358,8 +3343,7 @@ def AntigüedadCarteraDeudorJSON(request, deudor_id):
     cheques = None
     cuotas = None
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     facturas = Documentos.objects\
         .antigüedad_por_deudor(deudor_id)
@@ -3411,7 +3395,7 @@ def AntigüedadCarteraDeudorJSON(request, deudor_id):
 
 def GeneraListaFacturasPendientesDeudorJSON(request, deudor_id, fecha_corte = None):
     # Es invocado desde la url de una tabla bt
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     documentos = Documentos.objects\
         .facturas_pendientes_vencimiento_original(fecha_corte, id_empresa.empresa)\
@@ -3441,7 +3425,7 @@ def GeneraListaFacturasPendientesDeudorJSON(request, deudor_id, fecha_corte = No
 def GeneraListaChequesADepositarDeudorJSON(request, deudor_id, fecha_corte):
     # Es invocado desde la url de una tabla bt
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     documentos = ChequesAccesorios.objects\
         .cheques_a_depositar(fecha_corte, id_empresa.empresa)\
@@ -3464,7 +3448,7 @@ def GeneraListaProtestosPendientesDeudorJSON(request, deudor_id):
     # Es invocado desde la url de una tabla bt
     deudor = ModeloCliente.Datos_compradores.objects\
         .filter(pk=deudor_id).first()
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     if deudor.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -3503,8 +3487,7 @@ def GeneraListaCanjesDeudorJSON(request, deudor_id):
 
     deudor = ModeloCliente.Datos_compradores.objects\
         .filter(pk=deudor_id).first()
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     if deudor.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -3532,8 +3515,7 @@ def GeneraListaChequesQuitadosDeudorJSON(request, deudor_id):
 
     deudor = ModeloCliente.Datos_compradores.objects\
         .filter(pk=deudor_id).first()
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     if deudor.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -3559,7 +3541,7 @@ def GeneraListaProtestosClienteJSON(request, cliente_id):
     # Es invocado desde la url de una tabla bt
     cliente = ModeloCliente.Datos_generales.objects\
         .filter(pk=cliente_id).first()
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     if cliente.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -3593,8 +3575,8 @@ def GeneraListaProtestosDeudorJSON(request, deudor_id):
     # Es invocado desde la url de una tabla bt
     deudor = ModeloCliente.Datos_compradores.objects\
         .filter(pk=deudor_id).first()
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
-    
+    id_empresa = request.usuario_empresa
+
     if deudor.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
 

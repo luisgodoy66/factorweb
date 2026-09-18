@@ -59,7 +59,7 @@ def enviar_solicitud_aprobacion(request, id_solicitud):
     # Enviar un mensaje a un canal o usuario
     try:
         # Crear el PDF para adjuntar
-        id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+        id_empresa = request.usuario_empresa
         nombre_archivo, pdf_bytes, error = generar_pdf_liquidacion(request, id_solicitud, id_empresa)
         if error:
             return HttpResponse(error, status=400)
@@ -156,7 +156,7 @@ def enviar_solicitud_aprobacion(request, id_solicitud):
                             + configuracion_slack.ctslackchannelname + ": " 
                             + str(e.response['error']), status=500)
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     # crear registro de solicitud de aprobación
     solicitud_aprobacion = Solicitud_aprobacion.objects.create(

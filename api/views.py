@@ -40,12 +40,12 @@ class ConfiguracionesSlackView(SinPrivilegios, generic.ListView):
     permission_required="api.view_configuracion_slack"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Configuracion_slack.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(ConfiguracionesSlackView, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
                                        empresa = id_empresa.empresa).count()
@@ -63,13 +63,13 @@ class ConfiguracionSlackNew(SinPrivilegios, generic.CreateView):
     permission_required="api.add_configuracion_slack"
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(ConfiguracionSlackNew, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
                                        empresa = id_empresa.empresa).count()
@@ -90,7 +90,7 @@ class ConfiguracionSlackEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(ConfiguracionSlackEdit, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
                                        empresa = id_empresa.empresa).count()
@@ -105,12 +105,12 @@ class ConfiguracionesTwilioView(SinPrivilegios, generic.ListView):
     permission_required="api.view_configuracion_twilio_whatsapp"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Configuracion_twilio_whatsapp.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(ConfiguracionesTwilioView, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
                                        empresa = id_empresa.empresa).count()
@@ -128,13 +128,13 @@ class ConfiguracionTwilioNew(SinPrivilegios, generic.CreateView):
     permission_required="api.add_configuracion_twilio_whatsapp"
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(ConfiguracionTwilioNew, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
                                        empresa = id_empresa.empresa).count()
@@ -155,7 +155,7 @@ class ConfiguracionTwilioEdit(SinPrivilegios, generic.UpdateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(ConfiguracionTwilioEdit, self).get_context_data(**kwargs)
         sp = ModelosSolicitud.Asignacion.objects.filter(cxestado='P', leliminado=False,
                                        empresa = id_empresa.empresa).count()
@@ -177,7 +177,7 @@ def estado_operativo_cliente_api(request, cliente_id):
     restructuracion = 0
 
     # Aislamiento multi-empresa: el cliente debe pertenecer a la empresa del usuario
-    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+    id_empresa = request.usuario_empresa
     if not id_empresa:
         return Response(
             {'error': 'El usuario no tiene una empresa asignada'},
@@ -268,7 +268,7 @@ class InvoiceAIAnalysisView(APIView):
 
     def post(self, request, id):
         # Aislamiento multi-empresa: la factura debe ser de la empresa del usuario
-        id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+        id_empresa = request.usuario_empresa
         if not id_empresa:
             return Response(
                 {"error": "El usuario no tiene una empresa asignada"},
@@ -362,7 +362,7 @@ class InvoiceAIAnalysisView(APIView):
             recommendation=parsed["recommendation"],
             raw_response=parsed["raw"],
             cxusuariocrea=request.user,
-            empresa = Usuario_empresa.objects.filter(user=request.user).first().empresa
+            empresa = request.empresa
         )
 
         return Response(
@@ -380,7 +380,7 @@ class InvoiceAIAnalysisView(APIView):
 @permission_classes([IsAuthenticated])
 def ConsultarFacturaAI(request, id):
     # Aislamiento multi-empresa: el analisis debe ser de la empresa del usuario
-    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+    id_empresa = request.usuario_empresa
     if not id_empresa:
         return Response(
             {"error": "El usuario no tiene una empresa asignada"},

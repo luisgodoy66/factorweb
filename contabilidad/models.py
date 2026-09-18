@@ -3,7 +3,7 @@ from django.db.models import Sum, Q, F, ExpressionWrapper, DateField, CharField\
     , Value
 
 # Create your models here.
-from bases.models import ClaseModelo
+from bases.models import ClaseModelo, TenantManager
 from empresa.models import Cuentas_bancarias, Tipos_factoring,  Puntos_emision
 from clientes.models import Datos_generales
 from operaciones.models import Documentos, ChequesAccesorios
@@ -148,7 +148,7 @@ class Cuentas_provisiones(ClaseModelo):
 
 from operaciones.models import  Notas_debito_cabecera
 
-class Facturas_manager(models.Manager):
+class Facturas_manager(TenantManager):
     def ingresos_mensuales(self, id_empresa, año):
         return self.filter(demision__year = año,
             cxestado = "A"

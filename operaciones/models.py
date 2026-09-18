@@ -10,7 +10,7 @@ from django.utils.dateparse import parse_date
 # from django.db.models import Subquery, OuterRef
 # from django.contrib.postgres.aggregates import JSONBAgg
 
-from bases.models import ClaseModelo
+from bases.models import ClaseModelo, TenantManager
 from empresa.models import Clases_cliente, Tasas_factoring, Tipos_factoring, Cuentas_bancarias\
     , Movimientos_maestro
 from clientes.models import Datos_generales as Datos_generales_cliente\
@@ -54,7 +54,7 @@ class Datos_operativos(ClaseModelo):
     def estado(self):
         return self.get_cxestado_display()
     
-class Asignacion_manager(models.Manager):
+class Asignacion_manager(TenantManager):
     def operaciones_negociadas(self, id_empresa, año):
         # en django obtener el año del campo date llamado ddesembolso?
         return self.filter(ddesembolso__year = año,
@@ -186,7 +186,7 @@ class Asignacion(ClaseModelo):
     def estado(self):
         return self.get_cxestado_display()
     
-class Documentos_Manager(models.Manager):
+class Documentos_Manager(TenantManager):
     def detalle_facturas_pendientes(self, fecha_corte, id_empresa):
         fecha = parse_date(fecha_corte)
         return self.filter(dvencimiento__lte = fecha - F('ndiasprorroga')
@@ -795,7 +795,7 @@ class Documentos(ClaseModelo):
     def total_cargos(self):
         return self.ngao + self.ndescuentocartera
     
-class ChequesAccesorios_Manager(models.Manager):
+class ChequesAccesorios_Manager(TenantManager):
 
     def cheques_a_depositar(self, fecha_corte, id_empresa):
         fecha = parse_date(fecha_corte)
@@ -1385,7 +1385,7 @@ class ChequesAccesorios_Manager(models.Manager):
                           )\
                 .order_by('documento__cxcomprador__cxcomprador__ctnombre')
 
-class Cheques_quitados_Manager(models.Manager):
+class Cheques_quitados_Manager(TenantManager):
     def antigüedad_cartera(self, id_empresa, id_cliente=None):
         # grafico de antigüedad de cartera 
         vcdo90 = datetime.today()+timedelta(days=-90)
@@ -1839,7 +1839,7 @@ class Condiciones_operativas_cabecera(ClaseModelo):
     def __str__(self):
         return f"{self.ctcondicion}"
 
-class Condiciones_Operativas_Manager(models.Manager):
+class Condiciones_Operativas_Manager(TenantManager):
     def ubicar_plazo(self, condicion, clase_cliente, clase_comprador, plazo=0):
         return self.filter(leliminado = False)\
             .filter(cxcondicion = condicion)\
@@ -2035,7 +2035,7 @@ class Desembolsos(ClaseModelo):
                                    self.cxoperacion,
                                    self.cxcuentapago or '')
 
-class Pagares_Manager(models.Manager):
+class Pagares_Manager(TenantManager):
 
     def TotalPagaresCliente(self, id_cliente):
         return self.filter(leliminado = False, nsaldo__gt = 0
@@ -2076,7 +2076,7 @@ class Pagares(ClaseModelo):
     def tasa_porciento(self):
         return self.ntasainteres*100
     
-class Cuotas_pagare_Manager(models.Manager):
+class Cuotas_pagare_Manager(TenantManager):
     
     def cuotas_pendientes(self, fecha_corte, id_empresa):
         fecha = parse_date(fecha_corte)
@@ -2282,7 +2282,7 @@ class Cortes_historico(ClaseModelo):
     def __str__(self):
         return self.ctdescripcion
 
-class Documentos_historico_Manager(models.Manager):
+class Documentos_historico_Manager(TenantManager):
     # def facturas_pendientes(self, fecha_corte, id_empresa):
     #     fecha = parse_date(fecha_corte)
     #     return self.filter(dvencimiento__lte = fecha - F('ndiasprorroga')
@@ -2559,7 +2559,7 @@ class Documentos_historico(ClaseModelo):
     def total_cargos(self):
         return self.ngao + self.ndescuentocartera
     
-class Cheques_quitados_historico_Manager(models.Manager):
+class Cheques_quitados_historico_Manager(TenantManager):
     def antigüedad_cartera(self, id_empresa, id_corte):
         # grafico de antigüedad de cartera 
         vcdo90 = datetime.today()+timedelta(days=-90)
@@ -2665,7 +2665,7 @@ class Cheques_quitados_historico(ClaseModelo):
             
     objects = Cheques_quitados_historico_Manager()
 
-class ChequesAccesorios_historico_Manager(models.Manager):
+class ChequesAccesorios_historico_Manager(TenantManager):
 
     # def cheques_a_depositar(self, fecha_corte, id_empresa):
     #     fecha = parse_date(fecha_corte)
@@ -2945,7 +2945,7 @@ class ChequesAccesorios_historico(ClaseModelo):
     def total_cargos(self):
         return self.ngao + self.ndescuentocartera
     
-class Cuotas_pagare_historico_Manager(models.Manager):
+class Cuotas_pagare_historico_Manager(TenantManager):
     
     # def cuotas_pendientes(self, fecha_corte, id_empresa):
     #     fecha = parse_date(fecha_corte)

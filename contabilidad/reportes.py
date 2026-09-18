@@ -26,7 +26,7 @@ def ImpresionDiarioContable(request, diario_id):
     detalle = {}
     template_path = 'contabilidad/diario_contable_reporte.html'
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     # tomar el codigo de asignacion grabado en la solicitud
     diario = Diario_cabecera.objects\
@@ -73,7 +73,7 @@ def ImpresionComprobanteEgreso(request, diario_id):
     detalle = {}
     template_path = 'contabilidad/comprobante_egreso_reporte.html'
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     # tomar el codigo de asignacion grabado en la solicitud
     diario = Diario_cabecera.objects\
@@ -120,7 +120,7 @@ def ImpresionComprobanteEgreso(request, diario_id):
 def ImpresionPlanDeCuentas(request):
     template_path = 'contabilidad/plandecuentas_reporte.html'
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     detalle = Plan_cuentas.objects.filter(empresa = id_empresa.empresa)\
         .order_by('cxcuenta')
@@ -144,7 +144,7 @@ def ImpresionPlanDeCuentas(request):
 def ImpresionBalanceGeneral(request, año, mes):
     template_path = 'contabilidad/balance_general_reporte.html'
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     cerrado = Control_meses.objects.filter(empresa = id_empresa.empresa
                                            , año = año, mes=mes).first()
@@ -193,7 +193,7 @@ def ImpresionBalanceGeneral(request, año, mes):
 def ImpresionPerdidasyGanancias(request, año, mes,):
     template_path = 'contabilidad/perdidasyganancias_reporte.html'
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     cerrado = Control_meses.objects.filter(empresa = id_empresa.empresa
                                            , año = año, mes=mes).first()

@@ -55,8 +55,7 @@ class DocumentosVencidosView(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_documentos"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Documentos.objects\
             .filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
@@ -66,8 +65,7 @@ class DocumentosVencidosView(SinPrivilegios, generic.ListView):
         fecha_corte = date.today() 
         context['fecha_corte'] =  fecha_corte
         context['por_vencer'] = 'No'
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -82,8 +80,7 @@ class DocumentosPorVencerView(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_documentos"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Documentos.objects\
             .filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
@@ -93,8 +90,7 @@ class DocumentosPorVencerView(SinPrivilegios, generic.ListView):
         fecha_corte = date.today() + timedelta(days=7)
         context['fecha_corte'] =  fecha_corte
         context['por_vencer'] = 'Si'
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -111,7 +107,7 @@ class ChequesADepositarView(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_chequesaccesorios"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=ChequesAccesorios.objects.filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
@@ -119,7 +115,7 @@ class ChequesADepositarView(SinPrivilegios, generic.ListView):
         context = super(ChequesADepositarView, self).get_context_data(*args,**kwargs) 
         fecha_corte = date.today() 
         context['fecha_corte'] =  fecha_corte#.strftime("%Y-%m-%d")
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -141,7 +137,7 @@ class CobranzasDocumentosView(SinPrivilegios, generic.FormView):
     # los pasa al html para que se pasen al js que carga el detalle
     def get_context_data(self, **kwargs):
 
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         
         docs = self.kwargs.get('ids_documentos')
         total_cartera=self.kwargs.get('total_cartera')
@@ -214,7 +210,7 @@ class CobranzasDocumentosView(SinPrivilegios, generic.FormView):
 
     def get_form_kwargs(self):
         kwargs = super(CobranzasDocumentosView, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
@@ -225,7 +221,7 @@ class CobranzasConsulta(SinPrivilegios, generic.TemplateView):
     permission_required="cobranzas.view_documentos_cabecera"
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         # obtener primer día del mes actual
         desde = date.today() + timedelta(days=-date.today().day +1)
         hasta = date.today()
@@ -251,7 +247,7 @@ class CobranzasPorConfirmarView(SinPrivilegios, generic.ListView):
     permission_required="cobranzas.view_documentos_cabecera"
 
     def get_queryset(self):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
 
         cobranzas = Documentos_cabecera.objects.filter(cxestado='A'\
             , leliminado = False\
@@ -288,7 +284,7 @@ class CobranzasPorConfirmarView(SinPrivilegios, generic.ListView):
         return cobranzas.union(recuperaciones)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context = super(CobranzasPorConfirmarView, self).get_context_data(**kwargs)
@@ -303,7 +299,7 @@ class CobranzasPendientesLiquidarView(SinPrivilegios, generic.ListView):
     permission_required="cobranzas.view_documentos_cabecera"
 
     def get_queryset(self):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
 
         cobranzas= Documentos_cabecera.objects\
             .filter( leliminado = False 
@@ -332,7 +328,7 @@ class CobranzasPendientesLiquidarView(SinPrivilegios, generic.ListView):
         return cobranzas.union(recuperaciones)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context = super(CobranzasPendientesLiquidarView, self).get_context_data(**kwargs)
@@ -347,8 +343,7 @@ class LiquidacionesPendientesPagarView(SinPrivilegios, generic.ListView):
     permission_required="cobranzas.view_liquidacion_cabecera"
 
     def get_queryset(self):
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         
         return Liquidacion_cabecera.objects\
             .filter(ldesembolsada=False, 
@@ -357,7 +352,7 @@ class LiquidacionesPendientesPagarView(SinPrivilegios, generic.ListView):
                     ddesembolso__lte = date.today())
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context = super(LiquidacionesPendientesPagarView, self).get_context_data(**kwargs)
@@ -372,14 +367,14 @@ class MotivosProtestoView(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_motivos_protesto_maestro"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Motivos_protesto_maestro.objects.filter(leliminado = False
                                               , empresa = id_empresa.empresa
                                               )
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context = super(MotivosProtestoView, self).get_context_data(**kwargs)
@@ -396,13 +391,13 @@ class MotivoProtestoNew(SinPrivilegios, generic.CreateView):
     permission_required="operaciones.add_motivos_protesto_maestro"
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context = super(MotivoProtestoNew, self).get_context_data(**kwargs)
@@ -420,7 +415,7 @@ class MotivoProtestoEdit(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -431,7 +426,7 @@ class MotivoProtestoEdit(SinPrivilegios, generic.UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(MotivoProtestoEdit, self).get_context_data(**kwargs)
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -447,7 +442,7 @@ class ProtestoCobranzaNew(SinPrivilegios, generic.CreateView):
     permission_required="cobranzas.add_cheques_protestados"
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
@@ -469,7 +464,7 @@ class ProtestoCobranzaNew(SinPrivilegios, generic.CreateView):
         context["codigo_cobranza"] = cobranza.cxcobranza
         context["tipo_operacion"]='Cobranza'
         context["lista_deposito"]=lista_deposito
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -478,7 +473,7 @@ class ProtestoCobranzaNew(SinPrivilegios, generic.CreateView):
 
     def get_form_kwargs(self):
         kwargs = super(ProtestoCobranzaNew, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
@@ -490,16 +485,14 @@ class ProtestosPendientesView(SinPrivilegios, generic.ListView):
     permission_required="cobranzas.view_cheques_protestados"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Cheques_protestados.objects\
             .filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self, **kwargs):
         context = super(ProtestosPendientesView, self).get_context_data(**kwargs)
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -585,7 +578,7 @@ class RecuperacionProtestoView(SinPrivilegios, generic.FormView):
         context["cuentas_conjuntas"] = cuentas_conjuntas
         context["tipo"]="Recuperación"
         context["deudor"] = comprador if un_solo_deudor == "Si" else None
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -594,7 +587,7 @@ class RecuperacionProtestoView(SinPrivilegios, generic.FormView):
 
     def get_form_kwargs(self):
         kwargs = super(RecuperacionProtestoView, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
@@ -608,7 +601,7 @@ class ProtestoRecuperacionNew(SinPrivilegios, generic.CreateView):
     permission_required="cobranzas.add_cheques_protestados"
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
@@ -630,7 +623,7 @@ class ProtestoRecuperacionNew(SinPrivilegios, generic.CreateView):
         context["codigo_cobranza"] = cobranza.cxrecuperacion
         context["tipo_operacion"]='Recuperacion'
         context["lista_deposito"]=lista_deposito
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -639,7 +632,7 @@ class ProtestoRecuperacionNew(SinPrivilegios, generic.CreateView):
 
     def get_form_kwargs(self):
         kwargs = super(ProtestoRecuperacionNew, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
@@ -651,7 +644,7 @@ class LiquidacionesEnNegativoPendientesView(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_notas_debito_cabecera"
 
     def get_queryset(self):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         return Notas_debito_cabecera.objects\
             .filter(leliminado = False
                 , empresa = id_empresa.empresa
@@ -660,7 +653,7 @@ class LiquidacionesEnNegativoPendientesView(SinPrivilegios, generic.ListView):
     def get_context_data(self, **kwargs):
 
         context = super(LiquidacionesEnNegativoPendientesView, self).get_context_data(**kwargs)
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -710,7 +703,7 @@ class CobranzasCargosView(SinPrivilegios, generic.FormView):
         context["cliente"] = cliente
         context["tipo_factoring"] = tipo_factoring
         context["tipo_deuda"] = tipo_deuda
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -719,7 +712,7 @@ class CobranzasCargosView(SinPrivilegios, generic.FormView):
 
     def get_form_kwargs(self):
         kwargs = super(CobranzasCargosView, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
@@ -733,7 +726,7 @@ class AmpliacionesConsulta(SinPrivilegios, generic.TemplateView):
         # Call the base implementation first to get a context
         # obtener primer día del mes actual
         
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         desde = date.today() + timedelta(days=-date.today().day +1)
@@ -815,7 +808,7 @@ class CobranzasCuotasView(SinPrivilegios, generic.FormView):
         context["tipo"]="CobranzaCuota"
         context["por_vencer"]=por_vencer
 
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -824,7 +817,7 @@ class CobranzasCuotasView(SinPrivilegios, generic.FormView):
 
     def get_form_kwargs(self):
         kwargs = super(CobranzasCuotasView, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
@@ -836,16 +829,14 @@ class GestionesDeCobroView(SinPrivilegios, generic.ListView):
     permission_required="operaciones.view_gestion_cobro"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Gestion_cobro.objects\
             .filter(leliminado = False, empresa = id_empresa.empresa)
         return qs
 
     def get_context_data(self,*args, **kwargs): 
         context = super(GestionesDeCobroView, self).get_context_data(*args,**kwargs) 
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -860,8 +851,7 @@ class GestionDeCobro(SinPrivilegios, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(GestionDeCobro, self).get_context_data(**kwargs)
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         
@@ -900,8 +890,7 @@ class LiquidacionEnCero(SinPrivilegios, generic.TemplateView):
     permission_required="cobranzas.view_documentos_cabecera"
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         cliente_id = self.kwargs.get('id_cliente')
         cliente = Datos_generales.objects.filter(id = cliente_id).first()
 
@@ -925,7 +914,7 @@ class LiquidacionEnCero(SinPrivilegios, generic.TemplateView):
 def CobranzaPorCondonar(request,pk, tipo_operacion):
     template_name = "cobranzas/detallecobroporcondonar.html"
     
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     sp = Asignacion.objects\
         .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
 
@@ -951,8 +940,7 @@ def GeneraListaCarteraPorVencerJSON(request, fecha_corte = None):
     #     fecha = date.today()
     #     fecha = fecha + timedelta(days=7)
     # Se incluyen los registros de cheques a los que se le quitó el acesorio
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     tempBlogs = []
     documentos = Documentos.objects\
@@ -1049,7 +1037,7 @@ def DetalleDocumentosFacturasPuras(request, ids_documentos):
     arr_acc = []
     arr_fac = []
     tempBlogs = []
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     ids = ids_documentos.split(',')
     for id in ids:
@@ -1217,7 +1205,7 @@ def AceptarCobranza(request):
 
 def GeneraListaChequesADepositarJSON(request, fecha_corte):
     # Es invocado desde la url de una tabla bt
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     documentos = ChequesAccesorios.objects\
         .cheques_a_depositar(fecha_corte, id_empresa.empresa).all()
@@ -1266,7 +1254,7 @@ def DepositoCheques(request, ids_cheques, total_cartera, cuenta_destino
     result={}
     cuentas_conjuntas=None
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if request.method =='GET':
 
@@ -1325,7 +1313,7 @@ def GeneraListaCobranzasJSON(request, desde = None, hasta= None
                              , clientes =None):
     # Es invocado desde la url de una tabla bt
     arr_clientes = []
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     if clientes != None:
         ids = clientes.split(',')
@@ -1640,7 +1628,7 @@ def GeneraListaCobranzasJSONSalida(transaccion):
 # distincion de la tabla de recuperaciones
 def ConfirmarCobranza(request, cobranza_id, tipo_operacion):
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if tipo_operacion=='C':
         cobr = Documentos_cabecera.objects.filter(pk=cobranza_id).first()
@@ -1673,8 +1661,7 @@ def DetalleDocumentosCobrados(request, cobranza_id, tipo_operacion):
             .filter(recuperacion = cobranza_id
                     , leliminado = False)
 
-    if detalle.first().empresa != Usuario_empresa.objects\
-        .filter(user = request.user).first().empresa:
+    if detalle.first().empresa != request.empresa:
         return redirect("bases:sin_permisos")
     
     # Converting `QuerySet` to a Python Dictionary
@@ -1734,7 +1721,7 @@ def DetalleDocumentosRecuperadosSalida(doc):
 # distincion de la tabla de recuperaciones
 def DatosDiasACondonar(request, id, dias, cobranza_id, tipo_operacion):
     template_name = "cobranzas/datosdiasacondonar_modal.html"
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     sp = Asignacion.objects\
         .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
     
@@ -1777,7 +1764,7 @@ def DatosDiasACondonar(request, id, dias, cobranza_id, tipo_operacion):
 def ReversaConfirmacionCobranza(request, cobranza_id, tipo_operacion):
     # la eliminacion es lógica
     # debe devolver: OK si esta bien
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if tipo_operacion =='C':
         cobr = Documentos_cabecera.objects.filter(pk=cobranza_id).first()
@@ -1819,7 +1806,7 @@ def GeneraListaCobranzasPendientesProcesarJSON(request):
     # movimiento = Documentos_cabecera.objects.filter(Q(cxestado='C',\
     #         leliminado = False) | Q(cxformapago__in=["EFE", "MOV"], cxestado='A'))
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     cobranzas= Documentos_cabecera.objects\
         .filter( leliminado = False 
@@ -1965,8 +1952,7 @@ def DesembolsarCobranzas(request, pk, cliente_ruc):
     contexto = {}
     formulario={}
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     liquidacion = Liquidacion_cabecera.objects\
         .filter(pk=pk).first()
@@ -2100,7 +2086,7 @@ def AceptarProtesto(request):
 def GeneraListaProtestosPendientesJSON(request):
     # Es invocado desde la url de una tabla bt
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     documentos = Cheques_protestados.objects\
         .filter(leliminado=False
@@ -2166,8 +2152,7 @@ def GeneraListaProtestosPendientesJSONSalida(doc):
     return output
 
 def DetalleDocumentosProtesosJSON(request, ids_protestos):
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     # filtrar los documentos correspondientes a la lista pasada
     documentos = Documentos_protestados.objects\
@@ -2334,7 +2319,7 @@ def obtenercontextoLiquidacion(request, tipo_operacion, ids_cobranzas
     error = ''
     nombre_cliente = None
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     porcentaje_iva = id_empresa.empresa.nporcentajeiva
 
     gao = Tasas_factoring.objects\
@@ -2826,7 +2811,7 @@ def GeneraOtroCargoJSONSalida(id_cargo, nombre_cargo, fecha,  valor
 @permission_required('cobranzas.change_liquidacion_cabecera', login_url='bases:sin_permisos')
 def ReversaLiquidacion(request, pid_liquidacion):
     # # ejecuta un store procedure 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     liquidacion = Liquidacion_cabecera.objects\
         .filter(id = pid_liquidacion)\
@@ -2867,7 +2852,7 @@ def ReversaCobranza(request, pid_cobranza, tipo_operacion):
 
 def GeneraListaCobranzasRegistradasJSON(request, desde , hasta):
     # Es invocado desde la url de una tabla bt
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     cobranzas = Documentos_cabecera.objects\
         .filter(dregistro__gte = desde, dregistro__lte = hasta
@@ -2929,7 +2914,7 @@ def GeneraListaCobranzasRegistradasJSON(request, desde , hasta):
 
 def GeneraListaLiquidacionesEnNegativoPendientesJSON(request):
     # Es invocado desde la url de una tabla bt
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     movimiento = Notas_debito_cabecera.objects\
         .filter(leliminado = False, nsaldo__gt = 0, empresa = id_empresa.empresa)\
         .all()
@@ -2996,8 +2981,7 @@ def GeneraListaNotasDeDebitoPendientesJSONSalida(transaccion):
     return output
 
 def DetalleNotasDebitoPendientesJSON(request, ids_documentos):
-    id_empresa = Usuario_empresa.objects\
-        .filter(user=request.user).first()
+    id_empresa = request.usuario_empresa
 
     # filtrar los documentos correspondientes a la lista pasada
     documentos = Notas_debito_cabecera.objects\
@@ -3135,7 +3119,7 @@ def AceptarCobranzaNotasDebito(request):
 
 def GeneraListaLiquidacionesRegistradasJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if desde == 'None':
         movimiento = Liquidacion_cabecera.objects\
@@ -3189,7 +3173,7 @@ def GeneraListaLiquidacionesJSONSalida(transaccion):
 
 def GeneraListaCobranzasCargosRegistradasJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if desde == 'None':
         movimiento = Cargos_cabecera.objects\
@@ -3345,8 +3329,7 @@ def ObtenerOtrosCargosDeDocumento(id_documento, listaotroscargos):
 def ReversaProtesto(request, id_cobranza, tipo_operacion, id_protesto, cobranza
                     , cliente_id, factoring_id):
     # # ejecuta un store procedure 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user=request.user).first()
+    id_empresa = request.usuario_empresa
 
     nusuario = request.user.id
 
@@ -3371,7 +3354,7 @@ def ReversaProtesto(request, id_cobranza, tipo_operacion, id_protesto, cobranza
 def CanjeDeCheque(request, cheque_id, cliente_id, deudor_id):
     template_path = 'cobranzas/datoscanjecheque_modal.html'
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     cliente = Datos_generales.objects\
         .filter(pk = cliente_id
@@ -3471,7 +3454,7 @@ def CanjeDeCheque(request, cheque_id, cliente_id, deudor_id):
 def QuitarAccesorio(request, cheque_id, cliente_id):
     template_path = 'cobranzas/datosquitaraccesorio_modal.html'
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     cheque = ChequesAccesorios.objects.filter(id = cheque_id).first()
     if cheque.empresa != id_empresa.empresa:
@@ -3521,7 +3504,7 @@ def AmpliacionDePlazo(request, ids, tipo_factoring, tipo_asignacion, id_cliente)
     # buscar en la configuracion del tipo de factoring las condiciones para menajer 
     # las ampliaciones de plazo
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     # buscar el tipo de factoring
     tipo_factoring = Tipos_factoring.objects.get(id=tipo_factoring)
@@ -3589,7 +3572,7 @@ def DetalleCargosAmpliacionPlazo(request, ids, tipo_asignacion, fecha_corte
     arr_acc = []    # estos dos arreglos son
     arr_fac = []    # usados para separar facturas de accesorio quitados
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     # obtener las tasas de los datos operativos del ciente
     datos_operativos = Datos_operativos.objects\
@@ -3710,8 +3693,7 @@ def GeneraDetalleCargosAmpliacionPlazoJSON(request, ids, tipo_asignacion):
     arr_acc = []    # estos dos arreglos son
     arr_fac = []    # usados para separar facturas de accesorio quitados
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user=request.user).first()
+    id_empresa = request.usuario_empresa
 
     if tipo_asignacion==FACTURAS_PURAS:
         ids = ids.split(',')
@@ -3793,7 +3775,7 @@ def SumaCargos(request, ids, tipo_asignacion, gaoa_carga_iva, dc_carga_iva
     arr_fac = []    # usados para separar facturas de accesorio quitados
 
     if not porcentaje_iva:
-        id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+        id_empresa = request.usuario_empresa
         porcentaje_iva = id_empresa.empresa.nporcentajeiva
 
     g=Decimal(0); d=Decimal(0); 
@@ -3863,7 +3845,7 @@ def SumaCargos(request, ids, tipo_asignacion, gaoa_carga_iva, dc_carga_iva
 # distincion de la tabla de accesorios
 def Prorroga(request, id, tipo_asignacion, vencimiento, numero_factura, porvencer='No'):
     template_path = 'cobranzas/datosdiasprorroga_modal.html'
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if tipo_asignacion ==FACTURAS_PURAS:
         documento = Documentos.objects.filter(pk=id).first()
@@ -3921,7 +3903,7 @@ def EditarTasasDocumentoAmpliacionDePlazo(request, documento_id, fecha_ampliacio
     # si son facturas puras los documentos son las facturas
     # si son accesorios los documentos son los cheques
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if tipo_asignacion ==FACTURAS_PURAS:
         documento = Documentos.objects\
@@ -4025,7 +4007,7 @@ def AceptarAmpliacionDePlazo(request):
 
 def GeneraListaFacturasPendientesJSON(request):
     # Es invocado desde la url de una tabla bt
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     movimiento = Factura_venta.objects\
         .filter( leliminado = False, nsaldo__gt = 0, empresa = id_empresa.empresa)
@@ -4077,7 +4059,7 @@ def GeneraListaFacturasPendientesJSONSalida(transaccion):
 
 def GeneraListaAmpliacionesJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if desde == 'None':
         movimiento = Ampliaciones_plazo_cabecera.objects\
@@ -4137,7 +4119,7 @@ def ModificarCobranza(request, id, tipo_operacion):
     cuenta_deposito=None
     cuenta_compartida=None
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     if tipo_operacion=='C':
         cobranza=Documentos_cabecera.objects.get(pk=id)
@@ -4231,8 +4213,7 @@ def GeneraListaCuotasPorVencerJSONSalida(doc):
     return output
 
 def DetalleCuotasJSON(request, ids_cuotas):
-    id_empresa = Usuario_empresa.objects\
-        .filter(user=request.user).first()
+    id_empresa = request.usuario_empresa
 
     # filtrar los documentos correspondientes a la lista pasada
     documentos = Pagare_detalle.objects\
@@ -4322,8 +4303,7 @@ def AceptarCobranzaCuota(request):
 @permission_required('operaciones.change_desembolsos', login_url='bases:sin_permisos')
 def ReversoDesembolsoLiquidacion(request, desembolso_id):
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     desembolso = Desembolsos.objects\
         .filter(pk=desembolso_id).first()
@@ -4360,8 +4340,7 @@ def ReversoDesembolsoLiquidacion(request, desembolso_id):
 @login_required(login_url='/login/')
 @permission_required('operaciones.change_ampliaciones_plazo_cabecera', login_url='bases:sin_permisos')
 def ReversaAmpliacion(request, id_nd):
-    id_empresa = Usuario_empresa.objects\
-        .filter(user=request.user).first()
+    id_empresa = request.usuario_empresa
 
     notadebito = Notas_debito_cabecera.objects\
         .filter(pk=id_nd).first()
@@ -4380,7 +4359,7 @@ def ReversaAmpliacion(request, id_nd):
     return HttpResponse(resultado)
 
 def proyeccion_cobros(request, dia=None, dias=14):
-    id_empresa = Usuario_empresa.objects.filter(user=request.user).first().empresa
+    id_empresa = request.empresa
 
     if dia is None:
         dia = date.today().strftime('%Y-%m-%d')
@@ -4490,8 +4469,7 @@ def proyeccion_cobros(request, dia=None, dias=14):
 def Registra_gestion_cobro(request, tipo_participante, id_detalle_revision):
     # validar que no exista un registro del cliente (deudor)
     # en estado pendiente o abierto
-    id_empresa = Usuario_empresa.objects\
-        .filter(user=request.user).first()
+    id_empresa = request.usuario_empresa
 
     revision = Revision_cartera_detalle.objects\
         .filter(id=id_detalle_revision).first()
@@ -4525,8 +4503,7 @@ def GeneraLiquidacionEnCero(request, ids_documentos, tipo_factoring,
     detalle_cobranza = []
     cabecera_cobranza = []
     lista_documentos = {}
-    id_empresa = Usuario_empresa.objects\
-        .filter(user=request.user).first()
+    id_empresa = request.usuario_empresa
 
     ids = ids_documentos.split(',')
     for id in ids:
@@ -4697,8 +4674,7 @@ def DetalleDocumentosFacturasPurasLiquidacionEnCero(request, ids_documentos):
     arr_acc = []
     arr_fac = []
     tempBlogs = []
-    id_empresa = Usuario_empresa.objects\
-        .filter(user=request.user).first()
+    id_empresa = request.usuario_empresa
 
     ids = ids_documentos.split(',')
     for id in ids:
@@ -4804,8 +4780,7 @@ def get_motivo_responsabilidad(request, motivo_id):
         return JsonResponse({'error': 'Motivo no encontrado'}, status=404)
 
 def DetalleDocumentosProtestosLiquidacionEnCero(request, ids_protestos):
-    id_empresa = Usuario_empresa.objects\
-        .filter(user=request.user).first()
+    id_empresa = request.usuario_empresa
 
     # filtrar los documentos correspondientes a la lista pasada
     documentos = Documentos_protestados.objects\

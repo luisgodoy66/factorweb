@@ -26,8 +26,7 @@ def ImpresionAsignacionDesdeSolicitud(request, asignacion_id):
 
     solicitud = SolicitudModels.Asignacion.objects\
         .filter(id= asignacion_id).first()
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     if solicitud.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -115,8 +114,7 @@ def ImpresionAsignacion(request, asignacion_id):
     asignacion = Asignacion.objects\
         .filter(id = asignacion_id).first()
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     if asignacion.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -220,8 +218,7 @@ def ImpresionLiquidacion(request, solicitud_id):
     asignacion = SolicitudModels.Asignacion.objects\
         .filter(id = solicitud_id).first()
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if asignacion.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -234,7 +231,7 @@ def ImpresionLiquidacion(request, solicitud_id):
     return response
 
 def ImpresionAntiguedadCartera(request):
-    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+    id_empresa = request.usuario_empresa
 
     facturas = Documentos.objects.antigüedad_por_cliente(id_empresa.empresa)
     accesorios = ChequesAccesorios.objects.antigüedad_por_cliente(id_empresa.empresa)
@@ -353,7 +350,7 @@ def ImpresionAntiguedadCartera(request):
     return response
 
 def ImpresionFacturasPendientes(request, clientes = None):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     totalfacturas=0
     totalquitados=0
     arr_clientes = []
@@ -401,7 +398,7 @@ def ImpresionFacturasPendientes(request, clientes = None):
     return response
 
 def ImpresionAccesoriosPendientes(request, id_cliente=None):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 #     se esta filtrando por un solo cliente por lo que el arreglo no hace falta
     arr_clientes = []
      
@@ -438,7 +435,7 @@ def ImpresionAccesoriosPendientes(request, id_cliente=None):
     return response
 
 def ImpresionResumenAsignaciones(request, desde, hasta, clientes=None):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
      
     arr_clientes = []
     
@@ -498,7 +495,7 @@ def ImpresionPagare(request, pagare_id):
     pagare = Pagares.objects.filter(id = pagare_id).first()
     cuotas = {}
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if pagare.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -529,7 +526,7 @@ def ImpresionPagare(request, pagare_id):
     return response
 
 def ImpresionPagaresPendientes(request, clientes=None):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     total = 0
     template_path = 'operaciones/detalle_pagarespendientes_reporte.html'
     arr_clientes = []
@@ -570,7 +567,7 @@ def ImpresionPagaresPendientes(request, clientes=None):
     return response
 
 def ImpresionRevisionCartera(request, revision_id, ):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
      
     template_path = 'operaciones/revisioncartera_reporte.html'
 
@@ -615,7 +612,7 @@ def ImpresionRevisionCartera(request, revision_id, ):
     return response
 
 def ImpresionAntiguedadCarteraCorte(request, corte_id):
-    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+    id_empresa = request.usuario_empresa
 
     corte = Cortes_historico.objects.filter(id=corte_id).first()
 
@@ -751,7 +748,7 @@ def ImpresionAntiguedadCarteraCorte(request, corte_id):
     return response
 
 def ImpresionFacturasPendientesCorte(request, corte_id):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     corte = Cortes_historico.objects.filter(id=corte_id).first()
 
@@ -794,7 +791,7 @@ def ImpresionFacturasPendientesCorte(request, corte_id):
     return response
 
 def ImpresionAccesoriosPendientesCorte(request, corte_id=None):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     corte = Cortes_historico.objects.filter(id=corte_id).first()
 
@@ -827,7 +824,7 @@ def ImpresionAccesoriosPendientesCorte(request, corte_id=None):
 
 def ImpresionAntiguedadCarteraPorDeudor(request, id_cliente, cliente):
     # esta función dejó de usarse para usar los datos json grabados en el registro del cliente en la revision de cartera
-    id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+    id_empresa = request.usuario_empresa
 
     facturas = Documentos.objects\
         .antigüedad_por_deudor(id_empresa.empresa, id_cliente)
@@ -946,7 +943,7 @@ def ImpresionAntiguedadCarteraPorDeudor(request, id_cliente, cliente):
     return response
 
 def ImpresionFacturasPendientesDeudores(request, deudores = None):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     totalfacturas=0
     totalquitados=0
     arr_deudores = []
@@ -994,7 +991,7 @@ def ImpresionFacturasPendientesDeudores(request, deudores = None):
     return response
 
 def ImpresionCarteraPendientePorCliente(request, clientes = None):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     totalfacturas=0
     totalquitados=0
     arr_clientes = []
@@ -1059,7 +1056,7 @@ def ImpresionCarteraPendientePorCliente(request, clientes = None):
     return response
 
 def ImpresionCarteraPendientePorDeudor(request, deudores = None):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     totalfacturas=0
     totalquitados=0
     arr_deudores = []
@@ -1125,7 +1122,7 @@ def ImpresionCarteraPendientePorDeudor(request, deudores = None):
     return response
 
 def ImpresionCargosCarteraVencida(request, fecha_corte, clientes = None):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     arr_clientes = []
     
     template_path = 'operaciones/cargoscarteravencida_reporte.html'
@@ -1190,7 +1187,7 @@ def ImpresionCargosCarteraVencida(request, fecha_corte, clientes = None):
     return response
 
 def ImpresionAccesoriosPendientesDeudores(request, deudores=None):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 #     se esta filtrando por un solo cliente por lo que el arreglo no hace falta
     arr_deudores = []
      

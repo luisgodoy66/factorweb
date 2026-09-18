@@ -35,7 +35,7 @@ def ImpresionCobranzaCartera(request, cobranza_id):
     motivo_protesto=''
     nd_protesto = 0
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     # tomar el codigo de asignacion grabado en la solicitud
     cobranza = Documentos_cabecera.objects.filter(id= cobranza_id).first()
@@ -135,7 +135,7 @@ def ImpresionCobranzaCartera(request, cobranza_id):
 def ImpresionLiquidacion(request, liquidacion_id):
     template_path = 'cobranzas/liquidacion_reporte.html'
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     liquidacion = Liquidacion_cabecera.objects.filter(pk = liquidacion_id).first()
 
@@ -272,7 +272,7 @@ def ImpresionRecuperacionProtesto(request, cobranza_id):
     motivo_protesto=''
     nd_protesto = 0
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     # tomar el codigo de asignacion grabado en la solicitud
     recuperacion = Recuperaciones_cabecera.objects.filter(id= cobranza_id).first()
@@ -442,7 +442,7 @@ def ImpresionCobranzaCargos(request, cobranza_id):
     datos_deposito='N/A'
     codigo_forma = ''
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     cobranza = Cargos_cabecera.objects.filter(id= cobranza_id).first()
     
@@ -510,7 +510,7 @@ def ImpresionCobranzaCargos(request, cobranza_id):
 
 def ImpresionProtestosPendientes(request, id_cliente = None):
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
      
     if id_cliente:         
         protestos = Cheques_protestados.objects\
@@ -559,8 +559,7 @@ def ImpresionProtestosPendientes(request, id_cliente = None):
 def ImpresionAmpliacionDePlazo(request, ampliacion_id):
     template_path = 'cobranzas/ampliacion_de_plazo_reporte.html'
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
      
     ampliacion = Notas_debito_cabecera.objects\
         .filter(pk = ampliacion_id).first()
@@ -692,7 +691,7 @@ def ImpresionAmpliacionDePlazo(request, ampliacion_id):
     return response    
 
 def ImpresionDetalleCobranzas(request, desde, hasta, clientes = None):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     arr_clientes = []
     
     if clientes != None:
@@ -761,7 +760,7 @@ def ImpresionDetalleCobranzas(request, desde, hasta, clientes = None):
     return response    
 
 def ImpresionDetalleRecuperaciones(request, desde, hasta, clientes = None):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     arr_clientes = []
     
     if clientes != None:
@@ -840,7 +839,7 @@ def ImpresionCobranzaCuota(request, cobranza_id):
     motivo_protesto=''
     nd_protesto = 0
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     # tomar el codigo de asignacion grabado en la solicitud
     cobranza = Pagare_cabecera.objects.filter(id= cobranza_id).first()
@@ -924,7 +923,7 @@ def ImpresionCobranzaCuota(request, cobranza_id):
 
 def ImpresionProtestosPendientesCorte(request, corte_id = None):
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
      
     corte = Cortes_historico.objects.filter(id=corte_id).first()
     if not corte:
@@ -965,7 +964,7 @@ def ImpresionProtestosPendientesCorte(request, corte_id = None):
 
 def ImpresionProtestosPendientesDeudor(request, id_participante = None):
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
      
     if id_participante:         
         protestos = Cheques_protestados.objects\

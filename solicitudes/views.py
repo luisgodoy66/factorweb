@@ -49,16 +49,14 @@ class SolicitudesView(SinPrivilegios, generic.ListView):
     permission_required="solicitudes.view_asignacion"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Asignacion.objects.filter(cxestado__in=['P', 'R'], leliminado = False
                                      , empresa = id_empresa.empresa)\
                                      .order_by("dregistro")
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects\
-            .filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(SolicitudesView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -76,7 +74,7 @@ class AsignacionFacturasPurasView(SinPrivilegios, generic.UpdateView):
     
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -87,12 +85,12 @@ class AsignacionFacturasPurasView(SinPrivilegios, generic.UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super(AsignacionFacturasPurasView, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(AsignacionFacturasPurasView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -110,7 +108,7 @@ class AsignacionConAccesoriosView(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -121,12 +119,12 @@ class AsignacionConAccesoriosView(SinPrivilegios, generic.UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super(AsignacionConAccesoriosView, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(AsignacionConAccesoriosView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -144,13 +142,13 @@ class ClienteCrearView(SinPrivilegios, generic.CreateView):
 
     def form_valid(self, form):
 
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(ClienteCrearView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -165,14 +163,14 @@ class NivelesAprobacionView(SinPrivilegios, generic.ListView):
     permission_required="solicitudes.view_niveles_aprobacion"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         qs=Niveles_aprobacion.objects.filter(leliminado = False
                                      , empresa = id_empresa.empresa)\
                                      .order_by("dregistro")
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(NivelesAprobacionView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -189,19 +187,19 @@ class NivelAprobacionCrearView(SinPrivilegios, generic.CreateView):
     permission_required="solicitudes.add_niveles_aprobacion"
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
     def get_form_kwargs(self):
         kwargs = super(NivelAprobacionCrearView, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(NivelAprobacionCrearView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -219,7 +217,7 @@ class NivelAprobacionEditarView(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -231,12 +229,12 @@ class NivelAprobacionEditarView(SinPrivilegios, generic.UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super(NivelAprobacionEditarView, self).get_form_kwargs()
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         kwargs['empresa'] = id_empresa.empresa
         return kwargs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(NivelAprobacionEditarView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -251,7 +249,7 @@ class ExcesosTemporalesView(SinPrivilegios, generic.ListView):
     permission_required="solicitudes.view_exceso_temporal"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if self.kwargs.get('filtro') == 'todos':
             qs=Exceso_temporal.objects\
                 .filter(empresa = id_empresa.empresa)\
@@ -265,7 +263,7 @@ class ExcesosTemporalesView(SinPrivilegios, generic.ListView):
         return qs
 
     def get_context_data(self, **kwargs):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         context = super(ExcesosTemporalesView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
@@ -283,7 +281,7 @@ class InstruccionDePagoView(SinPrivilegios, generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        id_empresa = Usuario_empresa.objects.filter(user=self.request.user).first()
+        id_empresa = self.request.usuario_empresa
         if obj.empresa_id != id_empresa.empresa.id:
             raise Http404("No tiene permisos para editar este registro")
         return obj
@@ -306,7 +304,7 @@ class InstruccionDePagoView(SinPrivilegios, generic.UpdateView):
 @login_required(login_url='/login/')
 @permission_required('solicitudes.change_asignacion', login_url='bases:sin_permisos')
 def DatosAsignacionFacturasPurasNueva(request):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     template_name="solicitudes/datosasignacionfacturaspuras_form.html"
     
@@ -323,7 +321,7 @@ def DatosAsignacionFacturasPurasNueva(request):
 @login_required(login_url='/login/')
 @permission_required('solicitudes.change_asignacion', login_url='bases:sin_permisos')
 def DatosAsignacionConAccesoriosNueva(request):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     template_name="solicitudes/datosasignacionconaccesorios_form.html"
     
@@ -342,8 +340,7 @@ def DatosAsignacionConAccesoriosNueva(request):
 def DatosFacturasPuras(request, cliente_id, tipo_factoring_id
                        , asignacion_id=None, doc_id = None):
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     template_name="solicitudes/datosasignacionfacturaspuras_modal.html"
     acepta_vencimiento_en_feriado = False
@@ -532,7 +529,7 @@ def EliminarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
     # la eliminacion es lógica
     # el documento_id debe ser el id del accesorio cuando es asignacin con accesorios
     # el valor no negociado se encuentra en el total del documento, no debe restar adicional
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if request.method=="GET":
         # marcar como eliminado el doc o el cheque
@@ -587,7 +584,7 @@ def RecuperarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
     # la eliminacion es lógica
     # el documento_id debe ser el id del accesorio cuando es asignacin con accesorios
     # el valor no negociado se encuentra en el total del documento, no debe restar adicional
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if request.method=="GET":
         # marcar como eliminado el doc o el cheque
@@ -663,7 +660,7 @@ def RecuperarDocumento(request, asignacion_id, documento_id, tipo_asignacion):
 @permission_required('solicitudes.change_documentos', login_url='bases:sin_permisos')
 def EliminarAsignacion(request, asignacion_id):
     # la eliminacion es lógica
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     asgn = Asignacion.objects\
         .filter(pk=asignacion_id
@@ -691,7 +688,7 @@ def EliminarAsignacion(request, asignacion_id):
     return HttpResponse("OK")
 
 def DetalleSolicitudFacturasPuras(request, asignacion_id):
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     documentos = Documentos.objects\
         .filter(cxasignacion=asignacion_id
@@ -732,7 +729,7 @@ def DetalleSolicitudFacturasPurasOutput(doc):
 
 def DetalleSolicitudConAccesorios(request, asignacion_id = None):
     # mostrar incluso los documentos eliminados
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     documentos = ChequesAccesorios.objects\
         .filter(documento__in=Documentos.objects\
@@ -785,8 +782,7 @@ def DatosAsignacionConAccesorios(request, cliente_id,
     asignacion = {}
     contexto = {}
     form_documento = {}
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     asignacion = Asignacion.objects\
         .filter(pk=asignacion_id).first()
@@ -992,7 +988,7 @@ def DatosAsignacionConAccesorios(request, cliente_id,
 @permission_required('solicitudes.change_chequesaccesorios', login_url='bases:sin_permisos')
 def DatosAccesorioEditar(request, accesorio_id = None, tipo_factoring_id = None):
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     template_name = "solicitudes/datoschequeaccesorio_modal.html"
     form_cheque = ChequesForm(empresa=id_empresa.empresa)
@@ -1087,7 +1083,7 @@ def PedirArchivoXML(request):
 
 def ImportarOperacion(request):
     objeto=json.loads(request.body.decode("utf-8"))
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     ruc=objeto["id_cliente"]
     nombre_cliente=objeto["nombre_cliente"]
@@ -1277,7 +1273,7 @@ def ImportarOperacion(request):
 def GeneraListaSolicitudesRegistradasJSON(request, desde = None, hasta= None):
     # Es invocado desde la url de una tabla bt
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     if desde == 'None':
         asignacion = Asignacion.objects\
@@ -1332,7 +1328,7 @@ def GeneraListaSolicitudesJSONSalida(asignacion):
 def RechazarExcesoTemporal(request, exceso_id):
     # la eliminacion es lógica
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
     
     exceso = Exceso_temporal.objects\
         .filter(pk=exceso_id
@@ -1360,7 +1356,7 @@ def RechazarExcesoTemporal(request, exceso_id):
 def AceptarExcesoTemporal(request, exceso_id):
     # la eliminacion es lógica
 
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     exceso = Exceso_temporal.objects\
         .filter(pk=exceso_id, empresa = id_empresa.empresa).first()
@@ -1378,8 +1374,7 @@ def AceptarExcesoTemporal(request, exceso_id):
     return HttpResponse("OK")
 
 def ImpresionSolicitud(request, solicitud_id, crear_pdf = False):
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
+    id_empresa = request.usuario_empresa
 
     asignacion = Asignacion.objects\
         .filter(id = solicitud_id

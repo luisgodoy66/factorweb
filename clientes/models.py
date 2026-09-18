@@ -1,6 +1,6 @@
 from django.db import models
 
-from bases.models import ClaseModelo
+from bases.models import ClaseModelo, TenantManager
 from empresa.models import Datos_participantes, Clases_cliente, \
     Localidades, Tipos_empresas, Funcionarios
 from pais.models import Bancos
@@ -59,7 +59,7 @@ class Datos_compradores(ClaseModelo):
             'cxcomprador__ctnombre'
             ]  
 
-class Datos_generales_Manager(models.Manager):
+class Datos_generales_Manager(TenantManager):
         def clientes_nuevos_por_mes(self, id_empresa, año, mes):
             return self.filter(
                 dprimeraoperacion__year=año,
@@ -82,10 +82,6 @@ class Datos_generales(ClaseModelo):
         help_text='Fecha de emisión de contrato'    )
     ctbeneficiariodevolucion=models.CharField(max_length=80, null=True,
         help_text='beneficiario de devolucion por valores no negociados'    )
-    # cxfuncionario=models.CharField(max_length=5, null=True,
-    #     help_text='funcionario asignado'    )
-    # cxfuncionario2=models.CharField(max_length=5,null=True,
-    #     help_text='funcionario que comparte la comision por venta'    )
     lcomisiones=models.BooleanField(default=True,
         help_text='el cliente ingresa en el proceso de calculo de comisiones a funconarios'    )
     npromediodemoradepago=models.DecimalField(max_digits=8, decimal_places=2, default=0,
@@ -201,7 +197,7 @@ class Cuentas_bancarias(ClaseModelo):
     def cuenta(self):
         return 'Cuenta {} Nº{}'.format(self.tipo_cuenta(),self.cxcuenta)
     
-class Cuenta_transferencia_Manager(models.Manager):
+class Cuenta_transferencia_Manager(TenantManager):
     def cuenta_default(self, id_cliente):
         return self.filter(leliminado = False, cxcliente = id_cliente)
 
@@ -253,7 +249,7 @@ class Cupos_compradores(ClaseModelo):
     def disponible(self):
         return self.ncupocartera - self.nutilizadocartera
 
-class Linea_Manager(models.Manager):
+class Linea_Manager(TenantManager):
     def clientes_con_valores_pendientes(self, id_empresa, porcentaje=80):
         # Obtener el total de valores pendientes
         total_valores_pendientes = self.filter(

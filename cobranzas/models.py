@@ -10,7 +10,7 @@ from django.db.models.functions import TruncDay, Cast\
 
 from datetime import timedelta, datetime, date
 
-from bases.models import ClaseModelo
+from bases.models import ClaseModelo, TenantManager
 from empresa.models import Datos_participantes , Tipos_factoring\
     , Cuentas_bancarias, Tasas_factoring
 from clientes import models as Cliente_models
@@ -45,7 +45,7 @@ class Cheques(ClaseModelo):
     def __str__(self):
         return '{} CH/{}'.format(self.cxcuentabancaria, self.ctcheque)
 
-class Documentos_cabecera_Manager(models.Manager):
+class Documentos_cabecera_Manager(TenantManager):
     def valores_cobrados_por_dia(self, id_empresa, año, mes):
         return self.filter(
             empresa = id_empresa,
@@ -124,7 +124,7 @@ class Documentos_cabecera(ClaseModelo):
     def estado(self):
         return self.get_cxestado_display()
     
-class Documentos_detalle_Manager(models.Manager):
+class Documentos_detalle_Manager(TenantManager):
     # def promedio_ponderado_demora(self, id_cliente):
     #     # promedio ponderado de demora de los documentos
     #     # de la empresa
@@ -391,7 +391,7 @@ class Liquidacion_detalle(ClaseModelo):
 
 from operaciones.models import  Notas_debito_cabecera
 
-class Protestos_Manager(models.Manager):
+class Protestos_Manager(TenantManager):
     def TotalProtestos(self, id_empresa):
         return self.filter(leliminado=False
                            , empresa = id_empresa
@@ -547,7 +547,7 @@ class Cheques_protestados(ClaseModelo):
     def __str__(self):
         return '{} CH/{}'.format(self.cheque.cxcuentabancaria, self.cheque.ctcheque)        
 
-class Documentos_protestados_Manager(models.Manager):
+class Documentos_protestados_Manager(TenantManager):
 
     def antigüedad_cartera(self, id_empresa, id_cliente=None):
         # grafico de antigüedad de cartera 
@@ -1616,7 +1616,7 @@ class Factura_cuota(ClaseModelo):
     def __str__(self):
         return f"{self.cobranzacuota.cobranza}"
     
-class Protestos_historico_Manager(models.Manager):
+class Protestos_historico_Manager(TenantManager):
     def TotalProtestos(self, id_empresa, id_corte):
         return self.filter(leliminado=False
                            , historico = id_corte
@@ -1737,7 +1737,7 @@ class Cheques_protestados_historico(ClaseModelo):
     def __str__(self):
         return '{} CH/{}'.format(self.cheque.cxcuentabancaria, self.cheque.ctcheque)        
 
-class Documentos_protestados_historico_Manager(models.Manager):
+class Documentos_protestados_historico_Manager(TenantManager):
 
     def antigüedad_cartera(self, id_empresa, id_corte):
         # grafico de antigüedad de cartera 
