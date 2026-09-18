@@ -30,7 +30,7 @@ class CuentasBancariasForm(forms.ModelForm):
 
         if empresa:
             self.fields['cxbanco'].queryset = Bancos.objects\
-                .filter(empresa=empresa, leliminado = False)
+                .filter(leliminado = False)
             self.fields['cxcliente'].queryset = Datos_generales.objects\
                 .filter(empresa=empresa, leliminado = False)
 

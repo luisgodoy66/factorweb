@@ -1,17 +1,17 @@
 from enum import unique
 from django.db import models
 from django.forms import DateField
-from bases.models import ClaseModelo
+from bases.models import ClaseModeloPais
 from datetime import date
 
-class Bancos(ClaseModelo):
+class Bancos(ClaseModeloPais):
     ctbanco =models.TextField()
     llocal = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.ctbanco}"
 
-class Feriados(ClaseModelo):
+class Feriados(ClaseModeloPais):
     dferiado = models.DateField()
     llaborable = models.BooleanField(default=False)
 
@@ -19,14 +19,14 @@ class Feriados(ClaseModelo):
         # return date.isoformat(self.dferiado)
         return self.dferiado.strftime("%Y-%m-%d") 
     
-class Provincias(ClaseModelo):
+class Provincias(ClaseModeloPais):
     cxprovincia = models.CharField(max_length=10, null=True, blank=True)
     ctprovincia = models.CharField(max_length=50)
 
     def __str__(self):
         return f"{self.ctprovincia}"
     
-class Cantones(ClaseModelo):
+class Cantones(ClaseModeloPais):
     provincia = models.ForeignKey(Provincias, on_delete=models.CASCADE)
     cxcanton = models.CharField(max_length=10, null=True, blank=True)
     ctcanton = models.CharField(max_length=50)

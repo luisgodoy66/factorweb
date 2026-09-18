@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from factorweb25.request_context import get_current_empresa_id
+
 # Create your models here.
 class Empresas(models.Model):
     AMBIENTES_SRI = (
@@ -33,6 +35,22 @@ class Empresas(models.Model):
     def __str__(self):
         return self.ctnombre
     
+
+class TenantQuerySet(models.QuerySet):
+    def for_current_empresa(self):
+        empresa_id = get_current_empresa_id()
+        if empresa_id is None:
+            return self
+        return self.filter(empresa_id=empresa_id)
+
+
+class TenantManager(models.Manager.from_queryset(TenantQuerySet)):
+    """Filtra automáticamente por la empresa activa en el request (si existe)."""
+
+    def get_queryset(self):
+        return super().get_queryset().for_current_empresa()
+
+
 class ClaseModelo(models.Model):
     dregistro = models.DateTimeField(auto_now_add=True)
     dmodificacion = models.DateTimeField(auto_now=True)
@@ -44,7 +62,10 @@ class ClaseModelo(models.Model):
     cxusuarioelimina=models.IntegerField(blank=True,null=True)
     empresa =models.ForeignKey(Empresas,  on_delete=models.CASCADE,
         related_name="%(app_label)s_%(class)s_empresa",)
-    
+
+    objects = TenantManager()
+    all_objects = models.Manager()
+
     class Meta:
         abstract=True
 
@@ -76,4 +97,17 @@ class Actividades(models.Model):
     nnivel = models.IntegerField(default=0)
 
     def __str__(self):
-        return "{} {}".format(self.cxactividad, self.ctactividad)    
+        return "{} {}".format(self.cxactividad, self.ctactividad)  
+
+class ClaseModeloPais(models.Model):
+    dregistro = models.DateTimeField(auto_now_add=True)
+    dmodificacion = models.DateTimeField(auto_now=True)
+    cxusuariocrea = models.ForeignKey(
+        User, on_delete= models.CASCADE,
+        related_name="%(app_label)s_%(class)s_usuariocrea",)
+    cxusuariomodifica = models.IntegerField(blank=True, null=True)
+    leliminado=models.BooleanField(default=False)
+    cxusuarioelimina=models.IntegerField(blank=True,null=True)
+    
+    class Meta:
+        abstract=True

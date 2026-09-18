@@ -18,8 +18,7 @@ class BancosView(SinPrivilegios, generic.ListView):
     permission_required="pais.view_bancos"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        qs=Bancos.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        qs=Bancos.objects.filter(leliminado = False)
         return qs
 
     def get_context_data(self, **kwargs):
@@ -40,8 +39,6 @@ class BancosNew(SinPrivilegios, generic.CreateView):
     permission_required="pais.add_bancos"
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 
@@ -82,8 +79,7 @@ class FeriadosView(SinPrivilegios, generic.ListView):
     permission_required="pais.view_feriados"
 
     def get_queryset(self) :
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        qs=Feriados.objects.filter(leliminado = False, empresa = id_empresa.empresa)
+        qs=Feriados.objects.filter(leliminado = False)
         return qs
 
     def get_context_data(self, **kwargs):
@@ -104,8 +100,6 @@ class FeriadosNew(SinPrivilegios, generic.CreateView):
     permission_required="pais.add_feriados"
 
     def form_valid(self, form):
-        id_empresa = Usuario_empresa.objects.filter(user = self.request.user).first()
-        form.instance.empresa = id_empresa.empresa
         form.instance.cxusuariocrea = self.request.user
         return super().form_valid(form)
 

@@ -11,7 +11,7 @@ from bases.models import Usuario_empresa
 from .models import Configuracion_slack
 
 from bases.views import enviarPost
-from operaciones.reportes import ImpresionLiquidacion
+from operaciones.reportes import generar_pdf_liquidacion
 
 import json
 import os
@@ -59,11 +59,14 @@ def enviar_solicitud_aprobacion(request, id_solicitud):
     # Enviar un mensaje a un canal o usuario
     try:
         # Crear el PDF para adjuntar
-        if ImpresionLiquidacion(request,id_solicitud,True) == "OK":
-            print("PDF generado correctamente")
+        id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+        nombre_archivo, pdf_bytes, error = generar_pdf_liquidacion(request, id_solicitud, id_empresa)
+        if error:
+            return HttpResponse(error, status=400)
 
-        # usar la misma ruta para el archivo que se genera en ImpresionLiquidacion
-        filepath = os.path.join(settings.MEDIA_ROOT, f"asignacion_{id_solicitud}.pdf")
+        filepath = os.path.join(settings.MEDIA_ROOT, nombre_archivo)
+        with open(filepath, "wb") as f:
+            f.write(pdf_bytes)
 
         # Iterar sobre cada canal/usuario para enviar el archivo y el mensaje
         canales = configuracion_slack.ctslackchannelname.split(",")

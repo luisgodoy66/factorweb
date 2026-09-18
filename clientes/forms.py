@@ -267,7 +267,7 @@ class CuentasBancariasForm(forms.ModelForm):
 
         if empresa:
             self.fields['cxbanco'].queryset = Bancos.objects\
-                .filter(empresa=empresa, leliminado = False)
+                .filter(leliminado = False)
             deudores = Datos_compradores.objects\
                 .filter(empresa = empresa).values_list('cxcomprador__id')
             self.fields['cxparticipante'].queryset = Datos_participantes.objects\

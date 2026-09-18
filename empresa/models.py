@@ -196,7 +196,22 @@ class Tasas_factoring(ClaseModelo):
         self.cxtasa=self.cxtasa.upper()
         # self.cttasa=self.cttasa.upper()
         return super(Tasas_factoring, self).save()
-   
+
+    def periodicidad(self):
+        if self.ndiasperiocidad is None:
+            return 'N/A'
+        elif self.ndiasperiocidad == 30:
+            return 'mensual'
+        elif self.ndiasperiocidad == 60:
+            return 'bimensual'
+        elif self.ndiasperiocidad == 90:
+            return 'trimestral'
+        elif self.ndiasperiocidad == 180:
+            return 'semestral'
+        elif self.ndiasperiocidad == 360:
+            return 'anual'
+        return 'cada ' + str(self.ndiasperiocidad) + ' días'
+    
 class Otros_cargos(ClaseModelo):
     ctabreviacion = models.CharField(max_length= 30) 
     lcargaiva = models.BooleanField(default=True)

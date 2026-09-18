@@ -19,14 +19,15 @@ from cobranzas.models import Documentos_protestados, Documentos_protestados_hist
 from empresa.models import Tasas_factoring
 from solicitudes import models as SolicitudModels
 from bases.models import Usuario_empresa
-# from weasyprint import HTML, CSS
 
 FACTURAS_PURAS = 'F'
 
 def ImpresionAsignacionDesdeSolicitud(request, asignacion_id):
 
-    solicitud = SolicitudModels.Asignacion.objects.filter(id= asignacion_id).first()
-    id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
+    solicitud = SolicitudModels.Asignacion.objects\
+        .filter(id= asignacion_id).first()
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
     
     if solicitud.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
@@ -39,17 +40,11 @@ def ImpresionAsignacionDesdeSolicitud(request, asignacion_id):
     else:   
             return HttpResponse("no encontró asignación ")
 
-def ImpresionAsignacion(request, asignacion_id):
-    asignacion = Asignacion.objects\
-        .filter(id = asignacion_id).first()
+def _armar_respuesta_pdf_asignacion(request, asignacion, id_empresa):
+    # construye la WeasyTemplateResponse compartida entre la vista de pantalla
+    # y la generación del PDF para el correo de liquidación
     documentos = {}
 
-    id_empresa = Usuario_empresa.objects\
-        .filter(user = request.user).first()
-    
-    if asignacion.empresa != id_empresa.empresa:
-        return redirect("bases:sin_permisos")
-    
     if asignacion.cxtipo==FACTURAS_PURAS:
 
         template_path = 'operaciones/asignacion_facturas_puras_reporte.html'
@@ -65,21 +60,20 @@ def ImpresionAsignacion(request, asignacion_id):
             .filter(leliminado = False
                     , ncanjeadopor = None
                     , documento__in=Documentos.objects\
-                        .filter(cxasignacion=asignacion_id))\
+                        .filter(cxasignacion=asignacion.id))\
                 .order_by('documento__cxcomprador__cxcomprador__ctnombre')
                 
     # datos de tasa gao/dc
     gao = Tasas_factoring.objects\
         .filter(cxtasa="GAO", empresa = id_empresa.empresa).first()
     if not gao:
-        return HttpResponse("no encontró tasa de gao en el sistema."
-                +" Registre el cargo con código GAO")
+        return None, "no encontró tasa de gao en el sistema. Registre el cargo con código GAO"
 
     dc = Tasas_factoring.objects\
         .filter(cxtasa="DCAR", empresa = id_empresa.empresa).first()
     if not dc:
-        return HttpResponse("no encontró tasa de descuento de "
-                +"catera en el sistema.Registre el cargo con código DCAR")
+        return None, ("no encontró tasa de descuento de catera en el sistema."
+                       +"Registre el cargo con código DCAR")
 
     dic_gao  = {'imprimir':gao.limprimeenreporte
         , 'descripcion': gao.ctdescripcionenreporte
@@ -115,20 +109,45 @@ def ImpresionAsignacion(request, asignacion_id):
         content_type='application/pdf',
         # stylesheets=stylesheet_paths
     )
-    response['Content-Disposition'] = 'inline; filename="asgn' + str(asignacion_id) + '.pdf"'
-    return response
+    return response, None
 
-def ImpresionLiquidacion(request, solicitud_id, crear_pdf = False):
-    asignacion = SolicitudModels.Asignacion.objects\
-        .filter(id = solicitud_id).first()
-    documentos = {}
+def ImpresionAsignacion(request, asignacion_id):
+    asignacion = Asignacion.objects\
+        .filter(id = asignacion_id).first()
 
     id_empresa = Usuario_empresa.objects\
         .filter(user = request.user).first()
-
+    
     if asignacion.empresa != id_empresa.empresa:
         return redirect("bases:sin_permisos")
 
+    response, error = _armar_respuesta_pdf_asignacion(request, asignacion, id_empresa)
+    if error:
+        return HttpResponse(error)
+
+    response['Content-Disposition'] = 'inline; filename="asgn' + str(asignacion_id) + '.pdf"'
+    return response
+
+def generar_pdf_liquidacion(request, asignacion_id, id_empresa):
+    # devuelve (nombre_archivo, bytes_pdf, error) del PDF de liquidación de una
+    # asignación (id de operaciones.Asignacion), para adjuntarlo al correo
+    asignacion = SolicitudModels.Asignacion.objects\
+        .filter(id = asignacion_id).first()
+    if not asignacion:
+        return None, None, "no encontró asignación"
+
+    response, error = _armar_respuesta_pdf_liquidacion(request, asignacion, id_empresa)
+    if error:
+        return None, None, error
+
+    nombre_archivo = asignacion.cxasignacion + '.pdf'
+    return nombre_archivo, response.rendered_content, None
+
+def _armar_respuesta_pdf_liquidacion(request, asignacion, id_empresa):
+    # construye la WeasyTemplateResponse compartida entre la vista de pantalla
+    # y la generación del PDF para el correo de liquidación
+    documentos = {}
+    
     if asignacion.cxtipo==FACTURAS_PURAS:
 
         template_path = 'operaciones/asignacion_facturas_puras_reporte.html'
@@ -195,17 +214,24 @@ def ImpresionLiquidacion(request, solicitud_id, crear_pdf = False):
         content_type='application/pdf',
         # stylesheets=stylesheet_paths
     )
-    if crear_pdf:
-        # Guardar el PDF generado en un archivo directamente
-        output_filename = os.path.join(settings.MEDIA_ROOT, f"asignacion_{solicitud_id}.pdf")
-        with open(output_filename, "wb") as f:
-            f.write(response.rendered_content)
-        print(f"Archivo PDF creado en: {output_filename}")
-        return "OK"
-    else:
-        # Devolver el PDF para visualización en el navegador
-        response['Content-Disposition'] = 'inline; filename="asgn' + str(solicitud_id) + '.pdf"'
-        return response
+    return response, None
+
+def ImpresionLiquidacion(request, solicitud_id):
+    asignacion = SolicitudModels.Asignacion.objects\
+        .filter(id = solicitud_id).first()
+
+    id_empresa = Usuario_empresa.objects\
+        .filter(user = request.user).first()
+
+    if asignacion.empresa != id_empresa.empresa:
+        return redirect("bases:sin_permisos")
+
+    response, error = _armar_respuesta_pdf_liquidacion(request, asignacion, id_empresa)
+    if error:
+        return HttpResponse(error)
+
+    response['Content-Disposition'] = 'inline; filename="asgn' + str(solicitud_id) + '.pdf"'
+    return response
 
 def ImpresionAntiguedadCartera(request):
     id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
@@ -863,12 +889,12 @@ def ImpresionAntiguedadCarteraPorDeudor(request, id_cliente, cliente):
     detalle = facturas.union(accesorios, prot_facturas
                              , prot_accesorios, acc_quitados, )\
             .order_by('cxcomprador__cxcomprador__ctnombre')
-    print('detalle', detalle)
+
     # Acumular totales por deudor
     acumulado_por_deudor = {}
     for doc in detalle:
         deudor = doc['cxcomprador__cxcomprador__ctnombre']
-        print('deudor', deudor)
+
         if deudor not in acumulado_por_deudor:
             acumulado_por_deudor[deudor] = {
                 'vencido_mas_90': 0,

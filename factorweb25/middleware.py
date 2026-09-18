@@ -2,10 +2,42 @@ import logging
 import time
 import uuid
 
-from .request_context import request_id_context
+from .request_context import empresa_id_context, request_id_context
 
 
 logger = logging.getLogger("factorweb.request")
+
+
+class TenantMiddleware:
+    """Resuelve la empresa (tenant) del usuario una sola vez por request."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        from bases.models import Usuario_empresa
+
+        empresa = None
+        usuario_empresa = None
+        user = getattr(request, "user", None)
+
+        if getattr(user, "is_authenticated", False):
+            usuario_empresa = (
+                Usuario_empresa.objects.select_related("empresa")
+                .filter(user=user)
+                .first()
+            )
+            if usuario_empresa:
+                empresa = usuario_empresa.empresa
+
+        request.usuario_empresa = usuario_empresa
+        request.empresa = empresa
+
+        token = empresa_id_context.set(empresa.id if empresa else None)
+        try:
+            return self.get_response(request)
+        finally:
+            empresa_id_context.reset(token)
 
 
 class RequestLoggingMiddleware:

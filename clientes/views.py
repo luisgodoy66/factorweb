@@ -1203,7 +1203,7 @@ def obtener_cantones_por_provincia(request, provincia_id):
             
         cantones = Cantones.objects.filter(
             provincia_id=provincia_id,
-            empresa=id_empresa.empresa,
+            # empresa=id_empresa.empresa,
             leliminado=False
         ).select_related('provincia').order_by('ctcanton')
         

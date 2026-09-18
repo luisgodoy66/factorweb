@@ -227,7 +227,7 @@ class ChequesForm(forms.ModelForm):
 
         if empresa:
             self.fields['cxbanco'].queryset = Bancos.objects\
-                .filter(empresa=empresa, leliminado = False)
+                .filter(leliminado = False)
             
 class ClientesForm(forms.ModelForm):
 

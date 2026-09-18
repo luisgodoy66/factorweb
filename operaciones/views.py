@@ -812,7 +812,12 @@ def DatosOperativos(request, cliente_id=None):
     
     datos_operativos = Datos_operativos.objects\
         .filter(cxcliente=cliente).first()
-    
+
+    gao = Tasas_factoring.objects.filter(cxtasa = 'GAO').first()
+    dc = Tasas_factoring.objects.filter(cxtasa = 'DCAR').first()
+    if not gao or not dc:
+        return HttpResponse("Una de las tasas requeridas no está definida. Revise la tasa de GAO y la tasa de descuento de cartera.", status=403)
+
     if request.method=='GET':
 
         if datos_operativos:
@@ -842,6 +847,8 @@ def DatosOperativos(request, cliente_id=None):
     contexto={'nombrecliente':cliente
             , 'form_cliente':formulario
             , 'solicitudes_pendientes':sp
+            , 'periodicidad_gao':gao.periodicidad()
+            , 'periodicidad_dc':dc.periodicidad()
             }
 
     if request.method=='POST':
@@ -1506,6 +1513,36 @@ def EditarTasasDocumentoSolicitud(request, documento_id, fecha_desembolso, asign
     return render(request, template_name, contexto)
 
 from bases.views import enviarPost, numero_a_letras
+from .reportes import generar_pdf_liquidacion
+from empresa.correos import enviar_correo_liquidacion
+
+def EnviarCorreoLiquidacionAsignacion(request, solicitud_id):
+    # envía al cliente el PDF de liquidación de su solicitud ya aceptada.
+    # es un envío de mejor esfuerzo: cualquier error se registra pero no
+    # interrumpe la respuesta al usuario
+    try:
+        solicitud = ModelosSolicitud.Asignacion.objects\
+            .filter(id=solicitud_id).first()
+        if not solicitud:
+            return HttpResponse(f"No se pudo enviar correo de liquidación: no se encontró la asignación generada {solicitud_id}", status=404)
+
+        id_empresa = Usuario_empresa.objects.filter(user=request.user).first()
+
+        nombre_archivo, pdf_bytes, error = generar_pdf_liquidacion(
+            request, solicitud.id, id_empresa)
+        if error:
+            return HttpResponse("No se pudo generar el PDF para el correo de liquidación: " + error)
+
+        cliente = solicitud.cxcliente
+        ok, error = enviar_correo_liquidacion(
+            id_empresa.empresa, cliente.ctemail if cliente else None
+            , cliente.ctnombre if cliente else ''
+            , solicitud.cxasignacion
+            , nombre_archivo, pdf_bytes)
+        if not ok:
+            return HttpResponse(f"No se pudo enviar el correo de liquidación: {error}")
+    except Exception as error:
+        return HttpResponse(f"Error inesperado al enviar correo de liquidación: {error}")
 
 def AceptarDocumentos(request):
     # ejecuta un store procedure 
@@ -1533,11 +1570,13 @@ def AceptarDocumentos(request):
                          ,{4},{5},{6},'{7}'\
                          ,{8},'{9}',{10}, '{11}'\
                          ,{12},{13},{14},'')"
-        .format(pid_asignacion,pdnegociacion,pddesembolso,pnanticipo
+        .format(pid_asignacion, pdnegociacion, pddesembolso, pnanticipo
                 ,pngao, pndescuentocartera,pniva,psinstruccionpago
                 ,nusuario, pslocalidad, porcentaje_iva, otros_cargos
                 , base_iva, base_noiva, exceso_temporal))
 
+    if resultado and resultado[0]=='OK':
+        EnviarCorreoLiquidacionAsignacion(request, pid_asignacion)
 
     return HttpResponse(resultado)
 
@@ -1561,7 +1600,6 @@ def DatosCondicionesOperativas(request, tipo_factoring_id
                                , condicion_id=None, detalle_id=None):
     template_name='operaciones/datoscondicionesoperativas_modal.html'
     condicion={}
-    print("condicion id: " + str(condicion_id))
     id_empresa = Usuario_empresa.objects.filter(user = request.user).first()
 
     if condicion_id:

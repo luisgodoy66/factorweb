@@ -55,10 +55,10 @@ class ParticipanteForm(forms.ModelForm):
 
         if self.empresa:
             self.fields['provincia'].queryset = Provincias.objects\
-                .filter(empresa=self.empresa, leliminado=False)\
+                .filter(leliminado=False)\
                 .order_by('ctprovincia')
             self.fields['canton'].queryset = Cantones.objects\
-                .filter(empresa=self.empresa, leliminado=False)\
+                .filter(leliminado=False)\
                 .order_by('ctcanton')
 
     def clean(self):
@@ -216,7 +216,7 @@ class CuentaBancariaForm(forms.ModelForm):
 
         if empresa:
             self.fields['cxbanco'].queryset = Bancos.objects\
-                .filter(empresa=empresa, leliminado = False,)
+                .filter(leliminado = False,)
 
 class LocalidadForm(forms.ModelForm):
     class Meta:

@@ -38,7 +38,7 @@ from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     GeneraListaChequesADepositarDeudorJSON, \
     GeneraListaProtestosPendientesDeudorJSON, GeneraListaCanjesDeudorJSON,\
     GeneraListaChequesQuitadosDeudorJSON, GeneraListaProtestosClienteJSON, \
-    GeneraListaProtestosDeudorJSON
+    GeneraListaProtestosDeudorJSON, EnviarCorreoLiquidacionAsignacion
 # EstadoOperativoCliente, \
     
 from .reportes import ImpresionAsignacion, ImpresionAntiguedadCartera, \
@@ -190,6 +190,8 @@ urlpatterns = [
          , ImpresionResumenAsignaciones, name='resumen_asignaciones'),
     path('impresionresumenasignaciones/<desde>/<hasta>/'
          , ImpresionResumenAsignaciones, name='resumen_asignaciones'),
+    path('enviarcorreoliquidacionasignacion/<int:asignacion_id>', 
+         EnviarCorreoLiquidacionAsignacion, name='enviar_correo_liquidacion_asignacion'),
 #  anexos
     path("anexosactivos/<tipo_cliente>", ConsultaAnexosActivos),
     path('anexoscliente/<cliente_id>/<solicitud_id>'
