@@ -100,8 +100,8 @@ def facturas_por_vencer(request):
 
     return JsonResponse(
         {
-            "empresa_id": empresa.id,
-            "usuario_id": usuario_id,
+            "empresa": empresa,
+            # "usuario_id": usuario_id,
             "dias": dias,
             "clientes": resultado,
         },
