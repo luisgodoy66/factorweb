@@ -110,7 +110,7 @@ def webhook_cargar_solicitudes_factoring(request):
     # print(resultado)
     return JsonResponse({
         'ok': True,
-        'empresa_id': empresa,
+        'empresa': empresa.ctnombre,
         'procesados': resultado.get('procesados', 0),
         'creadas': resultado.get('creadas', 0),
         # 'resultados': resultado.get('resultados', []),
