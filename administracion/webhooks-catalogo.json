@@ -1,0 +1,1121 @@
+{
+  "convencion": "entidad.accion_en_pasado",
+  "dominios": [
+    {
+      "id": "solicitudes",
+      "titulo": "Dominio 1 — Solicitudes / Negociación (ingreso de facturas)",
+      "eventos": [
+        {
+          "e": "solicitud.creada",
+          "t": "solicitudes/views.py:401,836,1127 · servicios.py:281",
+          "d": "Alta manual de facturas puras / con accesorios, importación masiva JSON o carga automática por correo-XML.",
+          "p": "asignacion_id, cxasignacion (sol00001), cliente{id,ruc,nombre,email,celular}, cxcliente_id, tipo_factoring, cxtipo, nvalor, ncantidaddocumentos, usuario, empresa_id, origen(manual|masivo|correo|api)",
+          "a": "POST a CRM (HubSpot/Odoo) creando la oportunidad; acuse de recibo automático al cliente por email+WhatsApp con checklist documental y número de solicitud.",
+          "pri": "P0"
+        },
+        {
+          "e": "solicitud.documento_agregado",
+          "t": "solicitudes/views.py:458,1238",
+          "d": "Se agrega una factura (Documentos) a la solicitud/negociación.",
+          "p": "asignacion_id, documento_id, comprador{ruc,nombre}, ctserie1, ctserie2, ctdocumento, demision, dvencimiento, nvalorantesiva, niva, nretencioniva, nretencionrenta, ntotal, cxautorizacion_ec",
+          "a": "Verificar en n8n la clave de acceso contra el SRI (SOAP AutorizacionComprobantesOffline) y marcar la factura como validada antes de liquidar.",
+          "pri": "P0"
+        },
+        {
+          "e": "solicitud.documento_eliminado",
+          "t": "solicitudes/views.py:530 EliminarDocumento",
+          "d": "Eliminación lógica de un documento; en accesorios devuelve el valor a nvalornonegociado.",
+          "p": "asignacion_id, documento_id, nvalornonegociado_restante, ncantidaddocumentos",
+          "a": "Recalcular en hoja de control el monto solicitado y avisar a operaciones que la solicitud cambió de valor.",
+          "pri": "P2"
+        },
+        {
+          "e": "solicitud.documento_recuperado",
+          "t": "solicitudes/views.py:585 RecuperarDocumento",
+          "d": "Reincorporación de un documento previamente eliminado de la solicitud.",
+          "p": "asignacion_id, documento_id, cxautorizacion_ec",
+          "a": "Revalidar duplicidad contra operaciones.Documentos y contra otros factores antes de aceptar.",
+          "pri": "P2"
+        },
+        {
+          "e": "solicitud.eliminada",
+          "t": "solicitudes/views.py:663 EliminarAsignacion",
+          "d": "Reversa/eliminación de la negociación completa en estado Pendiente.",
+          "p": "asignacion_id, cxasignacion, cliente_id, nvalor, motivo",
+          "a": "Cerrar la oportunidad como perdida en el CRM y medir tasa de desistimiento por ejecutivo de ventas.",
+          "pri": "P2"
+        },
+        {
+          "e": "solicitud.duplicado_detectado",
+          "t": "solicitudes/views.py:1160-1164,1234 · forms.py:142-190",
+          "d": "La factura ya existe en operaciones o ya fue negociada en otro factor; se marca leliminado=True.",
+          "p": "documento_id, ctdocumento, ruc_emisor, operacion_origen, motivo, origen_solicitud",
+          "a": "ALERTA ANTIFRAUDE a Slack/email del comité: factura duplicada o negociada en otro factor, con bloqueo preventivo de la solicitud.",
+          "pri": "P0"
+        },
+        {
+          "e": "solicitud.correo_procesado",
+          "t": "solicitudes/webhooks.py:45 → servicios.py:365",
+          "d": "Resultado del webhook entrante que procesa un correo con adjuntos XML.",
+          "p": "from, subject, procesados, creadas, asignaciones[], empresa_id",
+          "a": "Responder automáticamente al correo del proveedor con el detalle de facturas cargadas y las que fallaron.",
+          "pri": "P1"
+        },
+        {
+          "e": "solicitud.correo_sin_cliente",
+          "t": "solicitudes/servicios.py:234-236 (ValueError)",
+          "d": "Llegó un XML de un remitente que no corresponde a ningún cliente registrado.",
+          "p": "sender_email, subject, n_adjuntos, empresa_id",
+          "a": "Crear tarea de alta express del solicitante y responder una plantilla pidiendo completar el registro.",
+          "pri": "P1"
+        },
+        {
+          "e": "solicitud.correo_xml_invalido",
+          "t": "solicitudes/servicios.py:402-403",
+          "d": "El adjunto no es un XML de factura válido o falla la validación XSD.",
+          "p": "sender_email, filename, error, empresa_id",
+          "a": "Notificar a mesa de ayuda con el archivo adjunto para reproceso manual.",
+          "pri": "P1"
+        },
+        {
+          "e": "solicitud.autorizacion_sri_formato_invalido",
+          "t": "solicitudes/forms.py:117-120",
+          "d": "El número de autorización no respeta el prefijo ddmmyyyy+01+RUC+2+serie+documento.",
+          "p": "documento_id, cxautorizacion_ec, ctdocumento, ruc_emisor",
+          "a": "Solicitar en automático el XML/RIDE correcto al cliente y bloquear la liquidación hasta su regularización.",
+          "pri": "P1"
+        },
+        {
+          "e": "solicitud.cheque_accesorio_agregado",
+          "t": "solicitudes/views.py:942-955",
+          "d": "Alta de cheque o letra que respalda la factura (tipo 'A' con accesorios).",
+          "p": "asignacion_id, banco, ctcuenta, ctcheque, ctgirador, propietario(C|D), ntotal, dvencimiento",
+          "a": "Agendar recordatorio de depósito y validar fondos/estado del cheque antes del desembolso.",
+          "pri": "P1"
+        },
+        {
+          "e": "solicitud.instruccion_pago_registrada",
+          "t": "solicitudes/views.py:274 InstruccionDePagoView",
+          "d": "El cliente registra la instrucción de pago del desembolso.",
+          "p": "asignacion_id, ctinstrucciondepago, cliente_id",
+          "a": "Enviar la instrucción al área de tesorería y precargar la orden de transferencia.",
+          "pri": "P1"
+        },
+        {
+          "e": "solicitud.pdf_generado",
+          "t": "solicitudes/views.py:1400 ImpresionSolicitud",
+          "d": "Generación del PDF de la solicitud (facturas puras o con accesorios).",
+          "p": "asignacion_id, tipo, url_documento, cliente_id",
+          "a": "Archivar en gestor documental (Drive/S3) y enviar copia al cliente y al ejecutivo comercial.",
+          "pri": "P2"
+        },
+        {
+          "e": "solicitud.exceso_temporal_generado",
+          "t": "solicitudes/models.py:268 Exceso_temporal (creado por el flujo de operaciones)",
+          "d": "El valor negociado supera el cupo disponible de la línea de factoring.",
+          "p": "exceso_id, cxexceso, cliente_id, asignacion_id, nvalor, disponible_linea, porcentaje_disponible",
+          "a": "Pedir aprobación extraordinaria de cupo al comité vía Slack con botones y plazo de respuesta.",
+          "pri": "P0"
+        },
+        {
+          "e": "solicitud.exceso_temporal_aceptado",
+          "t": "solicitudes/views.py:1355-1361 AceptarExcesoTemporal",
+          "d": "Exceso temporal autorizado (estado 'A').",
+          "p": "exceso_id, cliente_id, asignacion_id, nvalor, usuario",
+          "a": "Ampliar la línea temporalmente en el sistema, notificar al comité y agendar la revisión al vencimiento del exceso.",
+          "pri": "P1"
+        },
+        {
+          "e": "solicitud.exceso_temporal_rechazado",
+          "t": "solicitudes/views.py:1330-1338 RechazarExcesoTemporal",
+          "d": "Exceso rechazado; ejecuta el SP uspreversaliquidacionasignacion (estado 'R').",
+          "p": "exceso_id, asignacion_id, cliente_id, usuario, resultado_sp",
+          "a": "Reversar el desembolso en tesorería, liberar la línea y avisar al cliente el motivo del rechazo.",
+          "pri": "P1"
+        },
+        {
+          "e": "solicitud.aprobacion_solicitada",
+          "t": "api/slack.py:159-167 enviar_solicitud_aprobacion",
+          "d": "Se crea Solicitud_aprobacion en estado 'P' y se publica el PDF en Slack con botones.",
+          "p": "solicitud_id, asignacion_id, nivel_id, nmontominimo, naprobadores, canal_slack, monto_neto, url_pdf",
+          "a": "Temporizador de SLA con Niveles_aprobacion.nhorasrespuestamaxima: escalar al jefe si no hay respuesta, reenviar a las 2 h y registrar el tiempo de decisión.",
+          "pri": "P0"
+        },
+        {
+          "e": "solicitud.aprobada",
+          "t": "api/slack.py:241-246 manejar_interactividad (naprobaciones>=naprobadores → cxestado='A')",
+          "d": "Alcanzado el número de aprobadores requerido; la negociación queda Aceptada.",
+          "p": "solicitud_id, asignacion_id, aprobadores[], monto_neto, usuario_slack, tiempo_respuesta_horas",
+          "a": "Disparar la liquidación/desembolso, cerrar el hilo de Slack y avisar al cliente por WhatsApp que su operación fue aprobada.",
+          "pri": "P0"
+        },
+        {
+          "e": "solicitud.rechazada",
+          "t": "api/slack.py:255-262 (cxestado='R' + uspreversaliquidacionasignacion)",
+          "d": "Rechazo de la solicitud con reversa de liquidación.",
+          "p": "solicitud_id, asignacion_id, usuario_slack, motivo, resultado_sp",
+          "a": "Notificar al cliente con el motivo, liberar línea de factoring y registrar el motivo de rechazo en el CRM.",
+          "pri": "P0"
+        },
+        {
+          "e": "solicitud.aprobacion_reenviada",
+          "t": "api/slack.py:171-187 reenviar_solicitud_aprobacion (anterior 'X')",
+          "d": "Reenvío de una solicitud de aprobación vencida; la anterior se cancela.",
+          "p": "solicitud_id, asignacion_id, intento, canal_slack",
+          "a": "Medir cuántas veces se reenvía cada nivel y alertar a gerencia si un aprobador es cuello de botella.",
+          "pri": "P2"
+        },
+        {
+          "e": "solicitud.pdf_exceso_aprobacion",
+          "t": "api/slack.py:62-87 (ImpresionLiquidacion + files_upload_v2)",
+          "d": "PDF de liquidación subido a Slack como soporte de la aprobación.",
+          "p": "solicitud_id, url_pdf, canal_slack, ts_mensaje",
+          "a": "Respaldar cada PDF de aprobación en el repositorio documental con trazabilidad de quién aprobó qué.",
+          "pri": "P3"
+        }
+      ]
+    },
+    {
+      "id": "clientes",
+      "titulo": "Dominio 2 — Participantes: Clientes y Deudores",
+      "eventos": [
+        {
+          "e": "cliente.solicitante_creado",
+          "t": "solicitudes/views.py:135-149 ClienteCrearView · views.py:1099-1107",
+          "d": "Alta del solicitante (pre-cliente) que luego se formaliza como cliente.",
+          "p": "solicitante_id, cxcliente(RUC/cédula), ctnombre, email, celular, cxlocalidad, origen",
+          "a": "Onboarding automático: enviar welcome pack, formulario KYC y checklist de documentos por email y WhatsApp.",
+          "pri": "P1"
+        },
+        {
+          "e": "cliente.promovido_desde_solicitante",
+          "t": "clientes/views.py:709-747 DatosClientes",
+          "d": "El solicitante pasa a cliente formal (Datos_participantes + Datos_generales) y se sincroniza el registro original.",
+          "p": "cliente_id, solicitante_id, ctnombre, tipo_cliente(N|J), ejecutivo, dcontrato",
+          "a": "Iniciar onboarding completo: contrato digital, definición de línea y alta de cuentas bancarias con tareas asignadas.",
+          "pri": "P1"
+        },
+        {
+          "e": "cliente.actualizado",
+          "t": "clientes/views.py:721-726 DatosClientes (POST)",
+          "d": "Modificación de los datos maestros del cliente.",
+          "p": "cliente_id, campos_modificados, usuario, empresa_id",
+          "a": "Resincronizar el maestro de clientes con el ERP/CRM y versionar los cambios para auditoría.",
+          "pri": "P2"
+        },
+        {
+          "e": "cliente.persona_juridica_registrada",
+          "t": "clientes/views.py:618-644",
+          "d": "Alta de la ficha jurídica con representantes legales y vencimiento de sus cargos.",
+          "p": "cliente_id, razon_social, ruc, tipoempresa, representantes[{nombre,cargo,dvencimientocargo}]",
+          "a": "Agendar alertas de vencimiento de nombramiento del representante legal y pedir el nombramiento actualizado.",
+          "pri": "P1"
+        },
+        {
+          "e": "cliente.persona_natural_registrada",
+          "t": "clientes/views.py:648-674",
+          "d": "Alta de la ficha de persona natural.",
+          "p": "cliente_id, nombres, cxtipoid, sexo, dnacimiento, estado_civil, ctnombrenegocio",
+          "a": "Completar expediente digital y validar identidad (validación de cédula) antes de la primera operación.",
+          "pri": "P2"
+        },
+        {
+          "e": "cliente.linea_factoring_otorgada",
+          "t": "clientes/views.py:274-289 LineaNew",
+          "d": "Otorgamiento de la línea de factoring (cupo del cliente).",
+          "p": "cliente_id, nvalor, cxmoneda, lconrecurso, nreestructuracion",
+          "a": "Notificar al cliente el cupo aprobado con condiciones y carta de línea; actualizar el límite en el CRM.",
+          "pri": "P0"
+        },
+        {
+          "e": "cliente.linea_factoring_modificada",
+          "t": "clientes/views.py:300-319 LineaEdit · Linea_factoring_hist",
+          "d": "Cambio de la línea (incluye su histórico Linea_factoring_hist).",
+          "p": "cliente_id, valor_anterior, valor_nuevo, utilizado, disponible, porcentaje_disponible, usuario",
+          "a": "Si baja el cupo: alerta de riesgo al comité y comunicación formal al cliente. Si sube: oferta comercial automática.",
+          "pri": "P0"
+        },
+        {
+          "e": "cliente.linea_por_agotar",
+          "t": "clientes/models.py:302 Linea_Factoring.disponible/porcentaje_disponible",
+          "d": "Umbral configurable (p. ej. 90 %) de consumo de la línea de factoring.",
+          "p": "cliente_id, nvalor, utilizado, disponible, porcentaje_disponible, umbral",
+          "a": "Avisar al ejecutivo comercial para ampliar cupo y al cliente por WhatsApp; generar propuesta de ampliación.",
+          "pri": "P0"
+        },
+        {
+          "e": "deudor.registrado",
+          "t": "solicitudes/views.py:492-498,903-909,1207-1213 · clientes/views.py:1160-1165",
+          "d": "Alta automática o manual del deudor (Datos_compradores) al cargar una factura de un comprador nuevo.",
+          "p": "comprador_id, cxcomprador(RUC), ctnombre, cxclase, cxestado, cliente_relacionado",
+          "a": "Consulta automática de buró de crédito + listas de control (PEP/sanciones) + validación de RUC en el SRI antes de aceptar sus facturas.",
+          "pri": "P0"
+        },
+        {
+          "e": "deudor.estado_cambiado",
+          "t": "clientes/views.py:459-491 EstadoCompradorEdit (A Activo / X Bloqueado)",
+          "d": "Cambio de estado del deudor (bloqueo o reactivación).",
+          "p": "comprador_id, estado_anterior, estado_nuevo, clase, usuario, motivo",
+          "a": "Bloquear o habilitar en automático la negociación de facturas de ese deudor y avisar al comité de riesgo.",
+          "pri": "P0"
+        },
+        {
+          "e": "deudor.cupo_otorgado",
+          "t": "clientes/views.py:377-397 CuposCompradoresNew",
+          "d": "Otorgamiento de cupo por deudor (concentración).",
+          "p": "cupo_id, cliente_id, comprador_id, ncupocartera, cxtipocupo, cxmoneda, lsenotifica",
+          "a": "Enviar carta de cupo/notificación al deudor y recalcular la concentración de cartera por deudor.",
+          "pri": "P1"
+        },
+        {
+          "e": "deudor.cupo_modificado",
+          "t": "clientes/views.py:405-429 CuposCompradoresEdit",
+          "d": "Modificación del cupo por deudor.",
+          "p": "cupo_id, cliente_id, comprador_id, cupo_anterior, cupo_nuevo, utilizadocartera",
+          "a": "Recalcular concentración y alertar si un deudor supera el porcentaje máximo de la cartera.",
+          "pri": "P1"
+        },
+        {
+          "e": "deudor.cupo_eliminado",
+          "t": "clientes/views.py:1186 EliminarCupoComprador",
+          "d": "Retiro del cupo de un deudor.",
+          "p": "cupo_id, cliente_id, comprador_id",
+          "a": "Bloquear nuevas facturas de ese deudor y notificar al área comercial.",
+          "pri": "P2"
+        },
+        {
+          "e": "deudor.cupo_por_agotar",
+          "t": "clientes/models.py:242 Cupos_compradores (ncupocartera vs nutilizadocartera)",
+          "d": "Umbral configurable de consumo del cupo del deudor.",
+          "p": "cupo_id, comprador_id, ncupocartera, nutilizadocartera, porcentaje",
+          "a": "Alertar a riesgo y comercial; generar solicitud de ampliación de cupo al deudor.",
+          "pri": "P1"
+        },
+        {
+          "e": "cliente.cuenta_bancaria_registrada",
+          "t": "clientes/views.py:102-139 CuentasBancariasNew",
+          "d": "Alta de cuenta bancaria del cliente.",
+          "p": "cuenta_id, cliente_id, banco, cxcuenta, tipo_cuenta(A|C), lpropia, cxidpropietario, ctnombrepropietario",
+          "a": "Validar titularidad y estado de la cuenta; alerta antifraude si el titular no coincide con el RUC del cliente.",
+          "pri": "P1"
+        },
+        {
+          "e": "cliente.cuenta_bancaria_eliminada",
+          "t": "clientes/views.py:1100-1113 EliminarCuentaBancaria",
+          "d": "Baja de cuenta bancaria (arrastra Cuenta_transferencia).",
+          "p": "cuenta_id, cliente_id, banco, cxcuenta, usuario",
+          "a": "Auditoría de cambios bancarios: alerta al oficial de cumplimiento ante bajas inesperadas.",
+          "pri": "P1"
+        },
+        {
+          "e": "cliente.cuenta_transferencia_actualizada",
+          "t": "clientes/views.py:1147 ActualizarCuentaTransferencia",
+          "d": "Cambio de la cuenta destino por defecto para desembolsos.",
+          "p": "cliente_id, cuenta_id, banco, cxcuenta, cuenta_anterior",
+          "a": "ALERTA ANTIFRAUDE obligatoria: cambio de cuenta de desembolso exige doble confirmación (OTP) antes de liberar pagos.",
+          "pri": "P0"
+        },
+        {
+          "e": "deudor.cuenta_bancaria_registrada",
+          "t": "clientes/views.py:216-245 CuentasBancariasDeudorNew",
+          "d": "Alta de cuenta del deudor para recaudo.",
+          "p": "cuenta_id, comprador_id, banco, cxcuenta, tipo_cuenta",
+          "a": "Preparar domiciliación/recaudo y validar la cuenta contra el RUC del deudor.",
+          "pri": "P2"
+        },
+        {
+          "e": "cliente.datos_operativos_actualizados",
+          "t": "operaciones/views.py:799 DatosOperativos (+ Datos_operativos_hist)",
+          "d": "Cambio de tasas, porcentaje de anticipo, clase o estado operativo del cliente.",
+          "p": "cliente_id, nporcentajeanticipo, ntasacomision, ntasadescuentocartera, ntasagaoa, ntasamora, cxclase, cxestado",
+          "a": "Versionar el tarifario por cliente y notificar al ejecutivo comercial y a riesgo de las nuevas condiciones.",
+          "pri": "P1"
+        },
+        {
+          "e": "cliente.estado_operativo_cambiado",
+          "t": "operaciones/models.py:47 Datos_operativos.cxestado (A/B/I/P/L/X/C)",
+          "d": "Cambio de estado operativo: Activo, Baja, Inactivo, Pre legal, Legal, Bloqueado, Cartera castigada.",
+          "p": "cliente_id, estado_anterior, estado_nuevo, clase, usuario, motivo",
+          "a": "Bloquear o rehabilitar la operación; si pasa a Pre legal/Legal, abrir expediente con el abogado; si a Bloqueado, avisar a todo el equipo.",
+          "pri": "P0"
+        },
+        {
+          "e": "cliente.tasas_actualizadas_masivamente",
+          "t": "clientes/views.py:1521,1570 CambiarTasaGAOA_todos / CambiarTasaMora_todos",
+          "d": "Actualización masiva de tasas GAO/GAOA o de mora para todos los clientes.",
+          "p": "usuario, tasa_anterior, tasa_nueva, clientes_afectados, tipo_tasa",
+          "a": "Registrar el cambio como evento de gobierno de precios, notificar a gerencia y generar comunicación a los clientes afectados.",
+          "pri": "P1"
+        }
+      ]
+    },
+    {
+      "id": "operaciones",
+      "titulo": "Dominio 3 — Operaciones: Liquidación, Desembolso, Cartera y Pagarés",
+      "eventos": [
+        {
+          "e": "operacion.condiciones_calculadas",
+          "t": "operaciones/views.py:1061 DetalleCargosAsignacion → 1177 CalcularCargosPorDocumento",
+          "d": "Cálculo de anticipo, GAO, descuento de cartera e IVA por documento.",
+          "p": "asignacion_id, documento_id, nplazo, nporcentajeanticipo, ntasacomision, ntasadescuento, nanticipo, ngao, ndescuentodecartera, condicion_operativa_id",
+          "a": "Control de política: alertar si el anticipo supera el 80 % o si la tasa aplicada está fuera del rango autorizado para la clase del cliente.",
+          "pri": "P1"
+        },
+        {
+          "e": "operacion.totales_calculados",
+          "t": "operaciones/views.py:1358 SumaCargos",
+          "d": "Totalización de la liquidación: negociado, anticipo, GAO, DC, bases de IVA, IVA y neto.",
+          "p": "asignacion_id, nvalor, nanticipo, ngao, ndescuentodecartera, notroscargos, nbaseiva, nbasenoiva, niva, neto",
+          "a": "Enviar resumen de liquidación a Slack/WhatsApp del comité para visto bueno antes de desembolsar.",
+          "pri": "P2"
+        },
+        {
+          "e": "operacion.tasa_documento_editada",
+          "t": "operaciones/views.py:1427 EditarTasasDocumentoSolicitud · cobranzas/views.py:3915",
+          "d": "Override manual de tasas sobre un documento (excepción a la política de precios).",
+          "p": "documento_id, asignacion_id, tasas_anteriores, tasas_nuevas, usuario, motivo",
+          "a": "Registrar la excepción, notificar a riesgo y exigir justificación documentada si supera un umbral de desvío.",
+          "pri": "P0"
+        },
+        {
+          "e": "operacion.liquidada",
+          "t": "operaciones/views.py:1510 AceptarDocumentos → uspLiquidarAsignacion · cxestado='L'",
+          "d": "La negociación queda liquidada: se crean asignación, documentos definitivos, cargos, línea y contabilidad.",
+          "p": "asignacion_id, cxasignacion, cliente_id, nvalor, nanticipo, neto, ddesembolso, documentos[], resultado_sp",
+          "a": "Crear la tarjeta de operación en el CRM, agendar el desembolso y notificar a contabilidad para el registro del devengo.",
+          "pri": "P0"
+        },
+        {
+          "e": "operacion.liquidacion_reversada",
+          "t": "operaciones/views.py:1741 ReversaAceptacionAsignacion → uspreversaliquidacionasignacion",
+          "d": "Reversa de la liquidación de una asignación.",
+          "p": "asignacion_id, cliente_id, usuario, resultado_sp, excesos_eliminados",
+          "a": "Alerta a tesorería y contabilidad, y registro de auditoría con el motivo de la reversa.",
+          "pri": "P0"
+        },
+        {
+          "e": "operacion.desembolsada",
+          "t": "operaciones/views.py:697 DesembolsarAsignacion → uspdesembolsarasignacion · cxestado='P'",
+          "d": "Pago al cliente: crea Desembolsos y marca la asignación como Pagada.",
+          "p": "asignacion_id, desembolso_id, cliente_id, nvalor(neto), cxformapago, beneficiario, cuenta_origen, cuenta_destino, ddesembolso",
+          "a": "Avisar al cliente por WhatsApp y email con el comprobante y la fecha valor; actualizar el flujo de caja del día.",
+          "pri": "P0"
+        },
+        {
+          "e": "operacion.desembolso_efectivo",
+          "t": "operaciones/views.py:697 (cxformapago='EFE')",
+          "d": "Desembolso en efectivo.",
+          "p": "desembolso_id, cliente_id, nvalor, beneficiario, caja",
+          "a": "Exigir aprobación adicional por monto y registrar la entrega con evidencia (foto/firma) en el expediente.",
+          "pri": "P1"
+        },
+        {
+          "e": "operacion.desembolso_cheque_emitido",
+          "t": "operaciones/views.py:752 (cxformapago='CHE')",
+          "d": "Emisión de cheque para el desembolso.",
+          "p": "desembolso_id, ctbeneficiario, cxbeneficiario, cuenta_origen, nvalor, n_cheque",
+          "a": "Encolar la impresión del cheque, controlar la numeración y confirmar la entrega con acuse.",
+          "pri": "P1"
+        },
+        {
+          "e": "operacion.desembolso_transferencia_ejecutada",
+          "t": "operaciones/views.py:756 (cxformapago='TRA')",
+          "d": "Transferencia al cliente (usa Cuenta_transferencia del cliente).",
+          "p": "desembolso_id, cuenta_destino, banco, nvalor, cuenta_origen",
+          "a": "Generar el archivo de transferencia para el banco y enviar el comprobante al cliente.",
+          "pri": "P0"
+        },
+        {
+          "e": "operacion.desembolso_reversado",
+          "t": "operaciones/views.py:2629 ReversoDesembolsoAsignacion",
+          "d": "Reversa del desembolso de una asignación.",
+          "p": "desembolso_id, asignacion_id, cliente_id, nvalor, usuario",
+          "a": "Bloquear la conciliación bancaria, alertar a tesorería y verificar si el dinero ya salió de la cuenta.",
+          "pri": "P0"
+        },
+        {
+          "e": "operacion.desembolso_archivo_banco_generado",
+          "t": "operaciones/models.py:2025 Desembolsos.lgeneradoarchivobanco",
+          "d": "Se marca que se generó el archivo bancario del desembolso (hoy es solo un booleano).",
+          "p": "desembolso_id, nvalor, cxformapago, cuenta_origen, nombre_archivo",
+          "a": "Subir el archivo al repositorio, enviarlo al banco por canal seguro y registrar el acuse de recibo.",
+          "pri": "P2"
+        },
+        {
+          "e": "operacion.desembolso_contabilizado",
+          "t": "operaciones/models.py:2026-2029 Desembolsos.lcontabilizado / cxasiento",
+          "d": "El desembolso queda contabilizado (O2O con contabilidad.Diario_cabecera).",
+          "p": "desembolso_id, asiento_id, cxtransaccion, dcontabilizado, nvalor",
+          "a": "Cotejar con el ERP, verificar el cuadre del asiento y alertar si quedan desembolsos sin contabilizar al cierre del día.",
+          "pri": "P2"
+        },
+        {
+          "e": "operacion.anexo_generado",
+          "t": "operaciones/views.py:2351 GenerarAnexo (docxtpl)",
+          "d": "Generación del anexo/contrato en Word desde la plantilla del tipo de cliente.",
+          "p": "asignacion_id, anexo_id, cliente_id, deudor_id, total_deudor, url_documento",
+          "a": "Enviar a firma electrónica, archivar el documento firmado y verificar que el expediente quede completo.",
+          "pri": "P1"
+        },
+        {
+          "e": "operacion.cesion_facturas_notificada",
+          "t": "operaciones/views.py:2454-2457 (Anexos.lcesionfacturas → Documentos.lnotificaciongenerada)",
+          "d": "Se marca la cesión de facturas para notificar (hoy solo genera el .docx, sin envío ni acuse).",
+          "p": "asignacion_id, cliente_id, deudor_id, documentos[], fecha_cesion",
+          "a": "**Cerrar el ciclo legal**: enviar la notificación de cesión al deudor, exigir acuse de recibo, registrar la fecha y reintentar si no responde en 48 h.",
+          "pri": "P0"
+        },
+        {
+          "e": "operacion.anexos_marcados_impresos",
+          "t": "operaciones/views.py:2475 MarcarAnexoGenerado (lanexosimpresos)",
+          "d": "Se marca el expediente de anexos como impreso/completo.",
+          "p": "asignacion_id, usuario",
+          "a": "Checklist de expediente completo por operación y semáforo de operaciones con documentación pendiente.",
+          "pri": "P3"
+        },
+        {
+          "e": "operacion.pagare_importado",
+          "t": "operaciones/views.py:2503 ImportarOperacion (secuencia PAGARE)",
+          "d": "Reestructuración: alta del pagaré y sus cuotas a partir de XML.",
+          "p": "pagare_id, cxpagare, cliente_id, ncapital, ninteres, ntasainteres, nplazo, ncantidadcuotas, dvencimiento, cuotas[]",
+          "a": "Notificar al cliente el calendario de pagos y programar los recordatorios de cada cuota.",
+          "pri": "P1"
+        },
+        {
+          "e": "operacion.pagare_aceptacion_reversada",
+          "t": "operaciones/views.py:2615 ReversaAceptacionPagare",
+          "d": "Reversa de la aceptación del pagaré.",
+          "p": "pagare_id, asignacion_id, cliente_id, usuario",
+          "a": "Restaurar el cupo consumido, avisar a contabilidad y anular los recordatorios de cuotas.",
+          "pri": "P1"
+        },
+        {
+          "e": "operacion.linea_reestructuracion_consumida",
+          "t": "operaciones/views.py:2568-2572 (Linea_Factoring.nreestructuracion += total)",
+          "d": "Consumo de línea por reestructuración de cartera.",
+          "p": "cliente_id, total_reestructurado, nreestructuracion, disponible",
+          "a": "Alerta temprana de deterioro del cliente: si la reestructuración crece, escalar a riesgo y revisar la clase.",
+          "pri": "P1"
+        },
+        {
+          "e": "operacion.cuota_pagare_reprogramada",
+          "t": "operaciones/views.py:2683 ModificarCuota",
+          "d": "Cambio de la fecha de pago de una cuota del pagaré.",
+          "p": "cuota_id, ncuota, dfechapago_anterior, dfechapago_nueva, pagare_id, cliente_id",
+          "a": "Reprogramar los recordatorios de cobro y registrar la reprogramación como señal de riesgo de pago.",
+          "pri": "P1"
+        },
+        {
+          "e": "cartera.revision_generada",
+          "t": "operaciones/views.py:2787 NuevaRevisionCarteraJSON (Revision_cartera + detalle)",
+          "d": "Corrida de revisión de cartera con buckets de antigüedad y clase/estado sugeridos.",
+          "p": "revision_id, cliente_id, nvencido30, nvencido60, nvencidomas60, nvencido90, nvencidomas90, nporvencer, nprotesto, nlineaactual, ctclaseactual, ctestadoactual, jdetalle",
+          "a": "Generar el paquete de comité de riesgo (Excel + email) y proponer en automático el cambio de clase o de cupo.",
+          "pri": "P0"
+        },
+        {
+          "e": "cartera.revision_comentada",
+          "t": "operaciones/views.py:535 RevisionCarteraClienteEdit (ctcomentario)",
+          "d": "El analista comenta un cliente dentro de la revisión de cartera.",
+          "p": "revision_id, cliente_id, ctcomentario, usuario",
+          "a": "Abrir una tarea de seguimiento asignada al analista y notificar al oficial de crédito.",
+          "pri": "P2"
+        },
+        {
+          "e": "cartera.provision_calculada",
+          "t": "operaciones/views.py:3234 GeneraListaCarteraVencidaJSON → Documentos_Manager.provision_cargos",
+          "d": "Cálculo de la deuda provisionada: saldo anticipado, DC negociado, DC vencido, GAO adicional e IVA.",
+          "p": "documento_id, cliente_id, saldo_anticipado, dc_negociado, dc_vencido, gao_adicional, iva, deuda, dias_vencidos",
+          "a": "Generar la nota de débito y el aviso de mora al cliente por email/WhatsApp con el detalle de la deuda.",
+          "pri": "P0"
+        },
+        {
+          "e": "cartera.corte_historico_generado",
+          "t": "operaciones/views.py:2984 GuardarCorteHistorico → uspguardarcortehistorico",
+          "d": "Snapshot histórico de cartera (facturas, protestos, pagarés).",
+          "p": "corte_id, ctdescripcion, nvalorfacturas, nvalorprotestos, nvalorpagares, usuario, empresa_id",
+          "a": "Publicar el reporte ejecutivo mensual de cartera a dirección y archivar el corte como evidencia.",
+          "pri": "P1"
+        },
+        {
+          "e": "cartera.condicion_operativa_actualizada",
+          "t": "operaciones/views.py:1560,1707,2318",
+          "d": "Alta, modificación, borrado lógico o inactivación de tramos de condiciones operativas.",
+          "p": "condicion_id, ctdescripcion, tipo_factoring, tramos[{plazodesde,plazohasta,anticipo,tasadescuento,tasagao}], clases, lactiva",
+          "a": "Recalcular el simulador de tarifas y publicar internamente la nueva tabla de precios por plazo y clase.",
+          "pri": "P2"
+        },
+        {
+          "e": "cartera.documento_castigado",
+          "t": "operaciones/models.py:762 Documentos.lcastigada · estado cliente 'C'",
+          "d": "Castigo de cartera (flag existente pero sin flujo que lo asigne hoy).",
+          "p": "documento_id, cliente_id, nsaldo, motivo, usuario, acta_id",
+          "a": "Abrir expediente de castigo con acta de comité, registrar la provisión contable y separar la cartera en recuperación extrajudicial.",
+          "pri": "P2"
+        }
+      ]
+    },
+    {
+      "id": "cobranzas",
+      "titulo": "Dominio 4 — Cobranzas, Cheques y Protestos",
+      "eventos": [
+        {
+          "e": "cobranza.factura_por_vencer",
+          "t": "cobranzas/webhooks.py:13 facturas_por_vencer · views.py:77 DocumentosPorVencerView",
+          "d": "Facturas con vencimiento dentro del rango de días solicitado (vencimiento efectivo = dvencimiento + ndiasprorroga).",
+          "p": "empresa_id, dias, clientes[{nombre, celular, facturas[{numero, fecha_vencimiento, saldo}]}]",
+          "a": "Secuencia de recordatorios escalonada a 7/3/1 días al cliente y al deudor por WhatsApp con enlace de pago.",
+          "pri": "P0"
+        },
+        {
+          "e": "cobranza.factura_vencida",
+          "t": "cobranzas/views.py:50 DocumentosVencidosView · operaciones/models.py:793 vencimiento()",
+          "d": "Factura que superó su fecha de vencimiento efectivo con saldo pendiente.",
+          "p": "documento_id, ctdocumento, cliente_id, deudor_id, nsaldo, dvencimiento, dias_vencidos",
+          "a": "Registrar la gestión de cobro, asignar al cobrador y disparar el primer contacto automático.",
+          "pri": "P0"
+        },
+        {
+          "e": "cobranza.cheque_por_depositar",
+          "t": "cobranzas/views.py:104,1218 ChequesADepositarView",
+          "d": "Cheque accesorio próximo a vencer y pendiente de depósito.",
+          "p": "accesorio_id, cliente_id, banco, ctcuenta, ctcheque, ctgirador, ntotal, dvencimiento",
+          "a": "Avisar a tesorería y agendar el depósito; generar la papeleta y confirmar acreditación.",
+          "pri": "P0"
+        },
+        {
+          "e": "cobranza.cheque_depositado",
+          "t": "cobranzas/views.py:1262,1311 DepositoCheques → uspDepositarChequesAccesorios",
+          "d": "Depósito de cheques accesorios en cuenta de la empresa o cuenta conjunta.",
+          "p": "ids_cheques[], cuenta_destino(CE|CC), ddeposito, total, usuario",
+          "a": "Conciliar con el extracto bancario y confirmar la acreditación por cada cheque depositado.",
+          "pri": "P1"
+        },
+        {
+          "e": "cobranza.cheque_canjeado",
+          "t": "cobranzas/views.py:3371 CanjeDeCheque",
+          "d": "Canje de un cheque por otro (Cheques_canjeados + nuevo ChequesAccesorios).",
+          "p": "accesorio_original, accesorio_nuevo, ctmotivocanje, banco, ntotal, dvencimiento",
+          "a": "Llevar el historial de cheques rechazados o canjeados por deudor y ajustar su score de comportamiento.",
+          "pri": "P1"
+        },
+        {
+          "e": "cobranza.accesorio_quitado",
+          "t": "cobranzas/views.py:3471 QuitarAccesorio",
+          "d": "Retiro de un cheque accesorio de la cartera (pasa a Cheques_quitados).",
+          "p": "accesorio_id, cliente_id, ctmotivoquitado, nsaldo",
+          "a": "Notificar el cambio de garantía al comité y reconvertir el saldo en factura pendiente de cobro.",
+          "pri": "P1"
+        },
+        {
+          "e": "cobranza.documento_prorrogado",
+          "t": "cobranzas/views.py:3864 Prorroga (ndiasprorroga / ncontadorprorrogas)",
+          "d": "Prórroga del vencimiento de un documento.",
+          "p": "documento_id, cliente_id, ndiasprorroga, dvencimiento_nuevo, ncontadorprorrogas, usuario",
+          "a": "Reproyectar el flujo de caja de cobros y registrar la prórroga como señal de riesgo de pago.",
+          "pri": "P1"
+        },
+        {
+          "e": "cobranza.ampliacion_plazo_registrada",
+          "t": "cobranzas/views.py:3990 AceptarAmpliacionDePlazo → uspAmpliacionDePlazo",
+          "d": "Ampliación formal de plazo con comisión, descuento de cartera e IVA, y nota de débito tipo 'A'.",
+          "p": "ampliacion_id, cliente_id, dampliacionhasta, ncomision, ndescuentodecartera, niva, nvalor, documentos[], nota_debito_id",
+          "a": "Emitir y enviar la nota de débito/factura de la comisión de prórroga y notificar al cliente las nuevas condiciones.",
+          "pri": "P0"
+        },
+        {
+          "e": "cobranza.ampliacion_plazo_revertida",
+          "t": "cobranzas/views.py:4362 ReversaAmpliacion → uspReversarAmpliacionDePlazo",
+          "d": "Reversa de una ampliación de plazo.",
+          "p": "ampliacion_id, cliente_id, usuario, resultado_sp",
+          "a": "Revertir la nota de débito, restaurar el vencimiento anterior y avisar a contabilidad.",
+          "pri": "P1"
+        },
+        {
+          "e": "cobranza.registrada",
+          "t": "cobranzas/views.py:1157,1205 AceptarCobranza → uspAceptarCobranzaCartera",
+          "d": "Registro de una cobranza de cartera con aplicación por documento.",
+          "p": "cobranza_id, cxcobranza, cliente_id, cxformapago, nvalor, dcobranza, nsobrepago, documentos[{documento_id, nvalorcobranza, nretenciones, ndiasacondonar}], cxcheque, cuenta_deposito, cuenta_conjunta",
+          "a": "Avisar a contabilidad y al canal de Slack de cobranzas; actualizar la cartera y el disponible de la línea en tiempo real.",
+          "pri": "P0"
+        },
+        {
+          "e": "cobranza.confirmada",
+          "t": "cobranzas/views.py:1641 ConfirmarCobranza (cxestado='C')",
+          "d": "Confirmación de la cobranza registrada (requerida para TRA/CHE/DEP).",
+          "p": "cobranza_id, cxcobranza, nvalor, ddeposito, cxcuentadeposito, usuario",
+          "a": "Liberar la cobranza para liquidación y disparar la conciliación bancaria del depósito.",
+          "pri": "P1"
+        },
+        {
+          "e": "cobranza.confirmacion_revertida",
+          "t": "cobranzas/views.py:1777 ReversaConfirmacionCobranza",
+          "d": "Reversa de la confirmación de una cobranza (también desactiva el movimiento de cuenta conjunta).",
+          "p": "cobranza_id, cxcobranza, tenia_cuenta_conjunta, usuario, motivo",
+          "a": "ALERTA de control interno: cobranza confirmada y luego revertida es un patrón típico de fraude; notificar a auditoría.",
+          "pri": "P0"
+        },
+        {
+          "e": "cobranza.cobranza_cuenta_conjunta",
+          "t": "cuentasconjuntas/views.py:115,343 AceptarConfirmacion → uspConfirmarCobranzaCuentaConjunta",
+          "d": "Confirmación de cobranza depositada en cuenta conjunta, con transferencia y/o cargo.",
+          "p": "tipo_operacion, cobranza_id, transferencia{nvalor, ndevolucion, cuenta_origen, cuenta_destino, dmovimiento}, cargo{nvalor, ctmotivo, dmovimiento}",
+          "a": "Notificar al cliente el depósito en su cuenta compartida con el detalle de transferencia y cargos aplicados.",
+          "pri": "P1"
+        },
+        {
+          "e": "cobranza.protesto_registrado",
+          "t": "cobranzas/views.py:2064,2089 AceptarProtesto → uspRegistroProtesto",
+          "d": "Protesto de cheque: crea Cheques_protestados, Documentos_protestados y la nota de débito; la cobranza pasa a 'P'.",
+          "p": "protesto_id, cobranza_id, cheque_id, cliente_id, deudor_id, dprotesto, motivoprotesto, lresponsabilidadgirador, nvalor, nvalorcartera, documentos[]",
+          "a": "Abrir caso legal en automático, notificar al deudor el protesto por WhatsApp/carta y alertar al comité de riesgo.",
+          "pri": "P0"
+        },
+        {
+          "e": "cobranza.protesto_revertido",
+          "t": "cobranzas/views.py:3345,3360 ReversaProtesto → uspReversaProtesto",
+          "d": "Reversa de un protesto registrado.",
+          "p": "protesto_id, cheque_id, usuario, resultado_sp",
+          "a": "Cerrar el caso legal, revertir las alertas y auditar el motivo de la reversa.",
+          "pri": "P1"
+        },
+        {
+          "e": "cobranza.recuperacion_protesto_registrada",
+          "t": "cobranzas/views.py:2241,2290 AceptarRecuperacion → uspAceptarRecuperacionProtesto",
+          "d": "Recuperación de cartera protestada (pago total o parcial).",
+          "p": "recuperacion_id, cxrecuperacion, cliente_id, nvalor, nsobrepago, protestos[{protesto_id, nvalorrecuperacion, nsaldoaldia, ndiasacondonar}]",
+          "a": "Actualizar la cartera protestada, avisar al deudor y al abogado, y evaluar el cierre del caso.",
+          "pri": "P0"
+        },
+        {
+          "e": "cobranza.protesto_saldado",
+          "t": "cobranzas/views.py:2420-2433 (Cheques_protestados.nsaldocartera → 0)",
+          "d": "Cheque protestado completamente saldado.",
+          "p": "protesto_id, cheque_id, cliente_id, nvalorcartera, dultimacobranza",
+          "a": "Cerrar el caso y liberar la provisión; reconocer al deudor que regularizó su situación.",
+          "pri": "P2"
+        },
+        {
+          "e": "cobranza.liquidacion_generada",
+          "t": "cobranzas/views.py:1913,1944 Liquidacion → uspLiquidarCobranzas",
+          "d": "Liquidación de cobranzas/recuperaciones con GAO, GAOA, DC, DC vencido, retenciones, bajas, IVA y neto.",
+          "p": "liquidacion_id, cliente_id, cxtipooperacion(R|C), nvuelto, nsobrepago, ngao, ngaoa, ndescuentodecartera, ndescuentodecarteravencido, nretenciones, nbajas, notroscargos, nbaseiva, nbasenoiva, niva, nneto, jcobranzas, jotroscargos",
+          "a": "Enviar el PDF de liquidación al cliente por email y WhatsApp, y registrar la rentabilidad por cliente en el tablero.",
+          "pri": "P0"
+        },
+        {
+          "e": "cobranza.liquidacion_en_negativo",
+          "t": "cobranzas/views.py:646 LiquidacionesEnNegativoPendientesView (Notas_debito nsaldo>0)",
+          "d": "Liquidación en negativo: el cliente queda debiendo cargos (cobranza pendiente o nota de débito).",
+          "p": "nota_debito_id, cxnotadebito, cliente_id, cxtipooperacion, nvalor, nsaldo, dnotadebito",
+          "a": "Cobrar la diferencia con nota de débito o debitar la cuenta conjunta, con aviso previo al cliente.",
+          "pri": "P0"
+        },
+        {
+          "e": "cobranza.liquidacion_desembolsada",
+          "t": "cobranzas/views.py:1963-2038 DesembolsarCobranzas (ldesembolsada=True, cxestado='P')",
+          "d": "Pago al cliente del neto de la liquidación de cobranzas, creando operaciones.Desembolsos tipo 'C'.",
+          "p": "liquidacion_id, desembolso_id, cliente_id, neto, cxformapago, beneficiario, cuenta, ddesembolso",
+          "a": "Avisar al cliente el pago del excedente y programar la transferencia bancaria.",
+          "pri": "P0"
+        },
+        {
+          "e": "cobranza.desembolso_revertido",
+          "t": "cobranzas/views.py:4323 ReversoDesembolsoLiquidacion",
+          "d": "Reversa del desembolso de una liquidación (bloqueado si está contabilizada o facturada).",
+          "p": "liquidacion_id, desembolso_id, cliente_id, nvalor, usuario",
+          "a": "Alertar a tesorería y controlar que no exista un pago duplicado.",
+          "pri": "P1"
+        },
+        {
+          "e": "cobranza.cobranza_revertida",
+          "t": "cobranzas/views.py:2847 ReversaCobranza (enruta por prefijo CC/C/R/P)",
+          "d": "Reversa de una cobranza según su tipo (cargos, cartera, recuperación o pagaré).",
+          "p": "cobranza_id, cxcobranza, tipo_operacion, usuario, motivo, resultado_sp",
+          "a": "Notificar la corrección al cliente, ajustar el asiento contable y registrar el evento de auditoría.",
+          "pri": "P0"
+        },
+        {
+          "e": "cobranza.liquidacion_revertida",
+          "t": "cobranzas/views.py:2827,2838 ReversaLiquidacion → uspReversaLiquidarCobranzas",
+          "d": "Reversa de una liquidación de cobranzas.",
+          "p": "liquidacion_id, cliente_id, usuario, resultado_sp",
+          "a": "Reprocesar la liquidación, avisar a contabilidad y bloquear el desembolso asociado.",
+          "pri": "P1"
+        },
+        {
+          "e": "cobranza.cargos_registrados",
+          "t": "cobranzas/views.py:3079 AceptarCobranzaNotasDebito → uspAceptarCobranzaCargos",
+          "d": "Cobranza de notas de débito / otros cargos.",
+          "p": "cobranza_id, cxcobranza, cliente_id, nvalor, nsobrepago, cargos[{nota_debito_id, nvalor}], cuenta_deposito",
+          "a": "Cerrar las notas de débito pendientes y conciliar contra el movimiento bancario.",
+          "pri": "P1"
+        },
+        {
+          "e": "cobranza.cuota_pagare_cobrada",
+          "t": "cobranzas/views.py:4273 AceptarCobranzaCuota → uspAceptarCobranzaCuota",
+          "d": "Cobro de una cuota de pagaré.",
+          "p": "pagare_cabecera_id, cuota_id, cliente_id, nvalorcobranza, nvaloraplicainteres, nsaldoaldia",
+          "a": "Confirmar al cliente el pago recibido y reprogramar el recordatorio de la siguiente cuota.",
+          "pri": "P1"
+        },
+        {
+          "e": "cobranza.dias_condonados",
+          "t": "cobranzas/views.py:925,1735 CobranzaPorCondonar / DatosDiasACondonar",
+          "d": "Condonación de días de mora con registro de usuario autorizante.",
+          "p": "cobranza_id, liquidacion_id, ndiasacondonar, cxusuariocondona, valor_condonado, tipo_operacion",
+          "a": "Control de excepciones: exigir aprobación de supervisor por encima de un monto y medir la condonación acumulada por cobrador.",
+          "pri": "P0"
+        },
+        {
+          "e": "cuentaconjunta.debito_registrado",
+          "t": "cuentasconjuntas/views.py:186,384 DebitoBancarioEdit / DebitoBancarioSinCobranza",
+          "d": "Débito a la cuenta conjunta del cliente (con o sin cobranza asociada).",
+          "p": "cuentabancaria_id, cliente_id, dmovimiento, nvalor, ctmotivo, nota_debito_id, cargos_detalle",
+          "a": "Avisar al cliente el débito aplicado y su saldo pendiente, y conciliar contra la nota de débito.",
+          "pri": "P1"
+        },
+        {
+          "e": "cuentaconjunta.nota_debito_eliminada",
+          "t": "cuentasconjuntas/views.py:431 EliminarNotaDebito",
+          "d": "Eliminación de una nota de débito en cuenta conjunta.",
+          "p": "nota_debito_id, cliente_id, nvalor, usuario, motivo",
+          "a": "Reversar el movimiento contable y auditar la eliminación con doble visto bueno.",
+          "pri": "P1"
+        },
+        {
+          "e": "cuentaconjunta.transferencia_creada",
+          "t": "cuentasconjuntas/views.py:497 DatosTransferencia",
+          "d": "Transferencia de la cuenta conjunta hacia una cuenta de la empresa.",
+          "p": "transferencia_id, cuentabancaria_id, cuenta_empresa, nvalor, ndevolucion, dmovimiento",
+          "a": "Conciliar la transferencia con el extracto bancario y registrar la devolución al cliente.",
+          "pri": "P1"
+        },
+        {
+          "e": "cuentaconjunta.transferencia_eliminada",
+          "t": "cuentasconjuntas/views.py:459 EliminarTransferencia",
+          "d": "Eliminación de una transferencia de cuenta conjunta.",
+          "p": "transferencia_id, cliente_id, nvalor, usuario",
+          "a": "Auditoría de movimientos eliminados y verificación bancaria de que el dinero no salió.",
+          "pri": "P1"
+        },
+        {
+          "e": "cobranza.gestion_cobro_abierta",
+          "t": "cobranzas/views.py:4490 Registra_gestion_cobro (cxestado='P')",
+          "d": "Apertura de una gestión de cobro sobre la revisión de cartera de un cliente/deudor.",
+          "p": "gestion_id, revision_cartera_detalle_id, cxtipoparticipante(C|D), cliente_id, ctnumerowhatsapp, buckets_vencido, nporvencer, nprotesto, nlineaactual, ctclaseactual, ctestadoactual",
+          "a": "Asignar la tarea al cobrador en el turno, notificar por Slack y calcular el SLA de primer contacto.",
+          "pri": "P0"
+        },
+        {
+          "e": "cobranza.gestion_cobro_contactada",
+          "t": "api/twilio_service.py:51-74 (Gestion_cobro 'P'→'A')",
+          "d": "Primer contacto efectivo por WhatsApp sobre la gestión de cobro.",
+          "p": "gestion_id, whatsapp_destino, ctsid, ctstatus, ctbody, tiempo_hasta_contacto_horas",
+          "a": "Medir tiempo de respuesta del cobrador y programar el siguiente contacto si no hay respuesta del deudor.",
+          "pri": "P1"
+        },
+        {
+          "e": "cobranza.whatsapp_recibido",
+          "t": "api/twilio_service.py:100-133 webhook_whatsapp_twilio",
+          "d": "Mensaje entrante del deudor o cliente en el hilo de cobranza.",
+          "p": "ctfrom, ctto, ctbody, ctsid, ctstatus, ctdirection, gestion_cobro_id, jcontexto",
+          "a": "Clasificar la intención con IA (promesa de pago, disputa, consulta, número equivocado) y crear la tarea o respuesta correspondiente.",
+          "pri": "P0"
+        }
+      ]
+    },
+    {
+      "id": "contabilidad",
+      "titulo": "Dominio 5 — Contabilidad, Facturación Electrónica y Cierre",
+      "eventos": [
+        {
+          "e": "contabilidad.factura_venta_generada",
+          "t": "contabilidad/views.py:1458 GenerarFactura → uspGenerarFacturaContabilidad",
+          "d": "Generación de factura de venta al cliente por comisiones, cargos y otros conceptos.",
+          "p": "factura_id, cxnumerofactura, cxtipooperacion(LA|LC|AP|VF|CP), cliente_id, demision, nbasenoiva, nbaseiva, niva, nvalor, operacion, asiento_id",
+          "a": "Emitir PDF/RIDE, enviar por email al cliente y encolar la generación del XML electrónico.",
+          "pri": "P0"
+        },
+        {
+          "e": "contabilidad.factura_al_vencimiento_generada",
+          "t": "contabilidad/views.py:2340 GenerarFacturasAlVencimientoDiario → uspGenerarFacturasAlVencimiento",
+          "d": "Emisión de la factura al vencimiento de la operación.",
+          "p": "factura_id, documento_id, cliente_id, nvalor, niva, cxtipooperacion",
+          "a": "Avisar al deudor y programar el cobro de esa factura; adjuntar el XML autorizado en el mismo correo.",
+          "pri": "P1"
+        },
+        {
+          "e": "contabilidad.xml_electronico_generado",
+          "t": "contabilidad/sri.py:15 GeneraXMLFactura (ldocumentoelectronicogenerado)",
+          "d": "Generación del XML de factura con clave de acceso (módulo 11). Hoy no se firma ni se envía al SRI.",
+          "p": "factura_id, clave_acceso, ambiente, punto_emision, cxtipodocumento, nvalor",
+          "a": "**Completar la cadena**: firmar XAdES, enviar a Recepción del SRI y hacer seguimiento hasta la autorización.",
+          "pri": "P0"
+        },
+        {
+          "e": "contabilidad.comprobante_recibido_sri",
+          "t": "api/sri.py:180 consulta_estado_comprobante_sri (estado AUTORIZADO / rechazado)",
+          "d": "Resultado de la consulta del comprobante en el SRI (AutorizacionComprobantesOffline).",
+          "p": "clave_acceso, estado, numero_autorizacion, fecha_autorizacion, ambiente, mensajes[], comprobante_xml",
+          "a": "Si AUTORIZADO: enviar PDF+XML al deudor y archivar en el repositorio. Si RECHAZADO: alerta a contabilidad y reintento.",
+          "pri": "P0"
+        },
+        {
+          "e": "contabilidad.comprobante_retencion_recibido",
+          "t": "Retenciones hoy se digitan a mano (solicitudes/forms.py:50,61-62)",
+          "d": "Evento propuesto: detección/recepción de comprobante de retención del deudor desde el correo.",
+          "p": "cliente_id, deudor_id, numero_retencion, fecha, nretencioniva, nretencionrenta, clave_acceso, documento_relacionado",
+          "a": "Leer el comprobante, aplicarlo automáticamente contra la factura y generar el asiento de retención.",
+          "pri": "P0"
+        },
+        {
+          "e": "contabilidad.asiento_generado",
+          "t": "contabilidad/views.py:1809 AsientoDiario",
+          "d": "Registro de un asiento contable manual (Diario_cabecera + Transaccion).",
+          "p": "diario_id, cxtransaccion, dcontabilizado, ctconcepto, nvalor, n_lineas, empresa_id, usuario",
+          "a": "Sincronizar con el ERP y validar el cuadre debe/haber con alerta si el asiento queda descuadrado.",
+          "pri": "P2"
+        },
+        {
+          "e": "contabilidad.asiento_reversado",
+          "t": "contabilidad/views.py:2151 ReversarAsiento",
+          "d": "Reversa de un asiento contable.",
+          "p": "diario_id, cxtransaccion, usuario, concepto, motivo",
+          "a": "Notificar a auditoría y registrar el evento en un log inmutable con el asiento original.",
+          "pri": "P1"
+        },
+        {
+          "e": "contabilidad.asientos_cobranzas_generados",
+          "t": "contabilidad/views.py:2271 → uspGenerarAsientosCobranzas",
+          "d": "Generación masiva de asientos de cobranzas y cuotas de pagaré.",
+          "p": "ids[], usuario, n_asientos, total, empresa_id",
+          "a": "Conciliar contra bancos y alertar descuadres entre lo cobrado y lo contabilizado.",
+          "pri": "P1"
+        },
+        {
+          "e": "contabilidad.asientos_protestos_generados",
+          "t": "contabilidad/views.py:2486",
+          "d": "Generación masiva de asientos de cheques protestados.",
+          "p": "ids[], n_asientos, total_protestado, usuario",
+          "a": "Activar el flujo legal/judicial y actualizar el score del deudor moroso.",
+          "pri": "P1"
+        },
+        {
+          "e": "contabilidad.asientos_recuperaciones_generados",
+          "t": "contabilidad/views.py:2610",
+          "d": "Generación masiva de asientos de recuperaciones.",
+          "p": "ids[], n_asientos, total_recuperado, usuario",
+          "a": "Cerrar los casos de protesto recuperados y liberar provisiones.",
+          "pri": "P2"
+        },
+        {
+          "e": "contabilidad.asientos_transferencias_generados",
+          "t": "contabilidad/views.py:2545",
+          "d": "Generación masiva de asientos de transferencias de cuentas conjuntas.",
+          "p": "ids[], n_asientos, total, cuenta_destino, usuario",
+          "a": "Verificar la acreditación bancaria real y conciliar la devolución al cliente.",
+          "pri": "P2"
+        },
+        {
+          "e": "contabilidad.comprobante_egreso_generado",
+          "t": "contabilidad/views.py:1616 GenerarEgreso → GenerarEgresoDiario:1757",
+          "d": "Emisión de comprobante de egreso (caja/banco) con forma de pago.",
+          "p": "egreso_id, cxformapago(EFE|CHE|TRA|TRN|DEB), cxbeneficiario, ctbeneficiario, nvalor, ctcheque, cuenta_bancaria, asiento_id",
+          "a": "Enviar la orden de pago al banco, imprimir/enviar el cheque y registrar el acuse del beneficiario.",
+          "pri": "P1"
+        },
+        {
+          "e": "contabilidad.mes_cerrado",
+          "t": "contabilidad/views.py:2291 CierreDeMes → uspBloqueoMesContabilidad · Control_meses.lbloqueado",
+          "d": "Cierre del mes contable (bloqueo del período).",
+          "p": "año, mes, usuario, empresa_id, n_asientos, total_debe, total_haber",
+          "a": "Congelar el período, generar el paquete de estados financieros (balance, P&G, libro mayor) y enviarlo a gerencia y al contador externo.",
+          "pri": "P1"
+        },
+        {
+          "e": "contabilidad.mes_desbloqueado",
+          "t": "contabilidad/views.py:2629 DesbloqueoDeMes",
+          "d": "Desbloqueo de un mes contable previamente cerrado.",
+          "p": "año, mes, usuario, empresa_id, motivo",
+          "a": "Alerta de control interno a auditoría: reapertura de período cerrado siempre debe justificarse.",
+          "pri": "P0"
+        },
+        {
+          "e": "contabilidad.saldos_actualizados",
+          "t": "contabilidad/views.py:2290,2628 (Saldos / Saldos_gyp)",
+          "d": "Actualización de saldos por cuenta y año / saldos de pérdidas y ganancias.",
+          "p": "año, cuenta_id, ndebe, nhaber, usuario",
+          "a": "Publicar el tablero financiero diario y alertar variaciones anómalas por cuenta.",
+          "pri": "P3"
+        },
+        {
+          "e": "contabilidad.analisis_ia_factura_completado",
+          "t": "api/views.py:329 InvoiceAIAnalysis.objects.create (OpenAI gpt-4.1)",
+          "d": "Análisis de riesgo de una factura/documento con IA: nivel BAJO/MEDIO/ALTO y recomendación.",
+          "p": "invoice_id, risk_level, analysis_text, recommendation, cliente_id, raw_response",
+          "a": "Si risk_level=ALTO: Slack a riesgo, bloquear la asignación y exigir doble aprobación; si BAJO, auto-avanzar.",
+          "pri": "P0"
+        }
+      ]
+    },
+    {
+      "id": "plataforma",
+      "titulo": "Dominio 6 — Plataforma, Configuración, Seguridad y Comercial (Premium)",
+      "eventos": [
+        {
+          "e": "plataforma.empresa_datos_actualizados",
+          "t": "empresa/views.py:501 DatosEmpresaEdit",
+          "d": "Cambio de datos de la empresa: RUC, razón social, ambiente SRI, IVA, logos.",
+          "p": "empresa_id, campos_modificados, ambientesri, nporcentajeiva, ctruccompania, usuario",
+          "a": "Versionar el cambio y alertar si se modifica el RUC o el ambiente SRI (impacta facturación electrónica).",
+          "pri": "P1"
+        },
+        {
+          "e": "plataforma.tipo_factoring_configurado",
+          "t": "empresa/views.py:44-95 (ltipofactoringconfigurado=True)",
+          "d": "Alta/edición de tipos de factoring con sus políticas y cuentas.",
+          "p": "tipo_factoring_id, cttipofactoring, ctabreviacion, cxmoneda, ndiasgracia, nporcentajeretencionenfactura, politicas{}, usuario",
+          "a": "Validar que existan las cuentas contables asociadas y avisar a contabilidad antes de permitir operar con ese tipo.",
+          "pri": "P2"
+        },
+        {
+          "e": "plataforma.tasa_factoring_configurada",
+          "t": "empresa/views.py:131-195 (ltasasfactoringconfiguradas=True)",
+          "d": "Alta/edición de tasas de factoring (flat, periodicidad, IVA, sobre anticipo).",
+          "p": "tasa_id, cxtasa, lflat, ndiasperiocidad, lcargaiva, lsobreanticipo, usuario",
+          "a": "Recalcular los simuladores de precio y publicar la tabla vigente al equipo comercial.",
+          "pri": "P2"
+        },
+        {
+          "e": "plataforma.otro_cargo_configurado",
+          "t": "empresa/views.py:557-630 OtroCargoNew/Edit",
+          "d": "Alta/edición de otros cargos (con IVA, en liquidación de asignación o de cobranza).",
+          "p": "cargo_id, ctabreviacion, nvalor, lcargaiva, lcargaenliquidacionasignacion, lcargaenliquidacioncobranza, lactivo",
+          "a": "Avisar a contabilidad y comercial del cambio de cargos y actualizar las cotizaciones del CRM.",
+          "pri": "P2"
+        },
+        {
+          "e": "plataforma.cuenta_bancaria_empresa_actualizada",
+          "t": "empresa/views.py:291-352 CuentaBancariaNew/Edit",
+          "d": "Alta/edición de cuenta bancaria de la empresa (incluye ruta de archivo bancario).",
+          "p": "cuenta_id, banco, cxcuenta, ctrutaarchivobanco, limprimecheque, lactiva, usuario",
+          "a": "Alerta de cumplimiento y actualización de la configuración de pagos masivos.",
+          "pri": "P1"
+        },
+        {
+          "e": "plataforma.funcionario_creado",
+          "t": "empresa/views.py:723-768 FuncionariosNew/Edit",
+          "d": "Alta/edición de funcionario con esquema de comisión (%, flat, periodicidad, base).",
+          "p": "funcionario_id, cxfuncionario, ctfuncionario, nporcentajecomision, lcomisionflat, nperiocidadcomision, lcomisionsobregao, lcomisionsobredescuentocartera",
+          "a": "Alta en el cálculo de comisiones, notificación al funcionario y publicación del tarifario comercial.",
+          "pri": "P2"
+        },
+        {
+          "e": "plataforma.punto_emision_creado",
+          "t": "empresa/views.py:448-499 PuntoEmisionNew/Edit",
+          "d": "Alta/edición de punto de emisión (establecimiento, secuencias, generación XML).",
+          "p": "puntoemision_id, cxestablecimiento, cxpuntoemision, nultimasecuencia, lgeneracionxmldocumentoelectronico, lactiva",
+          "a": "Verificar la disponibilidad de secuenciales en el SRI y alertar cuando se agoten.",
+          "pri": "P2"
+        },
+        {
+          "e": "plataforma.usuario_creado",
+          "t": "bases/views.py:215-292 user_editar / user_password",
+          "d": "Creación o edición de usuario del sistema y cambio de contraseña.",
+          "p": "user_id, username, email, grupos[], es_nuevo, empresa_id, usuario_ejecutor",
+          "a": "Onboarding del usuario (invitación, guía de permisos) y alerta de seguridad al administrador.",
+          "pri": "P2"
+        },
+        {
+          "e": "plataforma.permiso_denegado",
+          "t": "bases/views.py:47-56 SinPrivilegios.handle_no_permission",
+          "d": "Intento de acceso a una vista sin permiso o sin sesión válida.",
+          "p": "user_id, username, ruta, metodo, ip, user_agent, empresa_id",
+          "a": "Detección de accesos indebidos: 3+ denegaciones en 10 min dispara alerta de seguridad y bloqueo temporal.",
+          "pri": "P1"
+        },
+        {
+          "e": "plataforma.cierre_automatico_sin_actividad",
+          "t": "Propuesto — hoy no existe scheduler ni cierre de período automático",
+          "d": "Evento de plataforma: cierre diario/mensual de procesos que hoy son botones manuales.",
+          "p": "empresa_id, proceso(cierre_mes|facturas_vencimiento|asientos|provisiones|recordatorios), resultado, duracion_seg",
+          "a": "Orquestar desde n8n el disparo de los procesos manuales (CierreDeMes, GenerarAsientos*, GenerarFacturasAlVencimiento, recordatorios) y reportar el resultado.",
+          "pri": "P0"
+        },
+        {
+          "e": "plataforma.tarea_programada_fallida",
+          "t": "Propuesto — orquestación n8n sobre endpoints hoy manuales",
+          "d": "Fallo de una tarea automatizada de negocio (conciliación, recordatorios, cierre).",
+          "p": "proceso, error, timestamp, empresa_id, intento, url_endpoint",
+          "a": "Reintento con backoff, escalamiento a soporte y registro del incidente.",
+          "pri": "P0"
+        },
+        {
+          "e": "plataforma.disponibilidad_servicio",
+          "t": "Propuesto — health check (hoy no existe LOGGING ni health-check)",
+          "d": "Monitoreo de disponibilidad del sistema y de las integraciones (SRI, OpenAI, Slack, WhatsApp).",
+          "p": "servicio, estado, latencia_ms, codigo_http, timestamp",
+          "a": "Aviso de caída a soporte, apertura de incidente y comunicación al cliente si supera el SLA.",
+          "pri": "P1"
+        },
+        {
+          "e": "premium.onboarding_cliente_iniciado",
+          "t": "Propuesto — paquete premium",
+          "d": "Inicio del onboarding automatizado de un nuevo cliente de factoring.",
+          "p": "cliente_id, plan, ejecutivo, checklist[{documento, estado, fecha_limite}], canal",
+          "a": "Secuencia de bienvenida multicanal, recolección de documentos KYC, firma electrónica y activación de línea.",
+          "pri": "P0"
+        },
+        {
+          "e": "premium.kyc_cliente_completado",
+          "t": "Propuesto — paquete premium (hoy no hay KYC/AML)",
+          "d": "Resultado de la verificación KYC/AML: identidad, RUC en el SRI, listas de control, PEP y beneficiario final.",
+          "p": "cliente_id, ruc, resultado, listas_consultadas[], coincidencias[], nivel_riesgo, evidencia_url",
+          "a": "Aprobación o rechazo automático del alta, apertura de caso de cumplimiento y archivado de la evidencia.",
+          "pri": "P0"
+        },
+        {
+          "e": "premium.score_deudor_calculado",
+          "t": "Propuesto — hoy no existe scoring de deudor",
+          "d": "Cálculo periódico del score de comportamiento de pago de cada deudor.",
+          "p": "comprador_id, score, categoria(A|B|C|D), dias_promedio_pago, protestos_historicos, cheques_rechazados, monto_anual, recomendacion",
+          "a": "Actualizar el cupo sugerido por deudor y alertar a riesgo cuando el score cruza un umbral.",
+          "pri": "P1"
+        },
+        {
+          "e": "premium.conciliacion_bancaria_completada",
+          "t": "Propuesto — hoy no existe conciliación bancaria",
+          "d": "Resultado de la conciliación automática entre extracto bancario y movimientos del sistema.",
+          "p": "cuenta_bancaria_id, periodo, movimientos_banco, movimientos_sistema, conciliados, diferencias[{fecha, valor, referencia, sugerencia}], archivo_url",
+          "a": "Notificar diferencias a tesorería con el detalle y el archivo sugerido de ajuste.",
+          "pri": "P0"
+        },
+        {
+          "e": "premium.promesas_pago_seguimiento",
+          "t": "Propuesto — hoy Gestion_cobro no tiene fecha/monto comprometido",
+          "d": "Registro y seguimiento de la promesa de pago acordada con el deudor.",
+          "p": "comprador_id, gestion_id, monto_comprometido, fecha_compromiso, estado(cumplida|incumplida|pendiente), cobrador",
+          "a": "Recordatorio al deudor 1 día antes del compromiso y escalamiento automático si incumple.",
+          "pri": "P0"
+        },
+        {
+          "e": "premium.sla_operativo_incumplido",
+          "t": "Propuesto — usa campos existentes: Niveles_aprobacion.nhorasrespuestamaxima",
+          "d": "Incumplimiento de un SLA operativo (aprobación, primer contacto de cobranza, desembolso).",
+          "p": "proceso, referencia_id, sla_horas, horas_transcurridas, responsable, nivel_escalamiento",
+          "a": "Escalar al jefe del responsable por Slack/WhatsApp y registrar el incumplimiento en el tablero de productividad.",
+          "pri": "P0"
+        },
+        {
+          "e": "premium.reporte_ejecutivo_enviado",
+          "t": "Propuesto — cortes y revisiones ya existen pero no se distribuyen",
+          "d": "Distribución programada de reportes ejecutivos (cartera, mora, producción, rentabilidad).",
+          "p": "reporte(cartera|mora|produccion|rentabilidad), periodo, destinatarios[], url_pdf, url_excel, kpis{}",
+          "a": "Envío automático semanal/mensual a gerencia y accionistas con KPIs y comparativo contra el período anterior.",
+          "pri": "P1"
+        }
+      ]
+    }
+  ]
+}

@@ -1510,31 +1510,37 @@ from empresa.correos import enviar_correo_liquidacion
 
 def EnviarCorreoLiquidacionAsignacion(request, solicitud_id):
     # envía al cliente el PDF de liquidación de su solicitud ya aceptada.
-    # es un envío de mejor esfuerzo: cualquier error se registra pero no
-    # interrumpe la respuesta al usuario
+    # La logica vive en .servicios para que tambien pueda invocarse desde una
+    # automatizacion (n8n) sin sesion de usuario.
+    from .servicios import enviar_liquidacion
+
+    id_empresa = request.usuario_empresa
+    if id_empresa is None:
+        return HttpResponse(
+            "No se pudo enviar correo de liquidación: el usuario no tiene "
+            "empresa asignada", status=403)
+
     try:
-        solicitud = ModelosSolicitud.Asignacion.objects\
-            .filter(id=solicitud_id).first()
-        if not solicitud:
-            return HttpResponse(f"No se pudo enviar correo de liquidación: no se encontró la asignación generada {solicitud_id}", status=404)
-
-        id_empresa = request.usuario_empresa
-
-        nombre_archivo, pdf_bytes, error = generar_pdf_liquidacion(
-            request, solicitud.id, id_empresa)
-        if error:
-            return HttpResponse("No se pudo generar el PDF para el correo de liquidación: " + error)
-
-        cliente = solicitud.cxcliente
-        ok, error = enviar_correo_liquidacion(
-            id_empresa.empresa, cliente.ctemail if cliente else None
-            , cliente.ctnombre if cliente else ''
-            , solicitud.cxasignacion
-            , nombre_archivo, pdf_bytes)
-        if not ok:
-            return HttpResponse(f"No se pudo enviar el correo de liquidación: {error}")
+        resultado = enviar_liquidacion(
+            solicitud_id, id_empresa.empresa, request.user,
+            forzar=False)
     except Exception as error:
-        return HttpResponse(f"Error inesperado al enviar correo de liquidación: {error}")
+        return HttpResponse(
+            f"Error inesperado al enviar correo de liquidación: {error}")
+
+    if not resultado['ok']:
+        return HttpResponse(
+            "No se pudo enviar el correo de liquidación: "
+            + str(resultado['error']))
+
+    if resultado['ya_enviada']:
+        return HttpResponse(
+            f"El correo de liquidación de {resultado['cxasignacion']} ya había "
+            f"sido enviado a {resultado['destinatario']}")
+
+    return HttpResponse(
+        f"Correo de liquidación enviado a {resultado['destinatario']} "
+        f"({resultado['pdf']})")
 
 def AceptarDocumentos(request):
     # ejecuta un store procedure 

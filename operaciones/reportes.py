@@ -126,24 +126,86 @@ def ImpresionAsignacion(request, asignacion_id):
     response['Content-Disposition'] = 'inline; filename="asgn' + str(asignacion_id) + '.pdf"'
     return response
 
+def _request_para_reporte(empresa, user=None):
+    """Construye un request minimo para renderizar un PDF fuera de una vista.
+
+    Las plantillas de reporte usan {{ user.usuario_empresa.get.empresa... }} para
+    el logo, de modo que WeasyTemplateResponse necesita un request con un
+    usuario que pertenezca a la empresa. Al generar el PDF desde un webhook (n8n)
+    no hay sesion, asi que se fabrica uno con los mismos datos que ya se usan en
+    el contexto (empresa, usuario).
+    """
+    from django.test import RequestFactory
+
+    request = RequestFactory().get('/')
+    request.empresa = empresa
+    request.usuario_empresa = _usuario_empresa_de(empresa, user)
+    request.user = user if user is not None else _usuario_de(empresa)
+    return request
+
+
+def _usuario_empresa_de(empresa, user=None):
+    """Devuelve el Usuario_empresa de la empresa (el del usuario si se indica)."""
+    consulta = Usuario_empresa.objects.filter(empresa=empresa)
+    if user is not None:
+        propio = consulta.filter(user=user).first()
+        if propio:
+            return propio
+    return consulta.first()
+
+
+def _usuario_de(empresa):
+    """Primer usuario asociado a la empresa, para el contexto de la plantilla."""
+    vinculo = Usuario_empresa.objects.filter(empresa=empresa)\
+        .select_related('user').first()
+    return vinculo.user if vinculo else None
+
+
 def generar_pdf_liquidacion(request, asignacion_id, id_empresa):
     # devuelve (nombre_archivo, bytes_pdf, error) del PDF de liquidación de una
-    # asignación (id de operaciones.Asignacion), para adjuntarlo al correo
+    # asignación (id de operaciones.Asignacion), para adjuntarlo al correo.
+    # `id_empresa` es un objeto Usuario_empresa cuando se invoca desde una vista;
+    # ver generar_pdf_liquidacion_para_empresa para invocarlo sin sesion.
     asignacion = SolicitudModels.Asignacion.objects\
         .filter(id = asignacion_id).first()
     if not asignacion:
         return None, None, "no encontró asignación"
 
-    response, error = _armar_respuesta_pdf_liquidacion(request, asignacion, id_empresa)
+    response, error = _armar_respuesta_pdf_liquidacion(
+        request, asignacion, id_empresa)
     if error:
         return None, None, error
 
     nombre_archivo = asignacion.cxasignacion + '.pdf'
     return nombre_archivo, response.rendered_content, None
 
+
+def generar_pdf_liquidacion_para_empresa(asignacion_id, empresa, user=None):
+    """Igual que generar_pdf_liquidacion pero sin depender de una sesion.
+
+    `empresa` es una instancia de bases.Empresas. Pensado para el envio
+    automatico del correo de liquidacion desde una automatizacion (n8n).
+    """
+    request = _request_para_reporte(empresa, user)
+    usuario_empresa = request.usuario_empresa or _usuario_empresa_de(empresa)
+    if usuario_empresa is None:
+        # _armar_respuesta... usa id_empresa.empresa; se construye un objeto
+        # minimo para no romper la firma existente.
+        class _Vinculo:
+            pass
+
+        vinculo = _Vinculo()
+        vinculo.empresa = empresa
+        vinculo.user = user
+        usuario_empresa = vinculo
+
+    return generar_pdf_liquidacion(request, asignacion_id, usuario_empresa)
+
+
 def _armar_respuesta_pdf_liquidacion(request, asignacion, id_empresa):
     # construye la WeasyTemplateResponse compartida entre la vista de pantalla
-    # y la generación del PDF para el correo de liquidación
+    # y la generación del PDF para el correo de liquidación.
+    # Devuelve (response, error): en caso de error el primer elemento es None.
     documentos = {}
     
     if asignacion.cxtipo==FACTURAS_PURAS:
@@ -168,14 +230,14 @@ def _armar_respuesta_pdf_liquidacion(request, asignacion, id_empresa):
     gao = Tasas_factoring.objects\
         .filter(cxtasa="GAO", empresa = id_empresa.empresa).first()
     if not gao:
-        return HttpResponse("no encontró tasa de gao en el sistema."
-                +" Registre el cargo con código GAO")
+        return None, ("no encontró tasa de gao en el sistema."
+                      " Registre el cargo con código GAO")
 
     dc = Tasas_factoring.objects\
         .filter(cxtasa="DCAR", empresa = id_empresa.empresa).first()
     if not dc:
-        return HttpResponse("no encontró tasa de descuento de "
-                +"catera en el sistema.Registre el cargo con código DCAR")
+        return None, ("no encontró tasa de descuento de "
+                      "cartera en el sistema. Registre el cargo con código DCAR")
 
     dic_gao  = {'imprimir':gao.limprimeenreporte
         , 'descripcion': gao.ctdescripcionenreporte

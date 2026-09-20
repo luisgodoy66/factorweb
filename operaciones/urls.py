@@ -1,5 +1,7 @@
 from django.urls import URLPattern, path
 
+from .webhooks import webhook_enviar_correo_liquidacion
+
 from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     DatosOperativos, AsignacionesConsulta, PagaresView,SumaCargos, \
     DetalleCargosAsignacion, GeneraResumenCarteraNegociadaJSON, \
@@ -192,6 +194,10 @@ urlpatterns = [
          , ImpresionResumenAsignaciones, name='resumen_asignaciones'),
     path('enviarcorreoliquidacionasignacion/<int:asignacion_id>', 
          EnviarCorreoLiquidacionAsignacion, name='enviar_correo_liquidacion_asignacion'),
+#  webhooks para automatizaciones (n8n). Requieren X-Margarita-Key de empresa.
+    path('webhook/enviar-correo-liquidacion/',
+         webhook_enviar_correo_liquidacion,
+         name='webhook_enviar_correo_liquidacion'),
 #  anexos
     path("anexosactivos/<tipo_cliente>", ConsultaAnexosActivos),
     path('anexoscliente/<cliente_id>/<solicitud_id>'

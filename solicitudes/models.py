@@ -138,6 +138,12 @@ class Asignacion(ClaseModelo):
                                             , on_delete=models.CASCADE)
     nmayorplazonegociacion = models.SmallIntegerField(default=0
                                                       , null=True)
+    # 19-sep-26 l.g.  Marca de idempotencia del correo de liquidacion enviado al
+    # cliente. Es independiente de Documentos.lnotificaciongenerada, que se usa
+    # para la notificacion de cesion de facturas (Anexos.lcesionfacturas).
+    lliquidacionnotificada = models.BooleanField(default=False
+        , help_text='Indica que ya se envio al cliente el correo de liquidacion')
+    dliquidacionnotificada = models.DateTimeField(null=True, blank=True)
     
     objects = Asignacion_Manager()
 
