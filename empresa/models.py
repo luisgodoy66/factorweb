@@ -83,10 +83,10 @@ class Datos_participantes(ClaseModelo):
     def __str__(self):
         return self.ctnombre
 
-    def save(self):
+    def save(self, *args, **kwargs):
         self.ctnombre=self.ctnombre.upper()
         # self.ctobjetosocial=self.ctobjetosocial.upper()
-        return super(Datos_participantes, self).save()
+        return super(Datos_participantes, self).save(*args, **kwargs)
     
     def tipo_identificacion(self):
         return dict(self.TIPOS_DE_ID).get(self.cxtipoid, 'Desconocido')
@@ -128,7 +128,7 @@ class Tipos_factoring(ClaseModelo):
     lesnegociada = models.BooleanField(default= True)
     lcobramorabc = models.BooleanField(default= False)
     nporcentajeretencionenfactura = models.DecimalField(max_digits = 5, decimal_places= 2, default=0, null=True)
-    ctinicialesliquidacioncobranza = models.CharField(max_length=3, blank=True)
+    ctinicialesliquidacioncobranza = models.CharField(max_length=3, blank=True, default='LC-')
     lacumulagaoaatasagao = models.BooleanField(default= False)
     lfactoringproveedores = models.BooleanField(default= False)
     ctinicialesasignacion = models.CharField(max_length=3, blank=True, default='OP-')
@@ -140,12 +140,12 @@ class Tipos_factoring(ClaseModelo):
     def __str__(self):
         return self.ctabreviacion
     
-    def save(self):
+    def save(self, *args, **kwargs):
         self.ctinicialesliquidacioncobranza=self.ctinicialesliquidacioncobranza.upper()
         self.ctinicialesasignacion=self.ctinicialesasignacion.upper()
         # self.cxtipofactoring=self.cxtipofactoring.upper()
         self.cttipofactoring=self.cttipofactoring.upper()
-        return super(Tipos_factoring, self).save()
+        return super(Tipos_factoring, self).save(*args, **kwargs)
 
 class Puntos_emision(ClaseModelo):
     cxestablecimiento = models.CharField(max_length=3)
@@ -176,10 +176,10 @@ class Movimientos_maestro(ClaseModelo):
     def __str__(self):
         return f"{self.ctmovimiento}"
 
-    def save(self):
+    def save(self, *args, **kwargs):
         self.cxmovimiento=self.cxmovimiento.upper()
         self.cxmovimientopadre=self.cxmovimientopadre.upper()
-        return super(Movimientos_maestro, self).save()
+        return super(Movimientos_maestro, self).save(*args, **kwargs)
 
 class Tasas_factoring(ClaseModelo):
     cxtasa = models.CharField(max_length=4)
@@ -197,10 +197,10 @@ class Tasas_factoring(ClaseModelo):
     def __str__(self):
         return f"{self.movimiento.ctmovimiento}"
     
-    def save(self):
+    def save(self, *args, **kwargs):
         self.cxtasa=self.cxtasa.upper()
         # self.cttasa=self.cttasa.upper()
-        return super(Tasas_factoring, self).save()
+        return super(Tasas_factoring, self).save(*args, **kwargs)
 
     def periodicidad(self):
         if self.ndiasperiocidad is None:
@@ -232,10 +232,10 @@ class Otros_cargos(ClaseModelo):
     def __str__(self):
         return self.ctabreviacion
     
-    def save(self):
+    def save(self, *args, **kwargs):
         # self.ctcargo=self.ctcargo.upper()
         self.ctabreviacion=self.ctabreviacion.upper()
-        return super(Otros_cargos, self).save()
+        return super(Otros_cargos, self).save(*args, **kwargs)
    
 class Tipos_empresas(ClaseModelo):
     cttipoempresa = models.CharField(max_length=60, blank=True)

@@ -30,6 +30,22 @@ def _leer_cuerpo(request):
     return datos, None
 
 
+def _a_booleano(valor):
+    return str(valor).strip().lower() in ('1', 'true', 'yes', 'si', 'sí', 'on')
+
+
+def _a_entero(valor, por_defecto, minimo=None, maximo=None):
+    try:
+        numero = int(valor)
+    except (TypeError, ValueError):
+        numero = por_defecto
+    if minimo is not None:
+        numero = max(minimo, numero)
+    if maximo is not None:
+        numero = min(maximo, numero)
+    return numero
+
+
 def _normalizar_ids(valor):
     """Admite un id suelto, una cadena separada por comas o una lista."""
     if valor is None:
@@ -53,19 +69,23 @@ def _normalizar_ids(valor):
 @csrf_exempt
 @require_POST
 def webhook_enviar_correo_liquidacion(request):
-    """Envia el correo de liquidacion al cliente de una o varias solicitudes.
+    """Envia al cliente el correo de liquidacion, con el PDF adjunto.
 
-    Cuerpo admitido:
+    Modo puntual (una o varias solicitudes concretas):
         {"asignacion_id": 158}
         {"asignacion_ids": [158, 159]}
         {"asignacion_ids": "158,159"}
         {"asignacion_id": 158, "forzar": true}
 
-    Responde con el detalle por solicitud para que n8n pueda ramificar y
-    registrar. Es idempotente por defecto: reenviar no duplica el correo salvo
-    que se pida `forzar`.
+    Modo lote: la empresa decide que notificar, sin que la automatizacion tenga
+    que consultar la base de datos.
+        {"lote": true, "limite": 50}
+        {"lote": true, "desde": "2026-09-01", "hasta": "2026-09-30"}
+
+    Es idempotente por defecto: reenviar no duplica el correo salvo que se pida
+    `forzar`. Devuelve el detalle por solicitud para que n8n pueda ramificar.
     """
-    from .servicios import enviar_liquidacion
+    from .servicios import enviar_liquidacion, solicitudes_pendientes_de_notificar
 
     datos, error = _leer_cuerpo(request)
     if error:
@@ -86,17 +106,38 @@ def webhook_enviar_correo_liquidacion(request):
              'error': 'La clave usada no identifica una empresa'},
             status=403)
 
-    ids = _normalizar_ids(datos.get('asignacion_ids')
-                          if datos.get('asignacion_ids') is not None
-                          else datos.get('asignacion_id'))
-    if not ids:
-        return JsonResponse(
-            {'ok': False,
-             'error': 'Se requiere asignacion_id o asignacion_ids'},
-            status=400)
+    forzar = _a_booleano(datos.get('forzar'))
+    modo_lote = _a_booleano(datos.get('lote'))
 
-    forzar = str(datos.get('forzar', '')).strip().lower() in (
-        '1', 'true', 'yes', 'si', 'sí', 'on')
+    if modo_lote:
+        ids = solicitudes_pendientes_de_notificar(
+            empresa,
+            limite=_a_entero(datos.get('limite'), 50, minimo=1, maximo=500),
+            desde=datos.get('desde'),
+            hasta=datos.get('hasta'),
+        )
+        if not ids:
+            return JsonResponse({
+                'ok': True,
+                'empresa': empresa.ctnombre,
+                'modo': 'lote',
+                'solicitados': 0,
+                'enviados': 0,
+                'ya_enviadas': 0,
+                'fallidos': 0,
+                'resultados': [],
+                'mensaje': 'No hay solicitudes pendientes de notificar',
+            })
+    else:
+        ids = _normalizar_ids(datos.get('asignacion_ids')
+                              if datos.get('asignacion_ids') is not None
+                              else datos.get('asignacion_id'))
+        if not ids:
+            return JsonResponse(
+                {'ok': False,
+                 'error': ('Se requiere asignacion_id, asignacion_ids o '
+                           'lote=true')},
+                status=400)
 
     resultados = []
     for asignacion_id in ids:
@@ -123,6 +164,7 @@ def webhook_enviar_correo_liquidacion(request):
     return JsonResponse({
         'ok': fallidos == 0,
         'empresa': empresa.ctnombre,
+        'modo': 'lote' if modo_lote else 'puntual',
         'solicitados': len(ids),
         'enviados': enviados,
         'ya_enviadas': ya_enviadas,

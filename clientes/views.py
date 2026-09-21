@@ -10,7 +10,7 @@ from .models import Cuenta_transferencia, Datos_generales \
     , Personas_juridicas, Personas_naturales, Linea_Factoring \
     , Datos_compradores, Cupos_compradores, Cuentas_bancarias \
     , Datos_operativos_hist
-from solicitudes.models import Clientes as Solicitante \
+from solicitudes.models import Solicitantes \
     , Asignacion as Asignacion
 from bases.models import Usuario_empresa
 from empresa.models import Datos_participantes, Localidades\
@@ -423,21 +423,21 @@ class CuposCompradoresEdit(SinPrivilegios, generic.UpdateView):
         return kwargs
 
 class ClientesSolicitudesView(SinPrivilegios, generic.ListView):
-    model = Solicitante
+    model = Solicitantes
     template_name = "clientes/listaclientessolicitudes.html"
     context_object_name='consulta'
     login_url = 'bases:login'
-    permission_required="solicitudes.view_clientes"
+    permission_required="solicitudes.view_solicitantes"
 
     def get_queryset(self):
         id_empresa = self.request.usuario_empresa
 
-        solicitantes = Solicitante.objects\
+        solicitantes = Solicitantes.objects\
             .filter(empresa = id_empresa.empresa).values_list('cxcliente')
         clientes = Datos_generales.objects\
             .filter(empresa = id_empresa.empresa).values_list('cxcliente__cxparticipante')
 
-        return Solicitante.objects\
+        return Solicitantes.objects\
             .filter(cxcliente__in = solicitantes.difference(clientes)
                     , empresa = id_empresa.empresa)
 
@@ -720,12 +720,12 @@ def DatosClientes(request, participante_id=None, solicitante_id=None, tab=None):
                     datoscliente.save()
 
                 # buscar si se creó previamante un registro como solicitante
-                solicitante = Solicitante.objects\
+                solicitante = Solicitantes.objects\
                     .filter(cxcliente = datosparticipante.cxparticipante,
                             empresa = id_empresa.empresa).first()
                 # si no existe se crea
                 if not solicitante:
-                    solicitante = Solicitante(
+                    solicitante = Solicitantes(
                         cxcliente = datosparticipante.cxparticipante,
                         ctnombre = datosparticipante.ctnombre,
                         cttelefono1 = datosparticipante.cttelefono1,
@@ -803,7 +803,7 @@ def DatosClientes(request, participante_id=None, solicitante_id=None, tab=None):
 
             # si viene desde la opción de arrastre desde solicitud
             if solicitante_id:
-                solicitante = Solicitante.objects.filter(pk=solicitante_id).first()
+                solicitante = Solicitantes.objects.filter(pk=solicitante_id).first()
                 if solicitante:
                     e={ 
                         'cxparticipante':solicitante.cxcliente,

@@ -20,6 +20,34 @@ logger = logging.getLogger(__name__)
 ESTADOS_NOTIFICABLES = ('L', 'A')
 
 
+def solicitudes_pendientes_de_notificar(empresa, limite=50, desde=None,
+                                        hasta=None):
+    """Ids de solicitudes liquidables que aun no fueron notificadas al cliente.
+
+    Permite que la automatizacion pida "lo pendiente de esta empresa" sin tener
+    que consultar la base de datos. Ordena de la mas antigua a la mas reciente,
+    de modo que un limite bajo vaya vaciando el atraso en lugar de dejar las
+    mas viejas postergadas indefinidamente.
+
+    `desde` y `hasta` filtran por la fecha de desembolso (formato AAAA-MM-DD).
+    """
+    consulta = AsignacionSolicitud.objects.filter(
+        empresa=empresa,
+        leliminado=False,
+        cxestado__in=ESTADOS_NOTIFICABLES,
+        lliquidacionnotificada=False,
+    )
+
+    if desde:
+        consulta = consulta.filter(ddesembolso__gte=desde)
+    if hasta:
+        consulta = consulta.filter(ddesembolso__lte=hasta)
+
+    return list(
+        consulta.order_by('ddesembolso', 'id').values_list('id', flat=True)[:limite]
+    )
+
+
 def enviar_liquidacion(asignacion_id, empresa, user=None, forzar=False):
     """Envia al cliente el PDF de liquidacion de una solicitud.
 
@@ -70,7 +98,9 @@ def enviar_liquidacion(asignacion_id, empresa, user=None, forzar=False):
                '/'.join(ESTADOS_NOTIFICABLES)))
         return resultado
 
-    cliente = asignacion.cxcliente
+    # 20-sep-26 l.g.    tomar el cliente directamente desde asignacion.cliente no al solicitante
+    # cliente = asignacion.cxcliente
+    cliente = asignacion.cliente
     if not cliente:
         resultado['error'] = 'La solicitud no tiene cliente asociado'
         return resultado
@@ -96,7 +126,7 @@ def enviar_liquidacion(asignacion_id, empresa, user=None, forzar=False):
     ok, error_envio = enviar_correo_liquidacion(
         empresa,
         destinatario,
-        cliente.ctnombre or '',
+        cliente.cxcliente.ctnombre or '',
         asignacion.cxasignacion,
         nombre_pdf,
         pdf_bytes,

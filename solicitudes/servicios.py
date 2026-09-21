@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from django.db import transaction
 
 from empresa.models import Tipos_factoring, Contador, Datos_participantes
-from solicitudes.models import Asignacion, Clientes, Documentos
+from solicitudes.models import Asignacion, Solicitantes, Documentos
 from clientes.models import Datos_compradores
 
 
@@ -186,13 +186,13 @@ def parsear_factura_xml(xml_content, xsd_path=None):
     }
 
 
-def encontrar_cliente_por_remitente(sender_email, empresa=None):
-    """Busca el cliente por el email del remitente usando ctemail2."""
+def encontrar_solicitante_por_remitente(sender_email, empresa=None):
+    """Busca el solicitante por el email del remitente usando ctemail2."""
     email = _normalizar_email(sender_email)
     if not email:
         return None
 
-    qs = Clientes.objects.filter(leliminado=False)
+    qs = Solicitantes.objects.filter(leliminado=False)
     if empresa is not None:
         qs = qs.filter(empresa=empresa)
 
@@ -231,9 +231,9 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
     if not xml_contents:
         raise ValueError('No se recibieron facturas XML')
 
-    cliente = encontrar_cliente_por_remitente(sender_email, empresa=empresa)
-    if cliente is None:
-        raise ValueError('No se encontró un cliente para el remitente {}'.format(sender_email))
+    solicitante = encontrar_solicitante_por_remitente(sender_email, empresa=empresa)
+    if solicitante is None:
+        raise ValueError('No se encontró un solicitante para el remitente {}'.format(sender_email))
 
     if tipo_factoring is None:
         tipo_factoring = Tipos_factoring.objects.filter(
@@ -244,22 +244,22 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
 
     datos_facturas = [parsear_factura_xml(xml, xsd_path=xsd_path) for xml in xml_contents]
     total_lote = sum((datos['total'] for datos in datos_facturas), Decimal('0'))
-    ruc = cliente.cxcliente
+    ruc = solicitante.cxcliente
 
     with transaction.atomic():
-        # Buscar una asignación existente para el cliente y tipo de 
+        # Buscar una asignación existente para el solicitante y tipo de 
         # factoring, si no existe, crear una nueva
-        print(f"Buscando asignación existente para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.id}")
+        print(f"Buscando asignación existente para solicitante {solicitante.cxcliente} y tipo de factoring {tipo_factoring.id}")
         asignacion = Asignacion.objects.filter(
             empresa=empresa,
-            cxcliente=cliente,
+            cxcliente=solicitante,
             cxtipo='F',
             cxestado='P',
             leliminado=False,
         ).first()
 
         if asignacion is None:
-            print(f"No se encontró asignación existente, creando una nueva para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.id}")
+            print(f"No se encontró asignación existente, creando una nueva para solicitante {solicitante.cxcliente} y tipo de factoring {tipo_factoring.id}")
             secuencia = Contador.objects\
                 .filter(
                     empresa=empresa,
@@ -279,7 +279,7 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
             numero_solicitud = INICIAL_SOLICITUD + str(secuencia.nultimonumero).zfill(5)
             
             asignacion = Asignacion.objects.create(
-                cxcliente=cliente,
+                cxcliente=solicitante,
                 cxtipofactoring=tipo_factoring,
                 cxtipo='F',
                 nvalor=Decimal('0'),
@@ -288,7 +288,7 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
                 empresa=empresa,
                 cxasignacion=numero_solicitud,
             )
-            print(f"Asignación creada con número {numero_solicitud} para cliente {cliente.cxcliente} y tipo de factoring {tipo_factoring.id}")
+            print(f"Asignación creada con número {numero_solicitud} para solicitante {solicitante.cxcliente} y tipo de factoring {tipo_factoring.id}")
 
         documentos = [
             _crear_documento_desde_datos(datos, asignacion, empresa, user, dias)
@@ -348,7 +348,7 @@ def crear_asignacion_desde_xmls(xml_contents, sender_email, empresa, user, tipo_
             print(f"Documento {documento.ctserie1}-{documento.ctserie2}-{documento.ctdocumento} procesado y asociado al comprador {comprador.id}")
 
     return {
-        'cliente': cliente,
+        'solicitante': solicitante,
         'asignacion': asignacion,
         'documentos': documentos,
         'datos': datos_facturas,

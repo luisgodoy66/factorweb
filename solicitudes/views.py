@@ -16,12 +16,12 @@ from django.http import JsonResponse
 from django.db import DataError
 
 from .forms import AsignacionesForm, ChequesForm, DocumentosForm\
-    , ClientesForm, NivelesAprobacionForm, LiquidacionesForm
+    , SolicitantesForm, NivelesAprobacionForm, LiquidacionesForm
 
 from empresa.models import Tipos_factoring, Datos_participantes, \
     Contador
 from .models import Asignacion, ChequesAccesorios, Documentos, \
-    Clientes, Niveles_aprobacion, Exceso_temporal
+    Solicitantes, Niveles_aprobacion, Exceso_temporal
 from clientes.models import Datos_compradores
 from pais.models import Bancos, Feriados
 from bases.models import Usuario_empresa, Empresas
@@ -131,14 +131,38 @@ class AsignacionConAccesoriosView(SinPrivilegios, generic.UpdateView):
         context['solicitudes_pendientes'] = sp
         return context
 
-class ClienteCrearView(SinPrivilegios, generic.CreateView):
-    model = Clientes
-    template_name="solicitudes/datosclientes_form.html"
-    context_object_name="cliente"
+class SolicitantesView(SinPrivilegios, generic.ListView):
+    """Mantenimiento de la tabla de solicitantes de factoring."""
+    model = Solicitantes
+    template_name = "solicitudes/listasolicitantes.html"
+    context_object_name = 'consulta'
+    login_url = 'bases:login'
+    permission_required = "solicitudes.view_solicitantes"
+
+    def get_queryset(self):
+        id_empresa = self.request.usuario_empresa
+        qs = Solicitantes.objects\
+            .filter(leliminado=False
+                    , empresa=id_empresa.empresa)\
+            .order_by("ctnombre")
+        return qs
+
+    def get_context_data(self, **kwargs):
+        id_empresa = self.request.usuario_empresa
+        context = super(SolicitantesView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa=id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class SolicitanteCrearView(SinPrivilegios, generic.CreateView):
+    model = Solicitantes
+    template_name="solicitudes/datossolicitante_form.html"
+    context_object_name="solicitante"
     login_url = "bases:login"
-    form_class = ClientesForm
-    success_url= reverse_lazy("solicitudes:listasolicitudes")
-    permission_required="solicitudes.add_clientes"
+    form_class = SolicitantesForm
+    success_url= reverse_lazy("solicitudes:listasolicitantes")
+    permission_required="solicitudes.add_solicitantes"
 
     def form_valid(self, form):
 
@@ -149,7 +173,36 @@ class ClienteCrearView(SinPrivilegios, generic.CreateView):
 
     def get_context_data(self, **kwargs):
         id_empresa = self.request.usuario_empresa
-        context = super(ClienteCrearView, self).get_context_data(**kwargs)
+        context = super(SolicitanteCrearView, self).get_context_data(**kwargs)
+        sp = Asignacion.objects\
+            .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
+        context['solicitudes_pendientes'] = sp
+        return context
+
+class SolicitanteEditarView(SinPrivilegios, generic.UpdateView):
+    model = Solicitantes
+    template_name="solicitudes/datossolicitante_form.html"
+    context_object_name="solicitante"
+    login_url = "bases:login"
+    form_class = SolicitantesForm
+    success_url= reverse_lazy("solicitudes:listasolicitantes")
+    permission_required="solicitudes.change_solicitantes"
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        id_empresa = self.request.usuario_empresa
+        if obj.empresa_id != id_empresa.empresa.id:
+            raise Http404("No tiene permisos para editar este registro")
+        return obj
+
+    def form_valid(self, form):
+
+        form.instance.cxusuariomodifica = self.request.user.id
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        id_empresa = self.request.usuario_empresa
+        context = super(SolicitanteEditarView, self).get_context_data(**kwargs)
         sp = Asignacion.objects\
             .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
         context['solicitudes_pendientes'] = sp
@@ -312,7 +365,7 @@ def DatosAsignacionFacturasPurasNueva(request):
         .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
 
     contexto={'form': AsignacionesForm(empresa = id_empresa.empresa),
-            'clientes' : Clientes.objects.all() ,
+            'solicitantes' : Solicitantes.objects.all() ,
             "asignacion": Asignacion,
             'solicitudes_pendientes':sp
        }
@@ -329,7 +382,7 @@ def DatosAsignacionConAccesoriosNueva(request):
         .pendientes_o_rechazadas(empresa = id_empresa.empresa).count()
 
     contexto={'form': AsignacionesForm(empresa = id_empresa.empresa),
-            'clientes' : Clientes.objects.all(),
+            'solicitantes' : Solicitantes.objects.all(),
             "asignacion": Asignacion,
             'solicitudes_pendientes':sp
        }
@@ -362,7 +415,7 @@ def DatosFacturasPuras(request, cliente_id, tipo_factoring_id
     if request.method=='POST':
 
         # buscar el RUC para la validacion de la autorizacion del SRI
-        cliente = Clientes.objects.get(pk=cliente_id)
+        cliente = Solicitantes.objects.get(pk=cliente_id)
         ruc = cliente.cxcliente
 
         form_documento = DocumentosForm(request.POST
@@ -687,6 +740,36 @@ def EliminarAsignacion(request, asignacion_id):
 
     return HttpResponse("OK")
 
+@login_required(login_url='/login/')
+@permission_required('solicitudes.delete_solicitantes', login_url='bases:sin_permisos')
+def EliminarSolicitante(request, solicitante_id):
+    # la eliminacion es lógica: el solicitante queda referenciado por las
+    # solicitudes históricas, por lo que la fila no se borra.
+    id_empresa = request.usuario_empresa
+
+    solicitante = Solicitantes.objects\
+        .filter(pk=solicitante_id
+                , empresa = id_empresa.empresa).first()
+    if not solicitante:
+        return HttpResponse("ERROR: El solicitante no existe")
+
+    if request.method=="GET":
+        # no se permite eliminar un solicitante con solicitudes vigentes
+        vigentes = Asignacion.objects\
+            .filter(cxcliente=solicitante
+                    , leliminado = False
+                    , empresa = id_empresa.empresa).count()
+        if vigentes:
+            return HttpResponse("ERROR: El solicitante tiene "
+                                f"{vigentes} solicitud(es) vigente(s), "
+                                "elimínelas primero")
+
+        solicitante.leliminado = True
+        solicitante.cxusuarioelimina = request.user.id
+        solicitante.save()
+
+    return HttpResponse("OK")
+
 def DetalleSolicitudFacturasPuras(request, asignacion_id):
     id_empresa = request.usuario_empresa
     
@@ -800,7 +883,7 @@ def DatosAsignacionConAccesorios(request, cliente_id,
         tipoFactoring = Tipos_factoring.objects\
             .get(pk=tipo_factoring_id)
 
-        cliente = Clientes.objects.get(pk=cliente_id)
+        cliente = Solicitantes.objects.get(pk=cliente_id)
         ruc = cliente.cxcliente
 
         form_documento = DocumentosForm(request.POST
@@ -1104,20 +1187,20 @@ def ImportarOperacion(request):
         try:
             # Intenta realizar operaciones de base de datos aquí
             # Por ejemplo, guardar un objeto que podría exceder el largo máximo permitido para un campo
-            # grabar el cliente
-            cliente = Clientes.objects\
+            # grabar el solicitante
+            solicitante = Solicitantes.objects\
                 .filter(cxcliente=ruc,
                         empresa = id_empresa.empresa).first()
             
-            if not cliente:
-                cliente = Clientes(
+            if not solicitante:
+                solicitante = Solicitantes(
                     cxcliente = ruc,
                     ctnombre = nombre_cliente,
                     cxusuariocrea = request.user,
                     empresa = id_empresa.empresa,
                 )
-                if cliente:
-                    cliente.save()
+                if solicitante:
+                    solicitante.save()
 
             # 6-mar-25  l.g.    se incorpora el contador de solicitudes SOL0001
             secuencia = Contador.objects.filter(empresa = id_empresa.empresa,
@@ -1138,7 +1221,7 @@ def ImportarOperacion(request):
 
             # grabar la asignacion
             asignacion = Asignacion(
-                cxcliente = cliente,
+                cxcliente = solicitante,
                 cxtipofactoring = tipoFactoring,
                 cxtipo = tipo_operacion,
                 nvalor = total_negociado,

@@ -19,7 +19,7 @@ from django.utils import timezone
 
 from bases.models import Empresas, Usuario_empresa
 from empresa.models import Claves_webhook, Tipos_factoring
-from solicitudes.models import Asignacion, Clientes
+from solicitudes.models import Asignacion, Solicitantes
 
 
 class BaseLiquidacionTests(TestCase):
@@ -46,12 +46,12 @@ class BaseLiquidacionTests(TestCase):
             cxusuariocrea=self.user, empresa=self.empresa)
         self.tipo.save()
 
-        self.cliente = Clientes.objects.create(
+        self.cliente = Solicitantes.objects.create(
             cxcliente='1790012345001', ctnombre='CLIENTE UNO',
             ctemail='cliente@example.com',
             cxusuariocrea=self.user, empresa=self.empresa)
 
-        self.cliente_sin_email = Clientes.objects.create(
+        self.cliente_sin_email = Solicitantes.objects.create(
             cxcliente='1790012345002', ctnombre='CLIENTE SIN CORREO',
             ctemail=None, ctemail2=None,
             cxusuariocrea=self.user, empresa=self.empresa)
@@ -367,3 +367,119 @@ class WebhookTests(BaseLiquidacionTests):
         self.assertEqual(cuerpo['enviados'], 1)
         self.assertEqual(cuerpo['fallidos'], 1)
         self.assertFalse(cuerpo['ok'])
+
+
+class ModoLoteTests(BaseLiquidacionTests):
+    """Modo lote: la empresa decide que notificar, sin que n8n pase ids."""
+
+    def test_lote_vacio_responde_ok_sin_enviar(self):
+        from operaciones.webhooks import webhook_enviar_correo_liquidacion
+
+        _c, plana = self.crear_clave()
+        p1, p2 = self.parchear_envio()
+        with p1 as enviar, p2:
+            respuesta = webhook_enviar_correo_liquidacion(
+                self.peticion({'lote': True}, clave=plana))
+
+        self.assertEqual(respuesta.status_code, 200)
+        cuerpo = json.loads(respuesta.content)
+        self.assertTrue(cuerpo['ok'])
+        self.assertEqual(cuerpo['solicitados'], 0)
+        self.assertEqual(cuerpo['modo'], 'lote')
+        enviar.assert_not_called()
+
+    def test_lote_envia_las_pendientes(self):
+        from operaciones.webhooks import webhook_enviar_correo_liquidacion
+
+        self.crear_asignacion(codigo='sol00001')
+        self.crear_asignacion(codigo='sol00002')
+        _c, plana = self.crear_clave()
+
+        p1, p2 = self.parchear_envio()
+        with p1, p2:
+            respuesta = webhook_enviar_correo_liquidacion(
+                self.peticion({'lote': True}, clave=plana))
+
+        cuerpo = json.loads(respuesta.content)
+        self.assertEqual(cuerpo['modo'], 'lote')
+        self.assertEqual(cuerpo['solicitados'], 2)
+        self.assertEqual(cuerpo['enviados'], 2)
+
+    def test_lote_ignora_las_ya_notificadas(self):
+        from operaciones.webhooks import webhook_enviar_correo_liquidacion
+
+        a1 = self.crear_asignacion(codigo='sol00001')
+        a2 = self.crear_asignacion(codigo='sol00002')
+        a2.lliquidacionnotificada = True
+        a2.save()
+        _c, plana = self.crear_clave()
+
+        p1, p2 = self.parchear_envio()
+        with p1, p2:
+            respuesta = webhook_enviar_correo_liquidacion(
+                self.peticion({'lote': True}, clave=plana))
+
+        cuerpo = json.loads(respuesta.content)
+        self.assertEqual(cuerpo['solicitados'], 1)
+        self.assertEqual(cuerpo['resultados'][0]['asignacion_id'], a1.id)
+
+    def test_lote_ignora_las_no_liquidadas(self):
+        from operaciones.webhooks import webhook_enviar_correo_liquidacion
+
+        self.crear_asignacion(estado='P', codigo='sol00009')
+        _c, plana = self.crear_clave()
+        p1, p2 = self.parchear_envio()
+        with p1, p2:
+            respuesta = webhook_enviar_correo_liquidacion(
+                self.peticion({'lote': True}, clave=plana))
+        cuerpo = json.loads(respuesta.content)
+        self.assertEqual(cuerpo['solicitados'], 0)
+
+    def test_lote_no_ve_solicitudes_de_otra_empresa(self):
+        from operaciones.webhooks import webhook_enviar_correo_liquidacion
+
+        self.crear_asignacion(empresa=self.otra_empresa, codigo='sol00099')
+        self.crear_asignacion(codigo='sol00001')
+        _c, plana = self.crear_clave(empresa=self.empresa)
+
+        p1, p2 = self.parchear_envio()
+        with p1, p2:
+            respuesta = webhook_enviar_correo_liquidacion(
+                self.peticion({'lote': True}, clave=plana))
+        cuerpo = json.loads(respuesta.content)
+        self.assertEqual(cuerpo['solicitados'], 1)
+        self.assertEqual(cuerpo['resultados'][0]['cxasignacion'], 'sol00001')
+
+    def test_lote_respeta_el_limite(self):
+        from operaciones.webhooks import webhook_enviar_correo_liquidacion
+
+        for n in range(1, 4):
+            self.crear_asignacion(codigo='sol0000%d' % n)
+        _c, plana = self.crear_clave()
+
+        p1, p2 = self.parchear_envio()
+        with p1, p2:
+            respuesta = webhook_enviar_correo_liquidacion(
+                self.peticion({'lote': True, 'limite': 2}, clave=plana))
+        cuerpo = json.loads(respuesta.content)
+        self.assertEqual(cuerpo['solicitados'], 2)
+
+    def test_lote_segunda_corrida_no_reenvia(self):
+        from operaciones.webhooks import webhook_enviar_correo_liquidacion
+
+        self.crear_asignacion(codigo='sol00001')
+        self.crear_asignacion(codigo='sol00002')
+        _c, plana = self.crear_clave()
+
+        p1, p2 = self.parchear_envio()
+        with p1 as enviar, p2:
+            primera = webhook_enviar_correo_liquidacion(
+                self.peticion({'lote': True}, clave=plana))
+            segunda = webhook_enviar_correo_liquidacion(
+                self.peticion({'lote': True}, clave=plana))
+
+        self.assertEqual(enviar.call_count, 2)
+        c1 = json.loads(primera.content)
+        c2 = json.loads(segunda.content)
+        self.assertEqual(c1['enviados'], 2)
+        self.assertEqual(c2['solicitados'], 0)

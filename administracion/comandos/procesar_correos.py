@@ -4,7 +4,7 @@ from email.header import decode_header
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from empresa.models import Empresa  # Ajusta a tu modelo real de Empresa
-from solicitudes.servicios import procesar_adjuntos_xml_de_correo, encontrar_cliente_por_remitente  # Importa tus funciones
+from solicitudes.servicios import procesar_adjuntos_xml_de_correo, encontrar_solicitante_por_remitente  # Importa tus funciones
 
 User = get_user_model()
 
@@ -89,7 +89,7 @@ class Command(BaseCommand):
                                 self.stdout.write("No se encontraron XMLs válidos o estructurados correctamente en los adjuntos.")
 
                         except ValueError as ve:
-                            # Captura errores de negocio predefinidos (ej. "No se encontró cliente para el remitente")
+                            # Captura errores de negocio predefinidos (ej. "No se encontró solicitante para el remitente")
                             self.stderr.write(f"Error de validación al procesar {sender}: {str(ve)}")
                             # Aquí puedes disparar una alerta a la IA o enviar un correo de notificación
 

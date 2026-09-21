@@ -5,7 +5,8 @@ from solicitudes.views import SolicitudesView, DetalleSolicitudFacturasPuras , \
     DatosAsignacionConAccesorios,  DatosFacturasPuras, RecuperarDocumento,\
     AsignacionFacturasPurasView, DatosAsignacionFacturasPurasNueva, \
     DatosAsignacionConAccesoriosNueva, AsignacionConAccesoriosView, \
-    ClienteCrearView, DatosAccesorioEditar, ImportarOperacion, PedirArchivoXML,\
+    SolicitantesView, SolicitanteCrearView, SolicitanteEditarView, \
+    EliminarSolicitante, DatosAccesorioEditar, ImportarOperacion, PedirArchivoXML,\
     GeneraListaSolicitudesRegistradasJSON, NivelesAprobacionView, \
     NivelAprobacionCrearView, NivelAprobacionEditarView, \
     ExcesosTemporalesView, AceptarExcesoTemporal, RechazarExcesoTemporal, \
@@ -16,8 +17,14 @@ from solicitudes.webhooks import webhook_cargar_solicitudes_factoring
 urlpatterns=[
     path('listasolicitudes/',SolicitudesView.as_view(), \
         name='listasolicitudes'),
-    path('crearcliente/',ClienteCrearView.as_view(), \
-        name='cliente_nuevo'),
+    path('listasolicitantes/',SolicitantesView.as_view(), \
+        name='listasolicitantes'),
+    path('solicitantenuevo/',SolicitanteCrearView.as_view(), \
+        name='solicitante_nuevo'),
+    path('solicitanteeditar/<int:pk>',SolicitanteEditarView.as_view(), \
+        name='solicitante_editar'),
+    path('eliminarsolicitante/<int:solicitante_id>',EliminarSolicitante, \
+        name='eliminar_solicitante'),
     path('nuevasolicitud/',DatosAsignacionFacturasPurasNueva
         , name='asignacionfacturaspuras_nueva'),
     path('nuevasolicitudconaccesorios/',DatosAsignacionConAccesoriosNueva

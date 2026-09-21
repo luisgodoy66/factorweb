@@ -9,7 +9,14 @@ from api.models import Configuracion_slack
 
 from django.contrib.auth.models import User
 
-class Clientes(ClaseModelo):
+class Solicitantes(ClaseModelo):
+    """Empresa que solicita factoring.
+
+    No necesariamente llega a ser cliente del factor: mientras la solicitud
+    esta en tramite el registro vive en esta tabla y solo se promueve a
+    cliente (clientes.Datos_generales) cuando la negociacion se concreta.
+    """
+
     cxcliente = models.CharField(max_length=13)
     ctnombre =models.CharField(max_length=100)
     cxzona =models.CharField(max_length=5, null=True)
@@ -30,11 +37,13 @@ class Clientes(ClaseModelo):
     
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['cxcliente', 'empresa'], name='cliente_solicitud')
+            models.UniqueConstraint(fields=['cxcliente', 'empresa'], name='solicitante_solicitud')
         ]
         ordering = [
             'ctnombre'
-            ]  
+            ]
+        verbose_name = 'Solicitante'
+        verbose_name_plural = 'Solicitantes'
 
 class Niveles_aprobacion(ClaseModelo):
     nmontominimo = models.DecimalField(max_digits=15, decimal_places=2)
@@ -85,9 +94,9 @@ class Asignacion(ClaseModelo):
         ('L', 'Liquidada'),
         ('A', 'Aceptada'),
     )
-    cxcliente=models.ForeignKey(Clientes
+    cxcliente=models.ForeignKey(Solicitantes
                                 , on_delete=models.CASCADE
-                                , related_name="cliente_asignacion")
+                                , related_name="solicitante_asignacion")
     cxtipofactoring = models.ForeignKey(Tipos_factoring
         , on_delete=models.RESTRICT)
     cxtipo = models.CharField(max_length=1

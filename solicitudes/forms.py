@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from .models import Asignacion, Documentos, ChequesAccesorios, \
-    Clientes, Niveles_aprobacion
+    Solicitantes, Niveles_aprobacion
 from empresa.models import Tipos_factoring
 from pais.models import Bancos
 from api.models import Configuracion_slack
@@ -18,7 +18,7 @@ class AsignacionesForm(forms.ModelForm):
         fields=['cxcliente', 'cxtipofactoring'
             ,'nvalor', 'ncantidaddocumentos', 
         ]
-        labels={'cxcliente':'Cliente', 'cxtipofactoring':'Tipo de factoring'
+        labels={'cxcliente':'Solicitante', 'cxtipofactoring':'Tipo de factoring'
             ,'nvalor':'Total negociado', 'ncantidaddocumentos':'Cantidad de documentos', 
         }
 
@@ -34,7 +34,7 @@ class AsignacionesForm(forms.ModelForm):
         self.fields['nvalor'].widget.attrs['readonly']=True
 
         if empresa:
-            self.fields['cxcliente'].queryset = Clientes.objects\
+            self.fields['cxcliente'].queryset = Solicitantes.objects\
                 .filter(empresa=empresa, leliminado = False)
             self.fields['cxtipofactoring'].queryset = Tipos_factoring.objects\
                 .filter(empresa=empresa, leliminado = False)
@@ -229,15 +229,15 @@ class ChequesForm(forms.ModelForm):
             self.fields['cxbanco'].queryset = Bancos.objects\
                 .filter(leliminado = False)
             
-class ClientesForm(forms.ModelForm):
+class SolicitantesForm(forms.ModelForm):
 
     class Meta:
-        model = Clientes
+        model = Solicitantes
         fields=['cxcliente', 'ctnombre', 'ctdireccion', 'cttelefono1'
             , 'cttelefono2', 'ctemail', 'ctemail2', 'ctcelular'
             , 'ctgirocomercial', 'dinicioactividades', 'empresa']
         labels={
-            'cxcliente':'Id. cliente', 'ctnombre':'Nombre de cliente'
+            'cxcliente':'Id. solicitante', 'ctnombre':'Nombre de solicitante'
             , 'ctdireccion':'Dirección', 'cttelefono1':'Teléfono principal'
             , 'cttelefono2':'Teléfono secundario', 'ctemail':'Dirección email'
             , 'ctemail2':'Dirección email', 'ctcelular':'WhatsApp'
@@ -265,7 +265,7 @@ class ClientesForm(forms.ModelForm):
         
     def clean(self):
         try:
-            sc = Clientes.objects.get(cxcliente=self.cleaned_data["cxcliente"]
+            sc = Solicitantes.objects.get(cxcliente=self.cleaned_data["cxcliente"]
                                       , empresa= self.cleaned_data["empresa"]
             )
 
@@ -273,7 +273,7 @@ class ClientesForm(forms.ModelForm):
                 raise forms.ValidationError("Identificación ya registrada anteriormente.")
             elif self.instance.pk!=sc.pk:
                 raise forms.ValidationError("Cambio No Permitido.")
-        except Clientes.DoesNotExist:
+        except Solicitantes.DoesNotExist:
             pass
         return self.cleaned_data
 

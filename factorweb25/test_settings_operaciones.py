@@ -10,6 +10,12 @@ from .settings import *  # noqa: F401,F403
 DEBUG = False
 ALLOWED_HOSTS = ['testserver', 'localhost', '127.0.0.1']
 
+# Las suites que resuelven URLs con el cliente de pruebas necesitan HTTP plano
+# (la configuracion de produccion redirige con 301 a https).
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',

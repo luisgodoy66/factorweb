@@ -181,7 +181,7 @@
       "eventos": [
         {
           "e": "cliente.solicitante_creado",
-          "t": "solicitudes/views.py:135-149 ClienteCrearView · views.py:1099-1107",
+          "t": "solicitudes/views.py SolicitanteCrearView · views.py ImportarOperacion",
           "d": "Alta del solicitante (pre-cliente) que luego se formaliza como cliente.",
           "p": "solicitante_id, cxcliente(RUC/cédula), ctnombre, email, celular, cxlocalidad, origen",
           "a": "Onboarding automático: enviar welcome pack, formulario KYC y checklist de documentos por email y WhatsApp.",

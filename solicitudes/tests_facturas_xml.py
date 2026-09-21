@@ -6,9 +6,9 @@ from django.test import RequestFactory, TestCase
 
 from bases.models import Empresas
 from empresa.models import Tipos_factoring
-from solicitudes.models import Asignacion, Clientes, Documentos
-from solicitudes.servicios import crear_asignacion_desde_xml, crear_asignacion_desde_xmls, encontrar_cliente_por_remitente
-from solicitudes.views import webhook_cargar_solicitudes_factoring
+from solicitudes.models import Asignacion, Solicitantes, Documentos
+from solicitudes.servicios import crear_asignacion_desde_xml, crear_asignacion_desde_xmls, encontrar_solicitante_por_remitente
+from solicitudes.webhooks import webhook_cargar_solicitudes_factoring
 
 
 class FacturasXmlTests(TestCase):
@@ -27,7 +27,7 @@ class FacturasXmlTests(TestCase):
             ctabreviacion='FT',
             cxmoneda='USD',
         )
-        self.cliente = Clientes.objects.create(
+        self.solicitante = Solicitantes.objects.create(
             empresa=self.empresa,
             cxusuariocrea=self.user,
             cxcliente='0999999999001',
@@ -35,9 +35,9 @@ class FacturasXmlTests(TestCase):
             ctemail2='facturas@example.com',
         )
 
-    def test_encontrar_cliente_por_remitente(self):
-        cliente = encontrar_cliente_por_remitente('FACTURAS@example.com', empresa=self.empresa)
-        self.assertEqual(cliente, self.cliente)
+    def test_encontrar_solicitante_por_remitente(self):
+        solicitante = encontrar_solicitante_por_remitente('FACTURAS@example.com', empresa=self.empresa)
+        self.assertEqual(solicitante, self.solicitante)
 
     def test_crear_asignacion_desde_xml(self):
         xml_content = '''<?xml version="1.0" encoding="UTF-8"?>
@@ -100,9 +100,9 @@ class FacturasXmlTests(TestCase):
             asunto='Factura nueva',
         )
 
-        self.assertEqual(resultado['cliente'], self.cliente)
+        self.assertEqual(resultado['solicitante'], self.solicitante)
         self.assertTrue(isinstance(resultado['asignacion'], Asignacion))
-        self.assertEqual(resultado['asignacion'].cxcliente, self.cliente)
+        self.assertEqual(resultado['asignacion'].cxcliente, self.solicitante)
         self.assertEqual(resultado['asignacion'].nvalor, Decimal('115.00'))
         self.assertEqual(resultado['asignacion'].ncantidaddocumentos, 1)
         documento = resultado['documentos'][0]
@@ -163,7 +163,7 @@ class FacturasXmlTests(TestCase):
             asunto='Factura autorizada',
         )
 
-        self.assertEqual(resultado['cliente'], self.cliente)
+        self.assertEqual(resultado['solicitante'], self.solicitante)
         self.assertEqual(resultado['asignacion'].nvalor, Decimal('65.93'))
         self.assertEqual(resultado['documentos'][0].ctdocumento, '000048480')
 

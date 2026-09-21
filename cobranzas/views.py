@@ -26,7 +26,7 @@ from empresa.models import Tasas_factoring, Cuentas_bancarias as CuentasEmpresa\
     , Datos_participantes, Tipos_factoring, Otros_cargos
 from cuentasconjuntas import models as CuentasConjuntasModels
 from bases.models import Usuario_empresa
-from solicitudes.models import Asignacion, Clientes
+from solicitudes.models import Asignacion, Solicitantes
 from contabilidad.models import Factura_venta
 
 from .forms import CobranzasDocumentosForm, ChequesForm, LiquidarForm\

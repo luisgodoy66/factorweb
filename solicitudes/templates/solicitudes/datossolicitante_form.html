@@ -6,9 +6,9 @@
             <div class="page-title">
                 <ol class="breadcrumb text-right">
                     <li><a href="#">Operaciones</a></li>
-                    <li><a href="#">negociación</a></li>
-                    <li><a href="{% url 'solicitudes:listasolicitudes' %}">solicitudes</a></li>
-                    <li class="active">nuevo solicitante</li>
+                    <li><a href="#">Negociación</a></li>
+                    <li><a href="{% url 'solicitudes:listasolicitantes' %}">solicitantes</a></li>
+                    <li class="active">{% if form.instance.pk %}editar solicitante{% else %}nuevo solicitante{% endif %}</li>
                 </ol>
             </div>
         </div>
@@ -24,8 +24,8 @@
     <div class="card">
         <div class="card-header" style="background-color: white;">
             <div class="d-flex justify-content-between align-items-center ">
-                <h5>{% if datosparticipante %} {{ datosparticipante }} {% else %}Nueva ficha general{% endif %}</h5>
-                <a href="{% url 'solicitudes:listasolicitudes' %}" class="btn btn-sm">
+                <h5>{% if form.instance.pk %}Editar solicitante: {{ solicitante.ctnombre }}{% else %}Nuevo solicitante{% endif %}</h5>
+                <a href="{% url 'solicitudes:listasolicitantes' %}" class="btn btn-sm">
                     <i class="fa fa-times"></i> 
                 </a>
             </div>
