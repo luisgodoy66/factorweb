@@ -86,8 +86,8 @@ def enviar_liquidacion(asignacion_id, empresa, user=None, forzar=False):
     if asignacion.lliquidacionnotificada and not forzar:
         resultado['ok'] = True
         resultado['ya_enviada'] = True
-        resultado['destinatario'] = (asignacion.cxcliente.ctemail
-                                     if asignacion.cxcliente else None)
+        resultado['destinatario'] = (asignacion.cliente.cxcliente.ctemail
+                                     if asignacion.cliente else None)
         return resultado
 
     # --- 3. Estado: no notificar una liquidacion que no ocurrio.
@@ -105,10 +105,10 @@ def enviar_liquidacion(asignacion_id, empresa, user=None, forzar=False):
         resultado['error'] = 'La solicitud no tiene cliente asociado'
         return resultado
 
-    destinatario = cliente.ctemail or cliente.ctemail2
+    destinatario = cliente.cxcliente.ctemail or asignacion.cxcliente.ctemail or cliente.cxcliente.ctemail2
     if not destinatario:
         resultado['error'] = ('El cliente %s no tiene correo electronico '
-                              'registrado' % cliente.ctnombre)
+                              'registrado' % cliente.cxcliente.ctnombre)
         return resultado
     resultado['destinatario'] = destinatario
 
@@ -126,7 +126,7 @@ def enviar_liquidacion(asignacion_id, empresa, user=None, forzar=False):
     ok, error_envio = enviar_correo_liquidacion(
         empresa,
         destinatario,
-        cliente.cxcliente.ctnombre or '',
+        cliente.cxcliente.ctnombre or asignacion.cxcliente.ctnombre,
         asignacion.cxasignacion,
         nombre_pdf,
         pdf_bytes,
