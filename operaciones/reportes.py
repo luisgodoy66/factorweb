@@ -221,7 +221,7 @@ def _armar_respuesta_pdf_liquidacion(request, asignacion, id_empresa):
 
     # Generar el archivo PDF usando WeasyTemplateResponse
     response = WeasyTemplateResponse(
-        request=request,
+        # request=request,
         template=template_path,
         context=context,
         content_type='application/pdf',
