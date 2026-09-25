@@ -1522,8 +1522,7 @@ def EnviarCorreoLiquidacionAsignacion(request, solicitud_id):
 
     try:
         resultado = enviar_liquidacion(
-            solicitud_id, id_empresa.empresa, request.user,
-            forzar=False)
+            solicitud_id, id_empresa.empresa, forzar=False)
     except Exception as error:
         return HttpResponse(
             f"Error inesperado al enviar correo de liquidación: {error}")

@@ -48,7 +48,7 @@ def solicitudes_pendientes_de_notificar(empresa, limite=50, desde=None,
     )
 
 
-def enviar_liquidacion(asignacion_id, empresa, user=None, forzar=False):
+def enviar_liquidacion(asignacion_id, empresa, forzar=False):
     """Envia al cliente el PDF de liquidacion de una solicitud.
 
     Devuelve un dict con el resultado, pensado para serializarse como JSON:
@@ -116,7 +116,7 @@ def enviar_liquidacion(asignacion_id, empresa, user=None, forzar=False):
     from .reportes import generar_pdf_liquidacion_para_empresa
 
     nombre_pdf, pdf_bytes, error_pdf = generar_pdf_liquidacion_para_empresa(
-        asignacion.id, empresa, user)
+        asignacion.id, empresa)
     if error_pdf:
         resultado['error'] = 'No se pudo generar el PDF: %s' % error_pdf
         return resultado

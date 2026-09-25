@@ -126,41 +126,6 @@ def ImpresionAsignacion(request, asignacion_id):
     response['Content-Disposition'] = 'inline; filename="asgn' + str(asignacion_id) + '.pdf"'
     return response
 
-def _request_para_reporte(empresa, user=None):
-    """Construye un request minimo para renderizar un PDF fuera de una vista.
-
-    Las plantillas de reporte usan {{ user.usuario_empresa.get.empresa... }} para
-    el logo, de modo que WeasyTemplateResponse necesita un request con un
-    usuario que pertenezca a la empresa. Al generar el PDF desde un webhook (n8n)
-    no hay sesion, asi que se fabrica uno con los mismos datos que ya se usan en
-    el contexto (empresa, usuario).
-    """
-    from django.test import RequestFactory
-
-    request = RequestFactory().get('/')
-    request.empresa = empresa
-    request.usuario_empresa = _usuario_empresa_de(empresa, user)
-    request.user = user if user is not None else _usuario_de(empresa)
-    return request
-
-
-def _usuario_empresa_de(empresa, user=None):
-    """Devuelve el Usuario_empresa de la empresa (el del usuario si se indica)."""
-    consulta = Usuario_empresa.objects.filter(empresa=empresa)
-    if user is not None:
-        propio = consulta.filter(user=user).first()
-        if propio:
-            return propio
-    return consulta.first()
-
-
-def _usuario_de(empresa):
-    """Primer usuario asociado a la empresa, para el contexto de la plantilla."""
-    vinculo = Usuario_empresa.objects.filter(empresa=empresa)\
-        .select_related('user').first()
-    return vinculo.user if vinculo else None
-
-
 def generar_pdf_liquidacion(request, asignacion_id, id_empresa):
     # devuelve (nombre_archivo, bytes_pdf, error) del PDF de liquidación de una
     # asignación (id de operaciones.Asignacion), para adjuntarlo al correo.
@@ -180,26 +145,13 @@ def generar_pdf_liquidacion(request, asignacion_id, id_empresa):
     return nombre_archivo, response.rendered_content, None
 
 
-def generar_pdf_liquidacion_para_empresa(asignacion_id, empresa, user=None):
+def generar_pdf_liquidacion_para_empresa(asignacion_id, empresa):
     """Igual que generar_pdf_liquidacion pero sin depender de una sesion.
 
     `empresa` es una instancia de bases.Empresas. Pensado para el envio
     automatico del correo de liquidacion desde una automatizacion (n8n).
     """
-    request = _request_para_reporte(empresa, user)
-    usuario_empresa = request.usuario_empresa or _usuario_empresa_de(empresa)
-    if usuario_empresa is None:
-        # _armar_respuesta... usa id_empresa.empresa; se construye un objeto
-        # minimo para no romper la firma existente.
-        class _Vinculo:
-            pass
-
-        vinculo = _Vinculo()
-        vinculo.empresa = empresa
-        vinculo.user = user
-        usuario_empresa = vinculo
-
-    return generar_pdf_liquidacion(request, asignacion_id, usuario_empresa)
+    return generar_pdf_liquidacion(None, asignacion_id, empresa)
 
 
 def _armar_respuesta_pdf_liquidacion(request, asignacion, id_empresa):
@@ -207,6 +159,7 @@ def _armar_respuesta_pdf_liquidacion(request, asignacion, id_empresa):
     # y la generación del PDF para el correo de liquidación.
     # Devuelve (response, error): en caso de error el primer elemento es None.
     documentos = {}
+    empresa = getattr(id_empresa, 'empresa', id_empresa)
     
     if asignacion.cxtipo==FACTURAS_PURAS:
 
@@ -228,13 +181,13 @@ def _armar_respuesta_pdf_liquidacion(request, asignacion, id_empresa):
                 
     # datos de tasa gao/dc
     gao = Tasas_factoring.objects\
-        .filter(cxtasa="GAO", empresa = id_empresa.empresa).first()
+        .filter(cxtasa="GAO", empresa = empresa).first()
     if not gao:
         return None, ("no encontró tasa de gao en el sistema."
                       " Registre el cargo con código GAO")
 
     dc = Tasas_factoring.objects\
-        .filter(cxtasa="DCAR", empresa = id_empresa.empresa).first()
+        .filter(cxtasa="DCAR", empresa = empresa).first()
     if not dc:
         return None, ("no encontró tasa de descuento de "
                       "cartera en el sistema. Registre el cargo con código DCAR")
@@ -261,7 +214,7 @@ def _armar_respuesta_pdf_liquidacion(request, asignacion, id_empresa):
         'subtotal': subtotal,
         'cargos_negociacion': cargos_negociacion,
         'neto': asignacion.neto(),
-        'empresa': id_empresa.empresa,
+        'empresa': empresa,
         'otros_cargos': otros_cargos,
         'fuente': 'solicitud'
     }
