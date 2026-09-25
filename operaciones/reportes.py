@@ -145,13 +145,38 @@ def generar_pdf_liquidacion(request, asignacion_id, id_empresa):
     return nombre_archivo, response.rendered_content, None
 
 
+def _request_para_reporte():
+    from io import BytesIO
+    from django.contrib.auth.models import AnonymousUser
+    from django.core.handlers.wsgi import WSGIRequest
+
+    hosts = [host for host in settings.ALLOWED_HOSTS if host != '*']
+    host = hosts[0].lstrip('.') if hosts else 'localhost'
+    secure = not settings.DEBUG
+    request = WSGIRequest({
+        'REQUEST_METHOD': 'GET',
+        'PATH_INFO': '/',
+        'QUERY_STRING': '',
+        'HTTP_HOST': host,
+        'SERVER_NAME': host,
+        'SERVER_PORT': '443' if secure else '80',
+        'wsgi.url_scheme': 'https' if secure else 'http',
+        'wsgi.input': BytesIO(),
+        'CONTENT_LENGTH': '0',
+        'CONTENT_TYPE': '',
+    })
+    request.user = AnonymousUser()
+    return request
+
+
 def generar_pdf_liquidacion_para_empresa(asignacion_id, empresa):
     """Igual que generar_pdf_liquidacion pero sin depender de una sesion.
 
     `empresa` es una instancia de bases.Empresas. Pensado para el envio
     automatico del correo de liquidacion desde una automatizacion (n8n).
     """
-    return generar_pdf_liquidacion(None, asignacion_id, empresa)
+    request = _request_para_reporte()
+    return generar_pdf_liquidacion(request, asignacion_id, empresa)
 
 
 def _armar_respuesta_pdf_liquidacion(request, asignacion, id_empresa):
@@ -221,7 +246,7 @@ def _armar_respuesta_pdf_liquidacion(request, asignacion, id_empresa):
 
     # Generar el archivo PDF usando WeasyTemplateResponse
     response = WeasyTemplateResponse(
-        # request=request,
+        request=request,
         template=template_path,
         context=context,
         content_type='application/pdf',
