@@ -18,7 +18,8 @@ from django.test import RequestFactory, TestCase
 from django.utils import timezone
 
 from bases.models import Empresas, Usuario_empresa
-from empresa.models import Claves_webhook, Tipos_factoring
+from clientes.models import Datos_generales
+from empresa.models import Claves_webhook, Datos_participantes, Tipos_factoring
 from solicitudes.models import Asignacion, Solicitantes
 
 
@@ -46,20 +47,67 @@ class BaseLiquidacionTests(TestCase):
             cxusuariocrea=self.user, empresa=self.empresa)
         self.tipo.save()
 
-        self.cliente = Solicitantes.objects.create(
+        self.solicitante = Solicitantes.objects.create(
             cxcliente='1790012345001', ctnombre='CLIENTE UNO',
             ctemail='cliente@example.com',
             cxusuariocrea=self.user, empresa=self.empresa)
 
-        self.cliente_sin_email = Solicitantes.objects.create(
+        self.solicitante_sin_email = Solicitantes.objects.create(
             cxcliente='1790012345002', ctnombre='CLIENTE SIN CORREO',
             ctemail=None, ctemail2=None,
             cxusuariocrea=self.user, empresa=self.empresa)
 
-    def crear_asignacion(self, cliente=None, estado='L', empresa=None,
-                        codigo='sol00001'):
+        # El cliente del contrato (clientes.Datos_generales) es el que manda
+        # para la notificacion; se enlaza OneToOne con Datos_participantes.
+        # `_solicitante_de` guarda la pareja cliente -> solicitante para que
+        # crear_asignacion no mezcle unos con otros.
+        self._solicitante_de = {}
+
+        self.cliente = self.crear_datos_generales(
+            '1790012345001', 'CLIENTE UNO', 'cliente@example.com')
+        self._solicitante_de[self.cliente.id] = self.solicitante
+
+        # Cliente de contrato sin correo: su solicitante TAMPOCO tiene, para que
+        # no lo rescate el respaldo por solicitante.
+        self.solicitante_mudo = Solicitantes.objects.create(
+            cxcliente='1790012345003', ctnombre='SOLICITANTE SIN CORREO',
+            ctemail=None, ctemail2=None,
+            cxusuariocrea=self.user, empresa=self.empresa)
+        self.cliente_sin_email = self.crear_datos_generales(
+            '1790012345004', 'CLIENTE SIN CORREO', None)
+        self._solicitante_de[self.cliente_sin_email.id] = self.solicitante_mudo
+
+        # Cliente cuyo correo solo esta en el campo alterno del solicitante.
+        self.solicitante_alterno = Solicitantes.objects.create(
+            cxcliente='1790012345005', ctnombre='SOLICITANTE ALTERNO',
+            ctemail=None, ctemail2='alterno@example.com',
+            cxusuariocrea=self.user, empresa=self.empresa)
+        self.cliente_solo_alterno = self.crear_datos_generales(
+            '1790012345006', 'CLIENTE ALTERNO', None)
+        self._solicitante_de[self.cliente_solo_alterno.id] = \
+            self.solicitante_alterno
+
+    def crear_datos_generales(self, identificacion, nombre, email):
+        participante = Datos_participantes.objects.create(
+            cxtipoid='R', cxparticipante=identificacion, ctnombre=nombre,
+            ctemail=email, cxusuariocrea=self.user, empresa=self.empresa)
+        return Datos_generales.objects.create(
+            cxcliente=participante, cxtipocliente='J',
+            cxusuariocrea=self.user, empresa=self.empresa)
+
+    def crear_asignacion(self, solicitante=None, cliente=None, estado='L',
+                        empresa=None, codigo='sol00001'):
+        cliente_final = cliente if cliente is not None else self.cliente
+        # El solicitante debe ser el que corresponde a ese cliente de contrato;
+        # si no se indica, se busca la pareja guardada en setUp.
+        solicitante_final = (
+            solicitante
+            or self._solicitante_de.get(getattr(cliente_final, 'id', None))
+            or self.solicitante
+        )
         return Asignacion.objects.create(
-            cxcliente=cliente or self.cliente,
+            cxcliente=solicitante_final,
+            cliente=cliente_final,
             cxtipofactoring=self.tipo,
             cxtipo='F',
             cxestado=estado,
@@ -87,10 +135,26 @@ class BaseLiquidacionTests(TestCase):
             '/operaciones/webhook/enviar-correo-liquidacion/',
             data=json.dumps(cuerpo), content_type='application/json', **extra)
 
+    def peticion_datos(self, parametros=None, clave=None, metodo='get'):
+        """Peticion al endpoint de composicion (admite GET y POST)."""
+        extra = {}
+        if clave:
+            extra['HTTP_X_MARGARITA_KEY'] = clave
+        url = '/operaciones/webhook/datos-correo-liquidacion/'
+        if metodo == 'post':
+            return self.factory.post(
+                url, data=json.dumps(parametros or {}),
+                content_type='application/json', **extra)
+        return self.factory.get(url, data=parametros or {}, **extra)
+
     def parchear_envio(self, ok=True, error=None):
-        """Sustituye el PDF y el SMTP."""
+        """Sustituye el PDF y el SMTP.
+
+        enviar_correo_liquidacion se importa dentro de la funcion, asi que el
+        parche debe apuntar al modulo donde se define (empresa.correos).
+        """
         return (
-            mock.patch('operaciones.servicios.enviar_correo_liquidacion',
+            mock.patch('empresa.correos.enviar_correo_liquidacion',
                        return_value=(ok, error)),
             mock.patch('operaciones.reportes.generar_pdf_liquidacion_para_empresa',
                        return_value=('sol00001.pdf', b'%PDF-1.4 fake', None)),
@@ -165,9 +229,7 @@ class ServicioEnvioTests(BaseLiquidacionTests):
     def test_usa_ctemail2_si_falta_el_principal(self):
         from operaciones.servicios import enviar_liquidacion
 
-        self.cliente_sin_email.ctemail2 = 'alterno@example.com'
-        self.cliente_sin_email.save()
-        asignacion = self.crear_asignacion(cliente=self.cliente_sin_email)
+        asignacion = self.crear_asignacion(cliente=self.cliente_solo_alterno)
 
         p1, p2 = self.parchear_envio()
         with p1, p2:
@@ -238,7 +300,7 @@ class ServicioEnvioTests(BaseLiquidacionTests):
                 'operaciones.reportes.generar_pdf_liquidacion_para_empresa',
                 return_value=(None, None, 'falta tasa GAO')):
             with mock.patch(
-                    'operaciones.servicios.enviar_correo_liquidacion') as enviar:
+                    'empresa.correos.enviar_correo_liquidacion') as enviar:
                 resultado = enviar_liquidacion(asignacion.id, self.empresa)
 
         self.assertFalse(resultado['ok'])
@@ -367,6 +429,265 @@ class WebhookTests(BaseLiquidacionTests):
         self.assertEqual(cuerpo['enviados'], 1)
         self.assertEqual(cuerpo['fallidos'], 1)
         self.assertFalse(cuerpo['ok'])
+
+
+class ComposicionParaEnvioExternoTests(BaseLiquidacionTests):
+    """Camino nuevo: Django compone, n8n envia (nodo nativo de Gmail).
+
+    Resuelve el caso de Gmail, cuyo SMTP exige contrasena de aplicacion y
+    rechaza el login con 534 5.7.9.
+    """
+
+    def test_compone_sin_enviar_y_sin_marcar(self):
+        from operaciones.servicios import construir_correo_liquidacion
+
+        asignacion = self.crear_asignacion()
+
+        p1, p2 = self.parchear_envio()
+        with p1 as enviar, p2:
+            correo = construir_correo_liquidacion(asignacion.id, self.empresa)
+
+        self.assertTrue(correo['ok'], correo['error'])
+        self.assertFalse(correo['ya_enviada'])
+        self.assertEqual(correo['destinatario'], 'cliente@example.com')
+        self.assertTrue(correo['asunto'])
+        self.assertTrue(correo['cuerpo'])
+        self.assertEqual(correo['pdf_nombre'], 'sol00001.pdf')
+        # el PDF viaja en base64 para que n8n lo adjunte
+        import base64 as _b64
+        self.assertEqual(_b64.b64decode(correo['pdf_base64']), b'%PDF-1.4 fake')
+
+        # NO se envio nada y la solicitud sigue pendiente de marcar
+        enviar.assert_not_called()
+        asignacion.refresh_from_db()
+        self.assertFalse(asignacion.lliquidacionnotificada)
+
+    def test_compone_no_requiere_configuracion_smtp(self):
+        """Para que n8n envie no hace falta que la empresa tenga SMTP."""
+        from operaciones.servicios import construir_correo_liquidacion
+
+        asignacion = self.crear_asignacion()
+        self.assertEqual(0, self.empresa.configuracioncorreos_empresa.count()
+                         if hasattr(self.empresa, 'configuracioncorreos_empresa')
+                         else 0)
+
+        p1, p2 = self.parchear_envio()
+        with p1, p2:
+            correo = construir_correo_liquidacion(asignacion.id, self.empresa)
+
+        self.assertTrue(correo['ok'], correo['error'])
+        self.assertTrue(correo['asunto'])
+
+    def test_marcar_tras_envio_externo(self):
+        from operaciones.servicios import (construir_correo_liquidacion,
+                                           marcar_liquidacion_notificada)
+
+        asignacion = self.crear_asignacion()
+        p1, p2 = self.parchear_envio()
+        with p1, p2:
+            construir_correo_liquidacion(asignacion.id, self.empresa)
+
+        marca = marcar_liquidacion_notificada(asignacion.id, self.empresa)
+        self.assertTrue(marca['ok'], marca['error'])
+        self.assertFalse(marca['ya_estaba'])
+
+        asignacion.refresh_from_db()
+        self.assertTrue(asignacion.lliquidacionnotificada)
+        self.assertIsNotNone(asignacion.dliquidacionnotificada)
+
+    def test_marcar_no_ve_solicitudes_de_otra_empresa(self):
+        from operaciones.servicios import marcar_liquidacion_notificada
+
+        asignacion = self.crear_asignacion(empresa=self.otra_empresa)
+        marca = marcar_liquidacion_notificada(asignacion.id, self.empresa)
+        self.assertFalse(marca['ok'])
+        self.assertIn('No existe la solicitud', marca['error'])
+
+        asignacion.refresh_from_db()
+        self.assertFalse(asignacion.lliquidacionnotificada)
+
+    def test_compuesta_dos_veces_no_cambia_nada_hasta_marcar(self):
+        from operaciones.servicios import construir_correo_liquidacion
+
+        asignacion = self.crear_asignacion()
+        p1, p2 = self.parchear_envio()
+        with p1, p2:
+            primera = construir_correo_liquidacion(asignacion.id, self.empresa)
+            segunda = construir_correo_liquidacion(asignacion.id, self.empresa)
+
+        self.assertTrue(primera['ok'])
+        self.assertTrue(segunda['ok'])
+        self.assertFalse(segunda['ya_enviada'])
+
+
+class WebhookDatosTests(BaseLiquidacionTests):
+    """Endpoints para el flujo que envia desde n8n."""
+
+    def test_sin_clave_se_rechaza(self):
+        from operaciones.webhooks import webhook_datos_correo_liquidacion
+
+        respuesta = webhook_datos_correo_liquidacion(
+            self.peticion_datos({'asignacion_id': 1}))
+        self.assertEqual(respuesta.status_code, 403)
+
+    def test_devuelve_un_correo_con_pdf(self):
+        from operaciones.webhooks import webhook_datos_correo_liquidacion
+
+        asignacion = self.crear_asignacion()
+        _c, plana = self.crear_clave()
+
+        p1, p2 = self.parchear_envio()
+        with p1, p2:
+            respuesta = webhook_datos_correo_liquidacion(
+                self.peticion_datos({'asignacion_id': asignacion.id}, plana))
+
+        self.assertEqual(respuesta.status_code, 200)
+        cuerpo = json.loads(respuesta.content)
+        self.assertEqual(cuerpo['listos'], 1)
+        correo = cuerpo['correos'][0]
+        self.assertEqual(correo['destinatario'], 'cliente@example.com')
+        self.assertTrue(correo['pdf_base64'])
+        self.assertTrue(correo['asunto'])
+
+    def test_con_pdf_false_omite_el_adjunto(self):
+        from operaciones.webhooks import webhook_datos_correo_liquidacion
+
+        asignacion = self.crear_asignacion()
+        _c, plana = self.crear_clave()
+
+        p1, p2 = self.parchear_envio()
+        with p1, p2:
+            respuesta = webhook_datos_correo_liquidacion(
+                self.peticion_datos({'asignacion_id': asignacion.id,
+                                     'con_pdf': 'false'}, plana))
+
+        correo = json.loads(respuesta.content)['correos'][0]
+        self.assertNotIn('pdf_base64', correo)
+        self.assertTrue(correo['ok'])
+
+    def test_lote_devuelve_las_pendientes(self):
+        from operaciones.webhooks import webhook_datos_correo_liquidacion
+
+        self.crear_asignacion(codigo='sol00001')
+        self.crear_asignacion(codigo='sol00002')
+        _c, plana = self.crear_clave()
+
+        p1, p2 = self.parchear_envio()
+        with p1, p2:
+            respuesta = webhook_datos_correo_liquidacion(
+                self.peticion_datos({'lote': 'true'}, plana))
+
+        cuerpo = json.loads(respuesta.content)
+        self.assertEqual(cuerpo['modo'], 'lote')
+        self.assertEqual(cuerpo['solicitados'], 2)
+        self.assertEqual(cuerpo['listos'], 2)
+
+    def test_lote_sin_pdf_lista_los_ids(self):
+        """Con con_pdf=false el flujo puede pedir solo la lista de trabajo."""
+        from operaciones.webhooks import webhook_datos_correo_liquidacion
+
+        self.crear_asignacion(codigo='sol00001')
+        _c, plana = self.crear_clave()
+
+        p1, p2 = self.parchear_envio()
+        with p1, p2:
+            respuesta = webhook_datos_correo_liquidacion(
+                self.peticion_datos({'lote': 'true', 'con_pdf': 'false'}, plana))
+
+        correo = json.loads(respuesta.content)['correos'][0]
+        self.assertNotIn('pdf_base64', correo)
+        self.assertEqual(correo['asignacion_id'], 1)
+
+    def test_no_ve_solicitudes_de_otra_empresa(self):
+        from operaciones.webhooks import webhook_datos_correo_liquidacion
+
+        self.crear_asignacion(empresa=self.otra_empresa, codigo='sol00099')
+        _c, plana = self.crear_clave()
+
+        p1, p2 = self.parchear_envio()
+        with p1, p2:
+            respuesta = webhook_datos_correo_liquidacion(
+                self.peticion_datos({'lote': 'true'}, plana))
+
+        cuerpo = json.loads(respuesta.content)
+        self.assertEqual(cuerpo['solicitados'], 0)
+
+
+class WebhookConfirmarTests(BaseLiquidacionTests):
+    def test_confirma_y_marca(self):
+        from operaciones.webhooks import webhook_confirmar_correo_liquidacion
+
+        asignacion = self.crear_asignacion()
+        _c, plana = self.crear_clave()
+
+        respuesta = webhook_confirmar_correo_liquidacion(
+            self.peticion({'asignacion_ids': [asignacion.id]}, clave=plana))
+
+        self.assertEqual(respuesta.status_code, 200)
+        cuerpo = json.loads(respuesta.content)
+        self.assertEqual(cuerpo['confirmadas'], 1)
+
+        asignacion.refresh_from_db()
+        self.assertTrue(asignacion.lliquidacionnotificada)
+
+    def test_confirma_varias(self):
+        from operaciones.webhooks import webhook_confirmar_correo_liquidacion
+
+        a1 = self.crear_asignacion(codigo='sol00001')
+        a2 = self.crear_asignacion(codigo='sol00002')
+        _c, plana = self.crear_clave()
+
+        respuesta = webhook_confirmar_correo_liquidacion(
+            self.peticion({'asignacion_ids': [a1.id, a2.id]}, clave=plana))
+        self.assertEqual(json.loads(respuesta.content)['confirmadas'], 2)
+
+    def test_sin_ids_devuelve_400(self):
+        from operaciones.webhooks import webhook_confirmar_correo_liquidacion
+
+        _c, plana = self.crear_clave()
+        respuesta = webhook_confirmar_correo_liquidacion(
+            self.peticion({}, clave=plana))
+        self.assertEqual(respuesta.status_code, 400)
+
+    def test_no_confirma_de_otra_empresa(self):
+        from operaciones.webhooks import webhook_confirmar_correo_liquidacion
+
+        asignacion = self.crear_asignacion(empresa=self.otra_empresa)
+        _c, plana = self.crear_clave(empresa=self.empresa)
+
+        respuesta = webhook_confirmar_correo_liquidacion(
+            self.peticion({'asignacion_ids': [asignacion.id]}, clave=plana))
+        self.assertEqual(respuesta.status_code, 207)
+
+        asignacion.refresh_from_db()
+        self.assertFalse(asignacion.lliquidacionnotificada)
+
+    def test_ciclo_completo_compone_envia_y_confirma(self):
+        """Ciclo como lo hace n8n: componer, enviar (simulado), confirmar."""
+        from operaciones.servicios import marcar_liquidacion_notificada
+        from operaciones.webhooks import (webhook_confirmar_correo_liquidacion,
+                                          webhook_datos_correo_liquidacion)
+
+        asignacion = self.crear_asignacion()
+        _c, plana = self.crear_clave()
+
+        p1, p2 = self.parchear_envio()
+        with p1, p2:
+            datos = json.loads(webhook_datos_correo_liquidacion(
+                self.peticion_datos({'asignacion_id': asignacion.id},
+                                    plana)).content)
+        self.assertEqual(datos['listos'], 1)
+
+        # n8n enviaria aqui con el nodo de Gmail; se simula la confirmacion
+        confirmacion = webhook_confirmar_correo_liquidacion(
+            self.peticion({'asignacion_ids': [asignacion.id]}, clave=plana))
+        self.assertEqual(confirmacion.status_code, 200)
+
+        # la segunda corrida no vuelve a ofrecerla
+        with p1, p2:
+            segunda = json.loads(webhook_datos_correo_liquidacion(
+                self.peticion_datos({'lote': 'true'}, plana)).content)
+        self.assertEqual(segunda['solicitados'], 0)
 
 
 class ModoLoteTests(BaseLiquidacionTests):

@@ -1,6 +1,10 @@
 from django.urls import URLPattern, path
 
-from .webhooks import webhook_enviar_correo_liquidacion
+from .webhooks import (
+    webhook_confirmar_correo_liquidacion,
+    webhook_datos_correo_liquidacion,
+    webhook_enviar_correo_liquidacion,
+)
 
 from .views import  AnexosNew, AsignacionesView, DatosOperativosView, \
     DatosOperativos, AsignacionesConsulta, PagaresView,SumaCargos, \
@@ -198,6 +202,12 @@ urlpatterns = [
     path('webhook/enviar-correo-liquidacion/',
          webhook_enviar_correo_liquidacion,
          name='webhook_enviar_correo_liquidacion'),
+    path('webhook/datos-correo-liquidacion/',
+         webhook_datos_correo_liquidacion,
+         name='webhook_datos_correo_liquidacion'),
+    path('webhook/confirmar-correo-liquidacion/',
+         webhook_confirmar_correo_liquidacion,
+         name='webhook_confirmar_correo_liquidacion'),
 #  anexos
     path("anexosactivos/<tipo_cliente>", ConsultaAnexosActivos),
     path('anexoscliente/<cliente_id>/<solicitud_id>'
